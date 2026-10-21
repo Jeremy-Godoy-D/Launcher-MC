@@ -1,0 +1,17 @@
+Launcher MC
+Copyright (c) 2026 Jeremy Godoy (https://github.com/Jeremy-Godoy-D)
+
+This product includes software developed by the X Minecraft Launcher (XMCL) project:
+  Copyright (c) 2017-2026 ci010 and X Minecraft Launcher contributors
+  Upstream repository: https://github.com/Voxelum/x-minecraft-launcher
+  Base revision: 1b4c9859ce0fc9d43b7da0cc9290b3507bc4e66a
+  License: MIT (see launcher/LICENSE-XMCL.txt)
+
+Additional third-party runtime dependencies and their respective licenses
+(MIT, ISC, BSD-2-Clause, BSD-3-Clause, Apache-2.0) are documented in:
+  launcher/THIRD_PARTY_NOTICES.txt
+
+Trademark Notice:
+  "Minecraft" is a trademark of Mojang Synergies AB / Microsoft Corporation.
+  Launcher MC is an independent project and is not affiliated with, endorsed,
+  or sponsored by Mojang Synergies AB or Microsoft Corporation.

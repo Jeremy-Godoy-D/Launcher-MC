@@ -37,6 +37,7 @@ export const config = {
   }],
   extraResources: [
     { from: '../LICENSE', to: 'LICENSE.txt' },
+    { from: '../NOTICE', to: 'NOTICE.txt' },
     { from: '../LICENSE-XMCL.txt', to: 'LICENSE-XMCL.txt' },
     { from: '../THIRD_PARTY_NOTICES.txt', to: 'THIRD_PARTY_NOTICES.txt' },
     { from: '../UPSTREAM.md', to: 'UPSTREAM.md' },
