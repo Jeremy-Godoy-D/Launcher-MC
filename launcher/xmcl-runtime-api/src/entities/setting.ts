@@ -1,0 +1,299 @@
+import { type InvalidDirectoryErrorCode } from '../services/BaseService'
+import { DEFAULT_AGENT_ENDPOINT, DEFAULT_AGENT_MODEL } from '../services/AgentService'
+import { type SettingSchema } from './setting.schema'
+import { type ReleaseInfo } from './update'
+
+/**
+ * The basic setting of the launcher.
+ *
+ * It also contains the some state properties of the launcher.
+ */
+export class Settings implements SettingSchema {
+  globalDisableAuthlibInjector = false
+  globalDisableElyByAuthlib = false
+  globalSyncGameLanguage = false
+  globalMinMemory = 0
+  globalMaxMemory = 0
+  globalAssignMemory: 'auto' | boolean = false
+  globalJava: string = ''
+  globalVmOptions: string[] = []
+  globalMcOptions: string[] = []
+  globalPrependCommand: string = ''
+  globalPreExecuteCommand: string = ''
+  globalFastLaunch = false
+  globalHideLauncher = false
+  globalShowLog = false
+  globalEnv: Record<string, string> = {}
+  globalResolution: { width?: number; height?: number; fullscreen?: boolean; monitor?: string } = {}
+  discordPresence = false
+  developerMode = false
+  disableTelemetry = true
+  multiplayerTransport: import('../multiplayer').MultiplayerTransport = 'webrtc'
+  agentEndpoint = DEFAULT_AGENT_ENDPOINT
+  agentModel = DEFAULT_AGENT_MODEL
+  linuxTitlebar = false
+  windowTranslucent = false
+  quickActionShortcut = ''
+
+  locale = 'es-ES'
+
+  theme = 'dark' as 'dark' | 'light' | 'system'
+  /**
+   * All supported languages of the launcher
+   */
+  locales: {
+    /**
+     * The i18n locale key
+     */
+    locale: string
+    /**
+     * The human readable name of the locale
+     */
+    name: string
+  }[] = []
+
+  updateInfo: ReleaseInfo | null = null
+  updateStatus: 'ready' | 'none' | 'pending' = 'none'
+  allowPrerelease = false
+  autoInstallOnAppQuit = false
+  autoDownload = false
+  enableDedicatedGPUOptimization = true
+  apiSetsPreference: 'mojang' | 'bmcl' | '' = ''
+  apiSets = [{ name: 'bmcl', url: 'https://bmclapi2.bangbang93.com' }]
+  /**
+   * Is current environment connecting to internet?
+   */
+  online = false
+  replaceNatives: 'all' | 'legacy-only' | false = 'legacy-only'
+
+  httpProxy = ''
+
+  httpProxyEnabled = false
+
+  maxSockets = 0
+
+  maxAPISockets = 0
+
+  diskFullError = false
+
+  databaseReady = false
+
+  /**
+   * Number of resource DB rows whose curseforge/modrinth metadata was
+   * detected as corrupted (e.g. a file path leaked into modrinth.versionId)
+   * during the startup sweep. The rows have already been healed
+   * (offending fields nulled); this count is purely a UI hint so the
+   * user knows some resource attribution was lost.
+   */
+  corruptedResourceCount = 0
+
+  invalidGameDataPath: InvalidDirectoryErrorCode = undefined
+
+  config(config: SettingSchema) {
+    this.locale = config.locale
+    this.autoDownload = config.autoDownload || false
+    this.autoInstallOnAppQuit = config.autoInstallOnAppQuit || false
+    this.allowPrerelease = config.allowPrerelease || false
+    this.apiSetsPreference = config.apiSetsPreference
+    this.httpProxy = config.httpProxy
+    this.httpProxyEnabled = config.httpProxyEnabled
+    this.maxSockets = config.maxSockets ?? 16
+    this.maxAPISockets = config.maxAPISockets ?? 0
+    this.theme = config.theme
+    this.globalMinMemory = config.globalMinMemory
+    this.globalMaxMemory = config.globalMaxMemory
+    this.globalAssignMemory = config.globalAssignMemory
+    this.globalJava = config.globalJava
+    this.globalVmOptions = config.globalVmOptions
+    this.globalMcOptions = config.globalMcOptions
+    this.globalFastLaunch = config.globalFastLaunch
+    this.globalPrependCommand = config.globalPrependCommand
+    this.globalHideLauncher = config.globalHideLauncher
+    this.globalShowLog = config.globalShowLog
+    this.globalDisableElyByAuthlib = config.globalDisableElyByAuthlib
+    this.globalSyncGameLanguage = config.globalSyncGameLanguage ?? false
+    this.globalDisableAuthlibInjector = config.globalDisableAuthlibInjector
+    this.globalPreExecuteCommand = config.globalPreExecuteCommand
+    this.globalEnv = config.globalEnv
+    this.discordPresence = config.discordPresence
+    this.developerMode = config.developerMode
+    this.disableTelemetry = config.disableTelemetry
+    this.multiplayerTransport = config.multiplayerTransport
+    this.agentEndpoint = config.agentEndpoint
+    this.agentModel = config.agentModel
+    this.linuxTitlebar = config.linuxTitlebar
+    this.windowTranslucent = config.windowTranslucent
+    this.enableDedicatedGPUOptimization = config.enableDedicatedGPUOptimization
+    this.replaceNatives = config.replaceNatives
+    this.globalResolution = config.globalResolution
+    this.quickActionShortcut = config.quickActionShortcut ?? ''
+  }
+
+  developerModeSet(developerMode: boolean) {
+    this.developerMode = developerMode
+  }
+
+  quickActionShortcutSet(shortcut: string) {
+    this.quickActionShortcut = shortcut
+  }
+
+  discordPresenceSet(presence: boolean) {
+    this.discordPresence = presence
+  }
+
+  themeSet(theme: 'dark' | 'light' | 'system') {
+    this.theme = theme
+  }
+
+  localeSet(language: string) {
+    this.locale = language
+  }
+
+  enableDedicatedGPUOptimizationSet(enabled: boolean) {
+    this.enableDedicatedGPUOptimization = enabled
+  }
+
+  localesSet(languages: {
+    /**
+     * The i18n locale key
+     */
+    locale: string
+    /**
+     * The human readable name of the locale
+     */
+    name: string
+  }[]) {
+    this.locales = languages
+  }
+
+  httpProxySet(proxy: string) {
+    this.httpProxy = proxy
+  }
+
+  httpProxyEnabledSet(enabled: boolean) {
+    this.httpProxyEnabled = enabled
+  }
+
+  allowPrereleaseSet(allowPrerelease: boolean) {
+    if (typeof allowPrerelease === 'boolean') { this.allowPrerelease = allowPrerelease }
+  }
+
+  autoInstallOnAppQuitSet(autoInstallOnAppQuit: boolean) {
+    if (typeof autoInstallOnAppQuit === 'boolean') this.autoInstallOnAppQuit = autoInstallOnAppQuit
+  }
+
+  updateStatusSet(updateStatus: 'ready' | 'none' | 'pending') {
+    this.updateStatus = updateStatus
+  }
+
+  autoDownloadSet(autoDownload: boolean) {
+    if (typeof autoDownload === 'boolean') this.autoDownload = autoDownload
+  }
+
+  updateInfoSet(updateInfo: ReleaseInfo) {
+    if (typeof updateInfo === 'object') this.updateInfo = updateInfo
+  }
+
+  apiSetsPreferenceSet(apiSetsPreference: 'mojang' | 'bmcl' | '') {
+    this.apiSetsPreference = apiSetsPreference
+  }
+
+  apiSetsSet(sets: { name: string; url: string }[]) {
+    this.apiSets = sets
+  }
+
+  onlineSet(online: boolean) {
+    this.online = online
+  }
+
+  maxSocketsSet(val: number) {
+    this.maxSockets = Number(val)
+  }
+
+  maxAPISocketsSet(val: number) {
+    this.maxAPISockets = val
+  }
+
+  disableTelemetrySet(disable: boolean) {
+    this.disableTelemetry = disable
+  }
+
+  multiplayerTransportSet(transport: import('../multiplayer').MultiplayerTransport) {
+    this.multiplayerTransport = transport
+  }
+
+  agentProviderSet(provider: { endpoint: string; model: string }) {
+    this.agentEndpoint = provider.endpoint
+    this.agentModel = provider.model
+  }
+
+  linuxTitlebarSet(enabled: boolean) {
+    this.linuxTitlebar = enabled
+  }
+
+  windowTranslucentSet(enabled: boolean) {
+    this.windowTranslucent = enabled
+  }
+
+  replaceNativesSet(replace: 'all' | 'legacy-only' | false) {
+    this.replaceNatives = replace
+  }
+
+  globalResolutionSet(resolution: { width?: number; height?: number; fullscreen?: boolean; monitor?: string }) {
+    this.globalResolution = resolution
+  }
+
+  diskFullErrorSet(diskFullError: boolean) {
+    this.diskFullError = diskFullError
+  }
+
+  databaseReadySet(ready: boolean) {
+    this.databaseReady = ready
+  }
+
+  corruptedResourceCountSet(count: number) {
+    this.corruptedResourceCount = count
+  }
+
+  invalidGameDataPathSet(invalid: InvalidDirectoryErrorCode) {
+    this.invalidGameDataPath = invalid
+  }
+
+  globalInstanceSetting(settings: {
+    globalMinMemory: number
+    globalMaxMemory: number
+    globalAssignMemory: boolean | 'auto'
+    globalJava: string
+    globalVmOptions: string[]
+    globalMcOptions: string[]
+    globalFastLaunch: boolean
+    globalHideLauncher: boolean
+    globalShowLog: boolean
+    globalDisableAuthlibInjector: boolean
+    globalDisableElyByAuthlib: boolean
+    globalSyncGameLanguage?: boolean
+    globalPrependCommand: string
+    globalPreExecuteCommand: string
+    globalEnv: Record<string, string>
+    globalResolution: { width?: number; height?: number; fullscreen?: boolean; monitor?: string }
+  }) {
+    this.globalMinMemory = settings.globalMinMemory
+    this.globalMaxMemory = settings.globalMaxMemory
+    this.globalAssignMemory = settings.globalAssignMemory
+    this.globalJava = settings.globalJava
+    this.globalVmOptions = settings.globalVmOptions
+    this.globalMcOptions = settings.globalMcOptions
+    this.globalFastLaunch = settings.globalFastLaunch
+    this.globalHideLauncher = settings.globalHideLauncher
+    this.globalShowLog = settings.globalShowLog
+    this.globalDisableAuthlibInjector = settings.globalDisableAuthlibInjector
+    this.globalDisableElyByAuthlib = settings.globalDisableElyByAuthlib
+    if (typeof settings.globalSyncGameLanguage === 'boolean') {
+      this.globalSyncGameLanguage = settings.globalSyncGameLanguage
+    }
+    this.globalPrependCommand = settings.globalPrependCommand
+    this.globalPreExecuteCommand = settings.globalPreExecuteCommand
+    this.globalEnv = settings.globalEnv
+    this.globalResolution = settings.globalResolution
+  }
+}

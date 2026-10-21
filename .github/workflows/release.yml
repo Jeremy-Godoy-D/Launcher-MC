@@ -1,0 +1,91 @@
+name: Build & Publish Launcher MC Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'launcher/package.json'
+      - 'launcher/xmcl-electron-app/package.json'
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release-windows:
+    name: Windows x64 (.exe + .zip + Auto-Update ASAR)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.10.0
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: launcher/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: launcher
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck & Lint
+        working-directory: launcher
+        run: |
+          pnpm check
+          pnpm lint
+
+      - name: Build Renderer (Vue UI)
+        working-directory: launcher
+        run: pnpm build:renderer
+
+      - name: Build Windows Installer (.exe), Portable (.zip) & ASAR Update
+        working-directory: launcher
+        env:
+          LAUNCHER_GITHUB_REPO: ${{ github.repository }}
+          MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
+          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
+          LAUNCHER_UPDATE_TOKEN: ${{ secrets.LAUNCHER_UPDATE_TOKEN }}
+        run: pnpm build:all
+
+      - name: Read version from package.json
+        id: pkg
+        shell: pwsh
+        run: |
+          $pkg = Get-Content "launcher/xmcl-electron-app/package.json" | ConvertFrom-Json
+          $ver = $pkg.version
+          $isPrerelease = $ver.Contains("-")
+          "version=$ver" >> $env:GITHUB_OUTPUT
+          "tag=v$ver" >> $env:GITHUB_OUTPUT
+          "prerelease=$isPrerelease" >> $env:GITHUB_OUTPUT
+
+      - name: Publish or Update GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.pkg.outputs.tag }}
+          VERSION: ${{ steps.pkg.outputs.version }}
+          IS_PRERELEASE: ${{ steps.pkg.outputs.prerelease }}
+        run: |
+          $outDir = "launcher/xmcl-electron-app/build/output"
+          $assets = Get-ChildItem "$outDir/*" -Include *.exe,*.zip,*.asar,*.gz,*.sha256,*.yml,manifest.json | Select-Object -ExpandProperty FullName
+          $exists = gh release view $env:TAG 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $env:TAG @assets --clobber
+          } else {
+            $flags = @("--title", "Launcher MC $env:TAG", "--generate-notes")
+            if ($env:IS_PRERELEASE -eq "True" -or $env:IS_PRERELEASE -eq "true") {
+              $flags += "--prerelease"
+            }
+            gh release create $env:TAG @assets @flags
+          }
