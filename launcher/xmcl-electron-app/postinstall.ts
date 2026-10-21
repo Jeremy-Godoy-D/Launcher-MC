@@ -1,0 +1,30 @@
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
+import { join } from 'path'
+
+if (!existsSync(join(__dirname, 'dist'))) {
+  mkdirSync(join(__dirname, 'dist'))
+}
+
+if (!existsSync(join(__dirname, '.env'))) {
+  writeFileSync(join(__dirname, '.env'), 'CURSEFORGE_API_KEY=\n')
+}
+
+if (process.platform === 'win32') {
+  const appxManifestFilePath = './node_modules/app-builder-lib/templates/appx/appxmanifest.xml'
+  writeFileSync(appxManifestFilePath, readFileSync(appxManifestFilePath, 'utf-8')
+    // eslint-disable-next-line no-template-curly-in-string
+    .replace("Publisher='${publisher}'", 'Publisher="${publisher}"'), 'utf-8')
+}
+
+if (process.platform === 'linux' || process.platform === 'openbsd' || process.platform === 'freebsd') {
+  // Overwrite the linux electron-builder js code
+  const fpmTargetFilePath = './node_modules/app-builder-lib/out/targets/FpmTarget.js'
+  const linuxTargetHelperFilePath = './node_modules/app-builder-lib/out/targets/LinuxTargetHelper.js'
+  writeFileSync(fpmTargetFilePath, readFileSync(fpmTargetFilePath, 'utf-8')
+    // eslint-disable-next-line no-template-curly-in-string
+    .replace('installPrefix}/${appInfo.sanitizedProductName}', 'installPrefix}/xmcl'), 'utf-8')
+  writeFileSync(linuxTargetHelperFilePath, readFileSync(linuxTargetHelperFilePath, 'utf-8')
+    // eslint-disable-next-line no-template-curly-in-string
+    .replace('installPrefix}/${appInfo.sanitizedProductName}', 'installPrefix}/xmcl'), 'utf-8')
+  console.log('Patched linux build target')
+}
