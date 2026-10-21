@@ -11,8 +11,15 @@ on:
       - 'v*'
   workflow_dispatch:
 
+concurrency:
+  group: release-windows-${{ github.repository }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   release-windows:
@@ -78,14 +85,30 @@ jobs:
           IS_PRERELEASE: ${{ steps.pkg.outputs.prerelease }}
         run: |
           $outDir = "launcher/xmcl-electron-app/build/output"
-          $assets = Get-ChildItem "$outDir/*" -Include *.exe,*.zip,*.asar,*.gz,*.sha256,*.yml,manifest.json | Select-Object -ExpandProperty FullName
-          $exists = gh release view $env:TAG 2>$null
-          if ($LASTEXITCODE -eq 0) {
-            gh release upload $env:TAG @assets --clobber
-          } else {
+          $assets = Get-ChildItem "$outDir/*" -Include *.exe,*.zip,*.asar,*.gz,*.sha256,*.yml,manifest.json |
+            Where-Object { $_.Name -notlike "*__uninstaller.exe" } |
+            Select-Object -ExpandProperty FullName
+
+          gh release view $env:TAG 2>$null | Out-Null
+          if ($LASTEXITCODE -ne 0) {
             $flags = @("--title", "Launcher MC $env:TAG", "--generate-notes")
             if ($env:IS_PRERELEASE -eq "True" -or $env:IS_PRERELEASE -eq "true") {
               $flags += "--prerelease"
             }
-            gh release create $env:TAG @assets @flags
+            gh release create $env:TAG @flags
+          }
+
+          foreach ($asset in $assets) {
+            $uploaded = $false
+            for ($attempt = 1; $attempt -le 3; $attempt++) {
+              gh release upload $env:TAG $asset --clobber
+              if ($LASTEXITCODE -eq 0) {
+                $uploaded = $true
+                break
+              }
+              Start-Sleep -Seconds (2 * $attempt)
+            }
+            if (-not $uploaded) {
+              throw "Failed to upload release asset: $asset"
+            }
           }
