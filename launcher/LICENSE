@@ -1,0 +1,115 @@
+================================================================================
+                          LAUNCHER MC — LICENCIA DE SOFTWARE
+                     SOFTWARE LICENSE & UPSTREAM ATTRIBUTION
+================================================================================
+
+Proyecto / Project: Launcher MC
+Autor y Mantenedor / Author & Maintainer: Jeremy Godoy (@Jeremy-Godoy-D)
+Repositorio Oficial / Official Repository: https://github.com/Jeremy-Godoy-D/Launcher-MC
+Identificador de Aplicación / App ID: local.launchermc.desktop
+
+--------------------------------------------------------------------------------
+SECCIÓN 1: LICENCIA DEL PROYECTO (MIT LICENSE — ESPAÑOL / ENGLISH)
+--------------------------------------------------------------------------------
+
+Copyright (c) 2026 Jeremy Godoy (Jeremy-Godoy-D)
+Copyright (c) 2017-2026 ci010 (cijhn@hotmail.com) y colaboradores de X Minecraft Launcher (XMCL)
+
+[ESPAÑOL — Traducción informativa]
+Por la presente se concede permiso, libre de cargos, a cualquier persona que
+obtenga una copia de este software y de los archivos de documentación asociados
+(el "Software"), para utilizar el Software sin restricción, incluyendo sin
+limitación los derechos a usar, copiar, modificar, fusionar, publicar,
+distribuir, sublicenciar, y/o vender copias del Software, y a permitir a las
+personas a las que se les proporcione el Software a hacer lo mismo, sujeto a
+las siguientes condiciones:
+
+El aviso de copyright anterior y este aviso de permiso se incluirán en todas
+las copias o partes sustanciales del Software.
+
+EL SOFTWARE SE PROPORCIONA "TAL CUAL", SIN GARANTÍA DE NINGÚN TIPO, EXPRESA O
+IMPLÍCITA, INCLUYENDO PERO NO LIMITADO A GARANTÍAS DE COMERCIALIZACIÓN,
+IDONEIDAD PARA UN PROPÓSITO PARTICULAR Y NO INFRACCIÓN. EN NINGÚN CASO LOS
+AUTORES O TITULARES DEL COPYRIGHT SERÁN RESPONSABLES DE NINGUNA RECLAMACIÓN,
+DAÑOS U OTRAS RESPONSABILIDADES, YA SEA EN UNA ACCIÓN DE CONTRATO, AGRAVIO O
+CUALQUIER OTRO MOTIVO, QUE SURJA DE O EN CONEXIÓN CON EL SOFTWARE O EL USO U
+OTRO TIPO DE ACCIONES EN EL SOFTWARE.
+
+[ENGLISH — Binding MIT License Text]
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+--------------------------------------------------------------------------------
+SECCIÓN 2: ATRIBUCIÓN Y LICENCIA DE LA BASE UPSTREAM (X MINECRAFT LAUNCHER)
+--------------------------------------------------------------------------------
+
+Launcher MC es una obra derivada y distribución adaptada basada en el proyecto
+de código abierto "X Minecraft Launcher" (XMCL):
+- Proyecto Upstream: https://github.com/Voxelum/x-minecraft-launcher
+- Commit Base Verificado: 1b4c9859ce0fc9d43b7da0cc9290b3507bc4e66a
+- Autor Original: ci010 (cijhn@hotmail.com) / Voxelum
+- Licencia Original: MIT License (incluida íntegramente a continuación y en el
+  archivo adjunto LICENSE-XMCL.txt).
+
+Texto íntegro de la licencia original de X Minecraft Launcher (XMCL):
+
+  MIT License
+
+  Copyright (c) 2023 ci010 (cijhn@hotmail.com)
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+
+--------------------------------------------------------------------------------
+SECCIÓN 3: COMPONENTES Y BIBLIOTECAS DE TERCEROS (THIRD-PARTY NOTICES)
+--------------------------------------------------------------------------------
+
+Esta distribución incorpora paquetes y bibliotecas de código abierto de terceros
+(incluyendo Electron, Chromium, Node.js, Vue.js, Vuetify, @xmcl/*, 7-Zip, koffi,
+undici y otros componentes), cuyos avisos de copyright y textos de licencia
+completos se encuentran documentados en el archivo `THIRD_PARTY_NOTICES.txt`
+distribuido junto a este software.
+
+--------------------------------------------------------------------------------
+SECCIÓN 4: AVISO DE MARCAS REGISTRADAS Y CUMPLIMIENTO (TRADEMARK DISCLAIMER)
+--------------------------------------------------------------------------------
+
+- "Minecraft" es una marca registrada de Mojang Synergies AB y Microsoft
+  Corporation.
+- Launcher MC NO es un producto oficial de Minecraft y NO está aprobado,
+  respaldado ni asociado con Mojang Synergies AB ni con Microsoft Corporation.
+- "X Minecraft Launcher" (XMCL) y "Voxelum" son nombres del proyecto upstream
+  original. Launcher MC es una distribución independiente mantenida por
+  Jeremy Godoy (@Jeremy-Godoy-D) que opera sin afiliación comercial ni
+  infraestructura compartida con el proyecto upstream.
+================================================================================

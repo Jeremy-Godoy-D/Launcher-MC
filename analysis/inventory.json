@@ -1,0 +1,334 @@
+{
+  "method": "Python stdlib, supplementary to REA; static observations only",
+  "version": "4.0.39",
+  "artifacts": [
+    {
+      "path": "C:\\Users\\jerez\\AppData\\Local\\Programs\\sklauncher\\sklauncher.exe",
+      "bytes": 225536512,
+      "sha256": "a135eb3c058f3633bf75f0c4866fc6c83d0590f74556d9c6b45fc7f938552f51"
+    },
+    {
+      "path": "C:\\Users\\jerez\\AppData\\Local\\Programs\\sklauncher\\resources\\app.asar",
+      "bytes": 48412387,
+      "sha256": "1166326521155f95d72849d8259d7593978cd4c77ff844b15783ee74ec0d7782"
+    },
+    {
+      "path": "C:\\Users\\jerez\\AppData\\Roaming\\sklauncher\\SKlauncher.jar",
+      "bytes": 1401788,
+      "sha256": "25a73e3770a1d8d14bce53e8920e2e893aacc3c715d0fb22f878ef2090d03863"
+    },
+    {
+      "path": "C:\\Users\\jerez\\AppData\\Roaming\\.sklauncher\\sklauncher-fx.jar",
+      "bytes": 17223929,
+      "sha256": "07d93bd540ccdc9ef1779a5362e04abb0c22cd3bc1f1ead5a1495b8cc922fda0"
+    },
+    {
+      "path": "C:\\Users\\jerez\\AppData\\Roaming\\.minecraft\\sklauncher-fx.jar",
+      "bytes": 17226853,
+      "sha256": "c6b0f9be0176c14bd224475c7c36903feda68e2cdedc9404a03181790caee404"
+    }
+  ],
+  "asar_regular_members": 7631,
+  "verified_application_members": [
+    {
+      "path": "out/main/LibraryPatchProvider-BIKzo3nB.js",
+      "bytes": 7529,
+      "sha256": "dca1d045d95171cb4b3e9da1e4741c03db4e759402e393214dcec27fc4b1cc9c"
+    },
+    {
+      "path": "out/main/index.js",
+      "bytes": 443010,
+      "sha256": "3a3603acfc591310232e7c6223f69539bfd3a15ca0d1d8b2e6ccb3a60bd55b38"
+    },
+    {
+      "path": "out/main/patchesEnabled-Di6gFtiD.js",
+      "bytes": 117,
+      "sha256": "62bebf608d9f89f547295824c37b2dee70e534ad674e25312e50ea57577ed441"
+    },
+    {
+      "path": "out/preload/index.js",
+      "bytes": 18086,
+      "sha256": "f97a06fa0b4fe6f9c215d53da8e495e77002a67e4e9a976c2e0d0b714fcba5f7"
+    },
+    {
+      "path": "out/renderer/assets/console-P8DIl65R.js",
+      "bytes": 6970,
+      "sha256": "d2d35e4b7d7dbd35bfbdc4ccbdc4a8e4be818c7ff1c9bfa8cc2180980d29d2dd"
+    },
+    {
+      "path": "out/renderer/assets/downloads.svelte-BQ7mIuin.js",
+      "bytes": 92250,
+      "sha256": "ed5f891b7a1f3f2875d92158789111ede8ae71c999320316025cefb0e954455e"
+    },
+    {
+      "path": "out/renderer/assets/game.svelte-DLNvbQrr.js",
+      "bytes": 13486,
+      "sha256": "f2293428292246d25b5c4d12744cdfbd63588a1d75c3a5311b3aab1fc35e0e4e"
+    },
+    {
+      "path": "out/renderer/assets/index-C44oHH58.js",
+      "bytes": 1448934,
+      "sha256": "4e77beef2a754619563675bf6710b2ef072ba605d08ada5b340b07cdce06d115"
+    },
+    {
+      "path": "out/renderer/assets/instances.svelte-CA2qEpy9.js",
+      "bytes": 32864,
+      "sha256": "b69df1f5a78bda0222c7cbda1ef9c9e79dab575943ce3c45a43de7f733a02b86"
+    },
+    {
+      "path": "out/renderer/assets/marked.esm-BvfF1IFJ.js",
+      "bytes": 41696,
+      "sha256": "8700cbf2dd7a2dcc51fce435bf9e817bb3d20a987d4fcda3efe4f23c64c704a5"
+    },
+    {
+      "path": "out/renderer/assets/purify.es-BiqCFv-r.js",
+      "bytes": 28706,
+      "sha256": "4429a9ad880519630d2d1545dceecc12edb3cebc4b8a8beb262c56c835e6251b"
+    },
+    {
+      "path": "out/renderer/assets/rolldown-runtime-BQ-_32WO.js",
+      "bytes": 164,
+      "sha256": "5159a55832e9c21c0fcf31198dad4582cc8e88fef8e77c71e821c32af65845c5"
+    },
+    {
+      "path": "out/renderer/assets/scroll-B1oij-by.js",
+      "bytes": 20262,
+      "sha256": "d43559d292de9f064b4928f2573db7713e57b33de850bda91537f1ee60a96d44"
+    },
+    {
+      "path": "out/renderer/assets/skinview3d-B3NzCLfg.js",
+      "bytes": 524584,
+      "sha256": "6ed56bbba418e21e36a85a53bb1d477ebd8fd768cc36c7e78b440c7181125f8d"
+    },
+    {
+      "path": "out/renderer/console.html",
+      "bytes": 920,
+      "sha256": "a9942337e2638c31c2a9c609b39f300c2b56a8e4bc38e5332d0873d4966db797"
+    },
+    {
+      "path": "out/renderer/index.html",
+      "bytes": 1240,
+      "sha256": "4ae2e23be570c1a49e831065f68ac3941ce5c01fc5bbcf2cce032644eea425f2"
+    },
+    {
+      "path": "package.json",
+      "bytes": 1097,
+      "sha256": "ff86073c9bf66017438954261977295639fef50c12eaad2038a5e7eca2c19de3"
+    }
+  ],
+  "dependencies_declared": {
+    "@electron-toolkit/preload": "^3.0.2",
+    "@electron-toolkit/utils": "^4.0.0",
+    "@lucide/lab": "latest",
+    "@lucide/svelte": "latest",
+    "@xhayper/discord-rpc": "^1.3.4",
+    "chokidar": "^5.0.0",
+    "dompurify": "^3.4.12",
+    "electron-log": "^5.4.4",
+    "electron-updater": "^6.8.9",
+    "filename-reserved-regex": "^4.0.0",
+    "inter-ui": "^4.1.1",
+    "jetbrains-mono": "^1.0.6",
+    "marked": "^18.0.6",
+    "os-name": "^7.0.0",
+    "p-limit": "^7.3.0",
+    "prismarine-nbt": "^2.8.0",
+    "semver": "^7.8.5",
+    "skinview3d": "3.4.2",
+    "tar": "7.5.20",
+    "virtua": "^0.49.3",
+    "yauzl": "^3.4.0"
+  },
+  "navigation_literal_ids": [
+    "customization",
+    "dashboard",
+    "discoverContent",
+    "library",
+    "newInstance",
+    "servers",
+    "settings"
+  ],
+  "settings_literal_ids": [
+    "about",
+    "appearance",
+    "defaults",
+    "friends",
+    "general",
+    "java",
+    "notifications",
+    "privacy",
+    "storage"
+  ],
+  "main_literal_url_hosts": [
+    "api.curseforge.com",
+    "api.foojay.io",
+    "api.mclo.gs",
+    "api.minecraftservices.com",
+    "api.modrinth.com",
+    "auth.xboxlive.com",
+    "beta.skmedix.pl",
+    "cdn.xyrios.com",
+    "files.minecraftforge.net",
+    "files.skmedix.pl",
+    "github.com",
+    "launchercontent.mojang.com",
+    "launchermeta.mojang.com",
+    "libraries.minecraft.net",
+    "localhost",
+    "login.live.com",
+    "maven.minecraftforge.net",
+    "maven.neoforged.net",
+    "meta.babric.glass-launcher.net",
+    "meta.fabricmc.net",
+    "meta.legacyfabric.net",
+    "meta.quiltmc.org",
+    "meta.skmedix.pl",
+    "minotar.net",
+    "piston-meta.mojang.com",
+    "resources.download.minecraft.net",
+    "s2.skmedix.pl",
+    "sessionserver.mojang.com",
+    "sessionserver.skmedix.pl",
+    "skmedix.pl",
+    "updates.skmedix.pl",
+    "user.auth.xboxlive.com",
+    "www.google-analytics.com",
+    "xsts.auth.xboxlive.com",
+    "xyrios.com"
+  ],
+  "private_state_shapes_only": {
+    "settings.json": {
+      "hardwareAcceleration": "bool",
+      "alwaysOpenConsoleAsPopout": "bool",
+      "minimizeToTray": "bool",
+      "minimizeOnLaunch": "bool",
+      "autoLaunch": "bool",
+      "autoLaunchMinimized": "bool",
+      "disableQuickplay": "bool",
+      "disablePlaytimeTracking": "bool",
+      "disableModSuggestions": "bool",
+      "allowUnstableModUpdates": "bool",
+      "disableModrinthBlockedModFallback": "bool",
+      "curseforgeApiKey": "<sensitive-value-omitted>",
+      "disableDiscordRpc": "bool",
+      "disableAnalytics": "bool",
+      "analyticsConsentChosen": "bool",
+      "preferDedicatedGpu": "bool",
+      "preferThirdPartyJava": "bool",
+      "defaultOptions": {},
+      "disableFriendsList": "bool",
+      "disableOfflineAccounts": "bool",
+      "lowEndDefaultsApplied": "bool",
+      "disableLibraryPatches": "bool",
+      "clientId": "str"
+    },
+    "accounts.json": {
+      "accounts": {
+        "type": "array",
+        "item_shapes": [
+          {
+            "id": "str",
+            "type": "str",
+            "username": "str",
+            "uuid": "str"
+          }
+        ]
+      },
+      "activeAccountId": "str"
+    },
+    "instances.json": {
+      "instances": {
+        "type": "array",
+        "item_shapes": [
+          {
+            "id": "str",
+            "name": "str",
+            "type": "str",
+            "icon": "str",
+            "versionId": "str",
+            "gameType": "str",
+            "minecraftVersion": "str",
+            "directory": "str",
+            "createdAt": "str",
+            "playTime": "int",
+            "sessionCount": "int",
+            "playTimeByDay": {}
+          },
+          {
+            "id": "str",
+            "name": "str",
+            "type": "str",
+            "installComplete": "bool",
+            "icon": "str",
+            "versionId": "str",
+            "gameType": "str",
+            "minecraftVersion": "str",
+            "loaderVersion": "str",
+            "directory": "str",
+            "createdAt": "str",
+            "lastPlayed": "str",
+            "playTime": "int",
+            "sessionCount": "int",
+            "playTimeByDay": {
+              "<date>": "int"
+            },
+            "memoryMax": "int",
+            "modpackInfo": {
+              "projectId": "str",
+              "versionId": "str",
+              "source": "str"
+            },
+            "customLaunchHooks": "bool",
+            "allowModpackModUpdates": "bool"
+          }
+        ]
+      }
+    },
+    "quick_play.json": {
+      "quickPlayData": {
+        "<id>": {
+          "type": "array",
+          "item_shapes": [
+            {
+              "id": "str",
+              "name": "str",
+              "epochLastPlayedTimeMs": "int",
+              "source": "str",
+              "javaInstance": {
+                "configId": "str",
+                "game": {
+                  "gamemode": "str",
+                  "type": "str"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "version": "int"
+    },
+    "window-state.json": {
+      "width": "int",
+      "height": "int",
+      "x": "int",
+      "y": "int",
+      "maximized": "bool"
+    },
+    "updater-state.json": {
+      "installedAt": "int",
+      "lastVerifiedAt": "int",
+      "lastStartedAt": "int",
+      "lastKnownLatestVersion": "str",
+      "lastKnownMinimumSupportedVersion": "str",
+      "lastInstallAttemptVersion": "str",
+      "hasEverVerified": "bool",
+      "channel": "str"
+    }
+  },
+  "limits": [
+    "Literal navigation and host inventory is not a proof of runtime reachability.",
+    "Dependency manifest ranges are declarations, not exact installed versions.",
+    "No private state values are retained; dynamic map keys are normalized.",
+    "Verified extracted application JavaScript and HTML only; CSS, images, fonts and dependency files are not verified here."
+  ]
+}

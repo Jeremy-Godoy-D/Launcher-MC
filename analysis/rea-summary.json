@@ -1,0 +1,945 @@
+{
+  "full_asar": {
+    "projection_method": "Python projection of saved REA Evidence; not a new REA Evidence record",
+    "evidence_id": "ev_81914d28e04e8ef922631494b24f0c97464167d73dad25da350edbe245b4b7c2",
+    "operation": "analyze_javascript_application",
+    "subject": {
+      "name": "app.asar",
+      "digest": {
+        "sha256": "1166326521155f95d72849d8259d7593978cd4c77ff844b15783ee74ec0d7782"
+      },
+      "local_path": "C:\\Users\\jerez\\AppData\\Local\\Programs\\sklauncher\\resources\\app.asar",
+      "format": "asar",
+      "architecture": null
+    },
+    "raw_file": "C:\\Users\\jerez\\Documents\\ChatGPT\\Launcher MC\\.analysis\\rea-application.json",
+    "raw_bytes": 249266605,
+    "statistics": {
+      "relevant_files": 5089,
+      "nested_asar_containers": 0,
+      "text_bytes_read": 31322525,
+      "invalid_utf8_files": 0,
+      "parsed_javascript_files": 3797,
+      "skipped_javascript_files": 0,
+      "visited_ast_nodes": 2989150,
+      "findings": 22685,
+      "modules": 4,
+      "parse_failures": 1
+    },
+    "summary": {
+      "browser_windows": 2,
+      "explicit_web_preferences": 10,
+      "preload_entrypoints": 0,
+      "context_bridge_apis": 4,
+      "exposed_api_members": 0,
+      "ipc": {
+        "operations": 443,
+        "literal_channels": 229,
+        "dynamic_channel_operations": 14,
+        "renderer_transmissions": 209,
+        "renderer_listeners": 33,
+        "main_handlers": 201,
+        "paired_renderer_transmissions": 199,
+        "ambiguous_renderer_transmissions": 0,
+        "unpaired_literal_renderer_transmissions": 0
+      },
+      "sender_validation_observations": 0,
+      "utility_processes": 0,
+      "resolved_utility_entrypoints": 0,
+      "native_addon_bindings": 0,
+      "resolved_native_addon_bindings": 0
+    },
+    "graph": {
+      "nodes": 32579,
+      "edges": 43487,
+      "coverage": {
+        "status": "partial",
+        "truncated": false,
+        "omitted_count": null
+      }
+    },
+    "semantic_graph": {
+      "nodes": 54520,
+      "relations": 33649,
+      "unknowns": 30226,
+      "coverage": {
+        "status": "partial",
+        "truncated": true,
+        "omitted_nodes": null,
+        "omitted_relations": null
+      },
+      "families": [
+        {
+          "family": "boundary",
+          "status": "partial",
+          "retained_relations": 48,
+          "unknown_count": 1795
+        },
+        {
+          "family": "call-flow",
+          "status": "partial",
+          "retained_relations": 1254,
+          "unknown_count": 3536
+        },
+        {
+          "family": "child-process",
+          "status": "partial",
+          "retained_relations": 0,
+          "unknown_count": 1795
+        },
+        {
+          "family": "closure",
+          "status": "partial",
+          "retained_relations": 936,
+          "unknown_count": 1795
+        },
+        {
+          "family": "configuration",
+          "status": "partial",
+          "retained_relations": 0,
+          "unknown_count": 1795
+        },
+        {
+          "family": "data-flow",
+          "status": "partial",
+          "retained_relations": 20315,
+          "unknown_count": 4434
+        },
+        {
+          "family": "event",
+          "status": "partial",
+          "retained_relations": 84,
+          "unknown_count": 1826
+        },
+        {
+          "family": "object-flow",
+          "status": "partial",
+          "retained_relations": 10880,
+          "unknown_count": 5966
+        },
+        {
+          "family": "promise-ownership",
+          "status": "partial",
+          "retained_relations": 112,
+          "unknown_count": 1891
+        },
+        {
+          "family": "request",
+          "status": "partial",
+          "retained_relations": 0,
+          "unknown_count": 1795
+        },
+        {
+          "family": "resource-lifecycle",
+          "status": "partial",
+          "retained_relations": 0,
+          "unknown_count": 1795
+        },
+        {
+          "family": "timer",
+          "status": "partial",
+          "retained_relations": 20,
+          "unknown_count": 1803
+        }
+      ]
+    },
+    "integrity_contradictions": [],
+    "limitations_count": 3598,
+    "general_limitations": [
+      "CommonJS and ESM binding relationships were recovered from inert syntax and resolved only within the inventoried artifact container.",
+      "Dynamic IPC channel expressions remain unresolved and are never paired by textual similarity.",
+      "Electron API identity follows proven lexical module aliases and structurally verified module-namespace interop. Other reassignments, dynamic selections, and visibly overwritten namespace members are unresolved; missing findings do not establish absence. Arbitrary call side effects and runtime registration are not evaluated.",
+      "Electron relationships are derived from inert syntax; runtime registration, reachability, defaults, and enforcement remain unproven.",
+      "Graph coverage is incomplete; unavailable facts remain explicit and must not be read as absence.",
+      "JavaScript and HTML were parsed as inert text; bundle bootstrap code was never executed."
+    ],
+    "firstparty_limitations": [
+      "Resource constraint during analyze_javascript_application: Expanded application relationships for out/main/LibraryPatchProvider-BIKzo3nB.js exceed the parent's result budget; complete static facts were retained on the file node",
+      "Resource constraint during analyze_javascript_application: Expanded application relationships for out/main/index.js exceed the parent's result budget; complete static facts were retained on the file node",
+      "Resource constraint during analyze_javascript_application: Expanded application relationships for out/main/patchesEnabled-Di6gFtiD.js exceed the parent's result budget; complete static facts were retained on the file node",
+      "Resource constraint during analyze_javascript_application: Expanded application relationships for out/preload/index.js exceed the parent's result budget; complete static facts were retained on the file node",
+      "Resource constraint during analyze_javascript_application: Expanded application relationships for out/renderer/assets/console-P8DIl65R.js exceed the parent's result budget; complete static facts were retained on the file node",
+      "Resource constraint during analyze_javascript_application: Expanded application relationships for out/renderer/assets/downloads.svelte-BQ7mIuin.js exceed the parent's result budget; complete static facts were retained on the file node",
+      "Resource constraint during analyze_javascript_application: Expanded application relationships for out/renderer/assets/game.svelte-DLNvbQrr.js exceed the parent's result budget; complete static facts were retained on the file node",
+      "Resource constraint during analyze_javascript_application: Expanded application relationships for out/renderer/assets/index-C44oHH58.js exceed the parent's result budget; complete static facts were retained on the file node",
+      "Resource constraint during analyze_javascript_application: Expanded application relationships for out/renderer/assets/instances.svelte-CA2qEpy9.js exceed the parent's result budget; complete static facts were retained on the file node",
+      "Resource constraint during analyze_javascript_application: Expanded application relationships for out/renderer/assets/marked.esm-BvfF1IFJ.js exceed the parent's result budget; complete static facts were retained on the file node",
+      "Resource constraint during analyze_javascript_application: Expanded application relationships for out/renderer/assets/purify.es-BiqCFv-r.js exceed the parent's result budget; complete static facts were retained on the file node",
+      "Resource constraint during analyze_javascript_application: Expanded application relationships for out/renderer/assets/rolldown-runtime-BQ-_32WO.js exceed the parent's result budget; complete static facts were retained on the file node",
+      "Resource constraint during analyze_javascript_application: Expanded application relationships for out/renderer/assets/scroll-B1oij-by.js exceed the parent's result budget; complete static facts were retained on the file node",
+      "out/main/LibraryPatchProvider-BIKzo3nB.js: Resource constraint during analyze_javascript_application: The parent reserved its remaining result capacity for static observations; semantic analysis of out/main/LibraryPatchProvider-BIKzo3nB.js was not started",
+      "out/main/index.js: Resource constraint during analyze_javascript_application: The parent reserved its remaining result capacity for static observations; semantic analysis of out/main/index.js was not started",
+      "out/main/patchesEnabled-Di6gFtiD.js: Resource constraint during analyze_javascript_application: The parent reserved its remaining result capacity for static observations; semantic analysis of out/main/patchesEnabled-Di6gFtiD.js was not started",
+      "out/preload/index.js: Resource constraint during analyze_javascript_application: The parent reserved its remaining result capacity for static observations; semantic analysis of out/preload/index.js was not started",
+      "out/renderer/assets/console-P8DIl65R.js: Resource constraint during analyze_javascript_application: The parent reserved its remaining result capacity for static observations; semantic analysis of out/renderer/assets/console-P8DIl65R.js was not started",
+      "out/renderer/assets/downloads.svelte-BQ7mIuin.js: Resource constraint during analyze_javascript_application: The parent reserved its remaining result capacity for static observations; semantic analysis of out/renderer/assets/downloads.svelte-BQ7mIuin.js was not started",
+      "out/renderer/assets/game.svelte-DLNvbQrr.js: Resource constraint during analyze_javascript_application: The parent reserved its remaining result capacity for static observations; semantic analysis of out/renderer/assets/game.svelte-DLNvbQrr.js was not started",
+      "out/renderer/assets/index-C44oHH58.js: Resource constraint during analyze_javascript_application: The parent reserved its remaining result capacity for static observations; semantic analysis of out/renderer/assets/index-C44oHH58.js was not started",
+      "out/renderer/assets/instances.svelte-CA2qEpy9.js: Resource constraint during analyze_javascript_application: The parent reserved its remaining result capacity for static observations; semantic analysis of out/renderer/assets/instances.svelte-CA2qEpy9.js was not started",
+      "out/renderer/assets/marked.esm-BvfF1IFJ.js: Resource constraint during analyze_javascript_application: The parent reserved its remaining result capacity for static observations; semantic analysis of out/renderer/assets/marked.esm-BvfF1IFJ.js was not started",
+      "out/renderer/assets/purify.es-BiqCFv-r.js: Resource constraint during analyze_javascript_application: The parent reserved its remaining result capacity for static observations; semantic analysis of out/renderer/assets/purify.es-BiqCFv-r.js was not started",
+      "out/renderer/assets/rolldown-runtime-BQ-_32WO.js: Resource constraint during analyze_javascript_application: The parent reserved its remaining result capacity for static observations; semantic analysis of out/renderer/assets/rolldown-runtime-BQ-_32WO.js was not started",
+      "out/renderer/assets/scroll-B1oij-by.js: Resource constraint during analyze_javascript_application: The parent reserved its remaining result capacity for static observations; semantic analysis of out/renderer/assets/scroll-B1oij-by.js was not started",
+      "out/renderer/assets/skinview3d-B3NzCLfg.js: Resource constraint during analyze_javascript_application: Semantic graph for out/renderer/assets/skinview3d-B3NzCLfg.js exceeds the parent's remaining result budget; static and module facts were retained"
+    ],
+    "non_resource_failures": [],
+    "application_nodes": [
+      {
+        "node_id": "jag_node_01060fa48b377844ec9fb45ec7c4a2d8b60b9ce8ee15ebd7d529c9064c018c0e",
+        "kind": "unknown",
+        "path": "out/renderer/assets/instances.svelte-CA2qEpy9.js",
+        "analysis_status": "interrupted",
+        "property_keys": [
+          "analysis_status",
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_03946b03adef41ba501fc89301e5b197a5cc515a77dcd1ae3342c178c168c1be",
+        "kind": "unknown",
+        "path": "out/renderer/assets/marked.esm-BvfF1IFJ.js",
+        "analysis_status": null,
+        "property_keys": [
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_11a21e8392b21d8f2b8c65926ecd83ea888675c437ca1e89416104cdc1f8c75d",
+        "kind": "unknown",
+        "path": "out/preload/index.js",
+        "analysis_status": null,
+        "property_keys": [
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_246726900dc3683ab00c90cc1e267f018e7cc7a87e73a9635fc752d9211d853e",
+        "kind": "unknown",
+        "path": "out/renderer/assets/rolldown-runtime-BQ-_32WO.js",
+        "analysis_status": null,
+        "property_keys": [
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_38fef0fe9e5f876109527783eee3b442528fda2fdf00737c8483ffb9cb741e6b",
+        "kind": "unknown",
+        "path": "out/main/index.js",
+        "analysis_status": "interrupted",
+        "property_keys": [
+          "analysis_status",
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_4856c695d263ad98240ca3012d4cabdf7d8b65792293cb263e93fe1e4111aaa2",
+        "kind": "javascript-module",
+        "path": "out/renderer/assets/skinview3d-B3NzCLfg.js",
+        "analysis_status": null,
+        "property_keys": [
+          "semantic_role",
+          "source_sha256",
+          "path",
+          "logical_module_key",
+          "module_format",
+          "import_relationships",
+          "type_relationships",
+          "export_relationships",
+          "export_names",
+          "type_export_names",
+          "omitted_export_names"
+        ]
+      },
+      {
+        "node_id": "jag_node_5b9e8b2c96108d7fa72c0efc1a71006fffaa0df17fcba1602a162198d06bbc51",
+        "kind": "unknown",
+        "path": "out/renderer/assets/purify.es-BiqCFv-r.js",
+        "analysis_status": null,
+        "property_keys": [
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_5e057ef7ca80f4ebf3503e9a267e2ab055795f84b8ef690ce2fba314388b463a",
+        "kind": "unknown",
+        "path": "out/renderer/assets/index-C44oHH58.js",
+        "analysis_status": null,
+        "property_keys": [
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_5e10d1c130cb0cb354b4413d55384fcffdf1ded8a439ee8f7096cde2a11320c2",
+        "kind": "unknown",
+        "path": "out/renderer/assets/game.svelte-DLNvbQrr.js",
+        "analysis_status": null,
+        "property_keys": [
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_6d07031c8b781ab168fdad81feec666c0f6fd84c959ccba54a069671472d1eca",
+        "kind": "unknown",
+        "path": "out/renderer/assets/console-P8DIl65R.js",
+        "analysis_status": "interrupted",
+        "property_keys": [
+          "analysis_status",
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_6dbcda28d8d9d13dfa896bf34a620370c8ffe0ea437d8350d3889d239a54f0fd",
+        "kind": "unknown",
+        "path": "out/main/patchesEnabled-Di6gFtiD.js",
+        "analysis_status": "interrupted",
+        "property_keys": [
+          "analysis_status",
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_6df58333846e2cf612f3d43a1ec86cbc6a44eb0372a71f90899ed042862ef4b2",
+        "kind": "unknown",
+        "path": "out/renderer/assets/downloads.svelte-BQ7mIuin.js",
+        "analysis_status": null,
+        "property_keys": [
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_90be5bfee3618a9a8cf331a7f3bfc8d605925838a0f372fb3023a7afaa4711d0",
+        "kind": "unknown",
+        "path": "out/renderer/assets/skinview3d-B3NzCLfg.js",
+        "analysis_status": "interrupted",
+        "property_keys": [
+          "analysis_status",
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_9678d73f9abb559edccdcd641a773505ff23c4922a97832a05d3f77711d44e54",
+        "kind": "unknown",
+        "path": "out/renderer/assets/index-C44oHH58.js",
+        "analysis_status": "interrupted",
+        "property_keys": [
+          "analysis_status",
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_986e1f8f3fe3f29511132dd9831cf70d2d9600e54e93c0ab0458e78e4d5f6f87",
+        "kind": "unknown",
+        "path": "out/main/patchesEnabled-Di6gFtiD.js",
+        "analysis_status": null,
+        "property_keys": [
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_a590505732a56564e01cf36f9c286b171fd26e7eb7c1c5f1c3210f00fc87cef3",
+        "kind": "unknown",
+        "path": "out/renderer/assets/scroll-B1oij-by.js",
+        "analysis_status": "interrupted",
+        "property_keys": [
+          "analysis_status",
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_b05a4a83d5718775adbd39681bc624e074570dfa0f8dbdbc4dbe9c2eaa769de3",
+        "kind": "unknown",
+        "path": "out/main/index.js",
+        "analysis_status": null,
+        "property_keys": [
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_be07df666eeb7b3c81c3d8dcdd415e90e2e25554db0ba5c149b53605fb207d6a",
+        "kind": "unknown",
+        "path": "out/renderer/assets/marked.esm-BvfF1IFJ.js",
+        "analysis_status": "interrupted",
+        "property_keys": [
+          "analysis_status",
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_c1302976c43b92dda99b4bc29c08eb5296481bf27f3206accb8ed3159f18120f",
+        "kind": "unknown",
+        "path": "out/renderer/assets/downloads.svelte-BQ7mIuin.js",
+        "analysis_status": "interrupted",
+        "property_keys": [
+          "analysis_status",
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_c941c0a942dc9ca5479a0f53d364adc6c7f017f671034545657b809874dcb468",
+        "kind": "unknown",
+        "path": "out/renderer/assets/purify.es-BiqCFv-r.js",
+        "analysis_status": "interrupted",
+        "property_keys": [
+          "analysis_status",
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_ca999a752a948451303be7a287913cf85cfd55fd796ce04f8b93b86ad2cab62a",
+        "kind": "unknown",
+        "path": "out/renderer/assets/scroll-B1oij-by.js",
+        "analysis_status": null,
+        "property_keys": [
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_d4933dbadb64b28353757dc16d69c3ab9ac483353a71ad8f2f141d638cd4f1bf",
+        "kind": "unknown",
+        "path": "out/renderer/assets/game.svelte-DLNvbQrr.js",
+        "analysis_status": "interrupted",
+        "property_keys": [
+          "analysis_status",
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_e3d4d057ce9a1735f4a5765238d1f3f658867814e8b000a6a4befe15066f669e",
+        "kind": "unknown",
+        "path": "out/main/LibraryPatchProvider-BIKzo3nB.js",
+        "analysis_status": "interrupted",
+        "property_keys": [
+          "analysis_status",
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_e41bd1fac085432396924e596dd415350ca81469e1229b586036f76db118ff35",
+        "kind": "unknown",
+        "path": "out/preload/index.js",
+        "analysis_status": "interrupted",
+        "property_keys": [
+          "analysis_status",
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_e7cc68ef320868784c881b91f5640c32e1927f77759b66c2c92deade01a7f0fe",
+        "kind": "unknown",
+        "path": "out/main/LibraryPatchProvider-BIKzo3nB.js",
+        "analysis_status": null,
+        "property_keys": [
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_e98fc3d1c94a422c17fe9417c652dd3aaa0eda8f8b08b4295e344c18675e2818",
+        "kind": "unknown",
+        "path": "out/renderer/assets/instances.svelte-CA2qEpy9.js",
+        "analysis_status": null,
+        "property_keys": [
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_f3e463883bbd2fc355cc177ba12bd642dca7077ebc61b6f3b4ce4826115a6609",
+        "kind": "unknown",
+        "path": "out/renderer/assets/rolldown-runtime-BQ-_32WO.js",
+        "analysis_status": "interrupted",
+        "property_keys": [
+          "analysis_status",
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      },
+      {
+        "node_id": "jag_node_fdf5edbe51a73035fb6f60b416242dd579dc055a8604fb7eb382d6a6d76d51c4",
+        "kind": "unknown",
+        "path": "out/renderer/assets/console-P8DIl65R.js",
+        "analysis_status": null,
+        "property_keys": [
+          "path",
+          "operation",
+          "limitation",
+          "analysis_failure"
+        ]
+      }
+    ],
+    "parse_status_counts": {
+      "complete": 3661,
+      "included": 99,
+      "partial": 136
+    },
+    "other_parse_statuses": []
+  },
+  "bootstrap": {
+    "projection_method": "Python projection; not a new REA Evidence record",
+    "evidence_id": "ev_81b1e1f44ae78011c7e312527c18900c682d5ecd54d6e6a920b3dd2820c53e85",
+    "operation": "inspect_artifact",
+    "subject": {
+      "name": "SKlauncher.jar",
+      "digest": {
+        "sha256": "25a73e3770a1d8d14bce53e8920e2e893aacc3c715d0fb22f878ef2090d03863"
+      },
+      "local_path": "C:\\Users\\jerez\\AppData\\Roaming\\sklauncher\\SKlauncher.jar",
+      "format": "zip",
+      "architecture": null
+    },
+    "raw_file": "C:\\Users\\jerez\\Documents\\ChatGPT\\Launcher MC\\.analysis\\rea-bootstrap.json",
+    "raw_bytes": 783773,
+    "limitations": [
+      "Inspection derives bounded static hypotheses and next probes; it does not execute the artifact or claim format-specific semantics.",
+      "ZIP inventory lists central-directory entries only. Non-entry bytes, including an APK Signing Block before the central directory or a ZIP comment after it, are not occurrences."
+    ],
+    "coverage": {
+      "status": "complete-within-substeps",
+      "substeps_completed": 1,
+      "observations_retained": 1,
+      "observations_omitted": 0,
+      "hypotheses_retained": 0,
+      "hypotheses_omitted": 0,
+      "unexplored_branches_retained": 0,
+      "unexplored_branches_omitted": 0,
+      "next_probes_retained": 0,
+      "next_probes_omitted": 0
+    },
+    "inventory_counts": {
+      "node_count": 680,
+      "occurrence_count": 682,
+      "edge_count": 681
+    }
+  },
+  "java601": {
+    "projection_method": "Python projection; not a new REA Evidence record",
+    "evidence_id": "ev_db38620277c8157f332e9297b0129af336069ed9f306c77482e5cfa6d6a31883",
+    "operation": "inspect_artifact",
+    "subject": {
+      "name": "sklauncher-fx.jar",
+      "digest": {
+        "sha256": "07d93bd540ccdc9ef1779a5362e04abb0c22cd3bc1f1ead5a1495b8cc922fda0"
+      },
+      "local_path": "C:\\Users\\jerez\\AppData\\Roaming\\.sklauncher\\sklauncher-fx.jar",
+      "format": "zip",
+      "architecture": null
+    },
+    "raw_file": "C:\\Users\\jerez\\Documents\\ChatGPT\\Launcher MC\\.analysis\\rea-java601.json",
+    "raw_bytes": 8189273,
+    "limitations": [
+      "Inspection derives bounded static hypotheses and next probes; it does not execute the artifact or claim format-specific semantics.",
+      "ZIP inventory lists central-directory entries only. Non-entry bytes, including an APK Signing Block before the central directory or a ZIP comment after it, are not occurrences."
+    ],
+    "coverage": {
+      "status": "complete-within-substeps",
+      "substeps_completed": 1,
+      "observations_retained": 1,
+      "observations_omitted": 0,
+      "hypotheses_retained": 0,
+      "hypotheses_omitted": 0,
+      "unexplored_branches_retained": 0,
+      "unexplored_branches_omitted": 0,
+      "next_probes_retained": 0,
+      "next_probes_omitted": 0
+    },
+    "inventory_counts": {
+      "node_count": 7086,
+      "occurrence_count": 7125,
+      "edge_count": 7124
+    }
+  },
+  "java602": {
+    "projection_method": "Python projection; not a new REA Evidence record",
+    "evidence_id": "ev_1426d174dbc197e95e7fca606d8cf84c88a97526522dc93339be71e8f5733722",
+    "operation": "inspect_artifact",
+    "subject": {
+      "name": "sklauncher-fx.jar",
+      "digest": {
+        "sha256": "c6b0f9be0176c14bd224475c7c36903feda68e2cdedc9404a03181790caee404"
+      },
+      "local_path": "C:\\Users\\jerez\\AppData\\Roaming\\.minecraft\\sklauncher-fx.jar",
+      "format": "zip",
+      "architecture": null
+    },
+    "raw_file": "C:\\Users\\jerez\\Documents\\ChatGPT\\Launcher MC\\.analysis\\rea-java602.json",
+    "raw_bytes": 8190421,
+    "limitations": [
+      "Inspection derives bounded static hypotheses and next probes; it does not execute the artifact or claim format-specific semantics.",
+      "ZIP inventory lists central-directory entries only. Non-entry bytes, including an APK Signing Block before the central directory or a ZIP comment after it, are not occurrences."
+    ],
+    "coverage": {
+      "status": "complete-within-substeps",
+      "substeps_completed": 1,
+      "observations_retained": 1,
+      "observations_omitted": 0,
+      "hypotheses_retained": 0,
+      "hypotheses_omitted": 0,
+      "unexplored_branches_retained": 0,
+      "unexplored_branches_omitted": 0,
+      "next_probes_retained": 0,
+      "next_probes_omitted": 0
+    },
+    "inventory_counts": {
+      "node_count": 7087,
+      "occurrence_count": 7126,
+      "edge_count": 7125
+    }
+  },
+  "fuses": {
+    "projection_method": "Python projection; not a new REA Evidence record",
+    "evidence_id": "ev_6a0bc2888555c95426123908e8f993f1778e37bf16b3e19d43aa5d75b433351d",
+    "operation": "inspect_electron_fuses",
+    "subject": {
+      "name": "sklauncher.exe",
+      "digest": {
+        "sha256": "a135eb3c058f3633bf75f0c4866fc6c83d0590f74556d9c6b45fc7f938552f51"
+      },
+      "local_path": "C:\\Users\\jerez\\AppData\\Local\\Programs\\sklauncher\\sklauncher.exe",
+      "format": "pe",
+      "architecture": "x86_64"
+    },
+    "raw_file": "C:\\Users\\jerez\\Documents\\ChatGPT\\Launcher MC\\.analysis\\rea-fuses.json",
+    "raw_bytes": 3621,
+    "limitations": [
+      "Fuse state does not prove the application enables Inspector through other means, such as app.commandLine or a remote-debugging switch in application code.",
+      "A missing sentinel means fuse state is unknown, not that every fuse is disabled.",
+      "The selected file is admitted as one regular file of at most 1 GiB. Sentinel search uses 262144-byte windows, and each slice keeps at most 32 sentinels."
+    ],
+    "fuses": [
+      {
+        "index": 0,
+        "name": "RunAsNode",
+        "state": "disabled",
+        "raw_byte": 48
+      },
+      {
+        "index": 1,
+        "name": "EnableCookieEncryption",
+        "state": "enabled",
+        "raw_byte": 49
+      },
+      {
+        "index": 2,
+        "name": "EnableNodeOptionsEnvironmentVariable",
+        "state": "disabled",
+        "raw_byte": 48
+      },
+      {
+        "index": 3,
+        "name": "EnableNodeCliInspectArguments",
+        "state": "disabled",
+        "raw_byte": 48
+      },
+      {
+        "index": 4,
+        "name": "EnableEmbeddedAsarIntegrityValidation",
+        "state": "enabled",
+        "raw_byte": 49
+      },
+      {
+        "index": 5,
+        "name": "OnlyLoadAppFromAsar",
+        "state": "enabled",
+        "raw_byte": 49
+      },
+      {
+        "index": 6,
+        "name": "LoadBrowserProcessSpecificV8Snapshot",
+        "state": "disabled",
+        "raw_byte": 48
+      },
+      {
+        "index": 7,
+        "name": "GrantFileProtocolExtraPrivileges",
+        "state": "enabled",
+        "raw_byte": 49
+      },
+      {
+        "index": 8,
+        "name": "WasmTrapHandlers",
+        "state": "enabled",
+        "raw_byte": 49
+      }
+    ]
+  },
+  "focused_application": {
+    "projection_method": "Python projection of saved REA Evidence; not a new REA Evidence record",
+    "evidence_id": "ev_f9cc2aefecd0107c38859293a389670b24338659df5b2be0b96a6095d36a206e",
+    "operation": "analyze_javascript_application",
+    "subject": {
+      "name": "app.asar",
+      "digest": {
+        "sha256": "1166326521155f95d72849d8259d7593978cd4c77ff844b15783ee74ec0d7782"
+      },
+      "local_path": "C:\\Users\\jerez\\AppData\\Local\\Programs\\sklauncher\\resources\\app.asar",
+      "format": "asar",
+      "architecture": null
+    },
+    "raw_file": "C:\\Users\\jerez\\Documents\\ChatGPT\\Launcher MC\\.analysis\\rea-firstparty.json",
+    "raw_bytes": 277900440,
+    "parameters": {
+      "format": "auto",
+      "integrity_policy": "fail",
+      "source_paths": [
+        "out/main/LibraryPatchProvider-BIKzo3nB.js",
+        "out/main/index.js",
+        "out/main/patchesEnabled-Di6gFtiD.js",
+        "out/preload/index.js",
+        "out/renderer/assets/console-P8DIl65R.js",
+        "out/renderer/assets/downloads.svelte-BQ7mIuin.js",
+        "out/renderer/assets/game.svelte-DLNvbQrr.js",
+        "out/renderer/assets/index-C44oHH58.js",
+        "out/renderer/assets/instances.svelte-CA2qEpy9.js",
+        "out/renderer/assets/marked.esm-BvfF1IFJ.js",
+        "out/renderer/assets/purify.es-BiqCFv-r.js",
+        "out/renderer/assets/rolldown-runtime-BQ-_32WO.js",
+        "out/renderer/assets/scroll-B1oij-by.js",
+        "out/renderer/assets/skinview3d-B3NzCLfg.js",
+        "out/renderer/console.html",
+        "out/renderer/index.html",
+        "package.json",
+        "node_modules/@electron-toolkit/preload/dist/index.cjs"
+      ]
+    },
+    "statistics": {
+      "relevant_files": 5089,
+      "nested_asar_containers": 0,
+      "text_bytes_read": 2685093,
+      "invalid_utf8_files": 0,
+      "parsed_javascript_files": 15,
+      "skipped_javascript_files": 0,
+      "visited_ast_nodes": 668851,
+      "findings": 1163,
+      "modules": 0,
+      "parse_failures": 0
+    },
+    "summary": {
+      "browser_windows": 2,
+      "explicit_web_preferences": 10,
+      "preload_entrypoints": 0,
+      "context_bridge_apis": 3,
+      "exposed_api_members": 0,
+      "ipc": {
+        "operations": 434,
+        "literal_channels": 228,
+        "dynamic_channel_operations": 7,
+        "renderer_transmissions": 204,
+        "renderer_listeners": 31,
+        "main_handlers": 199,
+        "paired_renderer_transmissions": 199,
+        "ambiguous_renderer_transmissions": 0,
+        "unpaired_literal_renderer_transmissions": 0
+      },
+      "sender_validation_observations": 0,
+      "utility_processes": 0,
+      "resolved_utility_entrypoints": 0,
+      "native_addon_bindings": 0,
+      "resolved_native_addon_bindings": 0
+    },
+    "source_selection": {
+      "requested_paths": [
+        "out/main/LibraryPatchProvider-BIKzo3nB.js",
+        "out/main/index.js",
+        "out/main/patchesEnabled-Di6gFtiD.js",
+        "out/preload/index.js",
+        "out/renderer/assets/console-P8DIl65R.js",
+        "out/renderer/assets/downloads.svelte-BQ7mIuin.js",
+        "out/renderer/assets/game.svelte-DLNvbQrr.js",
+        "out/renderer/assets/index-C44oHH58.js",
+        "out/renderer/assets/instances.svelte-CA2qEpy9.js",
+        "out/renderer/assets/marked.esm-BvfF1IFJ.js",
+        "out/renderer/assets/purify.es-BiqCFv-r.js",
+        "out/renderer/assets/rolldown-runtime-BQ-_32WO.js",
+        "out/renderer/assets/scroll-B1oij-by.js",
+        "out/renderer/assets/skinview3d-B3NzCLfg.js",
+        "out/renderer/console.html",
+        "out/renderer/index.html",
+        "package.json",
+        "node_modules/@electron-toolkit/preload/dist/index.cjs"
+      ],
+      "unselected_files": 5071
+    },
+    "graph": {
+      "nodes": 16052,
+      "edges": 17464,
+      "coverage": {
+        "status": "partial",
+        "truncated": false,
+        "omitted_count": null
+      }
+    },
+    "semantic_graph": {
+      "nodes": 100000,
+      "relations": 63175,
+      "unknowns": 100000,
+      "coverage": {
+        "status": "partial",
+        "truncated": true,
+        "omitted_nodes": null,
+        "omitted_relations": null
+      },
+      "families": [
+        {
+          "family": "boundary",
+          "status": "partial",
+          "retained_relations": 20,
+          "unknown_count": 2077
+        },
+        {
+          "family": "call-flow",
+          "status": "partial",
+          "retained_relations": 9769,
+          "unknown_count": 13285
+        },
+        {
+          "family": "child-process",
+          "status": "partial",
+          "retained_relations": 0,
+          "unknown_count": 2071
+        },
+        {
+          "family": "closure",
+          "status": "partial",
+          "retained_relations": 16161,
+          "unknown_count": 2070
+        },
+        {
+          "family": "configuration",
+          "status": "partial",
+          "retained_relations": 0,
+          "unknown_count": 2070
+        },
+        {
+          "family": "data-flow",
+          "status": "partial",
+          "retained_relations": 33890,
+          "unknown_count": 19940
+        },
+        {
+          "family": "event",
+          "status": "partial",
+          "retained_relations": 59,
+          "unknown_count": 2128
+        },
+        {
+          "family": "object-flow",
+          "status": "partial",
+          "retained_relations": 3201,
+          "unknown_count": 47971
+        },
+        {
+          "family": "promise-ownership",
+          "status": "partial",
+          "retained_relations": 70,
+          "unknown_count": 2129
+        },
+        {
+          "family": "request",
+          "status": "partial",
+          "retained_relations": 0,
+          "unknown_count": 2070
+        },
+        {
+          "family": "resource-lifecycle",
+          "status": "partial",
+          "retained_relations": 0,
+          "unknown_count": 2070
+        },
+        {
+          "family": "timer",
+          "status": "partial",
+          "retained_relations": 5,
+          "unknown_count": 2119
+        }
+      ]
+    },
+    "integrity_contradictions": [],
+    "limitations": [
+      "Caller-selected source analysis leaves 5071 inventoried files outside analysis scope. Inventory identity covers the complete artifact; relationships through unselected sources remain unknown.",
+      "CommonJS and ESM binding relationships were recovered from inert syntax and resolved only within the inventoried artifact container.",
+      "Dynamic IPC channel expressions remain unresolved and are never paired by textual similarity.",
+      "Electron API identity follows proven lexical module aliases and structurally verified module-namespace interop. Other reassignments, dynamic selections, and visibly overwritten namespace members are unresolved; missing findings do not establish absence. Arbitrary call side effects and runtime registration are not evaluated.",
+      "Electron relationships are derived from inert syntax; runtime registration, reachability, defaults, and enforcement remain unproven.",
+      "Graph coverage is incomplete; unavailable facts remain explicit and must not be read as absence.",
+      "JavaScript and HTML were parsed as inert text; bundle bootstrap code was never executed.",
+      "Static imports, entrypoints, workers, endpoints, and storage relationships do not prove runtime execution.",
+      "Static paths and relationships may remain unresolved when expressions are dynamic or obfuscated.",
+      "Webpack/Rspack factories were recovered from AST literals; REA did not invoke push handlers or bundle bootstrap code."
+    ]
+  }
+}

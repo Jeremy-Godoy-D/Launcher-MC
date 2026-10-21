@@ -1,0 +1,210 @@
+{
+  "date_local": "2026-10-20",
+  "method": "Lectura ZIP/SHA256 y javap OpenJDK 17.0.20.101; no ejecución del launcher; no REA",
+  "binaries": [
+    {
+      "path": "C:\\Users\\jerez\\AppData\\Roaming\\sklauncher\\SKlauncher.jar",
+      "bytes": 1401788,
+      "sha256": "25a73e3770a1d8d14bce53e8920e2e893aacc3c715d0fb22f878ef2090d03863",
+      "manifest": {
+        "Manifest-Version": "1.0",
+        "Main-Class": "pl.skmedix.bootstrap.Main",
+        "Implementation-Version": "3.2.18",
+        "Multi-Release": "true"
+      },
+      "class_count": 599,
+      "prior_matches": [
+        "bootstrap"
+      ],
+      "main_class_entry_exists": true,
+      "package_class_counts": {
+        "pl/skmedix/bootstrap/": 61,
+        "net/minecraft/launcher/": 0,
+        "net/minecraft/launcher/ui/": 0,
+        "com/mojang/launcher/": 0,
+        "com/sklauncher/injector/": 0
+      }
+    },
+    {
+      "path": "C:\\Users\\jerez\\AppData\\Roaming\\.sklauncher\\sklauncher-fx.jar",
+      "bytes": 17223929,
+      "sha256": "07d93bd540ccdc9ef1779a5362e04abb0c22cd3bc1f1ead5a1495b8cc922fda0",
+      "manifest": {
+        "Manifest-Version": "1.0",
+        "Implementation-Version": "3.2.18",
+        "Implementation-Timestamp": "2026-07-19T23:30:07+0000",
+        "Premain-Class": "com.sklauncher.injector.javaagent.Premain",
+        "Agent-Class": "com.sklauncher.injector.javaagent.Premain",
+        "Can-Retransform-Classes": "true",
+        "Can-Redefine-Classes": "true",
+        "Multi-Release": "true",
+        "Build-Number": "601",
+        "Main-Class": "net.minecraft.launcher.MainFX"
+      },
+      "class_count": 6225,
+      "prior_matches": [
+        "sklauncher-fx"
+      ],
+      "main_class_entry_exists": false,
+      "package_class_counts": {
+        "pl/skmedix/bootstrap/": 0,
+        "net/minecraft/launcher/": 309,
+        "net/minecraft/launcher/ui/": 113,
+        "com/mojang/launcher/": 47,
+        "com/sklauncher/injector/": 90
+      }
+    },
+    {
+      "path": "C:\\Users\\jerez\\AppData\\Roaming\\.minecraft\\sklauncher-fx.jar",
+      "bytes": 17226853,
+      "sha256": "c6b0f9be0176c14bd224475c7c36903feda68e2cdedc9404a03181790caee404",
+      "manifest": {
+        "Manifest-Version": "1.0",
+        "Implementation-Version": "3.2.18",
+        "Implementation-Timestamp": "2026-08-04T15:52:35+0000",
+        "Premain-Class": "com.sklauncher.injector.javaagent.Premain",
+        "Agent-Class": "com.sklauncher.injector.javaagent.Premain",
+        "Can-Retransform-Classes": "true",
+        "Can-Redefine-Classes": "true",
+        "Multi-Release": "true",
+        "Build-Number": "602",
+        "Main-Class": "net.minecraft.launcher.MainFX"
+      },
+      "class_count": 6226,
+      "prior_matches": [
+        "minecraft-fx"
+      ],
+      "main_class_entry_exists": false,
+      "package_class_counts": {
+        "pl/skmedix/bootstrap/": 0,
+        "net/minecraft/launcher/": 310,
+        "net/minecraft/launcher/ui/": 113,
+        "com/mojang/launcher/": 47,
+        "com/sklauncher/injector/": 90
+      }
+    }
+  ],
+  "javafx_build_601_to_602_class_delta": {
+    "added": [
+      "net/minecraft/launcher/util/platform/MacOsUtils.class"
+    ],
+    "removed": [],
+    "changed": [
+      "net/minecraft/launcher/JavaFXUserInterface$1.class",
+      "net/minecraft/launcher/JavaFXUserInterface.class",
+      "net/minecraft/launcher/LauncherSettings.class"
+    ]
+  },
+  "current_javap_verification": [
+    {
+      "class": "pl.skmedix.bootstrap.Bootstrap",
+      "binary": "C:\\Users\\jerez\\AppData\\Roaming\\sklauncher\\SKlauncher.jar",
+      "current_javap_matches_prior_ignoring_blank_lines": true,
+      "prior_file": "C:\\Users\\jerez\\Documents\\Codex\\2026-10-20\\qui\\work\\java-audit\\pl.skmedix.bootstrap.Bootstrap.javap.txt",
+      "prior_line_count": 1071,
+      "current_javap_sha256_utf8": "6668f7380c7d700a7990a7ea8c74277b695352be547a358cdb2a020a60d9c68e"
+    },
+    {
+      "class": "pl.skmedix.bootstrap.BootstrapConstants",
+      "binary": "C:\\Users\\jerez\\AppData\\Roaming\\sklauncher\\SKlauncher.jar",
+      "current_javap_matches_prior_ignoring_blank_lines": true,
+      "prior_file": "C:\\Users\\jerez\\Documents\\Codex\\2026-10-20\\qui\\work\\java-audit\\pl.skmedix.bootstrap.BootstrapConstants.javap.txt",
+      "prior_line_count": 58,
+      "current_javap_sha256_utf8": "1a48c3c8158e3e0093458fe45b0d6b0e6a0036907e66601bd0e0fb4b7de28db6"
+    },
+    {
+      "class": "pl.skmedix.bootstrap.task.impl.LauncherStartTask",
+      "binary": "C:\\Users\\jerez\\AppData\\Roaming\\sklauncher\\SKlauncher.jar",
+      "current_javap_matches_prior_ignoring_blank_lines": true,
+      "prior_file": "C:\\Users\\jerez\\Documents\\Codex\\2026-10-20\\qui\\work\\java-audit\\pl.skmedix.bootstrap.task.impl.LauncherStartTask.javap.txt",
+      "prior_line_count": 256,
+      "current_javap_sha256_utf8": "dbc4884cdcf7792e0e138d725c801a5d2be751a7fc696108dddfec909a0f9a32"
+    },
+    {
+      "class": "pl.skmedix.bootstrap.task.impl.FileValidationTask",
+      "binary": "C:\\Users\\jerez\\AppData\\Roaming\\sklauncher\\SKlauncher.jar",
+      "current_javap_matches_prior_ignoring_blank_lines": true,
+      "prior_file": "C:\\Users\\jerez\\Documents\\Codex\\2026-10-20\\qui\\work\\java-audit\\pl.skmedix.bootstrap.task.impl.FileValidationTask.javap.txt",
+      "prior_line_count": 246,
+      "current_javap_sha256_utf8": "3fb6c08e94d1cb12c933d6290d969c224df8fdf4fc899d42df5ae1363506c7fe"
+    },
+    {
+      "class": "pl.skmedix.bootstrap.task.impl.FileUpdateTask",
+      "binary": "C:\\Users\\jerez\\AppData\\Roaming\\sklauncher\\SKlauncher.jar",
+      "current_javap_matches_prior_ignoring_blank_lines": true,
+      "prior_file": "C:\\Users\\jerez\\Documents\\Codex\\2026-10-20\\qui\\work\\java-audit\\pl.skmedix.bootstrap.task.impl.FileUpdateTask.javap.txt",
+      "prior_line_count": 508,
+      "current_javap_sha256_utf8": "04bb7c9e910700d5599df664ada3a67bbcc673b8538d503117c54e5358606852"
+    },
+    {
+      "class": "pl.skmedix.bootstrap.task.impl.ConfigurationTask",
+      "binary": "C:\\Users\\jerez\\AppData\\Roaming\\sklauncher\\SKlauncher.jar",
+      "current_javap_matches_prior_ignoring_blank_lines": true,
+      "prior_file": "C:\\Users\\jerez\\Documents\\Codex\\2026-10-20\\qui\\work\\java-audit\\pl.skmedix.bootstrap.task.impl.ConfigurationTask.javap.txt",
+      "prior_line_count": 360,
+      "current_javap_sha256_utf8": "4dcfb8fe64a13b31c0db72332e74115d157d89f634b7f04fae03f0472bdf2f3e"
+    },
+    {
+      "class": "pl.skmedix.bootstrap.task.impl.VersionCheckTask",
+      "binary": "C:\\Users\\jerez\\AppData\\Roaming\\sklauncher\\SKlauncher.jar",
+      "current_javap_matches_prior_ignoring_blank_lines": true,
+      "prior_file": "C:\\Users\\jerez\\Documents\\Codex\\2026-10-20\\qui\\work\\java-audit\\pl.skmedix.bootstrap.task.impl.VersionCheckTask.javap.txt",
+      "prior_line_count": 89,
+      "current_javap_sha256_utf8": "9c9d91c213fd63812a48de1816e27fa8611cc9a8f6dd2e1f93212276603f7c3e"
+    },
+    {
+      "class": "net.minecraft.launcher.Launcher",
+      "binary": "C:\\Users\\jerez\\AppData\\Roaming\\.sklauncher\\sklauncher-fx.jar",
+      "current_javap_matches_prior_ignoring_blank_lines": true,
+      "prior_file": "C:\\Users\\jerez\\Documents\\Codex\\2026-10-20\\qui\\work\\java-audit\\net.minecraft.launcher.Launcher.javap.txt",
+      "prior_line_count": 1929,
+      "current_javap_sha256_utf8": "253e8ed15c07845fbe5b23296d6877434febaa06148b1dcc6e145a932fcf2d07"
+    },
+    {
+      "class": "net.minecraft.launcher.game.MinecraftGameRunner",
+      "binary": "C:\\Users\\jerez\\AppData\\Roaming\\.sklauncher\\sklauncher-fx.jar",
+      "current_javap_matches_prior_ignoring_blank_lines": true,
+      "prior_file": "C:\\Users\\jerez\\Documents\\Codex\\2026-10-20\\qui\\work\\java-audit\\net.minecraft.launcher.game.MinecraftGameRunner.javap.txt",
+      "prior_line_count": 2916,
+      "current_javap_sha256_utf8": "ff39145363bada4a9211e83cad27b183a4fea4e77cee19e0df15ee05b55b9deb"
+    },
+    {
+      "class": "net.minecraft.launcher.auth.MicrosoftLogin",
+      "binary": "C:\\Users\\jerez\\AppData\\Roaming\\.sklauncher\\sklauncher-fx.jar",
+      "current_javap_matches_prior_ignoring_blank_lines": true,
+      "prior_file": "C:\\Users\\jerez\\Documents\\Codex\\2026-10-20\\qui\\work\\java-audit\\net.minecraft.launcher.auth.MicrosoftLogin.javap.txt",
+      "prior_line_count": 951,
+      "current_javap_sha256_utf8": "545f08746f138b74c2a9a85d9207c763b808db6889d8925f5b4a714b156d7bc1"
+    },
+    {
+      "class": "net.minecraft.launcher.LauncherUpdates",
+      "binary": "C:\\Users\\jerez\\AppData\\Roaming\\.sklauncher\\sklauncher-fx.jar",
+      "current_javap_matches_prior_ignoring_blank_lines": true,
+      "prior_file": "C:\\Users\\jerez\\Documents\\Codex\\2026-10-20\\qui\\work\\java-audit\\net.minecraft.launcher.LauncherUpdates.javap.txt",
+      "prior_line_count": 69,
+      "current_javap_sha256_utf8": "c78b360ebff9d3ba313a3fcced2c80d21e8439bf06b423658cb5ff2e3d35cdc7"
+    },
+    {
+      "class": "net.minecraft.launcher.util.CentralizedHttpClient",
+      "binary": "C:\\Users\\jerez\\AppData\\Roaming\\.sklauncher\\sklauncher-fx.jar",
+      "current_javap_matches_prior_ignoring_blank_lines": true,
+      "prior_file": "C:\\Users\\jerez\\Documents\\Codex\\2026-10-20\\qui\\work\\java-audit\\net.minecraft.launcher.util.CentralizedHttpClient.javap.txt",
+      "prior_line_count": 494,
+      "current_javap_sha256_utf8": "7dbd0f3df0cb66938e6cc331b6873d46285640ded8b0660d39ba27866a2a94e3"
+    },
+    {
+      "class": "net.minecraft.launcher.LauncherSettings",
+      "binary": "C:\\Users\\jerez\\AppData\\Roaming\\.minecraft\\sklauncher-fx.jar",
+      "current_javap_matches_prior_ignoring_blank_lines": true,
+      "prior_file": "C:\\Users\\jerez\\Documents\\Codex\\2026-10-20\\qui\\work\\java-audit\\net.minecraft.launcher.LauncherSettings.javap.txt",
+      "prior_line_count": 656,
+      "current_javap_sha256_utf8": "9632e904ab819f9e631874106730e23de93d15990ff8ff1f06904af6a68888a9"
+    }
+  ],
+  "prior_audit_caveat": "El javap previo de LauncherSettings corresponde a build 602; se verificó contra .minecraft, no contra build 601.",
+  "limits": [
+    "No se leyeron cuentas, tokens ni perfiles del usuario.",
+    "Sin prueba dinámica ni solicitudes a servidores.",
+    "Estas evidencias son shell/javap, no salida de REA."
+  ]
+}

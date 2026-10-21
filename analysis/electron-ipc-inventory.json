@@ -1,0 +1,4519 @@
+{
+  "method": "Shell AST analysis; static main and preload only; no execution",
+  "sourceHashes": [
+    {
+      "path": "package.json",
+      "sha256": "ff86073c9bf66017438954261977295639fef50c12eaad2038a5e7eca2c19de3",
+      "bytes": 1097,
+      "extractionMatches": true
+    },
+    {
+      "path": "out\\main\\LibraryPatchProvider-BIKzo3nB.js",
+      "sha256": "dca1d045d95171cb4b3e9da1e4741c03db4e759402e393214dcec27fc4b1cc9c",
+      "bytes": 7529,
+      "extractionMatches": true
+    },
+    {
+      "path": "out\\main\\index.js",
+      "sha256": "3a3603acfc591310232e7c6223f69539bfd3a15ca0d1d8b2e6ccb3a60bd55b38",
+      "bytes": 443010,
+      "extractionMatches": true
+    },
+    {
+      "path": "out\\main\\patchesEnabled-Di6gFtiD.js",
+      "sha256": "62bebf608d9f89f547295824c37b2dee70e534ad674e25312e50ea57577ed441",
+      "bytes": 117,
+      "extractionMatches": true
+    },
+    {
+      "path": "out\\preload\\index.js",
+      "sha256": "f97a06fa0b4fe6f9c215d53da8e495e77002a67e4e9a976c2e0d0b714fcba5f7",
+      "bytes": 18086,
+      "extractionMatches": true
+    },
+    {
+      "path": "node_modules/@electron-toolkit/preload/dist/index.cjs",
+      "sha256": "a591a7f58d26674a10f2d404874a7b01d9ebc617419c21b74773a6c77912c067",
+      "bytes": 3178,
+      "extractionMatches": true
+    }
+  ],
+  "apiTopLevelGroups": [
+    "windowControls",
+    "app",
+    "net",
+    "system",
+    "analytics",
+    "theme",
+    "security",
+    "updater",
+    "settings",
+    "auth",
+    "skin",
+    "friends",
+    "versions",
+    "java",
+    "downloads",
+    "instances",
+    "jumplist",
+    "servers",
+    "news",
+    "remoteConfig",
+    "game",
+    "dialog",
+    "dataDir",
+    "migration",
+    "utils",
+    "storage",
+    "quickplay",
+    "content",
+    "installation"
+  ],
+  "apiEntries": [
+    {
+      "path": "api.windowControls.minimize",
+      "kind": "function",
+      "line": 1,
+      "offset": 88,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "window:minimize",
+          "offset": 101
+        }
+      ]
+    },
+    {
+      "path": "api.windowControls.maximize",
+      "kind": "function",
+      "line": 1,
+      "offset": 141,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "window:maximize",
+          "offset": 154
+        }
+      ]
+    },
+    {
+      "path": "api.windowControls.close",
+      "kind": "function",
+      "line": 1,
+      "offset": 194,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "window:close",
+          "offset": 204
+        }
+      ]
+    },
+    {
+      "path": "api.windowControls.openConsole",
+      "kind": "function",
+      "line": 1,
+      "offset": 241,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "console:open",
+          "offset": 256
+        }
+      ]
+    },
+    {
+      "path": "api.app.platform",
+      "kind": "value",
+      "line": 1,
+      "offset": 301,
+      "calls": []
+    },
+    {
+      "path": "api.app.getVersion",
+      "kind": "function",
+      "line": 1,
+      "offset": 327,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "app:get-version",
+          "offset": 342
+        }
+      ]
+    },
+    {
+      "path": "api.app.getGpuStatus",
+      "kind": "function",
+      "line": 1,
+      "offset": 382,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "app:get-gpu-status",
+          "offset": 399
+        }
+      ]
+    },
+    {
+      "path": "api.app.getOsInfo",
+      "kind": "function",
+      "line": 1,
+      "offset": 442,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "app:get-os-info",
+          "offset": 456
+        }
+      ]
+    },
+    {
+      "path": "api.app.getMemoryInfo",
+      "kind": "function",
+      "line": 1,
+      "offset": 496,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "app:get-memory-info",
+          "offset": 514
+        }
+      ]
+    },
+    {
+      "path": "api.app.shareLauncherLog",
+      "kind": "function",
+      "line": 1,
+      "offset": 558,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "app:share-launcher-log",
+          "offset": 579
+        }
+      ]
+    },
+    {
+      "path": "api.app.restart",
+      "kind": "function",
+      "line": 1,
+      "offset": 626,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "app:restart",
+          "offset": 639
+        }
+      ]
+    },
+    {
+      "path": "api.net.isOnline",
+      "kind": "function",
+      "line": 1,
+      "offset": 682,
+      "calls": []
+    },
+    {
+      "path": "api.net.onStatusChange",
+      "kind": "function",
+      "line": 1,
+      "offset": 772,
+      "calls": []
+    },
+    {
+      "path": "api.system.openExternal",
+      "kind": "function",
+      "line": 1,
+      "offset": 996,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "system:open-external",
+          "offset": 1012
+        }
+      ]
+    },
+    {
+      "path": "api.analytics.track",
+      "kind": "function",
+      "line": 1,
+      "offset": 1071,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "analytics:track",
+          "offset": 1084
+        }
+      ]
+    },
+    {
+      "path": "api.theme.setSource",
+      "kind": "function",
+      "line": 1,
+      "offset": 1136,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "theme:set-source",
+          "offset": 1149
+        }
+      ]
+    },
+    {
+      "path": "api.security.scanSystemThreats",
+      "kind": "function",
+      "line": 1,
+      "offset": 1203,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "security:scan-system",
+          "offset": 1225
+        }
+      ]
+    },
+    {
+      "path": "api.security.runManualScan",
+      "kind": "function",
+      "line": 1,
+      "offset": 1270,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "security:run-manual-scan",
+          "offset": 1288
+        }
+      ]
+    },
+    {
+      "path": "api.security.threatAcknowledge",
+      "kind": "function",
+      "line": 1,
+      "offset": 1337,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "security:threat-acknowledge",
+          "offset": 1359
+        }
+      ]
+    },
+    {
+      "path": "api.security.threatQuit",
+      "kind": "function",
+      "line": 1,
+      "offset": 1411,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "security:threat-quit",
+          "offset": 1426
+        }
+      ]
+    },
+    {
+      "path": "api.updater.getInitialStateSync",
+      "kind": "function",
+      "line": 1,
+      "offset": 1481,
+      "calls": [
+        {
+          "operation": "sendSync",
+          "channel": "updater:get-initial-state-sync",
+          "offset": 1505
+        }
+      ]
+    },
+    {
+      "path": "api.updater.getState",
+      "kind": "function",
+      "line": 1,
+      "offset": 1562,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "updater:get-state",
+          "offset": 1575
+        }
+      ]
+    },
+    {
+      "path": "api.updater.checkNow",
+      "kind": "function",
+      "line": 1,
+      "offset": 1617,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "updater:check-now",
+          "offset": 1630
+        }
+      ]
+    },
+    {
+      "path": "api.updater.downloadAndInstall",
+      "kind": "function",
+      "line": 1,
+      "offset": 1672,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "updater:download-and-install",
+          "offset": 1695
+        }
+      ]
+    },
+    {
+      "path": "api.updater.installAndRestart",
+      "kind": "function",
+      "line": 1,
+      "offset": 1748,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "updater:install-and-restart",
+          "offset": 1770
+        }
+      ]
+    },
+    {
+      "path": "api.updater.setChannel",
+      "kind": "function",
+      "line": 1,
+      "offset": 1822,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "updater:set-channel",
+          "offset": 1836
+        }
+      ]
+    },
+    {
+      "path": "api.updater.openManualDownload",
+      "kind": "function",
+      "line": 1,
+      "offset": 1882,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "updater:open-manual-download",
+          "offset": 1905
+        }
+      ]
+    },
+    {
+      "path": "api.updater.onStatusChange",
+      "kind": "function",
+      "line": 1,
+      "offset": 1958,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "updater:status",
+          "offset": 2004
+        }
+      ]
+    },
+    {
+      "path": "api.updater.onLockStateChange",
+      "kind": "function",
+      "line": 1,
+      "offset": 2097,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "updater:lock-state",
+          "offset": 2146
+        }
+      ]
+    },
+    {
+      "path": "api.updater.onProgress",
+      "kind": "function",
+      "line": 1,
+      "offset": 2247,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "updater:download-progress",
+          "offset": 2289
+        }
+      ]
+    },
+    {
+      "path": "api.updater.onDownloaded",
+      "kind": "function",
+      "line": 1,
+      "offset": 2404,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "updater:downloaded",
+          "offset": 2448
+        }
+      ]
+    },
+    {
+      "path": "api.updater.onError",
+      "kind": "function",
+      "line": 1,
+      "offset": 2549,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "updater:error",
+          "offset": 2588
+        }
+      ]
+    },
+    {
+      "path": "api.settings.getAll",
+      "kind": "function",
+      "line": 1,
+      "offset": 2690,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "settings:get-all",
+          "offset": 2701
+        }
+      ]
+    },
+    {
+      "path": "api.settings.get",
+      "kind": "function",
+      "line": 1,
+      "offset": 2742,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "settings:get",
+          "offset": 2749
+        }
+      ]
+    },
+    {
+      "path": "api.settings.set",
+      "kind": "function",
+      "line": 1,
+      "offset": 2788,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "settings:set",
+          "offset": 2795
+        }
+      ]
+    },
+    {
+      "path": "api.settings.getAutoLaunch",
+      "kind": "function",
+      "line": 1,
+      "offset": 2834,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "settings:get-auto-launch",
+          "offset": 2852
+        }
+      ]
+    },
+    {
+      "path": "api.auth.initialize",
+      "kind": "function",
+      "line": 1,
+      "offset": 2908,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "auth:initialize",
+          "offset": 2923
+        }
+      ]
+    },
+    {
+      "path": "api.auth.loginMicrosoft",
+      "kind": "function",
+      "line": 1,
+      "offset": 2963,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "auth:login-microsoft",
+          "offset": 2982
+        }
+      ]
+    },
+    {
+      "path": "api.auth.cancelMicrosoftLogin",
+      "kind": "function",
+      "line": 1,
+      "offset": 3027,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "auth:cancel-microsoft-login",
+          "offset": 3052
+        }
+      ]
+    },
+    {
+      "path": "api.auth.loginOffline",
+      "kind": "function",
+      "line": 1,
+      "offset": 3104,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "auth:login-offline",
+          "offset": 3120
+        }
+      ]
+    },
+    {
+      "path": "api.auth.logout",
+      "kind": "function",
+      "line": 1,
+      "offset": 3165,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "auth:logout",
+          "offset": 3175
+        }
+      ]
+    },
+    {
+      "path": "api.auth.switchAccount",
+      "kind": "function",
+      "line": 1,
+      "offset": 3213,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "auth:switch-account",
+          "offset": 3230
+        }
+      ]
+    },
+    {
+      "path": "api.auth.getAccounts",
+      "kind": "function",
+      "line": 1,
+      "offset": 3276,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "auth:get-accounts",
+          "offset": 3292
+        }
+      ]
+    },
+    {
+      "path": "api.auth.getActiveAccount",
+      "kind": "function",
+      "line": 1,
+      "offset": 3334,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "auth:get-active-account",
+          "offset": 3355
+        }
+      ]
+    },
+    {
+      "path": "api.auth.refreshToken",
+      "kind": "function",
+      "line": 1,
+      "offset": 3403,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "auth:refresh-token",
+          "offset": 3419
+        }
+      ]
+    },
+    {
+      "path": "api.auth.isTokenExpired",
+      "kind": "function",
+      "line": 1,
+      "offset": 3464,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "auth:is-token-expired",
+          "offset": 3483
+        }
+      ]
+    },
+    {
+      "path": "api.auth.onStateChange",
+      "kind": "function",
+      "line": 1,
+      "offset": 3529,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "auth:state-changed",
+          "offset": 3574
+        }
+      ]
+    },
+    {
+      "path": "api.skin.get",
+      "kind": "function",
+      "line": 1,
+      "offset": 3680,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "skin:get",
+          "offset": 3691
+        }
+      ]
+    },
+    {
+      "path": "api.skin.forceRefresh",
+      "kind": "function",
+      "line": 1,
+      "offset": 3728,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "skin:force-refresh",
+          "offset": 3748
+        }
+      ]
+    },
+    {
+      "path": "api.skin.getCape",
+      "kind": "function",
+      "line": 1,
+      "offset": 3795,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "skin:get-cape",
+          "offset": 3810
+        }
+      ]
+    },
+    {
+      "path": "api.skin.refreshActive",
+      "kind": "function",
+      "line": 1,
+      "offset": 3852,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "skin:refresh-active",
+          "offset": 3869
+        }
+      ]
+    },
+    {
+      "path": "api.skin.getProfile",
+      "kind": "function",
+      "line": 1,
+      "offset": 3915,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "skin:get-profile",
+          "offset": 3930
+        }
+      ]
+    },
+    {
+      "path": "api.skin.upload",
+      "kind": "function",
+      "line": 1,
+      "offset": 3971,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "skin:upload",
+          "offset": 3985
+        }
+      ]
+    },
+    {
+      "path": "api.skin.reset",
+      "kind": "function",
+      "line": 1,
+      "offset": 4025,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "skin:reset",
+          "offset": 4035
+        }
+      ]
+    },
+    {
+      "path": "api.skin.fetchTexture",
+      "kind": "function",
+      "line": 1,
+      "offset": 4070,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "skin:fetch-texture",
+          "offset": 4086
+        }
+      ]
+    },
+    {
+      "path": "api.skin.equipCape",
+      "kind": "function",
+      "line": 1,
+      "offset": 4131,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "cape:equip",
+          "offset": 4144
+        }
+      ]
+    },
+    {
+      "path": "api.skin.unequipCape",
+      "kind": "function",
+      "line": 1,
+      "offset": 4181,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "cape:unequip",
+          "offset": 4197
+        }
+      ]
+    },
+    {
+      "path": "api.skin.libraryList",
+      "kind": "function",
+      "line": 1,
+      "offset": 4234,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "skin-library:list",
+          "offset": 4250
+        }
+      ]
+    },
+    {
+      "path": "api.skin.libraryRemove",
+      "kind": "function",
+      "line": 1,
+      "offset": 4292,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "skin-library:remove",
+          "offset": 4309
+        }
+      ]
+    },
+    {
+      "path": "api.skin.libraryEquip",
+      "kind": "function",
+      "line": 1,
+      "offset": 4355,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "skin-library:equip",
+          "offset": 4371
+        }
+      ]
+    },
+    {
+      "path": "api.skin.libraryGetTexture",
+      "kind": "function",
+      "line": 1,
+      "offset": 4416,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "skin-library:get-texture",
+          "offset": 4437
+        }
+      ]
+    },
+    {
+      "path": "api.skin.onUpdated",
+      "kind": "function",
+      "line": 1,
+      "offset": 4488,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "skin:updated",
+          "offset": 4529
+        }
+      ]
+    },
+    {
+      "path": "api.skin.onAppearanceUpdated",
+      "kind": "function",
+      "line": 1,
+      "offset": 4616,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "skin:appearance-updated",
+          "offset": 4667
+        }
+      ]
+    },
+    {
+      "path": "api.friends.list",
+      "kind": "function",
+      "line": 1,
+      "offset": 4786,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "friends:list",
+          "offset": 4794
+        }
+      ]
+    },
+    {
+      "path": "api.friends.cached",
+      "kind": "function",
+      "line": 1,
+      "offset": 4833,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "friends:cached",
+          "offset": 4844
+        }
+      ]
+    },
+    {
+      "path": "api.friends.mutate",
+      "kind": "function",
+      "line": 1,
+      "offset": 4883,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "friends:mutate",
+          "offset": 4893
+        }
+      ]
+    },
+    {
+      "path": "api.friends.presence",
+      "kind": "function",
+      "line": 1,
+      "offset": 4934,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "friends:presence:get",
+          "offset": 4947
+        }
+      ]
+    },
+    {
+      "path": "api.friends.blocklist",
+      "kind": "function",
+      "line": 1,
+      "offset": 4992,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "friends:blocklist",
+          "offset": 5005
+        }
+      ]
+    },
+    {
+      "path": "api.friends.setPanelOpen",
+      "kind": "function",
+      "line": 1,
+      "offset": 5049,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "friends:setPanelOpen",
+          "offset": 5065
+        }
+      ]
+    },
+    {
+      "path": "api.friends.getAttributes",
+      "kind": "function",
+      "line": 1,
+      "offset": 5112,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "friends:attributes:get",
+          "offset": 5129
+        }
+      ]
+    },
+    {
+      "path": "api.friends.setAttributes",
+      "kind": "function",
+      "line": 1,
+      "offset": 5178,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "friends:attributes:set",
+          "offset": 5195
+        }
+      ]
+    },
+    {
+      "path": "api.friends.onUpdated",
+      "kind": "function",
+      "line": 1,
+      "offset": 5244,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "friends:updated",
+          "offset": 5285
+        }
+      ]
+    },
+    {
+      "path": "api.friends.onPresenceUpdated",
+      "kind": "function",
+      "line": 1,
+      "offset": 5378,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "presence:updated",
+          "offset": 5427
+        }
+      ]
+    },
+    {
+      "path": "api.friends.onAttributesUpdated",
+      "kind": "function",
+      "line": 1,
+      "offset": 5522,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "friends:attributes:updated",
+          "offset": 5573
+        }
+      ]
+    },
+    {
+      "path": "api.versions.getVanilla",
+      "kind": "function",
+      "line": 1,
+      "offset": 5699,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "versions:get-vanilla",
+          "offset": 5714
+        }
+      ]
+    },
+    {
+      "path": "api.versions.getModded",
+      "kind": "function",
+      "line": 1,
+      "offset": 5759,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "versions:get-modded",
+          "offset": 5772
+        }
+      ]
+    },
+    {
+      "path": "api.versions.getLocal",
+      "kind": "function",
+      "line": 1,
+      "offset": 5818,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "versions:get-local",
+          "offset": 5831
+        }
+      ]
+    },
+    {
+      "path": "api.versions.clearCache",
+      "kind": "function",
+      "line": 1,
+      "offset": 5874,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "versions:clear-cache",
+          "offset": 5889
+        }
+      ]
+    },
+    {
+      "path": "api.java.isInstalled",
+      "kind": "function",
+      "line": 1,
+      "offset": 5941,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "java:is-installed",
+          "offset": 5956
+        }
+      ]
+    },
+    {
+      "path": "api.java.isAvailable",
+      "kind": "function",
+      "line": 1,
+      "offset": 6000,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "java:is-available",
+          "offset": 6015
+        }
+      ]
+    },
+    {
+      "path": "api.java.getInstalled",
+      "kind": "function",
+      "line": 1,
+      "offset": 6059,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "java:get-installed",
+          "offset": 6076
+        }
+      ]
+    },
+    {
+      "path": "api.java.getAvailable",
+      "kind": "function",
+      "line": 1,
+      "offset": 6119,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "java:get-available",
+          "offset": 6136
+        }
+      ]
+    },
+    {
+      "path": "api.java.getAllComponents",
+      "kind": "function",
+      "line": 1,
+      "offset": 6179,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "java:get-all-components",
+          "offset": 6200
+        }
+      ]
+    },
+    {
+      "path": "api.java.getExecutablePath",
+      "kind": "function",
+      "line": 1,
+      "offset": 6248,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "java:get-executable-path",
+          "offset": 6269
+        }
+      ]
+    },
+    {
+      "path": "api.java.getInfo",
+      "kind": "function",
+      "line": 1,
+      "offset": 6320,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "java:get-info",
+          "offset": 6331
+        }
+      ]
+    },
+    {
+      "path": "api.java.getInstalledVersion",
+      "kind": "function",
+      "line": 1,
+      "offset": 6371,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "java:get-installed-version",
+          "offset": 6394
+        }
+      ]
+    },
+    {
+      "path": "api.java.getProvider",
+      "kind": "function",
+      "line": 1,
+      "offset": 6447,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "java:get-provider",
+          "offset": 6462
+        }
+      ]
+    },
+    {
+      "path": "api.java.getDiskUsage",
+      "kind": "function",
+      "line": 1,
+      "offset": 6506,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "java:get-disk-usage",
+          "offset": 6523
+        }
+      ]
+    },
+    {
+      "path": "api.java.install",
+      "kind": "function",
+      "line": 1,
+      "offset": 6567,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "java:install",
+          "offset": 6578
+        }
+      ]
+    },
+    {
+      "path": "api.java.delete",
+      "kind": "function",
+      "line": 1,
+      "offset": 6617,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "java:delete",
+          "offset": 6627
+        }
+      ]
+    },
+    {
+      "path": "api.java.verify",
+      "kind": "function",
+      "line": 1,
+      "offset": 6665,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "java:verify",
+          "offset": 6675
+        }
+      ]
+    },
+    {
+      "path": "api.java.onInstallComplete",
+      "kind": "function",
+      "line": 1,
+      "offset": 6713,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "java:install-complete",
+          "offset": 6762
+        }
+      ]
+    },
+    {
+      "path": "api.downloads.onProgress",
+      "kind": "function",
+      "line": 1,
+      "offset": 6879,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "download:progress",
+          "offset": 6921
+        }
+      ]
+    },
+    {
+      "path": "api.downloads.onComplete",
+      "kind": "function",
+      "line": 1,
+      "offset": 7018,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "download:complete",
+          "offset": 7060
+        }
+      ]
+    },
+    {
+      "path": "api.downloads.onError",
+      "kind": "function",
+      "line": 1,
+      "offset": 7157,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "download:error",
+          "offset": 7196
+        }
+      ]
+    },
+    {
+      "path": "api.instances.initialize",
+      "kind": "function",
+      "line": 1,
+      "offset": 7299,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:initialize",
+          "offset": 7314
+        }
+      ]
+    },
+    {
+      "path": "api.instances.list",
+      "kind": "function",
+      "line": 1,
+      "offset": 7359,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:list",
+          "offset": 7368
+        }
+      ]
+    },
+    {
+      "path": "api.instances.get",
+      "kind": "function",
+      "line": 1,
+      "offset": 7407,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:get",
+          "offset": 7414
+        }
+      ]
+    },
+    {
+      "path": "api.instances.create",
+      "kind": "function",
+      "line": 1,
+      "offset": 7454,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:create",
+          "offset": 7464
+        }
+      ]
+    },
+    {
+      "path": "api.instances.duplicate",
+      "kind": "function",
+      "line": 1,
+      "offset": 7507,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:duplicate",
+          "offset": 7524
+        }
+      ]
+    },
+    {
+      "path": "api.instances.allocateId",
+      "kind": "function",
+      "line": 1,
+      "offset": 7572,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:allocate-id",
+          "offset": 7586
+        }
+      ]
+    },
+    {
+      "path": "api.instances.delete",
+      "kind": "function",
+      "line": 1,
+      "offset": 7634,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:delete",
+          "offset": 7651
+        }
+      ]
+    },
+    {
+      "path": "api.instances.update",
+      "kind": "function",
+      "line": 1,
+      "offset": 7696,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:update",
+          "offset": 7710
+        }
+      ]
+    },
+    {
+      "path": "api.instances.changeVersion",
+      "kind": "function",
+      "line": 1,
+      "offset": 7755,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:change-version",
+          "offset": 7776
+        }
+      ]
+    },
+    {
+      "path": "api.instances.getVersion",
+      "kind": "function",
+      "line": 1,
+      "offset": 7829,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:get-version",
+          "offset": 7843
+        }
+      ]
+    },
+    {
+      "path": "api.instances.resolveVersion",
+      "kind": "function",
+      "line": 1,
+      "offset": 7891,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:resolve-version",
+          "offset": 7909
+        }
+      ]
+    },
+    {
+      "path": "api.instances.getDefaultVersionId",
+      "kind": "function",
+      "line": 1,
+      "offset": 7961,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:get-default-version-id",
+          "offset": 7984
+        }
+      ]
+    },
+    {
+      "path": "api.instances.openDirectory",
+      "kind": "function",
+      "line": 1,
+      "offset": 8043,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:open-directory",
+          "offset": 8067
+        }
+      ]
+    },
+    {
+      "path": "api.instances.listMods",
+      "kind": "function",
+      "line": 1,
+      "offset": 8120,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:list-mods",
+          "offset": 8132
+        }
+      ]
+    },
+    {
+      "path": "api.instances.listFiles",
+      "kind": "function",
+      "line": 1,
+      "offset": 8178,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:list-files",
+          "offset": 8198
+        }
+      ]
+    },
+    {
+      "path": "api.instances.resolvePath",
+      "kind": "function",
+      "line": 1,
+      "offset": 8247,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:resolve-path",
+          "offset": 8266
+        }
+      ]
+    },
+    {
+      "path": "api.instances.revealFile",
+      "kind": "function",
+      "line": 1,
+      "offset": 8317,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:reveal-file",
+          "offset": 8335
+        }
+      ]
+    },
+    {
+      "path": "api.instances.deleteFile",
+      "kind": "function",
+      "line": 1,
+      "offset": 8385,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:delete-file",
+          "offset": 8403
+        }
+      ]
+    },
+    {
+      "path": "api.instances.renameFile",
+      "kind": "function",
+      "line": 1,
+      "offset": 8453,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:rename-file",
+          "offset": 8473
+        }
+      ]
+    },
+    {
+      "path": "api.instances.importFiles",
+      "kind": "function",
+      "line": 1,
+      "offset": 8525,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:import-files",
+          "offset": 8546
+        }
+      ]
+    },
+    {
+      "path": "api.instances.listScreenshots",
+      "kind": "function",
+      "line": 1,
+      "offset": 8599,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:list-screenshots",
+          "offset": 8618
+        }
+      ]
+    },
+    {
+      "path": "api.instances.copyScreenshot",
+      "kind": "function",
+      "line": 1,
+      "offset": 8671,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:copy-screenshot",
+          "offset": 8693
+        }
+      ]
+    },
+    {
+      "path": "api.instances.saveScreenshotAs",
+      "kind": "function",
+      "line": 1,
+      "offset": 8747,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:save-screenshot-as",
+          "offset": 8771
+        }
+      ]
+    },
+    {
+      "path": "api.instances.onScreenshotAdded",
+      "kind": "function",
+      "line": 1,
+      "offset": 8828,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "screenshot:added",
+          "offset": 8877
+        }
+      ]
+    },
+    {
+      "path": "api.instances.toggleMod",
+      "kind": "function",
+      "line": 1,
+      "offset": 8972,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:toggle-mod",
+          "offset": 8989
+        }
+      ]
+    },
+    {
+      "path": "api.instances.deleteMod",
+      "kind": "function",
+      "line": 1,
+      "offset": 9038,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:delete-mod",
+          "offset": 9055
+        }
+      ]
+    },
+    {
+      "path": "api.instances.createShortcut",
+      "kind": "function",
+      "line": 1,
+      "offset": 9104,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:create-shortcut",
+          "offset": 9126
+        }
+      ]
+    },
+    {
+      "path": "api.instances.fetchIconBytes",
+      "kind": "function",
+      "line": 1,
+      "offset": 9180,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:fetch-icon-bytes",
+          "offset": 9198
+        }
+      ]
+    },
+    {
+      "path": "api.instances.launcherImport.getDefaultPath",
+      "kind": "function",
+      "line": 1,
+      "offset": 9267,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:import-default-path",
+          "offset": 9285
+        }
+      ]
+    },
+    {
+      "path": "api.instances.launcherImport.list",
+      "kind": "function",
+      "line": 1,
+      "offset": 9341,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:import-list",
+          "offset": 9353
+        }
+      ]
+    },
+    {
+      "path": "api.instances.launcherImport.run",
+      "kind": "function",
+      "line": 1,
+      "offset": 9403,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "instances:import-run",
+          "offset": 9416
+        }
+      ]
+    },
+    {
+      "path": "api.instances.launcherImport.onProgress",
+      "kind": "function",
+      "line": 1,
+      "offset": 9467,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "instances:import-progress",
+          "offset": 9509
+        }
+      ]
+    },
+    {
+      "path": "api.instances.onStateChange",
+      "kind": "function",
+      "line": 1,
+      "offset": 9623,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "instances:state-changed",
+          "offset": 9668
+        }
+      ]
+    },
+    {
+      "path": "api.instances.onInstallationError",
+      "kind": "function",
+      "line": 1,
+      "offset": 9777,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "instance:installation-error",
+          "offset": 9828
+        }
+      ]
+    },
+    {
+      "path": "api.jumplist.setRecents",
+      "kind": "function",
+      "line": 1,
+      "offset": 9956,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "jumplist:set-recents",
+          "offset": 9970
+        }
+      ]
+    },
+    {
+      "path": "api.servers.fetch",
+      "kind": "function",
+      "line": 1,
+      "offset": 10027,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "servers:fetch",
+          "offset": 10037
+        }
+      ]
+    },
+    {
+      "path": "api.servers.fetchOne",
+      "kind": "function",
+      "line": 1,
+      "offset": 10075,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "servers:fetchOne",
+          "offset": 10087
+        }
+      ]
+    },
+    {
+      "path": "api.servers.trackIpCopy",
+      "kind": "function",
+      "line": 1,
+      "offset": 10130,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "servers:trackIpCopy",
+          "offset": 10145
+        }
+      ]
+    },
+    {
+      "path": "api.news.fetch",
+      "kind": "function",
+      "line": 1,
+      "offset": 10198,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "news:fetch",
+          "offset": 10207
+        }
+      ]
+    },
+    {
+      "path": "api.remoteConfig.fetch",
+      "kind": "function",
+      "line": 1,
+      "offset": 10259,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "remote:config-fetch",
+          "offset": 10269
+        }
+      ]
+    },
+    {
+      "path": "api.game.launch",
+      "kind": "function",
+      "line": 1,
+      "offset": 10320,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:launch",
+          "offset": 10330
+        }
+      ]
+    },
+    {
+      "path": "api.game.launchQuickplay",
+      "kind": "function",
+      "line": 1,
+      "offset": 10368,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:launch-quickplay",
+          "offset": 10391
+        }
+      ]
+    },
+    {
+      "path": "api.game.stop",
+      "kind": "function",
+      "line": 1,
+      "offset": 10441,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:stop",
+          "offset": 10449
+        }
+      ]
+    },
+    {
+      "path": "api.game.stopAll",
+      "kind": "function",
+      "line": 1,
+      "offset": 10485,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:stop-all",
+          "offset": 10497
+        }
+      ]
+    },
+    {
+      "path": "api.game.getState",
+      "kind": "function",
+      "line": 1,
+      "offset": 10535,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:get-state",
+          "offset": 10547
+        }
+      ]
+    },
+    {
+      "path": "api.game.getRunning",
+      "kind": "function",
+      "line": 1,
+      "offset": 10588,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:get-running",
+          "offset": 10603
+        }
+      ]
+    },
+    {
+      "path": "api.game.getLog",
+      "kind": "function",
+      "line": 1,
+      "offset": 10644,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:get-log",
+          "offset": 10654
+        }
+      ]
+    },
+    {
+      "path": "api.game.isRunning",
+      "kind": "function",
+      "line": 1,
+      "offset": 10693,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:is-running",
+          "offset": 10706
+        }
+      ]
+    },
+    {
+      "path": "api.game.isInstalled",
+      "kind": "function",
+      "line": 1,
+      "offset": 10748,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:is-installed",
+          "offset": 10763
+        }
+      ]
+    },
+    {
+      "path": "api.game.install",
+      "kind": "function",
+      "line": 1,
+      "offset": 10807,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:install",
+          "offset": 10818
+        }
+      ]
+    },
+    {
+      "path": "api.game.repair",
+      "kind": "function",
+      "line": 1,
+      "offset": 10857,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:repair",
+          "offset": 10867
+        }
+      ]
+    },
+    {
+      "path": "api.game.onStateChange",
+      "kind": "function",
+      "line": 1,
+      "offset": 10905,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "game:state-changed",
+          "offset": 10950
+        }
+      ]
+    },
+    {
+      "path": "api.game.onOutput",
+      "kind": "function",
+      "line": 1,
+      "offset": 11049,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "game:output",
+          "offset": 11089
+        }
+      ]
+    },
+    {
+      "path": "api.game.onModsRemoved",
+      "kind": "function",
+      "line": 1,
+      "offset": 11174,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "game:mods-removed",
+          "offset": 11219
+        }
+      ]
+    },
+    {
+      "path": "api.game.getDefaultJvmArgs",
+      "kind": "function",
+      "line": 1,
+      "offset": 11316,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:get-default-jvm-args",
+          "offset": 11337
+        }
+      ]
+    },
+    {
+      "path": "api.game.getRecommendedJavaComponent",
+      "kind": "function",
+      "line": 1,
+      "offset": 11389,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:get-recommended-java-component",
+          "offset": 11420
+        }
+      ]
+    },
+    {
+      "path": "api.game.onCrashDetected",
+      "kind": "function",
+      "line": 1,
+      "offset": 11482,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "crash:report-detected",
+          "offset": 11529
+        }
+      ]
+    },
+    {
+      "path": "api.game.openCrashReport",
+      "kind": "function",
+      "line": 1,
+      "offset": 11634,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:open-crash-report",
+          "offset": 11657
+        }
+      ]
+    },
+    {
+      "path": "api.game.shareCrashReport",
+      "kind": "function",
+      "line": 1,
+      "offset": 11708,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:share-crash-report",
+          "offset": 11732
+        }
+      ]
+    },
+    {
+      "path": "api.game.shareLog",
+      "kind": "function",
+      "line": 1,
+      "offset": 11784,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "game:share-log",
+          "offset": 11800
+        }
+      ]
+    },
+    {
+      "path": "api.dialog.openFile",
+      "kind": "function",
+      "line": 1,
+      "offset": 11852,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "dialog:open-file",
+          "offset": 11864
+        }
+      ]
+    },
+    {
+      "path": "api.dialog.openDirectory",
+      "kind": "function",
+      "line": 1,
+      "offset": 11911,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "dialog:open-directory",
+          "offset": 11928
+        }
+      ]
+    },
+    {
+      "path": "api.dataDir.get",
+      "kind": "function",
+      "line": 1,
+      "offset": 11990,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "data-dir:get",
+          "offset": 11998
+        }
+      ]
+    },
+    {
+      "path": "api.dataDir.change",
+      "kind": "function",
+      "line": 1,
+      "offset": 12035,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "data-dir:change",
+          "offset": 12045
+        }
+      ]
+    },
+    {
+      "path": "api.dataDir.recover",
+      "kind": "function",
+      "line": 1,
+      "offset": 12087,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "data-dir:recover",
+          "offset": 12098
+        }
+      ]
+    },
+    {
+      "path": "api.migration.getInitialStateSync",
+      "kind": "function",
+      "line": 1,
+      "offset": 12153,
+      "calls": [
+        {
+          "operation": "sendSync",
+          "channel": "migration:get-initial-state-sync",
+          "offset": 12177
+        }
+      ]
+    },
+    {
+      "path": "api.migration.onStatus",
+      "kind": "function",
+      "line": 1,
+      "offset": 12236,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "migration:status",
+          "offset": 12276
+        }
+      ]
+    },
+    {
+      "path": "api.utils.getPathForFile",
+      "kind": "function",
+      "line": 1,
+      "offset": 12381,
+      "calls": []
+    },
+    {
+      "path": "api.storage.getSummary",
+      "kind": "function",
+      "line": 1,
+      "offset": 12438,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "storage:get-summary",
+          "offset": 12453
+        }
+      ]
+    },
+    {
+      "path": "api.storage.computeSizes",
+      "kind": "function",
+      "line": 1,
+      "offset": 12497,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "storage:compute-sizes",
+          "offset": 12514
+        }
+      ]
+    },
+    {
+      "path": "api.storage.clearShared",
+      "kind": "function",
+      "line": 1,
+      "offset": 12560,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "storage:clear-shared",
+          "offset": 12575
+        }
+      ]
+    },
+    {
+      "path": "api.storage.onItemSize",
+      "kind": "function",
+      "line": 1,
+      "offset": 12622,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "storage:item-size",
+          "offset": 12664
+        }
+      ]
+    },
+    {
+      "path": "api.quickplay.getInstances",
+      "kind": "function",
+      "line": 1,
+      "offset": 12775,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "quickplay:get-instances",
+          "offset": 12792
+        }
+      ]
+    },
+    {
+      "path": "api.quickplay.removeInstance",
+      "kind": "function",
+      "line": 1,
+      "offset": 12840,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "quickplay:remove-instance",
+          "offset": 12864
+        }
+      ]
+    },
+    {
+      "path": "api.quickplay.setPinned",
+      "kind": "function",
+      "line": 1,
+      "offset": 12920,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "quickplay:set-pinned",
+          "offset": 12941
+        }
+      ]
+    },
+    {
+      "path": "api.quickplay.updateInstance",
+      "kind": "function",
+      "line": 1,
+      "offset": 12994,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "quickplay:update-instance",
+          "offset": 13020
+        }
+      ]
+    },
+    {
+      "path": "api.quickplay.onUpdate",
+      "kind": "function",
+      "line": 1,
+      "offset": 13078,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "quickplay:update",
+          "offset": 13118
+        }
+      ]
+    },
+    {
+      "path": "api.quickplay.getWorldIcon",
+      "kind": "function",
+      "line": 1,
+      "offset": 13213,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "quickplay:get-world-icon",
+          "offset": 13233
+        }
+      ]
+    },
+    {
+      "path": "api.quickplay.clearAllData",
+      "kind": "function",
+      "line": 1,
+      "offset": 13286,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "quickplay:clear-all-data",
+          "offset": 13303
+        }
+      ]
+    },
+    {
+      "path": "api.content.modrinth.search",
+      "kind": "function",
+      "line": 1,
+      "offset": 13372,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:modrinth-search",
+          "offset": 13382
+        }
+      ]
+    },
+    {
+      "path": "api.content.modrinth.getProject",
+      "kind": "function",
+      "line": 1,
+      "offset": 13432,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:modrinth-get-project",
+          "offset": 13446
+        }
+      ]
+    },
+    {
+      "path": "api.content.modrinth.getVersions",
+      "kind": "function",
+      "line": 1,
+      "offset": 13501,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:modrinth-get-versions",
+          "offset": 13520
+        }
+      ]
+    },
+    {
+      "path": "api.content.modrinth.getVersion",
+      "kind": "function",
+      "line": 1,
+      "offset": 13578,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:modrinth-get-version",
+          "offset": 13592
+        }
+      ]
+    },
+    {
+      "path": "api.content.modrinth.getChangelog",
+      "kind": "function",
+      "line": 1,
+      "offset": 13647,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:modrinth-get-changelog",
+          "offset": 13663
+        }
+      ]
+    },
+    {
+      "path": "api.content.modrinth.getVersionFromHash",
+      "kind": "function",
+      "line": 1,
+      "offset": 13720,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:modrinth-get-version-from-hash",
+          "offset": 13755
+        }
+      ]
+    },
+    {
+      "path": "api.content.modrinth.batchCheckUpdates",
+      "kind": "function",
+      "line": 1,
+      "offset": 13822,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:modrinth-batch-check-updates",
+          "offset": 13858
+        }
+      ]
+    },
+    {
+      "path": "api.content.modrinth.getCategories",
+      "kind": "function",
+      "line": 1,
+      "offset": 13925,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:modrinth-get-categories",
+          "offset": 13942
+        }
+      ]
+    },
+    {
+      "path": "api.content.curseforge.search",
+      "kind": "function",
+      "line": 1,
+      "offset": 14013,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:curseforge-search",
+          "offset": 14023
+        }
+      ]
+    },
+    {
+      "path": "api.content.curseforge.getProject",
+      "kind": "function",
+      "line": 1,
+      "offset": 14075,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:curseforge-get-project",
+          "offset": 14089
+        }
+      ]
+    },
+    {
+      "path": "api.content.curseforge.getVersions",
+      "kind": "function",
+      "line": 1,
+      "offset": 14146,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:curseforge-get-versions",
+          "offset": 14165
+        }
+      ]
+    },
+    {
+      "path": "api.content.curseforge.getDownloadUrl",
+      "kind": "function",
+      "line": 1,
+      "offset": 14225,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:curseforge-get-download-url",
+          "offset": 14247
+        }
+      ]
+    },
+    {
+      "path": "api.content.curseforge.getChangelog",
+      "kind": "function",
+      "line": 1,
+      "offset": 14311,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:curseforge-get-changelog",
+          "offset": 14331
+        }
+      ]
+    },
+    {
+      "path": "api.content.curseforge.matchFingerprints",
+      "kind": "function",
+      "line": 1,
+      "offset": 14392,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:curseforge-match-fingerprints",
+          "offset": 14413
+        }
+      ]
+    },
+    {
+      "path": "api.content.curseforge.setApiKey",
+      "kind": "function",
+      "line": 1,
+      "offset": 14477,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:curseforge-set-api-key",
+          "offset": 14490
+        }
+      ]
+    },
+    {
+      "path": "api.content.curseforge.getApiKey",
+      "kind": "function",
+      "line": 1,
+      "offset": 14547,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:curseforge-get-api-key",
+          "offset": 14561
+        }
+      ]
+    },
+    {
+      "path": "api.content.curseforge.getCategories",
+      "kind": "function",
+      "line": 1,
+      "offset": 14616,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:curseforge-get-categories",
+          "offset": 14633
+        }
+      ]
+    },
+    {
+      "path": "api.content.mods.install",
+      "kind": "function",
+      "line": 1,
+      "offset": 14700,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:install-mod",
+          "offset": 14719
+        }
+      ]
+    },
+    {
+      "path": "api.content.mods.resolveDependencies",
+      "kind": "function",
+      "line": 1,
+      "offset": 14771,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:resolve-dependencies",
+          "offset": 14800
+        }
+      ]
+    },
+    {
+      "path": "api.content.mods.remove",
+      "kind": "function",
+      "line": 1,
+      "offset": 14859,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:remove-mod",
+          "offset": 14875
+        }
+      ]
+    },
+    {
+      "path": "api.content.mods.toggle",
+      "kind": "function",
+      "line": 1,
+      "offset": 14924,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:toggle-mod",
+          "offset": 14940
+        }
+      ]
+    },
+    {
+      "path": "api.content.manifest.get",
+      "kind": "function",
+      "line": 1,
+      "offset": 15000,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:get-manifest",
+          "offset": 15007
+        }
+      ]
+    },
+    {
+      "path": "api.content.manifest.getModpackLink",
+      "kind": "function",
+      "line": 1,
+      "offset": 15054,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:get-modpack-link",
+          "offset": 15072
+        }
+      ]
+    },
+    {
+      "path": "api.content.manifest.unlinkModpack",
+      "kind": "function",
+      "line": 1,
+      "offset": 15123,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:unlink-modpack",
+          "offset": 15140
+        }
+      ]
+    },
+    {
+      "path": "api.content.manifest.setModpackLocked",
+      "kind": "function",
+      "line": 1,
+      "offset": 15189,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:set-modpack-locked",
+          "offset": 15213
+        }
+      ]
+    },
+    {
+      "path": "api.content.manifest.checkModpackUpdate",
+      "kind": "function",
+      "line": 1,
+      "offset": 15268,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:check-modpack-update",
+          "offset": 15290
+        }
+      ]
+    },
+    {
+      "path": "api.content.manifest.installContent",
+      "kind": "function",
+      "line": 1,
+      "offset": 15345,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:install-content",
+          "offset": 15371
+        }
+      ]
+    },
+    {
+      "path": "api.content.manifest.removeContent",
+      "kind": "function",
+      "line": 1,
+      "offset": 15427,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:remove-content",
+          "offset": 15450
+        }
+      ]
+    },
+    {
+      "path": "api.content.manifest.toggleContent",
+      "kind": "function",
+      "line": 1,
+      "offset": 15503,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:toggle-content",
+          "offset": 15526
+        }
+      ]
+    },
+    {
+      "path": "api.content.manifest.scanUnmanagedContent",
+      "kind": "function",
+      "line": 1,
+      "offset": 15579,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:scan-unmanaged-content",
+          "offset": 15603
+        }
+      ]
+    },
+    {
+      "path": "api.content.manifest.verifyAndRepair",
+      "kind": "function",
+      "line": 1,
+      "offset": 15660,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:verify-and-repair",
+          "offset": 15679
+        }
+      ]
+    },
+    {
+      "path": "api.content.manifest.syncWithDisk",
+      "kind": "function",
+      "line": 1,
+      "offset": 15731,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:sync-with-disk",
+          "offset": 15747
+        }
+      ]
+    },
+    {
+      "path": "api.content.manifest.refresh",
+      "kind": "function",
+      "line": 1,
+      "offset": 15796,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:refresh-instance",
+          "offset": 15807
+        }
+      ]
+    },
+    {
+      "path": "api.content.manifest.reinstallMissing",
+      "kind": "function",
+      "line": 1,
+      "offset": 15858,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:reinstall-missing",
+          "offset": 15884
+        }
+      ]
+    },
+    {
+      "path": "api.content.manifest.importUnmanaged",
+      "kind": "function",
+      "line": 1,
+      "offset": 15940,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:import-unmanaged",
+          "offset": 15965
+        }
+      ]
+    },
+    {
+      "path": "api.content.manifest.removeFromManifest",
+      "kind": "function",
+      "line": 1,
+      "offset": 16020,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:remove-from-manifest",
+          "offset": 16048
+        }
+      ]
+    },
+    {
+      "path": "api.content.updates.check",
+      "kind": "function",
+      "line": 1,
+      "offset": 16117,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:check-updates",
+          "offset": 16130
+        }
+      ]
+    },
+    {
+      "path": "api.content.updates.checkModpack",
+      "kind": "function",
+      "line": 1,
+      "offset": 16180,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:check-modpack-update",
+          "offset": 16200
+        }
+      ]
+    },
+    {
+      "path": "api.content.updates.applyModpack",
+      "kind": "function",
+      "line": 1,
+      "offset": 16257,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:apply-modpack-update",
+          "offset": 16273
+        }
+      ]
+    },
+    {
+      "path": "api.content.updates.previewModpack",
+      "kind": "function",
+      "line": 1,
+      "offset": 16328,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:preview-modpack-update",
+          "offset": 16346
+        }
+      ]
+    },
+    {
+      "path": "api.content.updates.apply",
+      "kind": "function",
+      "line": 1,
+      "offset": 16403,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:apply-updates",
+          "offset": 16416
+        }
+      ]
+    },
+    {
+      "path": "api.content.updates.scanAndIdentify",
+      "kind": "function",
+      "line": 1,
+      "offset": 16466,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:scan-identify-content",
+          "offset": 16485
+        }
+      ]
+    },
+    {
+      "path": "api.content.worlds.listForInstance",
+      "kind": "function",
+      "line": 1,
+      "offset": 16550,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:worlds-list",
+          "offset": 16569
+        }
+      ]
+    },
+    {
+      "path": "api.content.worlds.delete",
+      "kind": "function",
+      "line": 1,
+      "offset": 16615,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:worlds-delete",
+          "offset": 16629
+        }
+      ]
+    },
+    {
+      "path": "api.content.worlds.copy",
+      "kind": "function",
+      "line": 1,
+      "offset": 16679,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:worlds-copy",
+          "offset": 16693
+        }
+      ]
+    },
+    {
+      "path": "api.content.worlds.move",
+      "kind": "function",
+      "line": 1,
+      "offset": 16743,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "content:worlds-move",
+          "offset": 16757
+        }
+      ]
+    },
+    {
+      "path": "api.installation.start",
+      "kind": "function",
+      "line": 1,
+      "offset": 16823,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "installation:start-modpack",
+          "offset": 16832
+        }
+      ]
+    },
+    {
+      "path": "api.installation.previewModpackFile",
+      "kind": "function",
+      "line": 1,
+      "offset": 16885,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "installation:preview-modpack-file",
+          "offset": 16907
+        }
+      ]
+    },
+    {
+      "path": "api.installation.importFromFile",
+      "kind": "function",
+      "line": 1,
+      "offset": 16967,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "installation:import-modpack",
+          "offset": 16985
+        }
+      ]
+    },
+    {
+      "path": "api.installation.importMmcPack",
+      "kind": "function",
+      "line": 1,
+      "offset": 17039,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "installation:import-mmc-pack",
+          "offset": 17056
+        }
+      ]
+    },
+    {
+      "path": "api.installation.previewOptifineFile",
+      "kind": "function",
+      "line": 1,
+      "offset": 17111,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "installation:preview-optifine-file",
+          "offset": 17134
+        }
+      ]
+    },
+    {
+      "path": "api.installation.importOptifine",
+      "kind": "function",
+      "line": 1,
+      "offset": 17195,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "installation:import-optifine",
+          "offset": 17213
+        }
+      ]
+    },
+    {
+      "path": "api.installation.cancel",
+      "kind": "function",
+      "line": 1,
+      "offset": 17268,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "installation:cancel",
+          "offset": 17278
+        }
+      ]
+    },
+    {
+      "path": "api.installation.getStatus",
+      "kind": "function",
+      "line": 1,
+      "offset": 17324,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "installation:get-status",
+          "offset": 17337
+        }
+      ]
+    },
+    {
+      "path": "api.installation.getAll",
+      "kind": "function",
+      "line": 1,
+      "offset": 17387,
+      "calls": [
+        {
+          "operation": "invoke",
+          "channel": "installation:get-all",
+          "offset": 17398
+        }
+      ]
+    },
+    {
+      "path": "api.installation.onProgress",
+      "kind": "function",
+      "line": 1,
+      "offset": 17443,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "installation:progress",
+          "offset": 17485
+        }
+      ]
+    },
+    {
+      "path": "api.installation.onComplete",
+      "kind": "function",
+      "line": 1,
+      "offset": 17590,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "installation:complete",
+          "offset": 17632
+        }
+      ]
+    },
+    {
+      "path": "api.installation.onError",
+      "kind": "function",
+      "line": 1,
+      "offset": 17737,
+      "calls": [
+        {
+          "operation": "on",
+          "channel": "installation:error",
+          "offset": 17776
+        }
+      ]
+    }
+  ],
+  "mainReceivers": [
+    {
+      "operation": "handle",
+      "channel": "settings:get-all",
+      "line": 122,
+      "offset": 44454
+    },
+    {
+      "operation": "handle",
+      "channel": "settings:get",
+      "line": 122,
+      "offset": 44532
+    },
+    {
+      "operation": "handle",
+      "channel": "settings:set",
+      "line": 122,
+      "offset": 44611
+    },
+    {
+      "operation": "handle",
+      "channel": "settings:get-auto-launch",
+      "line": 122,
+      "offset": 44988
+    },
+    {
+      "operation": "handle",
+      "channel": "auth:initialize",
+      "line": 122,
+      "offset": 63822
+    },
+    {
+      "operation": "handle",
+      "channel": "auth:login-microsoft",
+      "line": 122,
+      "offset": 64109
+    },
+    {
+      "operation": "handle",
+      "channel": "auth:cancel-microsoft-login",
+      "line": 122,
+      "offset": 64448
+    },
+    {
+      "operation": "handle",
+      "channel": "auth:login-offline",
+      "line": 122,
+      "offset": 64527
+    },
+    {
+      "operation": "handle",
+      "channel": "auth:logout",
+      "line": 122,
+      "offset": 64679
+    },
+    {
+      "operation": "handle",
+      "channel": "auth:switch-account",
+      "line": 122,
+      "offset": 64736
+    },
+    {
+      "operation": "handle",
+      "channel": "auth:get-accounts",
+      "line": 122,
+      "offset": 64825
+    },
+    {
+      "operation": "handle",
+      "channel": "auth:get-active-account",
+      "line": 122,
+      "offset": 64883
+    },
+    {
+      "operation": "handle",
+      "channel": "auth:refresh-token",
+      "line": 122,
+      "offset": 64952
+    },
+    {
+      "operation": "handle",
+      "channel": "auth:is-token-expired",
+      "line": 122,
+      "offset": 65027
+    },
+    {
+      "operation": "handle",
+      "channel": "skin:get",
+      "line": 122,
+      "offset": 65092
+    },
+    {
+      "operation": "handle",
+      "channel": "skin:force-refresh",
+      "line": 122,
+      "offset": 65228
+    },
+    {
+      "operation": "handle",
+      "channel": "skin:get-cape",
+      "line": 122,
+      "offset": 65374
+    },
+    {
+      "operation": "handle",
+      "channel": "skin:get-profile",
+      "line": 122,
+      "offset": 65684
+    },
+    {
+      "operation": "handle",
+      "channel": "skin:refresh-active",
+      "line": 122,
+      "offset": 65771
+    },
+    {
+      "operation": "handle",
+      "channel": "skin:upload",
+      "line": 122,
+      "offset": 65857
+    },
+    {
+      "operation": "handle",
+      "channel": "skin:reset",
+      "line": 122,
+      "offset": 65953
+    },
+    {
+      "operation": "handle",
+      "channel": "skin:fetch-texture",
+      "line": 122,
+      "offset": 66039
+    },
+    {
+      "operation": "handle",
+      "channel": "cape:equip",
+      "line": 122,
+      "offset": 66103
+    },
+    {
+      "operation": "handle",
+      "channel": "cape:unequip",
+      "line": 122,
+      "offset": 66193
+    },
+    {
+      "operation": "handle",
+      "channel": "skin-library:list",
+      "line": 122,
+      "offset": 66283
+    },
+    {
+      "operation": "handle",
+      "channel": "skin-library:remove",
+      "line": 122,
+      "offset": 66400
+    },
+    {
+      "operation": "handle",
+      "channel": "skin-library:equip",
+      "line": 122,
+      "offset": 66546
+    },
+    {
+      "operation": "handle",
+      "channel": "skin-library:get-texture",
+      "line": 122,
+      "offset": 66651
+    },
+    {
+      "operation": "handle",
+      "channel": "friends:list",
+      "line": 122,
+      "offset": 66971
+    },
+    {
+      "operation": "handle",
+      "channel": "friends:cached",
+      "line": 122,
+      "offset": 67141
+    },
+    {
+      "operation": "handle",
+      "channel": "friends:mutate",
+      "line": 122,
+      "offset": 67210
+    },
+    {
+      "operation": "handle",
+      "channel": "friends:presence:get",
+      "line": 122,
+      "offset": 67368
+    },
+    {
+      "operation": "handle",
+      "channel": "friends:blocklist",
+      "line": 122,
+      "offset": 67553
+    },
+    {
+      "operation": "handle",
+      "channel": "friends:setPanelOpen",
+      "line": 122,
+      "offset": 67630
+    },
+    {
+      "operation": "handle",
+      "channel": "friends:attributes:get",
+      "line": 122,
+      "offset": 67703
+    },
+    {
+      "operation": "handle",
+      "channel": "friends:attributes:set",
+      "line": 122,
+      "offset": 67792
+    },
+    {
+      "operation": "handle",
+      "channel": "analytics:track",
+      "line": 122,
+      "offset": 70275
+    },
+    {
+      "operation": "handle",
+      "channel": "versions:get-vanilla",
+      "line": 122,
+      "offset": 105096
+    },
+    {
+      "operation": "handle",
+      "channel": "versions:get-local",
+      "line": 122,
+      "offset": 105175
+    },
+    {
+      "operation": "handle",
+      "channel": "versions:get-modded",
+      "line": 122,
+      "offset": 105223
+    },
+    {
+      "operation": "handle",
+      "channel": "versions:clear-cache",
+      "line": 122,
+      "offset": 105304
+    },
+    {
+      "operation": "handle",
+      "channel": "content:modrinth-search",
+      "line": 123,
+      "offset": 188212
+    },
+    {
+      "operation": "handle",
+      "channel": "content:modrinth-get-project",
+      "line": 123,
+      "offset": 188348
+    },
+    {
+      "operation": "handle",
+      "channel": "content:modrinth-get-versions",
+      "line": 123,
+      "offset": 188431
+    },
+    {
+      "operation": "handle",
+      "channel": "content:modrinth-get-version",
+      "line": 123,
+      "offset": 188585
+    },
+    {
+      "operation": "handle",
+      "channel": "content:modrinth-get-changelog",
+      "line": 123,
+      "offset": 188668
+    },
+    {
+      "operation": "handle",
+      "channel": "content:modrinth-get-version-from-hash",
+      "line": 123,
+      "offset": 188755
+    },
+    {
+      "operation": "handle",
+      "channel": "content:modrinth-batch-check-updates",
+      "line": 123,
+      "offset": 188860
+    },
+    {
+      "operation": "handle",
+      "channel": "content:curseforge-search",
+      "line": 123,
+      "offset": 189005
+    },
+    {
+      "operation": "handle",
+      "channel": "content:curseforge-get-project",
+      "line": 123,
+      "offset": 189143
+    },
+    {
+      "operation": "handle",
+      "channel": "content:curseforge-get-versions",
+      "line": 123,
+      "offset": 189228
+    },
+    {
+      "operation": "handle",
+      "channel": "content:curseforge-get-download-url",
+      "line": 123,
+      "offset": 189384
+    },
+    {
+      "operation": "handle",
+      "channel": "content:curseforge-get-changelog",
+      "line": 123,
+      "offset": 189482
+    },
+    {
+      "operation": "handle",
+      "channel": "content:curseforge-match-fingerprints",
+      "line": 123,
+      "offset": 189575
+    },
+    {
+      "operation": "handle",
+      "channel": "content:curseforge-set-api-key",
+      "line": 123,
+      "offset": 189713
+    },
+    {
+      "operation": "handle",
+      "channel": "content:curseforge-get-api-key",
+      "line": 123,
+      "offset": 189779
+    },
+    {
+      "operation": "handle",
+      "channel": "content:modrinth-get-categories",
+      "line": 123,
+      "offset": 189839
+    },
+    {
+      "operation": "handle",
+      "channel": "content:curseforge-get-categories",
+      "line": 123,
+      "offset": 189928
+    },
+    {
+      "operation": "handle",
+      "channel": "content:get-manifest",
+      "line": 123,
+      "offset": 190019
+    },
+    {
+      "operation": "handle",
+      "channel": "content:get-modpack-link",
+      "line": 123,
+      "offset": 190084
+    },
+    {
+      "operation": "handle",
+      "channel": "content:unlink-modpack",
+      "line": 123,
+      "offset": 190162
+    },
+    {
+      "operation": "handle",
+      "channel": "content:set-modpack-locked",
+      "line": 123,
+      "offset": 190242
+    },
+    {
+      "operation": "handle",
+      "channel": "content:install-content",
+      "line": 123,
+      "offset": 190333
+    },
+    {
+      "operation": "handle",
+      "channel": "content:resolve-dependencies",
+      "line": 123,
+      "offset": 190427
+    },
+    {
+      "operation": "handle",
+      "channel": "content:install-mod",
+      "line": 123,
+      "offset": 190527
+    },
+    {
+      "operation": "handle",
+      "channel": "content:remove-content",
+      "line": 123,
+      "offset": 190654
+    },
+    {
+      "operation": "handle",
+      "channel": "content:remove-mod",
+      "line": 123,
+      "offset": 190742
+    },
+    {
+      "operation": "handle",
+      "channel": "content:toggle-content",
+      "line": 123,
+      "offset": 190826
+    },
+    {
+      "operation": "handle",
+      "channel": "content:toggle-mod",
+      "line": 123,
+      "offset": 190914
+    },
+    {
+      "operation": "handle",
+      "channel": "content:scan-unmanaged-content",
+      "line": 123,
+      "offset": 190998
+    },
+    {
+      "operation": "handle",
+      "channel": "content:verify-and-repair",
+      "line": 123,
+      "offset": 191093
+    },
+    {
+      "operation": "handle",
+      "channel": "content:sync-with-disk",
+      "line": 123,
+      "offset": 191185
+    },
+    {
+      "operation": "handle",
+      "channel": "content:refresh-instance",
+      "line": 123,
+      "offset": 191264
+    },
+    {
+      "operation": "handle",
+      "channel": "content:reinstall-missing",
+      "line": 123,
+      "offset": 191352
+    },
+    {
+      "operation": "handle",
+      "channel": "content:import-unmanaged",
+      "line": 123,
+      "offset": 191453
+    },
+    {
+      "operation": "handle",
+      "channel": "content:remove-from-manifest",
+      "line": 123,
+      "offset": 191552
+    },
+    {
+      "operation": "handle",
+      "channel": "installation:start-modpack",
+      "line": 123,
+      "offset": 191668
+    },
+    {
+      "operation": "handle",
+      "channel": "installation:cancel",
+      "line": 123,
+      "offset": 191753
+    },
+    {
+      "operation": "handle",
+      "channel": "installation:get-status",
+      "line": 123,
+      "offset": 191812
+    },
+    {
+      "operation": "handle",
+      "channel": "installation:get-all",
+      "line": 123,
+      "offset": 191875
+    },
+    {
+      "operation": "handle",
+      "channel": "installation:preview-modpack-file",
+      "line": 123,
+      "offset": 191935
+    },
+    {
+      "operation": "handle",
+      "channel": "installation:import-modpack",
+      "line": 123,
+      "offset": 192970
+    },
+    {
+      "operation": "handle",
+      "channel": "installation:preview-optifine-file",
+      "line": 123,
+      "offset": 193838
+    },
+    {
+      "operation": "handle",
+      "channel": "installation:import-optifine",
+      "line": 123,
+      "offset": 194256
+    },
+    {
+      "operation": "handle",
+      "channel": "installation:import-mmc-pack",
+      "line": 123,
+      "offset": 194762
+    },
+    {
+      "operation": "handle",
+      "channel": "content:check-updates",
+      "line": 123,
+      "offset": 196109
+    },
+    {
+      "operation": "handle",
+      "channel": "content:check-modpack-update",
+      "line": 123,
+      "offset": 196209
+    },
+    {
+      "operation": "handle",
+      "channel": "content:apply-modpack-update",
+      "line": 123,
+      "offset": 196319
+    },
+    {
+      "operation": "handle",
+      "channel": "content:preview-modpack-update",
+      "line": 123,
+      "offset": 196410
+    },
+    {
+      "operation": "handle",
+      "channel": "content:apply-updates",
+      "line": 123,
+      "offset": 196505
+    },
+    {
+      "operation": "handle",
+      "channel": "content:scan-identify-content",
+      "line": 123,
+      "offset": 196590
+    },
+    {
+      "operation": "handle",
+      "channel": "content:worlds-list",
+      "line": 123,
+      "offset": 196686
+    },
+    {
+      "operation": "handle",
+      "channel": "content:worlds-delete",
+      "line": 123,
+      "offset": 196750
+    },
+    {
+      "operation": "handle",
+      "channel": "content:worlds-copy",
+      "line": 123,
+      "offset": 196820
+    },
+    {
+      "operation": "handle",
+      "channel": "content:worlds-move",
+      "line": 123,
+      "offset": 196892
+    },
+    {
+      "operation": "handle",
+      "channel": "data-dir:get",
+      "line": 123,
+      "offset": 203447
+    },
+    {
+      "operation": "on",
+      "channel": "migration:get-initial-state-sync",
+      "line": 123,
+      "offset": 203510
+    },
+    {
+      "operation": "handle",
+      "channel": "data-dir:recover",
+      "line": 123,
+      "offset": 203583
+    },
+    {
+      "operation": "handle",
+      "channel": "data-dir:change",
+      "line": 123,
+      "offset": 203666
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:import-default-path",
+      "line": 123,
+      "offset": 223497
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:import-list",
+      "line": 123,
+      "offset": 223584
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:import-run",
+      "line": 123,
+      "offset": 223776
+    },
+    {
+      "operation": "handle",
+      "channel": "java:is-installed",
+      "line": 132,
+      "offset": 247257
+    },
+    {
+      "operation": "handle",
+      "channel": "java:is-available",
+      "line": 132,
+      "offset": 247330
+    },
+    {
+      "operation": "handle",
+      "channel": "java:get-installed",
+      "line": 132,
+      "offset": 247403
+    },
+    {
+      "operation": "handle",
+      "channel": "java:get-available",
+      "line": 132,
+      "offset": 247473
+    },
+    {
+      "operation": "handle",
+      "channel": "java:get-all-components",
+      "line": 132,
+      "offset": 247554
+    },
+    {
+      "operation": "handle",
+      "channel": "java:get-executable-path",
+      "line": 132,
+      "offset": 247634
+    },
+    {
+      "operation": "handle",
+      "channel": "java:get-info",
+      "line": 132,
+      "offset": 247709
+    },
+    {
+      "operation": "handle",
+      "channel": "java:get-installed-version",
+      "line": 132,
+      "offset": 247781
+    },
+    {
+      "operation": "handle",
+      "channel": "java:get-disk-usage",
+      "line": 132,
+      "offset": 247871
+    },
+    {
+      "operation": "handle",
+      "channel": "java:get-provider",
+      "line": 132,
+      "offset": 247943
+    },
+    {
+      "operation": "handle",
+      "channel": "java:install",
+      "line": 132,
+      "offset": 248100
+    },
+    {
+      "operation": "handle",
+      "channel": "java:delete",
+      "line": 132,
+      "offset": 248174
+    },
+    {
+      "operation": "handle",
+      "channel": "java:verify",
+      "line": 132,
+      "offset": 248245
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:initialize",
+      "line": 132,
+      "offset": 273716
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:list",
+      "line": 132,
+      "offset": 273939
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:get",
+      "line": 132,
+      "offset": 273995
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:create",
+      "line": 132,
+      "offset": 274053
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:duplicate",
+      "line": 132,
+      "offset": 274128
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:allocate-id",
+      "line": 132,
+      "offset": 274213
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:delete",
+      "line": 132,
+      "offset": 274308
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:update",
+      "line": 132,
+      "offset": 274500
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:change-version",
+      "line": 132,
+      "offset": 274579
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:get-version",
+      "line": 132,
+      "offset": 274791
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:resolve-version",
+      "line": 132,
+      "offset": 274864
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:get-default-version-id",
+      "line": 132,
+      "offset": 274956
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:open-directory",
+      "line": 132,
+      "offset": 275060
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:fetch-icon-bytes",
+      "line": 132,
+      "offset": 275400
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:create-shortcut",
+      "line": 132,
+      "offset": 276639
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:list-mods",
+      "line": 132,
+      "offset": 277495
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:list-files",
+      "line": 132,
+      "offset": 278095
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:resolve-path",
+      "line": 132,
+      "offset": 279097
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:reveal-file",
+      "line": 132,
+      "offset": 279161
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:copy-screenshot",
+      "line": 132,
+      "offset": 279409
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:save-screenshot-as",
+      "line": 132,
+      "offset": 279789
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:delete-file",
+      "line": 132,
+      "offset": 280274
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:rename-file",
+      "line": 132,
+      "offset": 280696
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:import-files",
+      "line": 132,
+      "offset": 281338
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:list-screenshots",
+      "line": 132,
+      "offset": 282434
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:toggle-mod",
+      "line": 132,
+      "offset": 283106
+    },
+    {
+      "operation": "handle",
+      "channel": "instances:delete-mod",
+      "line": 132,
+      "offset": 283425
+    },
+    {
+      "operation": "handle",
+      "channel": "updater:get-state",
+      "line": 135,
+      "offset": 321468
+    },
+    {
+      "operation": "on",
+      "channel": "updater:get-initial-state-sync",
+      "line": 135,
+      "offset": 321523
+    },
+    {
+      "operation": "handle",
+      "channel": "updater:check-now",
+      "line": 135,
+      "offset": 321613
+    },
+    {
+      "operation": "handle",
+      "channel": "updater:download-and-install",
+      "line": 135,
+      "offset": 321733
+    },
+    {
+      "operation": "handle",
+      "channel": "updater:install-and-restart",
+      "line": 135,
+      "offset": 321822
+    },
+    {
+      "operation": "handle",
+      "channel": "updater:set-channel",
+      "line": 135,
+      "offset": 321909
+    },
+    {
+      "operation": "handle",
+      "channel": "updater:open-manual-download",
+      "line": 135,
+      "offset": 322176
+    },
+    {
+      "operation": "handle",
+      "channel": "game:launch",
+      "line": 145,
+      "offset": 359992
+    },
+    {
+      "operation": "handle",
+      "channel": "game:launch-quickplay",
+      "line": 145,
+      "offset": 360366
+    },
+    {
+      "operation": "handle",
+      "channel": "game:stop",
+      "line": 145,
+      "offset": 360714
+    },
+    {
+      "operation": "handle",
+      "channel": "game:stop-all",
+      "line": 145,
+      "offset": 360763
+    },
+    {
+      "operation": "handle",
+      "channel": "game:get-state",
+      "line": 145,
+      "offset": 360815
+    },
+    {
+      "operation": "handle",
+      "channel": "game:get-running",
+      "line": 145,
+      "offset": 360871
+    },
+    {
+      "operation": "handle",
+      "channel": "game:get-log",
+      "line": 145,
+      "offset": 360936
+    },
+    {
+      "operation": "handle",
+      "channel": "game:is-running",
+      "line": 145,
+      "offset": 360994
+    },
+    {
+      "operation": "handle",
+      "channel": "game:is-installed",
+      "line": 145,
+      "offset": 361052
+    },
+    {
+      "operation": "handle",
+      "channel": "game:install",
+      "line": 145,
+      "offset": 361125
+    },
+    {
+      "operation": "handle",
+      "channel": "game:repair",
+      "line": 145,
+      "offset": 361186
+    },
+    {
+      "operation": "handle",
+      "channel": "game:open-crash-report",
+      "line": 145,
+      "offset": 361245
+    },
+    {
+      "operation": "handle",
+      "channel": "game:share-crash-report",
+      "line": 145,
+      "offset": 361803
+    },
+    {
+      "operation": "handle",
+      "channel": "game:share-log",
+      "line": 145,
+      "offset": 362450
+    },
+    {
+      "operation": "handle",
+      "channel": "game:get-default-jvm-args",
+      "line": 145,
+      "offset": 362753
+    },
+    {
+      "operation": "handle",
+      "channel": "game:get-recommended-java-component",
+      "line": 145,
+      "offset": 363427
+    },
+    {
+      "operation": "handle",
+      "channel": "quickplay:get-instances",
+      "line": 145,
+      "offset": 363910
+    },
+    {
+      "operation": "handle",
+      "channel": "quickplay:remove-instance",
+      "line": 145,
+      "offset": 364022
+    },
+    {
+      "operation": "handle",
+      "channel": "quickplay:set-pinned",
+      "line": 145,
+      "offset": 364186
+    },
+    {
+      "operation": "handle",
+      "channel": "quickplay:update-instance",
+      "line": 145,
+      "offset": 364344
+    },
+    {
+      "operation": "handle",
+      "channel": "quickplay:get-world-icon",
+      "line": 145,
+      "offset": 364512
+    },
+    {
+      "operation": "handle",
+      "channel": "quickplay:clear-all-data",
+      "line": 145,
+      "offset": 364900
+    },
+    {
+      "operation": "handle",
+      "channel": "security:scan-system",
+      "line": 157,
+      "offset": 424533
+    },
+    {
+      "operation": "handle",
+      "channel": "security:run-manual-scan",
+      "line": 157,
+      "offset": 424688
+    },
+    {
+      "operation": "handle",
+      "channel": "security:threat-acknowledge",
+      "line": 157,
+      "offset": 425180
+    },
+    {
+      "operation": "handle",
+      "channel": "security:threat-quit",
+      "line": 157,
+      "offset": 425268
+    },
+    {
+      "operation": "handle",
+      "channel": "storage:get-summary",
+      "line": 157,
+      "offset": 425457
+    },
+    {
+      "operation": "handle",
+      "channel": "storage:clear-shared",
+      "line": 157,
+      "offset": 425820
+    },
+    {
+      "operation": "handle",
+      "channel": "storage:compute-sizes",
+      "line": 157,
+      "offset": 426178
+    },
+    {
+      "operation": "handle",
+      "channel": "theme:set-source",
+      "line": 157,
+      "offset": 426815
+    },
+    {
+      "operation": "handle",
+      "channel": "window:minimize",
+      "line": 157,
+      "offset": 429372
+    },
+    {
+      "operation": "handle",
+      "channel": "window:maximize",
+      "line": 157,
+      "offset": 429467
+    },
+    {
+      "operation": "handle",
+      "channel": "window:close",
+      "line": 157,
+      "offset": 429607
+    },
+    {
+      "operation": "handle",
+      "channel": "console:open",
+      "line": 157,
+      "offset": 429696
+    },
+    {
+      "operation": "handle",
+      "channel": "app:get-version",
+      "line": 157,
+      "offset": 429744
+    },
+    {
+      "operation": "handle",
+      "channel": "app:get-gpu-status",
+      "line": 157,
+      "offset": 429803
+    },
+    {
+      "operation": "handle",
+      "channel": "system:open-external",
+      "line": 157,
+      "offset": 430031
+    },
+    {
+      "operation": "handle",
+      "channel": "app:restart",
+      "line": 157,
+      "offset": 430290
+    },
+    {
+      "operation": "handle",
+      "channel": "app:get-os-info",
+      "line": 157,
+      "offset": 430359
+    },
+    {
+      "operation": "handle",
+      "channel": "app:get-memory-info",
+      "line": 157,
+      "offset": 430646
+    },
+    {
+      "operation": "handle",
+      "channel": "app:share-launcher-log",
+      "line": 157,
+      "offset": 430729
+    },
+    {
+      "operation": "handle",
+      "channel": "dialog:open-file",
+      "line": 157,
+      "offset": 431097
+    },
+    {
+      "operation": "handle",
+      "channel": "jumplist:set-recents",
+      "line": 157,
+      "offset": 431447
+    },
+    {
+      "operation": "handle",
+      "channel": "dialog:open-directory",
+      "line": 157,
+      "offset": 431545
+    },
+    {
+      "operation": "on",
+      "channel": "ping",
+      "line": 157,
+      "offset": 438379
+    },
+    {
+      "operation": "handle",
+      "channel": "servers:fetch",
+      "line": 157,
+      "offset": 438445
+    },
+    {
+      "operation": "handle",
+      "channel": "servers:fetchOne",
+      "line": 157,
+      "offset": 438800
+    },
+    {
+      "operation": "handle",
+      "channel": "servers:trackIpCopy",
+      "line": 157,
+      "offset": 439215
+    },
+    {
+      "operation": "handle",
+      "channel": "news:fetch",
+      "line": 157,
+      "offset": 439688
+    },
+    {
+      "operation": "handle",
+      "channel": "remote:config-fetch",
+      "line": 157,
+      "offset": 440078
+    }
+  ],
+  "mainBroadcastHelperCalls": [
+    {
+      "channel": "auth:state-changed",
+      "dynamic": false,
+      "line": 122,
+      "offset": 52803
+    },
+    {
+      "channel": "skin:updated",
+      "dynamic": false,
+      "line": 122,
+      "offset": 55894
+    },
+    {
+      "channel": "skin:updated",
+      "dynamic": false,
+      "line": 122,
+      "offset": 56791
+    },
+    {
+      "channel": "skin:updated",
+      "dynamic": false,
+      "line": 122,
+      "offset": 57321
+    },
+    {
+      "channel": "skin:updated",
+      "dynamic": false,
+      "line": 122,
+      "offset": 57612
+    },
+    {
+      "channel": "skin:appearance-updated",
+      "dynamic": false,
+      "line": 122,
+      "offset": 65646
+    },
+    {
+      "channel": "friends:updated",
+      "dynamic": false,
+      "line": 122,
+      "offset": 67109
+    },
+    {
+      "channel": "friends:updated",
+      "dynamic": false,
+      "line": 122,
+      "offset": 67336
+    },
+    {
+      "channel": "presence:updated",
+      "dynamic": false,
+      "line": 122,
+      "offset": 67520
+    },
+    {
+      "channel": "friends:attributes:updated",
+      "dynamic": false,
+      "line": 122,
+      "offset": 67935
+    },
+    {
+      "channel": "migration:status",
+      "dynamic": false,
+      "line": 123,
+      "offset": 198671,
+      "resolvedFrom": "top-level string constant Rg"
+    },
+    {
+      "channel": "instances:import-progress",
+      "dynamic": false,
+      "line": 123,
+      "offset": 224016
+    },
+    {
+      "channel": "download:progress",
+      "dynamic": false,
+      "line": 132,
+      "offset": 233013
+    },
+    {
+      "channel": "java:install-complete",
+      "dynamic": false,
+      "line": 132,
+      "offset": 242441
+    },
+    {
+      "channel": "download:complete",
+      "dynamic": false,
+      "line": 132,
+      "offset": 242482
+    },
+    {
+      "channel": "download:error",
+      "dynamic": false,
+      "line": 132,
+      "offset": 242590
+    },
+    {
+      "channel": "download:progress",
+      "dynamic": false,
+      "line": 132,
+      "offset": 242911
+    },
+    {
+      "channel": "java:install-complete",
+      "dynamic": false,
+      "line": 132,
+      "offset": 243284
+    },
+    {
+      "channel": "download:complete",
+      "dynamic": false,
+      "line": 132,
+      "offset": 243325
+    },
+    {
+      "channel": "download:error",
+      "dynamic": false,
+      "line": 132,
+      "offset": 243547
+    },
+    {
+      "channel": "download:error",
+      "dynamic": false,
+      "line": 132,
+      "offset": 243728
+    },
+    {
+      "channel": "instances:state-changed",
+      "dynamic": false,
+      "line": 132,
+      "offset": 271292
+    },
+    {
+      "channel": "instance:installation-error",
+      "dynamic": false,
+      "line": 132,
+      "offset": 271384
+    },
+    {
+      "channel": "updater:download-progress",
+      "dynamic": false,
+      "line": 135,
+      "offset": 317105
+    },
+    {
+      "channel": "updater:downloaded",
+      "dynamic": false,
+      "line": 135,
+      "offset": 317314
+    },
+    {
+      "channel": "updater:lock-state",
+      "dynamic": false,
+      "line": 135,
+      "offset": 320331
+    },
+    {
+      "channel": "updater:status",
+      "dynamic": false,
+      "line": 135,
+      "offset": 320575
+    },
+    {
+      "channel": "crash:report-detected",
+      "dynamic": false,
+      "line": 137,
+      "offset": 325116
+    },
+    {
+      "channel": "game:output",
+      "dynamic": false,
+      "line": 140,
+      "offset": 336167
+    },
+    {
+      "channel": "screenshot:added",
+      "dynamic": false,
+      "line": 140,
+      "offset": 342695
+    },
+    {
+      "channel": "game:mods-removed",
+      "dynamic": false,
+      "line": 140,
+      "offset": 344219
+    },
+    {
+      "channel": "game:state-changed",
+      "dynamic": false,
+      "line": 142,
+      "offset": 354195
+    },
+    {
+      "channel": "quickplay:update",
+      "dynamic": false,
+      "line": 145,
+      "offset": 363742
+    },
+    {
+      "channel": "installation:progress",
+      "dynamic": false,
+      "line": 157,
+      "offset": 420704
+    },
+    {
+      "channel": "installation:complete",
+      "dynamic": false,
+      "line": 157,
+      "offset": 420891
+    },
+    {
+      "channel": "installation:error",
+      "dynamic": false,
+      "line": 157,
+      "offset": 421096
+    },
+    {
+      "channel": "storage:item-size",
+      "dynamic": false,
+      "line": 157,
+      "offset": 426511
+    },
+    {
+      "channel": "storage:item-size",
+      "dynamic": false,
+      "line": 157,
+      "offset": 426645
+    }
+  ],
+  "counts": {
+    "apiEntries": 232,
+    "groups": 29,
+    "asyncMainHandlers": 196,
+    "syncPreloadCalls": 2,
+    "subscriptionSites": 29,
+    "broadcastSites": 38,
+    "uniqueBroadcastChannels": 28
+  },
+  "limits": [
+    "Records declared API paths; no proprietary function bodies copied",
+    "One direct main webContents.send site was observed inside helper L; its 38 call sites resolve to 28 event names",
+    "updater:error is exposed as a subscription but no corresponding main broadcast was observed; updater errors also travel in updater:status",
+    "A handler name match does not validate payloads or runtime behavior"
+  ],
+  "mainDirectSendSites": [
+    {
+      "callee": "n.webContents.send",
+      "channelSource": "parameter e of helper L",
+      "line": 1,
+      "offset": 17186
+    }
+  ],
+  "preloadSubscribedChannelsWithoutObservedMainBroadcast": [
+    "updater:error"
+  ]
+}
