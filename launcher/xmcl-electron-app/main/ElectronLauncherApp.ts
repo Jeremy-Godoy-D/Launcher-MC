@@ -200,7 +200,7 @@ export default class ElectronLauncherApp extends LauncherApp {
   get version(): string {
     const hostVersion = super.version
     if (!hostVersion || hostVersion === process.versions.electron) {
-      return '0.1.0-beta.1'
+      return '0.1.0-beta.2'
     }
     return hostVersion
   }

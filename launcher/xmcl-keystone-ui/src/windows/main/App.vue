@@ -1,12 +1,19 @@
 <template>
   <v-app v-if="!showSetup" class="h-full max-h-screen overflow-hidden select-none" :class="{ 'dark': isDark }">
+    <div class="lmc-ambient-aura" aria-hidden="true" />
     <AppBackground />
     <div v-if="!isBigPicture" class="w-full h-full absolute left-0 header-overlay" :style="{
       height: headerHeight + 70 + 'px',
       'background-image': `linear-gradient(${appBarColor} 0%, color-mix(in srgb, ${appBarColor}, transparent) 65%, transparent 100%)`
     }">
     </div>
-    <AppSystemBar v-if="!isBigPicture" no-debug back><span>Launcher MC</span></AppSystemBar>
+    <AppSystemBar v-if="!isBigPicture" no-debug back>
+      <span class="inline-flex items-center gap-2 px-2 font-semibold tracking-tight text-slate-200">
+        <span class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.85)]" />
+        <span>Launcher MC</span>
+        <span class="rounded-full border border-emerald-400/30 bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300">Beta 2</span>
+      </span>
+    </AppSystemBar>
     <div
       class="app-layout flex-grow relative flex overflow-auto"
       :class="[layoutClasses, { 'workspace-side-panel-attached': hasAttachedWorkspacePanel }]"

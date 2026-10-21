@@ -118,8 +118,18 @@
     <div class="contents lg:(flex flex-col flex-1 overflow-hidden relative)">
       <div
         id="store-search"
-        class="store-search-bar order-first lg:order-none flex-none px-6 lg:px-10 py-5 sticky top-0 z-10 backdrop-blur-md border-b border-divider/40"
+        class="store-search-bar order-first lg:order-none flex-none px-6 lg:px-10 py-4 sticky top-0 z-10 backdrop-blur-md border-b border-white/8"
       >
+        <div class="flex items-center justify-between gap-4 flex-wrap mb-2.5">
+          <div>
+            <div class="lg-eyebrow">Catálogo integrado · Modrinth y CurseForge</div>
+            <h1 class="text-lg font-bold text-slate-100">Explorar modpacks, mods, recursos y shaders</h1>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="lg-pill lg-pill--emerald">Modrinth Activo</span>
+            <span class="lg-pill lg-pill--cyan">Instalación directa</span>
+          </div>
+        </div>
         <div class="max-w-3xl">
           <v-text-field
             ref="filter"

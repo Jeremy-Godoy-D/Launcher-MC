@@ -1,6 +1,6 @@
 <template>
   <div
-    class="header sticky max-w-full select-none transition-all px-2"
+    class="header sticky max-w-full select-none transition-all px-4 pt-2 pb-1 z-20"
     :style="{
       '--app-bar-blur': blurAppBar + 'px',
     }"
@@ -13,26 +13,29 @@
     @wheel.stop
   >
     <div
-      class="flex flex-col header-content"
+      class="lg-surface rounded-3xl px-5 py-3.5 flex flex-col gap-2.5 header-content"
       style="margin: auto"
       :style="{
         opacity: dragover ? 0 : '',
       }"
     >
       <div
-        class="header-primary-row align-center flex max-h-20 flex-1 flex-grow-0 items-baseline pl-6 pr-2 gap-1"
+        class="header-primary-row align-center flex flex-wrap items-center gap-2.5"
       >
-        <span
-          :style="{
-            fontSize: headerFontSize
-          }"
-          class="home-title overflow-hidden overflow-ellipsis whitespace-nowrap transition-all"
-        >{{ name || `Minecraft ${version.minecraft}` }}</span>
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399] flex-shrink-0" />
+          <span
+            :style="{
+              fontSize: headerFontSize
+            }"
+            class="home-title font-bold tracking-tight text-slate-100 overflow-hidden overflow-ellipsis whitespace-nowrap transition-all"
+          >{{ name || `Minecraft ${version.minecraft}` }}</span>
+        </div>
         <v-chip
           size="small"
           variant="tonal"
           color="primary"
-          class="ml-2 flex-shrink-0"
+          class="ml-1 flex-shrink-0 font-semibold"
           data-testid="instance-header-runtime"
         >
           {{ version.minecraft }} · {{ loaderLabel }}
@@ -48,15 +51,17 @@
           </transition>
         </router-view>
       </div>
+
       <nav
         aria-label="Secciones de la instancia"
-        class="flex items-center flex-wrap gap-1 px-6 pt-2"
+        class="instance-pill-nav flex items-center flex-wrap gap-1 pt-1.5 border-t border-white/8"
       >
         <v-btn
           to="/"
           exact
           size="small"
           variant="text"
+          class="tab-pill-btn rounded-xl text-none font-medium"
           prepend-icon="home"
           data-testid="instance-tab-overview"
         >
@@ -66,6 +71,7 @@
           to="/mods"
           size="small"
           variant="text"
+          class="tab-pill-btn rounded-xl text-none font-medium"
           prepend-icon="extension"
           data-testid="instance-tab-mods"
         >
@@ -75,6 +81,7 @@
           to="/resourcepacks"
           size="small"
           variant="text"
+          class="tab-pill-btn rounded-xl text-none font-medium"
           prepend-icon="palette"
           data-testid="instance-tab-resourcepacks"
         >
@@ -84,6 +91,7 @@
           to="/shaderpacks"
           size="small"
           variant="text"
+          class="tab-pill-btn rounded-xl text-none font-medium"
           prepend-icon="gradient"
           data-testid="instance-tab-shaderpacks"
         >
@@ -93,6 +101,7 @@
           to="/save"
           size="small"
           variant="text"
+          class="tab-pill-btn rounded-xl text-none font-medium"
           prepend-icon="map"
           data-testid="instance-tab-saves"
         >
@@ -102,6 +111,7 @@
           to="/base-setting"
           size="small"
           variant="text"
+          class="tab-pill-btn rounded-xl text-none font-medium"
           prepend-icon="tune"
           data-testid="instance-tab-settings"
         >
@@ -110,6 +120,7 @@
         <v-btn
           size="small"
           variant="text"
+          class="tab-pill-btn rounded-xl text-none font-medium ml-auto"
           prepend-icon="subtitles"
           data-testid="instance-tab-console"
           @click="showLogDialog()"
@@ -117,6 +128,7 @@
           Consola
         </v-btn>
       </nav>
+
       <router-view name="extensions" v-slot="{ Component }">
         <transition
           name="slide-y-reverse-transition"
@@ -124,15 +136,12 @@
         >
           <component
             :is="Component"
-            class="header-extension px-4"
-            :class="{
-              'mt-3': !compact,
-              'mt-1': compact,
-            }"
+            class="header-extension pt-1"
           />
         </transition>
       </router-view>
     </div>
+
     <div
       v-if="dragover"
       class="w-full h-full flex top-0 p-5"
@@ -195,12 +204,12 @@ const onTransitionEnd = (e: TransitionEvent) => {
 const compact = injection(kCompact)
 const headerFontSize = computed(() => {
   if (compact.value) {
-    return '1.35rem'
+    return '1.25rem'
   }
   if (name.value && name.value.length > 30) {
-    return '2rem'
+    return '1.55rem'
   }
-  return '2.425rem'
+  return '1.85rem'
 })
 
 const { dragover } = injection(kDropHandler)
@@ -221,71 +230,18 @@ const onDropModpack = (e: DragEvent) => {
 const overcount = ref(0)
 </script>
 <style scoped>
-
-.header {
-  padding-top: 2.5rem;
-}
-
-/*
- * Faded backdrop so content scrolling underneath the sticky header is masked
- * instead of bleeding through the (otherwise transparent) header. The gradient
- * matches the global app-bar overlay color and lives in the header's own
- * stacking context (z-20), so it sits above the scrolling page content while
- * staying behind the header text (z-index: -1). The backdrop blur is masked
- * with the same gradient so it fades out smoothly instead of cutting off.
- */
-.header::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  bottom: -70px;
-  z-index: -1;
-  pointer-events: none;
-  background-image: linear-gradient(var(--app-bar-color, transparent), transparent);
-  -webkit-backdrop-filter: blur(var(--app-bar-blur, 0));
-  backdrop-filter: blur(var(--app-bar-blur, 0));
-  -webkit-mask-image: linear-gradient(black 40%, transparent);
-  mask-image: linear-gradient(black 40%, transparent);
-}
-
-.header.compact::before {
-  bottom: -20px;
-}
-
-.header.compact {
-  padding-top: 0.2rem;
-  padding-bottom: 0.5rem;
-}
-
 .header-primary-row,
 .home-title {
   min-width: 0;
 }
 
-.header.compact .header-primary-row {
-  min-height: 36px;
-  align-items: center;
-  padding-left: 1rem;
+.tab-pill-btn {
+  color: rgba(226, 232, 240, 0.78) !important;
 }
 
-@media (max-width: 900px) {
-  .header {
-    padding-right: 0.25rem !important;
-    padding-left: 0.25rem !important;
-  }
-
-  .header-primary-row {
-    padding-left: 0.75rem !important;
-  }
-
-  .header.compact .home-title {
-    max-width: 40vw;
-  }
-
-  .header-extension {
-    padding-right: 0.75rem !important;
-    padding-left: 0.75rem !important;
-  }
+.tab-pill-btn.v-btn--active {
+  background: rgba(16, 185, 129, 0.18) !important;
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  color: #6ee7b7 !important;
 }
-
 </style>

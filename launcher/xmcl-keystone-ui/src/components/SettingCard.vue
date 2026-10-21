@@ -1,6 +1,6 @@
 <template>
   <v-card
-    class="surface-card-subsection"
+    class="surface-card-subsection lg-inset"
     :elevation="tokens.cardSubsectionElevation.value"
     role="region"
     :aria-label="title || subtitle || undefined"

@@ -1,10 +1,10 @@
 <template>
-  <div class="w-full">
-    <div class="relative footer flex-grow flex items-end">
+  <div class="w-full pb-2">
+    <div class="relative footer lg-surface rounded-3xl p-4 flex-grow flex items-center justify-between gap-4 flex-wrap">
       <HomeFooterCard />
       <div
         key="launch-button-group"
-        class="flex flex-wrap justify-end items-center gap-y-6 gap-x-2 flex-grow"
+        class="flex flex-wrap justify-end items-center gap-y-4 gap-x-2 flex-grow"
       >
         <HomeLaunchButtonStatus
           class="mr-4 ml-2"
@@ -35,12 +35,12 @@ const active = ref(false)
 </style>
 <style scoped>
 .footer {
-  @apply mx-6;
+  @apply mx-4;
 }
 
 @media (max-width: 850px) {
   .footer {
-    @apply mr-2;
+    @apply mx-2;
   }
 }
 </style>

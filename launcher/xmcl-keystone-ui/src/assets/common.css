@@ -824,3 +824,111 @@ a {
 .v-chip--variant-outlined {
   border-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
 }
+
+/* ── Launcher MC Liquid Glass Design System (v0.1.0-beta.2) ── */
+:root {
+  --lmc-bg-deep: #070b12;
+  --lmc-emerald: #10b981;
+  --lmc-emerald-bright: #34d399;
+  --lmc-cyan: #06b6d4;
+  --lmc-amber: #f59e0b;
+  --lmc-rose: #f43f5e;
+  --lmc-glass-bg: linear-gradient(155deg, rgba(17, 25, 40, 0.78) 0%, rgba(10, 15, 26, 0.88) 100%);
+  --lmc-glass-border: rgba(255, 255, 255, 0.10);
+  --lmc-glass-specular: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  --lmc-glass-shadow: 0 20px 50px -16px rgba(0, 0, 0, 0.65), 0 8px 24px -8px rgba(0, 0, 0, 0.45);
+  --lmc-inset-bg: linear-gradient(165deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.022) 100%);
+  --lmc-inset-bg-hover: linear-gradient(165deg, rgba(16, 185, 129, 0.11) 0%, rgba(6, 182, 212, 0.05) 55%, rgba(255, 255, 255, 0.035) 100%);
+  --lmc-inset-border: rgba(255, 255, 255, 0.09);
+  --lmc-inset-border-hover: rgba(52, 211, 153, 0.42);
+}
+
+.lmc-ambient-aura {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(680px circle at 12% 14%, rgba(16, 185, 129, 0.14), transparent 62%),
+    radial-gradient(620px circle at 88% 18%, rgba(6, 182, 212, 0.11), transparent 60%),
+    radial-gradient(760px circle at 52% 92%, rgba(16, 185, 129, 0.09), transparent 66%),
+    linear-gradient(180deg, #070b12 0%, #0b111e 52%, #080d17 100%);
+}
+
+/* Tier 1: Primary Structural Liquid Glass Plane */
+.lg-surface {
+  background: var(--lmc-glass-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(175%);
+  backdrop-filter: blur(24px) saturate(175%);
+  border: 1px solid var(--lmc-glass-border);
+  box-shadow: var(--lmc-glass-specular), var(--lmc-glass-shadow);
+}
+
+/* Tier 2: Nested Bento Card / Tile (No nested backdrop-filter for 60fps scrolling) */
+.lg-inset {
+  background: var(--lmc-inset-bg);
+  border: 1px solid var(--lmc-inset-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 10px 26px -12px rgba(0, 0, 0, 0.42);
+  border-radius: 18px;
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+              background 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lg-inset-interactive:hover {
+  transform: translateY(-2px);
+  background: var(--lmc-inset-bg-hover);
+  border-color: var(--lmc-inset-border-hover);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.20), 0 18px 36px -12px rgba(0, 0, 0, 0.55), 0 0 24px -8px rgba(16, 185, 129, 0.22);
+}
+
+.lg-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.73rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  color: rgba(241, 245, 249, 0.92);
+}
+
+.lg-pill--emerald {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(52, 211, 153, 0.36);
+  color: #6ee7b7;
+}
+
+.lg-pill--cyan {
+  background: rgba(6, 182, 212, 0.15);
+  border-color: rgba(34, 211, 238, 0.36);
+  color: #67e8f9;
+}
+
+.lg-pill--amber {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(251, 191, 36, 0.36);
+  color: #fcd34d;
+}
+
+.lg-eyebrow {
+  font-size: 0.69rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: #34d399;
+}
+
+.lg-hero-title {
+  font-size: clamp(1.38rem, 2.1vw, 1.88rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.18;
+  color: #f8fafc;
+}
+
