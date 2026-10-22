@@ -3,7 +3,7 @@
     ref="root"
     flat
     data-gamepad-section
-    class="surface-card-subsection overflow-hidden tabs-card"
+    class="mc-card overflow-hidden tabs-card"
     v-context-menu="getBackgroundMenu"
   >
     <HomeScreenshotCard

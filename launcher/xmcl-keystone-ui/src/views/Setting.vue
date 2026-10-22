@@ -5,16 +5,13 @@
   >
     <!-- Navigation Sidebar (Only in Wide/Scroll Mode) -->
     <nav v-if="!isNarrowView" id="settings-nav" class="setting-sidebar pt-6 pl-4 pr-2" :aria-label="t('setting.name', 2)">
-      <v-card class="surface-card-subsection lg-surface rounded-2xl!" :elevation="tokens.cardSubsectionElevation.value">
-        <v-list nav density="compact" color="transparent" :selected="[activeSectionIndex]" @update:selected="v => activeSectionIndex = (v[0] as number) ?? 0">
-          <v-list-subheader class="lg-eyebrow pl-4 mb-1">
-            {{ t('setting.name') }}
-          </v-list-subheader>
+      <div class="mc-card p-1.5">
+        <v-list nav density="compact" bg-color="transparent" :selected="[activeSectionIndex]" @update:selected="v => activeSectionIndex = (v[0] as number) ?? 0">
           <v-list-item
             v-for="(item, idx) in sections"
             :key="item.id"
             :value="idx"
-            class="mb-1 rounded-lg"
+            class="mb-0.5 rounded-md"
             color="primary"
             :title="t(item.title)"
             @click="scrollTo(item.id)"
@@ -24,7 +21,7 @@
             </template>
           </v-list-item>
         </v-list>
-      </v-card>
+      </div>
     </nav>
 
     <!-- Content Area -->
@@ -73,7 +70,8 @@
         </section>
         <section id="global" class="mb-8 scroll-target" role="region" :aria-label="t('setting.globalSetting')">
           <SettingHeader
-            :title="'🌍 ' + t('setting.globalSetting')"
+            icon="videogame_asset"
+            :title="t('setting.globalSetting')"
             :subtitle="t('setting.globalSettingHint')"
           />
           <SettingGlobal />

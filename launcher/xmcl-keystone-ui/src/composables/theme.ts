@@ -80,31 +80,31 @@ export interface UIThemeDataV1 {
 
 export function getDefaultTheme(): UIThemeDataV1 {
   return {
-    dark: 'system',
+    dark: true,
     backgroundMusic: [],
     backgroundMusicPlayOrder: 'sequential',
     colors: {
-      lightAppBarColor: '#e0e0e0FF',
-      lightSideBarColor: '#FFFFFFFF',
-      darkAppBarColor: '#111111FF',
-      darkSideBarColor: '#11111166',
-      darkPrimaryColor: '#4caf50',
-      darkBackground: '#121212A5',
-      darkInfoColor: '#2196F3',
-      darkErrorColor: '#FF5252',
-      darkWarningColor: '#FB8C00',
+      lightAppBarColor: '#f3f1ecFF',
+      lightSideBarColor: '#eae6dfFF',
+      darkAppBarColor: '#0c0e12FF',
+      darkSideBarColor: '#12151cFF',
+      darkPrimaryColor: '#e06d53',
+      darkBackground: '#0c0e12FF',
+      darkInfoColor: '#5b8def',
+      darkErrorColor: '#d94e4e',
+      darkWarningColor: '#d4943a',
 
-      darkSuccessColor: '#4CAF50',
-      darkAccentColor: '#00e676',
-      darkCardColor: '#0c0c0ccc',
-      lightPrimaryColor: '#1976D2',
-      lightBackground: '#FFFFFF',
-      lightInfoColor: '#2196F3',
-      lightErrorColor: '#FF5252',
-      lightWarningColor: '#FB8C00',
-      lightSuccessColor: '#4CAF50',
-      lightAccentColor: '#82B1FF',
-      lightCardColor: '#e0e0e080' },
+      darkSuccessColor: '#3b9b78',
+      darkAccentColor: '#3b9b78',
+      darkCardColor: '#171b24FF',
+      lightPrimaryColor: '#c9563d',
+      lightBackground: '#f3f1ecFF',
+      lightInfoColor: '#3b6fd4',
+      lightErrorColor: '#c93b3b',
+      lightWarningColor: '#b87b28',
+      lightSuccessColor: '#2d8263',
+      lightAccentColor: '#2d8263',
+      lightCardColor: '#ffffffFF' },
     backgroundColorOverlay: true,
     backgroundVolume: 1,
     backgroundImage: undefined,
@@ -116,10 +116,10 @@ export function getDefaultTheme(): UIThemeDataV1 {
     borderRadiusEnabled: true,
     customCssEnabled: false,
     blur: {
-      background: 3,
-      card: 20,
-      appBar: 3,
-      sideBar: 3 } }
+      background: 0,
+      card: 12,
+      appBar: 0,
+      sideBar: 0 } }
 }
 
 export function useStoredThemes() {
@@ -830,6 +830,16 @@ export function useTheme(
     }
     if (!theme) {
       theme = getDefaultTheme()
+    } else if (
+      theme.colors?.darkPrimaryColor?.toLowerCase() === '#4caf50' &&
+      (!theme.backgroundImage && !theme.backgroundImageDark)
+    ) {
+      const mineralDefaults = getDefaultTheme()
+      theme.colors = { ...mineralDefaults.colors }
+      if (theme.backgroundType === BackgroundType.HALO) {
+        theme.backgroundType = BackgroundType.NONE
+      }
+      migratedFromLegacy = true
     }
 
     normalizeThemeColors(theme)

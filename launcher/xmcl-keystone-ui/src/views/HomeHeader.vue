@@ -1,6 +1,6 @@
 <template>
   <div
-    class="header sticky max-w-full select-none transition-all px-4 pt-2 pb-1 z-20"
+    class="header sticky max-w-full select-none transition-all z-20 mc-hairline-b bg-[var(--mc-canvas)]/95 backdrop-blur-md"
     :style="{
       '--app-bar-blur': blurAppBar + 'px',
     }"
@@ -13,33 +13,29 @@
     @wheel.stop
   >
     <div
-      class="lg-surface rounded-3xl px-5 py-3.5 flex flex-col gap-2.5 header-content"
+      class="px-7 pt-4 pb-0 flex flex-col gap-3 header-content"
       style="margin: auto"
       :style="{
         opacity: dragover ? 0 : '',
       }"
     >
       <div
-        class="header-primary-row align-center flex flex-wrap items-center gap-2.5"
+        class="header-primary-row align-center flex flex-wrap items-center gap-3"
       >
         <div class="flex items-center gap-2.5 min-w-0">
-          <div class="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399] flex-shrink-0" />
           <span
             :style="{
               fontSize: headerFontSize
             }"
-            class="home-title font-bold tracking-tight text-slate-100 overflow-hidden overflow-ellipsis whitespace-nowrap transition-all"
+            class="home-title font-bold tracking-tight text-[var(--mc-ink)] overflow-hidden overflow-ellipsis whitespace-nowrap transition-all"
           >{{ name || `Minecraft ${version.minecraft}` }}</span>
         </div>
-        <v-chip
-          size="small"
-          variant="tonal"
-          color="primary"
-          class="ml-1 flex-shrink-0 font-semibold"
+        <span
+          class="mc-tag mc-tag--jade mc-tabular flex-shrink-0"
           data-testid="instance-header-runtime"
         >
-          {{ version.minecraft }} · {{ loaderLabel }}
-        </v-chip>
+          MC {{ version.minecraft }} · {{ loaderLabel }}
+        </span>
         <router-view name="route" />
         <div class="flex-grow" />
         <router-view name="actions" v-slot="{ Component }">
@@ -54,14 +50,14 @@
 
       <nav
         aria-label="Secciones de la instancia"
-        class="instance-pill-nav flex items-center flex-wrap gap-1 pt-1.5 border-t border-white/8"
+        class="instance-tab-nav flex items-center flex-wrap gap-1"
       >
         <v-btn
           to="/"
           exact
           size="small"
           variant="text"
-          class="tab-pill-btn rounded-xl text-none font-medium"
+          class="mc-header-tab rounded-t-md rounded-b-none text-none font-medium"
           prepend-icon="home"
           data-testid="instance-tab-overview"
         >
@@ -71,7 +67,7 @@
           to="/mods"
           size="small"
           variant="text"
-          class="tab-pill-btn rounded-xl text-none font-medium"
+          class="mc-header-tab rounded-t-md rounded-b-none text-none font-medium"
           prepend-icon="extension"
           data-testid="instance-tab-mods"
         >
@@ -81,7 +77,7 @@
           to="/resourcepacks"
           size="small"
           variant="text"
-          class="tab-pill-btn rounded-xl text-none font-medium"
+          class="mc-header-tab rounded-t-md rounded-b-none text-none font-medium"
           prepend-icon="palette"
           data-testid="instance-tab-resourcepacks"
         >
@@ -91,7 +87,7 @@
           to="/shaderpacks"
           size="small"
           variant="text"
-          class="tab-pill-btn rounded-xl text-none font-medium"
+          class="mc-header-tab rounded-t-md rounded-b-none text-none font-medium"
           prepend-icon="gradient"
           data-testid="instance-tab-shaderpacks"
         >
@@ -101,7 +97,7 @@
           to="/save"
           size="small"
           variant="text"
-          class="tab-pill-btn rounded-xl text-none font-medium"
+          class="mc-header-tab rounded-t-md rounded-b-none text-none font-medium"
           prepend-icon="map"
           data-testid="instance-tab-saves"
         >
@@ -111,7 +107,7 @@
           to="/base-setting"
           size="small"
           variant="text"
-          class="tab-pill-btn rounded-xl text-none font-medium"
+          class="mc-header-tab rounded-t-md rounded-b-none text-none font-medium"
           prepend-icon="tune"
           data-testid="instance-tab-settings"
         >
@@ -120,7 +116,7 @@
         <v-btn
           size="small"
           variant="text"
-          class="tab-pill-btn rounded-xl text-none font-medium ml-auto"
+          class="mc-header-tab rounded-t-md rounded-b-none text-none font-medium ml-auto"
           prepend-icon="subtitles"
           data-testid="instance-tab-console"
           @click="showLogDialog()"
@@ -136,7 +132,7 @@
         >
           <component
             :is="Component"
-            class="header-extension pt-1"
+            class="header-extension pb-2"
           />
         </transition>
       </router-view>
@@ -235,13 +231,33 @@ const overcount = ref(0)
   min-width: 0;
 }
 
-.tab-pill-btn {
-  color: rgba(226, 232, 240, 0.78) !important;
+.mc-header-tab {
+  position: relative;
+  color: var(--mc-ink-muted) !important;
+  padding-bottom: 4px;
+  transition:
+    color 150ms var(--mc-ease-out),
+    background-color 150ms var(--mc-ease-out);
 }
 
-.tab-pill-btn.v-btn--active {
-  background: rgba(16, 185, 129, 0.18) !important;
-  border: 1px solid rgba(52, 211, 153, 0.35);
-  color: #6ee7b7 !important;
+.mc-header-tab:hover {
+  color: var(--mc-ink) !important;
+  background-color: rgba(243, 241, 236, 0.04) !important;
+}
+
+.mc-header-tab.v-btn--active {
+  color: var(--mc-ink) !important;
+  background-color: transparent !important;
+}
+
+.mc-header-tab.v-btn--active::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background-color: var(--mc-accent);
 }
 </style>

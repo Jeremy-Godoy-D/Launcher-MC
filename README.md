@@ -5,14 +5,14 @@
 # Launcher MC
 
 **Launcher de escritorio para Minecraft: Java Edition en Windows 10/11 (x64)**  
-Interfaz Liquid Glass en español · Instancias aisladas · Perfiles locales y Microsoft · Actualizador delta integrado
+Sistema de diseño «Taller Mineral» (Impeccable) · Instancias aisladas · Perfiles locales y Microsoft · Actualizador delta integrado
 
-[![Release](https://img.shields.io/badge/version-v0.1.0--beta.2-10b981?style=flat-square&logo=github)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases)
+[![Release](https://img.shields.io/badge/version-v0.1.0--beta.3-e06d53?style=flat-square&logo=github)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11%20x64-0ea5e9?style=flat-square&logo=windows)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases)
 [![Electron](https://img.shields.io/badge/Electron-34-47848F?style=flat-square&logo=electron&logoColor=white)](https://www.electronjs.org/)
-[![Vue](https://img.shields.io/badge/Vue-2.7%20%2B%20Vuetify-4FC08D?style=flat-square&logo=vuedotjs&logoColor=white)](https://vuejs.org/)
+[![Vue](https://img.shields.io/badge/Vue-2.7%20%2B%20Vuetify-3b9b78?style=flat-square&logo=vuedotjs&logoColor=white)](https://vuejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-f59e0b?style=flat-square)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-d4943a?style=flat-square)](LICENSE)
 
 [**Descargar `.exe`**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/latest) · [**Notas de versión**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases) · [**Reportar un problema**](https://github.com/Jeremy-Godoy-D/Launcher-MC/issues) · [**Licencia y Avisos**](NOTICE)
 
@@ -25,8 +25,8 @@ Interfaz Liquid Glass en español · Instancias aisladas · Perfiles locales y M
 <table>
   <tr>
     <td width="50%" valign="top">
-      <h3>🧊 Interfaz Liquid Glass</h3>
-      <p>Superficies translúcidas con refracción multicapa, jerarquía tipográfica editorial y navegación directa entre <b>Biblioteca</b>, <b>Catálogo</b>, <b>Cuentas</b> y <b>Ajustes</b>, sin menús heredados ni flujos ocultos.</p>
+      <h3>🧱 Diseño «Taller Mineral»</h3>
+      <p>Interfaz táctil en obsidiana mate, marfil mineral y acentos en terracota/cobre y jade musgo, estructurada con filetes de 1px y estantería interactiva de instancias.</p>
     </td>
     <td width="50%" valign="top">
       <h3>⚡ Instancias y Modloaders</h3>
@@ -71,19 +71,19 @@ Interfaz Liquid Glass en español · Instancias aisladas · Perfiles locales y M
   <tbody>
     <tr>
       <td><b>Instalador NSIS (Recomendado)</b></td>
-      <td><code>LauncherMC-0.1.0-beta.2-win-x64.exe</code></td>
+      <td><code>LauncherMC-0.1.0-beta.3-win-x64.exe</code></td>
       <td>Asistente de instalación con selección de ruta y accesos directos en Escritorio y Menú Inicio.</td>
       <td>✅ Delta (<code>.asar.gz</code>) + Instalador</td>
     </tr>
     <tr>
       <td><b>Archivo Portable</b></td>
-      <td><code>LauncherMC-0.1.0-beta.2-win-x64.zip</code></td>
+      <td><code>LauncherMC-0.1.0-beta.3-win-x64.zip</code></td>
       <td>Carpeta descomprimible sin instalación en el registro del sistema.</td>
       <td>✅ Delta (<code>.asar.gz</code>)</td>
     </tr>
     <tr>
       <td><b>Paquete Incremental</b></td>
-      <td><code>app-0.1.0-beta.2-win.asar.gz</code></td>
+      <td><code>app-0.1.0-beta.3-win.asar.gz</code></td>
       <td>Artefacto consumido automáticamente por el actualizador interno (incluye <code>.sha256</code>).</td>
       <td>🔒 Automático</td>
     </tr>

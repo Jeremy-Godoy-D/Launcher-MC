@@ -1,10 +1,10 @@
 <template>
-  <div class="w-full pb-2">
-    <div class="relative footer lg-surface rounded-3xl p-4 flex-grow flex items-center justify-between gap-4 flex-wrap">
+  <div class="w-full pb-4">
+    <div class="relative footer px-3 py-2 flex-grow flex items-end justify-between gap-6 flex-wrap">
       <HomeFooterCard />
       <div
         key="launch-button-group"
-        class="flex flex-wrap justify-end items-center gap-y-4 gap-x-2 flex-grow"
+        class="flex flex-wrap justify-end items-center gap-y-4 gap-x-2 flex-grow pb-1"
       >
         <HomeLaunchButtonStatus
           class="mr-4 ml-2"

@@ -1,49 +1,43 @@
 <template>
-  <section class="library-view p-6 overflow-auto flex flex-col gap-5">
-    <header class="lg-surface rounded-3xl p-6 flex flex-col gap-4">
+  <section class="library-view px-7 py-6 overflow-auto flex flex-col gap-5">
+    <header class="flex flex-col gap-4 mc-hairline-b pb-4">
       <div class="flex items-start justify-between gap-4 flex-wrap">
         <div class="max-w-2xl">
-          <div class="lg-eyebrow mb-1.5 flex items-center gap-2">
-            <v-icon size="14" color="#34d399">layers</v-icon>
-            <span>Entornos aislados · Minecraft Java</span>
+          <div class="flex items-baseline gap-3">
+            <h1 class="text-2xl font-bold tracking-tight text-[var(--mc-ink)]">Biblioteca</h1>
+            <span class="mc-tag mc-tabular">
+              {{ instances.length }} {{ instances.length === 1 ? 'instancia' : 'instancias' }}
+            </span>
           </div>
-          <h1 class="lg-hero-title">Biblioteca</h1>
-          <p class="text-sm text-slate-300/80 mt-1.5 leading-relaxed">
+          <p class="text-sm text-[var(--mc-ink-muted)] mt-1 leading-relaxed">
             Cada instancia mantiene sus propios mods, configuración, recursos y mundos de forma independiente.
           </p>
         </div>
 
-        <div class="flex items-center gap-3 flex-wrap">
-          <div class="hidden sm:flex items-center gap-2">
-            <span class="lg-pill">
-              <v-icon size="14" color="#34d399">inventory_2</v-icon>
-              <span>{{ instances.length }} {{ instances.length === 1 ? 'instancia' : 'instancias' }}</span>
-            </span>
-          </div>
-          <v-btn
-            color="primary"
-            prepend-icon="add"
-            class="rounded-xl font-semibold text-none px-5 shadow-[0_8px_24px_-6px_rgba(16,185,129,0.55)]"
-            data-testid="library-create-instance"
-            @click="show()"
-          >
-            Crear instancia
-          </v-btn>
-        </div>
+        <v-btn
+          color="primary"
+          variant="flat"
+          prepend-icon="add"
+          class="rounded-lg font-semibold text-none px-4"
+          data-testid="library-create-instance"
+          @click="show()"
+        >
+          Crear instancia
+        </v-btn>
       </div>
 
-      <div v-if="instances.length > 0" class="flex items-center justify-between gap-3 pt-2 border-t border-white/8 flex-wrap">
-        <div class="flex items-center gap-1.5 flex-wrap" role="group" aria-label="Filtrar por modloader">
+      <div v-if="instances.length > 0" class="flex items-center justify-between gap-3 pt-1 flex-wrap">
+        <div class="flex items-center gap-1 flex-wrap" role="group" aria-label="Filtrar por modloader">
           <button
             v-for="opt in loaderFilters"
             :key="opt.id"
             type="button"
-            class="filter-pill"
-            :class="{ 'filter-pill--active': activeLoaderFilter === opt.id }"
+            class="mc-filter-tab"
+            :class="{ 'mc-filter-tab--active': activeLoaderFilter === opt.id }"
             @click="activeLoaderFilter = opt.id"
           >
             <span>{{ opt.label }}</span>
-            <span class="opacity-60 text-[11px] ml-1">{{ opt.count }}</span>
+            <span class="mc-tabular text-[11px] opacity-65 ml-1.5">{{ opt.count }}</span>
           </button>
         </div>
 
@@ -62,102 +56,98 @@
       </div>
     </header>
 
-    <v-alert v-if="error" type="error" class="rounded-2xl">
+    <v-alert v-if="error" type="error" class="rounded-lg">
       No se pudo cargar la biblioteca. {{ String(error) }}
     </v-alert>
-    <v-progress-linear v-if="isValidating" indeterminate color="primary" aria-label="Cargando biblioteca" class="rounded-full" />
+    <v-progress-linear v-if="isValidating" indeterminate color="primary" aria-label="Cargando biblioteca" />
 
     <div
       v-if="!instances.length && !isValidating"
-      class="lg-inset p-8 text-center flex flex-col items-center justify-center gap-3 my-2"
+      class="mc-card p-8 text-center flex flex-col items-center justify-center gap-3 my-2"
     >
-      <div class="h-14 w-14 rounded-2xl bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center mb-1">
-        <v-icon size="28" color="#34d399">rocket_launch</v-icon>
+      <div class="h-12 w-12 rounded-lg bg-[var(--mc-accent-soft)] border border-[rgba(224,109,83,0.32)] flex items-center justify-center mb-1">
+        <v-icon size="24" color="#e06d53">add_box</v-icon>
       </div>
-      <h2 class="text-lg font-bold text-slate-100">Tu biblioteca está lista para despegar</h2>
-      <p class="text-sm text-slate-300/80 max-w-md">
+      <h2 class="text-lg font-semibold text-[var(--mc-ink)]">Sin instancias creadas</h2>
+      <p class="text-sm text-[var(--mc-ink-muted)] max-w-md">
         Crea tu primera instancia de Minecraft Java. Cada instancia conserva sus propios mundos, mods y ajustes.
       </p>
       <v-btn
         color="primary"
+        variant="flat"
         prepend-icon="add"
-        class="mt-2 rounded-xl text-none font-semibold"
+        class="mt-2 rounded-lg text-none font-semibold"
         @click="show()"
       >
         Crear primera instancia
       </v-btn>
     </div>
 
-    <div class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(310px, 1fr))">
-      <v-card
+    <div class="mc-shelf-grid">
+      <article
         v-for="instance in filteredInstances"
         :key="instance.path"
-        variant="outlined"
-        class="instance-bento-card lg-inset lg-inset-interactive flex flex-col justify-between overflow-hidden"
-        :class="{ 'instance-bento-card--active': instance.path === path }"
+        class="instance-shelf-card mc-card mc-card-interactive mc-shelf-item flex flex-col justify-between overflow-hidden"
+        :class="{ 'instance-shelf-card--active': instance.path === path }"
         :data-testid="`instance-card-${instance.name}`"
       >
-        <div>
-          <v-card-title class="flex items-start justify-between gap-2 pt-4 px-4 pb-1">
-            <div class="flex items-center gap-2.5 min-w-0">
-              <div class="instance-glyph flex-shrink-0 flex items-center justify-center rounded-xl" :class="getLoaderGlyphClass(instance)">
+        <div class="p-4 flex flex-col gap-3">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="instance-glyph flex-shrink-0 flex items-center justify-center rounded-lg" :class="getLoaderGlyphClass(instance)">
                 <v-icon size="18">{{ getLoaderIcon(instance) }}</v-icon>
               </div>
               <div class="min-w-0">
-                <div class="font-bold text-base text-slate-100 truncate" :title="instance.name || `Minecraft ${instance.runtime.minecraft}`">
+                <h2 class="font-semibold text-base text-[var(--mc-ink)] truncate leading-snug" :title="instance.name || `Minecraft ${instance.runtime.minecraft}`">
                   {{ instance.name || `Minecraft ${instance.runtime.minecraft}` }}
-                </div>
-                <div class="text-xs text-slate-300/75 font-mono">
-                  {{ instance.runtime.minecraft }} · {{ getLoaderName(instance) }}
+                </h2>
+                <div class="text-xs text-[var(--mc-ink-muted)] font-mono mc-tabular mt-0.5">
+                  MC {{ instance.runtime.minecraft }} · {{ getLoaderName(instance) }}
                 </div>
               </div>
             </div>
-            <v-chip
+            <span
               v-if="instance.path === path"
-              size="x-small"
-              color="primary"
-              variant="flat"
-              class="font-semibold"
+              class="mc-tag mc-tag--accent shrink-0"
             >
-              Seleccionada
-            </v-chip>
-          </v-card-title>
-
-          <v-card-subtitle class="px-4 pt-2 pb-3 flex items-center gap-1.5 flex-wrap opacity-100!">
-            <span class="lg-pill text-[11px]!">
-              <v-icon size="12" color="#34d399">terminal</v-icon>
-              MC {{ instance.runtime.minecraft }}
+              Activa
             </span>
-            <span class="lg-pill text-[11px]!" :class="getLoaderPillClass(instance)">
+          </div>
+
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="mc-tag mc-tabular">
+              Minecraft {{ instance.runtime.minecraft }}
+            </span>
+            <span class="mc-tag mc-tabular" :class="getLoaderTagClass(instance)">
               {{ getLoaderName(instance) }}
             </span>
-          </v-card-subtitle>
+          </div>
         </div>
 
-        <v-card-actions class="px-4 py-3 border-t border-white/8 bg-black/20 flex-wrap gap-1.5">
+        <div class="px-4 py-2.5 mc-hairline-t bg-[var(--mc-surface-subtle)] flex items-center flex-wrap gap-1">
           <v-btn
             color="primary"
             variant="flat"
             size="small"
             prepend-icon="play_arrow"
-            class="rounded-lg font-semibold text-none"
+            class="rounded-md font-semibold text-none"
             @click="open(instance.path, '/')"
           >
             Abrir instancia
           </v-btn>
-          <v-btn variant="text" size="small" class="rounded-lg text-none" @click="open(instance.path, '/mods')">
+          <v-btn variant="text" size="small" class="rounded-md text-none text-[var(--mc-ink-secondary)]" @click="open(instance.path, '/mods')">
             Contenido
           </v-btn>
-          <v-btn variant="text" size="small" class="rounded-lg text-none" @click="open(instance.path, '/base-setting')">
+          <v-btn variant="text" size="small" class="rounded-md text-none text-[var(--mc-ink-secondary)]" @click="open(instance.path, '/base-setting')">
             Configuración
           </v-btn>
-          <v-btn variant="text" size="small" class="rounded-lg text-none" @click="openConsole(instance.path)">
+          <v-btn variant="text" size="small" class="rounded-md text-none text-[var(--mc-ink-secondary)]" @click="openConsole(instance.path)">
             Consola
           </v-btn>
           <v-btn
             variant="text"
             size="small"
-            class="rounded-lg text-none"
+            class="rounded-md text-none text-[var(--mc-ink-secondary)]"
             :loading="duplicatingPath === instance.path"
             @click="onDuplicate(instance)"
           >
@@ -167,13 +157,13 @@
             variant="text"
             color="error"
             size="small"
-            class="rounded-lg text-none ml-auto"
+            class="rounded-md text-none ml-auto"
             @click="onDelete(instance)"
           >
             Eliminar
           </v-btn>
-        </v-card-actions>
-      </v-card>
+        </div>
+      </article>
     </div>
   </section>
 </template>
@@ -245,16 +235,14 @@ function getLoaderIcon(instance: Instance) {
   return 'view_in_ar'
 }
 
-function getLoaderPillClass(instance: Instance) {
-  if (instance.runtime.fabricLoader) return 'lg-pill--cyan'
-  if (instance.runtime.neoForged || instance.runtime.forge) return 'lg-pill--amber'
-  return 'lg-pill--emerald'
+function getLoaderTagClass(instance: Instance) {
+  if (instance.runtime.neoForged || instance.runtime.forge) return 'mc-tag--amber'
+  return 'mc-tag--jade'
 }
 
 function getLoaderGlyphClass(instance: Instance) {
-  if (instance.runtime.fabricLoader) return 'instance-glyph--cyan'
   if (instance.runtime.neoForged || instance.runtime.forge) return 'instance-glyph--amber'
-  return 'instance-glyph--emerald'
+  return 'instance-glyph--jade'
 }
 
 function open(instancePath: string, targetRoute = '/') {
@@ -284,60 +272,66 @@ function onDelete(instance: Instance) {
 </script>
 
 <style scoped>
-.filter-pill {
+.mc-filter-tab {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  padding: 5px 12px;
-  border-radius: 9999px;
-  font-size: 0.76rem;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  color: rgba(226, 232, 240, 0.8);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--mc-ink-muted);
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition:
+    color 150ms var(--mc-ease-out),
+    background-color 150ms var(--mc-ease-out),
+    border-color 150ms var(--mc-ease-out);
 }
 
-.filter-pill:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+.mc-filter-tab:hover {
+  background-color: rgba(243, 241, 236, 0.04);
+  color: var(--mc-ink);
 }
 
-.filter-pill--active {
-  background: rgba(16, 185, 129, 0.2);
-  border-color: rgba(52, 211, 153, 0.45);
-  color: #6ee7b7;
+.mc-filter-tab--active {
+  background-color: var(--mc-surface);
+  border-color: var(--mc-rule-strong);
+  color: var(--mc-ink);
+  font-weight: 600;
 }
 
-.instance-bento-card {
-  border-radius: 20px !important;
+.mc-filter-tab--active::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background-color: var(--mc-accent);
 }
 
-.instance-bento-card--active {
-  border-color: rgba(52, 211, 153, 0.5) !important;
-  box-shadow: inset 0 1px 0 rgba(52, 211, 153, 0.35), 0 16px 36px -12px rgba(16, 185, 129, 0.25) !important;
+.instance-shelf-card--active {
+  border-color: rgba(224, 109, 83, 0.55) !important;
 }
 
 .instance-glyph {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
 }
 
-.instance-glyph--emerald {
-  background: rgba(16, 185, 129, 0.16);
-  border: 1px solid rgba(52, 211, 153, 0.32);
-  color: #34d399;
-}
-
-.instance-glyph--cyan {
-  background: rgba(6, 182, 212, 0.16);
-  border: 1px solid rgba(34, 211, 238, 0.32);
-  color: #22d3ee;
+.instance-glyph--jade {
+  background-color: var(--mc-jade-soft);
+  border: 1px solid rgba(59, 155, 120, 0.32);
+  color: #7cd4b2;
 }
 
 .instance-glyph--amber {
-  background: rgba(245, 158, 11, 0.16);
-  border: 1px solid rgba(251, 191, 36, 0.32);
-  color: #fbbf24;
+  background-color: var(--mc-amber-soft);
+  border: 1px solid rgba(212, 148, 58, 0.32);
+  color: #f0bc6e;
 }
 </style>
+

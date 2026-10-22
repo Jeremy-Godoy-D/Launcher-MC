@@ -118,31 +118,22 @@
     <div class="contents lg:(flex flex-col flex-1 overflow-hidden relative)">
       <div
         id="store-search"
-        class="store-search-bar order-first lg:order-none flex-none px-6 lg:px-10 py-4 sticky top-0 z-10 backdrop-blur-md border-b border-white/8"
+        class="store-search-bar order-first lg:order-none flex-none px-6 lg:px-10 py-4 sticky top-0 z-10 bg-[var(--mc-canvas)]/95 backdrop-blur-md mc-hairline-b"
       >
         <div class="flex items-center justify-between gap-4 flex-wrap mb-2.5">
-          <div>
-            <div class="lg-eyebrow">Catálogo integrado · Modrinth y CurseForge</div>
-            <h1 class="text-lg font-bold text-slate-100">Explorar modpacks, mods, recursos y shaders</h1>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="lg-pill lg-pill--emerald">Modrinth Activo</span>
-            <span class="lg-pill lg-pill--cyan">Instalación directa</span>
-          </div>
+          <h1 class="text-lg font-bold tracking-tight text-[var(--mc-ink)]">Explorar modpacks, mods, recursos y shaders</h1>
         </div>
         <div class="max-w-3xl">
           <v-text-field
             ref="filter"
             v-model="keyword"
             data-testid="store-search"
-            variant="solo"
-            flat
+            variant="outlined"
             hide-details
-            rounded="xl"
-            density="comfortable"
+            rounded="lg"
+            density="compact"
             :placeholder="t('store.searchHint')"
             prepend-inner-icon="search"
-            class="elevated-search"
           >
             <template #append-inner>
               <v-slide-x-transition>

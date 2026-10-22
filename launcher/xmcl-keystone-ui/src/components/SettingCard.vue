@@ -1,7 +1,7 @@
 <template>
   <v-card
-    class="surface-card-subsection lg-inset"
-    :elevation="tokens.cardSubsectionElevation.value"
+    class="mc-card"
+    :elevation="0"
     role="region"
     :aria-label="title || subtitle || undefined"
   >

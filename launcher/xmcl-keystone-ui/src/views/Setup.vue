@@ -232,16 +232,9 @@ watch(() => data.theme, () => {
 const { state } = injection(kSettingsState)
 
 async function persistInitialTheme() {
-  // The wizard mutates `currentTheme` in-place when it picks defaults
-  // (dark mode + Halo background on GPU machines). `useTheme()` does not
-  // auto-persist those mutations, so we must explicitly save here —
-  // otherwise the first launch shows Halo but `theme.json` is never
-  // written and the next launch falls back to `BackgroundType.NONE`.
   try {
-    const e = await getEnvironment()
-    if (e.gpu && isDark.value) {
-      currentTheme.value.backgroundType = BackgroundType.HALO
-    }
+    await getEnvironment()
+    currentTheme.value.backgroundType = BackgroundType.NONE
   } catch (err) {
     console.error('Failed to detect environment during setup', err)
   }

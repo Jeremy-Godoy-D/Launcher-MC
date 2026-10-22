@@ -1,55 +1,46 @@
 <template>
-  <nav aria-label="Navegación principal" class="launcher-navigation lg-surface non-moveable">
-    <div class="brand-header px-3 py-2.5 flex items-center justify-between">
+  <nav aria-label="Navegación principal" class="launcher-navigation mc-rail non-moveable">
+    <div class="brand-header px-3.5 py-3 flex items-center justify-between mc-hairline-b">
       <div class="flex items-center gap-2.5 min-w-0">
-        <div class="brand-glyph flex items-center justify-center rounded-xl">
-          <v-icon size="18" color="#34d399">view_in_ar</v-icon>
+        <div class="brand-mark flex items-center justify-center rounded-lg">
+          <v-icon size="17" color="#e06d53">view_in_ar</v-icon>
         </div>
         <div class="flex flex-col min-w-0">
-          <strong class="text-sm font-bold tracking-tight text-slate-100 leading-tight truncate">Launcher MC</strong>
-          <span class="text-[11px] text-emerald-300/80 font-medium tracking-wide">Edición Java · x64</span>
+          <strong class="text-sm font-semibold tracking-tight text-[var(--mc-ink)] leading-tight truncate">Launcher MC</strong>
+          <span class="text-[11px] text-[var(--mc-ink-muted)] leading-tight truncate mc-tabular">Java Edition · v0.1.0-b3</span>
         </div>
       </div>
-      <span class="lg-pill lg-pill--emerald text-[10px]! px-2! py-0.5!">v0.1.0-b2</span>
     </div>
 
-    <div class="px-2 pt-1 pb-0.5">
-      <div class="lg-eyebrow px-2 mb-1.5">Navegación</div>
-      <div class="flex flex-col gap-1">
-        <v-btn
-          v-for="item in items"
-          :key="item.to"
-          :to="item.to"
-          :data-testid="item.testId"
-          variant="text"
-          class="nav-item-btn justify-start rounded-xl text-none font-medium"
-          :prepend-icon="item.icon"
-        >
-          {{ item.label }}
-        </v-btn>
-      </div>
+    <div class="px-2.5 py-2.5 flex flex-col gap-0.5">
+      <v-btn
+        v-for="item in items"
+        :key="item.to"
+        :to="item.to"
+        :data-testid="item.testId"
+        variant="text"
+        class="nav-item-btn justify-start rounded-lg text-none font-medium"
+        :prepend-icon="item.icon"
+      >
+        {{ item.label }}
+      </v-btn>
     </div>
 
     <section
       v-if="hasInstance"
       aria-label="Instancia seleccionada"
       data-testid="nav-active-instance"
-      class="instance-summary lg-inset mx-1.5 mt-2 p-3 flex flex-col gap-1.5"
+      class="instance-summary px-3 py-3 mc-hairline-t mc-hairline-b flex flex-col gap-1.5"
     >
       <div class="flex items-center justify-between gap-2 px-1">
-        <span class="lg-eyebrow flex items-center gap-1.5">
-          <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
-          Instancia activa
-        </span>
-        <span class="lg-pill text-[10px]! px-2! py-0.5!" :class="loaderPillClass">
-          {{ loaderLabel }}
+        <div class="font-semibold text-sm text-[var(--mc-ink)] truncate" :title="instanceTitle">
+          {{ instanceTitle }}
+        </div>
+        <span class="mc-tag shrink-0" :class="loaderTagClass">
+          {{ loaderShortLabel }}
         </span>
       </div>
-
-      <div class="font-bold text-sm text-slate-100 truncate px-1 mt-0.5" :title="instanceTitle">
-        {{ instanceTitle }}
-      </div>
-      <div class="text-xs text-slate-300/75 truncate px-1 mb-1 font-mono">
+      <div class="text-xs text-[var(--mc-ink-muted)] truncate px-1 mb-1 font-mono mc-tabular">
         {{ runtimeSummary }}
       </div>
 
@@ -60,7 +51,7 @@
           data-testid="nav-instance-overview"
           size="small"
           variant="text"
-          class="subnav-btn justify-start rounded-lg text-none"
+          class="subnav-btn justify-start rounded-md text-none"
           prepend-icon="play_circle"
         >
           Resumen y jugar
@@ -70,7 +61,7 @@
           data-testid="nav-instance-content"
           size="small"
           variant="text"
-          class="subnav-btn justify-start rounded-lg text-none"
+          class="subnav-btn justify-start rounded-md text-none"
           prepend-icon="extension"
         >
           Contenido
@@ -80,7 +71,7 @@
           data-testid="nav-instance-settings"
           size="small"
           variant="text"
-          class="subnav-btn justify-start rounded-lg text-none"
+          class="subnav-btn justify-start rounded-md text-none"
           prepend-icon="tune"
         >
           Configuración
@@ -89,7 +80,7 @@
           data-testid="nav-instance-console"
           size="small"
           variant="text"
-          class="subnav-btn justify-start rounded-lg text-none"
+          class="subnav-btn justify-start rounded-md text-none"
           prepend-icon="subtitles"
           @click="openConsole"
         >
@@ -98,8 +89,7 @@
       </div>
     </section>
 
-    <div class="mt-auto pt-2 px-1">
-      <div class="lg-eyebrow px-2 mb-1">Sesión activa</div>
+    <div class="mt-auto p-2.5 mc-hairline-t">
       <UserAccountSwitcher />
     </div>
   </nav>
@@ -125,16 +115,21 @@ const route = useRoute()
 
 const hasInstance = computed(() => Boolean(path.value))
 const instanceTitle = computed(() => name.value || `Minecraft ${runtime.value.minecraft || ''}`.trim())
+const loaderShortLabel = computed(() => {
+  if (runtime.value.fabricLoader) return 'Fabric'
+  if (runtime.value.neoForged) return 'NeoForge'
+  if (runtime.value.forge) return 'Forge'
+  return 'Vanilla'
+})
 const loaderLabel = computed(() => {
   if (runtime.value.fabricLoader) return `Fabric ${runtime.value.fabricLoader}`
   if (runtime.value.neoForged) return `NeoForge ${runtime.value.neoForged}`
   if (runtime.value.forge) return `Forge ${runtime.value.forge}`
   return 'Vanilla'
 })
-const loaderPillClass = computed(() => {
-  if (runtime.value.fabricLoader) return 'lg-pill--cyan'
-  if (runtime.value.neoForged || runtime.value.forge) return 'lg-pill--amber'
-  return 'lg-pill--emerald'
+const loaderTagClass = computed(() => {
+  if (runtime.value.neoForged || runtime.value.forge) return 'mc-tag--amber'
+  return 'mc-tag--jade'
 })
 const runtimeSummary = computed(() => {
   const mc = runtime.value.minecraft || 'Sin versión'
@@ -154,55 +149,73 @@ async function openConsole() {
 .launcher-navigation {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  width: 248px;
+  width: 236px;
   flex-shrink: 0;
-  margin: 6px 0 10px 10px;
-  padding: 12px 10px;
-  border-radius: 22px;
+  height: 100%;
   overflow-y: auto;
   z-index: 4;
 }
 
-.brand-glyph {
-  width: 34px;
-  height: 34px;
-  background: linear-gradient(145deg, rgba(16, 185, 129, 0.24) 0%, rgba(6, 182, 212, 0.14) 100%);
-  border: 1px solid rgba(52, 211, 153, 0.35);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 6px 16px -4px rgba(16, 185, 129, 0.3);
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  background-color: var(--mc-accent-soft);
+  border: 1px solid rgba(224, 109, 83, 0.32);
 }
 
 .nav-item-btn {
-  letter-spacing: 0.01em;
-  color: rgba(226, 232, 240, 0.82) !important;
-  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  letter-spacing: 0.005em;
+  color: var(--mc-ink-secondary) !important;
+  transition:
+    background-color 150ms var(--mc-ease-out),
+    color 150ms var(--mc-ease-out);
 }
 
 .nav-item-btn:hover {
-  background: rgba(255, 255, 255, 0.06) !important;
-  color: #ffffff !important;
+  background-color: rgba(243, 241, 236, 0.05) !important;
+  color: var(--mc-ink) !important;
 }
 
 .nav-item-btn.v-btn--active {
-  background: linear-gradient(90deg, rgba(16, 185, 129, 0.22) 0%, rgba(6, 182, 212, 0.08) 100%) !important;
-  border: 1px solid rgba(52, 211, 153, 0.35);
-  color: #6ee7b7 !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 8px 20px -8px rgba(16, 185, 129, 0.35);
+  background-color: var(--mc-surface) !important;
+  color: var(--mc-ink) !important;
+}
+
+.nav-item-btn.v-btn--active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background-color: var(--mc-accent);
+  opacity: 1 !important;
 }
 
 .subnav-btn {
-  color: rgba(226, 232, 240, 0.78) !important;
+  position: relative;
+  color: var(--mc-ink-muted) !important;
+  transition:
+    background-color 150ms var(--mc-ease-out),
+    color 150ms var(--mc-ease-out);
+}
+
+.subnav-btn:hover {
+  background-color: rgba(243, 241, 236, 0.04) !important;
+  color: var(--mc-ink) !important;
 }
 
 .subnav-btn.v-btn--active {
-  background: rgba(16, 185, 129, 0.16) !important;
-  color: #6ee7b7 !important;
+  background-color: rgba(224, 109, 83, 0.12) !important;
+  color: #f49d8a !important;
 }
 
 @media (max-width: 960px) {
   .launcher-navigation {
     width: 204px;
-    margin: 4px 0 8px 6px;
   }
 }
 </style>
+

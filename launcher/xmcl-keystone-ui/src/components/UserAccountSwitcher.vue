@@ -12,7 +12,7 @@
       <template #activator="{ props: menuProps }">
         <div
           v-bind="hasUsers ? menuProps : {}"
-          class="user-account-switcher__identity surface-card-row flex items-center gap-3 rounded-2xl px-3 py-2.5"
+          class="user-account-switcher__identity mc-card mc-card-interactive flex items-center gap-3 px-3 py-2"
           data-testid="me-user-switcher"
           role="button"
           tabindex="0"
