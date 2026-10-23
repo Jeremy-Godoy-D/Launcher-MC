@@ -4,6 +4,8 @@ Corrige el botón **Descargar instalador (.exe)**: ahora abre el archivo públic
 
 [**Descargar directamente el instalador v0.2.0-beta.2**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/download/v0.2.0-beta.2/LauncherMC-0.2.0-beta.2-win-x64.exe). Usa este enlace si el botón de tu versión anterior muestra JSON.
 
+Los indicadores de carga de actualización tienen nombres accesibles para lectores de pantalla.
+
 El diálogo mantiene visibles los botones en 1200×720 y 800×400, con scroll independiente para notas largas. Las actualizaciones manuales muestran **Ver actualización** y no abren el navegador automáticamente.
 
 ## Actualizar

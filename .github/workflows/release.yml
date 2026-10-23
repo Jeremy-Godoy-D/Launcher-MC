@@ -193,6 +193,8 @@ jobs:
           } else {
             $isDraft = gh release view $env:TAG --json isDraft --jq .isDraft
             if ($isDraft -ne 'true') { throw 'Published releases are immutable. Use a new version.' }
+            gh release edit $env:TAG --target $env:RELEASE_COMMIT
+            if ($LASTEXITCODE -ne 0) { throw 'Failed to update draft source commit.' }
           }
 
           foreach ($asset in $assets) {

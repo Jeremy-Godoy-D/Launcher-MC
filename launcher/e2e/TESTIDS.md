@@ -261,7 +261,7 @@ If the anchor you need is not here, add a `data-testid="…"` attribute to the c
 | `settings-check-update` | [`xmcl-keystone-ui/src/views/SettingUpdate.vue#L10`](../xmcl-keystone-ui/src/views/SettingUpdate.vue#L10) |
 | `settings-page` | [`xmcl-keystone-ui/src/views/Setting.vue#L3`](../xmcl-keystone-ui/src/views/Setting.vue#L3) |
 | `settings-proxy-host` | [`xmcl-keystone-ui/src/views/SettingNetwork.vue#L38`](../xmcl-keystone-ui/src/views/SettingNetwork.vue#L38) |
-| `settings-update-details` | [`xmcl-keystone-ui/src/views/SettingUpdate.vue#L43`](../xmcl-keystone-ui/src/views/SettingUpdate.vue#L43) |
+| `settings-update-details` | [`xmcl-keystone-ui/src/views/SettingUpdate.vue#L46`](../xmcl-keystone-ui/src/views/SettingUpdate.vue#L46) |
 | `setup-account` | [`xmcl-keystone-ui/src/views/SetupAccount.vue#L3`](../xmcl-keystone-ui/src/views/SetupAccount.vue#L3) |
 | `setup-account-add` | [`xmcl-keystone-ui/src/views/SetupAccount.vue#L22`](../xmcl-keystone-ui/src/views/SetupAccount.vue#L22) |
 | `setup-account-skip` | [`xmcl-keystone-ui/src/views/SetupAccount.vue#L33`](../xmcl-keystone-ui/src/views/SetupAccount.vue#L33) |

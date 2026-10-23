@@ -15,6 +15,9 @@
           @click="checkUpdate"
         >
           <v-icon>refresh</v-icon>
+          <template #loader>
+            <v-progress-circular indeterminate size="20" width="2" aria-label="Buscando actualizaciones" />
+          </template>
         </v-btn>
       </template>
       
@@ -48,6 +51,9 @@
           @click="showUpdateInfo()"
           size="small"
         >
+          <template #loader>
+            <v-progress-circular indeterminate size="20" width="2" aria-label="Preparando actualización" />
+          </template>
           <v-icon start size="small" v-if="updateStatus !== 'none'">system_update</v-icon>
           {{
             updateStatus === "none"
