@@ -2,6 +2,7 @@ import BaseSetting from '@/views/BaseSetting.vue'
 import BaseSettingActions from '@/views/BaseSettingActions.vue'
 import BaseSettingExtension from '@/views/BaseSettingExtension.vue'
 import Home from '@/views/Home.vue'
+import LaunchCenter from '@/views/LaunchCenter.vue'
 import HomeActions from '@/views/HomeActions.vue'
 import HomeExtension from '@/views/HomeExtension.vue'
 import HomeLayout from '@/views/HomeLayout.vue'
@@ -30,8 +31,9 @@ export const router = createRouter({
       path: '/',
       component: HomeLayout,
       children: [
+        { path: '', component: LaunchCenter },
         {
-          path: '',
+          path: 'instance',
           components: {
             default: Home,
             extensions: HomeExtension,
@@ -39,7 +41,7 @@ export const router = createRouter({
           },
         },
         {
-          path: 'save',
+          path: 'instance/save',
           components: {
             default: Save,
             extensions: SaveExtension,
@@ -47,7 +49,7 @@ export const router = createRouter({
           },
         },
         {
-          path: 'mods',
+          path: 'instance/mods',
           components: {
             default: Mod,
             extensions: ModExtension,
@@ -55,7 +57,7 @@ export const router = createRouter({
           },
         },
         {
-          path: 'resourcepacks',
+          path: 'instance/resourcepacks',
           components: {
             default: ResourcePack,
             extensions: ResourcePackExtension,
@@ -63,7 +65,7 @@ export const router = createRouter({
           },
         },
         {
-          path: 'shaderpacks',
+          path: 'instance/shaderpacks',
           components: {
             default: ShaderPack,
             extensions: ShaderPackExtension,
@@ -71,7 +73,7 @@ export const router = createRouter({
           },
         },
         {
-          path: 'blueprints',
+          path: 'instance/blueprints',
           meta: { blueprintState: true },
           components: {
             default: () => import('@/views/Blueprint.vue'),
@@ -80,7 +82,7 @@ export const router = createRouter({
           },
         },
         {
-          path: 'base-setting',
+          path: 'instance/base-setting',
           components: {
             default: BaseSetting,
             extensions: BaseSettingExtension,
@@ -99,7 +101,7 @@ export const router = createRouter({
       children: [
         {
           path: '',
-          component: () => import('@/views/StoreEntry.vue'),
+          component: { render: () => null },
         },
         {
           path: 'modrinth/:id',
@@ -136,5 +138,7 @@ export const router = createRouter({
 
 
 router.beforeEach((to) => {
-  if (to.path === '/multiplayer' || to.path.startsWith('/blueprints') || to.path.startsWith('/store/ftb/')) return '/me'
+  const legacy = ['/mods', '/resourcepacks', '/shaderpacks', '/save', '/base-setting']
+  if (legacy.includes(to.path)) return { path: '/instance' + to.path, query: to.query, hash: to.hash, replace: true }
+  if (to.path === '/multiplayer' || (to.path.startsWith('/blueprints') || to.path.startsWith('/instance/blueprints')) || to.path.startsWith('/store/ftb/')) return '/me'
 })

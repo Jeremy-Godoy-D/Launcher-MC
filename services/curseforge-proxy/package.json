@@ -1,0 +1,11 @@
+{
+  "name": "launcher-mc-curseforge-proxy",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test worker.test.mjs",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": { "wrangler": "^4.36.0" }
+}

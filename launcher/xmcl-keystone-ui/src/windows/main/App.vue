@@ -1,28 +1,28 @@
 <template>
-  <v-app v-if="!showSetup" class="h-full max-h-screen overflow-hidden select-none" :class="{ 'dark': isDark }">
+  <v-app v-if="!showSetup" class="aurora-shell h-full max-h-screen overflow-hidden select-none" :class="{ 'dark': isDark, 'ag-perf': performanceMode }">
     <AppBackground />
     <div v-if="!isBigPicture" class="w-full h-full absolute left-0 header-overlay" :style="{
       height: headerHeight + 70 + 'px',
       'background-image': `linear-gradient(${appBarColor} 0%, color-mix(in srgb, ${appBarColor}, transparent) 65%, transparent 100%)`
     }">
     </div>
-    <AppSystemBar v-if="!isBigPicture" no-debug back>
+    <AppSystemBar v-if="!isBigPicture" back>
       <span class="inline-flex items-center gap-2 px-2 text-xs font-semibold tracking-tight text-[var(--mc-ink-secondary)]">
-        <span>Launcher MC</span>
+        <span>Launcher MC</span><span class="opacity-40">/</span><span>{{ sectionLabel }}</span>
       </span>
     </AppSystemBar>
     <div
       class="app-layout flex-grow relative flex overflow-auto"
       :class="[layoutClasses, { 'workspace-side-panel-attached': hasAttachedWorkspacePanel }]"
     >
-      <LauncherNavigation />
-      <main class="relative flex max-h-full flex-1 flex-col overflow-auto" :class="mainClasses">
+      <main class="aurora-stage relative flex max-h-full flex-1 flex-col overflow-auto" :class="mainClasses">
         <router-view v-slot="{ Component }">
-          <transition name="mc-page" mode="out-in">
+          <transition name="aurora-scene" mode="out-in">
             <component :is="Component" class="z-2" />
           </transition>
         </router-view>
       </main>
+      <AppDock v-if="!isBigPicture" />
     </div>
     <AppContextMenu />
     <AppNotifier />
@@ -40,7 +40,8 @@
       <AppBigPictureView v-if="isBigPicture" />
     </transition>
   </v-app>
-  <v-app v-else class="h-full max-h-screen overflow-hidden" :class="{ 'dark': isDark }">
+  <v-app v-else class="aurora-shell h-full max-h-screen overflow-hidden" :class="{ 'dark': isDark }">
+    <AppBackground />
     <AppSystemBar no-user no-task no-debug><span class="px-4">Launcher MC</span></AppSystemBar>
     <div class="app-layout relative flex min-h-0 flex-1 overflow-hidden">
       <Setup @ready="onReady" />
@@ -53,6 +54,8 @@
 
 <script lang=ts setup>
 import '@/assets/common.css'
+import '@/assets/aurora.css'
+import { useAuroraPreferences } from '@/composables/aurora'
 import AppImageDialog from '@/components/AppImageDialog.vue'
 import AppSharedTooltip from '@/components/AppSharedTooltip.vue'
 import { useAuthProfileImportNotification } from '@/composables/authProfileImport'
@@ -60,6 +63,8 @@ import { kAgent, useAgent } from '@/composables/agent'
 import { useCommandPaletteHotkey } from '@/composables/commandPalette'
 import { kDialogModel } from '@/composables/dialog'
 import { useDefaultErrorHandler } from '@/composables/errorHandler'
+import { useDialog } from '@/composables/dialog'
+import { AddInstanceDialogKey } from '@/composables/instanceTemplates'
 import { kInstance } from '@/composables/instance'
 import { kInstanceLaunchCoordinator, useInstanceLaunchCoordinator } from '@/composables/instanceLaunchCoordinator'
 import { kLaunchButton, useLaunchButton } from '@/composables/launchButton'
@@ -81,7 +86,7 @@ import AppGameExitDialog from '@/views/AppGameExitDialog.vue'
 import AppUnauthenticatedWarningDialog from '@/views/AppUnauthenticatedWarningDialog.vue'
 import UserProfileDialog from '@/components/UserProfileDialog.vue'
 import AppNotifier from '@/views/AppNotifier.vue'
-import LauncherNavigation from '@/views/LauncherNavigation.vue'
+import AppDock from '@/views/AppDock.vue'
 import AppSystemBar from '@/views/AppSystemBar.vue'
 import Setup from '@/views/Setup.vue'
 import { useLocalStorage, useMediaQuery, usePreferredColorScheme, usePreferredDark } from '@vueuse/core'
@@ -115,6 +120,7 @@ const lazyDialogComponents = {
 }
 
 const showSetup = ref(location.search.indexOf('bootstrap') !== -1)
+const { performanceMode } = useAuroraPreferences()
 const { state } = injection(kSettingsState)
 const dialogModel = injection(kDialogModel)
 const lazyDialogComponent = computed(() => lazyDialogComponents[dialogModel.current.value.dialog as keyof typeof lazyDialogComponents])
@@ -139,6 +145,7 @@ provide(kAgent, agent)
 const userMenu = useUserMenuControl()
 const userProfileDialogShown = userMenu.shown
 const route = useRoute()
+const sectionLabel = computed(() => route.path.startsWith('/store') ? 'Catálogo' : route.path === '/me' ? 'Biblioteca' : route.path === '/setting' ? 'Ajustes' : route.path === '/accounts' ? 'Cuentas' : route.path.startsWith('/instance') ? 'Tu instancia' : 'Inicio')
 const hasAttachedWorkspacePanel = computed(
   () => route.meta.workspaceSidePanel === true && sidebarPosition.value === 'left',
 )
@@ -204,6 +211,8 @@ watch(dark, (newVal) => {
 }, { immediate: true })
 
 const tutor = injection(kTutorial)
+const { show: showCreateInstance } = useDialog(AddInstanceDialogKey)
+const router = useRouter()
 // Set theme and start tutorial
 const onReady = async (data: any) => {
   await nextTick()
@@ -219,7 +228,8 @@ const onReady = async (data: any) => {
       unwatch()
     })
   }
-  tutor.start()
+  await router.push(data.firstAction === 'store' ? '/store' : '/')
+  if (data.firstAction === 'create') showCreateInstance()
 }
 
 // color theme sync

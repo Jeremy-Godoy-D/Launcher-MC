@@ -5,20 +5,17 @@
     @wheel.stop
   >
     <v-progress-linear
+      aria-label="Cargando contenido"
       class="absolute left-0 top-0 z-20 m-0 p-0"
       :active="loading"
       height="3"
       :indeterminate="true"
     />
-    <SplitPane
-      flex-left
-      :min-percent="minPercentage ?? 30"
-      :default-percent="30"
-      class="flex h-full w-full overflow-auto py-0"
-    >
-      <template #left>
+    <div class="aurora-market-layout" :class="{ 'with-detail': hasSelectedContent && !narrow }">
+      <div class="aurora-market-list">
         <div class="flex flex-col h-full overflow-hidden">
           <div v-roving-tabindex role="toolbar">
+            <v-btn v-if="$slots.filter" variant="text" prepend-icon="tune" class="mx-3 mt-2" @click="filtersOpen = true">Filtros</v-btn>
             <slot
               name="actions"
             />
@@ -67,42 +64,24 @@
             />
           </div>
         </div>
-      </template>
-      <template #right>
-        <div
-          key="market-right"
-          id="right-pane"
-          class="relative flex flex-col h-full flex-grow-0 overflow-y-auto overflow-x-hidden market-right"
-        >
-          <Transition name="market-pane-fade">
-            <div
-              v-show="!hasSelectedContent && $slots.filter"
-              class="market-filter-cache absolute inset-0"
-            >
-              <slot name="filter" />
-            </div>
-          </Transition>
-          <Transition name="market-pane-fade" mode="out-in">
-            <slot
-              v-if="hasSelectedContent || !$slots.filter"
-              name="content"
-              :key="selectedId || 'market-content'"
-              :selected-item="selectedItem"
-              :selected-id="selectedId"
-              :selected-modrinth-id="selectedModrinthId"
-              :selected-curseforge-id="selectedCurseforgeId"
-              :updating="plans[selectedItem?.id ?? '']?.updating"
-            />
-          </Transition>
-        </div>
-      </template>
-    </SplitPane>
+      </div>
+      <aside v-if="hasSelectedContent && !narrow" class="aurora-market-detail glass-2">
+        <div class="flex justify-end p-2"><v-btn icon="close" size="small" variant="text" aria-label="Cerrar detalle" @click="selectedId = ''" /></div>
+        <slot name="content" :selected-item="selectedItem" :selected-id="selectedId" :selected-modrinth-id="selectedModrinthId" :selected-curseforge-id="selectedCurseforgeId" :updating="plans[selectedItem?.id ?? '']?.updating" />
+      </aside>
+    </div>
+    <v-dialog :model-value="hasSelectedContent && narrow" width="800" @update:model-value="value => { if (!value) selectedId = '' }">
+      <div class="glass-3 max-h-[85vh] overflow-auto"><div class="flex justify-end p-2"><v-btn icon="close" variant="text" aria-label="Cerrar detalle" @click="selectedId = ''" /></div><slot name="content" :selected-item="selectedItem" :selected-id="selectedId" :selected-modrinth-id="selectedModrinthId" :selected-curseforge-id="selectedCurseforgeId" :updating="plans[selectedItem?.id ?? '']?.updating" /></div>
+    </v-dialog>
+    <v-dialog v-model="filtersOpen" width="480" eager><div class="glass-3 max-h-[85vh] overflow-auto"><div class="flex items-center justify-between p-3"><h2 class="font-semibold">Filtrar contenido</h2><v-btn icon="close" variant="text" aria-label="Cerrar filtros" @click="filtersOpen = false" /></div><slot name="filter" /></div></v-dialog>
     <slot />
   </div>
 </template>
 
 <script lang=ts setup>
-import SplitPane from '@/components/SplitPane.vue'
+import { useMediaQuery } from '@vueuse/core'
+const narrow = useMediaQuery('(max-width: 999px)')
+const filtersOpen = ref(false)
 import { kDialogModel } from '@/composables/dialog'
 import { ProjectGroup } from '@/composables/modGroup'
 import { UpgradePlan } from '@/composables/modUpgrade'

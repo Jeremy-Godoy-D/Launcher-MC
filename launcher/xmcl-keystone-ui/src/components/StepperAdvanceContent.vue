@@ -6,6 +6,7 @@
       :show-minecraft="showMinecraft"
       auto-select-latest-on-click
     />
+    <details class="aurora-advanced"><summary class="cursor-pointer py-3">Java, memoria y carpetas compartidas</summary>
     <!-- Advanced Settings -->
     <v-list-subheader data-testid="add-instance-advanced" class="my-4">
       {{ t('setting.advancedSettings') }}
@@ -104,6 +105,7 @@
         </v-checkbox>
       </div>
     </v-list-item>
+    </details>
   </div>
 </template>
 

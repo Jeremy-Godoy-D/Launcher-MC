@@ -49,6 +49,7 @@ export function useSearchedItems(options: UseSearchedItemsOptions) {
     refreshing: isModrinthSearching,
     projects,
     pageCount: modrinthPageCount,
+    refresh: refreshModrinth,
   } = useModrinth(
     query,
     gameVersion,
@@ -60,10 +61,11 @@ export function useSearchedItems(options: UseSearchedItemsOptions) {
     'modpack',
     page,
     pageSize,
+    computed(() => sources.value.includes('modrinth')),
   )
 
   // Curseforge
-  const { projects: curseforgeProjects, pages: curseforgePageCount, isValidating: isCurseforgeSearching } = useCurseforge(
+  const { projects: curseforgeProjects, pages: curseforgePageCount, isValidating: isCurseforgeSearching, error: curseforgeError, mutate: refreshCurseforge } = useCurseforge(
     CurseforgeBuiltinClassId.modpack,
     query,
     page,
@@ -72,6 +74,7 @@ export function useSearchedItems(options: UseSearchedItemsOptions) {
     curseforgeSort,
     gameVersion,
     pageSize,
+    computed(() => sources.value.includes('curseforge')),
   )
 
   // Mappings for search results
@@ -161,7 +164,12 @@ export function useSearchedItems(options: UseSearchedItemsOptions) {
     if (source === 'curseforge') return curseforgePageCount.value
     return 0
   })))
-  const isSearching = computed(() => isModrinthSearching.value || isCurseforgeSearching.value)
+  const isSearching = computed(() => sources.value.some(source => source === 'modrinth' ? isModrinthSearching.value : isCurseforgeSearching.value))
+  const sourceErrors = computed(() => sources.value.filter(source => source === 'modrinth' ? searchError.value : curseforgeError.value))
+  const retrySource = (source: 'modrinth' | 'curseforge') => {
+    if (!sources.value.includes(source)) return
+    return source === 'modrinth' ? refreshModrinth() : refreshCurseforge()
+  }
 
   return {
     items,
@@ -169,5 +177,7 @@ export function useSearchedItems(options: UseSearchedItemsOptions) {
     searchError,
     pageCount,
     sources,
+    sourceErrors,
+    retrySource,
   }
 }

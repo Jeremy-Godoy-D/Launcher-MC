@@ -8,6 +8,7 @@
   >
     <v-btn
       v-if="i18nEnabled"
+      aria-label="Traducir contenido"
       v-shared-tooltip="() => 'Alt'"
       icon
       variant="text"
@@ -20,6 +21,7 @@
     </v-btn>
     <v-btn
       v-shared-tooltip="() => t('mod.showDirectory')"
+      :aria-label="t('mod.showDirectory')"
       icon
       size="large"
       variant="text"

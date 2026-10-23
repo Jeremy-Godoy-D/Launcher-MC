@@ -13,6 +13,7 @@
           class="primary ml-1 underline"
           target="browser"
           href="https://bmclapidoc.bangbang93.com/"
+          :aria-label="t('help')"
         >
           <v-icon size="small">
             question_mark

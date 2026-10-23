@@ -21,6 +21,7 @@ import {
 } from '@xmcl/runtime-api'
 import { basename, dirname, join } from 'path'
 import { LauncherAppPlugin } from '~/app'
+import { createCurseforgeProxyClient } from '~/app/curseforgeProxy'
 import { kTasks } from '~/infra'
 import { InstanceInstallService } from '~/instanceIO'
 import { kDownloadOptions } from '~/network'
@@ -42,9 +43,7 @@ type InstanceFile = _InstanceFile & { downloads: string[]; icon?: string }
 export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
   const modrinth = new ModrinthV2Client({ fetch: createModrinthAuthenticatedFetch(app) })
   app.registry.register(ModrinthV2Client, modrinth)
-  const curseforge = new CurseforgeV1Client(process.env.CURSEFORGE_API_KEY || '', {
-    fetch: (...args) => app.fetch(...args),
-  })
+  const curseforge = createCurseforgeProxyClient((...args) => app.fetch(...args))
   app.registry.register(CurseforgeV1Client, curseforge)
 
   const installService = await app.registry.get(InstanceInstallService)

@@ -1,3 +1,4 @@
+import { sanitizeHtml } from '../util/sanitizeHtml'
 import MarkdownIt from 'markdown-it'
 // @ts-ignore
 import attr from 'markdown-it-link-attributes'
@@ -120,7 +121,7 @@ export function useMarkdown() {
     return root.innerHTML
   }
 
-  const render = (t: string) => groupBadgeParagraphs(md.render(t))
+  const render = (t: string) => groupBadgeParagraphs(sanitizeHtml(md.render(t)))
 
   return {
     render,

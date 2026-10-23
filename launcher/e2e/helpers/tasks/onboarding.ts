@@ -30,27 +30,15 @@ export async function completeOnboarding(
   })
   await shell.setupNext.click()
 
-  await shoot(ctx, '02-appearance', {
-    caption: 'Step 2. Choose a **theme** and click **Next**.',
-    waitFor: [shell.setupAppearance],
-  })
-  await shell.setupNext.click()
-
-  await shoot(ctx, '03-data-root', {
-    caption: 'Step 3. Confirm where the launcher will store **game data**, then click **Next**.',
-    waitFor: [shell.setupDataRoot],
-  })
-  await shell.setupNext.click()
-
-  await shoot(ctx, '04-account', {
+  await shoot(ctx, '02-account', {
     caption: opts.skipAccount
-      ? 'Step 4. Skip the **account** step — add one later from **Accounts**.'
-      : 'Step 4. Add your **Minecraft account**, then click **Confirm**.',
+      ? 'Step 2. Skip the **account** step — add one later from **Accounts**.'
+      : 'Step 2. Add your **Minecraft account**, then click **Confirm**.',
     waitFor: [shell.setupAccount],
   })
 
   if (opts.skipAccount) {
-    await shell.setupNext.click()
+    await shell.setupAccountSkip.click()
   } else {
     await shell.setupAccountAdd.click()
     // The default authority is Microsoft (needs a real email); switch to the
@@ -64,13 +52,17 @@ export async function completeOnboarding(
     await shell.setupNext.click()
   }
 
+  await shoot(ctx, '03-ready', { caption: 'Step 3. Choose where to start.' })
+  await launcher.main.getByRole('radio').nth(1).check()
+  await shell.setupNext.click()
   await shell.sidebar.waitFor({ state: 'visible', timeout: 30_000 })
 
   // The first-launch guided tour (driver.js) auto-starts here and its overlay
   // blocks all subsequent clicks — dismiss it before the storyline continues.
   await shell.dismissTutorial()
 
-  await shoot(ctx, '05-home', {
-    caption: 'You are in! The **Home** view is where you launch and manage instances.',
+  await shell.goto('/me')
+  await shoot(ctx, '04-library', {
+    caption: 'You are in! The **Library** is where you find and manage instances.',
   })
 }

@@ -32,6 +32,15 @@ export const windowController: ControllerPlugin = function (this: ElectronContro
         // window torn down mid-send — drop quietly
       }
     }
+    // Native activity remains accurate when Chromium emulates page focus.
+    const sendActivity = () => safeSend('window-active', !win.isDestroyed() && win.isVisible() && win.isFocused() && !win.isMinimized())
+    win.on('focus', sendActivity)
+    win.on('blur', sendActivity)
+    win.on('minimize', sendActivity)
+    win.on('restore', sendActivity)
+    win.on('hide', sendActivity)
+    win.on('show', sendActivity)
+    win.webContents.on('did-finish-load', sendActivity)
     win.on('maximize', () => {
       safeSend('maximize', win.isDestroyed() ? false : win.isMaximized())
     })

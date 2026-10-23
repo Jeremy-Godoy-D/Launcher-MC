@@ -5,7 +5,7 @@
     window
     role="toolbar"
     :aria-label="systemBarAriaLabel"
-    class="moveable static! flex w-full grow-0 gap-1 p-0 text-[.8125rem]! bg-[var(--mc-rail)]! dark:color-[#f3f1ecb3] pr-0 max-h-[32px] mc-hairline-b"
+    class="moveable static! flex w-full grow-0 gap-1 p-0 text-[.8125rem]! bg-[var(--mc-rail)]! dark:color-[#f3f1ecb3] pr-0 aurora-titlebar max-h-[48px] min-h-[48px] mc-hairline-b"
     :style="{ 'backdrop-filter': `blur(${blurAppBar}px)` }"
   >
     <span
@@ -14,12 +14,12 @@
     >
       <div
         v-if="shouldShiftBackControl"
-        class="w-[80px]"
+        class="w-[40px]"
       />
       <button
         type="button"
         v-ripple
-        class="system-bar-back-btn non-moveable flex cursor-pointer select-none items-center h-full w-[80px]"
+        class="system-bar-back-btn non-moveable flex cursor-pointer select-none items-center h-full w-[40px]"
         :aria-label="backAriaLabel"
         @click="onBack"
       >
@@ -29,11 +29,6 @@
       </button>
     </span>
     <slot />
-
-    <AppAudioPlayer
-      v-if="!noDebug"
-      class="ml-22"
-    />
 
     <div class="flex-grow"/>
 
@@ -51,6 +46,7 @@
 
     <AppSystemBarBadge
       v-if="!noUser"
+      class="aurora-quick-action"
       v-shared-tooltip.bottom="() => t('commandPalette.openHint', { shortcut: paletteShortcut })"
       icon="search"
       :text="t('commandPalette.open')"
@@ -63,9 +59,13 @@
       </template>
     </AppSystemBarBadge>
 
+    <div class="flex-grow" />
+    <AppAudioPlayer v-if="!noDebug" class="aurora-topbar-audio" />
 
     <AppSystemBarBadge
       v-if="!noTask"
+      data-testid="topbar-tasks"
+      :aria-label="taskTooltip"
       v-shared-tooltip.bottom="() => taskTooltip"
       icon="assignment"
       :can-hide-text="!taskInlineText"

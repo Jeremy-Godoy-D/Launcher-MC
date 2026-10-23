@@ -5,6 +5,7 @@
     v-model="_keyword"
     class="max-w-80 min-w-40 market-search-field"
     :placeholder="placeholder"
+    :aria-label="placeholder || 'Buscar contenido'"
     variant="outlined"
     density="compact"
     hide-details
@@ -17,6 +18,7 @@
       <v-slide-x-transition>
         <v-btn
           v-if="clearable"
+          aria-label="Limpiar búsqueda"
           icon
           variant="text"
           size="small"

@@ -67,13 +67,6 @@ export async function createInstance(
     })
   }
 
-  await shell.addInstanceName.fill(args.name)
-  if (shouldShoot) {
-    await shoot(ctx, key('02-name'), {
-      caption: `Step 2. Name the instance (here: \`${args.name}\`).`,
-    })
-  }
-
   const mcInput = shell.versionInput('minecraft')
   await mcInput.click()
   if (args.minecraft) {
@@ -104,13 +97,21 @@ export async function createInstance(
     }
   }
 
+  await shell.addInstanceDetailsNext.click()
+  await shell.addInstanceName.fill(args.name)
+  if (shouldShoot) {
+    await shoot(ctx, key('04-name'), {
+      caption: `Name the instance (here: \`${args.name}\`).`,
+    })
+  }
   await shell.addInstanceCreate.click()
   await shell.addInstanceDialog
     .waitFor({ state: 'hidden', timeout: 60_000 })
-    .catch(() => {})
+  await shell.goto('/me')
+  await shell.instanceItems.filter({ hasText: args.name }).waitFor({ state: 'visible' })
   if (shouldShoot) {
     await shoot(ctx, key('05-created'), {
-      caption: 'Step 5. The new instance is selected and visible in the side bar.',
+      caption: 'Step 5. The new instance is visible in the library.',
     })
   }
 }

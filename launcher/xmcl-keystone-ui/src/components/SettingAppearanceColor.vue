@@ -4,7 +4,9 @@
     location="top"
   >
     <template #activator="{ props: activatorProps }">
-      <div
+      <button
+        type="button"
+        :aria-label="text"
         v-shared-tooltip="() => text"
         class="color-button min-w-5 max-w-5 dark:border-light-50 rounded-full border-2 p-5 transition-all"
         v-bind="activatorProps"
@@ -24,6 +26,7 @@
           {{ t('setting.backdropBlur') }}
         </v-list-subheader>
         <v-slider
+          :aria-label="t('setting.backdropBlur')"
           class="mx-2"
           :model-value="blur"
           :min="0"

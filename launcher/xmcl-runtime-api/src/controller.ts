@@ -83,6 +83,7 @@ export interface SaveDialogOptions {
 }
 
 interface WindowControllerEventMap {
+  'window-active': boolean
   maximize: boolean
   minimize: boolean
   navigate: string

@@ -5,7 +5,7 @@
     :style="{ scrollbarGutter: 'stable' }"
     @wheel="onScroll"
   >
-    <HomeHeader ref="headerEl" class="sticky top-0 z-20" />
+    <HomeHeader v-if="route.path !== '/'" ref="headerEl" class="sticky top-0 z-20" />
 
     <!-- This is to fix strange hover color issue... -->
     <router-view v-slot="{ Component }">
@@ -30,6 +30,8 @@
 </template>
 
 <script lang=ts setup>
+import { useDialog } from '@/composables/dialog'
+import { useGlobalDrop } from '@/composables/dropHandler'
 import { kInstance } from '@/composables/instance'
 import { usePresence } from '@/composables/presence'
 import { kCompact, useCompactScroll } from '@/composables/scrollTop'
@@ -47,10 +49,28 @@ import AppCollectionDialog from './AppCollectionDialog.vue'
 import HomeDropModpackDialog from './HomeDropModpackDialog.vue'
 import { useGamepadInnerNav } from '@/composables/gamepad'
 
+const { show } = useDialog('HomeDropModpackDialog')
+
+useGlobalDrop({
+  onDrop: async (e) => {
+    const files = e.files
+    const file = files?.[0]
+    if (file) {
+      const ext = file.name.split('.').pop()
+      const filePath = windowController.getPathForFile(file)
+      if ((ext === 'zip' || ext === 'mrpack') && filePath) {
+        show(filePath)
+        return
+      }
+    }
+  },
+})
+
 const router = useRouter()
+const route = useRoute()
 
 // Gamepad triggers (L2/R2) cycle through the instance pages.
-const HOME_GROUP = ['/', '/mods', '/resourcepacks', '/shaderpacks', '/save']
+const HOME_GROUP = ['/instance', '/instance/mods', '/instance/resourcepacks', '/instance/shaderpacks', '/instance/save']
 useGamepadInnerNav({
   handler: (dir) => {
     const cur = router.currentRoute.value.path

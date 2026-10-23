@@ -14,6 +14,7 @@ import {
 import { Inject, LauncherAppKey, type LauncherApp } from '@xmcl/runtime/app'
 import { LaunchService } from '@xmcl/runtime/launch'
 import { RemoteServerService } from '@xmcl/runtime/remoteServer'
+import { quoteWindowsArgument } from './utils/windowsCommand'
 import { AbstractService, ExposeServiceKey } from '@xmcl/runtime/service'
 
 const WINSW_VERSION = '2.12.0'
@@ -40,12 +41,6 @@ function escapeXml(value: string) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&apos;')
-}
-
-function quoteWindowsArgument(value: string) {
-  if (value.length === 0) return '""'
-  if (!/[\s"]/u.test(value)) return value
-  return `"${value.replace(/(\\*)"/g, '$1$1\\"').replace(/(\\+)$/g, '$1$1')}"`
 }
 
 function validateServiceName(name: string) {

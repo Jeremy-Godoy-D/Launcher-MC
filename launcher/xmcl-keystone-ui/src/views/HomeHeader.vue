@@ -37,6 +37,8 @@
           MC {{ version.minecraft }} · {{ loaderLabel }}
         </span>
         <router-view name="route" />
+        <v-btn v-if="!isBedrockInstance(instance) || hasMinecraftLicense" id="launch-button" data-testid="launch-button" color="primary" variant="tonal" :prepend-icon="launchIcon || 'play_arrow'" :disabled="isValidating" @click="launchClick()">{{ launchText }}</v-btn>
+        <v-menu location="bottom end"><template #activator="{ props }"><v-btn v-bind="props" data-testid="launch-button-menu" icon="more_horiz" variant="text" size="small" aria-label="Opciones de lanzamiento" /></template><HomeLaunchButtonMenuList /></v-menu>
         <div class="flex-grow" />
         <router-view name="actions" v-slot="{ Component }">
           <transition
@@ -53,7 +55,7 @@
         class="instance-tab-nav flex items-center flex-wrap gap-1"
       >
         <v-btn
-          to="/"
+          to="/instance"
           exact
           size="small"
           variant="text"
@@ -64,7 +66,7 @@
           Resumen
         </v-btn>
         <v-btn
-          to="/mods"
+          to="/instance/mods"
           size="small"
           variant="text"
           class="mc-header-tab rounded-t-md rounded-b-none text-none font-medium"
@@ -74,7 +76,7 @@
           Contenido ({{ t('mod.name', 2) }})
         </v-btn>
         <v-btn
-          to="/resourcepacks"
+          to="/instance/resourcepacks"
           size="small"
           variant="text"
           class="mc-header-tab rounded-t-md rounded-b-none text-none font-medium"
@@ -84,7 +86,7 @@
           {{ t('resourcepack.name', 2) }}
         </v-btn>
         <v-btn
-          to="/shaderpacks"
+          to="/instance/shaderpacks"
           size="small"
           variant="text"
           class="mc-header-tab rounded-t-md rounded-b-none text-none font-medium"
@@ -94,7 +96,7 @@
           {{ t('shaderPack.name', 2) }}
         </v-btn>
         <v-btn
-          to="/save"
+          to="/instance/save"
           size="small"
           variant="text"
           class="mc-header-tab rounded-t-md rounded-b-none text-none font-medium"
@@ -104,7 +106,7 @@
           {{ t('save.name', 2) }}
         </v-btn>
         <v-btn
-          to="/base-setting"
+          to="/instance/base-setting"
           size="small"
           variant="text"
           class="mc-header-tab rounded-t-md rounded-b-none text-none font-medium"
@@ -164,7 +166,12 @@
 </template>
 
 <script lang=ts setup>
+import { kLaunchButton } from '@/composables/launchButton'
+import { kInstances } from '@/composables/instances'
+import { useHasMinecraftLicense } from '@/composables/minecraftLicense'
+import { isBedrockInstance } from '@xmcl/instance'
 import Hint from '@/components/Hint.vue'
+import HomeLaunchButtonMenuList from './HomeLaunchButtonMenuList.vue'
 import { useDialog } from '@/composables/dialog'
 import { kDropHandler } from '@/composables/dropHandler'
 import { kInstance } from '@/composables/instance'
@@ -173,7 +180,10 @@ import { kCompact } from '@/composables/scrollTop'
 import { kTheme } from '@/composables/theme'
 import { injection } from '@/util/inject'
 
-const { name, runtime: version } = injection(kInstance)
+const { onClick: launchClick, text: launchText, icon: launchIcon } = injection(kLaunchButton)
+const { isValidating } = injection(kInstances)
+const { name, runtime: version, instance } = injection(kInstance)
+const { hasMinecraftLicense } = useHasMinecraftLicense()
 const { blurAppBar } = injection(kTheme)
 const { t } = useI18n()
 const { show: showLogDialog } = useDialog('log')

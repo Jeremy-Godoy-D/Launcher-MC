@@ -124,7 +124,7 @@ pnpm install
 
 #### Set Environment Variables
 
-You should set the `CURSEFORGE_API_KEY` by creating a `.env` file under `xmcl-electron-app`. This `.env` file is added in `.gitignore` file.
+Set the public HTTPS `CURSEFORGE_PROXY_URL` in `xmcl-electron-app/.env` (ignored by Git). Configure `CURSEFORGE_API_KEY` only as a secret of the Cloudflare Worker in `services/curseforge-proxy`; never compile it into the launcher.
 
 **DO NOT LEAK YOUR CURSEFORGE API KEY**
 

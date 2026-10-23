@@ -1,6 +1,7 @@
 <template>
   <div class="store-entry h-full w-full flex flex-col overflow-y-auto custom-scrollbar lg:(flex-row overflow-hidden)">
     <v-progress-linear
+      aria-label="Cargando catálogo"
       class="absolute left-0 top-0 z-20 m-0 p-0"
       :active="loading"
       height="3"
@@ -8,37 +9,12 @@
     />
 
     <!--#region Sidebar Filters -->
-    <aside
+    <v-dialog v-model="filtersOpen" activator="#store-filters-toggle" width="380" transition="slide-x-transition" content-class="aurora-filter-dialog"><aside
       id="store-filters"
-      class="store-sidebar w-auto lg:(w-88 h-full overflow-y-auto pb-20) flex-none border-b lg:(border-b-0 border-r) border-divider/40 px-4 pt-6 flex flex-col gap-6 custom-scrollbar"
+      class="glass-3 store-sidebar overflow-y-auto px-5 py-5 flex flex-col gap-5 custom-scrollbar"
     >
+      <div class="flex items-center justify-between gap-3"><h2 class="text-lg font-semibold">Filtros</h2><v-btn icon="close" variant="text" aria-label="Cerrar filtros" @click="filtersOpen = false" /></div>
       <div class="flex flex-col gap-4 flex-shrink-0">
-        <!-- Sources -->
-        <div class="filter-group">
-          <h3 class="filter-title">
-            {{ t('modrinth.modpackSource.source') }}
-          </h3>
-          <div class="flex gap-2">
-            <button
-              v-for="source in sourcesList"
-              :key="source.id"
-              type="button"
-              :aria-label="source.text"
-              :aria-pressed="!omitSources.includes(source.id)"
-              class="source-button surface-card-row rounded-xl relative flex-1 flex flex-col items-center justify-center p-3"
-              :class="{ omitted: omitSources.includes(source.id) }"
-              @click="toggleSource(source.id)"
-            >
-              <component :is="source.component" class="w-6 h-6 fill-current" />
-              <span class="text-xs font-bold mt-2">{{ source.text }}</span>
-              <div
-                class="cross-overlay absolute inset-0 flex items-center justify-center rounded-xl transition-opacity duration-200"
-              >
-                <v-icon color="red" size="60">close</v-icon>
-              </div>
-            </button>
-          </div>
-        </div>
 
         <div>
           <!-- Sort -->
@@ -110,20 +86,37 @@
         @toggle="toggleCurseforgeCategory"
         @clear="curseforgeCategory = undefined"
       />
-    </aside>
+    </aside></v-dialog>
 
     <!-- Right pane: on narrow it collapses (display:contents) so the search
          bar and content become direct children of store-entry, letting the
          search bar sit above the filters and stick to the top. -->
-    <div class="contents lg:(flex flex-col flex-1 overflow-hidden relative)">
+    <div class="flex flex-col flex-1 min-h-0 overflow-hidden relative">
       <div
         id="store-search"
         class="store-search-bar order-first lg:order-none flex-none px-6 lg:px-10 py-4 sticky top-0 z-10 bg-[var(--mc-canvas)]/95 backdrop-blur-md mc-hairline-b"
       >
         <div class="flex items-center justify-between gap-4 flex-wrap mb-2.5">
-          <h1 class="text-lg font-bold tracking-tight text-[var(--mc-ink)]">Explorar modpacks, mods, recursos y shaders</h1>
+          <h1 class="text-2xl font-bold tracking-tight text-[var(--mc-ink)]">Encuentra tu próxima aventura</h1><v-btn id="store-filters-toggle" variant="tonal" prepend-icon="tune" data-testid="store-filters-toggle">Filtros</v-btn>
         </div>
-        <div class="max-w-3xl">
+        <div class="flex items-center gap-3 flex-wrap">
+          <div class="flex gap-2">
+            <button
+              v-for="source in sourcesList"
+              :key="source.id"
+              type="button"
+              :aria-label="source.text"
+              :aria-pressed="!omitSources.includes(source.id)"
+              class="source-button surface-card-row rounded-xl relative flex items-center gap-2 px-3 py-2"
+              :class="{ omitted: omitSources.includes(source.id) }"
+              @click="toggleSource(source.id)"
+            >
+              <component :is="source.component" class="w-6 h-6 fill-current" />
+              <span class="text-xs font-bold">{{ source.text }}</span>
+              <v-icon size="16">{{ omitSources.includes(source.id) ? 'add' : 'check' }}</v-icon>
+            </button>
+          </div>
+        <div class="flex-1 min-w-60">
           <v-text-field
             ref="filter"
             v-model="keyword"
@@ -137,15 +130,19 @@
           >
             <template #append-inner>
               <v-slide-x-transition>
-                <v-icon v-if="keyword" class="cursor-pointer" @click="onClose">close</v-icon>
+                <v-btn v-if="keyword" icon="close" size="x-small" variant="text" aria-label="Limpiar búsqueda" @click="onClose" />
               </v-slide-x-transition>
             </template>
           </v-text-field>
-        </div>
+        </div></div>
       </div>
 
       <!-- Main Content -->
       <div id="store-content" class="p-6 lg:(flex-1 overflow-y-auto p-10) custom-scrollbar relative" ref="container">
+        <v-alert v-for="source in sourceErrors" :key="source" type="warning" variant="tonal" class="mb-4 store-source-error" :data-testid="`store-source-error-${source}`">
+          No pudimos consultar {{ source === 'modrinth' ? 'Modrinth' : 'CurseForge' }}. Inténtalo de nuevo más tarde.
+          <template #append><v-btn variant="text" :data-testid="`store-retry-${source}`" :loading="loading" @click="retrySource(source)">Reintentar</v-btn></template>
+        </v-alert>
         <!-- Featured Carousel -->
         <div v-if="!keyword && selectedCount === 0" class="mb-12">
           <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
@@ -153,7 +150,7 @@
             {{ t('store.trending') }}
           </h2>
           <v-carousel
-            cycle
+            :cycle="!performanceMode && reducedMotion !== 'reduce'"
             height="400"
             hide-delimiter-background
             show-arrows="hover"
@@ -165,6 +162,7 @@
               <v-btn
                 variant="plain"
                 icon="chevron_left"
+                aria-label="Anterior"
                 :color="arrowColor"
                 @click="btnProps.onClick"
               />
@@ -173,6 +171,7 @@
               <v-btn
                 variant="plain"
                 icon="chevron_right"
+                aria-label="Siguiente"
                 :color="arrowColor"
                 @click="btnProps.onClick"
               />
@@ -209,7 +208,7 @@
             v-roving-tabindex
             role="group"
             :aria-labelledby="latestMinecraftHeadingId"
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            class="grid grid-cols-2 lg:grid-cols-4 gap-6"
           >
             <StoreExploreCardModern
               v-for="item in recentMinecraftItems"
@@ -259,7 +258,7 @@
             </div>
           </div>
           <div
-            v-if="items.length === 0"
+            v-if="items.length === 0 && !loading && sourceErrors.length === 0"
             class="flex flex-col justify-center items-center h-96 text-center opacity-50"
           >
             <v-icon size="96" color="grey">mood_bad</v-icon>
@@ -267,11 +266,11 @@
             <p class="text-gray-400 mt-2">{{ t('store.emptyHint') }}</p>
           </div>
           <div
-            v-else
+            v-else-if="items.length > 0"
             v-roving-tabindex
             role="group"
             :aria-labelledby="discoverHeadingId"
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pb-20"
+            class="grid grid-cols-2 lg:grid-cols-4 gap-6 pb-20"
           >
             <StoreExploreCardModern
               v-for="mod in items"
@@ -303,6 +302,12 @@
 </template>
 
 <script lang="ts" setup>
+import { useAuroraPreferences } from '@/composables/aurora'
+import { usePreferredReducedMotion } from '@vueuse/core'
+
+const { performanceMode } = useAuroraPreferences()
+const reducedMotion = usePreferredReducedMotion()
+const filtersOpen = ref(false)
 import CurseforgeIcon from '@/components/CurseforgeIcon.vue'
 import FilterCard from '@/components/FilterCard.vue'
 import ModrinthIcon from '@/components/ModrinthIcon.vue'
@@ -365,7 +370,7 @@ const tCategory = useCurseforgeCategoryI18n()
 const { getDateString } = useDateString()
 const galleryMappings = ref<Record<string, { name: string; description: string }>>({})
 
-const { items, isSearching, searchError, pageCount, sources } = useSearchedItems({
+const { items, isSearching, sourceErrors, retrySource, pageCount, sources } = useSearchedItems({
   query,
   gameVersion,
   modLoaders,
@@ -439,7 +444,7 @@ const catModLoaders = computed(() =>
 )
 
 const enter = (type: string, id: string) => {
-  push(`/store/${type}/${id}`)
+  push({ path: `/store/${type}/${id}`, query: route.query })
 }
 
 // --- UI Logic for Filters ---
@@ -620,6 +625,11 @@ useTutorial(
   user-select: none;
 }
 
+.store-source-error :deep(.v-alert__content),
+.store-source-error :deep(.v-btn) {
+  color: var(--mc-ink);
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -673,40 +683,21 @@ useTutorial(
 }
 
 .filter-title {
-  @apply font-bold mb-3 text-xs uppercase text-gray-700 dark:text-gray-200 tracking-wider ml-1;
+  @apply font-bold mb-3 text-xs uppercase tracking-wider ml-1;
+  color: var(--mc-ink-secondary);
 }
 
 .filter-group {
   @apply mb-2;
 }
 
-/* Source Button Styles — shape + border + hover-border come from the
-   shared `.surface-card-row` utility. Only the colour-tone bits and
-   the omitted (off) override live here. */
 .source-button {
-  @apply text-gray-600 dark:text-gray-400;
-}
-
-.source-button .cross-overlay {
-  opacity: 0;
-}
-
-/* Off-state: transparent shell, no border swap on hover */
-.source-button.omitted,
-.source-button.omitted:hover {
-  background: transparent;
-  border-color: transparent;
+  color: var(--mc-ink-secondary);
 }
 
 .source-button.omitted {
-  @apply text-gray-400 dark:text-gray-500;
-}
-
-.source-button.omitted .cross-overlay {
-  opacity: 0.5;
-}
-
-.source-button:hover .cross-overlay {
-  opacity: 1;
+  background: transparent;
+  border-style: dashed;
+  color: var(--mc-ink-muted);
 }
 </style>

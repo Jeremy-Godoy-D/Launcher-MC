@@ -108,45 +108,39 @@ describe('pluginApiFallback', () => {
     expect(JSON.parse(response.body).error).toBe('xmcl_account_server_time_unavailable')
   })
 
-  test('rejects CurseForge requests locally when CURSEFORGE_API_KEY is missing', async () => {
-    const previous = process.env.CURSEFORGE_API_KEY
-    delete process.env.CURSEFORGE_API_KEY
+  test('rejects unconfigured or unsafe proxy URLs locally', async () => {
+    const previous = process.env.CURSEFORGE_PROXY_URL
     try {
-      const { handler } = createPlugin(async () => undefined)
-      const request = {
-        method: 'GET',
-        url: new URL('https://api.curseforge.com/v1/mods/search'),
-        headers: {} as Record<string, string>,
+      for (const value of ['', 'http://insecure.test', 'https://user:pass@proxy.test', 'https://api.curseforge.com', 'https://proxy.test/path']) {
+        process.env.CURSEFORGE_PROXY_URL = value
+        const { handler } = createPlugin(async () => undefined)
+        const request = { method: 'GET', url: new URL('https://api.curseforge.com/v1/mods/search'), headers: { 'X-Api-Key': 'untrusted-key' } }
+        const response: Record<string, any> = { headers: {} }
+        await handler({ request, response })
+        expect(response.status).toBe(503)
+        expect(response.handled).toBe(true)
+        expect(request.headers).toEqual({})
       }
-      const response: Record<string, any> = { headers: {} }
-      await handler({ request, response })
-      expect(response.status).toBe(401)
-      expect(response.handled).toBe(true)
-      expect(JSON.parse(response.body).message).toContain('CurseForge no está configurado')
     } finally {
-      if (previous === undefined) delete process.env.CURSEFORGE_API_KEY
-      else process.env.CURSEFORGE_API_KEY = previous
+      if (previous === undefined) delete process.env.CURSEFORGE_PROXY_URL
+      else process.env.CURSEFORGE_PROXY_URL = previous
     }
   })
 
-  test('injects x-api-key for CurseForge when CURSEFORGE_API_KEY is configured', async () => {
-    const previous = process.env.CURSEFORGE_API_KEY
-    process.env.CURSEFORGE_API_KEY = 'cf-test-key'
+  test('rewrites API requests to the HTTPS proxy without sending client credentials', async () => {
+    const previous = process.env.CURSEFORGE_PROXY_URL
+    process.env.CURSEFORGE_PROXY_URL = 'https://catalog.example.test'
     try {
       const { handler } = createPlugin(async () => undefined)
-      const headers: Record<string, string> = {}
-      const request = {
-        method: 'GET',
-        url: new URL('https://api.curseforge.com/v1/mods/search'),
-        headers,
-      }
+      const request = { method: 'POST', url: new URL('https://api.curseforge.com/v1/mods?index=1'), headers: { 'X-API-Key': 'untrusted-key', Authorization: 'do-not-forward', Cookie: 'session=private', 'content-type': 'application/json' } }
       const response: Record<string, any> = { headers: {} }
       await handler({ request, response })
       expect(response.handled).toBeUndefined()
-      expect(headers['x-api-key']).toBe('cf-test-key')
+      expect(request.url.href).toBe('https://catalog.example.test/v1/mods?index=1')
+      expect(request.headers).toEqual({ 'content-type': 'application/json' })
     } finally {
-      if (previous === undefined) delete process.env.CURSEFORGE_API_KEY
-      else process.env.CURSEFORGE_API_KEY = previous
+      if (previous === undefined) delete process.env.CURSEFORGE_PROXY_URL
+      else process.env.CURSEFORGE_PROXY_URL = previous
     }
   })
 })

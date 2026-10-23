@@ -102,7 +102,7 @@
         <div
           v-if="!version.changelogLoading"
           class="markdown-body version-card__changelog-body"
-          v-html="version.changelog || '—'"
+          v-html="sanitizeHtml(version.changelog || '—')"
         />
         <v-skeleton-loader
           v-else
@@ -114,6 +114,7 @@
 </template>
 
 <script setup lang="ts">
+import { sanitizeHtml } from '@/util/sanitizeHtml'
 import { useVuetifyColor } from '@/composables/vuetify'
 import { vSharedTooltip } from '@/directives/sharedTooltip'
 import { getColorForReleaseType } from '@/util/color'

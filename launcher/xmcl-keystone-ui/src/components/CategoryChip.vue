@@ -19,13 +19,14 @@
         v-else-if="item.icon"
         variant="plain"
         start
-        v-html="item.icon"
+        v-html="sanitizeIcon(item.icon)"
       />
     </template>
     {{ item.text }}
   </v-chip>
 </template>
 <script setup lang="ts">
+import { sanitizeIcon } from '@/util/sanitizeHtml'
 
 export interface CategoryChipProps {
   text: string

@@ -14,6 +14,7 @@
     <div class="explore-card__media aspect-[16/9] relative overflow-hidden">
       <transition name="fade-transition" mode="out-in">
         <img
+          alt=""
           :key="imgSrc"
           :src="imgSrc"
           class="explore-card__img w-full h-full object-cover"
@@ -57,6 +58,7 @@
       <!-- Header row: floating avatar + title/author inline -->
       <div class="flex items-center gap-3">
         <img
+          alt=""
           :src="value.iconUrl"
           class="explore-card__avatar w-12 h-12 rounded-xl object-cover bg-surface-variant shrink-0"
         />

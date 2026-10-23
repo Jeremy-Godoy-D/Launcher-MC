@@ -22,6 +22,7 @@
         :style="{ filter: `blur(${blur}px)` }"
         :click-mode="particleMode"
       />
+      <BubbleField v-else-if="backgroundType === BackgroundType.BUBBLES" />
       <Halo
         v-else-if="backgroundType === BackgroundType.HALO"
         class="absolute z-0 h-full w-full"
@@ -61,6 +62,7 @@
 </template>
 <script lang="ts" setup>
 import Halo from '@/components/Halo.vue'
+import BubbleField from '@/components/BubbleField.vue'
 import Particles from '@/components/Particles.vue'
 import { injection } from '@/util/inject'
 import { kTheme, BackgroundType } from '@/composables/theme'
