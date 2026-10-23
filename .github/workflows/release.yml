@@ -172,15 +172,13 @@ jobs:
             Where-Object { $_.Name -notlike "*__uninstaller.exe" -and ($_.Name -like "*$env:VERSION*" -or $_.Name -eq 'manifest.json') } |
             Select-Object -ExpandProperty FullName
 
-          # beta.3 cannot verify a newly downloaded ASAR; migrate through the full installer.
-          if ($env:VERSION -eq '0.2.0-beta.1') {
-            $assets = @($assets | Where-Object { (Split-Path $_ -Leaf) -notlike 'app-*' -and (Split-Path $_ -Leaf) -ne 'builder-debug.yml' })
-            if ($assets | Where-Object { $_ -match '\.asar' }) { throw 'This migration must not expose ASAR assets.' }
-            foreach ($name in @("LauncherMC-$env:VERSION-win-x64.exe", "LauncherMC-$env:VERSION-win-x64.zip")) {
-              if (-not ($assets | Where-Object { (Split-Path $_ -Leaf) -eq $name }) -or -not ($assets | Where-Object { (Split-Path $_ -Leaf) -eq "$name.sha256" })) { throw "Missing full-package artifact or checksum: $name" }
-              $actual = (Get-FileHash "$outDir/$name" -Algorithm SHA256).Hash
-              if ($actual -ne (Get-Content "$outDir/$name.sha256").Trim()) { throw "Full-package checksum mismatch: $name" }
-            }
+          # Legacy clients recognize app-*.asar; use new delta names before re-enabling them.
+          $assets = @($assets | Where-Object { (Split-Path $_ -Leaf) -notlike 'app-*' -and (Split-Path $_ -Leaf) -ne 'builder-debug.yml' })
+          if ($assets | Where-Object { $_ -match '\.asar' }) { throw 'This migration must not expose ASAR assets.' }
+          foreach ($name in @("LauncherMC-$env:VERSION-win-x64.exe", "LauncherMC-$env:VERSION-win-x64.zip")) {
+            if (-not ($assets | Where-Object { (Split-Path $_ -Leaf) -eq $name }) -or -not ($assets | Where-Object { (Split-Path $_ -Leaf) -eq "$name.sha256" })) { throw "Missing full-package artifact or checksum: $name" }
+            $actual = (Get-FileHash "$outDir/$name" -Algorithm SHA256).Hash
+            if ($actual -ne (Get-Content "$outDir/$name.sha256").Trim()) { throw "Full-package checksum mismatch: $name" }
           }
 
           gh release view $env:TAG 2>$null | Out-Null
