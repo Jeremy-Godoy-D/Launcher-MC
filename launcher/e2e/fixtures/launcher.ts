@@ -52,11 +52,12 @@ function isShowcase(file: string): boolean {
 // auto-resolve via local `node_modules/electron` doesn't find a binary. Point at
 // the workspace electron the launcher itself uses — the same binary `compile`
 // produces output for.
-const ELECTRON_BIN = process.platform === 'win32'
+const PACKAGED_BINARY = process.env.XMCL_E2E_EXECUTABLE
+const ELECTRON_BIN = PACKAGED_BINARY || (process.platform === 'win32'
   ? resolve(REPO_ROOT, 'xmcl-electron-app/node_modules/electron/dist/electron.exe')
   : process.platform === 'darwin'
     ? resolve(REPO_ROOT, 'xmcl-electron-app/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron')
-    : resolve(REPO_ROOT, 'xmcl-electron-app/node_modules/electron/dist/electron')
+    : resolve(REPO_ROOT, 'xmcl-electron-app/node_modules/electron/dist/electron'))
 
 /**
  * Poll `app.windows()` until at least one window's `url()` matches `pattern`,
@@ -201,7 +202,7 @@ export const test = base.extend<{
 
     const app = await _electron.launch({
       executablePath: ELECTRON_BIN,
-      args: [ELECTRON_ENTRY],
+      args: PACKAGED_BINARY ? [] : [ELECTRON_ENTRY],
       cwd: resolve(REPO_ROOT, 'xmcl-electron-app/dist'),
       env: {
         ...process.env,

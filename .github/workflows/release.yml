@@ -10,6 +10,11 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      validate_only:
+        description: Validate the existing beta.1 draft packages without replacing assets
+        type: boolean
+        default: false
 
 concurrency:
   group: release-windows-${{ github.repository }}
@@ -23,7 +28,7 @@ env:
 
 jobs:
   release-windows:
-    name: Windows x64 (.exe + .zip + Auto-Update ASAR)
+    name: Windows x64 packages and migration validation
     runs-on: windows-latest
 
     steps:
@@ -50,13 +55,16 @@ jobs:
         working-directory: launcher
         run: |
           pnpm check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           pnpm lint
 
       - name: Test security boundaries
         working-directory: launcher
         run: |
           pnpm exec vitest run xmcl-keystone-ui/src/util/auroraTheme.test.ts xmcl-keystone-ui/src/util/theme.v1.test.ts xmcl-runtime/app/pluginApiFallback.test.ts xmcl-runtime/app/curseforgeProxy.test.ts xmcl-electron-app/main/utils/verifyUpdate.test.ts xmcl-electron-app/main/utils/windowsUpdate.test.ts xmcl-electron-app/main/ServerService.test.ts packages/curseforge/index.test.ts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           pnpm exec vitest run xmcl-keystone-ui/src/util/sanitizeHtml.test.ts xmcl-keystone-ui/src/composables/markdown.test.ts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --test ../services/curseforge-proxy/worker.test.mjs
 
       - name: Verify production catalog proxy
@@ -70,16 +78,32 @@ jobs:
           if ($result.StatusCode -ne 200) { throw 'CurseForge proxy is not ready.' }
 
       - name: Build Renderer (Vue UI)
+        if: ${{ !inputs.validate_only }}
         working-directory: launcher
         run: pnpm build:renderer
 
       - name: Build Windows Installer (.exe), Portable (.zip) & ASAR Update
+        if: ${{ !inputs.validate_only }}
         working-directory: launcher
         env:
           LAUNCHER_GITHUB_REPO: ${{ github.repository }}
           MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
           CURSEFORGE_PROXY_URL: ${{ vars.CURSEFORGE_PROXY_URL }}
         run: pnpm build:all
+
+      - name: Download unchanged draft packages for validation
+        if: ${{ inputs.validate_only }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $out = 'launcher/xmcl-electron-app/build/output'
+          New-Item -ItemType Directory -Force $out | Out-Null
+          gh release download v0.2.0-beta.1 --pattern '*.zip*' --dir $out
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $name = 'LauncherMC-0.2.0-beta.1-win-x64.zip'
+          if ((Get-FileHash "$out/$name" -Algorithm SHA256).Hash -ne (Get-Content "$out/$name.sha256").Trim()) { throw 'Draft package checksum mismatch' }
+          Expand-Archive -LiteralPath "$out/$name" -DestinationPath "$out/win-unpacked"
 
       - name: Verify published beta.3 migration baseline
         shell: pwsh
@@ -90,16 +114,37 @@ jobs:
           if ((Get-FileHash "$baseline/beta3.zip" -Algorithm SHA256).Hash.ToLowerInvariant() -ne '47590518b18273811bb1118a02562d2d37b62d6a0b28efff903ae8a4fa75d301') { throw 'Published beta.3 checksum mismatch' }
           Expand-Archive -LiteralPath "$baseline/beta3.zip" -DestinationPath "$baseline/app"
 
-      - name: Validate Aurora and packaged Electron
+      - name: Prepare Electron validation tools
+        working-directory: launcher
+        run: |
+          pnpm e2e:install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pnpm --prefix=e2e exec playwright install ffmpeg
+
+      - name: Validate Aurora against the actual packaged executable
         working-directory: launcher
         env:
           XMCL_LIVE_CURSEFORGE: '1'
+          XMCL_E2E_EXECUTABLE: ${{ github.workspace }}\launcher\xmcl-electron-app\build\output\win-unpacked\Launcher MC.exe
+        run: pnpm --prefix=e2e exec playwright test specs/aurora --output=artifacts/aurora-production
+
+      - name: Validate packaged boot and beta.3 migration
+        working-directory: launcher
+        env:
           XMCL_BETA3_BINARY: ${{ github.workspace }}\launcher\e2e\artifacts\beta3\app\Launcher MC.exe
-        run: |
-          pnpm e2e:install --frozen-lockfile
-          pnpm --prefix=e2e exec playwright install ffmpeg
-          pnpm --prefix=e2e exec playwright test specs/aurora
-          pnpm test:e2e:release
+        run: pnpm test:e2e:release
+
+      - name: Preserve Electron validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-validation
+          path: |
+            launcher/e2e/artifacts/aurora-production
+            launcher/e2e/artifacts/test-results
+            launcher/e2e/artifacts/test-results.json
+            launcher/e2e/artifacts/screenshots
+          retention-days: 7
 
       - name: Read version from package.json
         id: pkg
@@ -113,6 +158,7 @@ jobs:
           "prerelease=$isPrerelease" >> $env:GITHUB_OUTPUT
 
       - name: Publish or Update GitHub Release
+        if: ${{ !inputs.validate_only }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -126,15 +172,13 @@ jobs:
             Where-Object { $_.Name -notlike "*__uninstaller.exe" -and ($_.Name -like "*$env:VERSION*" -or $_.Name -eq 'manifest.json') } |
             Select-Object -ExpandProperty FullName
 
-          # beta.3 cannot verify a newly downloaded ASAR; migrate through the full installer.
-          if ($env:VERSION -eq '0.2.0-beta.1') {
-            $assets = @($assets | Where-Object { (Split-Path $_ -Leaf) -notlike 'app-*' -and (Split-Path $_ -Leaf) -ne 'builder-debug.yml' })
-            if ($assets | Where-Object { $_ -match '\.asar' }) { throw 'This migration must not expose ASAR assets.' }
-            foreach ($name in @("LauncherMC-$env:VERSION-win-x64.exe", "LauncherMC-$env:VERSION-win-x64.zip")) {
-              if (-not ($assets | Where-Object { (Split-Path $_ -Leaf) -eq $name }) -or -not ($assets | Where-Object { (Split-Path $_ -Leaf) -eq "$name.sha256" })) { throw "Missing full-package artifact or checksum: $name" }
-              $actual = (Get-FileHash "$outDir/$name" -Algorithm SHA256).Hash
-              if ($actual -ne (Get-Content "$outDir/$name.sha256").Trim()) { throw "Full-package checksum mismatch: $name" }
-            }
+          # Legacy clients recognize app-*.asar; use new delta names before re-enabling them.
+          $assets = @($assets | Where-Object { (Split-Path $_ -Leaf) -notlike 'app-*' -and (Split-Path $_ -Leaf) -ne 'builder-debug.yml' })
+          if ($assets | Where-Object { $_ -match '\.asar' }) { throw 'This migration must not expose ASAR assets.' }
+          foreach ($name in @("LauncherMC-$env:VERSION-win-x64.exe", "LauncherMC-$env:VERSION-win-x64.zip")) {
+            if (-not ($assets | Where-Object { (Split-Path $_ -Leaf) -eq $name }) -or -not ($assets | Where-Object { (Split-Path $_ -Leaf) -eq "$name.sha256" })) { throw "Missing full-package artifact or checksum: $name" }
+            $actual = (Get-FileHash "$outDir/$name" -Algorithm SHA256).Hash
+            if ($actual -ne (Get-Content "$outDir/$name.sha256").Trim()) { throw "Full-package checksum mismatch: $name" }
           }
 
           gh release view $env:TAG 2>$null | Out-Null
