@@ -4,6 +4,7 @@
     :style="{ 'max-width': `${dimension}px`, 'max-height': `${dimension}px`, 'min-height': `${dimension}px`, 'min-width': `${dimension}px` }"
   >
     <img
+      alt=""
       :src="dataUrlSrc"
       :width="dimension"
       :height="dimension"

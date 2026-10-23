@@ -13,6 +13,8 @@
     <slot />
     <v-btn
       v-shared-tooltip="() => t('mod.denseView')"
+      :aria-label="t('mod.denseView')"
+      :aria-pressed="dense"
       icon
       variant="text"
       density="comfortable"

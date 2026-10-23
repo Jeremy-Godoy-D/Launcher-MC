@@ -2,7 +2,7 @@
     "name": "launcher-mc",
     "private": true,
     "main": "./index.js",
-    "version": "0.1.0-beta.3",
+    "version": "0.2.0-beta.1",
     "author": "Jeremy Godoy (@Jeremy-Godoy-D)",
     "description": "Launcher MC - Minecraft Java para Windows",
     "license": "MIT",

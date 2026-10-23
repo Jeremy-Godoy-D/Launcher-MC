@@ -1,142 +1,19 @@
 <template>
-  <AppMoodBackground
-    v-if="!data.fetching"
-    variant="ambient"
-    data-testid="setup-root"
-    class="setup flex h-full w-full flex-col overflow-hidden select-none"
-  >
-    <v-stepper
-      v-model="data.step"
-      flat
-      class="setup-stepper non-moveable flex h-full min-h-0 flex-col overflow-hidden bg-transparent"
-    >
-      <v-stepper-header class="setup-stepper-header px-4 py-2">
-        <v-stepper-item
-          :complete="data.step > 1"
-          :editable="data.step > 1"
-          :value="1"
-          color="primary"
-          class="setup-stepper-item"
-        >
-          {{ t('setup.locale.name') }}
-        </v-stepper-item>
-
-        <v-divider class="mx-1" />
-
-        <v-stepper-item
-          :complete="data.step > 2"
-          :editable="data.step > 2"
-          :value="2"
-          color="primary"
-          class="setup-stepper-item"
-        >
-          {{ t('setup.appearance.name') }}
-        </v-stepper-item>
-
-        <v-divider class="mx-1" />
-
-        <v-stepper-item
-          :complete="data.step > 3"
-          :editable="data.step > 3"
-          :value="3"
-          color="primary"
-          class="setup-stepper-item"
-        >
-          {{ t('setup.dataRoot.name') }}
-        </v-stepper-item>
-
-        <v-divider class="mx-1" />
-
-        <v-stepper-item :value="4" color="primary" class="setup-stepper-item">
-          {{ t('setup.account.name') }}
-        </v-stepper-item>
-      </v-stepper-header>
-
-      <v-stepper-window
-        class="setup-stepper-window"
-        transition="setup-step-forward"
-        reverse-transition="setup-step-back"
-      >
-        <v-stepper-window-item
-          class="setup-stepper-window-item"
-          :value="1"
-        >
-          <div class="setup-pane-wrap">
-            <AppMoodSurface fill>
-              <SetLocale
-                v-model="localeRef"
-              />
-            </AppMoodSurface>
-          </div>
-        </v-stepper-window-item>
-        <v-stepper-window-item
-          class="setup-stepper-window-item"
-          :value="2"
-        >
-          <div class="setup-pane-wrap">
-            <AppMoodSurface fill>
-              <SetupAppearance
-                v-model="data.path"
-                class="h-full"
-                :default-path="data.defaultPath"
-                :drives="data.drives"
-              />
-            </AppMoodSurface>
-          </div>
-        </v-stepper-window-item>
-        <v-stepper-window-item
-          class="setup-stepper-window-item"
-          :value="3"
-        >
-          <div class="setup-pane-wrap">
-            <AppMoodSurface fill>
-              <SetDataRoot
-                v-model="data.path"
-                class="h-full"
-                :error="data.pathError"
-                :default-path="data.defaultPath"
-                :drives="data.drives"
-              />
-            </AppMoodSurface>
-          </div>
-        </v-stepper-window-item>
-        <v-stepper-window-item
-          class="setup-stepper-window-item"
-          :value="4"
-        >
-          <div class="setup-pane-wrap">
-            <AppMoodSurface fill>
-              <SetupAccount
-                v-model="data.instancePath"
-                :loading="data.loading"
-                @skip="setup"
-              />
-            </AppMoodSurface>
-          </div>
-        </v-stepper-window-item>
-      </v-stepper-window>
-      <slot name="actions">
-        <SetupFooter
-          :prev="data.step !== 1"
-          next
-          :disabled="data.step === 3 && hasError"
-          :loading="data.loading"
-          :finish="data.step === 4"
-          @prev="prev"
-          @next="data.step === 4 ? setup() : next()"
-        />
-      </slot>
-    </v-stepper>
-  </AppMoodBackground>
-  <v-card
-    v-else
-    class="flex h-full w-full items-center justify-center"
-  >
-    <v-img
-      class="max-w-50"
-      src="http://launcher/icons/logoDark"
-    />
-  </v-card>
+  <div v-if="!data.fetching" data-testid="setup-root" class="aurora-onboarding">
+    <aside class="aurora-onboarding-intro">
+      <v-icon size="64" color="primary">view_in_ar</v-icon><h1>Tu mundo.<br>Tu manera de jugar.</h1><p>Minecraft Java, tus instancias y todo lo que las hace tuyas.</p>
+      <ol class="aurora-setup-progress"><li v-for="(label, index) in ['Bienvenida', 'Tu cuenta', 'A jugar']" :key="label" :class="{ active: data.step === index + 1, complete: data.step > index + 1 }"><span>{{ index + 1 }}</span>{{ label }}</li></ol>
+    </aside>
+    <div class="aurora-onboarding-form glass-1">
+      <div class="overflow-y-auto flex-1 min-h-0">
+        <div v-if="data.step === 1"><SetLocale v-model="localeRef" /><details class="mx-6 my-4"><summary class="cursor-pointer py-3">Opciones avanzadas</summary><SetDataRoot v-model="data.path" :error="data.pathError" :default-path="data.defaultPath" :drives="data.drives" /><SetupAppearance v-model="data.path" :default-path="data.defaultPath" :drives="data.drives" /></details></div>
+        <SetupAccount v-else-if="data.step === 2" v-model="data.instancePath" :loading="data.loading" @skip="next" />
+        <div v-else class="pa-6"><h2 class="text-2xl font-semibold mb-3">Todo listo para empezar</h2><p class="text-[var(--mc-ink-muted)] mb-6">Crea una instancia de Minecraft o explora los modpacks disponibles.</p><v-radio-group v-model="data.firstAction"><v-radio label="Crear mi primera instancia" value="create" /><v-radio label="Explorar el catálogo" value="store" /></v-radio-group></div>
+      </div>
+      <SetupFooter :prev="data.step !== 1" next :disabled="hasError" :loading="data.loading" :finish="data.step === 3" @prev="prev" @next="data.step === 3 ? setup() : next()" />
+    </div>
+  </div>
+  <div v-else class="flex h-full w-full items-center justify-center"><v-progress-circular indeterminate color="primary" /></div>
 </template>
 
 <script lang="ts" setup>
@@ -182,6 +59,7 @@ const data = reactive({
   loading: false,
   drives: [] as Drive[],
   theme: 'dark',
+  firstAction: 'create',
 })
 provide('setup', data)
 bootstrap.preset().then(({ minecraftPath, defaultPath, locale: locale_, drives }) => {
@@ -234,7 +112,7 @@ const { state } = injection(kSettingsState)
 async function persistInitialTheme() {
   try {
     await getEnvironment()
-    currentTheme.value.backgroundType = BackgroundType.NONE
+    currentTheme.value.backgroundType = BackgroundType.BUBBLES
   } catch (err) {
     console.error('Failed to detect environment during setup', err)
   }

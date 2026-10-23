@@ -1,6 +1,8 @@
 <template>
   <v-tooltip
+    v-if="cached.text || cached.items?.length || cached.list?.length"
     v-model="isShown"
+    :aria-hidden="!isShown"
     :color="cached.color || undefined"
     :transition="{
       name: 'scroll-y-reverse-transition',

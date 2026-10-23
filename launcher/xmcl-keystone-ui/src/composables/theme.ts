@@ -1,3 +1,4 @@
+import { migrateAuroraTheme } from '@/util/auroraTheme'
 import { injection } from '@/util/inject'
 import { clearLegacyThemeStorage, loadV1Theme } from '@/util/theme.v0'
 import { deserialize, deserialize as deserializeV0, serialize } from '@/util/theme.v1'
@@ -17,6 +18,7 @@ export enum ParticleMode {
   BUBBLE = 'bubble' }
 
 export enum BackgroundType {
+  BUBBLES = 'bubbles',
   NONE = 'none',
   PARTICLE = 'particle',
   HALO = 'halo',
@@ -86,17 +88,17 @@ export function getDefaultTheme(): UIThemeDataV1 {
     colors: {
       lightAppBarColor: '#f3f1ecFF',
       lightSideBarColor: '#eae6dfFF',
-      darkAppBarColor: '#0c0e12FF',
-      darkSideBarColor: '#12151cFF',
-      darkPrimaryColor: '#e06d53',
-      darkBackground: '#0c0e12FF',
+      darkAppBarColor: '#0a1d18E0',
+      darkSideBarColor: '#0a1d18E0',
+      darkPrimaryColor: '#56dbab',
+      darkBackground: '#071311FF',
       darkInfoColor: '#5b8def',
       darkErrorColor: '#d94e4e',
       darkWarningColor: '#d4943a',
 
-      darkSuccessColor: '#3b9b78',
-      darkAccentColor: '#3b9b78',
-      darkCardColor: '#171b24FF',
+      darkSuccessColor: '#56dbab',
+      darkAccentColor: '#56dbab',
+      darkCardColor: '#18332AE0',
       lightPrimaryColor: '#c9563d',
       lightBackground: '#f3f1ecFF',
       lightInfoColor: '#3b6fd4',
@@ -110,7 +112,7 @@ export function getDefaultTheme(): UIThemeDataV1 {
     backgroundImage: undefined,
     backgroundImageDark: undefined,
     backgroundImageFit: 'cover',
-    backgroundType: BackgroundType.NONE,
+    backgroundType: BackgroundType.BUBBLES,
     font: undefined,
     fontSize: 16,
     borderRadiusEnabled: true,
@@ -323,9 +325,16 @@ export function useThemeWritter(
   const _removeMedia = (url: string) =>
     instancePath ? instanceThemeService.removeMedia(instancePath, url) : removeMedia(url)
 
-  const writeTheme = useDebounceFn(() => {
+  let pendingSave = false
+  function flushTheme() {
+    if (!pendingSave) return
+    pendingSave = false
     save()
-  }, 800)
+  }
+  const scheduleSave = useDebounceFn(flushTheme, 800)
+  const writeTheme = () => { pendingSave = true; scheduleSave() }
+  // Save before the settings component loses its parent event listener.
+  onBeforeUnmount(flushTheme)
 
   const isDark = useIsDark(currentTheme)
   const dark = computed({
@@ -835,13 +844,16 @@ export function useTheme(
       (!theme.backgroundImage && !theme.backgroundImageDark)
     ) {
       const mineralDefaults = getDefaultTheme()
-      theme.colors = { ...mineralDefaults.colors }
+      for (const key of Object.keys(mineralDefaults.colors) as (keyof UIThemeDataV1['colors'])[]) {
+        if (key.startsWith('dark')) theme.colors[key] = mineralDefaults.colors[key]
+      }
       if (theme.backgroundType === BackgroundType.HALO) {
-        theme.backgroundType = BackgroundType.NONE
+        theme.backgroundType = BackgroundType.BUBBLES
       }
       migratedFromLegacy = true
     }
 
+    if (migrateAuroraTheme(theme, getDefaultTheme())) migratedFromLegacy = true
     normalizeThemeColors(theme)
 
     currentTheme.value = theme
@@ -1011,6 +1023,12 @@ export function useTheme(
     },
     { immediate: true },
   )
+
+  watch([isDark, cardColor, backgroundColor], () => {
+    const palette = framework.themes.value[framework.global.name.value].colors
+    palette.surface = cardColor.value.slice(0, 7)
+    palette.background = backgroundColor.value.slice(0, 7)
+  }, { immediate: true })
 
   const fontFace = computed(() =>
     font.value?.url

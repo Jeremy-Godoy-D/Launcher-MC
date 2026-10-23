@@ -11,6 +11,7 @@
       :class="{ responsive }"
     >
       <v-img
+        :alt="text ? '' : title || ''"
         v-if="avatar"
         :src="avatar"
         :width="32"

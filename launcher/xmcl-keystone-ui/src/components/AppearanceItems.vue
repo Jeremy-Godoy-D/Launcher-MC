@@ -1,4 +1,7 @@
 <template>
+    <SettingItemCheckbox v-model="performanceMode" title="Modo rendimiento" description="Reduce el cristal y deja el fondo estático para dedicar los recursos al juego." />
+    <SettingItemCheckbox v-model="bubbleReactive" title="Color de tu instancia" description="El fondo Aurora toma su color del icono local de la instancia seleccionada." />
+
     <SettingItemSelect
       v-model="darkModel"
       :title="t('setting.darkTheme')"
@@ -7,14 +10,9 @@
     />
     <div class="color-theme-row">
       <div class="color-theme-row__reset">
-        <v-tooltip color="warning" location="end">
-          <template #activator="{ props: tooltipProps }">
-            <v-btn icon variant="text" v-bind="tooltipProps" @click="resetToDefault">
-              <v-icon> restore </v-icon>
-            </v-btn>
-          </template>
-          {{ t('setting.resetToDefault') }}
-        </v-tooltip>
+        <v-btn v-shared-tooltip="() => t('setting.resetToDefault')" :aria-label="t('setting.resetToDefault')" icon variant="text" @click="resetToDefault">
+          <v-icon> restore </v-icon>
+        </v-btn>
       </div>
 
       <div class="color-theme-row__text">
@@ -241,6 +239,7 @@
       <template #action>
         <v-switch
           v-model="borderRadiusEnabled"
+          :aria-label="t('setting.themeBorderRadius')"
           color="primary"
           hide-details
           density="compact"
@@ -259,18 +258,19 @@
             <v-btn min-width="40">1px</v-btn>
             <v-btn min-width="40">0.1px</v-btn>
           </v-btn-toggle>
-          <v-btn icon size="small" variant="text" @click="onFontSizeDecrease">
+          <v-btn icon size="small" variant="text" aria-label="Reducir tamaño del texto" @click="onFontSizeDecrease">
             <v-icon>text_decrease</v-icon>
           </v-btn>
           <v-text-field
             :model-value="`${Math.round(fontSize * 10) / 10}px`"
+            :aria-label="t('setting.themeFont')"
             readonly
             class="max-w-20 w-20"
             variant="outlined"
             density="compact"
             hide-details
           />
-          <v-btn icon size="small" variant="text" @click="onFontSizeIncrease">
+          <v-btn icon size="small" variant="text" aria-label="Aumentar tamaño del texto" @click="onFontSizeIncrease">
             <v-icon>text_increase</v-icon>
           </v-btn>
         </div>
@@ -461,6 +461,7 @@ import { kEnvironment } from '@/composables/environment'
 import { kInstanceTheme } from '@/composables/instanceTheme'
 import { useService } from '@/composables/service'
 import { kSettingsState } from '@/composables/setting'
+import { useAuroraPreferences } from '@/composables/aurora'
 import { BackgroundType, UIThemeDataV1, useThemeWritter } from '@/composables/theme'
 import { basename } from '@/util/basename'
 import { injection } from '@/util/inject'
@@ -679,7 +680,9 @@ const backgroundImageFits = computed(() => [
   { value: 'cover', text: t('setting.backgroundImageFit.cover') },
   { value: 'contain', text: t('setting.backgroundImageFit.contain') },
 ])
+const { performanceMode, bubbleReactive } = useAuroraPreferences()
 const backgroundTypes = computed(() => [
+  { value: BackgroundType.BUBBLES, text: 'Aurora · Burbujas' },
   { value: BackgroundType.NONE, text: t('setting.backgroundTypes.none') },
   { value: BackgroundType.IMAGE, text: t('setting.backgroundTypes.image') },
   { value: BackgroundType.PARTICLE, text: t('setting.backgroundTypes.particle') },

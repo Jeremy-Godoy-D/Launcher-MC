@@ -1,12 +1,15 @@
 <template>
   <v-dialog
     v-model="isShown"
+    class="aurora-console"
+    :scrim="false"
+    :retain-focus="false"
     :width="1200"
     :content-props="{ 'aria-labelledby': 'log-dialog-title' }"
   >
     <v-card>
-      <v-toolbar class="select-none" color="warning">
-        <v-toolbar-title id="log-dialog-title" class="text-white">
+      <v-toolbar class="select-none" color="transparent">
+        <v-toolbar-title id="log-dialog-title" class="text-[var(--mc-ink)]">
           {{ t("logsCrashes.title") }}
         </v-toolbar-title>
         <v-spacer />
@@ -17,7 +20,7 @@
         />
 
         <template #extension>
-          <v-tabs v-model="data.tab" color="white" slider-color="yellow">
+          <v-tabs v-model="data.tab" color="primary" slider-color="primary">
             <v-tab :value="0" :disabled="data.loadingList" @click="goLog">
               {{ t("logsCrashes.logs") }}
             </v-tab>

@@ -26,10 +26,6 @@
     />
     <div class="w-full flex flex-col gap-2 lg:(grid grid-cols-3 gap-4 max-w-360)">
       <v-card class="col-span-2 flex flex-col gap-1 surface-card-prominent">
-        <StoreProjectGallery
-          class="h-full flex-grow"
-          :project="project"
-        />
         <StoreProjectHeader
           class="flex-shrink flex-grow-0"
           :project="project"
@@ -38,6 +34,7 @@
           @open="onOpen"
           @install="onInstall"
         />
+        <StoreProjectGallery v-if="project.gallery.length" class="flex-grow" :project="project" />
       </v-card>
       <v-card class="flex flex-col p-4 surface-card-prominent">
         <template v-if="project.links.length > 0">
@@ -57,7 +54,8 @@
       <div
         v-if="project.htmlDescription"
         class="markdown-body p-4"
-        v-html="project.htmlDescription"
+        style="contain: content; isolation: isolate"
+        v-html="sanitizeHtml(project.htmlDescription)"
       />
     </div>
     <StoreProjectInstallVersionDialog
@@ -70,6 +68,7 @@
   </div>
 </template>
 <script lang="ts"  setup>
+import { sanitizeHtml } from '@/util/sanitizeHtml'
 import ErrorView from '@/components/ErrorView.vue'
 import StoreProjectExternal from './StoreProjectExternal.vue'
 import StoreProjectGallery from './StoreProjectGallery.vue'

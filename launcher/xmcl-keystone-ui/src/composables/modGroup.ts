@@ -35,7 +35,7 @@ export function useModGroups<T extends GroupableProjectFile = ModFile>(
     updateSharedGroupRules,
   } = useService(InstanceModsGroupServiceKey);
   const { state } = useState(
-    () => getGroupState(path.value, contentType),
+    () => path.value ? getGroupState(path.value, contentType) : undefined,
     InstanceModsGroupState
   );
 

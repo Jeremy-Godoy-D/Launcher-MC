@@ -32,6 +32,7 @@
       <template #prepend v-if="com.compatible === true">
         <v-avatar start>
           <v-img
+            alt=""
             v-if="getDepIcon(com.modId, icons[com.modId])"
             :src="getDepIcon(com.modId, icons[com.modId])"
           />

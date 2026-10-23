@@ -5,16 +5,16 @@
 # Launcher MC
 
 **Launcher de escritorio para Minecraft: Java Edition en Windows 10/11 (x64)**  
-Sistema de diseño «Taller Mineral» (Impeccable) · Instancias aisladas · Perfiles locales y Microsoft · Actualizador delta integrado
+Sistema de diseño «Aurora Glass» · Instancias aisladas · Perfiles locales y Microsoft · Actualizador delta integrado
 
-[![Release](https://img.shields.io/badge/version-v0.1.0--beta.3-e06d53?style=flat-square&logo=github)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases)
+[![Release](https://img.shields.io/badge/version-v0.2.0--beta.1-39d9a1?style=flat-square&logo=github)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11%20x64-0ea5e9?style=flat-square&logo=windows)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases)
-[![Electron](https://img.shields.io/badge/Electron-34-47848F?style=flat-square&logo=electron&logoColor=white)](https://www.electronjs.org/)
+[![Electron](https://img.shields.io/badge/Electron-43-47848F?style=flat-square&logo=electron&logoColor=white)](https://www.electronjs.org/)
 [![Vue](https://img.shields.io/badge/Vue-2.7%20%2B%20Vuetify-3b9b78?style=flat-square&logo=vuedotjs&logoColor=white)](https://vuejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-d4943a?style=flat-square)](LICENSE)
 
-[**Descargar `.exe`**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/latest) · [**Notas de versión**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases) · [**Reportar un problema**](https://github.com/Jeremy-Godoy-D/Launcher-MC/issues) · [**Licencia y Avisos**](NOTICE)
+[**Descargar `.exe`**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/tag/v0.2.0-beta.1) · [**Notas de versión**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases) · [**Reportar un problema**](https://github.com/Jeremy-Godoy-D/Launcher-MC/issues) · [**Licencia y Avisos**](NOTICE)
 
 </div>
 
@@ -25,8 +25,8 @@ Sistema de diseño «Taller Mineral» (Impeccable) · Instancias aisladas · Per
 <table>
   <tr>
     <td width="50%" valign="top">
-      <h3>🧱 Diseño «Taller Mineral»</h3>
-      <p>Interfaz táctil en obsidiana mate, marfil mineral y acentos en terracota/cobre y jade musgo, estructurada con filetes de 1px y estantería interactiva de instancias.</p>
+      <h3>🫧 Diseño «Aurora Glass»</h3>
+      <p>Cristal esmeralda, centro de lanzamiento, dock inferior y biblioteca de instancias. Fondo de burbujas con movimiento reducido y modo rendimiento; distribución adaptada desde 800×400.</p>
     </td>
     <td width="50%" valign="top">
       <h3>⚡ Instancias y Modloaders</h3>
@@ -46,7 +46,7 @@ Sistema de diseño «Taller Mineral» (Impeccable) · Instancias aisladas · Per
   <tr>
     <td width="50%" valign="top">
       <h3>🔄 Actualizaciones Automáticas o Manuales</h3>
-      <p>Conectado a <b>GitHub Releases</b>: descarga actualizaciones delta (<code>app.asar.gz</code> verificadas con SHA-256) o el instalador completo <code>.exe</code> automáticamente al iniciar o bajo demanda.</p>
+      <p>Conectado a <b>GitHub Releases</b>: comprueba nuevas versiones al iniciar o bajo demanda. Esta transición desde beta.3 usa el instalador completo o ZIP; la nueva versión incorpora verificación SHA-256 para futuras actualizaciones delta.</p>
     </td>
     <td width="50%" valign="top">
       <h3>🛠️ Diagnóstico y Telemetría</h3>
@@ -71,21 +71,15 @@ Sistema de diseño «Taller Mineral» (Impeccable) · Instancias aisladas · Per
   <tbody>
     <tr>
       <td><b>Instalador NSIS (Recomendado)</b></td>
-      <td><code>LauncherMC-0.1.0-beta.3-win-x64.exe</code></td>
+      <td><code>LauncherMC-0.2.0-beta.1-win-x64.exe</code></td>
       <td>Asistente de instalación con selección de ruta y accesos directos en Escritorio y Menú Inicio.</td>
-      <td>✅ Delta (<code>.asar.gz</code>) + Instalador</td>
+      <td>Descarga manual del instalador en esta versión</td>
     </tr>
     <tr>
       <td><b>Archivo Portable</b></td>
-      <td><code>LauncherMC-0.1.0-beta.3-win-x64.zip</code></td>
+      <td><code>LauncherMC-0.2.0-beta.1-win-x64.zip</code></td>
       <td>Carpeta descomprimible sin instalación en el registro del sistema.</td>
-      <td>✅ Delta (<code>.asar.gz</code>)</td>
-    </tr>
-    <tr>
-      <td><b>Paquete Incremental</b></td>
-      <td><code>app-0.1.0-beta.3-win.asar.gz</code></td>
-      <td>Artefacto consumido automáticamente por el actualizador interno (incluye <code>.sha256</code>).</td>
-      <td>🔒 Automático</td>
+      <td>Reemplazo completo de la carpeta de programa</td>
     </tr>
   </tbody>
 </table>
@@ -154,7 +148,7 @@ Los artefactos generados se ubican en `launcher/xmcl-electron-app/build/output/`
 | Variable | Propósito | Comportamiento si se omite |
 | :--- | :--- | :--- |
 | `MICROSOFT_CLIENT_ID` | Client ID de Azure App Registration para login con Microsoft. | El modo local/offline funciona al 100%; el login Microsoft muestra aviso informativo. |
-| `CURSEFORGE_API_KEY` | API Key de CurseForge Studios para consultas de catálogo. | Modrinth e importación local funcionan al 100%; CurseForge se deshabilita con aviso claro. |
+| `CURSEFORGE_PROXY_URL` | Origen HTTPS público del Worker de CurseForge. La API key vive en Cloudflare. | Modrinth e importación local siguen disponibles; CurseForge muestra un error recuperable. |
 | `LAUNCHER_UPDATE_TOKEN` | Fine-Grained PAT (`Contents: Read-only`) si el repo GitHub es privado. | Consulta la API pública de GitHub Releases (`Jeremy-Godoy-D/Launcher-MC`). |
 
 ---
@@ -175,3 +169,11 @@ Distribuido bajo la licencia **MIT**. Consulta [`LICENSE`](LICENSE) y [`NOTICE`]
 - **Autoría y mantenimiento:** [Jeremy Godoy (@Jeremy-Godoy-D)](https://github.com/Jeremy-Godoy-D)
 - **Base tecnológica (Upstream):** Derivado de [X Minecraft Launcher (XMCL)](https://github.com/Voxelum/x-minecraft-launcher) (`Copyright (c) 2017-2026 ci010 and X Minecraft Launcher contributors`), cuya licencia original se conserva íntegra en [`launcher/LICENSE-XMCL.txt`](launcher/LICENSE-XMCL.txt) junto con el inventario de dependencias en [`launcher/THIRD_PARTY_NOTICES.txt`](launcher/THIRD_PARTY_NOTICES.txt).
 - **Aviso de marca:** *Minecraft* es una marca registrada de Mojang Synergies AB / Microsoft Corporation. Este proyecto es independiente y no está afiliado ni aprobado por Mojang ni Microsoft.
+
+## Aurora Glass — v0.2.0-beta.1
+
+El rediseño incorpora centro de lanzamiento, dock, navegación de instancia explícita, fichas de catálogo en hojas, filtros bajo demanda, onboarding de tres etapas y preferencias locales de rendimiento.
+
+CurseForge usa el proxy de [services/curseforge-proxy](services/curseforge-proxy/README.md); no incluir una API key en la compilación. El Worker está activo y se comprobó una instalación real de AppleSkin. Consulta [la validación y sus límites](launcher/IMPLEMENTACION_AURORA.md). Microsoft se pospone en esta versión; el modo local está disponible.
+
+Para actualizar desde beta.3, cierra el launcher y ejecuta el instalador completo en la misma ubicación, o reemplaza la carpeta del programa con el ZIP nuevo. Conserva la carpeta de datos y mundos. Esta entrega omite los assets ASAR para evitar que el actualizador antiguo aplique una descarga sin la verificación nueva. Los binarios no tienen firma Authenticode.

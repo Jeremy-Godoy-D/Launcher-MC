@@ -1,10 +1,11 @@
 <template>
   <v-dialog
     v-model="isShown"
-    hide-overlay
+    :scrim="false"
+    :retain-focus="false"
     width="700"
     style="max-height: 100%"
-    class="task-dialog"
+    class="task-dialog aurora-task-island"
   >
     <TaskView />
   </v-dialog>
@@ -40,5 +41,17 @@ onScopeDispose(removeAfterEach)
 }
 .task-dialog .v-treeview > .v-treeview-node--leaf {
   margin-left: 0px;
+}
+.aurora-task-island .v-overlay__content {
+  position: absolute;
+  top: 56px;
+  right: 20px;
+  margin: 0 !important;
+  max-width: calc(100vw - 40px) !important;
+  max-height: calc(100vh - 140px) !important;
+  overflow: auto;
+  border: 1px solid var(--mc-rule-strong);
+  border-radius: 20px;
+  background: var(--ag-glass, var(--mc-surface));
 }
 </style>

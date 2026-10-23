@@ -27,10 +27,9 @@ const config = {
   define: {
     'process.env.BUILD_NUMBER': JSON.stringify(process.env.BUILD_NUMBER) ?? '0',
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV) ?? '"development"',
-    'process.env.CURSEFORGE_API_KEY': JSON.stringify(process.env.CURSEFORGE_API_KEY || ''),
+    'process.env.CURSEFORGE_PROXY_URL': JSON.stringify(process.env.CURSEFORGE_PROXY_URL || ''),
     'process.env.MICROSOFT_CLIENT_ID': JSON.stringify(process.env.MICROSOFT_CLIENT_ID || ''),
     'process.env.LAUNCHER_GITHUB_REPO': JSON.stringify(process.env.LAUNCHER_GITHUB_REPO || 'Jeremy-Godoy-D/Launcher-MC'),
-    'process.env.LAUNCHER_UPDATE_TOKEN': JSON.stringify(process.env.LAUNCHER_UPDATE_TOKEN || ''),
   } as Record<string, string>,
   platform: 'node',
   loader: {

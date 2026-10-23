@@ -25,6 +25,7 @@
       >
         <div class="mod-group-entry__avatar-grid">
           <v-img
+            alt=""
             v-for="(avatar, index) in avatars.slice(0, 4)"
             :key="`avatar-${avatar}-${index}`"
             class="mod-group-entry__avatar-image"

@@ -109,13 +109,14 @@
     >
       <div
         class="markdown-body upstream-version__changelog"
-        v-html="version.changelog"
+        v-html="sanitizeHtml(version.changelog)"
       />
     </div>
   </v-card>
 </template>
 
 <script lang="ts" setup>
+import { sanitizeHtml } from '@/util/sanitizeHtml'
 import { useDateString } from '@/composables/date'
 import { kTheme } from '@/composables/theme'
 import { useVuetifyColor } from '@/composables/vuetify'

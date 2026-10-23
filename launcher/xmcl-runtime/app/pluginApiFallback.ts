@@ -3,6 +3,7 @@ import { kXmclSessionAuthorization, XmclAccountService } from '~/xmclAccount/Xmc
 import type { LauncherAppPlugin } from './LauncherAppPlugin'
 import type { Handler, Response as LauncherResponse } from './LauncherProtocolHandler'
 import { resolveXmclApiEndpoints } from './xmclApiBaseUrl'
+import { getCurseforgeProxyUrl } from './curseforgeProxy'
 
 function setHeader(headers: Record<string, any>, name: string, value?: string) {
   for (const key of Object.keys(headers)) {
@@ -57,15 +58,14 @@ export const pluginApiFallback: LauncherAppPlugin = (app) => {
       setHeader(request.headers, 'Authorization', `${tokenType} ${authorization.accessToken}`)
       setHeader(request.headers, 'DPoP', authorization.dpopProof)
     } else if (request.url.host === 'api.curseforge.com') {
-      if (!process.env.CURSEFORGE_API_KEY) {
-        rejectAuthentication(
-          response,
-          'CurseForge no está configurado. Añade CURSEFORGE_API_KEY en el entorno del proyecto.',
-          401,
-        )
-        return
+      setHeader(request.headers, 'x-api-key')
+      setHeader(request.headers, 'Authorization')
+      setHeader(request.headers, 'Cookie')
+      try {
+        request.url = getCurseforgeProxyUrl(request.url)
+      } catch {
+        rejectAuthentication(response, 'CurseForge no está disponible temporalmente.', 503)
       }
-      request.headers['x-api-key'] = process.env.CURSEFORGE_API_KEY
     }
   }
   app.protocol.registerHandler('https', handler)

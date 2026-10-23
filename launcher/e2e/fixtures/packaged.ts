@@ -35,7 +35,7 @@ const OUTPUT_ROOT = resolve(REPO_ROOT, 'xmcl-electron-app/build/output')
  * runner arch and fall back to whatever exists.
  */
 function findPackagedBinary(): string {
-  const productName = 'XMCL'
+  const productName = 'Launcher MC'
   if (process.platform === 'win32') {
     return join(OUTPUT_ROOT, 'win-unpacked', `${productName}.exe`)
   }
@@ -119,7 +119,7 @@ export const test = base.extend<{ packaged: PackagedFixture }>({
     const tempRoot = await mkdtemp(join(tmpdir(), 'xmcl-e2e-pkg-'))
     const appDataPath = join(tempRoot, 'appData')
     const gameDataPath = join(tempRoot, 'gameData')
-    const xmclDir = join(appDataPath, 'xmcl')
+    const xmclDir = join(appDataPath, 'LauncherMC')
     let app: ElectronApplication | undefined
     let failure: string | undefined
     let stdio = ''

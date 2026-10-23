@@ -189,7 +189,7 @@ export const test = base.extend<{
     // We write directly into the e2e-controlled appData parent so a fresh
     // run skips the bootstrap dialog. To trigger bootstrap, leave it absent.
     if (!launcherOptions.bootstrap) {
-      const xmclDir = join(appDataPath, 'xmcl')
+      const xmclDir = join(appDataPath, 'LauncherMC')
       await mkdir(xmclDir, { recursive: true })
       await writeFile(join(xmclDir, 'root'), gameDataPath)
     }
@@ -247,8 +247,10 @@ export const test = base.extend<{
     // instead of hanging the fixture.
     const ENTRY_PATTERN = /\/(index|setup)\.html(\?|#|$)/
     let main: Page
+    let attachedPage = false
     try {
       main = await waitForAppWindow(app, ENTRY_PATTERN, 30_000)
+      attachedPage = true
     } catch (err) {
       const message = (err as Error).message
       const stub = new Proxy({} as Page, {
@@ -262,6 +264,13 @@ export const test = base.extend<{
         },
       })
       main = stub
+    }
+
+    if (!persistent && attachedPage) {
+      // Physical controller input must not steer an isolated keyboard/UI test.
+      const isolateGamepads = () => { Object.defineProperty(navigator, 'getGamepads', { configurable: true, value: () => [] }) }
+      await main.addInitScript(isolateGamepads)
+      await main.evaluate(isolateGamepads)
     }
 
     const manifest = newJourneyManifest({

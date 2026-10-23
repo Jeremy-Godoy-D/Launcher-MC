@@ -5,10 +5,10 @@
   >
     <!-- Navigation Sidebar (Only in Wide/Scroll Mode) -->
     <nav v-if="!isNarrowView" id="settings-nav" class="setting-sidebar pt-6 pl-4 pr-2" :aria-label="t('setting.name', 2)">
-      <div class="mc-card p-1.5">
-        <v-list nav density="compact" bg-color="transparent" :selected="[activeSectionIndex]" @update:selected="v => activeSectionIndex = (v[0] as number) ?? 0">
+      <div class="p-1.5"><v-text-field v-model="settingsSearch" label="Buscar ajustes" prepend-inner-icon="search" density="compact" variant="outlined" hide-details class="mb-3" />
+        <v-list nav role="listbox" :aria-label="t('setting.name', 2)" density="compact" bg-color="transparent" :selected="[activeSectionIndex]" @update:selected="v => activeSectionIndex = (v[0] as number) ?? 0">
           <v-list-item
-            v-for="(item, idx) in sections"
+            v-for="(item, idx) in sections" v-show="matchesSection(item)"
             :key="item.id"
             :value="idx"
             class="mb-0.5 rounded-md"
@@ -25,34 +25,15 @@
     </nav>
 
     <!-- Content Area -->
-    <div 
-      class="flex-grow-1 overflow-y-auto fill-height scroll-container visible-scroll" 
-      :class="{ 'has-sticky-tabs': isNarrowView }"
-      ref="scrollContainer"
-      @scroll="onScroll"
-    >
-      <!-- Sticky Tabs Header (Only in Narrow/Tabs Mode) -->
-      <div v-if="isNarrowView" class="sticky-tabs-wrapper">
-        <v-tabs
-          v-model="activeSectionIndex"
-          align-tabs="center"
-          bg-color="transparent"
-          color="primary"
-          show-arrows
-          :aria-label="t('setting.name', 2)"
-          class="rounded-lg"
-          @update:model-value="onTabChange"
-        >
-          <v-tab v-for="item in sections" :key="item.id">
-            <v-icon start size="small">{{ item.icon }}</v-icon>
-            {{ t(item.title) }}
-          </v-tab>
-        </v-tabs>
+    <div class="setting-content">
+      <div v-if="isNarrowView" class="setting-category-header"><v-text-field v-model="settingsSearch" label="Buscar ajustes" prepend-inner-icon="search" density="compact" variant="outlined" hide-details class="mx-4 mb-2" />
+        <v-select v-model="activeSectionIndex" :items="sections.map((item, value) => ({ title: t(item.title), value })).filter(item => matchesSection(sections[item.value]))" label="Categoría de ajustes" density="compact" variant="outlined" hide-details class="mx-4" @update:model-value="onTabChange" />
       </div>
-
+      <div ref="scrollContainer" class="overflow-y-auto scroll-container visible-scroll" @scroll="onScroll">
       <div class="content-wrapper mx-auto pa-4 pa-md-6" :class="{ 'tabs-mode': isNarrowView }">
+        <p v-if="!sections.some(matchesSection)" class="py-8 text-center text-[var(--mc-ink-muted)]">No se encontraron ajustes con esa búsqueda.</p>
         <!-- All sections rendered vertically in both modes -->
-        <section id="general" class="mb-8 scroll-target" role="region" :aria-label="t('setting.general')">
+        <section v-show="matchesSection(sections[0])" id="general" class="mb-8 scroll-target" role="region" :aria-label="t('setting.general')">
           <SettingHeader
             :title="t('setting.general')"
             icon="settings"
@@ -60,15 +41,15 @@
           <SettingGeneral class="mb-4" />
           <SettingAdvanced />
         </section>
-        <section id="appearance" class="mb-8 scroll-target" role="region" :aria-label="t('setting.appearance')">
+        <section v-show="matchesSection(sections[1])" id="appearance" class="mb-8 scroll-target" role="region" :aria-label="t('setting.appearance')">
           <SettingHeader
             icon="brush"
             :title="t('setting.appearance')"
             :subtitle="t('setting.appearanceDescription')"
           />
-          <SettingGlobalUI />
+          <h3 class="text-lg mb-4">Fondo y rendimiento</h3><SettingGlobalUI />
         </section>
-        <section id="global" class="mb-8 scroll-target" role="region" :aria-label="t('setting.globalSetting')">
+        <section v-show="matchesSection(sections[2])" id="global" class="mb-8 scroll-target" role="region" :aria-label="t('setting.globalSetting')">
           <SettingHeader
             icon="videogame_asset"
             :title="t('setting.globalSetting')"
@@ -76,14 +57,14 @@
           />
           <SettingGlobal />
         </section>
-        <section id="network" class="mb-8 scroll-target" role="region" :aria-label="t('setting.network')">
+        <section v-show="matchesSection(sections[3])" id="network" class="mb-8 scroll-target" role="region" :aria-label="t('setting.network')">
           <SettingHeader
             :title="t('setting.network')"
             icon="public"
           />
           <SettingNetwork />
         </section>
-        <section id="about" class="mb-12 scroll-target" role="region" :aria-label="t('setting.about')">
+        <section v-show="matchesSection(sections[4])" id="about" class="mb-12 scroll-target" role="region" :aria-label="t('setting.about')">
           <SettingHeader
             :title="t('setting.about')"
             icon="info"
@@ -95,6 +76,7 @@
 
       <SettingUpdateInfoDialog />
       <SettingMigrationDialog />
+      </div>
     </div>
   </div>
 </template>
@@ -146,6 +128,13 @@ const scrollContainer = ref<HTMLElement | null>(null)
 const isUserScrolling = ref(false)
 let scrollTimeout: ReturnType<typeof setTimeout> | null = null
 
+const settingsSearch = ref('')
+function matchesSection(section: { id: string; title: string }) {
+  const query = settingsSearch.value.trim().toLocaleLowerCase()
+  if (!query) return true
+  const terms: Record<string, string> = { general: 'idioma carpeta java inicio avanzado', appearance: 'fondo rendimiento cristal burbujas tema color interfaz', global: 'memoria ram minecraft java jvm', network: 'red proxy descarga internet', about: 'actualizar actualizaciones versión acerca' }
+  return (t(section.title) + ' ' + terms[section.id]).toLocaleLowerCase().includes(query)
+}
 const sections = [
   { id: 'general', title: 'setting.general', icon: 'tune' },
   { id: 'appearance', title: 'setting.appearance', icon: 'palette' },
@@ -168,9 +157,7 @@ function scrollTo(id: string) {
   const el = document.getElementById(id)
   if (el && scrollContainer.value) {
     isUserScrolling.value = true
-    // Account for sticky tabs height in narrow view
-    const stickyOffset = isNarrowView.value ? 60 : 20
-    const offsetTop = el.offsetTop - stickyOffset
+    const offsetTop = el.offsetTop - 20
     scrollContainer.value.scrollTo({ top: offsetTop, behavior: 'smooth' })
     
     // Reset user scrolling flag after animation completes
@@ -192,9 +179,7 @@ function onScroll() {
   if (!scrollContainer.value || isUserScrolling.value) return
   
   const container = scrollContainer.value
-  // Account for sticky tabs height in narrow view
-  const stickyOffset = isNarrowView.value ? 80 : 100
-  const scrollTop = container.scrollTop + stickyOffset
+  const scrollTop = container.scrollTop + 100
   
   for (let i = sections.length - 1; i >= 0; i--) {
     const el = document.getElementById(sections[i].id)
@@ -261,19 +246,23 @@ useTutorial(
   max-height: 100vh;
 }
 
+.setting-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
 .scroll-container {
+  flex: 1;
+  min-height: 0;
   scroll-behavior: smooth;
   position: relative;
 }
 
-.scroll-container.has-sticky-tabs {
-  padding-top: 0;
-}
-
-.sticky-tabs-wrapper {
-  position: sticky;
-  top: 0;
-  z-index: 10;
+.setting-category-header {
+  flex-shrink: 0;
   background: rgba(var(--v-theme-surface), 0.95);
   backdrop-filter: blur(8px);
   padding: 8px 0;
@@ -285,6 +274,6 @@ useTutorial(
 }
 
 .scroll-target {
-  scroll-margin-top: 80px;
+  scroll-margin-top: 20px;
 }
 </style>

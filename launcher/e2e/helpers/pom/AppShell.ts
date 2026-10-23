@@ -59,12 +59,13 @@ export class AppShell {
 
   // Home / instance bar
   get launchButton(): Locator { return this.main.getByTestId('launch-button') }
-  get createInstance(): Locator { return this.main.getByTestId('create-instance') }
-  get instanceItems(): Locator { return this.main.getByTestId('instance-item') }
+  get createInstance(): Locator { return this.main.getByTestId('home-create-instance').or(this.main.getByTestId('library-create-instance')) }
+  get instanceItems(): Locator { return this.main.getByTestId(/^instance-card-/) }
 
   // Add Instance dialog
   get addInstanceDialog(): Locator { return this.main.getByTestId('add-instance-dialog') }
   get addInstanceName(): Locator { return this.main.getByTestId('add-instance-name').locator('input') }
+  get addInstanceDetailsNext(): Locator { return this.main.getByTestId('add-instance-details-next') }
   get addInstanceCreate(): Locator { return this.main.getByTestId('add-instance-create') }
   get addInstanceNext(): Locator { return this.main.getByTestId('add-instance-next') }
   get addInstanceCancel(): Locator { return this.main.getByTestId('add-instance-cancel') }

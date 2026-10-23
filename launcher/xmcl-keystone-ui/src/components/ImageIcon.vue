@@ -1,5 +1,6 @@
 <template>
   <img
+    alt=""
     :src="src"
     :width="width"
   >

@@ -11,6 +11,7 @@
         <template #append>
           <v-select
             data-testid="setup-locale-select"
+            :aria-label="t('setup.locale.language')"
             :model-value="modelValue"
             variant="outlined"
             density="comfortable"

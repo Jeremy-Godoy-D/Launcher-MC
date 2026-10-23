@@ -52,6 +52,23 @@ jobs:
           pnpm check
           pnpm lint
 
+      - name: Test security boundaries
+        working-directory: launcher
+        run: |
+          pnpm exec vitest run xmcl-keystone-ui/src/util/auroraTheme.test.ts xmcl-keystone-ui/src/util/theme.v1.test.ts xmcl-runtime/app/pluginApiFallback.test.ts xmcl-runtime/app/curseforgeProxy.test.ts xmcl-electron-app/main/utils/verifyUpdate.test.ts xmcl-electron-app/main/utils/windowsUpdate.test.ts xmcl-electron-app/main/ServerService.test.ts packages/curseforge/index.test.ts
+          pnpm exec vitest run xmcl-keystone-ui/src/util/sanitizeHtml.test.ts xmcl-keystone-ui/src/composables/markdown.test.ts
+          node --test ../services/curseforge-proxy/worker.test.mjs
+
+      - name: Verify production catalog proxy
+        shell: pwsh
+        env:
+          CURSEFORGE_PROXY_URL: ${{ vars.CURSEFORGE_PROXY_URL }}
+        run: |
+          $proxy = [Uri]$env:CURSEFORGE_PROXY_URL
+          if (-not $proxy.IsAbsoluteUri -or $proxy.Scheme -ne 'https' -or $proxy.UserInfo -or $proxy.AbsolutePath -ne '/' -or $proxy.Query -or $proxy.Fragment) { throw 'Configure a valid CURSEFORGE_PROXY_URL repository variable before release.' }
+          $result = Invoke-WebRequest -Uri ($proxy.GetLeftPart([UriPartial]::Authority) + '/v1/mods/search?gameId=432&pageSize=1&classId=6') -TimeoutSec 15
+          if ($result.StatusCode -ne 200) { throw 'CurseForge proxy is not ready.' }
+
       - name: Build Renderer (Vue UI)
         working-directory: launcher
         run: pnpm build:renderer
@@ -61,9 +78,28 @@ jobs:
         env:
           LAUNCHER_GITHUB_REPO: ${{ github.repository }}
           MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
-          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
-          LAUNCHER_UPDATE_TOKEN: ${{ secrets.LAUNCHER_UPDATE_TOKEN }}
+          CURSEFORGE_PROXY_URL: ${{ vars.CURSEFORGE_PROXY_URL }}
         run: pnpm build:all
+
+      - name: Verify published beta.3 migration baseline
+        shell: pwsh
+        run: |
+          $baseline = 'launcher/e2e/artifacts/beta3'
+          New-Item -ItemType Directory -Force $baseline | Out-Null
+          Invoke-WebRequest 'https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/download/v0.1.0-beta.3/LauncherMC-0.1.0-beta.3-win-x64.zip' -OutFile "$baseline/beta3.zip"
+          if ((Get-FileHash "$baseline/beta3.zip" -Algorithm SHA256).Hash.ToLowerInvariant() -ne '47590518b18273811bb1118a02562d2d37b62d6a0b28efff903ae8a4fa75d301') { throw 'Published beta.3 checksum mismatch' }
+          Expand-Archive -LiteralPath "$baseline/beta3.zip" -DestinationPath "$baseline/app"
+
+      - name: Validate Aurora and packaged Electron
+        working-directory: launcher
+        env:
+          XMCL_LIVE_CURSEFORGE: '1'
+          XMCL_BETA3_BINARY: ${{ github.workspace }}\launcher\e2e\artifacts\beta3\app\Launcher MC.exe
+        run: |
+          pnpm e2e:install --frozen-lockfile
+          pnpm --prefix=e2e exec playwright install ffmpeg
+          pnpm --prefix=e2e exec playwright test specs/aurora
+          pnpm test:e2e:release
 
       - name: Read version from package.json
         id: pkg
@@ -83,19 +119,34 @@ jobs:
           TAG: ${{ steps.pkg.outputs.tag }}
           VERSION: ${{ steps.pkg.outputs.version }}
           IS_PRERELEASE: ${{ steps.pkg.outputs.prerelease }}
+          RELEASE_COMMIT: ${{ github.sha }}
         run: |
           $outDir = "launcher/xmcl-electron-app/build/output"
           $assets = Get-ChildItem "$outDir/*" -Include *.exe,*.zip,*.asar,*.gz,*.sha256,*.yml,manifest.json |
-            Where-Object { $_.Name -notlike "*__uninstaller.exe" } |
+            Where-Object { $_.Name -notlike "*__uninstaller.exe" -and ($_.Name -like "*$env:VERSION*" -or $_.Name -eq 'manifest.json') } |
             Select-Object -ExpandProperty FullName
+
+          # beta.3 cannot verify a newly downloaded ASAR; migrate through the full installer.
+          if ($env:VERSION -eq '0.2.0-beta.1') {
+            $assets = @($assets | Where-Object { (Split-Path $_ -Leaf) -notlike 'app-*' -and (Split-Path $_ -Leaf) -ne 'builder-debug.yml' })
+            if ($assets | Where-Object { $_ -match '\.asar' }) { throw 'This migration must not expose ASAR assets.' }
+            foreach ($name in @("LauncherMC-$env:VERSION-win-x64.exe", "LauncherMC-$env:VERSION-win-x64.zip")) {
+              if (-not ($assets | Where-Object { (Split-Path $_ -Leaf) -eq $name }) -or -not ($assets | Where-Object { (Split-Path $_ -Leaf) -eq "$name.sha256" })) { throw "Missing full-package artifact or checksum: $name" }
+              $actual = (Get-FileHash "$outDir/$name" -Algorithm SHA256).Hash
+              if ($actual -ne (Get-Content "$outDir/$name.sha256").Trim()) { throw "Full-package checksum mismatch: $name" }
+            }
+          }
 
           gh release view $env:TAG 2>$null | Out-Null
           if ($LASTEXITCODE -ne 0) {
-            $flags = @("--title", "Launcher MC $env:TAG", "--generate-notes")
+            $flags = @("--title", "Launcher MC $env:TAG", "--generate-notes", "--draft")
             if ($env:IS_PRERELEASE -eq "True" -or $env:IS_PRERELEASE -eq "true") {
               $flags += "--prerelease"
             }
-            gh release create $env:TAG @flags
+            gh release create $env:TAG --target $env:RELEASE_COMMIT @flags
+          } else {
+            $isDraft = gh release view $env:TAG --json isDraft --jq .isDraft
+            if ($isDraft -ne 'true') { throw 'Published releases are immutable. Use a new version.' }
           }
 
           foreach ($asset in $assets) {

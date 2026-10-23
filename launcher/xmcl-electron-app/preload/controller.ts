@@ -41,6 +41,9 @@ function createController(): WindowController {
   ipcRenderer.on('navigate', (_, route: string) => {
     emitter.emit('navigate', route)
   })
+  ipcRenderer.on('window-active', (_, active: boolean) => {
+    emitter.emit('window-active', active)
+  })
   const emitter = new EventEmitter()
 
   const writeClipboard =

@@ -30,6 +30,7 @@ export function useCurseforge(
   sort: Ref<ModsSearchSortField | undefined>,
   gameVersion: Ref<string>,
   pageSize: MaybeRef<number> = 10,
+  enabled: MaybeRef<boolean> = true,
 ) {
   const data = reactive({
     pages: 5,
@@ -47,7 +48,7 @@ export function useCurseforge(
     pageSize,
   )
   const { mutate, isValidating, error, data: _data } = useSWRV(
-    computed(() => formatKey('/curseforge/search', {
+    computed(() => get(enabled) ? formatKey('/curseforge/search', {
       classId,
       keyword,
       modLoaders,
@@ -56,7 +57,7 @@ export function useCurseforge(
       gameVersion,
       page,
       pageSize,
-    })),
+    }) : undefined),
     async () => markRaw(search((page.value - 1) * get(pageSize))),
     useOverrideSWRVConfig({
       ttl: 30 * 1000,

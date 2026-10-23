@@ -31,6 +31,8 @@ import { kSettings } from '~/settings'
 import { checksum } from '~/util/fs'
 import ElectronLauncherApp from '../ElectronLauncherApp'
 import { ensureElevateExe } from './elevate'
+import { validateUpdateAsset, verifyUpdate } from './verifyUpdate'
+import { getWindowsUpdateArgs } from './windowsUpdate'
 
 export const DEFAULT_GITHUB_REPO = process.env.LAUNCHER_GITHUB_REPO || 'Jeremy-Godoy-D/Launcher-MC'
 
@@ -70,6 +72,7 @@ async function downloadAsarUpdate(
   } & DownloadBaseOptions,
 ): Promise<void> {
   version = version.startsWith('v') ? version.substring(1) : version
+  if (!semver.valid(version)) throw new AnyError('UpdateAsarError', 'La versión de actualización no es válida.')
   const pl = platform()
   let platformFlag = pl === 'win32' ? 'win' : pl === 'darwin' ? 'mac' : 'linux'
   if (process.arch === 'arm64') {
@@ -88,26 +91,29 @@ async function downloadAsarUpdate(
 
   const defaultBaseUrl = `https://github.com/${DEFAULT_GITHUB_REPO}/releases/download/v${version}/${baseName}`
   const shaUrl = shaAsset?.url || `${defaultBaseUrl}.sha256`
+  validateUpdateAsset(shaUrl, shaName, DEFAULT_GITHUB_REPO, version)
 
-  try {
-    const sha256Response = await app.fetch(shaUrl, {
-      headers: buildGitHubHeaders(token, 'application/octet-stream'),
-      signal: options?.abortSignal,
-    })
-    const sha256 = sha256Response.ok ? (await sha256Response.text()).trim().split(/\s+/)[0] : ''
-    const actual = await checksum(destination, 'sha256').catch(() => '')
-    if (sha256 && sha256 === actual) {
-      return
-    }
-  } catch {
-    // Ignore — fall through to download.
+  const sha256Response = await app.fetch(shaUrl, {
+    headers: buildGitHubHeaders(token, 'application/octet-stream'),
+    signal: options?.abortSignal,
+  })
+  if (!sha256Response.ok) throw new AnyError('UpdateAsarError', 'No se pudo verificar la integridad SHA-256 de la actualización.')
+  const sha256 = (await sha256Response.text()).trim().split(/\s+/)[0]
+  if (!/^[a-f\d]{64}$/i.test(sha256)) throw new AnyError('UpdateAsarError', 'El archivo SHA-256 de la actualización no es válido.')
+  const actual = await checksum(destination, 'sha256').catch(() => '')
+  if (actual.toLowerCase() === sha256.toLowerCase()) {
+    await writeFile(destination + '.sha256', sha256)
+    return
   }
 
   const targetAsset = gzAsset || rawAsset
   const isGz = Boolean(gzAsset) || !rawAsset
   const downloadUrl = targetAsset?.url || (isGz ? `${defaultBaseUrl}.gz` : defaultBaseUrl)
+  validateUpdateAsset(downloadUrl, isGz ? gzName : baseName, DEFAULT_GITHUB_REPO, version)
 
   const tempFile = destination + '.tmp'
+  const verifiedFile = destination + '.verified'
+  try {
   if (token && downloadUrl.includes('api.github.com/')) {
     const response = await app.fetch(downloadUrl, {
       headers: buildGitHubHeaders(token, 'application/octet-stream'),
@@ -129,37 +135,23 @@ async function downloadAsarUpdate(
   }
 
   if (isGz) {
-    await pipeline(createReadStream(tempFile), createGunzip(), createWriteStream(destination))
+    await pipeline(createReadStream(tempFile), createGunzip(), createWriteStream(verifiedFile))
     await unlinkAsync(tempFile).catch(() => {})
   } else {
-    await renameAsync(tempFile, destination)
+    await renameAsync(tempFile, verifiedFile)
   }
+    await verifyUpdate(verifiedFile, sha256)
+    options?.abortSignal?.throwIfAborted()
+    await renameAsync(verifiedFile, destination)
+    await writeFile(destination + '.sha256', sha256)
+  } finally {
+    await Promise.all([unlinkAsync(tempFile).catch(() => {}), unlinkAsync(verifiedFile).catch(() => {})])
+  }
+
 }
 
 async function hintUserDownload(): Promise<void> {
   shell.openExternal(`https://github.com/${DEFAULT_GITHUB_REPO}/releases`)
-}
-
-async function getUpdateAsarViaBatArgs(
-  appAsarPath: string,
-  updateAsarPath: string,
-  appDataPath: string,
-  elevatePath?: string,
-): Promise<string[]> {
-  const psPath = join(appDataPath, 'AutoUpdate.bat')
-  await writeFile(
-    psPath,
-    [
-      '@echo off',
-      'chcp 65001',
-      '%WinDir%\\System32\\timeout.exe 2',
-      `taskkill /f /im "${basename(process.argv[0])}"`,
-      `copy /Y "${updateAsarPath}" "${appAsarPath}"`,
-      `start /b "" /d "${process.cwd()}" ${process.argv.map((s) => `"${s}"`).join(' ')}`,
-    ].join('\r\n'),
-  )
-
-  return elevatePath ? [elevatePath, psPath] : ['cmd.exe', '/c', psPath]
 }
 
 /**
@@ -305,6 +297,9 @@ export class ElectronUpdater implements LauncherAppUpdater {
     const appAsarPath = join(dirname(__dirname), 'app.asar')
     const updateAsarPath = join(this.app.appDataPath, 'pending_update')
 
+    const sha256 = (await readFile(updateAsarPath + '.sha256', 'utf8')).trim()
+    await verifyUpdate(updateAsarPath, sha256)
+
     this.logger.log(`Install asar on ${this.app.platform.os} ${appAsarPath}`)
     if (this.app.platform.os === 'windows') {
       const elevatePath = await ensureElevateExe(this.app.appDataPath)
@@ -333,17 +328,22 @@ export class ElectronUpdater implements LauncherAppUpdater {
           : `Process does not have write access to ${appAsarPath}`,
       )
 
-      const args = await getUpdateAsarViaBatArgs(
-        appAsarPath,
-        updateAsarPath,
-        this.app.appDataPath,
-        !hasWriteAccess ? elevatePath : undefined,
-      )
-      this.logger.log(`Install from windows: ${args.join(' ')}`)
+      const command = getWindowsUpdateArgs({
+        target: appAsarPath, source: updateAsarPath, sha256, pid: process.pid,
+        executable: process.execPath, args: process.argv.slice(1), cwd: process.cwd(),
+        errorLog: join(this.app.appDataPath, 'update-error.log'),
+      })
+      const args = hasWriteAccess ? command : [elevatePath, ...command]
+      this.logger.log('Starting verified Windows update helper')
       const x = spawn(args[0], args.slice(1), {
         cwd: this.app.appDataPath,
         detached: true,
         stdio: 'ignore',
+        windowsHide: true,
+      })
+      await new Promise<void>((resolve, reject) => {
+        x.once('spawn', resolve)
+        x.once('error', reject)
       })
       x.unref()
       this.app.quit()

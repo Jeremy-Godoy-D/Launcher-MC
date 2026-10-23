@@ -2,12 +2,18 @@
   <v-card
     class="store-gallery grid h-[360px] max-h-[360px] select-none grid-cols-5 rounded-lg overflow-hidden"
     elevation="3"
+    role="button"
+    tabindex="0"
+    :aria-label="gallery.localizedTitle || gallery.title"
+    @keydown.enter.prevent="$emit('enter')"
+    @keydown.space.prevent="$emit('enter')"
     @click="$emit('enter')"
   >
     <!-- Main hero image (left) -->
     <div class="store-gallery__hero relative col-span-3 max-h-[360px] cursor-pointer overflow-hidden">
       <transition name="fade-transition" mode="out-in">
         <v-img
+          alt=""
           v-if="gallery.images[currentImageIndex]"
           :key="currentImageIndex"
           cover
@@ -63,6 +69,7 @@
           @click.stop="$emit('enter')"
         >
           <v-img
+            alt=""
             v-if="gallery.images[i - 1]"
             class="h-full w-full"
             cover
@@ -122,15 +129,9 @@
             +{{ gallery.minecraft.length - 1 }}
           </span>
         </div>
-        <v-btn
-          variant="tonal"
-          size="small"
-          color="primary"
-          append-icon="arrow_forward"
-          @click.stop="$emit('enter')"
-        >
-          {{ t('shared.browse') }}
-        </v-btn>
+        <span class="inline-flex items-center gap-2 rounded-lg px-3 py-2 bg-[var(--mc-accent-soft)] text-[var(--mc-accent)] text-sm font-semibold">
+          {{ t('shared.browse') }}<v-icon size="small">arrow_forward</v-icon>
+        </span>
       </div>
     </div>
   </v-card>

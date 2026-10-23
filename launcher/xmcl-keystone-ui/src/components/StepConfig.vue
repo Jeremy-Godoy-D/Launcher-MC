@@ -3,7 +3,13 @@
     ref="scrollElement"
     class="overflow-auto max-h-[70vh] px-[24px] pt-[24px] pb-[16px]"
   >
-    <v-form
+    <div class="aurora-config-tabs" role="tablist" aria-label="Crear instancia">
+      <button type="button" role="tab" :aria-selected="stage === 1" :class="{ active: stage === 1 }" @click="stage = 1">Versión y loader</button>
+      <button type="button" role="tab" :aria-selected="stage === 2" :class="{ active: stage === 2 }" @click="stage = 2">Nombre y detalles</button>
+    </div>
+    <StepperAdvanceContent v-show="stage === 1" v-if="content.edition !== 'bedrock'" :valid="valid" class="z-1 relative" />
+    <v-btn v-if="stage === 1" class="my-4 relative z-1" color="primary" append-icon="arrow_forward" data-testid="add-instance-details-next" @click="stage = 2">Continuar</v-btn>
+    <v-form v-show="stage === 2"
       lazy-validation
       style="height: 100%;"
       :value="valid"
@@ -50,12 +56,6 @@
         />
       </div>
     </v-form>
-    <StepperAdvanceContent
-      v-if="content.edition !== 'bedrock'"
-      :valid="valid"
-      class="z-1 relative"
-      @update:valid="onUpdate"
-    />
     <slot name="collection" />
     <v-list-subheader v-if="loading || error || files.length > 0">
       {{ t('instanceTemplate.preview') }}
@@ -71,7 +71,7 @@
       no-refresh
     />
     <InstanceManifestFileTree
-      v-else
+      v-else-if="files.length > 0 && stage === 2"
       :model-value="[]"
       :scroll-element="scrollElement"
     />
@@ -120,10 +120,13 @@ const nameRules = computed(() => [
   (v: any) => !/\p{Script=Cyrillic}/u.test(v) || t('instance.nameNoCyrillic'),
 ])
 
+const stage = ref(1)
+watchEffect(() => emit('update:valid', stage.value === 2 && nameRules.value.every(rule => rule(content.name) === true)))
+
 const scrollElement = ref<HTMLElement | null>(null)
 
 const onUpdate = ($event: any) => {
-  emit('update:valid', $event)
+  emit('update:valid', stage.value === 2 && $event)
 }
 
 provideFileNodes(computed(() => files.value.map(f => ({

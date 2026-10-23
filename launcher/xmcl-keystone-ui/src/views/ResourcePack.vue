@@ -24,6 +24,8 @@
           variant="text"
           density="comfortable"
           data-testid="market-multi-select-toggle"
+          aria-label="Selección múltiple"
+          :aria-pressed="selectionMode"
           @click="onUpdateSelectionMode(!selectionMode)"
         >
           <v-icon> checklist </v-icon>

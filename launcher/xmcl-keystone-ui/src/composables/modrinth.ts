@@ -151,6 +151,7 @@ export function useModrinth(
   projectType: MaybeRef<string>,
   page: MaybeRef<number>,
   pageSize: MaybeRef<number>,
+  enabled: MaybeRef<boolean> = true,
 ) {
   const search = useModrinthSearchFunc(
     query,
@@ -165,7 +166,7 @@ export function useModrinth(
   )
 
   const { data: searchData, isValidating: refreshing, error, mutate } = useSWRV(
-    computed(() => formatKey('/modrinth/search', {
+    computed(() => get(enabled) ? formatKey('/modrinth/search', {
       query,
       pageSize,
       page,
@@ -176,7 +177,7 @@ export function useModrinth(
       modLoader,
       environment,
       projectType,
-    })),
+    }) : undefined),
     () => search((get(page) - 1) * get(pageSize)), useOverrideSWRVConfig({ ttl: 30 * 1000 }))
 
   const pages = computed(() => searchData.value ? Math.ceil(searchData.value.total_hits / get(pageSize)) : 0)
@@ -184,6 +185,7 @@ export function useModrinth(
   const projects = computed(() => searchData.value?.hits || [])
   const debouncedRefresh = useDebounceFn(() => mutate(), 1000)
   const refresh = () => {
+    if (!get(enabled)) return Promise.resolve()
     refreshing.value = true
     return debouncedRefresh()
   }

@@ -70,7 +70,7 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=32768
           NODE_ENV: production
           RELEASE: ${{ startsWith(github.event.head_commit.message, 'chore(release)') }}
-          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
+          CURSEFORGE_PROXY_URL: ${{ vars.CURSEFORGE_PROXY_URL }}
           PUBLISHER: CN=SignPath Foundation, O=SignPath Foundation, L=Lewes, S=Delaware, C=US
       - name: Resolve pinned DeskGap runtime
         if: ${{ runner.os == 'Windows' }}
@@ -119,7 +119,7 @@ jobs:
         if: ${{ runner.os == 'Windows' }}
         shell: pwsh
         env:
-          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_TOKEN }}
+          CURSEFORGE_PROXY_URL: ${{ vars.CURSEFORGE_PROXY_URL }}
           DESKGAP_VERSION: ${{ steps.deskgap.outputs.version }}
         run: |
           $source = Join-Path $env:GITHUB_WORKSPACE 'deskgap-runtime-source'

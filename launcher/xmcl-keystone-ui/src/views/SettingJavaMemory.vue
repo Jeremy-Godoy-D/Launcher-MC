@@ -35,6 +35,7 @@
       </div>
       <v-slider
         :model-value="displayMin"
+        :aria-label="t('java.minMemory')"
         :disabled="!manual"
         :min="MIN_MEM"
         :max="Math.max(MIN_MEM, displayMax - STEP)"
@@ -52,6 +53,7 @@
       </v-slider>
       <v-text-field
         :model-value="displayMin"
+        :aria-label="t('java.minMemory')"
         :disabled="!manual"
         type="number"
         :min="MIN_MEM"
@@ -74,6 +76,7 @@
       </div>
       <v-slider
         :model-value="displayMax"
+        :aria-label="t('java.maxMemory')"
         :disabled="!manual"
         :min="Math.max(MIN_MAX, displayMin + STEP)"
         :max="totalMb"
@@ -91,6 +94,7 @@
       </v-slider>
       <v-text-field
         :model-value="displayMax"
+        :aria-label="t('java.maxMemory')"
         :disabled="!manual"
         type="number"
         :min="Math.max(MIN_MAX, displayMin + STEP)"
