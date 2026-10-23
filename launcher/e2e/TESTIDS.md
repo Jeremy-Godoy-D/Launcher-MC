@@ -6,7 +6,7 @@ This file is the contract between the launcher UI in `xmcl-keystone-ui/` and the
 
 If the anchor you need is not here, add a `data-testid="…"` attribute to the corresponding Vue component, then re-run `pnpm gen:testids`.
 
-**Total anchors:** 289 (in 325 Vue files)
+**Total anchors:** 293 (in 325 Vue files)
 
 | Test ID | Defined in |
 |---|---|
@@ -261,6 +261,7 @@ If the anchor you need is not here, add a `data-testid="…"` attribute to the c
 | `settings-check-update` | [`xmcl-keystone-ui/src/views/SettingUpdate.vue#L10`](../xmcl-keystone-ui/src/views/SettingUpdate.vue#L10) |
 | `settings-page` | [`xmcl-keystone-ui/src/views/Setting.vue#L3`](../xmcl-keystone-ui/src/views/Setting.vue#L3) |
 | `settings-proxy-host` | [`xmcl-keystone-ui/src/views/SettingNetwork.vue#L38`](../xmcl-keystone-ui/src/views/SettingNetwork.vue#L38) |
+| `settings-update-details` | [`xmcl-keystone-ui/src/views/SettingUpdate.vue#L43`](../xmcl-keystone-ui/src/views/SettingUpdate.vue#L43) |
 | `setup-account` | [`xmcl-keystone-ui/src/views/SetupAccount.vue#L3`](../xmcl-keystone-ui/src/views/SetupAccount.vue#L3) |
 | `setup-account-add` | [`xmcl-keystone-ui/src/views/SetupAccount.vue#L22`](../xmcl-keystone-ui/src/views/SetupAccount.vue#L22) |
 | `setup-account-skip` | [`xmcl-keystone-ui/src/views/SetupAccount.vue#L33`](../xmcl-keystone-ui/src/views/SetupAccount.vue#L33) |
@@ -274,7 +275,7 @@ If the anchor you need is not here, add a `data-testid="…"` attribute to the c
 | `store-install` | [`xmcl-keystone-ui/src/components/StoreProjectHeader.vue#L47`](../xmcl-keystone-ui/src/components/StoreProjectHeader.vue#L47) |
 | `store-page` | [`xmcl-keystone-ui/src/views/Store.vue#L2`](../xmcl-keystone-ui/src/views/Store.vue#L2) |
 | `store-project-card` | [`xmcl-keystone-ui/src/components/StoreExploreCardModern.vue#L4`](../xmcl-keystone-ui/src/components/StoreExploreCardModern.vue#L4) |
-| `store-search` | [`xmcl-keystone-ui/src/views/StoreEntry.vue#L127`](../xmcl-keystone-ui/src/views/StoreEntry.vue#L127) |
+| `store-search` | [`xmcl-keystone-ui/src/views/StoreEntry.vue#L123`](../xmcl-keystone-ui/src/views/StoreEntry.vue#L123) |
 | `topbar-tasks` | [`xmcl-keystone-ui/src/views/AppSystemBar.vue#L67`](../xmcl-keystone-ui/src/views/AppSystemBar.vue#L67) |
 | `unbind-server-upstream` | [`xmcl-keystone-ui/src/views/BaseSettingServer.vue#L41`](../xmcl-keystone-ui/src/views/BaseSettingServer.vue#L41) |
 | `unresolved-file-item` | [`xmcl-keystone-ui/src/views/HomeUnresolvedFilesDialog.vue#L58`](../xmcl-keystone-ui/src/views/HomeUnresolvedFilesDialog.vue#L58) |
@@ -282,6 +283,9 @@ If the anchor you need is not here, add a `data-testid="…"` attribute to the c
 | `unresolved-files-ignore` | [`xmcl-keystone-ui/src/views/HomeUnresolvedFilesDialog.vue#L126`](../xmcl-keystone-ui/src/views/HomeUnresolvedFilesDialog.vue#L126) |
 | `unresolved-files-install` | [`xmcl-keystone-ui/src/views/HomeUnresolvedFilesDialog.vue#L135`](../xmcl-keystone-ui/src/views/HomeUnresolvedFilesDialog.vue#L135) |
 | `unresolved-files-search` | [`xmcl-keystone-ui/src/views/HomeUnresolvedFilesDialog.vue#L113`](../xmcl-keystone-ui/src/views/HomeUnresolvedFilesDialog.vue#L113) |
+| `update-download-installer` | [`xmcl-keystone-ui/src/views/SettingUpdateInfoDialog.vue#L43`](../xmcl-keystone-ui/src/views/SettingUpdateInfoDialog.vue#L43) |
+| `update-info-dialog` | [`xmcl-keystone-ui/src/views/SettingUpdateInfoDialog.vue#L11`](../xmcl-keystone-ui/src/views/SettingUpdateInfoDialog.vue#L11) |
+| `update-release-notes` | [`xmcl-keystone-ui/src/views/SettingUpdateInfoDialog.vue#L28`](../xmcl-keystone-ui/src/views/SettingUpdateInfoDialog.vue#L28) |
 | `use-shared-servers-list` | [`xmcl-keystone-ui/src/views/BaseSettingServer.vue#L8`](../xmcl-keystone-ui/src/views/BaseSettingServer.vue#L8) |
 | `version-input-fabric` | [`xmcl-keystone-ui/src/components/ModloaderSelector.vue#L54`](../xmcl-keystone-ui/src/components/ModloaderSelector.vue#L54) |
 | `version-input-forge` | [`xmcl-keystone-ui/src/components/ModloaderSelector.vue#L45`](../xmcl-keystone-ui/src/components/ModloaderSelector.vue#L45) |

@@ -3,7 +3,14 @@ import { mkdtemp, writeFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, test } from 'vitest'
-import { validateUpdateAsset, verifyUpdate } from './verifyUpdate'
+import { getGitHubReleaseFiles, validateUpdateAsset, verifyUpdate } from './verifyUpdate'
+
+test.each([false, true])('browser downloads stay public when authenticated=%s', authenticated => {
+  const asset = { name: 'LauncherMC-0.2.0-beta.2-win-x64.exe', url: 'https://api.github.com/repos/owner/launcher/releases/assets/123', browser_download_url: 'https://github.com/owner/launcher/releases/download/v0.2.0-beta.2/LauncherMC-0.2.0-beta.2-win-x64.exe' }
+  const [file] = getGitHubReleaseFiles([asset], authenticated)
+  expect(file.url).toBe(asset.browser_download_url)
+  expect(file.apiUrl).toBe(authenticated ? asset.url : undefined)
+})
 
 test('accepts the downloaded bytes only when the expected hash matches', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'launcher-hash-'))

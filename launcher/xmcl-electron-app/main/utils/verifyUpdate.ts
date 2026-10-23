@@ -1,5 +1,14 @@
 import { createHash } from 'node:crypto'
 import { createReadStream } from 'node:fs'
+import type { ReleaseFile } from '@xmcl/runtime-api'
+
+export function getGitHubReleaseFiles(assets: Array<{ name: string; url: string; browser_download_url: string }>, authenticated: boolean): ReleaseFile[] {
+  return assets.map(asset => ({
+    name: asset.name,
+    url: asset.browser_download_url,
+    ...(authenticated ? { apiUrl: asset.url } : {}),
+  }))
+}
 
 /** Verify the expanded ASAR, before it is committed as the pending update. */
 export async function verifyUpdate(file: string, expected: string) {
