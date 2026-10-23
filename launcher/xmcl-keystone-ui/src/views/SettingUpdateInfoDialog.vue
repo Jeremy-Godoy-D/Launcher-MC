@@ -7,7 +7,8 @@
     <v-card
       v-if="updateInfo"
       outlined
-      class="visible-scroll max-h-90vh overflow-auto flex flex-col"
+      class="update-info-card flex flex-col overflow-hidden"
+      data-testid="update-info-dialog"
     >
       <v-alert
         v-if="isAppX"
@@ -16,7 +17,7 @@
       >
         {{ t('setting.appxUpdateHint') }}
       </v-alert>
-      <v-card-item>
+      <v-card-item class="shrink-0">
         <v-card-title>
           {{ updateInfo.name }}
         </v-card-title>
@@ -24,20 +25,22 @@
           {{ getLocalDateString(updateInfo.date) }}
         </v-card-subtitle>
       </v-card-item>
-      <v-card-text class="markdown-body flex flex-col overflow-auto">
+      <v-card-text class="markdown-body min-h-0 flex-1 overflow-auto" data-testid="update-release-notes">
         <div v-html="body" />
       </v-card-text>
       <v-alert
         v-if="hintRedownload"
         variant="tonal"
         type="warning"
+        class="shrink-0"
       >
-        {{ t('setting.maunalUpdateHint') }}
+        Descarga el instalador completo, cierra el launcher y ejecútalo. Conserva tu carpeta de datos y mundos.
       </v-alert>
-      <v-card-actions>
+      <v-card-actions class="flex-wrap shrink-0">
         <v-btn
           variant="text"
           @click="openExeInstaller()"
+          data-testid="update-download-installer"
         >
           <v-icon start>
             download
@@ -134,12 +137,13 @@ const hintRedownload = computed(() =>
 
 const openExeInstaller = () => {
   const exeAsset = state.value?.updateInfo?.files?.find((f) => f.name.endsWith('.exe'))
-  window.open(exeAsset?.url || 'https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/latest', 'browser')
+  window.open(exeAsset?.url || 'https://github.com/Jeremy-Godoy-D/Launcher-MC/releases', 'browser')
 }
 const openGithub = () => {
   window.open('https://github.com/Jeremy-Godoy-D/Launcher-MC/releases', 'browser')
 }
 </script>
 
-<style>
+<style scoped>
+.update-info-card { max-height: calc(100dvh - 32px); }
 </style>

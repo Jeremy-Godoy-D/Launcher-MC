@@ -10,6 +10,7 @@ import {
   DownloadUpdateTrackerEvents,
   ElectronUpdateOperation,
   ReleaseInfo,
+  ReleaseFile,
 } from '@xmcl/runtime-api'
 import { DownloadUpdateOptions, LauncherAppUpdater } from '@xmcl/runtime/app'
 import { AnyError, isSystemError } from '@xmcl/utils'
@@ -31,7 +32,7 @@ import { kSettings } from '~/settings'
 import { checksum } from '~/util/fs'
 import ElectronLauncherApp from '../ElectronLauncherApp'
 import { ensureElevateExe } from './elevate'
-import { validateUpdateAsset, verifyUpdate } from './verifyUpdate'
+import { getGitHubReleaseFiles, validateUpdateAsset, verifyUpdate } from './verifyUpdate'
 import { getWindowsUpdateArgs } from './windowsUpdate'
 
 export const DEFAULT_GITHUB_REPO = process.env.LAUNCHER_GITHUB_REPO || 'Jeremy-Godoy-D/Launcher-MC'
@@ -65,7 +66,7 @@ async function downloadAsarUpdate(
   app: ElectronLauncherApp,
   destination: string,
   version: string,
-  files: Array<{ name: string; url: string }> = [],
+  files: ReleaseFile[] = [],
   options?: {
     abortSignal?: AbortSignal
     tracker?: Tracker<DownloadUpdateTrackerEvents>
@@ -90,7 +91,7 @@ async function downloadAsarUpdate(
   const shaAsset = files.find((f) => f.name === shaName)
 
   const defaultBaseUrl = `https://github.com/${DEFAULT_GITHUB_REPO}/releases/download/v${version}/${baseName}`
-  const shaUrl = shaAsset?.url || `${defaultBaseUrl}.sha256`
+  const shaUrl = shaAsset?.apiUrl || shaAsset?.url || `${defaultBaseUrl}.sha256`
   validateUpdateAsset(shaUrl, shaName, DEFAULT_GITHUB_REPO, version)
 
   const sha256Response = await app.fetch(shaUrl, {
@@ -108,7 +109,7 @@ async function downloadAsarUpdate(
 
   const targetAsset = gzAsset || rawAsset
   const isGz = Boolean(gzAsset) || !rawAsset
-  const downloadUrl = targetAsset?.url || (isGz ? `${defaultBaseUrl}.gz` : defaultBaseUrl)
+  const downloadUrl = targetAsset?.apiUrl || targetAsset?.url || (isGz ? `${defaultBaseUrl}.gz` : defaultBaseUrl)
   validateUpdateAsset(downloadUrl, isGz ? gzName : baseName, DEFAULT_GITHUB_REPO, version)
 
   const tempFile = destination + '.tmp'
@@ -245,10 +246,7 @@ export class ElectronUpdater implements LauncherAppUpdater {
       }
     }
 
-    const files = (latest.assets ?? []).map((a: any) => ({
-      url: token ? (a.url || a.browser_download_url) : a.browser_download_url,
-      name: a.name,
-    })) as Array<{ url: string; name: string }>
+    const files = getGitHubReleaseFiles(latest.assets ?? [], Boolean(token))
     const platformString =
       app.platform.os === 'windows' ? 'win' : app.platform.os === 'osx' ? 'mac' : 'linux'
     const version = latest.tag_name.startsWith('v') ? latest.tag_name.substring(1) : latest.tag_name

@@ -15,6 +15,9 @@
           @click="checkUpdate"
         >
           <v-icon>refresh</v-icon>
+          <template #loader>
+            <v-progress-circular indeterminate size="20" width="2" aria-label="Buscando actualizaciones" />
+          </template>
         </v-btn>
       </template>
       
@@ -40,6 +43,7 @@
       
       <template #action>
         <v-btn
+          data-testid="settings-update-details"
           :loading="checkingUpdate || downloadingUpdate || installing"
           :disabled="updateStatus === 'none'"
           :color="updateStatus !== 'none' ? 'primary' : ''"
@@ -47,10 +51,15 @@
           @click="showUpdateInfo()"
           size="small"
         >
+          <template #loader>
+            <v-progress-circular indeterminate size="20" width="2" aria-label="Preparando actualización" />
+          </template>
           <v-icon start size="small" v-if="updateStatus !== 'none'">system_update</v-icon>
           {{
             updateStatus === "none"
               ? t("launcherUpdate.alreadyLatest")
+              : updateInfo?.operation === 'manual'
+                ? 'Ver actualización'
               : updateStatus === "pending"
                 ? t("launcherUpdate.updateToThisVersion")
                 : t("launcherUpdate.installAndQuit")
@@ -62,7 +71,7 @@
     <SettingItemCheckbox
       v-model="autoUpdate"
       title="Actualizaciones automáticas"
-      description="Buscar y preparar nuevas versiones automáticamente desde GitHub Releases al iniciar. Si lo desactivas, podrás buscar e instalar actualizaciones manualmente cuando quieras."
+      description="Buscar nuevas versiones al iniciar. Si una versión requiere el instalador completo, podrás descargarlo desde su ficha."
     />
   </SettingCard>
 </template>
@@ -93,7 +102,7 @@ onMounted(() => {
 })
 
 watch([updateStatus, autoUpdate], ([status, isAuto]) => {
-  if (isAuto && status === 'pending' && !downloadingUpdate.value) {
+  if (isAuto && status === 'pending' && updateInfo.value?.operation !== 'manual' && !downloadingUpdate.value) {
     downloadUpdate().catch(() => {})
   }
 })

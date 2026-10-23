@@ -9,6 +9,8 @@ export interface ReleaseFile {
    * The file download url
    */
   url: string
+  /** Authenticated API endpoint for internal downloads; never open in a browser. */
+  apiUrl?: string
 }
 
 /**

@@ -7,14 +7,14 @@
 **Launcher de escritorio para Minecraft: Java Edition en Windows 10/11 (x64)**  
 Sistema de diseño «Aurora Glass» · Instancias aisladas · Perfiles locales y Microsoft · Actualizador delta integrado
 
-[![Release](https://img.shields.io/badge/version-v0.2.0--beta.1-39d9a1?style=flat-square&logo=github)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases)
+[![Release](https://img.shields.io/badge/version-v0.2.0--beta.2-39d9a1?style=flat-square&logo=github)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11%20x64-0ea5e9?style=flat-square&logo=windows)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases)
 [![Electron](https://img.shields.io/badge/Electron-43-47848F?style=flat-square&logo=electron&logoColor=white)](https://www.electronjs.org/)
 [![Vue](https://img.shields.io/badge/Vue-2.7%20%2B%20Vuetify-3b9b78?style=flat-square&logo=vuedotjs&logoColor=white)](https://vuejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-d4943a?style=flat-square)](LICENSE)
 
-[**Descargar `.exe`**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/tag/v0.2.0-beta.1) · [**Notas de versión**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases) · [**Reportar un problema**](https://github.com/Jeremy-Godoy-D/Launcher-MC/issues) · [**Licencia y Avisos**](NOTICE)
+[**Descargar `.exe`**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/tag/v0.2.0-beta.2) · [**Notas de versión**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases) · [**Reportar un problema**](https://github.com/Jeremy-Godoy-D/Launcher-MC/issues) · [**Licencia y Avisos**](NOTICE)
 
 </div>
 
@@ -71,13 +71,13 @@ Sistema de diseño «Aurora Glass» · Instancias aisladas · Perfiles locales y
   <tbody>
     <tr>
       <td><b>Instalador NSIS (Recomendado)</b></td>
-      <td><code>LauncherMC-0.2.0-beta.1-win-x64.exe</code></td>
+      <td><code>LauncherMC-0.2.0-beta.2-win-x64.exe</code></td>
       <td>Asistente de instalación con selección de ruta y accesos directos en Escritorio y Menú Inicio.</td>
       <td>Descarga manual del instalador en esta versión</td>
     </tr>
     <tr>
       <td><b>Archivo Portable</b></td>
-      <td><code>LauncherMC-0.2.0-beta.1-win-x64.zip</code></td>
+      <td><code>LauncherMC-0.2.0-beta.2-win-x64.zip</code></td>
       <td>Carpeta descomprimible sin instalación en el registro del sistema.</td>
       <td>Reemplazo completo de la carpeta de programa</td>
     </tr>
@@ -170,10 +170,12 @@ Distribuido bajo la licencia **MIT**. Consulta [`LICENSE`](LICENSE) y [`NOTICE`]
 - **Base tecnológica (Upstream):** Derivado de [X Minecraft Launcher (XMCL)](https://github.com/Voxelum/x-minecraft-launcher) (`Copyright (c) 2017-2026 ci010 and X Minecraft Launcher contributors`), cuya licencia original se conserva íntegra en [`launcher/LICENSE-XMCL.txt`](launcher/LICENSE-XMCL.txt) junto con el inventario de dependencias en [`launcher/THIRD_PARTY_NOTICES.txt`](launcher/THIRD_PARTY_NOTICES.txt).
 - **Aviso de marca:** *Minecraft* es una marca registrada de Mojang Synergies AB / Microsoft Corporation. Este proyecto es independiente y no está afiliado ni aprobado por Mojang ni Microsoft.
 
-## Aurora Glass — v0.2.0-beta.1
+## Aurora Glass — v0.2.0-beta.2
 
 El rediseño incorpora centro de lanzamiento, dock, navegación de instancia explícita, fichas de catálogo en hojas, filtros bajo demanda, onboarding de tres etapas y preferencias locales de rendimiento.
 
 CurseForge usa el proxy de [services/curseforge-proxy](services/curseforge-proxy/README.md); no incluir una API key en la compilación. El Worker está activo y se comprobó una instalación real de AppleSkin. Consulta [la validación y sus límites](launcher/IMPLEMENTACION_AURORA.md). Microsoft se pospone en esta versión; el modo local está disponible.
 
 Para actualizar desde beta.3, cierra el launcher y ejecuta el instalador completo en la misma ubicación, o reemplaza la carpeta del programa con el ZIP nuevo. Conserva la carpeta de datos y mundos. Esta entrega omite los assets ASAR para evitar que el actualizador antiguo aplique una descarga sin la verificación nueva. Los binarios no tienen firma Authenticode.
+
+La beta.2 corrige la descarga manual con tokens de GitHub: el botón abre el instalador público, y las notas largas mantienen los botones visibles.
