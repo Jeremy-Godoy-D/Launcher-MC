@@ -195,6 +195,7 @@ jobs:
               $flags += "--prerelease"
             }
             gh release create $env:TAG --target $env:RELEASE_COMMIT @flags
+            if ($LASTEXITCODE -ne 0) { throw 'Failed to create release draft.' }
           } else {
             $isDraft = gh release view $env:TAG --json isDraft --jq .isDraft
             if ($isDraft -ne 'true') { throw 'Published releases are immutable. Use a new version.' }
