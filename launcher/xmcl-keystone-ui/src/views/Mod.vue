@@ -1015,7 +1015,7 @@ const updateSearch = useDebounceFn(() => {
       replace({ query: { ...route.query, keyword: buffer } })
     }
   } else {
-    if (route.query.keyword === '') return
+    if (!route.query.keyword) return
     replace({ query: { ...route.query, keyword: '' } })
   }
 }, 500)

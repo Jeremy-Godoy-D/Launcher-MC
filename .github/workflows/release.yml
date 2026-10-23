@@ -184,12 +184,6 @@ jobs:
 
           gh release view $env:TAG 2>$null | Out-Null
           if ($LASTEXITCODE -ne 0) {
-            # Create the tag with GITHUB_TOKEN so publishing the draft does not trigger a duplicate build.
-            $tagCommit = gh api "repos/$env:GITHUB_REPOSITORY/commits/$env:TAG" --jq .sha 2>$null
-            if ($LASTEXITCODE -ne 0) {
-              gh api --method POST "repos/$env:GITHUB_REPOSITORY/git/refs" -f "ref=refs/tags/$env:TAG" -f "sha=$env:RELEASE_COMMIT" | Out-Null
-              if ($LASTEXITCODE -ne 0) { throw 'Failed to create release tag.' }
-            } elseif ($tagCommit -ne $env:RELEASE_COMMIT) { throw 'Release tag does not match the tested commit.' }
             $flags = @("--title", "Launcher MC $env:TAG", "--generate-notes", "--draft")
             if ($env:IS_PRERELEASE -eq "True" -or $env:IS_PRERELEASE -eq "true") {
               $flags += "--prerelease"
