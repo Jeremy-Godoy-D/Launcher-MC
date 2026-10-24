@@ -19,8 +19,8 @@
     ],
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
-  "currentStage": 3,
-  "nextAction": "Etapa3: cliente tipado independiente de Vue, snapshots inmutables y cola/suscripciones compatibles; después tareas/eventos, i18n/preferencias y Strict Mode. Diseño ya aprobado, no solicitarlo otra vez.",
+  "currentStage": 4,
+  "nextAction": "Etapa4: conectar onboarding/perfil local e instancias reales en Inicio/Biblioteca, crear/importar/lanzar mediante servicios. Cliente/estados/tareas/Intlify/preferencias verificados en 086a281 y STAGE3. Mantener diseño aprobado, no pedir otra aprobación. No reintroducir extras ni activar Microsoft.",
   "stages": [
     {
       "id": 0,
@@ -234,34 +234,70 @@
     {
       "id": 3,
       "title": "Cliente y estados",
-      "status": "active",
+      "status": "complete",
       "gates": [
         {
           "id": "service-state-contracts",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE3.md",
+              "sha256": "46e8d1f80c5fed5a349126272009c79bca673180792f1b233fc23d82f20c0c42"
+            },
+            {
+              "path": "docs/react-migration/STAGE3.json",
+              "sha256": "8b401892be0d5f3607484c4dce2b2b599163b8330c91e319d8fba35794c34ead"
+            }
+          ]
         },
         {
           "id": "tasks-events",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE3.md",
+              "sha256": "46e8d1f80c5fed5a349126272009c79bca673180792f1b233fc23d82f20c0c42"
+            },
+            {
+              "path": "docs/react-migration/STAGE3.json",
+              "sha256": "8b401892be0d5f3607484c4dce2b2b599163b8330c91e319d8fba35794c34ead"
+            }
+          ]
         },
         {
           "id": "i18n-preferences",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE3.md",
+              "sha256": "46e8d1f80c5fed5a349126272009c79bca673180792f1b233fc23d82f20c0c42"
+            },
+            {
+              "path": "docs/react-migration/STAGE3.json",
+              "sha256": "8b401892be0d5f3607484c4dce2b2b599163b8330c91e319d8fba35794c34ead"
+            }
+          ]
         },
         {
           "id": "strict-mode-cleanup",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE3.md",
+              "sha256": "46e8d1f80c5fed5a349126272009c79bca673180792f1b233fc23d82f20c0c42"
+            },
+            {
+              "path": "docs/react-migration/STAGE3.json",
+              "sha256": "8b401892be0d5f3607484c4dce2b2b599163b8330c91e319d8fba35794c34ead"
+            }
+          ]
         }
       ]
     },
     {
       "id": 4,
       "title": "Recorrido principal",
-      "status": "pending",
+      "status": "active",
       "gates": [
         {
           "id": "onboarding-accounts",

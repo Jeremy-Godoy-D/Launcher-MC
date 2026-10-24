@@ -1,6 +1,6 @@
 # Matriz de alcance y paridad
 
-Referencia: beta.2, commit `7671c6f1bdc471d42816241920a262a18aca5a44`. Alcance corregido por el usuario: SCOPE.md. Estado inicial: inventario, **ninguna función implementada aún en React**.
+Referencia: beta.2, commit `7671c6f1bdc471d42816241920a262a18aca5a44`. Alcance corregido por el usuario: SCOPE.md. Las filas siguen pendientes hasta aceptar sus flujos completos; los fundamentos transversales verificados en la etapa 3 constan en STAGE3.md.
 
 `keep`: conservar comportamiento del núcleo. `remove`: retirada autorizada; no migrar UI ni iniciar el extra. `deferred`: conservar datos y compatibilidad, sin activar/configurar en esta entrega. Las rutas son relativas al renderer antiguo salvo indicación. Las pruebas mencionadas son criterios futuros, no resultados ya obtenidos.
 
@@ -71,3 +71,5 @@ Referencia: beta.2, commit `7671c6f1bdc471d42816241920a262a18aca5a44`. Alcance c
 ## Regla para actualizar esta matriz
 
 Cambiar pending a implemented solo con archivos React y contrato conectado; cambiar a verified únicamente con referencia a prueba/recorrido sobre el commit pertinente. Cada fila remove requiere evidencia de desconexión antes del cierre de etapa 8. Cambios de alcance requieren instrucción del usuario en SCOPE, no una preferencia de la IA.
+
+Etapa 3: cliente/estados/tareas/eventos, Intlify y preferencias verificados en `086a281` (STAGE3.md/JSON). Apariencia/rendimiento/vídeo/carrusel/vista ya persisten y se sincronizan; aún no se marca K18/K24/K25 completa porque quedan sus flujos de dominio y compatibilidad integral. La nueva UI principal conserva fixtures hasta la etapa 4; las retiradas del runtime siguen pendientes de la etapa 8.
