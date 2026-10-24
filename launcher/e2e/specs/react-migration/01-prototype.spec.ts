@@ -58,6 +58,7 @@ test('React prototype: both appearances and supported sizes, navigation and auto
 
 test('React prototype: independent selection, filters, dialogue focus and actual video pause', async ({ launcher }) => {
   const { page, window } = await openPrototype(launcher)
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
   const background = page.getByTestId('app-backdrop')
   const initialBackground = await background.evaluate(element => getComputedStyle(element).backgroundImage)
   expect(initialBackground).toContain('vanilla-shaders')
@@ -69,6 +70,8 @@ test('React prototype: independent selection, filters, dialogue focus and actual
   await page.getByRole('button', { name: 'Reanudar presentación' }).click()
   await page.getByTestId('nav-home').focus()
   await page.mouse.move(70, 20)
+  await window.evaluate(win => win.focus())
+  await expect.poll(() => window.evaluate(win => win.isFocused())).toBe(true)
   const video = page.locator('video')
   await expect(video).toHaveAttribute('data-state', 'playing')
   await expect.poll(() => video.evaluate(video => video.currentTime)).toBeGreaterThan(0.1)

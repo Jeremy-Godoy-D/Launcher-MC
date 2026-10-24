@@ -1,4 +1,4 @@
-import { HAS_DEV_SERVER, HOST, IS_DEV, WindowsBuild } from '@/constant'
+import { HAS_DEV_SERVER, HOST, IS_DEV, IS_REACT_RENDERER, WindowsBuild } from '@/constant'
 import browsePreload from '@preload/browse'
 import indexPreload from '@preload/index'
 import indexTogetherPreload from '@preload/indexTogether'
@@ -351,7 +351,7 @@ export class ElectronController implements LauncherAppController {
         session: restoredSession,
         contextIsolation: true,
         sandbox: true,
-        webviewTag: true,
+        webviewTag: !IS_REACT_RENDERER,
       },
       show: false,
     })

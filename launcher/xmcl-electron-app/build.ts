@@ -14,6 +14,10 @@ import { config as electronBuilderConfig } from './build/electron-builder.config
 import { resolveKoffiBinary } from './build/koffi'
 import esbuildConfig from './esbuild.config'
 import { version } from './package.json'
+import { rendererTarget } from '../scripts/renderer'
+
+const renderer = rendererTarget()
+const outputDirectory = renderer.name === 'react' ? 'build/output/react' : 'build/output'
 
 /**
  * @returns Hash string
@@ -69,7 +73,7 @@ async function buildMain(
   await copyFile(await resolveKoffiBinary(koffiPlatform, targetArch), join(__dirname, 'dist', 'koffi.node'))
   const time = ((Date.now() - startTime) / 1000).toFixed(2)
   if (!slient) console.log(`Build completed in ${time}s.`)
-  await copy(path.join(__dirname, '../xmcl-keystone-ui/dist'), path.join(__dirname, './dist/renderer'))
+  await copy(path.join(__dirname, '..', renderer.package, 'dist'), path.join(__dirname, './dist/renderer'))
   if (!slient) console.log('\n')
   return time
 }
@@ -127,6 +131,7 @@ async function start() {
   const dir = !(process.env.BUILD_TARGET || (process.env.RELEASE === 'true'))
   const config: Configuration = {
     ...electronBuilderConfig,
+    directories: { ...electronBuilderConfig.directories, output: outputDirectory },
     async beforePack(context) {
       const time = await buildMain({ ...esbuildConfig, metafile: true }, true, {
         platform: context.packager.platform.nodeName,
@@ -138,7 +143,7 @@ async function start() {
       const suffix = context.arch === 3 ? '-arm64' : context.arch === 0 ? '-ia32' : ''
       const platformName = (process.platform === 'win32' ? 'win' : process.platform === 'darwin' ? 'mac' : 'linux') + suffix
 
-      const dest = `build/output/app-${version}-${platformName}.asar`
+      const dest = `${outputDirectory}/app-${version}-${platformName}.asar`
       const gzipDest = dest + '.gz'
       let src = join(context.appOutDir, 'resources/app.asar')
       if (!existsSync(src)) {
@@ -154,8 +159,9 @@ async function start() {
       // pipeline reads this to tag the `@xmcl/app` npm package, so the
       // portable script installer knows which Electron prebuilt to fetch from
       // the mirror. Same value across platforms/arches, so overwriting is fine.
-      await writeFile('build/output/manifest.json', JSON.stringify({
+      await writeFile(`${outputDirectory}/manifest.json`, JSON.stringify({
         version,
+        renderer: renderer.name,
         electron: context.packager.info.framework.version,
       }, null, 2))
     },

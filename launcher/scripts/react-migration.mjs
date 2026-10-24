@@ -21,6 +21,15 @@ export const requirements = [
 
 export const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex')
 
+export function validateRendererBuild(pkg, targets) {
+  const errors = []
+  if (pkg.scripts['build:renderer'] !== 'tsx scripts/renderer.ts build') errors.push('El build debe usar el selector de renderer')
+  if (targets.default !== 'vue' || targets.vue?.package !== 'xmcl-keystone-ui' || targets.react?.package !== 'xmcl-react-ui') {
+    errors.push('Vue debe seguir como default y ambos paquetes deben conservar sus rutas durante la transición')
+  }
+  return errors
+}
+
 function readReference(repoRoot, ref) {
   if (!ref || typeof ref.path !== 'string' || !/^[a-f0-9]{64}$/.test(ref.sha256 ?? '')) {
     throw new Error('Referencia de evidencia inválida')
@@ -100,8 +109,10 @@ function checkRepository(state) {
   }
   if (state.currentStage < 8) {
     const pkg = JSON.parse(readFileSync(resolve(root, 'launcher/package.json'), 'utf8'))
-    if (pkg.scripts['build:renderer'] !== 'pnpm --prefix=xmcl-keystone-ui build') {
-      // shortcut: selector support can replace this guard in stage 2, but Vue must stay the default until stage 8.
+    if (state.currentStage >= 2) {
+      const targets = JSON.parse(readFileSync(resolve(root, 'launcher/scripts/renderer-targets.json'), 'utf8'))
+      errors.push(...validateRendererBuild(pkg, targets))
+    } else if (pkg.scripts['build:renderer'] !== 'pnpm --prefix=xmcl-keystone-ui build') {
       errors.push('El build público de referencia cambió antes de la etapa de sustitución; comprobar selector/default Vue')
     }
   }

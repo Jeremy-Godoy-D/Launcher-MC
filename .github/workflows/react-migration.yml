@@ -1,0 +1,77 @@
+name: React migration checks
+
+on:
+  pull_request:
+    paths:
+      - 'launcher/**'
+      - 'docs/react-migration/**'
+      - '.github/workflows/react-migration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  renderer:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        renderer: [vue, react]
+    env:
+      LAUNCHER_RENDERER: ${{ matrix.renderer }}
+    defaults:
+      run:
+        working-directory: launcher
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.10.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: launcher/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Types, lint and selector regressions
+        run: |
+          pnpm check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pnpm lint
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pnpm exec vitest run scripts/renderer.test.ts xmcl-react-ui/src/presentation.test.ts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --test scripts/react-migration.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node scripts/react-migration.mjs check
+      - name: Build selected renderer and Windows host
+        run: |
+          pnpm build:renderer
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pnpm --prefix xmcl-electron-app build
+      - name: React package smoke
+        if: matrix.renderer == 'react'
+        run: |
+          pnpm --dir e2e install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pnpm --dir e2e exec playwright install ffmpeg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:XMCL_E2E_EXECUTABLE=(Resolve-Path 'xmcl-electron-app/build/output/react/win-unpacked/Launcher MC.exe').Path
+          $env:XMCL_E2E_LOCALES='es-ES'
+          pnpm --dir e2e exec playwright test specs/react-migration/01-prototype.spec.ts specs/react-migration/02-packaged.spec.ts --reporter=line
+      - name: Vue compatibility smoke
+        if: matrix.renderer == 'vue'
+        run: |
+          pnpm --dir e2e install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pnpm --dir e2e exec playwright install ffmpeg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:XMCL_E2E_EXECUTABLE=(Resolve-Path 'xmcl-electron-app/build/output/win-unpacked/Launcher MC.exe').Path
+          $env:XMCL_E2E_LOCALES='es-ES'
+          pnpm --dir e2e exec playwright test specs/react-migration/03-vue-compatibility.spec.ts --reporter=line
+      - uses: actions/upload-artifact@v4
+        if: always() && matrix.renderer == 'react'
+        with:
+          name: react-migration-evidence
+          path: launcher/e2e/artifacts
+          retention-days: 7

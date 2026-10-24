@@ -355,16 +355,16 @@ export function App() {
         </Link>
         <nav className="main-nav" aria-label="Navegación principal">
           {[
-            { to: '/', label: 'Inicio', Icon: Home, id: 'nav-home' },
-            { to: '/me', label: 'Biblioteca', Icon: Layers, id: 'nav-library' },
-            { to: '/store', label: 'Descubrir', Icon: Compass, id: 'nav-store' },
-          ].map(({ to, label, Icon, id }) => (
+            { to: '/', label: 'Inicio', Icon: Home, testId: 'nav-home' },
+            { to: '/me', label: 'Biblioteca', Icon: Layers, testId: 'nav-library' },
+            { to: '/store', label: 'Descubrir', Icon: Compass, testId: 'nav-store' },
+          ].map(({ to, label, Icon, testId }) => (
             <NavLink
               key={to}
               to={to}
               end={to === '/'}
               title={label}
-              data-testid={id}
+              data-testid={testId}
               className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             >
               <Icon size={21} />

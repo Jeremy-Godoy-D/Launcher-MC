@@ -137,7 +137,7 @@ La profundidad se construye con transparencias, desenfoque localizado, bordes de
 - Cristal localizado con bordes suaves, sin neón ni desenfoques interiores anidados.
 - Movimiento ambiental que respeta la interacción y las preferencias del sistema.
 
-Este documento fusiona el borrador provisional con `src/styles.css` y `src/App.tsx`, incluida la corrección visual del usuario del 2026-10-24: fondo global y glassmorphism. Esta decisión sustituye el material anterior basado solo en profundidad tonal; no equivale a aprobación final. Los tokens describen la implementación de la fixture de etapa 1; no prueban migración funcional, paridad ni aprobación visual humana. La estrategia del primer viewport y la referencia `seed:822102f6440f5816` corresponden al contrato de superficie, no a nuevas reglas globales. Los documentos de desarrollo permanecen fuera de `src` y del artefacto distribuido.
+Este documento fusiona el borrador provisional con `src/styles.css` y `src/App.tsx`, incluida la corrección visual del usuario del 2026-10-24: fondo global y glassmorphism. Esta decisión sustituye el material anterior basado solo en profundidad tonal. La aprobación visual posterior del usuario está registrada en ../../docs/react-migration/DESIGN_APPROVAL.json. Los tokens describen la fixture de etapa 1; no prueban migración funcional ni paridad. La estrategia del primer viewport y la referencia `seed:822102f6440f5816` corresponden al contrato de superficie, no a nuevas reglas globales. Los documentos de desarrollo permanecen fuera de `src` y del artefacto distribuido.
 
 ## Colors
 

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { requirements, sha256, validateState } from './react-migration.mjs'
+import { requirements, sha256, validateState, validateRendererBuild } from './react-migration.mjs'
 
 function fixture(t) {
   const root = mkdtempSync(join(tmpdir(), 'launcher-react-harness-'))
@@ -23,6 +23,14 @@ function fixture(t) {
 test('una etapa activa con criterios pendientes es un estado válido, no una etapa terminada', t => {
   const { root, state } = fixture(t)
   assert.deepEqual(validateState(state, root), [])
+})
+
+test('selector conserva Vue como default y no admite sustituir su entrada', () => {
+  const pkg = { scripts: { 'build:renderer': 'tsx scripts/renderer.ts build' } }
+  const targets = { default: 'vue', vue: { package: 'xmcl-keystone-ui' }, react: { package: 'xmcl-react-ui' } }
+  assert.deepEqual(validateRendererBuild(pkg, targets), [])
+  assert.equal(validateRendererBuild(pkg, { ...targets, default: 'react' }).length, 1)
+  assert.equal(validateRendererBuild({ scripts: { 'build:renderer': 'other' } }, targets).length, 1)
 })
 
 test('detecta cambios accidentales del plan y del alcance aprobado', t => {

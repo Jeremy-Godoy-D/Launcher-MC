@@ -16,7 +16,7 @@ Read ../../docs/react-migration/PLAN.md, SCOPE.md, PARITY.md and state.json from
 
 Xbox/Epic quality and spatial familiarity with an owned identity. Left navigation. Continue-and-play home. Media correction: use each modpack's own resources from its metadata, without manually searching for replacement pack art. Search internet for real Vanilla/fallback imagery/videos, preferably rendered with shaders, with documented permission; no AI artwork or running shaders in the launcher. Rotate featured instance/media and pause on interaction. Fixed light/dark/system. No bubbles, editable themes or arbitrary CSS/background settings.
 
-Visual correction from the user on 2026-10-24: the landscape must also fill the whole window, with glassmorphism on the frame and panels. Preserve obsidian/copper, legibility, opaque fallback and a performance mode without blur. The prototype background follows the featured instance on Home and the selected instance on other routes; its video remains confined to the featured area. This replaces the earlier purely tonal material direction and does not constitute final acceptance of stage 1.
+Visual correction from the user on 2026-10-24: the landscape must also fill the whole window, with glassmorphism on the frame and panels. Preserve obsidian/copper, legibility, opaque fallback and a performance mode without blur. The prototype background follows the featured instance on Home and the selected instance on other routes; its video remains confined to the featured area. This replaces the earlier purely tonal material direction. The user subsequently approved this prototype on 2026-10-24; see ../../docs/react-migration/DESIGN_APPROVAL.json. Functional migration remains pending.
 
 ## Brand and evidence
 
