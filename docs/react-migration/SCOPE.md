@@ -16,7 +16,7 @@ Este documento corrige la conservación indiscriminada de funciones heredadas de
 - Consola integrada e independiente, tareas, progreso, errores recuperables y diagnósticos locales.
 - Actualizador, EXE/ZIP, checksums y enlaces públicos correctos.
 - Onboarding, teclado, accesibilidad, navegación, ayuda local y controles de ventana.
-- El nuevo diseño React con barra lateral, temas fijos claro/oscuro/sistema y presentación automática mediante imágenes/vídeos.
+- El nuevo diseño React con barra lateral, temas fijos claro/oscuro/sistema y presentación automática: recursos propios de cada modpack desde sus metadatos; para Vanilla/fallback buscar imágenes/vídeos reales de Minecraft en internet con fuente/licencia documentadas.
 - La posibilidad normal de entrar a servidores dentro de Minecraft Java; retirar P2P de XMCL no bloquea el multijugador propio de Minecraft.
 
 ## Retirar de la nueva aplicación
@@ -43,6 +43,20 @@ Este documento corrige la conservación indiscriminada de funciones heredadas de
 6. Los enlaces antiguos a extras retirados muestran un mensaje de función no disponible o redirigen de forma documentada a Biblioteca. No activar la función para conservar su ruta.
 7. Mantener las obligaciones MIT, LICENSE y NOTICE de XMCL; eliminar funcionalidades no elimina la atribución legal.
 8. Las ventanas React necesarias quedan reducidas a principal, logger y migración. La entrada browser antigua queda inventariada como retirada, no como pendiente de implementación.
+
+## Corrección posterior de medios
+
+El usuario pidió material de internet en lugar de crearlo y precisó: «si puedes buscar de minecraft vanilla, pero en internet no busquyes las de los modpacks por que esos si usa los mismos recursos que ellos tienen».
+
+- Para modpacks usar directamente sus recursos oficiales (icono, portada, galería y medios autorizados disponibles) mediante sus metadatos CurseForge/Modrinth. No buscarlos manualmente en bancos de imágenes ni inventar recursos del pack.
+- Para Vanilla, ausencia de instancias y fallback ambiental, buscar imágenes/vídeos reales de Minecraft Vanilla en internet. No generar nuevas ilustraciones IA.
+- Si un pack no proporciona vídeo autorizado, mantener su portada/imagen propia sobre un ambiente Vanilla general identificado como tal, conforme a la elección anterior del usuario de vídeo ambiental + portada.
+- La rotación sigue cambiando fondo y destacada con las pausas definidas. No sustituir todos los fondos de packs por Vanilla: esa fue una interpretación errónea de la IA que el usuario corrigió.
+- Documentar autor, URL, permiso/licencia, modificaciones y hash antes de distribuir material. No asumir que estar publicado en internet permite redistribuirlo.
+- Mantener los presupuestos y pausas del plan. Descargar/preparar recursos de distribución controlada, sin streaming de vídeos arbitrarios ni reproductores YouTube dentro del launcher.
+- La imagen generada antes de esta corrección no se incorporó al workspace y no debe copiarse a la app.
+- Preferencia posterior: los paisajes Vanilla pueden y preferiblemente deben verse con shaders para mejorar la presentación. Son imágenes/clips ya renderizados obtenidos de internet: no instalar shaders automáticamente en las instancias ni ejecutar un motor de shaders en el launcher.
+- Revisión visual 2026-10-24: «me gusta pero creo que te olvidaste de el fondo y quiero que agregues glassmorphismo». Extender paisaje a toda la ventana y aplicar cristal a marco/paneles/tarjetas, conservando legibilidad, fallback opaco y rendimiento. No interpretar este comentario como aceptación final del prototipo anterior ni reactivar el editor de temas o burbujas.
 
 ## Evidencia de aceptación del recorte
 

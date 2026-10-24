@@ -15,9 +15,10 @@ Reconstruir la interfaz con React y TypeScript, con identidad gaming propia insp
 | Navegación | Barra lateral persistente. |
 | Inicio | Continuar y jugar; primero la última instancia válida. |
 | Dirección visual | Gaming inmersivo con identidad propia; referencias Xbox/Epic. |
+| Material y fondo | Fondo ambiental en toda la ventana y glassmorphism, corrección del usuario del 2026-10-24. Conservar obsidiana/cobre, legibilidad y coste limitado. |
 | Apariencia | Claro, oscuro y seguir Windows, variantes fijas. |
 | Retiradas visuales | Editor de temas, burbujas, CSS personalizado y selector arbitrario de fondos antiguos. |
-| Nuevos fondos | Imágenes reales de modpacks y vídeos ambientales de Minecraft. |
+| Nuevos fondos | Modpacks: sus propios recursos desde metadatos. Vanilla/sin instancias/fallback: material real buscado en internet, preferentemente con shaders, no generado por IA. |
 | Carrusel | Cambiar fondo y destacada; detenerse al interactuar. |
 | Microsoft | Pospuesto; conservar datos/contratos sin configurar credenciales nuevas. |
 | Seguridad | Condición de aceptación de cada etapa. |
@@ -187,6 +188,8 @@ Referencia: https://raw.githubusercontent.com/intlify/vue-i18n/v11.4.0/packages/
 
 Paisajes de Minecraft, superficies de obsidiana y acento cálido de cobre. Los paisajes expresan el juego; los controles mantienen jerarquía legible.
 
+Corrección del usuario durante la revisión del prototipo: extender el paisaje a toda la ventana y aplicar glassmorphism. El fondo de Inicio sigue a la destacada; en otras pantallas sigue a la instancia seleccionada. Usar sus propios medios de pack o el ambiente Vanilla con shaders según el resolvedor. Cristal en marco, tarjetas y superficies elevadas mediante tintes, borde suave y blur estático limitado; controles interiores sin otro blur. Mantener velo de contraste, variantes clara/oscura, fallback opaco y modo rendimiento sin blur. No añadir un segundo decoder ni reactivar burbujas/editor de temas.
+
 | Token | Oscuro | Claro |
 | --- | --- | --- |
 | Fondo | #0E1117 | #F3F5F8 |
@@ -277,13 +280,15 @@ Migrar main (app/onboarding), logger (procesos/historial/acciones), migration (o
 
 ### 4.1. Resolución de presentación
 
-Resolvedor independiente de componentes. Entrada: identidad/edición/versión/origen/ID de proyecto/icono local/metadatos públicos.
+Resolvedor independiente de componentes. Entrada: identidad/edición/versión/upstream/ID de proyecto, icono local, metadatos propios del pack y manifiesto de ambientes Vanilla autorizados. Buscar en internet solo los ambientes Vanilla; para packs usar los recursos que ellos mismos proporcionan. Corrección final del usuario registrada en SCOPE.md.
 
 ```ts
 type InstancePresentation = {
   instancePath: string
   title: string
+  iconUrl?: string
   coverUrl: string
+  ambientId: string
   posterUrl: string
   videoAssetId?: string
   source: 'project' | 'vanilla' | 'fallback'
@@ -291,7 +296,7 @@ type InstancePresentation = {
 }
 ```
 
-Prioridad: imagen destacada del proyecto identificado → galería → versión Vanilla → imagen empaquetada. Conservar icono local como identidad aunque no sirva a pantalla completa. Identificar por upstream/ID, no por nombre editable. Vídeos genéricos etiquetados ambientales; no afirmar que son grabaciones del pack.
+Prioridad de imagen: destacada propia del proyecto → galería propia → Vanilla compatible → fallback empaquetado. Identificar pack por upstream/ID, no por nombre editable. Usar icono local como identidad aunque su resolución no sirva a pantalla completa. Si hay vídeo propio autorizado, utilizarlo; si no, portada propia junto a vídeo ambiental Vanilla identificado como genérico. No presentar un ambiente genérico como gameplay del pack. Catálogo conserva normalmente sus galerías.
 
 ### 4.2. Vídeos iniciales
 
@@ -299,8 +304,8 @@ Overworld/Nether/End, cada uno con clip en bucle, poster, miniatura, dimensiones
 
 - Máximo 1280×720, 24 fps, 12–20 segundos, MP4 H.264 sin pista de audio.
 - Máximo 5 MiB/clip y 15 MiB totales de vídeo inicial.
-- Material propio o distribución autorizada verificada, documentada antes de empaquetar.
-- Los clips no existen en la referencia: producir/conseguir/optimizar forma parte del trabajo. No marcar este requisito como terminado usando un poster en su lugar.
+- Material real de Minecraft Vanilla obtenido de internet, preferentemente paisajes con shaders ya renderizados, con distribución autorizada verificada/documentada antes de empaquetar. No crear ilustraciones IA ni sintetizar vídeo a partir de ellas. No instalar shaders en instancias por elegir un fondo ni ejecutarlos dentro del launcher.
+- Los clips no existen en la referencia: buscar/verificar/conseguir/optimizar forma parte del trabajo. No marcar este requisito como terminado usando un poster en su lugar.
 
 ### 4.3. Reproducción y coste
 

@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "plan": {
     "path": "docs/react-migration/PLAN.md",
-    "sha256": "8595d10f58038fcc06935c8cf7be6a34f6ac38942c12413b4c0db7a64a60f30a"
+    "sha256": "ea55fb9552eb69f39763bf00ae28e7c4c3c7b575b7d6f727580f75c2705f60e4"
   },
   "scope": {
     "path": "docs/react-migration/SCOPE.md",
-    "sha256": "16b7e8204a84c923dce1c695e4155da409d1df24c19e240fab54fde9f67063d2"
+    "sha256": "9bb6b44e3498e55b3c81f018689fe602e3b4e419d2864d8129cc66f89cabadfc"
   },
   "baseline": {
     "version": "0.2.0-beta.2",
@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 1,
-  "nextAction": "Crear prototipo React del núcleo (marco, Inicio, Biblioteca, Catálogo), medios optimizados y capturas; solicitar revisión visual real antes de extender el diseño.",
+  "nextAction": "Recoger revisión final del prototipo con fondo global y glass en http://127.0.0.1:3001. No cerrar user-design-review ni avanzar a etapa2 sin respuesta real; si hay cambios, corregir/revalidar.",
   "stages": [
     {
       "id": 0,
@@ -33,11 +33,11 @@
           "evidence": [
             {
               "path": "docs/react-migration/PLAN.md",
-              "sha256": "8595d10f58038fcc06935c8cf7be6a34f6ac38942c12413b4c0db7a64a60f30a"
+              "sha256": "ea55fb9552eb69f39763bf00ae28e7c4c3c7b575b7d6f727580f75c2705f60e4"
             },
             {
               "path": "docs/react-migration/SCOPE.md",
-              "sha256": "16b7e8204a84c923dce1c695e4155da409d1df24c19e240fab54fde9f67063d2"
+              "sha256": "9bb6b44e3498e55b3c81f018689fe602e3b4e419d2864d8129cc66f89cabadfc"
             }
           ],
           "note": "Usuario aprobó React y luego confirmó solo núcleo, sin extras, el 2026-10-23."
@@ -121,22 +121,49 @@
     {
       "id": 1,
       "title": "Prototipo y revisión visual",
-      "status": "active",
+      "status": "awaiting_review",
       "gates": [
         {
           "id": "prototype",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE1.md",
+              "sha256": "51cb3144aea0edac2f3ccad8170a83cb25228cc6e20ec8211071ec1fe023b0e5"
+            },
+            {
+              "path": "docs/react-migration/STAGE1.json",
+              "sha256": "06256ee1d2f6c1c7da48956a45a048d6421b901ec5e59c3764849eeb4816265d"
+            }
+          ]
         },
         {
           "id": "media",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE1.md",
+              "sha256": "51cb3144aea0edac2f3ccad8170a83cb25228cc6e20ec8211071ec1fe023b0e5"
+            },
+            {
+              "path": "docs/react-migration/STAGE1.json",
+              "sha256": "06256ee1d2f6c1c7da48956a45a048d6421b901ec5e59c3764849eeb4816265d"
+            }
+          ]
         },
         {
           "id": "visual-tests",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE1.md",
+              "sha256": "51cb3144aea0edac2f3ccad8170a83cb25228cc6e20ec8211071ec1fe023b0e5"
+            },
+            {
+              "path": "docs/react-migration/STAGE1.json",
+              "sha256": "06256ee1d2f6c1c7da48956a45a048d6421b901ec5e59c3764849eeb4816265d"
+            }
+          ]
         },
         {
           "id": "user-design-review",
@@ -340,6 +367,29 @@
           "evidence": []
         }
       ]
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-23",
+      "source": "user",
+      "change": "Medios reales: Vanilla/fallback se busca en internet; packs usan sus propios recursos vía metadatos. No usar la imagen IA generada ni reemplazar fondos de todos los packs por Vanilla.",
+      "previousPlanSha256": "8595d10f58038fcc06935c8cf7be6a34f6ac38942c12413b4c0db7a64a60f30a",
+      "previousScopeSha256": "16b7e8204a84c923dce1c695e4155da409d1df24c19e240fab54fde9f67063d2"
+    },
+    {
+      "date": "2026-10-23",
+      "source": "user",
+      "change": "Priorizar imágenes reales Vanilla con shaders ya renderizados; packs conservan sus propios recursos. No instalar ni ejecutar shaders para el fondo.",
+      "previousPlanSha256": "55c35896706c4546f3d95b97d87fee9f2a309636f88c41f53d52e33530abff01",
+      "previousScopeSha256": "0f69c85567cbeeed08198949abf02a281d60229822039dea617fe0c64f25bd52"
+    },
+    {
+      "date": "2026-10-24",
+      "source": "user",
+      "change": "Revisión visual: extender paisaje a fondo de toda la ventana y añadir glassmorphism. No es aceptación final; conservar contraste/rendimiento y no reintroducir extras.",
+      "previousPlanSha256": "14759855940f8a67672231b46f8c94f374e3828d583006b4c2af001c40a37b95",
+      "previousScopeSha256": "8c0b6136b39ab2a8bcfa982780ceb0971a013c68328bfcb5d196990432a71340"
     }
   ]
 }
