@@ -6,14 +6,14 @@ Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio
 
 ## Bloque actual
 
-Harness y etapa 0 completados. Etapa 1: prototipo React construido y validado con fixtures; el usuario pidió extender fondo a toda la ventana y añadir glassmorphism. Corrección implementada y probada; pendiente de su revisión final, evidencias en STAGE1.md/JSON. Rama: `codex/react-migration`; referencia Git inicial: `7671c6f1bdc471d42816241920a262a18aca5a44`.
+Etapas0/1/2 completadas. El usuario aprobó explícitamente el prototipo con fondo global y glass: «si lo apruebo», evidencia DESIGN_APPROVAL.json. Etapa3 activa: cliente/estados. Infraestructura y pruebas reales de paquetes en STAGE2.md/JSON; código c9b73c2. Rama: codex/react-migration; referencia Git inicial: 7671c6f1bdc471d42816241920a262a18aca5a44.
 
 ## Siguiente acción
 
 1. Ejecutar status/check; leer SCOPE.md antes de interpretar paridad.
-2. Recoger revisión del prototipo actualizado (fondo global+glass) en http://127.0.0.1:3001; si el servidor terminó, pnpm --dir launcher --filter @launcher/react-ui dev. Ya hay doce capturas y dos pruebas Electron aprobadas en react-migration-prototype-glass-final; no reconstruir el prototipo desde cero. No tratar «me gusta pero… agrega glassmorphism» como aprobación de la versión revisada.
-3. Si solicita cambios, implementarlos y repetir las comprobaciones afectadas; si lo acepta, registrar referencia real de su respuesta en user-design-review y cerrar etapa1.
-4. Solo después, etapa2: selector/build/entradas empaquetadas main/logger/migration, Vue por defecto hasta etapa8. Adaptar guard del harness para probar que el selector conserva ese default.
+2. Etapa3: extraer cliente sin Vue a packages/renderer-client; revisar service.ts/syncableState.ts y preload/service.ts, contratos SharedState/ServiceChannels reales. El workspace conserva una entrada xmcl-client-vue que no existe: no confundirla con código disponible.
+3. Probar inmutabilidad, suscripción compartida, cola inicial/herencia/null/cancelación/referencias y Strict Mode antes de conectar pantallas. Preload actual vacía pendingCommits en queueMicrotask; revisar carrera antes de consumidores y mantener compatibilidad Vue.
+4. Después tareas/eventos e i18n/preferencias. Nueve pruebas del harness pasan. No rehacer el prototipo ni pedir otra aprobación; main/logger/migration ya compilan, auxiliares todavía sin implementación funcional.
 
 ## Restricciones y hechos que no deben perderse
 
@@ -28,5 +28,7 @@ Harness y etapa 0 completados. Etapa 1: prototipo React construido y validado co
 - CLI de DevTools rechazado previamente: no reintentar ni eludir. Usar Playwright Electron autorizado.
 - No borrar por otra vía la carpeta temporal cuya limpieza fue rechazada.
 - Las cifras de rendimiento del plan son presupuestos, no mediciones de React.
-- La fixture nueva abre ventana React desde beta.2 usando su index-preload.js real y comprueba windowController.on; no inferir el preload de una ventana transitoria por URL. Pausa nativa window-active evita el foco DOM emulado. No equivale al paquete React completo ni a la retirada de extras.
+- Etapa1 abre una ventana React adicional sobre beta.2; etapa2 ya prueba el paquete React propio. No inferir preload por URL transitoria. Foco nativo explícito antes de medir vídeo, reducedMotion=no-preference en el caso de reproducción y pruebas de ventanas secuenciales; minimizar/reduced-motion deben pausar realmente. No equivale a retirar extras de runtime ni a migrar dominio.
+- Paquete React local: xmcl-electron-app/build/output/react/win-unpacked/Launcher MC.exe, ejecutar únicamente con fixtures temporales. Vue sigue como default en scripts/renderer-targets.json. Generic Electron se instaló con su install.js existente para pruebas Vue; app.getVersion() allí43.5.0 no es versión del launcher público.
+- DeskGap producción compila y pasa tipos; desarrollo sin NODE_ENV=production falla aserción ASCII, no se eliminó esa comprobación ni se afirmó ejecución nativa. Workflow de migración preparado, no probado aún en GitHub.
 - El harness detecta cambios del plan, evidencias ausentes o alteradas y saltos de etapa; no prueba por sí solo que una función esté correcta.

@@ -14,7 +14,7 @@ El usuario autorizó implementar el plan completo, incluyendo los cambios acotad
 
 Los planes anteriores de la raíz son contexto histórico. No reemplazar el plan React por Aurora ni reintroducir burbujas, editor de temas o CSS personalizado. Medios: los modpacks usan sus propios recursos vía metadatos; buscar en internet únicamente Vanilla/fallback, sin imágenes IA. El usuario corrigió la interpretación de usar Vanilla para todos los packs: no repetirla. Fuente/licencia, pausa y coste limitado.
 
-Corrección visual del usuario 2026-10-24: el paisaje también es fondo de toda la ventana, con glassmorphism en marco/paneles. Conservar contraste, fallback opaco y modo rendimiento sin blur; no confundirlo con volver al motor Aurora de temas/burbujas. Revisión humana final pendiente tras estos cambios.
+Corrección visual del usuario 2026-10-24: el paisaje también es fondo de toda la ventana, con glassmorphism en marco/paneles. Conservar contraste, fallback opaco y modo rendimiento sin blur; no confundirlo con volver al motor Aurora de temas/burbujas. El usuario aprobó esta versión: «si lo apruebo», registrado en docs/react-migration/DESIGN_APPROVAL.json. No volver a pedir la misma aprobación.
 
 Mantener Microsoft pospuesto y las credenciales fuera del renderer. Conservar datos del usuario, el proxy y las garantías del actualizador. No tocar `ANALISIS_ARQUITECTURA.md`, archivo preexistente del usuario.
 

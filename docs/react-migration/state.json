@@ -19,8 +19,8 @@
     ],
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
-  "currentStage": 1,
-  "nextAction": "Recoger revisión final del prototipo con fondo global y glass en http://127.0.0.1:3001. No cerrar user-design-review ni avanzar a etapa2 sin respuesta real; si hay cambios, corregir/revalidar.",
+  "currentStage": 3,
+  "nextAction": "Etapa3: cliente tipado independiente de Vue, snapshots inmutables y cola/suscripciones compatibles; después tareas/eventos, i18n/preferencias y Strict Mode. Diseño ya aprobado, no solicitarlo otra vez.",
   "stages": [
     {
       "id": 0,
@@ -121,7 +121,7 @@
     {
       "id": 1,
       "title": "Prototipo y revisión visual",
-      "status": "awaiting_review",
+      "status": "complete",
       "gates": [
         {
           "id": "prototype",
@@ -167,37 +167,74 @@
         },
         {
           "id": "user-design-review",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/DESIGN_APPROVAL.json",
+              "sha256": "b905301d3462acf3162df86daf05be5270570d10e84723db0cdb804daa2a3df1"
+            }
+          ],
+          "approval": {
+            "date": "2026-10-24",
+            "source": "user",
+            "reference": "Respuesta del usuario en este chat, posterior a la captura y entrega ebf87a1: «si lo apruebo». Acepta prototipo con fondo global y glassmorphism, código 21d9fdda21981e76bb1acd1ae4db41ec1b4112cd."
+          }
         }
       ]
     },
     {
       "id": 2,
       "title": "Infraestructura React",
-      "status": "pending",
+      "status": "complete",
       "gates": [
         {
           "id": "build-selector",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE2.md",
+              "sha256": "8a9f7f1d1c62e0e2a1317f4ceec76402f0b4544ead99ec0dd8debeff42ee16bb"
+            },
+            {
+              "path": "docs/react-migration/STAGE2.json",
+              "sha256": "21398f88383ce7386ea438662a7b92cd2d09230ca8849157a2dc7bfcf0ebef5f"
+            }
+          ]
         },
         {
           "id": "windows-build",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE2.md",
+              "sha256": "8a9f7f1d1c62e0e2a1317f4ceec76402f0b4544ead99ec0dd8debeff42ee16bb"
+            },
+            {
+              "path": "docs/react-migration/STAGE2.json",
+              "sha256": "21398f88383ce7386ea438662a7b92cd2d09230ca8849157a2dc7bfcf0ebef5f"
+            }
+          ]
         },
         {
           "id": "packaged-boot",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE2.md",
+              "sha256": "8a9f7f1d1c62e0e2a1317f4ceec76402f0b4544ead99ec0dd8debeff42ee16bb"
+            },
+            {
+              "path": "docs/react-migration/STAGE2.json",
+              "sha256": "21398f88383ce7386ea438662a7b92cd2d09230ca8849157a2dc7bfcf0ebef5f"
+            }
+          ]
         }
       ]
     },
     {
       "id": 3,
       "title": "Cliente y estados",
-      "status": "pending",
+      "status": "active",
       "gates": [
         {
           "id": "service-state-contracts",
