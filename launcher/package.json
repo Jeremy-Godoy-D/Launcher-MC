@@ -16,7 +16,7 @@
         "build:renderer": "tsx scripts/renderer.ts build",
         "build:docs": "tsx scripts/docs.ts",
         "postsign": "pnpm run --prefix=xmcl-electron-app postsign",
-        "check": "pnpm run --prefix=xmcl-runtime-api check && pnpm run --prefix=xmcl-runtime check && pnpm run --prefix=xmcl-electron-app check && pnpm run --prefix=xmcl-keystone-ui check && pnpm run --prefix=xmcl-react-ui check",
+        "check": "pnpm run --prefix=xmcl-runtime-api check && pnpm run --prefix=xmcl-runtime check && pnpm run --prefix=xmcl-electron-app check && pnpm run --prefix=xmcl-keystone-ui check && pnpm run --prefix=packages/renderer-client check && pnpm run --prefix=xmcl-react-ui check",
         "dev:main": "pnpm run --prefix=xmcl-electron-app dev",
         "dev:deskgap": "pnpm run --prefix=deskgap-app dev",
         "dev:renderer": "tsx scripts/renderer.ts dev",

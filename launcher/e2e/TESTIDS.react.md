@@ -6,17 +6,17 @@ This file is the contract between the launcher UI in `xmcl-react-ui/` and the Pl
 
 Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testids` with the selected LAUNCHER_RENDERER. Computed IDs are not resolved by this static registry.
 
-**Total anchors:** 10 (in 3 Vue/TSX files)
+**Total anchors:** 10 (in 7 Vue/TSX files)
 
 | Test ID | Defined in |
 |---|---|
-| `app-backdrop` | [`xmcl-react-ui/src/App.tsx#L313`](../xmcl-react-ui/src/App.tsx#L313) |
-| `app-sidebar` | [`xmcl-react-ui/src/App.tsx#L347`](../xmcl-react-ui/src/App.tsx#L347) |
-| `featured-play` | [`xmcl-react-ui/src/App.tsx#L488`](../xmcl-react-ui/src/App.tsx#L488) |
-| `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L572`](../xmcl-react-ui/src/App.tsx#L572) |
-| `nav-home` | [`xmcl-react-ui/src/App.tsx#L358`](../xmcl-react-ui/src/App.tsx#L358) |
-| `nav-library` | [`xmcl-react-ui/src/App.tsx#L359`](../xmcl-react-ui/src/App.tsx#L359) |
-| `nav-settings` | [`xmcl-react-ui/src/App.tsx#L393`](../xmcl-react-ui/src/App.tsx#L393) |
-| `nav-store` | [`xmcl-react-ui/src/App.tsx#L360`](../xmcl-react-ui/src/App.tsx#L360) |
-| `react-prototype` | [`xmcl-react-ui/src/App.tsx#L310`](../xmcl-react-ui/src/App.tsx#L310) |
-| `store-search` | [`xmcl-react-ui/src/App.tsx#L681`](../xmcl-react-ui/src/App.tsx#L681) |
+| `app-backdrop` | [`xmcl-react-ui/src/App.tsx#L321`](../xmcl-react-ui/src/App.tsx#L321) |
+| `app-sidebar` | [`xmcl-react-ui/src/App.tsx#L355`](../xmcl-react-ui/src/App.tsx#L355) |
+| `featured-play` | [`xmcl-react-ui/src/App.tsx#L496`](../xmcl-react-ui/src/App.tsx#L496) |
+| `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L580`](../xmcl-react-ui/src/App.tsx#L580) |
+| `nav-home` | [`xmcl-react-ui/src/App.tsx#L366`](../xmcl-react-ui/src/App.tsx#L366) |
+| `nav-library` | [`xmcl-react-ui/src/App.tsx#L367`](../xmcl-react-ui/src/App.tsx#L367) |
+| `nav-settings` | [`xmcl-react-ui/src/App.tsx#L401`](../xmcl-react-ui/src/App.tsx#L401) |
+| `nav-store` | [`xmcl-react-ui/src/App.tsx#L368`](../xmcl-react-ui/src/App.tsx#L368) |
+| `react-prototype` | [`xmcl-react-ui/src/App.tsx#L318`](../xmcl-react-ui/src/App.tsx#L318) |
+| `store-search` | [`xmcl-react-ui/src/App.tsx#L689`](../xmcl-react-ui/src/App.tsx#L689) |

@@ -39,7 +39,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           pnpm lint
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          pnpm exec vitest run scripts/renderer.test.ts xmcl-react-ui/src/presentation.test.ts
+          pnpm exec vitest run scripts/renderer.test.ts xmcl-react-ui/src packages/renderer-client xmcl-runtime/service/ServiceStateContainer.test.ts xmcl-runtime/service/ServiceStateManager.test.ts
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --test scripts/react-migration.test.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -58,7 +58,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $env:XMCL_E2E_EXECUTABLE=(Resolve-Path 'xmcl-electron-app/build/output/react/win-unpacked/Launcher MC.exe').Path
           $env:XMCL_E2E_LOCALES='es-ES'
-          pnpm --dir e2e exec playwright test specs/react-migration/01-prototype.spec.ts specs/react-migration/02-packaged.spec.ts --reporter=line
+          pnpm --dir e2e exec playwright test specs/react-migration/01-prototype.spec.ts specs/react-migration/02-packaged.spec.ts specs/react-migration/05-preferences-i18n.spec.ts --reporter=line
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:XMCL_REACT_CLIENT_HARNESS='1'
+          pnpm --dir e2e exec playwright test specs/react-migration/04-client-contracts.spec.ts --reporter=line
       - name: Vue compatibility smoke
         if: matrix.renderer == 'vue'
         run: |

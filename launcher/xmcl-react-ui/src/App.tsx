@@ -39,6 +39,8 @@ import cavesVideo from './assets/ambient/vanilla-caves.mp4'
 import ocean from './assets/ambient/vanilla-ocean.webp'
 import credits from './assets/ambient/credits.json'
 import { allowAmbientMotion, nextFeatured, ROTATION_MS } from './presentation'
+import { usePreferences } from './preferences-context'
+import { useI18n } from './i18n'
 
 declare global {
   interface Window {
@@ -98,7 +100,7 @@ function useMediaSetting(query: string) {
   return matches
 }
 
-function Ambient({ instance, playing }: { instance: Instance; playing: boolean }) {
+function Ambient({ instance, playing, videoEnabled }: { instance: Instance; playing: boolean; videoEnabled: boolean }) {
   const video = useRef<HTMLVideoElement>(null)
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -119,7 +121,7 @@ function Ambient({ instance, playing }: { instance: Instance; playing: boolean }
           event.currentTarget.src = sunset
         }}
       />
-      {instance.video && (
+      {instance.video && videoEnabled && (
         <video
           ref={video}
           src={instance.video}
@@ -200,19 +202,25 @@ function InstanceCard({
 }
 
 export function App() {
+  const { t } = useI18n()
   const location = useLocation()
   const navigate = useNavigate()
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  const { preferences, set: setPreferences, error: preferencesError } = usePreferences()
+  const systemDark = useMediaSetting('(prefers-color-scheme: dark)')
+  const theme = preferences.appearance === 'system' ? systemDark ? 'dark' : 'light' : preferences.appearance
+  const setTheme = (appearance: 'dark' | 'light' | 'system') => setPreferences({ appearance })
   const [featured, setFeatured] = useState(0)
   const [selected, setSelected] = useState('vanilla')
   const [query, setQuery] = useState('')
   const [loader, setLoader] = useState('')
   const restoreFocus = useRef<HTMLElement | null>(null)
-  const [view, setView] = useState<'grid' | 'list'>('grid')
+  const view = preferences.libraryView
+  const setView = (libraryView: 'grid' | 'list') => setPreferences({ libraryView })
   const [hovered, setHovered] = useState(false)
   const [focusWithin, setFocusWithin] = useState(false)
   const [paused, setPaused] = useState(false)
-  const [performanceMode, setPerformanceMode] = useState(false)
+  const performanceMode = preferences.performanceMode
+  const setPerformanceMode = (performanceMode: boolean) => setPreferences({ performanceMode })
   const [focused, setFocused] = useState(() => document.hasFocus())
   const [nativeActive, setNativeActive] = useState(true)
   const [visible, setVisible] = useState(() => !document.hidden)
@@ -266,13 +274,13 @@ export function App() {
     document.documentElement.dataset.performance = String(performanceMode)
   }, [theme, performanceMode])
   useEffect(() => {
-    if (!home || !canMove) return
+    if (!home || !canMove || !preferences.carouselEnabled) return
     const interval = window.setInterval(
       () => setFeatured((index) => nextFeatured(index, instances.length)),
       ROTATION_MS,
     )
     return () => clearInterval(interval)
-  }, [home, canMove])
+  }, [home, canMove, preferences.carouselEnabled])
   const preview = (
     title: string,
     message = 'Esta vista previa utiliza datos de ejemplo. La conexión a tus instancias se implementará después de revisar el diseño.',
@@ -355,9 +363,9 @@ export function App() {
         </Link>
         <nav className="main-nav" aria-label="Navegación principal">
           {[
-            { to: '/', label: 'Inicio', Icon: Home, testId: 'nav-home' },
-            { to: '/me', label: 'Biblioteca', Icon: Layers, testId: 'nav-library' },
-            { to: '/store', label: 'Descubrir', Icon: Compass, testId: 'nav-store' },
+            { to: '/', label: t('react.home'), Icon: Home, testId: 'nav-home' },
+            { to: '/me', label: t('react.library'), Icon: Layers, testId: 'nav-library' },
+            { to: '/store', label: t('react.discover'), Icon: Compass, testId: 'nav-store' },
           ].map(({ to, label, Icon, testId }) => (
             <NavLink
               key={to}
@@ -468,7 +476,7 @@ export function App() {
                     setFocusWithin(false)
                 }}
               >
-                <Ambient key={instance.id} instance={instance} playing={canMove} />
+                <Ambient key={`${instance.id}-${preferences.backgroundVideoEnabled}`} instance={instance} playing={canMove} videoEnabled={preferences.backgroundVideoEnabled} />
                 <div className="featured-shade" />
                 <div className="featured-copy">
                   <div className="featured-runtime">
@@ -767,30 +775,42 @@ export function App() {
               </div>
               <div className="settings-group">
                 <h2>Apariencia y rendimiento</h2>
+                {preferencesError && <p role="status">{preferencesError === 'newer-version'
+                  ? 'Tus preferencias pertenecen a una versión más reciente. Los cambios se aplicarán solo en esta ventana.'
+                  : 'No se pudieron recuperar o guardar todas tus preferencias. Puedes seguir usando el launcher y cambiar estos ajustes.'}</p>}
                 <div className="setting-row">
                   <div>
-                    <strong>Apariencia</strong>
+                    <strong>{t('react.appearance')}</strong>
                     <p>La misma interfaz, con otra luz.</p>
                   </div>
                   <select
-                    aria-label="Apariencia"
-                    value={theme}
-                    onChange={(event) => setTheme(event.target.value as 'dark' | 'light')}
+                    aria-label={t('react.appearance')}
+                    value={preferences.appearance}
+                    onChange={(event) => setTheme(event.target.value as 'dark' | 'light' | 'system')}
                   >
-                    <option value="dark">Oscura</option>
-                    <option value="light">Clara</option>
+                    <option value="system">{t('react.system')}</option>
+                    <option value="dark">{t('react.dark')}</option>
+                    <option value="light">{t('react.light')}</option>
                   </select>
                 </div>
                 <div className="setting-row">
+                  <div><strong>{t('react.ambientVideo')}</strong><p>Reproduce los vídeos disponibles cuando la ventana esté activa.</p></div>
+                  <input type="checkbox" aria-label={t('react.ambientVideo')} checked={preferences.backgroundVideoEnabled} onChange={event => setPreferences({ backgroundVideoEnabled: event.target.checked })} />
+                </div>
+                <div className="setting-row">
+                  <div><strong>{t('react.carousel')}</strong><p>Alterna la instancia destacada mientras no estés interactuando.</p></div>
+                  <input type="checkbox" aria-label={t('react.carousel')} checked={preferences.carouselEnabled} onChange={event => setPreferences({ carouselEnabled: event.target.checked })} />
+                </div>
+                <div className="setting-row">
                   <div>
-                    <strong>Modo rendimiento</strong>
+                    <strong>{t('react.performance')}</strong>
                     <p>
                       Utiliza imágenes estáticas, detiene la presentación y desactiva el desenfoque.
                     </p>
                   </div>
                   <input
                     type="checkbox"
-                    aria-label="Modo rendimiento"
+                    aria-label={t('react.performance')}
                     checked={performanceMode}
                     onChange={(event) => setPerformanceMode(event.target.checked)}
                   />

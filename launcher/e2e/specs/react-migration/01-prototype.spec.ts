@@ -26,7 +26,8 @@ test('React prototype: both appearances and supported sizes, navigation and auto
   const { page, window } = await openPrototype(launcher)
   const errors: string[] = []
   page.on('pageerror', error => errors.push(error.message))
-  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' })
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await page.evaluate(axe.source)
   const reports: unknown[] = []
   const failures: unknown[] = []

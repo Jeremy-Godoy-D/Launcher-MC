@@ -1,0 +1,12 @@
+react:
+  home: Home
+  library: Library
+  discover: Discover
+  settings: Settings
+  appearance: Appearance
+  system: Follow Windows
+  dark: Dark
+  light: Light
+  performance: Performance mode
+  ambientVideo: Ambient video
+  carousel: Automatic presentation
