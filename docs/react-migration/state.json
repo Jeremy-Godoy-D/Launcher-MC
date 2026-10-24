@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "plan": {
+    "path": "docs/react-migration/PLAN.md",
+    "sha256": "8595d10f58038fcc06935c8cf7be6a34f6ac38942c12413b4c0db7a64a60f30a"
+  },
+  "scope": {
+    "path": "docs/react-migration/SCOPE.md",
+    "sha256": "16b7e8204a84c923dce1c695e4155da409d1df24c19e240fab54fde9f67063d2"
+  },
+  "baseline": {
+    "version": "0.2.0-beta.2",
+    "commit": "7671c6f1bdc471d42816241920a262a18aca5a44",
+    "preservedFiles": [
+      {
+        "path": "ANALISIS_ARQUITECTURA.md",
+        "sha256": "e0a2246b6c27efdd1c4bf66be2c0649fbff418cd4b326c9429a50b115da7c6d8"
+      }
+    ],
+    "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
+  },
+  "currentStage": 1,
+  "nextAction": "Crear prototipo React del núcleo (marco, Inicio, Biblioteca, Catálogo), medios optimizados y capturas; solicitar revisión visual real antes de extender el diseño.",
+  "stages": [
+    {
+      "id": 0,
+      "title": "Inventario y referencia beta.2",
+      "status": "complete",
+      "gates": [
+        {
+          "id": "plan-scope",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/PLAN.md",
+              "sha256": "8595d10f58038fcc06935c8cf7be6a34f6ac38942c12413b4c0db7a64a60f30a"
+            },
+            {
+              "path": "docs/react-migration/SCOPE.md",
+              "sha256": "16b7e8204a84c923dce1c695e4155da409d1df24c19e240fab54fde9f67063d2"
+            }
+          ],
+          "note": "Usuario aprobó React y luego confirmó solo núcleo, sin extras, el 2026-10-23."
+        },
+        {
+          "id": "inventory-parity",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE0.md",
+              "sha256": "55cbd493035888defa05906848ded4479266c271a9f83bb6c71e945b75715277"
+            },
+            {
+              "path": "docs/react-migration/STAGE0.json",
+              "sha256": "dd68154ba63538ab8961a64db7d75fe6d25fc7b4461d88984d643e024ffc3e3e"
+            },
+            {
+              "path": "docs/react-migration/inventory.json",
+              "sha256": "0033a4ae24c39d538e6f059d5eb1162bc6e721eef5b7034023cad1e64a7b05cd"
+            }
+          ]
+        },
+        {
+          "id": "baseline-package",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE0.md",
+              "sha256": "55cbd493035888defa05906848ded4479266c271a9f83bb6c71e945b75715277"
+            },
+            {
+              "path": "docs/react-migration/STAGE0.json",
+              "sha256": "dd68154ba63538ab8961a64db7d75fe6d25fc7b4461d88984d643e024ffc3e3e"
+            }
+          ]
+        },
+        {
+          "id": "baseline-visual",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE0.md",
+              "sha256": "55cbd493035888defa05906848ded4479266c271a9f83bb6c71e945b75715277"
+            },
+            {
+              "path": "docs/react-migration/STAGE0.json",
+              "sha256": "dd68154ba63538ab8961a64db7d75fe6d25fc7b4461d88984d643e024ffc3e3e"
+            }
+          ]
+        },
+        {
+          "id": "baseline-performance",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE0.md",
+              "sha256": "55cbd493035888defa05906848ded4479266c271a9f83bb6c71e945b75715277"
+            },
+            {
+              "path": "docs/react-migration/STAGE0.json",
+              "sha256": "dd68154ba63538ab8961a64db7d75fe6d25fc7b4461d88984d643e024ffc3e3e"
+            }
+          ]
+        },
+        {
+          "id": "harness-checks",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE0.md",
+              "sha256": "55cbd493035888defa05906848ded4479266c271a9f83bb6c71e945b75715277"
+            },
+            {
+              "path": "docs/react-migration/STAGE0.json",
+              "sha256": "dd68154ba63538ab8961a64db7d75fe6d25fc7b4461d88984d643e024ffc3e3e"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "title": "Prototipo y revisión visual",
+      "status": "active",
+      "gates": [
+        {
+          "id": "prototype",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "media",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "visual-tests",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "user-design-review",
+          "status": "pending",
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Infraestructura React",
+      "status": "pending",
+      "gates": [
+        {
+          "id": "build-selector",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "windows-build",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "packaged-boot",
+          "status": "pending",
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Cliente y estados",
+      "status": "pending",
+      "gates": [
+        {
+          "id": "service-state-contracts",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "tasks-events",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "i18n-preferences",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "strict-mode-cleanup",
+          "status": "pending",
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Recorrido principal",
+      "status": "pending",
+      "gates": [
+        {
+          "id": "onboarding-accounts",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "home-carousel",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "library-instance-launch",
+          "status": "pending",
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Espacio de instancia",
+      "status": "pending",
+      "gates": [
+        {
+          "id": "instance-content",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "worlds-settings",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "console-isolation",
+          "status": "pending",
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Catálogo público",
+      "status": "pending",
+      "gates": [
+        {
+          "id": "catalog-search",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "catalog-install",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "catalog-network-failures",
+          "status": "pending",
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Superficies restantes",
+      "status": "pending",
+      "gates": [
+        {
+          "id": "global-settings-updater",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "remaining-windows",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "accessibility",
+          "status": "pending",
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Sustitución y retirada de extras",
+      "status": "pending",
+      "gates": [
+        {
+          "id": "react-default",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "removed-features",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "consumer-builds",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "data-compatibility",
+          "status": "pending",
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Validación y publicación",
+      "status": "pending",
+      "gates": [
+        {
+          "id": "full-validation",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "isolated-installer",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "performance-security",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "release-assets",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "publication",
+          "status": "pending",
+          "evidence": []
+        }
+      ]
+    }
+  ]
+}
