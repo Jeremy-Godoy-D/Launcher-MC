@@ -16,6 +16,24 @@ vi.mock('~/app', () => ({
 describe('UserService user persistence', () => {
   const directories: string[] = []
 
+  test('selects only existing profiles using current server data, without trusting stale renderer fields', async () => {
+    const directory = await mkdtemp(join(process.cwd(), '.test-user-service-'))
+    directories.push(directory)
+    const state = new UserState() as UserState & { subscribeAll(callback: () => void): void }
+    state.subscribeAll = vi.fn()
+    const profile = (id: string) => ({ id, name: id, textures: { SKIN: { url: '' } } })
+    const current = { id: 'OFFLINE', username: 'OFFLINE', authority: AUTHORITY_DEV, selectedProfile: 'first', invalidated: false, expiredAt: 0, profiles: { first: profile('first'), second: profile('second') } }
+    state.users.OFFLINE = current
+    const app = { appDataPath: directory, minecraftDataPath: directory, getLogger: () => ({ log: vi.fn(), warn: vi.fn(), error: vi.fn() }), controller: { broadcast: vi.fn() }, registry: { get: vi.fn() }, registryDisposer: vi.fn() } as any
+    const service = new UserService(app, { registerStatic: () => state } as any)
+    await service.selectUserGameProfile({ ...current, profiles: {}, authority: 'forged', username: 'forged' }, 'second')
+    expect(state.users.OFFLINE.selectedProfile).toBe('second')
+    expect(Object.keys(state.users.OFFLINE.profiles)).toEqual(['first', 'second'])
+    expect(state.users.OFFLINE.authority).toBe(AUTHORITY_DEV)
+    await expect(service.selectUserGameProfile(current, 'missing')).rejects.toThrow('Profile not found')
+    await expect(service.selectUserGameProfile({ ...current, id: '__proto__' }, 'first')).rejects.toThrow('Profile not found')
+  })
+
   afterEach(async () => {
     vi.useRealTimers()
     await Promise.all(directories.splice(0).map(directory => rm(directory, { recursive: true, force: true })))

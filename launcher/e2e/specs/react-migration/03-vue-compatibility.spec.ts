@@ -13,5 +13,13 @@ test('Vue default keeps the existing-instance launcher shell', async ({ launcher
   })
   await shell.goto('/me')
   await expect(launcher.main.getByTestId('instance-card-Vue client QA')).toBeVisible()
+  await launcher.main.evaluate(async () => {
+    const service = (window as any).serviceChannels.open('UserService')
+    const older = await service.call('login', { username: 'VueProfileA_QA', authority: 'x://dev' })
+    await service.call('login', { username: 'VueProfileB_QA', authority: 'x://dev' })
+    await service.call('selectUserGameProfile', older, older.selectedProfile)
+  })
+  await shell.goto('/accounts')
+  await expect(launcher.main.getByTestId('me-user-switcher')).toContainText('VueProfileA_QA')
   await snap(launcher, 'vue-default-existing', 'Renderer Vue predeterminado con instancia sintética, sin lanzar Minecraft.')
 })

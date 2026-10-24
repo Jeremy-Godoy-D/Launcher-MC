@@ -41,6 +41,8 @@ import credits from './assets/ambient/credits.json'
 import { allowAmbientMotion, nextFeatured, ROTATION_MS } from './presentation'
 import { usePreferences } from './preferences-context'
 import { useI18n } from './i18n'
+import { Accounts } from './features/accounts/Accounts'
+import { useAccounts } from './features/accounts/context'
 
 declare global {
   interface Window {
@@ -203,6 +205,7 @@ function InstanceCard({
 
 export function App() {
   const { t } = useI18n()
+  const accounts = useAccounts()
   const location = useLocation()
   const navigate = useNavigate()
   const { preferences, set: setPreferences, error: preferencesError } = usePreferences()
@@ -233,6 +236,7 @@ export function App() {
   const library = location.pathname === '/me'
   const catalog = location.pathname.startsWith('/store')
   const settings = location.pathname === '/setting'
+  const accountsPage = location.pathname === '/accounts'
   const title = home
     ? 'Inicio'
     : library
@@ -241,7 +245,7 @@ export function App() {
         ? 'Descubrir'
         : settings
           ? 'Ajustes'
-          : 'Tu instancia'
+          : accountsPage ? t('react.accounts.title') : 'Tu instancia'
   const canMove = allowAmbientMotion({
     focused: focused && nativeActive,
     visible,
@@ -326,7 +330,7 @@ export function App() {
         <div className="titlebar-left">
           <Box size={15} />
           <span>Launcher MC</span>
-          <span className="preview-label">Vista previa · datos de ejemplo</span>
+          <span className="preview-label">{accountsPage ? t('react.accounts.saved') : 'Vista previa · datos de ejemplo'}</span>
         </div>
         <div className="window-controls">
           <button
@@ -405,15 +409,16 @@ export function App() {
           </NavLink>
           <button
             className="account"
-            title="Cuenta local"
-            onClick={() => preview('Tu cuenta local')}
+            title={t('react.accounts.title')}
+            data-testid="nav-accounts"
+            onClick={() => navigate('/accounts')}
           >
             <span className="avatar">
               <UserRound size={20} />
             </span>
             <span>
-              <strong>Jugador</strong>
-              <small>Perfil local</small>
+              <strong>{accounts ? accounts.profile?.name ?? t('react.accounts.noneSelected') : 'Jugador'}</strong>
+              <small>{accounts ? t('react.accounts.title') : 'Perfil local'}</small>
             </span>
             <ChevronDown size={15} />
           </button>
@@ -827,7 +832,8 @@ export function App() {
               </div>
             </section>
           )}
-          {!home && !library && !catalog && !settings && (
+          {accountsPage && <Accounts />}
+          {!home && !library && !catalog && !settings && !accountsPage && (
             <section className="instance-page">
               <div className="page-heading">
                 <div>

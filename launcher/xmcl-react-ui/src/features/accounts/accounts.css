@@ -1,0 +1,75 @@
+@layer components {
+  .accounts-page {
+    max-width: 1000px;
+  }
+  .account-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px;
+  }
+  .account-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .account-row-identity {
+    flex: 1;
+    min-width: 120px;
+    display: grid;
+    gap: 5px;
+    overflow-wrap: anywhere;
+  }
+  .account-row-identity > span,
+  .form-help {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .accounts-page > .form-help {
+    margin-top: 20px;
+  }
+  .active-profile {
+    color: var(--accent-ink);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+  }
+  .local-profile-form {
+    display: grid;
+    gap: 10px;
+  }
+  .profile-input-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .profile-input-row > input {
+    flex: 1;
+    min-width: 180px;
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--canvas);
+    color: var(--ink);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .form-error {
+    color: var(--ink);
+    padding: 12px;
+    background: var(--elevated);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    line-height: 1.5;
+  }
+  .dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+}

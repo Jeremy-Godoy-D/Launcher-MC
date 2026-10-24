@@ -8,6 +8,7 @@ import { RuntimeProvider } from './runtime'
 import { PreferencesProvider } from './preferences-context'
 import { PreferencesStore } from './preferences'
 import { I18nProvider } from './i18n'
+import { AccountsProvider } from './features/accounts/context'
 import './styles.css'
 
 const router = createHashRouter([{ path: '*', element: <App /> }])
@@ -21,7 +22,7 @@ createRoot(document.getElementById('root')!).render(
     <RuntimeProvider client={client}>
       <PreferencesProvider store={preferences}>
         <I18nProvider client={client}>
-          <RouterProvider router={router} />
+          {client ? <AccountsProvider><RouterProvider router={router} /></AccountsProvider> : <RouterProvider router={router} />}
         </I18nProvider>
       </PreferencesProvider>
     </RuntimeProvider>

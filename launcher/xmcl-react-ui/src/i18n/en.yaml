@@ -10,3 +10,33 @@ react:
   performance: Performance mode
   ambientVideo: Ambient video
   carousel: Automatic presentation
+  accounts:
+    title: Accounts
+    saved: Profiles saved on this device
+    description: Choose the profile you will use to play. Each local name keeps its identity.
+    playerName: Player name
+    nameHelp: Use 3–16 letters, digits or underscores, without spaces.
+    duplicate: This local profile already exists. Select Use or choose another name.
+    create: Create local profile
+    saving: Saving…
+    actionError: Could not complete the action. Your data is still saved; try again.
+    runtimeRequired: Open this page in Launcher MC to manage your profiles.
+    loading: Loading saved profiles…
+    loadError: Could not load your accounts. Restart the launcher to try again.
+    storageError: Your selection applies in this window but could not be saved on this device.
+    local: Local profile
+    external: Existing account · sign-in deferred
+    active: Active
+    use: Use
+    useName: 'Use {name}'
+    remove: Remove
+    removeName: 'Remove {name}'
+    empty: You have no profiles yet. Create a local one to prepare your first game.
+    addTitle: Add a local profile
+    microsoftDeferred: Microsoft is deferred. Existing accounts are preserved; no credentials are requested here.
+    removeTitle: 'Remove profile {name}?'
+    removeDescription: This removes the profile from the launcher. Your instances, files and worlds are preserved. You can add the same local name again.
+    cancel: Cancel
+    confirmRemove: Remove profile
+    close: Close
+    noneSelected: No profile selected

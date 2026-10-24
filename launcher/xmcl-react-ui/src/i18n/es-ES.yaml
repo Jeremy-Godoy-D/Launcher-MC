@@ -10,3 +10,33 @@ react:
   performance: Modo rendimiento
   ambientVideo: Vídeo ambiental
   carousel: Presentación automática
+  accounts:
+    title: Cuentas
+    saved: Perfiles guardados en este equipo
+    description: Elige el perfil que usarás al jugar. Cada nombre local conserva su identidad.
+    playerName: Nombre del jugador
+    nameHelp: Entre 3 y 16 letras, números o guiones bajos, sin espacios.
+    duplicate: Ya existe ese perfil local. Selecciónalo con Usar o elige otro nombre.
+    create: Crear perfil local
+    saving: Guardando…
+    actionError: No se pudo completar la acción. Tus datos siguen guardados; vuelve a intentarlo.
+    runtimeRequired: Abre esta pantalla en Launcher MC para gestionar tus perfiles.
+    loading: Cargando perfiles guardados…
+    loadError: No se pudieron cargar tus cuentas. Reinicia el launcher para volver a intentarlo.
+    storageError: La selección se aplicará en esta ventana; no se pudo guardar en este equipo.
+    local: Perfil local
+    external: Cuenta existente · inicio de sesión pospuesto
+    active: Activo
+    use: Usar
+    useName: 'Usar {name}'
+    remove: Eliminar
+    removeName: 'Eliminar {name}'
+    empty: Aún no tienes perfiles. Crea uno local para preparar tu primera partida.
+    addTitle: Añadir un perfil local
+    microsoftDeferred: Microsoft está pospuesto. Las cuentas existentes se conservan; aquí no se solicitan credenciales.
+    removeTitle: '¿Eliminar el perfil {name}?'
+    removeDescription: Se retirará este perfil del launcher. Tus instancias, archivos y mundos se conservan. Puedes volver a añadir el mismo nombre local.
+    cancel: Cancelar
+    confirmRemove: Eliminar perfil
+    close: Cerrar
+    noneSelected: Sin perfil seleccionado

@@ -2,6 +2,7 @@
 import { download } from '@xmcl/file-transfer'
 import {
   AUTHORITY_MICROSOFT,
+  AUTHORITY_DEV,
   UserException,
   Users,
   UserServiceKey,
@@ -165,8 +166,11 @@ export class UserService extends StatefulService<UserState> implements IUserServ
   }
 
   async removeUserGameProfile(userProfile: UserProfile, gameProfileId: string): Promise<void> {
+    requireObject(userProfile)
+    requireString(gameProfileId)
     const current = this.state.users[userProfile.id]
     if (current) {
+      if (current.authority !== AUTHORITY_DEV) throw new TypeError('Only local profiles can be removed')
       delete current.profiles[gameProfileId]
       const remainingIds = Object.keys(current.profiles)
       if (remainingIds.length === 0) {
@@ -305,8 +309,12 @@ export class UserService extends StatefulService<UserState> implements IUserServ
   }
 
   async selectUserGameProfile(userProfile: UserProfile, gameProfileId: string): Promise<void> {
-    userProfile.selectedProfile = gameProfileId
-    this.state.userProfile(userProfile)
+    requireObject(userProfile)
+    requireString(gameProfileId)
+    const current = Object.hasOwn(this.state.users, userProfile.id) ? this.state.users[userProfile.id] : undefined
+    if (!current || !Object.hasOwn(current.profiles, gameProfileId)) throw new TypeError('Profile not found')
+    // The renderer may hold an older snapshot; only change selection on the current account.
+    this.state.userProfile({ ...current, selectedProfile: gameProfileId })
   }
 
   @Singleton(p => p.id)

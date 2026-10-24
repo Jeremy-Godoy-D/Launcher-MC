@@ -5,6 +5,7 @@ import { ImageStorage } from '~/infra'
 import { UserService } from './UserService'
 import { kUserTokenStorage } from './userTokenStore'
 import { getUUID } from './utils/offlineUser'
+import { isValidLocalProfileName } from '@xmcl/runtime-api/src/util/offlineUser'
 
 export const pluginOffineUser: LauncherAppPlugin = async (app) => {
   const OFFLINE_USER_ID = 'OFFLINE'
@@ -32,6 +33,7 @@ export const pluginOffineUser: LauncherAppPlugin = async (app) => {
   })
   userService.registerAccountSystem(AUTHORITY_DEV, {
     async login({ username, properties }) {
+      if (!isValidLocalProfileName(username)) throw new TypeError('Invalid local profile name')
       const auth = offline(username, properties?.uuid)
       auth.selectedProfile.id = getUUID(username)
 
