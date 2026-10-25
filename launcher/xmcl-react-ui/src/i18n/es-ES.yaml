@@ -100,6 +100,49 @@ react:
     success: Instancia guardada. Puedes abrirla para revisar su configuración.
     checkPending: Archivos procesados. Se está comprobando si quedan pendientes.
     open: Ver instancia
+  launch:
+    title: 'Jugar: {name}'
+    description: Revisa la preparación de esta instancia antes de iniciar Minecraft.
+    profile: 'Perfil: {name}'
+    checking: Comprobando instancia, instalación y Java…
+    preparing: Preparando el juego…
+    ready: Comprobaciones terminadas. Puedes iniciar el juego.
+    needsInstall: Se requiere preparar o reparar archivos del juego, del pack o de Java. Continuar puede descargar archivos.
+    java: 'Java previsto: {version}'
+    javaAfterInstall: La versión de Java se determinará al resolver Minecraft y su loader.
+    autoJava: Si falta un Java compatible, el launcher lo descargará automáticamente al confirmar. No necesitas cambiar el Java del sistema.
+    javaInstalling: 'Descargando y comprobando Java {version} para el launcher…'
+    javaWebsite: Descargar Java desde Eclipse Adoptium
+    javaManualHelp: También puedes instalar una versión compatible desde la página oficial y volver a detectarla. Las instalaciones existentes se conservan.
+    javaRedetect: Volver a detectar Java
+    javaFallback: El Java configurado no está disponible o no es compatible. Se usará uno compatible para esta partida, conservando tu configuración.
+    reason_profile: Elige un perfil local válido antes de jugar. Microsoft sigue pospuesto.
+    reason_path: La carpeta de esta instancia no está disponible o no tiene permisos. No se creará otra carpeta en su lugar.
+    reason_changed: La configuración de la instancia cambió durante la preparación. Revísala de nuevo antes de jugar.
+    reason_files: Quedan archivos pendientes, sin resolver o con errores de integridad. Corrige su instalación antes de jugar.
+    reason_java: No se pudo preparar un Java válido y compatible. Revisa la configuración o reintenta la descarga.
+    reason_mods: Hay archivos de mods que no se pudieron leer. Revísalos antes de jugar.
+    reason_version: La versión de juego no es válida o no se pudo resolver. Revisa la configuración de la instancia.
+    reason_network: No se pudo preparar o iniciar el juego. Revisa la conexión y los archivos; puedes volver a comprobarlo.
+    reason_cancelled: Lanzamiento cancelado. Se conservan los archivos y la preparación completada.
+    reason_process: No se pudo confirmar o detener el proceso. Comprueba el estado de la partida antes de reintentar.
+    reason_memory: La memoria configurada no es válida o supera la RAM del equipo. Revisa los valores de Java y memoria.
+    reason_permission: No hay permisos suficientes para preparar o iniciar el juego. Revisa los permisos de sus carpetas y Java.
+    reason_disk: No hay espacio suficiente en disco. Libera espacio antes de reintentar.
+    chooseProfile: Elegir perfil
+    library: Ir a la biblioteca
+    running: En ejecución
+    finished: La partida ha terminado.
+    stop: Detener partida
+    cancel: Cancelar lanzamiento
+    cancelHelp: El paso en curso puede terminar; cancelar impide iniciar el juego y conserva los archivos preparados.
+    tasks: '{count} tareas activas'
+    progressError: No se pudo consultar el progreso. La preparación puede continuar.
+    close: Cerrar
+    play: Jugar
+    view: Ver partida
+    installPlay: Instalar y jugar
+    retry: Volver a comprobar
   setup:
     nextAction: Al terminar
     choice_library: Ir a la biblioteca

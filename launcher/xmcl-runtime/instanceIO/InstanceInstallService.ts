@@ -6,7 +6,7 @@ import {
   InstanceLockSchema,
   computeFileUpdates,
   mergeInstanceInstallManifest,
-  type InstanceFile,
+  InstanceFile,
   type InstanceUpstream,
 } from '@xmcl/instance'
 import { ModrinthV2Client } from '@xmcl/modrinth'
@@ -955,11 +955,14 @@ export class InstanceInstallService extends AbstractService implements IInstance
       const status = new InstanceInstallStatus()
       status.instance = path
       let disposed = false
-      let revision = 0
-      const refreshPending = async () => {
-        const currentRevision = ++revision
+      const refreshPending = () => this.mutex.of(`instance-install-status:${path}`).runExclusive(async () => {
         try {
           const profiles = await readPendingInstalls(path)
+          const unresolved = await readJSON(join(path, 'unresolved-files.json')).catch(error => {
+            if (isSystemError(error) && error.code === 'ENOENT') return []
+            throw error
+          })
+          const unresolvedFiles = InstanceFile.array().parse(unresolved)
           const count = profiles.reduce((total, { state }) => {
             if (!hasInstallWork(state) && state.supersededPaths?.length) return total
             const committed = new Set(state.committedPath ?? [])
@@ -967,12 +970,15 @@ export class InstanceInstallService extends AbstractService implements IInstance
             // every target file has already been published.
             return total + Math.max(1, activeInstallFiles(state).filter(file => !committed.has(file.path)).length)
           }, 0)
-          if (!disposed && currentRevision === revision) status.pendingFileCountSet(count)
+          if (!disposed) {
+            status.pendingFileCountSet(count)
+            status.unresolvedFilesSet(unresolvedFiles)
+          }
         } catch (error) {
           this.warn('Failed to read pending instance installs', error)
-          if (!disposed && currentRevision === revision) status.pendingFileCountSet(Math.max(1, status.pendingFileCount))
+          if (!disposed) status.pendingFileCountSet(Math.max(1, status.pendingFileCount))
         }
-      }
+      })
       // Native watchers can coalesce atomic replacements or lose a removed
       // staging directory. Our own writes explicitly refresh the shared state.
       this.pendingInstallRefreshers.set(path, refreshPending)
@@ -1011,17 +1017,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
             await refreshPending()
             return
           }
-          if (ev === 'add' || ev === 'change') {
-            if (filePath === 'unresolved-files.json') {
-              const unresolvedFilesPath = join(path, 'unresolved-files.json')
-              const unresolvedFiles = await readJSON(unresolvedFilesPath).catch(() => [])
-              status.unresolvedFilesSet(unresolvedFiles)
-            }
-          } else if (ev === 'unlink') {
-            if (filePath === 'unresolved-files.json') {
-              status.unresolvedFilesSet([])
-            }
-          }
+          if (filePath === 'unresolved-files.json' && (ev === 'add' || ev === 'change' || ev === 'unlink')) await refreshPending()
         })
         .add('.')
 

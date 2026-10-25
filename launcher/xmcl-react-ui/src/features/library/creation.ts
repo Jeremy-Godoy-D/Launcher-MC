@@ -31,7 +31,7 @@ const containsControls = (value: string) =>
 export function validInstanceName(name: string) {
   return name.length <= 100 && !containsControls(name) && validateInstanceName(name) === true
 }
-const validVersionId = (value: string) =>
+export const validVersionId = (value: string) =>
   value.length <= 200 && !containsControls(value) && validateInstanceName(value) === true
 
 export function creationOptions(

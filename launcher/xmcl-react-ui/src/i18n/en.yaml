@@ -100,6 +100,49 @@ react:
     success: Instance saved. Open it to review its configuration.
     checkPending: Files processed. Checking for pending files.
     open: View instance
+  launch:
+    title: 'Play: {name}'
+    description: Review this instance before starting Minecraft.
+    profile: 'Profile: {name}'
+    checking: Checking the instance, installation and Java…
+    preparing: Preparing the game…
+    ready: Checks complete. You can start the game.
+    needsInstall: Game, pack or Java files need preparation or repair. Continuing may download files.
+    java: 'Expected Java: {version}'
+    javaAfterInstall: The Java version will be determined when Minecraft and its loader are resolved.
+    autoJava: If a compatible Java is missing, the launcher will download it automatically after confirmation. You do not need to change the system Java.
+    javaInstalling: 'Downloading and checking Java {version} for the launcher…'
+    javaWebsite: Download Java from Eclipse Adoptium
+    javaManualHelp: You can also install a compatible version from the official website and detect it again. Existing installations are preserved.
+    javaRedetect: Detect Java again
+    javaFallback: The configured Java is unavailable or incompatible. A compatible Java will be used for this game; your configuration is preserved.
+    reason_profile: Choose a valid local profile before playing. Microsoft remains deferred.
+    reason_path: This instance folder is unavailable or not writable. A replacement folder will not be created.
+    reason_changed: The instance configuration changed during preparation. Review it again before playing.
+    reason_files: Files are pending, unresolved or failed integrity checks. Fix the installation before playing.
+    reason_java: Could not prepare a valid compatible Java. Review the configuration or retry the download.
+    reason_mods: Some mod files could not be read. Review them before playing.
+    reason_version: The game version is invalid or could not be resolved. Review the instance configuration.
+    reason_network: Could not prepare or start the game. Check the connection and files, then review it again.
+    reason_cancelled: Launch cancelled. Files and completed preparation are preserved.
+    reason_process: Could not confirm or stop the process. Check the game status before trying again.
+    reason_memory: The memory configuration is invalid or exceeds the computer RAM. Review Java and memory settings.
+    reason_permission: Insufficient permissions to prepare or start the game. Review folder and Java permissions.
+    reason_disk: Insufficient disk space. Free space before trying again.
+    chooseProfile: Choose profile
+    library: Go to the library
+    running: Running
+    finished: The game has ended.
+    stop: Stop game
+    cancel: Cancel launch
+    cancelHelp: The current step may finish; cancelling prevents starting the game and keeps prepared files.
+    tasks: '{count} active tasks'
+    progressError: Could not retrieve progress. Preparation may continue.
+    close: Close
+    play: Play
+    view: View game
+    installPlay: Install and play
+    retry: Check again
   setup:
     nextAction: After setup
     choice_library: Go to the library

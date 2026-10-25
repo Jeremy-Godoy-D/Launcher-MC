@@ -97,13 +97,15 @@ describe('InstanceInstallService progressive installation', () => {
       }),
     }
     const sharedStates = new Map<string, InstanceInstallStatus>()
+    const revalidators = new Map<string, () => Promise<void>>()
     const stateManager = {
       registerOrGet: vi.fn(async (
         key: string,
-        factory: () => Promise<[InstanceInstallStatus, () => void]>,
+        factory: () => Promise<[InstanceInstallStatus, () => void, () => Promise<void>]>,
       ) => {
         if (sharedStates.has(key)) return sharedStates.get(key)!
-        const [state, dispose] = await factory()
+        const [state, dispose, revalidate] = await factory()
+        revalidators.set(key, revalidate)
         sharedStates.set(key, state)
         disposers.push(dispose)
         return state
@@ -174,6 +176,7 @@ describe('InstanceInstallService progressive installation', () => {
       instanceService,
       resourceManager,
       worker,
+      refreshStatus: () => revalidators.get(`instance-install://${instancePath}`)!(),
     }
   }
 
@@ -842,6 +845,23 @@ describe('InstanceInstallService progressive installation', () => {
     expect(await readFile(join(f.instancePath, ready.path), 'utf8')).toBe(ready.path)
     expect(await readPendingInstalls(f.instancePath)).toEqual([])
     await vi.waitFor(() => expect(status.pendingFileCount).toBe(0))
+  })
+
+  it('loads unresolved files at acquisition/revalidation and fails closed on a malformed file', async () => {
+    const f = await fixture()
+    const file = f.file('mods/missing.jar')
+    const unresolved = join(f.instancePath, 'unresolved-files.json')
+    await writeJson(unresolved, [file])
+    const status = await f.service.watchInstanceInstall(f.instancePath)
+    expect(status.unresolvedFiles).toEqual([file])
+    await writeJson(unresolved, null)
+    await f.refreshStatus()
+    expect(status.pendingFileCount).toBeGreaterThan(0)
+    expect(Array.isArray(status.unresolvedFiles)).toBe(true)
+    await rm(unresolved)
+    await f.refreshStatus()
+    expect(status.unresolvedFiles).toEqual([])
+    expect(status.pendingFileCount).toBe(0)
   })
 
   it.each([false, true])('reconciles a staged manifest after retry without removing a newer revision (%s)', async (newerRevision) => {

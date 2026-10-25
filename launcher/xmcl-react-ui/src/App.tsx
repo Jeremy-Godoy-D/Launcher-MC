@@ -46,6 +46,8 @@ import { useAccounts } from './features/accounts/context'
 import { useLibrary } from './features/library/context'
 import { instanceIcon, loaderName, type SavedInstance } from './features/library/model'
 import { AddInstance } from './features/library/AddInstance'
+import { useLaunch } from './features/launch/context'
+import { LaunchDialog } from './features/launch/LaunchDialog'
 
 declare global {
   interface Window {
@@ -144,12 +146,16 @@ function InstanceCard({
   onManage,
   onPlay,
   onOptions,
+  running,
+  busy,
 }: {
   instance: Instance
   view: 'grid' | 'list'
   onManage: (instance: Instance) => void
   onPlay: (instance: Instance) => void
   onOptions: (instance: Instance) => void
+  running?: boolean
+  busy?: boolean
 }) {
   const { t } = useI18n()
   return (
@@ -178,12 +184,13 @@ function InstanceCard({
         <div className="instance-card-actions">
           <span className="ready">
             <span />
-            {t('react.instances.saved')}
+            {t(running ? 'react.launch.running' : busy ? 'react.launch.preparing' : 'react.instances.saved')}
           </span>
           <button
             className="icon-button"
             aria-label={`Jugar ${instance.name}`}
             onClick={() => onPlay(instance)}
+            disabled={busy}
           >
             <Play size={17} fill="currentColor" />
           </button>
@@ -204,6 +211,7 @@ export function App() {
   const { t } = useI18n()
   const accounts = useAccounts()
   const savedLibrary = useLibrary()
+  const launch = useLaunch()
   const instances = (savedLibrary?.status === 'ready' ? savedLibrary.instances : []).map(presentInstance)
   const location = useLocation()
   const navigate = useNavigate()
@@ -262,7 +270,7 @@ export function App() {
     reducedMotion,
     performanceMode,
     interacting: hovered || focusWithin,
-    dialogOpen: !!dialog || showCredits || !!adding,
+    dialogOpen: !!dialog || showCredits || !!adding || !!launch?.dialog || !!launch?.running.length,
     manuallyPaused: paused,
   })
 
@@ -318,10 +326,9 @@ export function App() {
   }, [location.pathname])
   const play = (instance: Instance) => {
     if (!savedLibrary?.select(instance.id)) return
-    preview(
-      `Jugar: ${instance.name}`,
-      t('react.instances.launchPending', { name: instance.name }),
-    )
+    restoreFocus.current = document.activeElement as HTMLElement
+    const selected = accounts?.selected
+    launch?.store.open(instance.id, instance.name, selected && accounts.profile ? { userId: selected.id, profileId: accounts.profile.id, name: accounts.profile.name } : undefined)
   }
   const changeFeatured = (direction: number) => {
     setPaused(true)
@@ -344,7 +351,7 @@ export function App() {
   ) : null
 
   return (
-    <div className="app" data-testid="react-prototype" data-performance={performanceMode} data-motion-state={JSON.stringify({ focused, nativeActive, visible, reducedMotion, hovered, focusWithin, paused })}>
+    <div className="app" data-testid="react-prototype" data-performance={performanceMode} data-motion-state={JSON.stringify({ focused, nativeActive, visible, reducedMotion, hovered, focusWithin, paused, gameRunning: !!launch?.running.length })}>
       <div
         className="app-backdrop"
         data-testid="app-backdrop"
@@ -515,7 +522,7 @@ export function App() {
                   <div className="featured-runtime">
                     <span>
                       <span className="status-dot" />
-                      {t('react.instances.saved')}
+                      {t(launch?.running.some(process => process.path === instance.id) ? 'react.launch.running' : 'react.instances.saved')}
                     </span>
                     <span>
                       {instance.loader} · {instance.version}
@@ -529,9 +536,10 @@ export function App() {
                       className="button primary"
                       data-testid="featured-play"
                       onClick={() => play(instance)}
+                      disabled={launch?.phase === 'preparing'}
                     >
                       <Play size={19} fill="currentColor" />
-                      Jugar
+                      {t(launch?.running.some(process => process.path === instance.id) ? 'react.launch.view' : 'react.launch.play')}
                     </button>
                     <button
                       className="button on-art"
@@ -585,6 +593,8 @@ export function App() {
                     <InstanceCard
                       key={instance.id}
                       instance={instance}
+                      running={launch?.running.some(process => process.path === instance.id)}
+                      busy={launch?.phase === 'preparing'}
                       view="grid"
                       onPlay={play}
                       onManage={manage}
@@ -655,6 +665,8 @@ export function App() {
                   <InstanceCard
                     key={instance.id}
                     instance={instance}
+                    running={launch?.running.some(process => process.path === instance.id)}
+                    busy={launch?.phase === 'preparing'}
                     view={view}
                     onPlay={play}
                     onManage={manage}
@@ -864,9 +876,9 @@ export function App() {
                     Minecraft {current.version} · {current.loader}
                   </p>
                 </div>
-                <button className="button primary" onClick={() => play(current)}>
+                <button className="button primary" disabled={launch?.phase === 'preparing'} onClick={() => play(current)}>
                   <Play size={18} fill="currentColor" />
-                  Jugar
+                    {t(launch?.running.some(process => process.path === current.id) ? 'react.launch.view' : 'react.launch.play')}
                 </button>
               </div>
               <div className="instance-tabs">
@@ -904,6 +916,7 @@ export function App() {
           </footer>
         </div>
       </main>
+      {launch && <LaunchDialog launch={launch} returnFocus={restoreFocus} />}
       {savedLibrary && <AddInstance open={!!adding} initialMode={adding ?? 'create'} onClose={() => setAdding(undefined)} returnFocus={restoreFocus} onCreated={path => {
         setAdding(undefined)
         if (savedLibrary.select(path)) void navigate('/instance')
