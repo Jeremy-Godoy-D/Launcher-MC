@@ -1,5 +1,6 @@
 import { writeFile } from 'node:fs/promises'
 import { test, expect, snap } from '../../helpers/scratch'
+import { seedReactLibrary } from '../../helpers/react-library'
 
 test('selected React package boots all entries and decodes its shipped video', async ({
   launcher,
@@ -8,6 +9,8 @@ test('selected React package boots all entries and decodes its shipped video', a
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   await expect(page.getByTestId('react-prototype')).toBeVisible()
+  await seedReactLibrary(page)
+  await expect(page.locator('.featured h2')).toHaveText('Mi mundo')
   expect(page.url()).toMatch(/xmcl\.runtime\/index\.html/)
   await expect(page.getByTestId('app-backdrop')).toBeVisible()
   const main = await launcher.app.browserWindow(page)
@@ -27,7 +30,7 @@ test('selected React package boots all entries and decodes its shipped video', a
   await snap(
     launcher,
     'react-package-home',
-    'Renderer React desde el paquete Windows, datos de ejemplo.',
+    'Renderer React desde el paquete Windows, instancias sintéticas del servicio real.',
   )
   await page.getByRole('button', { name: 'Siguiente instancia' }).click()
   await page.getByRole('button', { name: 'Siguiente instancia' }).click()

@@ -10,6 +10,24 @@ react:
   performance: Modo rendimiento
   ambientVideo: Vídeo ambiental
   carousel: Presentación automática
+  instances:
+    saved: Guardada en este equipo
+    connected: Biblioteca del equipo · migración en curso
+    subtitle: Tus instancias de Minecraft Java, en un solo lugar.
+    description: Continúa tu aventura o administra esta instancia.
+    ambient: Paisaje ambiental de Minecraft Vanilla.
+    runtimeRequired: Abre Launcher MC para ver tus instancias guardadas.
+    loading: Cargando tus instancias…
+    loadError: No se pudo cargar la biblioteca. Reintenta para recuperar tus instancias.
+    retry: Reintentar
+    empty: Tu primera aventura empieza aquí.
+    emptyHelp: Aún no tienes instancias Java. La creación e importación se conectarán en el siguiente bloque de la migración.
+    noneSelected: Sin instancia seleccionada
+    choose: Elegir en la biblioteca
+    missingSelection: La instancia seleccionada ya no está disponible. Elige otra para continuar.
+    storageError: La selección se aplicará en esta ventana; no se pudo guardar en este equipo.
+    launchPending: 'Se ha seleccionado «{name}». El lanzamiento todavía no está conectado en React. No se inicia Minecraft.'
+    featurePending: Esta función sigue pendiente en la migración a React. Tus instancias guardadas se conservan.
   accounts:
     title: Cuentas
     saved: Perfiles guardados en este equipo

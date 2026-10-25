@@ -26,10 +26,14 @@ export type StateDescriptor<T extends object> = {
   load: (client: RendererClient) => Promise<SharedState<T>>
 }
 
-export function useSharedState<T extends object>({ key, Type, load }: StateDescriptor<T>) {
+export function useSharedStateStore<T extends object>({ key, Type, load }: StateDescriptor<T>) {
   const client = useClient()
   // A descriptor key includes all resource parameters; changing the key selects another store.
-  const store = useMemo(() => client.state(key, Type, () => load(client)), [client, key, Type])
+  return useMemo(() => client.state(key, Type, () => load(client)), [client, key, Type])
+}
+
+export function useSharedState<T extends object>(descriptor: StateDescriptor<T>) {
+  const store = useSharedStateStore(descriptor)
   return useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
 }
 

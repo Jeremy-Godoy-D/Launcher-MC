@@ -549,6 +549,7 @@
     letter-spacing: -1px;
     font-weight: 650;
     max-width: 590px;
+    overflow-wrap: anywhere;
   }
   .featured-copy > p {
     max-width: 350px;
@@ -556,6 +557,7 @@
     line-height: 1.6;
     color: #e1e5eb;
     margin-top: 14px;
+    overflow-wrap: anywhere;
   }
   .featured-actions {
     display: flex;
@@ -928,6 +930,10 @@
     gap: 20px;
     overflow: auto;
     margin: 0 0 20px;
+  }
+  .instance-page .page-heading > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
   .instance-tabs button {
     color: var(--muted);

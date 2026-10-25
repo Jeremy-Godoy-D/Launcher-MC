@@ -3,6 +3,7 @@ import { dirname, resolve } from 'node:path'
 import { writeFile } from 'node:fs/promises'
 import axe from 'axe-core'
 import { test, expect, snap, type LauncherFixture } from '../../helpers/scratch'
+import { seedReactLibrary } from '../../helpers/react-library'
 
 const url = pathToFileURL(resolve(dirname(fileURLToPath(import.meta.url)), '../../../xmcl-react-ui/dist/index.html')).href
 
@@ -16,6 +17,8 @@ async function openPrototype(launcher: LauncherFixture) {
   }, url)
   const page = await opening
   await expect(page.getByTestId('react-prototype')).toBeVisible()
+  await seedReactLibrary(page)
+  await expect(page.locator('.featured h2')).toHaveText('Mi mundo')
   expect(await page.evaluate(() => typeof window.windowController?.on)).toBe('function')
   const window = await launcher.app.browserWindow(page)
   await window.evaluate(win => win.focus())
@@ -41,7 +44,7 @@ test('React prototype: both appearances and supported sizes, navigation and auto
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
         await page.waitForFunction(() => [...document.images].filter(image => image.getBoundingClientRect().top < innerHeight && image.getBoundingClientRect().bottom > 0).every(image => image.complete && image.naturalWidth > 0))
         const name = `prototype-${appearance}-${width}-${section}`
-        await snap({ ...launcher, main: page }, name, `Prototipo React, ${appearance}, ${width}px, ${section}; datos de ejemplo.`)
+        await snap({ ...launcher, main: page }, name, `React, ${appearance}, ${width}px, ${section}; instancias sintéticas del servicio real, catálogo de ejemplo.`)
         await page.screenshot({ path: testInfo.outputPath(`${name}.png`) })
         const result = await page.evaluate(async () => {
           const { violations, incomplete } = await (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } })

@@ -10,6 +10,24 @@ react:
   performance: Performance mode
   ambientVideo: Ambient video
   carousel: Automatic presentation
+  instances:
+    saved: Saved on this device
+    connected: Local library · migration in progress
+    subtitle: Your Minecraft Java instances, in one place.
+    description: Continue your adventure or manage this instance.
+    ambient: Minecraft Vanilla ambient scenery.
+    runtimeRequired: Open Launcher MC to view your saved instances.
+    loading: Loading your instances…
+    loadError: Could not load the library. Try again to recover your instances.
+    retry: Try again
+    empty: Your first adventure starts here.
+    emptyHelp: You have no Java instances yet. Creation and import will be connected in the next migration block.
+    noneSelected: No instance selected
+    choose: Choose from the library
+    missingSelection: The selected instance is no longer available. Choose another to continue.
+    storageError: The selection applies to this window; it could not be saved on this device.
+    launchPending: 'Selected “{name}”. Launching is not connected in React yet. Minecraft will not start.'
+    featurePending: This feature is still pending in the React migration. Your saved instances are preserved.
   accounts:
     title: Accounts
     saved: Profiles saved on this device

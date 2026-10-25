@@ -58,7 +58,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $env:XMCL_E2E_EXECUTABLE=(Resolve-Path 'xmcl-electron-app/build/output/react/win-unpacked/Launcher MC.exe').Path
           $env:XMCL_E2E_LOCALES='es-ES'
-          pnpm --dir e2e exec playwright test specs/react-migration/01-prototype.spec.ts specs/react-migration/02-packaged.spec.ts specs/react-migration/05-preferences-i18n.spec.ts specs/react-migration/06-accounts.spec.ts specs/react-migration/07-onboarding.spec.ts --reporter=line
+          pnpm --dir e2e exec playwright test specs/react-migration/01-prototype.spec.ts specs/react-migration/02-packaged.spec.ts specs/react-migration/05-preferences-i18n.spec.ts specs/react-migration/06-accounts.spec.ts specs/react-migration/07-onboarding.spec.ts specs/react-migration/09-library.spec.ts --reporter=line
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $env:XMCL_REACT_CLIENT_HARNESS='1'
           pnpm --dir e2e exec playwright test specs/react-migration/04-client-contracts.spec.ts --reporter=line

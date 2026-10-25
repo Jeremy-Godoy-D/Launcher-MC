@@ -43,6 +43,8 @@ import { usePreferences } from './preferences-context'
 import { useI18n } from './i18n'
 import { Accounts } from './features/accounts/Accounts'
 import { useAccounts } from './features/accounts/context'
+import { useLibrary } from './features/library/context'
+import { instanceIcon, loaderName, type SavedInstance } from './features/library/model'
 
 declare global {
   interface Window {
@@ -57,40 +59,28 @@ declare global {
   }
 }
 
-const optimized = projects[0]
-const instances = [
-  {
-    id: 'vanilla',
-    name: 'Mi mundo',
-    version: '1.21.1',
-    loader: 'Vanilla',
-    image: sunset,
-    icon: '',
-    description: 'Un refugio entre montañas. Una aventura que continúa.',
-    video: undefined as string | undefined,
-  },
-  {
-    id: 'optimized',
-    name: optimized.title,
-    version: '1.21.1',
-    loader: 'Fabric',
-    image: optimized.gallery.find((image) => image.featured)?.url ?? sunset,
-    icon: optimized.icon,
-    description: 'Tu Minecraft de siempre, preparado para ir más lejos.',
-    video: undefined as string | undefined,
-  },
-  {
-    id: 'exploration',
-    name: 'Bajo la superficie',
-    version: '1.20.4',
-    loader: 'Vanilla',
-    image: caves,
-    icon: '',
-    description: 'Hay todo un mundo esperando al otro lado de la luz.',
-    video: cavesVideo,
-  },
-]
-type Instance = (typeof instances)[number]
+function presentInstance(instance: SavedInstance) {
+  const icon = instanceIcon(instance.icon)
+  const caveScene = instance.runtime.minecraft.startsWith('1.20.')
+  const pack = !!instance.upstream && instance.upstream.type !== 'server'
+  return {
+    id: instance.path, name: instance.name,
+    version: instance.runtime.minecraft || instance.version,
+    loader: loaderName(instance), icon,
+    // shortcut: use the pack's stored icon as its cover; resolve provider galleries in the catalog/media block.
+    image: pack && icon ? icon : caveScene ? caves : sunset,
+    video: !pack && caveScene ? cavesVideo : undefined,
+    description: instance.description,
+    ambientFallback: !pack || !icon,
+  }
+}
+type Instance = ReturnType<typeof presentInstance>
+
+function StoredImage({ src, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) {
+  return <img {...props} src={src} onError={event => {
+    if (event.currentTarget.getAttribute('src') !== sunset) event.currentTarget.src = sunset
+  }} />
+}
 
 function useMediaSetting(query: string) {
   const [matches, setMatches] = useState(() => matchMedia(query).matches)
@@ -160,6 +150,7 @@ function InstanceCard({
   onPlay: (instance: Instance) => void
   onOptions: (instance: Instance) => void
 }) {
+  const { t } = useI18n()
   return (
     <article key={instance.id} className={`instance-card ${view === 'list' ? 'instance-row' : ''}`}>
       <button
@@ -167,14 +158,14 @@ function InstanceCard({
         onClick={() => onManage(instance)}
         aria-label={`Administrar ${instance.name}`}
       >
-        <img src={instance.image} alt="" loading="lazy" />
+        <StoredImage src={instance.image} alt="" loading="lazy" />
         <span className="art-shade" />
         <span className="runtime-tag">{instance.loader}</span>
       </button>
       <div className="instance-card-body">
         <div className="instance-identity">
           {instance.icon ? (
-            <img src={instance.icon} alt="" />
+            <StoredImage src={instance.icon} alt="" />
           ) : (
             <Box size={22} aria-hidden="true" />
           )}
@@ -186,7 +177,7 @@ function InstanceCard({
         <div className="instance-card-actions">
           <span className="ready">
             <span />
-            Lista para jugar
+            {t('react.instances.saved')}
           </span>
           <button
             className="icon-button"
@@ -211,14 +202,15 @@ function InstanceCard({
 export function App() {
   const { t } = useI18n()
   const accounts = useAccounts()
+  const savedLibrary = useLibrary()
+  const instances = (savedLibrary?.status === 'ready' ? savedLibrary.instances : []).map(presentInstance)
   const location = useLocation()
   const navigate = useNavigate()
   const { preferences, set: setPreferences, error: preferencesError } = usePreferences()
   const systemDark = useMediaSetting('(prefers-color-scheme: dark)')
   const theme = preferences.appearance === 'system' ? systemDark ? 'dark' : 'light' : preferences.appearance
   const setTheme = (appearance: 'dark' | 'light' | 'system') => setPreferences({ appearance })
-  const [featured, setFeatured] = useState(0)
-  const [selected, setSelected] = useState('vanilla')
+  const [featuredPath, setFeaturedPath] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [loader, setLoader] = useState('')
   const restoreFocus = useRef<HTMLElement | null>(null)
@@ -235,8 +227,12 @@ export function App() {
   const [dialog, setDialog] = useState<{ title: string; message: string } | null>(null)
   const [showCredits, setShowCredits] = useState(false)
   const reducedMotion = useMediaSetting('(prefers-reduced-motion: reduce)')
-  const instance = instances[featured]
-  const current = instances.find((instance) => instance.id === selected)!
+  const current = instances.find(instance => instance.id === savedLibrary?.current?.path)
+  const instance = instances.find(instance => instance.id === featuredPath) ?? current ?? instances[0]
+  const featured = instances.findIndex(item => item.id === instance?.id)
+  useEffect(() => {
+    if (featuredPath === null && instance) setFeaturedPath(instance.id)
+  }, [featuredPath, instance?.id])
   const home = location.pathname === '/'
   const library = location.pathname === '/me'
   const catalog = location.pathname.startsWith('/store')
@@ -283,16 +279,16 @@ export function App() {
     document.documentElement.dataset.performance = String(performanceMode)
   }, [theme, performanceMode])
   useEffect(() => {
-    if (!home || !canMove || !preferences.carouselEnabled) return
+    if (!home || !canMove || !preferences.carouselEnabled || instances.length < 2) return
     const interval = window.setInterval(
-      () => setFeatured((index) => nextFeatured(index, instances.length)),
+      () => setFeaturedPath(instances[nextFeatured(featured, instances.length)].id),
       ROTATION_MS,
     )
     return () => clearInterval(interval)
-  }, [home, canMove, preferences.carouselEnabled])
+  }, [home, canMove, preferences.carouselEnabled, featured, savedLibrary?.data])
   const preview = (
     title: string,
-    message = 'Esta vista previa utiliza datos de ejemplo. La conexión a tus instancias se implementará después de revisar el diseño.',
+    message = t('react.instances.featurePending'),
   ) => {
     restoreFocus.current = document.activeElement as HTMLElement
     setDialog({ title, message })
@@ -312,16 +308,26 @@ export function App() {
     setLoader('')
   }, [location.pathname])
   const play = (instance: Instance) => {
-    setSelected(instance.id)
+    if (!savedLibrary?.select(instance.id)) return
     preview(
       `Jugar: ${instance.name}`,
-      `Se ha seleccionado «${instance.name}» en la vista previa. No se inicia Minecraft ni se modifican tus archivos.`,
+      t('react.instances.launchPending', { name: instance.name }),
     )
   }
   const changeFeatured = (direction: number) => {
     setPaused(true)
-    setFeatured((index) => nextFeatured(index, instances.length, direction))
+    if (instances.length) setFeaturedPath(instances[nextFeatured(featured, instances.length, direction)].id)
   }
+  const manage = (item: Instance) => {
+    if (savedLibrary?.select(item.id)) navigate('/instance')
+  }
+  const libraryState = !savedLibrary || savedLibrary.status !== 'ready' || !instances.length ? (
+    <div className="empty" role={!savedLibrary || savedLibrary.status === 'error' ? 'alert' : 'status'} data-testid="library-state">
+      <Box size={28} aria-hidden="true" />
+      <h2>{t(!savedLibrary ? 'react.instances.runtimeRequired' : savedLibrary.status === 'loading' ? 'react.instances.loading' : savedLibrary.status === 'error' ? 'react.instances.loadError' : 'react.instances.empty')}</h2>
+      {savedLibrary?.status === 'error' ? <button className="button secondary" disabled={savedLibrary.validating} onClick={() => void savedLibrary.retry()}>{t('react.instances.retry')}</button> : savedLibrary?.status === 'ready' && <p>{t('react.instances.emptyHelp')}</p>}
+    </div>
+  ) : null
 
   return (
     <div className="app" data-testid="react-prototype" data-performance={performanceMode} data-motion-state={JSON.stringify({ focused, nativeActive, visible, reducedMotion, hovered, focusWithin, paused })}>
@@ -329,13 +335,13 @@ export function App() {
         className="app-backdrop"
         data-testid="app-backdrop"
         aria-hidden="true"
-        style={{ backgroundImage: `url(${home ? instance.image : current.image})` }}
+        style={{ backgroundImage: `url(${JSON.stringify((home ? instance?.image : current?.image) ?? sunset)}), url(${JSON.stringify(sunset)})` }}
       />
       <header className="titlebar">
         <div className="titlebar-left">
           <Box size={15} />
           <span>Launcher MC</span>
-          <span className="preview-label">{accountsPage ? t('react.accounts.saved') : 'Vista previa · datos de ejemplo'}</span>
+          <span className="preview-label">{accountsPage ? t('react.accounts.saved') : catalog ? 'Vista previa · datos de ejemplo' : t('react.instances.connected')}</span>
         </div>
         <div className="window-controls">
           <button
@@ -391,12 +397,12 @@ export function App() {
         </nav>
         <div className="sidebar-instance">
           <span className="sidebar-caption">Instancia seleccionada</span>
-          <button onClick={() => navigate('/instance')} title={current.name}>
+          <button onClick={() => navigate('/instance')} title={current?.name} disabled={!current}>
             <Box size={20} />
             <span>
-              <strong>{current.name}</strong>
+              <strong>{current?.name ?? t('react.instances.noneSelected')}</strong>
               <small>
-                {current.version} · {current.loader}
+                {current ? `${current.version} · ${current.loader}` : t('react.instances.choose')}
               </small>
             </span>
             <ChevronRight size={15} />
@@ -467,6 +473,8 @@ export function App() {
           </div>
         </div>
         <div className="page-scroll">
+          {(home || library) && savedLibrary?.storageError && <p role="alert">{t('react.instances.storageError')}</p>}
+          {(home || library) && savedLibrary?.path && savedLibrary.status === 'ready' && !current && !!instances.length && <p role="status">{t('react.instances.missingSelection')} <Link to="/me">{t('react.instances.choose')}</Link></p>}
           {home && (
             <div className="home-page">
               <div className="page-heading">
@@ -475,7 +483,8 @@ export function App() {
                   <p>Vuelve a tu mundo o encuentra una nueva aventura.</p>
                 </div>
               </div>
-              <section
+              {libraryState}
+              {instance && <section
                 className="featured"
                 aria-label="Instancia destacada"
                 onMouseEnter={() => setHovered(true)}
@@ -486,20 +495,21 @@ export function App() {
                     setFocusWithin(false)
                 }}
               >
-                <Ambient key={`${instance.id}-${preferences.backgroundVideoEnabled}`} instance={instance} playing={canMove} videoEnabled={preferences.backgroundVideoEnabled} />
+                <Ambient key={`${instance.id}-${instance.image}-${instance.video}-${preferences.backgroundVideoEnabled}`} instance={instance} playing={canMove} videoEnabled={preferences.backgroundVideoEnabled} />
                 <div className="featured-shade" />
                 <div className="featured-copy">
                   <div className="featured-runtime">
                     <span>
                       <span className="status-dot" />
-                      Lista para jugar
+                      {t('react.instances.saved')}
                     </span>
                     <span>
                       {instance.loader} · {instance.version}
                     </span>
                   </div>
                   <h2>{instance.name}</h2>
-                  <p>{instance.description}</p>
+                  <p>{instance.description || t('react.instances.description')}</p>
+                  {instance.ambientFallback && <p>{t('react.instances.ambient')}</p>}
                   <div className="featured-actions">
                     <button
                       className="button primary"
@@ -511,10 +521,7 @@ export function App() {
                     </button>
                     <button
                       className="button on-art"
-                      onClick={() => {
-                        setSelected(instance.id)
-                        navigate('/instance')
-                      }}
+                      onClick={() => manage(instance)}
                     >
                       Administrar
                       <ArrowRight size={17} />
@@ -530,28 +537,28 @@ export function App() {
                     <button
                       className="icon-button"
                       aria-label="Instancia anterior"
-                      onClick={() => changeFeatured(-1)}
+                      onClick={() => changeFeatured(-1)} disabled={instances.length < 2}
                     >
                       <ChevronLeft size={19} />
                     </button>
                     <button
                       className="icon-button"
                       aria-label={paused ? 'Reanudar presentación' : 'Pausar presentación'}
-                      onClick={() => setPaused(!paused)}
+                      onClick={() => setPaused(!paused)} disabled={instances.length < 2}
                     >
                       {paused ? <Play size={16} /> : <Pause size={16} />}
                     </button>
                     <button
                       className="icon-button"
                       aria-label="Siguiente instancia"
-                      onClick={() => changeFeatured(1)}
+                      onClick={() => changeFeatured(1)} disabled={instances.length < 2}
                     >
                       <ChevronRight size={19} />
                     </button>
                   </div>
                 </div>
-              </section>
-              <section className="recent-section">
+              </section>}
+              {!!instances.length && <section className="recent-section">
                 <div className="section-heading">
                   <h2>Tus mundos, a un paso</h2>
                   <Link to="/me">
@@ -566,15 +573,12 @@ export function App() {
                       instance={instance}
                       view="grid"
                       onPlay={play}
-                      onManage={(item) => {
-                        setSelected(item.id)
-                        navigate('/instance')
-                      }}
+                      onManage={manage}
                       onOptions={(item) => preview(`Opciones de ${item.name}`)}
                     />
                   ))}
                 </div>
-              </section>
+              </section>}
             </div>
           )}
           {library && (
@@ -582,7 +586,7 @@ export function App() {
               <div className="page-heading">
                 <div>
                   <h1>Tu biblioteca</h1>
-                  <p>Tres formas de volver a Minecraft.</p>
+                  <p>{t('react.instances.subtitle')}</p>
                 </div>
                 <button
                   className="button primary"
@@ -593,6 +597,7 @@ export function App() {
                   Añadir instancia
                 </button>
               </div>
+              {libraryState}
               <div className="filterbar">
                 <label className="search">
                   <Search size={18} />
@@ -609,8 +614,7 @@ export function App() {
                   onChange={(event) => setLoader(event.target.value)}
                 >
                   <option value="">Todos los loaders</option>
-                  <option>Vanilla</option>
-                  <option>Fabric</option>
+                  {[...new Set(instances.map(instance => instance.loader))].sort().map(name => <option key={name}>{name}</option>)}
                 </select>
                 <div className="view-switch">
                   <button
@@ -638,15 +642,12 @@ export function App() {
                     instance={instance}
                     view={view}
                     onPlay={play}
-                    onManage={(item) => {
-                      setSelected(item.id)
-                      navigate('/instance')
-                    }}
+                    onManage={manage}
                     onOptions={(item) => preview(`Opciones de ${item.name}`)}
                   />
                 ))}
               </div>
-              {!instances.some(matchesInstance) && (
+              {!!instances.length && !instances.some(matchesInstance) && (
                 <div className="empty">
                   <Search size={28} />
                   <h2>No encontramos esa instancia</h2>
@@ -838,7 +839,8 @@ export function App() {
             </section>
           )}
           {accountsPage && <Accounts />}
-          {!home && !library && !catalog && !settings && !accountsPage && (
+          {!home && !library && !catalog && !settings && !accountsPage && !current && <div className="empty" role="status"><h1>{t('react.instances.noneSelected')}</h1><Link className="button secondary" to="/me">{t('react.instances.choose')}</Link></div>}
+          {!home && !library && !catalog && !settings && !accountsPage && current && (
             <section className="instance-page">
               <div className="page-heading">
                 <div>
@@ -861,7 +863,7 @@ export function App() {
                   ),
                 )}
               </div>
-              <img className="instance-cover" src={current.image} alt="" />
+              <StoredImage className="instance-cover" src={current.image} alt="" />
               <div className="section-heading">
                 <h2>Tu próxima aventura empieza aquí.</h2>
                 <button

@@ -10,6 +10,7 @@ import { PreferencesStore } from './preferences'
 import { I18nProvider } from './i18n'
 import { AccountsProvider } from './features/accounts/context'
 import { Onboarding } from './features/onboarding/Onboarding'
+import { LibraryProvider } from './features/library/context'
 import './styles.css'
 
 const router = createHashRouter([{ path: '*', element: <App /> }])
@@ -27,7 +28,7 @@ function Entry() {
     void router.navigate('/me')
     setOnboarding(false)
   }} />
-  return <RouterProvider router={router} />
+  return client ? <LibraryProvider><RouterProvider router={router} /></LibraryProvider> : <RouterProvider router={router} />
 }
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
