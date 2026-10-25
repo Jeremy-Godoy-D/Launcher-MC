@@ -79,14 +79,34 @@ test('React prototype: independent selection, filters, dialogue focus and actual
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await expect(video).toHaveAttribute('data-state', 'paused')
   await expect.poll(() => video.evaluate(video => video.paused)).toBe(true)
+  await page.evaluate(() => {
+    const original = HTMLMediaElement.prototype.play
+    HTMLMediaElement.prototype.play = function () {
+      HTMLMediaElement.prototype.play = original
+      ;(window as any).__interruptedPlayback = true
+      return Promise.reject(new DOMException('Fixture playback interruption', 'AbortError'))
+    }
+  })
   await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await expect.poll(() => page.evaluate(() => (window as any).__interruptedPlayback)).toBe(true)
   await expect(video).toHaveAttribute('data-state', 'playing')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect(video).toHaveAttribute('data-state', 'paused')
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await expect.poll(() => video.evaluate(video => video.paused)).toBe(false)
   await window.evaluate(win => win.minimize())
   await expect.poll(() => window.evaluate(win => win.isMinimized())).toBe(true)
   await expect(video).toHaveAttribute('data-state', 'paused')
   await expect.poll(() => video.evaluate(video => video.paused)).toBe(true)
-  await window.evaluate(win => { win.restore(); win.focus() })
+  await window.evaluate(win => win.restore())
+  await expect.poll(() => window.evaluate(win => win.isMinimized())).toBe(false)
+  await window.evaluate(win => { win.show(); win.focus() })
+  await expect.poll(() => window.evaluate(win => win.isFocused())).toBe(true)
+  // Windows can restore the window underneath the physical pointer; re-establish no interaction.
+  await page.mouse.move(70, 20)
+  await expect.poll(async () => JSON.parse((await page.getByTestId('react-prototype').getAttribute('data-motion-state'))!).hovered).toBe(false)
   await expect(video).toHaveAttribute('data-state', 'playing')
+  await expect.poll(() => video.evaluate(video => video.paused)).toBe(false)
   await page.getByTestId('featured-play').click()
   await expect(page.getByRole('dialog')).toContainText('Jugar: Bajo la superficie')
   await expect(page.locator('.sidebar-instance strong')).toHaveText('Bajo la superficie')

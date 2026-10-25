@@ -38,7 +38,7 @@ import caves from './assets/ambient/vanilla-caves.webp'
 import cavesVideo from './assets/ambient/vanilla-caves.mp4'
 import ocean from './assets/ambient/vanilla-ocean.webp'
 import credits from './assets/ambient/credits.json'
-import { allowAmbientMotion, nextFeatured, ROTATION_MS } from './presentation'
+import { allowAmbientMotion, isPlaybackInterruption, nextFeatured, ROTATION_MS } from './presentation'
 import { usePreferences } from './preferences-context'
 import { useI18n } from './i18n'
 import { Accounts } from './features/accounts/Accounts'
@@ -50,6 +50,7 @@ declare global {
       minimize(): void
       maximize(): void
       close(): void
+      showOpenDialog?: import('@xmcl/runtime-api/src/controller').WindowController['showOpenDialog']
       on(channel: 'window-active', listener: (active: boolean) => void): unknown
       removeListener(channel: 'window-active', listener: (active: boolean) => void): unknown
     }
@@ -109,9 +110,12 @@ function Ambient({ instance, playing, videoEnabled }: { instance: Instance; play
   useEffect(() => {
     const element = video.current
     if (!element) return
-    if (playing && !failed) void element.play().catch(() => setFailed(true))
+    let active = true
+    if (playing && !failed) void element.play().catch(error => {
+      if (active && !isPlaybackInterruption(error)) setFailed(true)
+    })
     else element.pause()
-    return () => element.pause()
+    return () => { active = false; element.pause() }
   }, [playing, failed])
   return (
     <div className="ambient" aria-hidden="true">
@@ -135,6 +139,7 @@ function Ambient({ instance, playing, videoEnabled }: { instance: Instance; play
           onLoadedData={() => setReady(true)}
           onError={() => setFailed(true)}
           data-state={playing && !failed ? 'playing' : 'paused'}
+          data-error={failed}
           style={{ opacity: ready && playing && !failed ? 1 : 0 }}
         />
       )}
@@ -319,7 +324,7 @@ export function App() {
   }
 
   return (
-    <div className="app" data-testid="react-prototype" data-performance={performanceMode}>
+    <div className="app" data-testid="react-prototype" data-performance={performanceMode} data-motion-state={JSON.stringify({ focused, nativeActive, visible, reducedMotion, hovered, focusWithin, paused })}>
       <div
         className="app-backdrop"
         data-testid="app-backdrop"

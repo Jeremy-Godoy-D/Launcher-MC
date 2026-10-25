@@ -2,7 +2,8 @@ import { getPlatform } from '@xmcl/core'
 import type { InstallEvent } from '@xmcl/installer'
 import { AgentRunTrace, InstalledAppManifest, Platform, createPromiseSignal } from '@xmcl/runtime-api'
 import { EventEmitter } from 'events'
-import { ensureDir, readFile, writeFile } from 'fs-extra'
+import { ensureDir, readFile } from 'fs-extra'
+import { writeFile } from 'atomically'
 import { Server, createServer } from 'http'
 import { join } from 'path'
 import { Readable } from 'stream'
@@ -27,6 +28,7 @@ import { kGameDataPath, kTempDataPath } from './gameDataPath'
 import { InjectionKey, ObjectFactory } from './objectRegistry'
 import { validateDirectory } from '~/util/validate'
 import { kSettings } from '~/settings'
+import { createBootstrapSession } from '../setup/bootstrapSession'
 
 export const LauncherAppKey: InjectionKey<LauncherApp> = Symbol('LauncherAppKey')
 
@@ -344,6 +346,7 @@ export class LauncherApp extends EventEmitter {
     await ensureDir(this.appDataPath)
 
     let gameDataPath: string
+    let bootstrapReady: ReturnType<typeof createPromiseSignal<void>> | undefined
     try {
       gameDataPath = await readFile(join(this.appDataPath, 'root')).then((b) => b.toString().trim())
       gameDataPath = await handleMigrateRoot(gameDataPath, this.logger, this)
@@ -352,13 +355,16 @@ export class LauncherApp extends EventEmitter {
       if (isSystemError(e) && e.code === 'ENOENT') {
         // first launch
         this.#isBootstrapSignal.resolve(true)
-        const path = await new Promise<string>((resolve) => {
-          this.controller.handle('bootstrap', (_, path) => {
-            resolve(path)
-          }, true)
-        })
-        gameDataPath = (path)
-        await writeFile(join(this.appDataPath, 'root'), path)
+        const chosen = createPromiseSignal<string>()
+        bootstrapReady = createPromiseSignal<void>()
+        const ready = bootstrapReady.promise
+        const accept = createBootstrapSession(
+          path => validateDirectory(this.platform, path),
+          async path => { await ensureDir(path); await writeFile(join(this.appDataPath, 'root'), path) },
+          async path => { chosen.resolve(path); await ready },
+        )
+        this.controller.handle('bootstrap', (_, path) => accept(path))
+        gameDataPath = await chosen.promise
       } else {
         this.#isBootstrapSignal.resolve(false)
         gameDataPath = (this.appDataPath)
@@ -368,7 +374,9 @@ export class LauncherApp extends EventEmitter {
     try {
       await ensureDir(gameDataPath)
       await this.#registerGamePath(gameDataPath)
-    } catch {
+      bootstrapReady?.resolve()
+    } catch (error) {
+      if (bootstrapReady) { bootstrapReady.reject(error); throw error }
       gameDataPath = this.appDataPath
       await ensureDir(gameDataPath)
       await this.#registerGamePath(gameDataPath)

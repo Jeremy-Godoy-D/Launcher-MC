@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { allowAmbientMotion, nextFeatured, type MotionState } from './presentation'
+import { allowAmbientMotion, isPlaybackInterruption, nextFeatured, type MotionState } from './presentation'
 
 const active: MotionState = {
   focused: true,
@@ -12,6 +12,10 @@ const active: MotionState = {
 }
 
 describe('prototype ambient policy', () => {
+  test('an interrupted playback request remains recoverable without masking permission or decode failures', () => {
+    expect(isPlaybackInterruption(new DOMException('Interrupted', 'AbortError'))).toBe(true)
+    for (const error of [new DOMException('Denied', 'NotAllowedError'), new Error('Decode failed'), null, undefined]) expect(isPlaybackInterruption(error)).toBe(false)
+  })
   test('only active, eligible media advances', () => {
     expect(allowAmbientMotion(active)).toBe(true)
     for (const key of ['focused', 'visible'] as const)

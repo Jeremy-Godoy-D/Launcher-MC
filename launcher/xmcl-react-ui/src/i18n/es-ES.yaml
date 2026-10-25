@@ -40,3 +40,31 @@ react:
     confirmRemove: Eliminar perfil
     close: Cerrar
     noneSelected: Sin perfil seleccionado
+  setup:
+    welcome: Tu próxima aventura empieza aquí.
+    intro: Prepara tu espacio y un perfil para Minecraft Java.
+    progress: Progreso de la configuración
+    location: Tu espacio de juego
+    profile: Tu perfil
+    ready: Todo preparado
+    loading: Buscando la ubicación recomendada…
+    loadError: No se pudo obtener la configuración inicial. Vuelve a intentarlo.
+    retry: Reintentar
+    pathDescription: Elige dónde guardar versiones, instancias y mundos del launcher.
+    folder: Carpeta de datos
+    chooseFolder: Elegir carpeta de datos
+    pathHelp: Usa una carpeta dedicada. Evita tu carpeta .minecraft habitual.
+    pathError: La ruta no es válida o no se puede escribir en ella. Elige una carpeta completa con permisos.
+    existing: Confirmo que quiero usar esta carpeta existente. Sus archivos no se eliminarán.
+    profileDescription: Crea un perfil local o continúa sin perfil para elegirlo después. Microsoft está pospuesto.
+    selected: 'Perfil seleccionado: {name}'
+    readyDescription: Revisa tu ubicación y tu perfil antes de entrar a la biblioteca.
+    noLaunch: No se iniciará Minecraft al terminar. Podrás crear o importar tu instancia desde la biblioteca.
+    actionError: No se pudo completar la configuración. Revisa la carpeta y reintenta; si el error persiste, reinicia el launcher. Tus campos se conservan.
+    back: Atrás
+    next: Continuar
+    skipProfile: Continuar sin perfil
+    finish: Entrar a la biblioteca
+    saving: Preparando…
+    minimize: Minimizar
+    maximize: Maximizar

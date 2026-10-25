@@ -40,3 +40,31 @@ react:
     confirmRemove: Remove profile
     close: Close
     noneSelected: No profile selected
+  setup:
+    welcome: Your next adventure starts here.
+    intro: Prepare your space and a profile for Minecraft Java.
+    progress: Setup progress
+    location: Your game space
+    profile: Your profile
+    ready: All set
+    loading: Finding the recommended location…
+    loadError: Could not load the initial setup. Try again.
+    retry: Retry
+    pathDescription: Choose where this launcher will store versions, instances and worlds.
+    folder: Data folder
+    chooseFolder: Choose data folder
+    pathHelp: Use a dedicated folder. Avoid your regular .minecraft folder.
+    pathError: This path is invalid or cannot be written to. Choose a full path to a writable folder.
+    existing: I confirm I want to use this existing folder. Its files will not be deleted.
+    profileDescription: Create a local profile or continue without one to choose it later. Microsoft is deferred.
+    selected: 'Selected profile: {name}'
+    readyDescription: Review your location and profile before entering the library.
+    noLaunch: Minecraft will not start when setup finishes. You can create or import an instance from the library.
+    actionError: Could not complete setup. Check the folder and retry; if the error persists, restart the launcher. Your fields are preserved.
+    back: Back
+    next: Continue
+    skipProfile: Continue without a profile
+    finish: Enter the library
+    saving: Preparing…
+    minimize: Minimize
+    maximize: Maximize

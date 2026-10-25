@@ -1,5 +1,9 @@
 export const ROTATION_MS = 30_000
 
+export function isPlaybackInterruption(error: unknown) {
+  return !!error && typeof error === 'object' && 'name' in error && error.name === 'AbortError'
+}
+
 export type MotionState = {
   focused: boolean
   visible: boolean
