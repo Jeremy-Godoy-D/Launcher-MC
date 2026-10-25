@@ -100,6 +100,43 @@ react:
     success: Instancia guardada. Puedes abrirla para revisar su configuración.
     checkPending: Archivos procesados. Se está comprobando si quedan pendientes.
     open: Ver instancia
+    advanced: Opciones avanzadas
+    descriptionLabel: Descripción
+    author: Autor
+    javaAutomatic: Automático según la instancia
+    chooseJava: Elegir ejecutable Java
+    javaError: No se pudo validar Java. Elige un ejecutable válido o usa la detección automática.
+    javaHelp: Si falta un Java compatible, se ofrecerá descargarlo al jugar.
+    memory: Memoria RAM
+    memory_inherit: Heredar ajustes del launcher
+    memory_auto: Asignación automática
+    memory_manual: Asignación manual
+    minMemory: Mínimo en MB (opcional)
+    maxMemory: Máximo en MB
+    advancedError: Revisa las opciones avanzadas. La memoria debe ser un número entero positivo y el mínimo no puede superar el máximo.
+    shared: Compartir con otras instancias
+    sharedHelp: Los cambios en estos archivos serán comunes. Solo se aplica a instancias nuevas, nunca a packs importados.
+    link_saves: Mundos
+    link_resourcepacks: Resource packs
+    link_shaderpacks: Shaders
+    link_options: Opciones del juego
+    link_servers: Lista de servidores
+    linkStorageError: No se pudieron guardar estas preferencias o pertenecen a una versión posterior. Los datos anteriores se conservan.
+    linkError: La instancia se guardó, pero faltan los siguientes enlaces compartidos. Reintenta para completarlos en la misma carpeta.
+    importSource: Fuente de importación
+    source_file: Archivo
+    source_url: Enlace HTTPS
+    source_folder: Carpeta existente
+    url: Enlace al archivo del modpack
+    reviewUrl: Revisar enlace
+    urlHelp: Usa un enlace HTTPS directo a un .mrpack o .zip. Revisar descarga una copia temporal; confirmar crea la instancia.
+    urlError: Usa un enlace HTTPS válido, sin credenciales ni fragmentos.
+    folderType: Formato de la carpeta
+    chooseFolder: Elegir carpeta de origen
+    folderProfile: Perfil que se importará
+    folderScanning: Revisando archivos e integridad del origen…
+    folderError: No se pudo revisar una instancia Java válida. Comprueba formato y permisos; no se admiten enlaces, carpetas raíz ni parches de versiones personalizados de Prism.
+    folderHelp: Se copiarán mundos, mods y configuración a una carpeta nueva. El origen se conserva; no se copian cuentas, cachés de Minecraft ni ajustes de arranque. Las versiones personalizadas no están incluidas en esta importación.
   launch:
     title: 'Jugar: {name}'
     description: Revisa la preparación de esta instancia antes de iniciar Minecraft.

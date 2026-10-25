@@ -100,6 +100,43 @@ react:
     success: Instance saved. Open it to review its configuration.
     checkPending: Files processed. Checking for pending files.
     open: View instance
+    advanced: Advanced options
+    descriptionLabel: Description
+    author: Author
+    javaAutomatic: Automatic for this instance
+    chooseJava: Choose Java executable
+    javaError: Could not validate Java. Choose a valid executable or use automatic detection.
+    javaHelp: If a compatible Java is missing, a download will be offered when playing.
+    memory: RAM allocation
+    memory_inherit: Inherit launcher settings
+    memory_auto: Automatic allocation
+    memory_manual: Manual allocation
+    minMemory: Minimum in MB (optional)
+    maxMemory: Maximum in MB
+    advancedError: Check advanced options. Memory must be a positive whole number and the minimum cannot exceed the maximum.
+    shared: Share with other instances
+    sharedHelp: Changes to these files will be shared. Applies only to new instances, never to imported packs.
+    link_saves: Worlds
+    link_resourcepacks: Resource packs
+    link_shaderpacks: Shaders
+    link_options: Game options
+    link_servers: Server list
+    linkStorageError: These preferences could not be saved or belong to a newer version. Existing data is preserved.
+    linkError: The instance was saved, but the following shared links could not be created. Retry to finish in the same folder.
+    importSource: Import source
+    source_file: File
+    source_url: HTTPS link
+    source_folder: Existing folder
+    url: Link to the modpack archive
+    reviewUrl: Review link
+    urlHelp: Use a direct HTTPS link to a .mrpack or .zip. Review downloads a temporary copy; confirm creates the instance.
+    urlError: Use a valid HTTPS link without credentials or fragments.
+    folderType: Folder format
+    chooseFolder: Choose source folder
+    folderProfile: Profile to import
+    folderScanning: Reviewing source files and integrity…
+    folderError: Could not review a valid Java instance. Check format and permissions; links, root folders and custom Prism version patches are not supported.
+    folderHelp: Worlds, mods and configuration will be copied into a new folder. The source is preserved; accounts, Minecraft caches and launch settings are excluded. Custom versions are not included in this import.
   launch:
     title: 'Play: {name}'
     description: Review this instance before starting Minecraft.

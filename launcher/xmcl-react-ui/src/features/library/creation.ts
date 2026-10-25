@@ -5,6 +5,43 @@ import type { VersionMetadataService } from '@xmcl/runtime-api/src/services/Vers
 import { InstanceDataSchema } from '../../../../packages/instance/instance'
 import { isInstanceInstallPath, type InstanceFile } from '../../../../packages/instance/files'
 import { validateInstanceName } from '../../../../xmcl-keystone-ui/src/util/instanceName'
+import { DEFAULT_LINK_PREFERENCES, type InstanceCreationLinkPreferences } from '@xmcl/runtime-api/src/util/instanceCreation'
+
+export const LINKS_KEY = 'addInstanceLinkPreferences'
+export function readLinkPreferences(getStorage: () => Pick<Storage, 'getItem'>) {
+  const defaults = { ...DEFAULT_LINK_PREFERENCES }
+  try {
+    const text = getStorage().getItem(LINKS_KEY)
+    if (!text) return { preferences: defaults, error: false, writable: true }
+    const data = JSON.parse(text)
+    if (!data || typeof data !== 'object' || Array.isArray(data) || data.version !== undefined && data.version !== 1) return { preferences: defaults, error: true, writable: false }
+    for (const key of ['saves', 'resourcepacks', 'shaderpacks', 'options', 'servers'] as const) defaults[key] = data[key] === true
+    return { preferences: defaults, error: false, writable: true }
+  } catch { return { preferences: defaults, error: true, writable: false } }
+}
+export type LinkPreferences = InstanceCreationLinkPreferences
+export type AdvancedCreation = { description: string; author: string; java: string; memory: 'inherit' | 'auto' | 'manual'; min: string; max: string }
+export const defaultAdvanced: AdvancedCreation = { description: '', author: '', java: '', memory: 'inherit', min: '', max: '' }
+export function advancedOptions(value: AdvancedCreation): Partial<CreationOptions> {
+  const result: Partial<CreationOptions> = { description: value.description.trim(), author: value.author.trim() }
+  if (result.description!.length > 1000 || result.author!.length > 100 || containsControls(value.java) || value.java.length > 4096) throw new Error('Invalid advanced settings')
+  if (value.java) result.java = value.java
+  if (value.memory === 'auto') result.assignMemory = 'auto'
+  else if (value.memory === 'manual') {
+    const min = value.min === '' ? undefined : Number(value.min)
+    const max = Number(value.max)
+    if (!/^\d+$/.test(value.max) || !Number.isSafeInteger(max) || max <= 0 || min !== undefined && (!/^\d+$/.test(value.min) || !Number.isSafeInteger(min) || min < 0 || min > max)) throw new Error('Invalid memory settings')
+    Object.assign(result, { assignMemory: true, minMemory: min, maxMemory: max })
+  } else if (value.memory !== 'inherit') throw new Error('Invalid memory mode')
+  return result
+}
+export function importUrl(value: string) {
+  const text = value.trim()
+  if (text.length > 4096 || containsControls(text)) throw new Error('Invalid import URL')
+  const url = new URL(text)
+  if (url.protocol !== 'https:' || url.username || url.password || url.hash || !url.hostname) throw new Error('Invalid import URL')
+  return url.href
+}
 
 export type CreationOptions = Parameters<InstanceService['createInstance']>[0]
 export const loaders = [
@@ -126,7 +163,7 @@ export function validateImportFiles(files: readonly Pick<InstanceFile, 'path'>[]
       path.startsWith('/') ||
       path
         .split('/')
-        .some((part) => !part || part === '.' || part === '..' || /[. ]$/.test(part)) ||
+        .some((part) => validateInstanceName(part) !== true) ||
       isInstanceInstallPath(path) ||
       path.toLowerCase() === 'instance.json' ||
       seen.has(path.toLowerCase())
@@ -140,6 +177,7 @@ export class CreationSession {
   path = ''
   private staged = false
   private running = false
+  private prepared = false
   constructor(
     private instances: Pick<InstanceService, 'createInstance'>,
     private installs: Pick<
@@ -151,6 +189,7 @@ export class CreationSession {
     options: CreationOptions,
     files: InstanceFile[] = [],
     onCreated?: (path: string) => void,
+    afterCreate?: (path: string) => Promise<void>,
   ) {
     if (this.running) throw new Error('Creation already running')
     validateImportFiles(files)
@@ -166,6 +205,10 @@ export class CreationSession {
         const errors = await this.installs.resumeInstanceInstall(this.path)
         if (errors?.length) throw new Error('File integrity check failed')
         await this.installs.applyInstanceInstallManifest(this.path)
+      }
+      if (!this.prepared && afterCreate) {
+        await afterCreate(this.path)
+        this.prepared = true
       }
       return this.path
     } finally {

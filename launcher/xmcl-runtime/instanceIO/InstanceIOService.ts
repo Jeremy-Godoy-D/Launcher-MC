@@ -24,6 +24,7 @@ import { LauncherApp } from '../app/LauncherApp'
 import { copyPassively, isPathDiskRootPath } from '../util/fs'
 import { uploadSSH } from './utils/uploadSSH'
 import { importLauncherInstance } from './utils/importLauncherInstance'
+import { previewFolderFiles } from './utils/previewFolderFiles'
 
 @ExposeServiceKey(InstanceIOServiceKey)
 export class InstanceIOService extends AbstractService implements IInstanceIOService {
@@ -90,6 +91,9 @@ export class InstanceIOService extends AbstractService implements IInstanceIOSer
   async parseInstanceFiles(path: string, type?: InstanceType): Promise<InstanceFile[]> {
     const result = await parseInstanceFiles(path, type === 'prism' ? 'mmc' : type)
     return result
+  }
+  async previewFolderFiles(path: string, type?: InstanceType) {
+    return previewFolderFiles(path, type)
   }
 
   async parseLauncherData(path: string, type?: InstanceType): Promise<ThirdPartyLauncherManifest> {

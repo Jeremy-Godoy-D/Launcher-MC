@@ -116,6 +116,8 @@ export interface InstanceIOService {
    * @param type Determine if this is a vanilla, mmc or modrinth folder
    */
   parseInstanceFiles(path: string, type?: InstanceType): Promise<InstanceFile[]>
+  /** Preview a local import with pinned hashes, rejecting links and launcher metadata. */
+  previewFolderFiles(path: string, type?: InstanceType): Promise<InstanceFile[]>
   /**
    * Export instance as server
    */

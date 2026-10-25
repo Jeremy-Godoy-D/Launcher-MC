@@ -25,6 +25,15 @@ import {
   type Loader,
 } from './creation'
 import { InstanceDataSchema } from '../../../../packages/instance/instance'
+import { InstanceSavesServiceKey } from '@xmcl/runtime-api/src/services/InstanceSavesService'
+import { InstanceResourcePacksServiceKey } from '@xmcl/runtime-api/src/services/InstanceResourcePacksService'
+import { InstanceShaderPacksServiceKey } from '@xmcl/runtime-api/src/services/InstanceShaderPacksService'
+import { InstanceOptionsServiceKey } from '@xmcl/runtime-api/src/services/InstanceOptionsService'
+import { InstanceServerInfoServiceKey } from '@xmcl/runtime-api/src/services/InstanceServerInfoService'
+import { applyInstanceLinkPreferences } from '@xmcl/runtime-api/src/util/instanceCreation'
+import { advancedOptions, defaultAdvanced, importUrl, LINKS_KEY, readLinkPreferences, type LinkPreferences } from './creation'
+import { AdvancedCreate } from './AdvancedCreate'
+import { FolderImport, type FolderDraft } from './FolderImport'
 import './creation.css'
 
 const localDescriptor: StateDescriptor<LocalVersions> = {
@@ -37,14 +46,16 @@ function ImportPreview({
   path,
   onReady,
   onName,
+  attempt,
 }: {
   path: string
   onReady: (data: ModpackState | undefined) => void
   onName: (name: string) => void
+  attempt: number
 }) {
   const { t } = useI18n()
   const state = useSharedState({
-    key: `modpack:${path}`,
+    key: `modpack:${path}:${attempt}`,
     Type: ModpackState,
     load: (client) => client.service(ModpackServiceKey).openModpack(path),
   })
@@ -145,6 +156,11 @@ export function AddInstance({
   const instances = useService(InstanceServiceKey)
   const installs = useService(InstanceInstallServiceKey)
   const metadata = useService(VersionMetadataServiceKey)
+  const saves = useService(InstanceSavesServiceKey)
+  const packs = useService(InstanceResourcePacksServiceKey)
+  const shaders = useService(InstanceShaderPacksServiceKey)
+  const gameOptions = useService(InstanceOptionsServiceKey)
+  const servers = useService(InstanceServerInfoServiceKey)
   const local = useSharedState(localDescriptor)
   const [mode, setMode] = useState<'create' | 'import'>('create')
   const [name, setName] = useState('')
@@ -160,6 +176,12 @@ export function AddInstance({
   const [retry, setRetry] = useState(0)
   const [snapshots, setSnapshots] = useState(false)
   const [archive, setArchive] = useState('')
+  const [source, setSource] = useState<'file' | 'url' | 'folder'>('file')
+  const [url, setUrl] = useState('')
+  const [attempt, setAttempt] = useState(0)
+  const [advanced, setAdvanced] = useState({ ...defaultAdvanced })
+  const [links, setLinks] = useState(() => readLinkPreferences(() => localStorage))
+  const [failedLinks, setFailedLinks] = useState<string[]>([])
   const [preview, setPreview] = useState<ModpackState>()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -168,14 +190,18 @@ export function AddInstance({
   const [succeeded, setSucceeded] = useState(false)
   const [installationComplete, setInstallationComplete] = useState(false)
   const session = useRef<CreationSession | null>(null)
+  const folderDraft = useRef<FolderDraft>({ type: 'vanilla', path: '', candidates: [], selected: -1 })
+  const suggestedName = useRef('')
   const operation = useRef(false)
   const nameInput = useRef<HTMLInputElement>(null)
+  const errorMessage = useRef<HTMLParagraphElement>(null)
   const versionRequest = useRef<Promise<MinecraftVersions> | undefined>(undefined)
   const loaderRequests = useRef(new Map<string, Promise<string[]>>())
   const tasks = useTasks()
+  useEffect(() => { if (open && error) errorMessage.current?.scrollIntoView({ block: 'nearest' }) }, [open, error])
 
   useEffect(() => {
-    if (open && !session.current?.path) setMode(initialMode)
+    if (open && !session.current?.path && !name && !archive && !url && !folderDraft.current.path) setMode(initialMode)
   }, [open, initialMode])
   useEffect(() => {
     if (local.data?.local.length)
@@ -278,6 +304,21 @@ export function AddInstance({
       task.state === TaskState.Running,
   )
   const locked = busy || !!createdPath
+  useEffect(() => {
+    const changed = (event: StorageEvent) => { if (!locked && (event.key === LINKS_KEY || event.key === null)) setLinks(readLinkPreferences(() => localStorage)) }
+    window.addEventListener('storage', changed)
+    return () => window.removeEventListener('storage', changed)
+  }, [locked])
+  function changeLinks(preferences: LinkPreferences) {
+    let error = !links.writable
+    if (links.writable) try { localStorage.setItem(LINKS_KEY, JSON.stringify(preferences)) } catch { error = true }
+    setLinks({ ...links, preferences, error })
+  }
+  function suggestName(suggested: string) {
+    const previous = suggestedName.current
+    setName(current => !current || current === previous ? suggested : current)
+    suggestedName.current = suggested
+  }
 
   async function submit() {
     if (operation.current || succeeded) return
@@ -293,14 +334,18 @@ export function AddInstance({
           (loader !== 'Vanilla' && !availableLoaders.includes(loaderVersion))))
     )
       return
+    let options
+    try {
+      options = mode === 'import' ? importedOptions(preview!.config, effectiveName)
+        : { ...creationOptions(effectiveName, minecraft, loader, loaderVersion), ...advancedOptions(advanced) }
+    } catch {
+      setError(mode === 'create' ? 'react.create.advancedError' : 'react.create.parseError')
+      return
+    }
     operation.current = true
     setBusy(true)
     setError('')
     try {
-      const options =
-        mode === 'import'
-          ? importedOptions(preview!.config, effectiveName)
-          : creationOptions(effectiveName, minecraft, loader, loaderVersion)
       const controller = (session.current ??= new CreationSession(instances, installs))
       // Publish the retained identity even when installation fails after native creation.
       try {
@@ -308,13 +353,21 @@ export function AddInstance({
           options,
           mode === 'import' ? structuredClone(preview!.files) : [],
           setCreatedPath,
+          mode === 'create' ? async path => {
+            const failed = await applyInstanceLinkPreferences(path, links.preferences, {
+              linkSaves: path => saves.linkSharedSave(path), linkResourcePacks: path => packs.linkShared(path), linkShaderPacks: path => shaders.linkShared(path),
+              linkOptions: path => gameOptions.linkGameOptions(path), linkServers: path => servers.link(path),
+            })
+            setFailedLinks(failed)
+            if (failed.length) throw new Error('SharedLinksFailed')
+          } : undefined,
         )
       } finally {
         setCreatedPath(controller.path)
       }
       setSucceeded(true)
-    } catch {
-      setError('react.create.actionError')
+    } catch (error) {
+      setError(error instanceof Error && error.message === 'SharedLinksFailed' ? 'react.create.linkError' : 'react.create.actionError')
     } finally {
       setBusy(false)
       operation.current = false
@@ -328,12 +381,18 @@ export function AddInstance({
   function reset() {
     setName('')
     setArchive('')
+    setUrl('')
+    setSource('file')
+    setAdvanced({ ...defaultAdvanced })
+    setFailedLinks([])
     setPreview(undefined)
     setCreatedPath('')
     setSucceeded(false)
     setSubmitted(false)
     setError('')
     session.current = null
+    folderDraft.current = { type: 'vanilla', path: '', candidates: [], selected: -1 }
+    suggestedName.current = ''
   }
   function finish() {
     if (!createdPath || !succeeded) return
@@ -519,9 +578,22 @@ export function AddInstance({
                   </>
                 )}
                 <p className="form-help">{t('react.create.noLaunch')}</p>
+                <AdvancedCreate value={advanced} onChange={setAdvanced} links={links.preferences} onLinks={changeLinks} locked={locked} storageError={links.error} />
               </>
             ) : (
               <>
+                <div className="creation-modes" aria-label={t('react.create.importSource')}>
+                  {(['file', 'url', 'folder'] as const).map(value => <button type="button" key={value} className={`button ${source === value ? 'primary' : 'secondary'}`} aria-pressed={source === value} disabled={locked} onClick={() => { setSource(value); setArchive(''); setPreview(undefined); setError('') }}>{t(`react.create.source_${value}`)}</button>)}
+                </div>
+                {source === 'folder' ? <FolderImport locked={locked} draft={folderDraft} onReady={setPreview} onName={suggestName} /> : source === 'url' ? <>
+                  <label htmlFor="instance-url">{t('react.create.url')}</label>
+                  <input id="instance-url" type="url" value={url} disabled={locked} maxLength={4096} onChange={event => { setUrl(event.target.value); setArchive(''); setPreview(undefined) }} />
+                  <button type="button" className="button secondary" disabled={locked || !url.trim()} onClick={() => {
+                    try { const value = importUrl(url); setPreview(undefined); setAttempt(value => value + 1); setArchive(value); setError('') }
+                    catch { setArchive(''); setPreview(undefined); setError('react.create.urlError') }
+                  }}>{t('react.create.reviewUrl')}</button>
+                  <p className="form-help">{t('react.create.urlHelp')}</p>
+                </> : <>
                 <label htmlFor="instance-archive">{t('react.create.archive')}</label>
                 <div className="creation-file">
                   <input
@@ -554,12 +626,14 @@ export function AddInstance({
                     <FolderOpen size={18} aria-hidden="true" />
                   </button>
                 </div>
+                </>}
                 {archive && (
                   <ImportPreview
-                    key={archive}
+                    key={`${archive}:${attempt}`}
                     path={archive}
+                    attempt={attempt}
                     onReady={setPreview}
-                    onName={(suggested) => setName((current) => current || suggested)}
+                    onName={suggestName}
                   />
                 )}
                 <p className="form-help">{t('react.create.importHelp')}</p>
@@ -587,10 +661,11 @@ export function AddInstance({
             )}
             {tasks.error && busy && <p role="status">{t('react.create.progressError')}</p>}
             {error && (
-              <p role="alert" className="form-error">
+              <p ref={errorMessage} role="alert" className="form-error">
                 {t(error)}
               </p>
             )}
+            {!!failedLinks.length && <ul>{failedLinks.map(key => <li key={key}>{t(`react.create.link_${key}`)}</li>)}</ul>}
             {succeeded && (
               <p role="status">
                 {t(

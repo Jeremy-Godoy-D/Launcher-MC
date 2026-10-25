@@ -6,7 +6,7 @@ This file is the contract between the launcher UI in `xmcl-react-ui/` and the Pl
 
 Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testids` with the selected LAUNCHER_RENDERER. Computed IDs are not resolved by this static registry.
 
-**Total anchors:** 21 (in 14 Vue/TSX files)
+**Total anchors:** 21 (in 16 Vue/TSX files)
 
 | Test ID | Defined in |
 |---|---|
@@ -14,9 +14,9 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `app-backdrop` | [`xmcl-react-ui/src/App.tsx#L358`](../xmcl-react-ui/src/App.tsx#L358) |
 | `app-sidebar` | [`xmcl-react-ui/src/App.tsx#L392`](../xmcl-react-ui/src/App.tsx#L392) |
 | `featured-play` | [`xmcl-react-ui/src/App.tsx#L538`](../xmcl-react-ui/src/App.tsx#L538) |
-| `instance-create-confirm` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L630`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L630) |
-| `instance-minecraft` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L441`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L441) |
-| `instance-name` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L416`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L416) |
+| `instance-create-confirm` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L705`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L705) |
+| `instance-minecraft` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L500`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L500) |
+| `instance-name` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L475`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L475) |
 | `launch-confirm` | [`xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157`](../xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157) |
 | `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L620`](../xmcl-react-ui/src/App.tsx#L620) |
 | `library-state` | [`xmcl-react-ui/src/App.tsx#L346`](../xmcl-react-ui/src/App.tsx#L346) |
