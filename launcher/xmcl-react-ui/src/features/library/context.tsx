@@ -21,7 +21,8 @@ function useLibraryState() {
     if (snapshot.status === 'ready' && !path && current) selection.set(current.path)
   }, [snapshot.status, path, current?.path])
   const select = (nextPath: string) => {
-    if (snapshot.status !== 'ready' || !instances.some(instance => instance.path === nextPath)) return false
+    const latest = store.getSnapshot()
+    if (latest.status !== 'ready' || !latest.data?.instances.some(instance => instance.path === nextPath && instance.edition !== 'bedrock')) return false
     selection.set(nextPath)
     return true
   }

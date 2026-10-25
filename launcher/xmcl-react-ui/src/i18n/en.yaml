@@ -21,7 +21,7 @@ react:
     loadError: Could not load the library. Try again to recover your instances.
     retry: Try again
     empty: Your first adventure starts here.
-    emptyHelp: You have no Java instances yet. Creation and import will be connected in the next migration block.
+    emptyHelp: Create a Minecraft Java instance or import a modpack to get started.
     noneSelected: No instance selected
     choose: Choose from the library
     missingSelection: The selected instance is no longer available. Choose another to continue.
@@ -58,7 +58,53 @@ react:
     confirmRemove: Remove profile
     close: Close
     noneSelected: No profile selected
+  create:
+    title: Add instance
+    description: Set up a new game or import a modpack into a new folder.
+    source: Instance source
+    create: New instance
+    import: Import modpack
+    name: Instance name
+    nameHelp: Up to 100 characters. Choose a distinct name for your game.
+    nameError: Use a valid distinct name, without path characters, control characters or Windows reserved names.
+    loading: Loading versions…
+    chooseVersion: Choose a version
+    snapshots: Show snapshots and older versions
+    metadataError: Could not fetch versions. Use versions available on this device or try again.
+    retry: Try again
+    loader: Loader
+    loaderVersion: Loader version
+    noLoader: No compatible versions are available for this combination.
+    noLaunch: Creating saves the configuration. Minecraft files will be prepared when installing or playing; the game does not start now.
+    archive: Modpack file
+    chooseArchive: Choose modpack file
+    chooseError: Could not open the file picker. Try again.
+    parsing: Reviewing the modpack…
+    parseError: Could not read a valid Java modpack. Choose another .mrpack or .zip file.
+    fileCount: '{count} files'
+    importHelp: Pack files will be installed into a new instance. Existing instances are preserved. Commands, Java and launch arguments from the archive are not imported. Only use packs you trust.
+    retained: The instance is saved. Retrying continues in the same folder; closing preserves the files.
+    statusError: Could not check installation. Keep the instance and review its status again.
+    unresolved: '{count} files need attention. Installation is incomplete.'
+    working: Preparing…
+    progress: Import progress
+    progressError: Could not retrieve progress. The operation may still be running.
+    actionError: Could not finish. Your fields and any created instance are preserved; try again without making another copy.
+    cancelError: Could not cancel the task. Wait until it finishes or try again.
+    cancelInstall: Cancel installation
+    cancel: Cancel
+    keepClose: Keep and close
+    close: Close
+    confirm: Create instance
+    importConfirm: Confirm import
+    success: Instance saved. Open it to review its configuration.
+    checkPending: Files processed. Checking for pending files.
+    open: View instance
   setup:
+    nextAction: After setup
+    choice_library: Go to the library
+    choice_create: Create an instance
+    choice_import: Import a modpack
     welcome: Your next adventure starts here.
     intro: Prepare your space and a profile for Minecraft Java.
     progress: Setup progress

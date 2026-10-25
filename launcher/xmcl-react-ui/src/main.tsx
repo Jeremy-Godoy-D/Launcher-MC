@@ -21,11 +21,11 @@ const preferences = new PreferencesStore(() => window.localStorage, window, asyn
 window.addEventListener('pagehide', () => client?.dispose(), { once: true })
 function Entry() {
   const [onboarding, setOnboarding] = useState(() => new URLSearchParams(location.search).has('bootstrap'))
-  if (onboarding && client) return <Onboarding onFinished={() => {
+  if (onboarding && client) return <Onboarding onFinished={choice => {
     const url = new URL(location.href)
     url.searchParams.delete('bootstrap')
     history.replaceState(history.state, '', url)
-    void router.navigate('/me')
+    void router.navigate(choice === 'library' ? '/me' : `/me?add=${choice}`)
     setOnboarding(false)
   }} />
   return client ? <LibraryProvider><RouterProvider router={router} /></LibraryProvider> : <RouterProvider router={router} />

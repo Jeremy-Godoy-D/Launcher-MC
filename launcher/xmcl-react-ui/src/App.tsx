@@ -45,6 +45,7 @@ import { Accounts } from './features/accounts/Accounts'
 import { useAccounts } from './features/accounts/context'
 import { useLibrary } from './features/library/context'
 import { instanceIcon, loaderName, type SavedInstance } from './features/library/model'
+import { AddInstance } from './features/library/AddInstance'
 
 declare global {
   interface Window {
@@ -226,6 +227,14 @@ export function App() {
   const [visible, setVisible] = useState(() => !document.hidden)
   const [dialog, setDialog] = useState<{ title: string; message: string } | null>(null)
   const [showCredits, setShowCredits] = useState(false)
+  const [adding, setAdding] = useState<'create' | 'import'>()
+  useEffect(() => {
+    const requested = new URLSearchParams(location.search).get('add')
+    if (savedLibrary?.status === 'ready' && (requested === 'create' || requested === 'import')) {
+      setAdding(requested)
+      void navigate(location.pathname, { replace: true })
+    }
+  }, [location.search, savedLibrary?.status, navigate, location.pathname])
   const reducedMotion = useMediaSetting('(prefers-reduced-motion: reduce)')
   const current = instances.find(instance => instance.id === savedLibrary?.current?.path)
   const instance = instances.find(instance => instance.id === featuredPath) ?? current ?? instances[0]
@@ -253,7 +262,7 @@ export function App() {
     reducedMotion,
     performanceMode,
     interacting: hovered || focusWithin,
-    dialogOpen: !!dialog || showCredits,
+    dialogOpen: !!dialog || showCredits || !!adding,
     manuallyPaused: paused,
   })
 
@@ -321,11 +330,16 @@ export function App() {
   const manage = (item: Instance) => {
     if (savedLibrary?.select(item.id)) navigate('/instance')
   }
+  const openCreation = (mode: 'create' | 'import' = 'create') => {
+    restoreFocus.current = document.activeElement as HTMLElement
+    setAdding(mode)
+  }
   const libraryState = !savedLibrary || savedLibrary.status !== 'ready' || !instances.length ? (
     <div className="empty" role={!savedLibrary || savedLibrary.status === 'error' ? 'alert' : 'status'} data-testid="library-state">
       <Box size={28} aria-hidden="true" />
       <h2>{t(!savedLibrary ? 'react.instances.runtimeRequired' : savedLibrary.status === 'loading' ? 'react.instances.loading' : savedLibrary.status === 'error' ? 'react.instances.loadError' : 'react.instances.empty')}</h2>
       {savedLibrary?.status === 'error' ? <button className="button secondary" disabled={savedLibrary.validating} onClick={() => void savedLibrary.retry()}>{t('react.instances.retry')}</button> : savedLibrary?.status === 'ready' && <p>{t('react.instances.emptyHelp')}</p>}
+      {savedLibrary?.status === 'ready' && <div className="empty-actions"><button className="button primary" onClick={() => openCreation('create')}>{t('react.create.create')}</button><button className="button secondary" onClick={() => openCreation('import')}>{t('react.create.import')}</button></div>}
     </div>
   ) : null
 
@@ -590,7 +604,8 @@ export function App() {
                 </div>
                 <button
                   className="button primary"
-                  onClick={() => preview('Añadir instancia')}
+                  onClick={() => openCreation('create')}
+                  disabled={savedLibrary?.status !== 'ready'}
                   data-testid="library-create-instance"
                 >
                   <Plus size={18} />
@@ -889,6 +904,11 @@ export function App() {
           </footer>
         </div>
       </main>
+      {savedLibrary && <AddInstance open={!!adding} initialMode={adding ?? 'create'} onClose={() => setAdding(undefined)} returnFocus={restoreFocus} onCreated={path => {
+        setAdding(undefined)
+        if (savedLibrary.select(path)) void navigate('/instance')
+        else void navigate('/me')
+      }} />}
       <Dialog.Root
         open={!!dialog || showCredits}
         onOpenChange={(open) => {

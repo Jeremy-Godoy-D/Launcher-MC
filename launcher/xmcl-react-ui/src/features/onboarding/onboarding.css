@@ -1,4 +1,8 @@
 @layer layout {
+  .setup-choice { border: 0; padding: 0; margin: 16px 0 0; display: grid; gap: 12px; }
+  .setup-choice legend { margin-bottom: 12px; font-weight: 600; }
+  .setup-choice label { display: flex; align-items: center; gap: 10px; }
+  .setup-choice input { accent-color: var(--accent); }
   .onboarding {
     height: 100dvh;
     display: grid;

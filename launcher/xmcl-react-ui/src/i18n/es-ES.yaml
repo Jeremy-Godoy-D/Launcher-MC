@@ -21,7 +21,7 @@ react:
     loadError: No se pudo cargar la biblioteca. Reintenta para recuperar tus instancias.
     retry: Reintentar
     empty: Tu primera aventura empieza aquí.
-    emptyHelp: Aún no tienes instancias Java. La creación e importación se conectarán en el siguiente bloque de la migración.
+    emptyHelp: Crea una instancia de Minecraft Java o importa un modpack para empezar.
     noneSelected: Sin instancia seleccionada
     choose: Elegir en la biblioteca
     missingSelection: La instancia seleccionada ya no está disponible. Elige otra para continuar.
@@ -58,7 +58,53 @@ react:
     confirmRemove: Eliminar perfil
     close: Cerrar
     noneSelected: Sin perfil seleccionado
+  create:
+    title: Añadir instancia
+    description: Prepara una nueva partida o importa un modpack a una carpeta nueva.
+    source: Origen de la instancia
+    create: Nueva instancia
+    import: Importar modpack
+    name: Nombre de la instancia
+    nameHelp: Hasta 100 caracteres. Usa un nombre distinto para identificar tu partida.
+    nameError: Usa un nombre válido y distinto, sin caracteres de rutas, controles ni nombres reservados de Windows.
+    loading: Cargando versiones…
+    chooseVersion: Elige una versión
+    snapshots: Mostrar snapshots y versiones antiguas
+    metadataError: No se pudo consultar las versiones. Puedes usar las disponibles en este equipo o reintentar.
+    retry: Reintentar
+    loader: Loader
+    loaderVersion: Versión del loader
+    noLoader: No hay versiones compatibles disponibles para esta combinación.
+    noLaunch: Crear guarda la configuración. Los archivos de Minecraft se prepararán al instalar o jugar; no se inicia el juego ahora.
+    archive: Archivo del modpack
+    chooseArchive: Elegir archivo de modpack
+    chooseError: No se pudo abrir el selector de archivos. Vuelve a intentarlo.
+    parsing: Revisando el modpack…
+    parseError: No se pudo leer un modpack Java válido. Elige otro archivo .mrpack o .zip.
+    fileCount: '{count} archivos'
+    importHelp: Se instalarán los archivos del pack en una instancia nueva. No se reemplazan instancias existentes ni se importan comandos, Java o argumentos de arranque del archivo. Usa solo packs de confianza.
+    retained: La instancia ya está guardada. Un reintento continúa en la misma carpeta; cerrar conserva los archivos.
+    statusError: No se pudo comprobar la instalación. Conserva la instancia y vuelve a revisar su estado.
+    unresolved: '{count} archivos requieren atención. La instalación está incompleta.'
+    working: Preparando…
+    progress: Progreso de la importación
+    progressError: No se pudo obtener el progreso. La operación puede seguir en curso.
+    actionError: No se pudo terminar. Tus campos y cualquier instancia ya creada se conservan; reintenta sin crear otra copia.
+    cancelError: No se pudo cancelar la tarea. Espera a que termine o vuelve a intentarlo.
+    cancelInstall: Cancelar instalación
+    cancel: Cancelar
+    keepClose: Conservar y cerrar
+    close: Cerrar
+    confirm: Crear instancia
+    importConfirm: Confirmar importación
+    success: Instancia guardada. Puedes abrirla para revisar su configuración.
+    checkPending: Archivos procesados. Se está comprobando si quedan pendientes.
+    open: Ver instancia
   setup:
+    nextAction: Al terminar
+    choice_library: Ir a la biblioteca
+    choice_create: Crear una instancia
+    choice_import: Importar un modpack
     welcome: Tu próxima aventura empieza aquí.
     intro: Prepara tu espacio y un perfil para Minecraft Java.
     progress: Progreso de la configuración

@@ -24,12 +24,13 @@ function loadPreset() {
   }))
 }
 
-export function Onboarding({ onFinished }: { onFinished: () => void }) {
+export function Onboarding({ onFinished }: { onFinished: (choice: 'library' | 'create' | 'import') => void }) {
   const { t } = useI18n()
   const accounts = useAccounts()
   const base = useService(BaseServiceKey)
   const { preferences } = usePreferences()
   const [step, setStep] = useState(1)
+  const [choice, setChoice] = useState<'library' | 'create' | 'import'>('library')
   const [path, setPath] = useState('')
   const [loading, setLoading] = useState(true)
   const [presetError, setPresetError] = useState(false)
@@ -136,7 +137,7 @@ export function Onboarding({ onFinished }: { onFinished: () => void }) {
         return
       }
       await window.bootstrap!.bootstrap(path)
-      onFinished()
+      onFinished(choice)
     } catch {
       setFailed(true)
     } finally {
@@ -307,6 +308,10 @@ export function Onboarding({ onFinished }: { onFinished: () => void }) {
                       <dd>{accounts?.profile?.name ?? t('react.accounts.noneSelected')}</dd>
                     </dl>
                     <p className="form-help">{t('react.setup.noLaunch')}</p>
+                    <fieldset className="setup-choice">
+                      <legend>{t('react.setup.nextAction')}</legend>
+                      {(['library', 'create', 'import'] as const).map(value => <label key={value}><input type="radio" name="setup-next-action" value={value} checked={choice === value} onChange={() => setChoice(value)} />{t(`react.setup.choice_${value}`)}</label>)}
+                    </fieldset>
                   </>
                 )}
               </>
@@ -339,7 +344,7 @@ export function Onboarding({ onFinished }: { onFinished: () => void }) {
               {busy
                 ? t('react.setup.saving')
                 : step === 3
-                  ? t('react.setup.finish')
+                  ? t(choice === 'library' ? 'react.setup.finish' : 'react.setup.next')
                   : step === 2 && !accounts?.profile
                     ? t('react.setup.skipProfile')
                     : t('react.setup.next')}
