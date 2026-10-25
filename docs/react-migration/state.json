@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Etapa4 parcial: Inicio/Biblioteca leen InstanceState real y conservan selectedInstancePath (7783a81, STAGE4-LIBRARY). Siguiente conectar crear/importar desde UI; después diagnósticos, instalación/lanzamiento y procesos. Galerías de packs/cache/pausa al jugar y edición de perfiles pendientes. Mantener los tres criterios abiertos, Microsoft pospuesto y diseño aprobado.",
+  "nextAction": "Etapa4 parcial: crear Java/loaders e importar mrpack/ZIP local desde UI/onboarding verificados (0fed2fc, STAGE4-CREATION). Siguiente lanzamiento completo: perfil/ruta, Java/RAM, resolver/diagnosticar/instalar y procesos; recuperar pendientes tras reiniciar. K03 URL/carpeta/opciones avanzadas y enlaces, galerías/cache, perfiles y rendimiento pendientes. No cerrar gates ni reintroducir extras; Microsoft pospuesto.",
   "stages": [
     {
       "id": 0,
@@ -318,9 +318,17 @@
             {
               "path": "docs/react-migration/STAGE4-ONBOARDING.json",
               "sha256": "085bec469e7de5034b2477f438b3cfa2cbf53214974d1c4320d440b4c8c08944"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CREATION.md",
+              "sha256": "acf54cdd7d4078c8132f1c134153fc00c86e01ff829721b1130e345eeeafe5b1"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CREATION.json",
+              "sha256": "d8691be6a876817c20e464bf6fc65496115537bd22baed8c3e61ac996151ec6d"
             }
           ],
-          "note": "Parcial: onboarding nuevo validado/confirmado, perfil opcional y CRUD básico verificados. Faltan edición/apariencia de perfiles y acciones reales de creación/importación del final; no cerrar el criterio."
+          "note": "Parcial: onboarding, perfiles locales básicos y las acciones Crear/Importar locales del final verificadas. Falta edición/apariencia de perfiles; no cerrar el criterio."
         },
         {
           "id": "home-carousel",
@@ -348,9 +356,17 @@
             {
               "path": "docs/react-migration/STAGE4-LIBRARY.json",
               "sha256": "7c7693f6f922b3bc65744c7c1aa49fa619b4570cef95b60fb9b8a7faf171807c"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CREATION.md",
+              "sha256": "acf54cdd7d4078c8132f1c134153fc00c86e01ff829721b1130e345eeeafe5b1"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CREATION.json",
+              "sha256": "d8691be6a876817c20e464bf6fc65496115537bd22baed8c3e61ac996151ec6d"
             }
           ],
-          "note": "Parcial: lectura/selección/filtros, persistencia, mutaciones del servicio y vacíos/error probados. Crear/importar y el lanzamiento completo siguen pendientes."
+          "note": "Parcial: biblioteca real, creación Java/loaders e importación local con persistencia/reintento verificadas. Faltan operaciones completas, URL/carpeta/avanzadas y lanzamiento/diagnósticos/procesos."
         }
       ]
     },
