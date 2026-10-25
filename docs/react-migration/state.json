@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Etapa4 parcial: perfiles locales y onboarding nativo verificados (cd6b9ae/0b3c713, STAGE4-ACCOUNTS/ONBOARDING). Siguiente Inicio/Biblioteca con InstanceState real y selectedInstancePath; luego crear/importar/instalar/lanzar con comprobaciones y procesos. Mantener los tres criterios pendientes hasta completar flujos; diseño ya aprobado, Microsoft pospuesto.",
+  "nextAction": "Etapa4 parcial: Inicio/Biblioteca leen InstanceState real y conservan selectedInstancePath (7783a81, STAGE4-LIBRARY). Siguiente conectar crear/importar desde UI; después diagnósticos, instalación/lanzamiento y procesos. Galerías de packs/cache/pausa al jugar y edición de perfiles pendientes. Mantener los tres criterios abiertos, Microsoft pospuesto y diseño aprobado.",
   "stages": [
     {
       "id": 0,
@@ -325,12 +325,32 @@
         {
           "id": "home-carousel",
           "status": "pending",
-          "evidence": []
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE4-LIBRARY.md",
+              "sha256": "8e7efee91ee040b1d4f7c0ce05840b4ac62450a6e3ff4bf13786064396a8c5da"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LIBRARY.json",
+              "sha256": "7c7693f6f922b3bc65744c7c1aa49fa619b4570cef95b60fb9b8a7faf171807c"
+            }
+          ],
+          "note": "Parcial: instancias reales, selección independiente, estados y pausas existentes probadas. Faltan galerías/caché, pausa al jugar y rendimiento medido."
         },
         {
           "id": "library-instance-launch",
           "status": "pending",
-          "evidence": []
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE4-LIBRARY.md",
+              "sha256": "8e7efee91ee040b1d4f7c0ce05840b4ac62450a6e3ff4bf13786064396a8c5da"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LIBRARY.json",
+              "sha256": "7c7693f6f922b3bc65744c7c1aa49fa619b4570cef95b60fb9b8a7faf171807c"
+            }
+          ],
+          "note": "Parcial: lectura/selección/filtros, persistencia, mutaciones del servicio y vacíos/error probados. Crear/importar y el lanzamiento completo siguen pendientes."
         }
       ]
     },
