@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Marca Grimo Launcher/cobre integrada y verificada en ab03193 (STAGE4-BRANDING); originales e identidades de datos conservados, 269 unitarias y 25 Electron. Retomar K03 URL/carpeta/opciones avanzadas/enlaces y operaciones. Mantener tres gates pendientes, resto de migración y Microsoft pospuesto; producción sin cambios.",
+  "nextAction": "Bloque f3ab9be URL/carpeta/Java/RAM/enlaces estándar verificado (STAGE4-IMPORTS): 301 unitarias y 29 escenarios Electron. Continuar K03 versiones personalizadas/standalone y después K02/K04 operaciones de biblioteca. Tres gates pendientes; conservar Grimo, datos y Vue predeterminado. Microsoft pospuesto; producción sin cambios.",
   "stages": [
     {
       "id": 0,
@@ -404,9 +404,17 @@
             {
               "path": "docs/react-migration/STAGE4-BRANDING.json",
               "sha256": "9c5593a4b74e695b378e5f915bfe90edae65c3f6ccf8c3cf8c086e6c5c2c0899"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-IMPORTS.md",
+              "sha256": "cefb9b7072f0233e5a97d1ad2ca9e654cb187f54f1649279e41ab1655c2ea3e7"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-IMPORTS.json",
+              "sha256": "92128b6fcdda77baff1bd3622adbedf3771f83162f35b46a2f328bdbd754c3d7"
             }
           ],
-          "note": "Parcial: creación local, preparación, recuperación y lanzamiento/Java automático conectados y probados con fixtures; faltan URL/carpeta/avanzadas, operaciones completas, selector Java/diagnóstico integral y partida/descarga real."
+          "note": "Parcial: creación, importación local/HTTPS/carpetas estándar, Java/RAM/enlaces, preparación y recuperación conectados y probados. Faltan versiones personalizadas/standalone, operaciones completas, ajustes/diagnóstico integral y partida/descarga real. No cerrar K03 ni la gate."
         }
       ]
     },
