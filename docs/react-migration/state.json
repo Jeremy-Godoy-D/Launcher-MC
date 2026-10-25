@@ -6,7 +6,7 @@
   },
   "scope": {
     "path": "docs/react-migration/SCOPE.md",
-    "sha256": "9bb6b44e3498e55b3c81f018689fe602e3b4e419d2864d8129cc66f89cabadfc"
+    "sha256": "fab038429ba2a0f4b2112732ab3db0cc9477e2f3e6b8404aed34a3629cad448c"
   },
   "baseline": {
     "version": "0.2.0-beta.2",
@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Etapa4 parcial: crear Java/loaders e importar mrpack/ZIP local desde UI/onboarding verificados (0fed2fc, STAGE4-CREATION). Siguiente lanzamiento completo: perfil/ruta, Java/RAM, resolver/diagnosticar/instalar y procesos; recuperar pendientes tras reiniciar. K03 URL/carpeta/opciones avanzadas y enlaces, galerías/cache, perfiles y rendimiento pendientes. No cerrar gates ni reintroducir extras; Microsoft pospuesto.",
+  "nextAction": "Etapa 4 parcial: lanzamiento/recuperación y Java automático conectados en 734b006 (STAGE4-LAUNCH); 263 unitarias y23 Electron, no descarga/partida real. Seguir K03 URL/carpeta/opciones avanzadas/enlaces, después operaciones de instancia. Ajustes/selector Java, perfiles, galerías/caché y presupuesto60s pendientes. Las tres gates siguen abiertas; Microsoft pospuesto y producción sin cambios.",
   "stages": [
     {
       "id": 0,
@@ -37,10 +37,10 @@
             },
             {
               "path": "docs/react-migration/SCOPE.md",
-              "sha256": "9bb6b44e3498e55b3c81f018689fe602e3b4e419d2864d8129cc66f89cabadfc"
+              "sha256": "fab038429ba2a0f4b2112732ab3db0cc9477e2f3e6b8404aed34a3629cad448c"
             }
           ],
-          "note": "Usuario aprobó React y luego confirmó solo núcleo, sin extras, el 2026-10-23."
+          "note": "Usuario aprobó React y luego confirmó solo núcleo, sin extras, el 2026-10-23. Aclaración directa del usuario el 2026-10-25: Java automático y alternativa manual, añadida a SCOPE; PLAN aprobado se conserva."
         },
         {
           "id": "inventory-parity",
@@ -341,9 +341,17 @@
             {
               "path": "docs/react-migration/STAGE4-LIBRARY.json",
               "sha256": "7c7693f6f922b3bc65744c7c1aa49fa619b4570cef95b60fb9b8a7faf171807c"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LAUNCH.md",
+              "sha256": "79cc0339304424f376db619d9f3c6a8fe1667ce6eb8155f22bbc6b46afeaa9ab"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LAUNCH.json",
+              "sha256": "8188594f39504979cb784e9bef40fd4110dd0b5c6beaad162acb2ce1ca6ca114"
             }
           ],
-          "note": "Parcial: instancias reales, selección independiente, estados y pausas existentes probadas. Faltan galerías/caché, pausa al jugar y rendimiento medido."
+          "note": "Parcial: selección real y pausa/reanudación del vídeo con proceso sintético verificadas; galerías/caché y rendimiento medido pendientes."
         },
         {
           "id": "library-instance-launch",
@@ -364,9 +372,17 @@
             {
               "path": "docs/react-migration/STAGE4-CREATION.json",
               "sha256": "d8691be6a876817c20e464bf6fc65496115537bd22baed8c3e61ac996151ec6d"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LAUNCH.md",
+              "sha256": "79cc0339304424f376db619d9f3c6a8fe1667ce6eb8155f22bbc6b46afeaa9ab"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LAUNCH.json",
+              "sha256": "8188594f39504979cb784e9bef40fd4110dd0b5c6beaad162acb2ce1ca6ca114"
             }
           ],
-          "note": "Parcial: biblioteca real, creación Java/loaders e importación local con persistencia/reintento verificadas. Faltan operaciones completas, URL/carpeta/avanzadas y lanzamiento/diagnósticos/procesos."
+          "note": "Parcial: creación local, preparación, recuperación y lanzamiento/Java automático conectados y probados con fixtures; faltan URL/carpeta/avanzadas, operaciones completas, selector Java/diagnóstico integral y partida/descarga real."
         }
       ]
     },

@@ -66,3 +66,9 @@ El usuario pidió material de internet en lugar de crearlo y precisó: «si pued
 - No hay procesos, listeners ni tareas de extras iniciados por el nuevo bootstrap.
 - Los contratos y recorridos de las funciones conservadas continúan pasando.
 - La matriz PARITY distingue `keep`, `remove` y `deferred`; una retirada autorizada no se contabiliza como función incompleta.
+
+## Aclaración del usuario — Java automático (2026-10-25)
+
+Si falta el Java que necesita una instancia o modpack, descargar y configurar automáticamente uno compatible al confirmar el lanzamiento. Resolver el requisito desde Minecraft y su loader; no forzar una sola versión de Java para todas las instancias ni sobrescribir el Java del sistema. Reutilizar el instalador nativo, su verificación de integridad y el directorio `jre` del launcher.
+
+Ante un fallo, indicar el requisito conocido, permitir reintentar y ofrecer una página oficial para instalación manual y volver a detectar Java. La elección de un ejecutable instalado en otra carpeta forma parte del selector Java de los ajustes de instancia/globales conservados. No iniciar Minecraft con Java incompatible ni tratar un enlace o una prueba con fixtures como evidencia de una descarga real. Detalle y límites en `STAGE4-LAUNCH.md`.
