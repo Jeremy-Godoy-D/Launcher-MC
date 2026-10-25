@@ -33,6 +33,7 @@ import {
   X,
 } from 'lucide-react'
 import projects from './project-fixtures.json'
+import brandIcon from '../../branding/copper/app-64.png'
 import sunset from './assets/ambient/vanilla-shaders.webp'
 import caves from './assets/ambient/vanilla-caves.webp'
 import cavesVideo from './assets/ambient/vanilla-caves.mp4'
@@ -360,8 +361,8 @@ export function App() {
       />
       <header className="titlebar">
         <div className="titlebar-left">
-          <Box size={15} />
-          <span>Launcher MC</span>
+          <img className="titlebar-logo" src={brandIcon} alt="" />
+          <span>Grimo Launcher</span>
           <span className="preview-label">{accountsPage ? t('react.accounts.saved') : catalog ? 'Vista previa · datos de ejemplo' : t('react.instances.connected')}</span>
         </div>
         <div className="window-controls">
@@ -389,12 +390,12 @@ export function App() {
         </div>
       </header>
       <aside className="sidebar" data-testid="app-sidebar">
-        <Link to="/" className="brand" aria-label="Launcher MC, Inicio">
+        <Link to="/" className="brand" aria-label="Grimo Launcher, Inicio">
           <span className="brand-mark">
-            <Box size={28} strokeWidth={1.7} />
+            <img src={brandIcon} width="40" height="40" alt="" />
           </span>
           <span>
-            Launcher<span className="brand-mc">MC</span>
+            Grimo<span className="brand-launcher">Launcher</span>
           </span>
         </Link>
         <nav className="main-nav" aria-label="Navegación principal">
@@ -943,7 +944,7 @@ export function App() {
             <Dialog.Title>{showCredits ? 'Créditos visuales' : dialog?.title}</Dialog.Title>
             <Dialog.Description>
               {showCredits
-                ? 'Material de Minecraft obtenido de sus fuentes, con atribución a sus autores. Launcher MC no está afiliado con Mojang ni Microsoft.'
+                ? 'Material de Minecraft obtenido de sus fuentes, con atribución a sus autores. Grimo Launcher no está afiliado con Mojang ni Microsoft.'
                 : dialog?.message}
             </Dialog.Description>
             {showCredits && (

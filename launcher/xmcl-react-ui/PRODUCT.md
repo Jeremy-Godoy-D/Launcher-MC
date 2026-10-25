@@ -20,7 +20,7 @@ Visual correction from the user on 2026-10-24: the landscape must also fill the 
 
 ## Brand and evidence
 
-Launcher MC is the current provisional name. Preserve existing product/install identity and legal attribution. No fabricated user counts, testimonials, endorsements or claims. Prototype stage uses clearly labelled fictional fixture instances, no real installs or launch side effects. Existing beta.2 screenshots are reference/anti-reference in e2e/artifacts/react-migration-baseline-visual.
+Grimo Launcher is the definitive name, confirmed by the user on 2026-10-25. Use the supplied assets in ../branding without altering the approved Obsidian/Copper surfaces. Preserve legacy storage, appId, protocol and update repository identities for compatibility, and all legal attribution. No fabricated user counts, testimonials, endorsements or claims. Prototype stage uses clearly labelled fictional fixture instances, no real installs or launch side effects. Existing beta.2 screenshots are reference/anti-reference in e2e/artifacts/react-migration-baseline-visual.
 
 ## Quality and acceptance
 

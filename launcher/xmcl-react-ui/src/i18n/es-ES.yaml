@@ -16,7 +16,7 @@ react:
     subtitle: Tus instancias de Minecraft Java, en un solo lugar.
     description: Continúa tu aventura o administra esta instancia.
     ambient: Paisaje ambiental de Minecraft Vanilla.
-    runtimeRequired: Abre Launcher MC para ver tus instancias guardadas.
+    runtimeRequired: Abre Grimo Launcher para ver tus instancias guardadas.
     loading: Cargando tus instancias…
     loadError: No se pudo cargar la biblioteca. Reintenta para recuperar tus instancias.
     retry: Reintentar
@@ -38,7 +38,7 @@ react:
     create: Crear perfil local
     saving: Guardando…
     actionError: No se pudo completar la acción. Tus datos siguen guardados; vuelve a intentarlo.
-    runtimeRequired: Abre esta pantalla en Launcher MC para gestionar tus perfiles.
+    runtimeRequired: Abre esta pantalla en Grimo Launcher para gestionar tus perfiles.
     loading: Cargando perfiles guardados…
     loadError: No se pudieron cargar tus cuentas. Reinicia el launcher para volver a intentarlo.
     storageError: La selección se aplicará en esta ventana; no se pudo guardar en este equipo.

@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { Box, FolderOpen, Maximize2, Minus, X } from 'lucide-react'
+import { FolderOpen, Maximize2, Minus, X } from 'lucide-react'
+import brandIcon from '../../../../branding/copper/app-64.png'
+import wordmarkDark from '../../../../branding/copper/wordmark-dark.png'
+import wordmarkLight from '../../../../branding/copper/wordmark-light.png'
 import type { Bootstrap } from '@xmcl/runtime-api/src/bootstrap'
 import { BaseServiceKey } from '@xmcl/runtime-api/src/services/BaseService'
 import { useService } from '../../runtime'
@@ -155,8 +158,8 @@ export function Onboarding({ onFinished }: { onFinished: (choice: 'library' | 'c
       />
       <header className="titlebar">
         <div className="titlebar-left">
-          <Box size={15} aria-hidden="true" />
-          <span>Launcher MC</span>
+          <img className="titlebar-logo" src={brandIcon} alt="" />
+          <span>Grimo Launcher</span>
         </div>
         <div className="window-controls">
           <button
@@ -181,6 +184,10 @@ export function Onboarding({ onFinished }: { onFinished: (choice: 'library' | 'c
       </header>
       <main className="onboarding-layout">
         <aside className="onboarding-intro">
+          <div className="setup-brand">
+            <img className="setup-wordmark brand-wordmark-dark" src={wordmarkDark} alt="Grimo Launcher" />
+            <img className="setup-wordmark brand-wordmark-light" src={wordmarkLight} alt="Grimo Launcher" />
+          </div>
           <h1>{t('react.setup.welcome')}</h1>
           <p>{t('react.setup.intro')}</p>
           <ol aria-label={t('react.setup.progress')}>

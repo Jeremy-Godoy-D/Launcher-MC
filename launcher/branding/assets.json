@@ -1,0 +1,119 @@
+{
+  "name": "Grimo Launcher",
+  "source": "User-provided assets, Nueva carpeta / 04_Icono_Aplicacion, 2026-10-25",
+  "modified": false,
+  "files": [
+    {
+      "file": "app-1024.png",
+      "sha256": "57652f39e46cb4bcfd9cea4565f448d8251d5805dc33d39d24c1607852458838",
+      "bytes": 402022,
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "app-128.png",
+      "sha256": "2ec533c943320e78604733bf0278e0dcc1375af9fe7b982dea531bfa9c4ca351",
+      "bytes": 22364,
+      "width": 128,
+      "height": 128
+    },
+    {
+      "file": "app-16.png",
+      "sha256": "49adc7e00a413758cd7ee101234e140074a25a9f5c823a33358706efd7c71a28",
+      "bytes": 809,
+      "width": 16,
+      "height": 16
+    },
+    {
+      "file": "app-256.png",
+      "sha256": "4dc37d972c5f93c0aa0e3e3c6811bf38bdd3275833983b4fb5d00a43e091001d",
+      "bytes": 71798,
+      "width": 256,
+      "height": 256
+    },
+    {
+      "file": "app-32.png",
+      "sha256": "a813efcc62b62890eea1aaf20830d4608b5bbb4ad281faee722dff044d344717",
+      "bytes": 2359,
+      "width": 32,
+      "height": 32
+    },
+    {
+      "file": "app-48.png",
+      "sha256": "2af13ff90f03cbbf8acdb238d52ba4c51d52dfd8b36f6851d58b764c6f956599",
+      "bytes": 4482,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "file": "app-512.png",
+      "sha256": "79db392d1955db404e55462310aa40cc87d32c3a46a3ff7cf50788fac54f1973",
+      "bytes": 183405,
+      "width": 512,
+      "height": 512
+    },
+    {
+      "file": "app-64.png",
+      "sha256": "f660f481aa45a446dbeda739483d302271d33d9fefbfed9d9afc4ff2cdeb89dd",
+      "bytes": 7072,
+      "width": 64,
+      "height": 64
+    },
+    {
+      "file": "grimo.ico",
+      "sha256": "ec8459f2dec80dbdafb97c1cd3376a00da1637fec3ae51ab44b1e11646d7a46d",
+      "bytes": 115126,
+      "sizes": [
+        {
+          "width": 16,
+          "height": 16
+        },
+        {
+          "width": 24,
+          "height": 24
+        },
+        {
+          "width": 32,
+          "height": 32
+        },
+        {
+          "width": 48,
+          "height": 48
+        },
+        {
+          "width": 64,
+          "height": 64
+        },
+        {
+          "width": 128,
+          "height": 128
+        },
+        {
+          "width": 256,
+          "height": 256
+        }
+      ]
+    },
+    {
+      "file": "isotipo.png",
+      "sha256": "08e2ec9538bd9428125cf5a3636ac4b4389e4d68d7bf6549d998f645005caa3a",
+      "bytes": 401328,
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "logo-horizontal.png",
+      "sha256": "28ce9e499052b31e1d2cc9832cd0d0c92dcbcd317b420403643bf83ffbecc91b",
+      "bytes": 38886,
+      "width": 374,
+      "height": 132
+    },
+    {
+      "file": "logo-principal.png",
+      "sha256": "2dcde8f72f4f75cd18028f966452075ad693e37750988f1c8c95616028540b09",
+      "bytes": 775873,
+      "width": 1600,
+      "height": 1600
+    }
+  ]
+}

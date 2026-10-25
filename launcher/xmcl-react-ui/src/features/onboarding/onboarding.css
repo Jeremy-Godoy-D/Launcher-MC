@@ -22,6 +22,12 @@
     align-self: center;
     padding: 0 16px;
   }
+  .setup-wordmark {
+    width: min(260px, 100%);
+    height: auto;
+    object-fit: contain;
+    margin-bottom: 24px;
+  }
   .onboarding-intro h1 {
     font-size: 40px;
     line-height: 1.15;
@@ -143,6 +149,9 @@
       margin-top: 12px;
       padding-top: 12px;
     }
+  }
+  @media (max-height: 500px) {
+    .setup-brand { display: none; }
   }
   @supports not (backdrop-filter: blur(1px)) {
     .onboarding-pane {

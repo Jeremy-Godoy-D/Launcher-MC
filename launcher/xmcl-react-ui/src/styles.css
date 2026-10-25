@@ -188,6 +188,12 @@
   .titlebar-left > svg {
     color: var(--accent-ink);
   }
+  .titlebar-logo {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
   .preview-label {
     margin-left: 17px;
     padding-left: 17px;
@@ -231,10 +237,25 @@
   .brand-mark {
     color: var(--accent-ink);
   }
-  .brand-mc {
+  .brand-mark img {
+    display: block;
+    object-fit: contain;
+  }
+  .brand-launcher {
     color: var(--muted);
-    margin-left: 3px;
+    display: block;
+    font-size: 12px;
+    letter-spacing: 0;
     font-weight: 400;
+  }
+  .brand-wordmark-light {
+    display: none;
+  }
+  :root[data-theme='light'] .brand-wordmark-dark {
+    display: none;
+  }
+  :root[data-theme='light'] .brand-wordmark-light {
+    display: block;
   }
   .main-nav {
     display: grid;
@@ -1076,7 +1097,8 @@
       padding: 22px 10px 12px;
     }
     .brand {
-      padding: 0 12px 27px;
+      padding: 0 0 27px;
+      justify-content: center;
     }
     .brand > span:last-child,
     .nav-item > span,

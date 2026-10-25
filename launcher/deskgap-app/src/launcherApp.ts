@@ -21,7 +21,7 @@ import { DeskGapUpdater } from './updater'
 import { createDeskGapUpdater } from './updaterHost'
 
 const manifest = {
-  name: 'X Minecraft Launcher',
+  name: 'Grimo Launcher',
   description: 'The default XMCL interface hosted by DeskGap',
   url: 'xmcl-deskgap://launcher/index.html',
   backgroundColor: '0x424242',

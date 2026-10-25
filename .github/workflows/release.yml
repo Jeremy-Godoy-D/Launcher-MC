@@ -1,4 +1,4 @@
-name: Build & Publish Launcher MC Release
+name: Build & Publish Grimo Launcher Release
 
 on:
   push:
@@ -102,7 +102,7 @@ jobs:
           New-Item -ItemType Directory -Force $out | Out-Null
           gh release download "v$version" --pattern '*.zip*' --dir $out
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          $name = "LauncherMC-$version-win-x64.zip"
+          $name = "GrimoLauncher-$version-win-x64.zip"
           if ((Get-FileHash "$out/$name" -Algorithm SHA256).Hash -ne (Get-Content "$out/$name.sha256").Trim()) { throw 'Draft package checksum mismatch' }
           Expand-Archive -LiteralPath "$out/$name" -DestinationPath "$out/win-unpacked"
 
@@ -126,7 +126,7 @@ jobs:
         working-directory: launcher
         env:
           XMCL_LIVE_CURSEFORGE: '1'
-          XMCL_E2E_EXECUTABLE: ${{ github.workspace }}\launcher\xmcl-electron-app\build\output\win-unpacked\Launcher MC.exe
+          XMCL_E2E_EXECUTABLE: ${{ github.workspace }}\launcher\xmcl-electron-app\build\output\win-unpacked\Grimo Launcher.exe
         run: pnpm --prefix=e2e exec playwright test specs/aurora --output=artifacts/aurora-production
 
       - name: Validate packaged boot and beta.3 migration
@@ -176,7 +176,7 @@ jobs:
           # Legacy clients recognize app-*.asar; use new delta names before re-enabling them.
           $assets = @($assets | Where-Object { (Split-Path $_ -Leaf) -notlike 'app-*' -and (Split-Path $_ -Leaf) -ne 'builder-debug.yml' })
           if ($assets | Where-Object { $_ -match '\.asar' }) { throw 'This migration must not expose ASAR assets.' }
-          foreach ($name in @("LauncherMC-$env:VERSION-win-x64.exe", "LauncherMC-$env:VERSION-win-x64.zip")) {
+          foreach ($name in @("GrimoLauncher-$env:VERSION-win-x64.exe", "GrimoLauncher-$env:VERSION-win-x64.zip")) {
             if (-not ($assets | Where-Object { (Split-Path $_ -Leaf) -eq $name }) -or -not ($assets | Where-Object { (Split-Path $_ -Leaf) -eq "$name.sha256" })) { throw "Missing full-package artifact or checksum: $name" }
             $actual = (Get-FileHash "$outDir/$name" -Algorithm SHA256).Hash
             if ($actual -ne (Get-Content "$outDir/$name.sha256").Trim()) { throw "Full-package checksum mismatch: $name" }
@@ -184,7 +184,7 @@ jobs:
 
           gh release view $env:TAG 2>$null | Out-Null
           if ($LASTEXITCODE -ne 0) {
-            $flags = @("--title", "Launcher MC $env:TAG", "--generate-notes", "--draft")
+            $flags = @("--title", "Grimo Launcher $env:TAG", "--generate-notes", "--draft")
             if ($env:IS_PRERELEASE -eq "True" -or $env:IS_PRERELEASE -eq "true") {
               $flags += "--prerelease"
             }

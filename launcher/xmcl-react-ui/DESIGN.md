@@ -1,5 +1,5 @@
 ---
-name: Launcher MC — Obsidiana y cobre
+name: Grimo Launcher — Obsidiana y cobre
 description: Paisajes reales de Minecraft a toda ventana, cristal de obsidiana y controles de cobre para volver a jugar.
 colors:
   canvas: "#0e1117"
@@ -119,7 +119,7 @@ components:
     rounded: "{rounded.feature}"
 ---
 
-# Design System: Launcher MC — Obsidiana y cobre
+# Design System: Grimo Launcher — Obsidiana y cobre
 
 ## Overview
 
@@ -257,8 +257,14 @@ Cristal elevado con borde de luz, blur exterior, oscurecimiento de fondo y cierr
 
 ### Don't:
 
-- **Don't** usar arte IA ni sustituir indiscriminadamente el arte de packs por paisajes Vanilla.
+- **Don't** generar arte IA para paisajes ni sustituir el arte de packs por paisajes Vanilla. La adaptación de color del logo solicitada por el usuario el 2026-10-25 sí está autorizada; no cambia esa regla de medios.
 - **Don't** reintroducir burbujas, editor de temas, CSS personalizado o neón genérico.
 - **Don't** anidar blur en contenidos internos ni añadir vídeo o desenfoque animado a pantalla completa.
 - **Don't** convertir datos, textos de disponibilidad o acciones de fixture en capacidades de producción.
 - **Don't** afirmar aprobación humana, contraste completo o rendimiento medido a partir de este documento.
+
+## Identidad definitiva: Grimo Launcher
+
+El nombre y los originales de marca los proporcionó el usuario el 2026-10-25. La corrección posterior pide adaptar el logo a la aplicación: usar los derivados cobre/crema/obsidiana de `../branding/copper`, preservando sus originales en `../branding`. Icono de aplicación y tamaños PNG para Windows, barra y navegación; horizontal claro/oscuro en superficies amplias como onboarding. Mantener las letras legibles con su variante propia, sin filtros de inversión. En altura mínima, priorizar controles y conservar el icono compacto de la barra. Principal e isotipo originales quedan disponibles para superficies que los necesiten; no forzar todas las variantes dentro de una pantalla.
+
+Esto no cambia paleta, distribución, fondos, atribuciones ni presupuesto de movimiento del diseño aprobado. Los identificadores históricos de datos, instalador y enlaces se conservan según SCOPE; la marca visible es Grimo Launcher.

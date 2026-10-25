@@ -16,7 +16,7 @@ react:
     subtitle: Your Minecraft Java instances, in one place.
     description: Continue your adventure or manage this instance.
     ambient: Minecraft Vanilla ambient scenery.
-    runtimeRequired: Open Launcher MC to view your saved instances.
+    runtimeRequired: Open Grimo Launcher to view your saved instances.
     loading: Loading your instances…
     loadError: Could not load the library. Try again to recover your instances.
     retry: Try again
@@ -38,7 +38,7 @@ react:
     create: Create local profile
     saving: Saving…
     actionError: Could not complete the action. Your data is still saved; try again.
-    runtimeRequired: Open this page in Launcher MC to manage your profiles.
+    runtimeRequired: Open this page in Grimo Launcher to manage your profiles.
     loading: Loading saved profiles…
     loadError: Could not load your accounts. Restart the launcher to try again.
     storageError: Your selection applies in this window but could not be saved on this device.
