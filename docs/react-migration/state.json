@@ -6,7 +6,7 @@
   },
   "scope": {
     "path": "docs/react-migration/SCOPE.md",
-    "sha256": "fab038429ba2a0f4b2112732ab3db0cc9477e2f3e6b8404aed34a3629cad448c"
+    "sha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
   },
   "baseline": {
     "version": "0.2.0-beta.2",
@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Etapa 4 parcial: lanzamiento/recuperación y Java automático conectados en 734b006 (STAGE4-LAUNCH); 263 unitarias y23 Electron, no descarga/partida real. Seguir K03 URL/carpeta/opciones avanzadas/enlaces, después operaciones de instancia. Ajustes/selector Java, perfiles, galerías/caché y presupuesto60s pendientes. Las tres gates siguen abiertas; Microsoft pospuesto y producción sin cambios.",
+  "nextAction": "Marca Grimo Launcher/cobre integrada y verificada en ab03193 (STAGE4-BRANDING); originales e identidades de datos conservados, 269 unitarias y 25 Electron. Retomar K03 URL/carpeta/opciones avanzadas/enlaces y operaciones. Mantener tres gates pendientes, resto de migración y Microsoft pospuesto; producción sin cambios.",
   "stages": [
     {
       "id": 0,
@@ -37,7 +37,7 @@
             },
             {
               "path": "docs/react-migration/SCOPE.md",
-              "sha256": "fab038429ba2a0f4b2112732ab3db0cc9477e2f3e6b8404aed34a3629cad448c"
+              "sha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
             }
           ],
           "note": "Usuario aprobó React y luego confirmó solo núcleo, sin extras, el 2026-10-23. Aclaración directa del usuario el 2026-10-25: Java automático y alternativa manual, añadida a SCOPE; PLAN aprobado se conserva."
@@ -326,6 +326,14 @@
             {
               "path": "docs/react-migration/STAGE4-CREATION.json",
               "sha256": "d8691be6a876817c20e464bf6fc65496115537bd22baed8c3e61ac996151ec6d"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-BRANDING.md",
+              "sha256": "1fc375ac843db313ba2fe45c0171e446b67818d93821fa0f8a1e2a6b0a1c0975"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-BRANDING.json",
+              "sha256": "9c5593a4b74e695b378e5f915bfe90edae65c3f6ccf8c3cf8c086e6c5c2c0899"
             }
           ],
           "note": "Parcial: onboarding, perfiles locales básicos y las acciones Crear/Importar locales del final verificadas. Falta edición/apariencia de perfiles; no cerrar el criterio."
@@ -349,6 +357,14 @@
             {
               "path": "docs/react-migration/STAGE4-LAUNCH.json",
               "sha256": "8188594f39504979cb784e9bef40fd4110dd0b5c6beaad162acb2ce1ca6ca114"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-BRANDING.md",
+              "sha256": "1fc375ac843db313ba2fe45c0171e446b67818d93821fa0f8a1e2a6b0a1c0975"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-BRANDING.json",
+              "sha256": "9c5593a4b74e695b378e5f915bfe90edae65c3f6ccf8c3cf8c086e6c5c2c0899"
             }
           ],
           "note": "Parcial: selección real y pausa/reanudación del vídeo con proceso sintético verificadas; galerías/caché y rendimiento medido pendientes."
@@ -380,6 +396,14 @@
             {
               "path": "docs/react-migration/STAGE4-LAUNCH.json",
               "sha256": "8188594f39504979cb784e9bef40fd4110dd0b5c6beaad162acb2ce1ca6ca114"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-BRANDING.md",
+              "sha256": "1fc375ac843db313ba2fe45c0171e446b67818d93821fa0f8a1e2a6b0a1c0975"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-BRANDING.json",
+              "sha256": "9c5593a4b74e695b378e5f915bfe90edae65c3f6ccf8c3cf8c086e6c5c2c0899"
             }
           ],
           "note": "Parcial: creación local, preparación, recuperación y lanzamiento/Java automático conectados y probados con fixtures; faltan URL/carpeta/avanzadas, operaciones completas, selector Java/diagnóstico integral y partida/descarga real."
