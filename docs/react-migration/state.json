@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Etapa4 parcial: cuentas locales crear/seleccionar/eliminar verificadas en cd6b9ae, STAGE4-ACCOUNTS. Siguiente onboarding real de tres pasos con validación/confirmación de root, reintentos y LocalProfileForm; luego Inicio/Biblioteca/instancias/crear/importar/lanzar reales. Tres criterios siguen pendientes; no pedir otra aprobación visual ni activar Microsoft.",
+  "nextAction": "Etapa4 parcial: perfiles locales y onboarding nativo verificados (cd6b9ae/0b3c713, STAGE4-ACCOUNTS/ONBOARDING). Siguiente Inicio/Biblioteca con InstanceState real y selectedInstancePath; luego crear/importar/instalar/lanzar con comprobaciones y procesos. Mantener los tres criterios pendientes hasta completar flujos; diseño ya aprobado, Microsoft pospuesto.",
   "stages": [
     {
       "id": 0,
@@ -310,9 +310,17 @@
             {
               "path": "docs/react-migration/STAGE4-ACCOUNTS.json",
               "sha256": "3f20d9ff278fdfde2298657ea8e848bd4d6485a1cd3c5a2eb4fab66532c13361"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-ONBOARDING.md",
+              "sha256": "38d74e958c96113b24bbeb49a19475ed25f223b0410139b638b05186cb6ef7fc"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-ONBOARDING.json",
+              "sha256": "085bec469e7de5034b2477f438b3cfa2cbf53214974d1c4320d440b4c8c08944"
             }
           ],
-          "note": "Parcial: CRUD básico de perfiles locales y conservación de cuentas externas verificados. Onboarding y edición/apariencia pendientes; no cerrar el criterio."
+          "note": "Parcial: onboarding nuevo validado/confirmado, perfil opcional y CRUD básico verificados. Faltan edición/apariencia de perfiles y acciones reales de creación/importación del final; no cerrar el criterio."
         },
         {
           "id": "home-carousel",
