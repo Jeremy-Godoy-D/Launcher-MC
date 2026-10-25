@@ -44,6 +44,7 @@ export function importUrl(value: string) {
 }
 
 export type CreationOptions = Parameters<InstanceService['createInstance']>[0]
+export type ImportPreviewData = ModpackState & { prismVersion?: { source: string; fingerprint: string } }
 export const loaders = [
   'Vanilla',
   'Fabric',

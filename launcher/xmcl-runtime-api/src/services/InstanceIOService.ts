@@ -118,6 +118,8 @@ export interface InstanceIOService {
   parseInstanceFiles(path: string, type?: InstanceType): Promise<InstanceFile[]>
   /** Preview a local import with pinned hashes, rejecting links and launcher metadata. */
   previewFolderFiles(path: string, type?: InstanceType): Promise<InstanceFile[]>
+  previewPrismVersion(path: string): Promise<{ fingerprint: string; runtime: CreateInstanceOptions['runtime'] } | undefined>
+  preparePrismVersion(path: string, name: string, fingerprint: string): Promise<{ version: string | undefined } | { error: 'sourceChanged' | 'conflict' }>
   /**
    * Export instance as server
    */

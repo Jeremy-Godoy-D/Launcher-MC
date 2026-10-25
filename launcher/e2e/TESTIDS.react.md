@@ -14,9 +14,9 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `app-backdrop` | [`xmcl-react-ui/src/App.tsx#L358`](../xmcl-react-ui/src/App.tsx#L358) |
 | `app-sidebar` | [`xmcl-react-ui/src/App.tsx#L392`](../xmcl-react-ui/src/App.tsx#L392) |
 | `featured-play` | [`xmcl-react-ui/src/App.tsx#L538`](../xmcl-react-ui/src/App.tsx#L538) |
-| `instance-create-confirm` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L705`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L705) |
-| `instance-minecraft` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L500`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L500) |
-| `instance-name` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L475`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L475) |
+| `instance-create-confirm` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L714`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L714) |
+| `instance-minecraft` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L509`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L509) |
+| `instance-name` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L484`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L484) |
 | `launch-confirm` | [`xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157`](../xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157) |
 | `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L620`](../xmcl-react-ui/src/App.tsx#L620) |
 | `library-state` | [`xmcl-react-ui/src/App.tsx#L346`](../xmcl-react-ui/src/App.tsx#L346) |

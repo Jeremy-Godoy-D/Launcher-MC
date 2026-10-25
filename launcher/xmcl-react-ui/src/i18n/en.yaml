@@ -81,8 +81,8 @@ react:
     chooseError: Could not open the file picker. Try again.
     parsing: Reviewing the modpack…
     parseError: Could not read a valid Java modpack. Choose another .mrpack or .zip file.
-    fileCount: '{count} files'
-    importHelp: Pack files will be installed into a new instance. Existing instances are preserved. Commands, Java and launch arguments from the archive are not imported. Only use packs you trust.
+    fileCount: 'Files: {count}'
+    importHelp: Files will be installed into a new instance, preserving existing instances. Commands and personal Java settings from the source launcher are not adopted. Only use packs you trust.
     retained: The instance is saved. Retrying continues in the same folder; closing preserves the files.
     statusError: Could not check installation. Keep the instance and review its status again.
     unresolved: '{count} files need attention. Installation is incomplete.'
@@ -135,8 +135,11 @@ react:
     chooseFolder: Choose source folder
     folderProfile: Profile to import
     folderScanning: Reviewing source files and integrity…
-    folderError: Could not review a valid Java instance. Check format and permissions; links, root folders and custom Prism version patches are not supported.
-    folderHelp: Worlds, mods and configuration will be copied into a new folder. The source is preserved; accounts, Minecraft caches and launch settings are excluded. Custom versions are not included in this import.
+    folderError: Could not review a valid Java instance. Check format, permissions and local libraries; links, root folders and incomplete versions are not supported.
+    folderHelp: Worlds, mods and configuration will be copied into a new folder. The source is preserved; accounts and personal launch settings are excluded. Prism includes its custom version and local libraries; other formats only copy game files.
+    prismVersion: Custom version reviewed. Confirming will save it with its local libraries without replacing different existing files. Use only trusted packs.
+    prism_sourceChanged: The source changed since review. Choose the folder again to review its files before confirming.
+    prism_conflict: A library or version with different content already exists. Existing files were preserved; this import cannot continue in this data directory.
   launch:
     title: 'Play: {name}'
     description: Review this instance before starting Minecraft.

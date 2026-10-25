@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { createReadStream } from 'node:fs'
 import { lstat, readdir, realpath } from 'node:fs/promises'
-import { dirname, isAbsolute, join, parse, relative, sep } from 'node:path'
+import { isAbsolute, join, parse, relative, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { getMultiMCGameDirectory, isInstanceInstallPath, type InstanceFile } from '@xmcl/instance'
 import type { InstanceType } from '@xmcl/runtime-api'
@@ -13,15 +13,6 @@ export async function previewFolderFiles(source: string, type?: InstanceType): P
   if (!isAbsolute(source) || parse(source).root === source) throw new Error('Invalid import directory')
   if ((await lstat(source)).isSymbolicLink()) throw new Error('Import directory is a link')
   const directory = type === 'mmc' || type === 'prism' ? getMultiMCGameDirectory(source) : source
-  if (type === 'mmc' || type === 'prism') {
-    const patches = join(dirname(directory), 'patches')
-    const info = await lstat(patches).catch(error => { if (error.code === 'ENOENT') return undefined; throw error })
-    if (info) {
-      if (info.isSymbolicLink() || !info.isDirectory()) throw new Error('Invalid Prism patches directory')
-      // shortcut: custom Prism version patches need the standalone-version migration before enabling them here.
-      if ((await readdir(patches)).some(name => name.endsWith('.json'))) throw new Error('Custom Prism version patches require standalone migration')
-    }
-  }
   if ((await lstat(directory)).isSymbolicLink()) throw new Error('Import directory is a link')
   const root = await realpath(directory)
   if (!(await lstat(root)).isDirectory() || parse(root).root === root) throw new Error('Invalid import directory')

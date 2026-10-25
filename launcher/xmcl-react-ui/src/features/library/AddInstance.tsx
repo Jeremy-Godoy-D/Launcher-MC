@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { FolderOpen, X } from 'lucide-react'
 import { InstanceServiceKey } from '@xmcl/runtime-api/src/services/InstanceService'
+import { InstanceIOServiceKey } from '@xmcl/runtime-api/src/services/InstanceIOService'
 import {
   InstanceInstallServiceKey,
   InstanceInstallStatus,
@@ -23,6 +24,7 @@ import {
   validInstanceName,
   validateImportFiles,
   type Loader,
+  type ImportPreviewData,
 } from './creation'
 import { InstanceDataSchema } from '../../../../packages/instance/instance'
 import { InstanceSavesServiceKey } from '@xmcl/runtime-api/src/services/InstanceSavesService'
@@ -154,6 +156,7 @@ export function AddInstance({
   const { t } = useI18n()
   const library = useLibrary()
   const instances = useService(InstanceServiceKey)
+  const instanceIO = useService(InstanceIOServiceKey)
   const installs = useService(InstanceInstallServiceKey)
   const metadata = useService(VersionMetadataServiceKey)
   const saves = useService(InstanceSavesServiceKey)
@@ -182,7 +185,7 @@ export function AddInstance({
   const [advanced, setAdvanced] = useState({ ...defaultAdvanced })
   const [links, setLinks] = useState(() => readLinkPreferences(() => localStorage))
   const [failedLinks, setFailedLinks] = useState<string[]>([])
-  const [preview, setPreview] = useState<ModpackState>()
+  const [preview, setPreview] = useState<ImportPreviewData>()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [submitted, setSubmitted] = useState(false)
@@ -346,6 +349,12 @@ export function AddInstance({
     setBusy(true)
     setError('')
     try {
+      if (mode === 'import' && preview?.prismVersion && !session.current?.path) {
+        const { source, fingerprint } = preview.prismVersion
+        const prepared = await instanceIO.preparePrismVersion(source, effectiveName, fingerprint)
+        if ('error' in prepared) { setError(`react.create.prism_${prepared.error}`); return }
+        options.version = prepared.version
+      }
       const controller = (session.current ??= new CreationSession(instances, installs))
       // Publish the retained identity even when installation fails after native creation.
       try {
@@ -585,7 +594,7 @@ export function AddInstance({
                 <div className="creation-modes" aria-label={t('react.create.importSource')}>
                   {(['file', 'url', 'folder'] as const).map(value => <button type="button" key={value} className={`button ${source === value ? 'primary' : 'secondary'}`} aria-pressed={source === value} disabled={locked} onClick={() => { setSource(value); setArchive(''); setPreview(undefined); setError('') }}>{t(`react.create.source_${value}`)}</button>)}
                 </div>
-                {source === 'folder' ? <FolderImport locked={locked} draft={folderDraft} onReady={setPreview} onName={suggestName} /> : source === 'url' ? <>
+                {source === 'folder' ? <FolderImport locked={locked} draft={folderDraft} onReady={value => { setPreview(value); if (value && !createdPath) setError('') }} onName={suggestName} /> : source === 'url' ? <>
                   <label htmlFor="instance-url">{t('react.create.url')}</label>
                   <input id="instance-url" type="url" value={url} disabled={locked} maxLength={4096} onChange={event => { setUrl(event.target.value); setArchive(''); setPreview(undefined) }} />
                   <button type="button" className="button secondary" disabled={locked || !url.trim()} onClick={() => {

@@ -5,10 +5,10 @@ import { ModpackState } from '@xmcl/runtime-api/src/services/ModpackService'
 import { InstanceDataSchema } from '../../../../packages/instance/instance'
 import { useService } from '../../runtime'
 import { useI18n } from '../../i18n'
-import { importedOptions, validateImportFiles } from './creation'
+import { importedOptions, validateImportFiles, type ImportPreviewData } from './creation'
 
 export type FolderDraft = { type: InstanceType; path: string; candidates: ThirdPartyLauncherManifest['instances']; selected: number }
-export function FolderImport({ locked, onReady, onName, draft }: { locked: boolean; onReady: (data: ModpackState | undefined) => void; onName: (name: string) => void; draft: RefObject<FolderDraft> }) {
+export function FolderImport({ locked, onReady, onName, draft }: { locked: boolean; onReady: (data: ImportPreviewData | undefined) => void; onName: (name: string) => void; draft: RefObject<FolderDraft> }) {
   const { t } = useI18n()
   const service = useService(InstanceIOServiceKey)
   const [type, setType] = useState(draft.current.type)
@@ -16,6 +16,7 @@ export function FolderImport({ locked, onReady, onName, draft }: { locked: boole
   const [candidates, setCandidates] = useState(draft.current.candidates)
   const [selected, setSelected] = useState(draft.current.selected)
   const [count, setCount] = useState<number>()
+  const [customVersion, setCustomVersion] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(false)
   const request = useRef(0)
@@ -28,16 +29,17 @@ export function FolderImport({ locked, onReady, onName, draft }: { locked: boole
   }, [])
   async function select(candidate: ThirdPartyLauncherManifest['instances'][number], index: number) {
     const id = ++request.current
-    setSelected(index); setBusy(true); setError(false); setCount(undefined); ready.current(undefined)
+    setSelected(index); setBusy(true); setError(false); setCount(undefined); setCustomVersion(false); ready.current(undefined)
     try {
       const config = InstanceDataSchema.parse(candidate.options)
       importedOptions(config, 'Imported')
       const files = await service.previewFolderFiles(candidate.path, type)
       validateImportFiles(files)
+      const version = type === 'prism' || type === 'mmc' ? await service.previewPrismVersion(candidate.path) : undefined
+      if (version && Object.entries(version.runtime || {}).some(([key, value]) => (config.runtime[key as keyof typeof config.runtime] || '') !== (value || ''))) throw new Error('Prism metadata changed')
       if (id !== request.current) return
-      const value = new ModpackState()
-      Object.assign(value, { config, files, ready: true, modpackPath: candidate.path })
-      ready.current(value); name.current(config.name); setCount(files.length)
+      const value: ImportPreviewData = Object.assign(new ModpackState(), { config, files, ready: true, modpackPath: candidate.path, ...(version ? { prismVersion: { source: candidate.path, fingerprint: version.fingerprint } } : {}) })
+      ready.current(value); name.current(config.name); setCount(files.length); setCustomVersion(!!version)
     } catch { if (id === request.current) setError(true) }
     finally { if (id === request.current) setBusy(false) }
   }
@@ -74,8 +76,9 @@ export function FolderImport({ locked, onReady, onName, draft }: { locked: boole
         {candidates.map((candidate, index) => <option value={index} key={`${candidate.path}:${index}`}>{candidate.options.name} · {candidate.options.runtime?.minecraft}</option>)}
       </select>
     </>}
-    {selected >= 0 && <p className="import-preview">{candidates[selected]?.path}</p>}
+    {selected >= 0 && candidates[selected]?.path !== path && <p className="import-preview">{candidates[selected]?.path}</p>}
     {count !== undefined && <p role="status">Minecraft {candidates[selected]?.options.runtime?.minecraft} · {t('react.create.fileCount', { count })}</p>}
+    {count !== undefined && customVersion && <p className="form-help">{t('react.create.prismVersion')}</p>}
     {busy && <p role="status">{t('react.create.folderScanning')}</p>}
     {error && <p role="alert" className="form-error">{t('react.create.folderError')}</p>}
     <p className="form-help">{t('react.create.folderHelp')}</p>

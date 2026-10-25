@@ -3,6 +3,7 @@ import {
   ServerSSHExporter,
   parseInstanceFiles,
   parseLauncherData,
+  getInstanceConfigFromMmcModpack,
   type InstanceFile,
 } from '@xmcl/instance'
 import {
@@ -25,6 +26,7 @@ import { copyPassively, isPathDiskRootPath } from '../util/fs'
 import { uploadSSH } from './utils/uploadSSH'
 import { importLauncherInstance } from './utils/importLauncherInstance'
 import { previewFolderFiles } from './utils/previewFolderFiles'
+import { inspectPrismFolderVersion, preparePrismFolderVersion } from './utils/prismFolderVersion'
 
 @ExposeServiceKey(InstanceIOServiceKey)
 export class InstanceIOService extends AbstractService implements IInstanceIOService {
@@ -94,6 +96,23 @@ export class InstanceIOService extends AbstractService implements IInstanceIOSer
   }
   async previewFolderFiles(path: string, type?: InstanceType) {
     return previewFolderFiles(path, type)
+  }
+  async previewPrismVersion(path: string) {
+    const inspected = await inspectPrismFolderVersion(path)
+    return inspected ? { fingerprint: inspected.fingerprint, runtime: getInstanceConfigFromMmcModpack(inspected.manifest).runtime } : undefined
+  }
+  async preparePrismVersion(path: string, name: string, fingerprint: string) {
+    try {
+      const version = await preparePrismFolderVersion(path, name, fingerprint, this.getPath(), async id => {
+        await this.versionService.refreshVersion(id)
+        return this.versionService.resolveLocalVersion(id)
+      })
+      return { version }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'PrismSourceChanged') return { error: 'sourceChanged' as const }
+      if (error instanceof Error && error.name === 'ImportFileConflict') return { error: 'conflict' as const }
+      throw error
+    }
   }
 
   async parseLauncherData(path: string, type?: InstanceType): Promise<ThirdPartyLauncherManifest> {

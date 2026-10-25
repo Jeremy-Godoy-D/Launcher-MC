@@ -28,7 +28,7 @@ describe('read-only folder import preview', () => {
     expect((await previewFolderFiles(dir, 'prism')).map(file => file.path)).toEqual(['options.txt'])
     await mkdir(join(dir, 'patches'))
     await writeFile(join(dir, 'patches', 'custom.json'), JSON.stringify({ uid: 'net.minecraft', mainClass: 'custom.Main' }))
-    await expect(previewFolderFiles(dir, 'prism')).rejects.toThrow('standalone migration')
+    expect((await previewFolderFiles(dir, 'prism')).map(file => file.path)).toEqual(['options.txt'])
   })
   it('refuses relative paths, drive roots, symlink sources and nested junctions', async () => {
     await expect(previewFolderFiles('.')).rejects.toThrow()
@@ -37,10 +37,6 @@ describe('read-only folder import preview', () => {
     await symlink(join(dir, 'original'), join(dir, 'linked'), 'junction')
     await expect(previewFolderFiles(join(dir, 'linked'))).rejects.toThrow('link')
     await expect(previewFolderFiles(dir)).rejects.toThrow('link')
-    const prism = join(dir, 'prism')
-    await mkdir(join(prism, '.minecraft'), { recursive: true })
-    await symlink(join(dir, 'original'), join(prism, 'patches'), 'junction')
-    await expect(previewFolderFiles(prism, 'prism')).rejects.toThrow('patches directory')
   })
   it('does not confuse a valid dot-prefixed filename with traversal', async () => {
     await writeFile(join(dir, '..cache'), 'safe')

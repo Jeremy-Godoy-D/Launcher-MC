@@ -1,9 +1,8 @@
-import { LibraryInfo } from '@xmcl/core'
+import { LibraryInfo, Version } from '@xmcl/core'
 import { getMmcLocalLibraryNames, getMmcVersionFromManifest, type MMCModpackManifest } from '@xmcl/instance'
 import { createHash } from 'crypto'
 import filenamify from 'filenamify'
-import { outputFile } from 'fs-extra'
-import { join } from 'path'
+import { importPathParts, writeImmutableImportFiles } from './importFile'
 
 export interface MmcStandaloneVersionOptions {
   manifest: MMCModpackManifest
@@ -11,6 +10,22 @@ export interface MmcStandaloneVersionOptions {
   gameDirectory: string
   readLocalLibrary: (mavenPath: string) => Promise<Buffer | undefined>
   refreshVersion: (id: string) => Promise<unknown>
+  includePatchArguments?: boolean
+}
+
+export function resolveMmcStandaloneVersion(manifest: MMCModpackManifest, includePatchArguments = false) {
+  const version = getMmcVersionFromManifest(manifest, 'mmc')
+  if (!version || !includePatchArguments) return version
+  const ordered = manifest.json.components.map((component, index) => ({ patch: manifest.patches?.[component.uid], index }))
+    .filter(item => !!item.patch).sort((a, b) => (a.patch!.order ?? a.index) - (b.patch!.order ?? b.index))
+  const extraJvm = ordered.flatMap(({ patch }) => patch!['+jvmArgs'] || [])
+  const tweakers = ordered.flatMap(({ patch }) => patch!['+tweakers'] || [])
+  if (extraJvm.length || tweakers.length) {
+    // Preserve legacy JVM defaults when translating additive Prism arguments.
+    const normalized = Version.normalizeVersionJson(JSON.stringify(version), '').arguments
+    version.arguments = { game: [...normalized.game, ...tweakers.flatMap(name => ['--tweakClass', name])], jvm: [...normalized.jvm, ...extraJvm] }
+  }
+  return version
 }
 
 /**
@@ -18,9 +33,9 @@ export interface MmcStandaloneVersionOptions {
  * ZIP and directory imports share IDs, local-library validation and registration.
  */
 export async function persistMmcStandaloneVersion({
-  manifest, name, gameDirectory, readLocalLibrary, refreshVersion,
+  manifest, name, gameDirectory, readLocalLibrary, refreshVersion, includePatchArguments,
 }: MmcStandaloneVersionOptions): Promise<string | undefined> {
-  const version = getMmcVersionFromManifest(manifest, 'mmc')
+  const version = resolveMmcStandaloneVersion(manifest, includePatchArguments)
   if (!version) return undefined
 
   // Names alone collide across packs (and with installed vanilla versions).
@@ -28,20 +43,19 @@ export async function persistMmcStandaloneVersion({
   const id = `mmc-${filenamify(name || 'instance', { maxLength: 80 }).trim() || 'instance'}-${hash}`
   version.id = id
 
+  const files: { path: string; data: Buffer }[] = []
   for (const library of getMmcLocalLibraryNames(version)) {
     const mavenPath = LibraryInfo.resolve(library).path
-    const segments = mavenPath.split('/')
-    if (segments.some((part) => !part || part === '.' || part === '..' || /[\\:]/.test(part))) {
-      throw new Error(`Invalid MultiMC local library path: ${library}`)
-    }
+    importPathParts(mavenPath)
     const content = await readLocalLibrary(mavenPath)
     if (!content) {
       throw new Error(`Cannot find local library ${library} (${mavenPath}) in the MultiMC instance`)
     }
-    await outputFile(join(gameDirectory, 'libraries', ...segments), content)
+    files.push({ path: `libraries/${mavenPath}`, data: content })
   }
 
-  await outputFile(join(gameDirectory, 'versions', id, `${id}.json`), JSON.stringify(version, null, 2))
+  files.push({ path: `versions/${id}/${id}.json`, data: Buffer.from(JSON.stringify(version, null, 2)) })
+  await writeImmutableImportFiles(gameDirectory, files)
   await refreshVersion(id)
   return id
 }

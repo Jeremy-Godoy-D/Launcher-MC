@@ -81,8 +81,8 @@ react:
     chooseError: No se pudo abrir el selector de archivos. Vuelve a intentarlo.
     parsing: Revisando el modpack…
     parseError: No se pudo leer un modpack Java válido. Elige otro archivo .mrpack o .zip.
-    fileCount: '{count} archivos'
-    importHelp: Se instalarán los archivos del pack en una instancia nueva. No se reemplazan instancias existentes ni se importan comandos, Java o argumentos de arranque del archivo. Usa solo packs de confianza.
+    fileCount: 'Archivos: {count}'
+    importHelp: Se instalarán los archivos en una instancia nueva, sin reemplazar otras existentes. No se adoptan comandos ni ajustes personales de Java del launcher de origen. Usa solo packs de confianza.
     retained: La instancia ya está guardada. Un reintento continúa en la misma carpeta; cerrar conserva los archivos.
     statusError: No se pudo comprobar la instalación. Conserva la instancia y vuelve a revisar su estado.
     unresolved: '{count} archivos requieren atención. La instalación está incompleta.'
@@ -135,8 +135,11 @@ react:
     chooseFolder: Elegir carpeta de origen
     folderProfile: Perfil que se importará
     folderScanning: Revisando archivos e integridad del origen…
-    folderError: No se pudo revisar una instancia Java válida. Comprueba formato y permisos; no se admiten enlaces, carpetas raíz ni parches de versiones personalizados de Prism.
-    folderHelp: Se copiarán mundos, mods y configuración a una carpeta nueva. El origen se conserva; no se copian cuentas, cachés de Minecraft ni ajustes de arranque. Las versiones personalizadas no están incluidas en esta importación.
+    folderError: No se pudo revisar una instancia Java válida. Comprueba formato, permisos y bibliotecas locales; no se admiten enlaces, carpetas raíz ni versiones incompletas.
+    folderHelp: Se copiarán mundos, mods y configuración a una carpeta nueva. El origen se conserva; no se copian cuentas ni ajustes personales de arranque. Prism incluye su versión personalizada y bibliotecas locales; en otros formatos solo se copian los archivos de juego.
+    prismVersion: Versión personalizada revisada. Se guardará al confirmar, junto a sus bibliotecas locales, sin reemplazar archivos existentes distintos. Usa solo packs de confianza.
+    prism_sourceChanged: El origen cambió desde la revisión. Vuelve a elegir la carpeta para revisar los archivos antes de confirmar.
+    prism_conflict: Ya existe una biblioteca o versión con contenido distinto. Se conservaron los archivos existentes; esta importación no puede continuar en este directorio de datos.
   launch:
     title: 'Jugar: {name}'
     description: Revisa la preparación de esta instancia antes de iniciar Minecraft.
