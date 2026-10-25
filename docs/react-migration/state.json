@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Bloque f3ab9be URL/carpeta/Java/RAM/enlaces estándar verificado (STAGE4-IMPORTS): 301 unitarias y 29 escenarios Electron. Continuar K03 versiones personalizadas/standalone y después K02/K04 operaciones de biblioteca. Tres gates pendientes; conservar Grimo, datos y Vue predeterminado. Microsoft pospuesto; producción sin cambios.",
+  "nextAction": "Bloque 4ab24c7 Prism standalone completo verificado (STAGE4-PRISM):349 unitarias y30 escenarios Electron. Continuar K03 Vanilla personalizada/herencia/JAR/bibliotecas y Prism parcial/alias jar; después K02/K04 operaciones. Tres gates pendientes. Grimo/datos/proxy/Vue conservados; Microsoft pospuesto y producción sin cambios.",
   "stages": [
     {
       "id": 0,
@@ -412,9 +412,17 @@
             {
               "path": "docs/react-migration/STAGE4-IMPORTS.json",
               "sha256": "92128b6fcdda77baff1bd3622adbedf3771f83162f35b46a2f328bdbd754c3d7"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PRISM.md",
+              "sha256": "e6cfefe9950a0ea3bb1b37429e517e38a3fad3bbb35f1e7683c6b9c0aaa80f43"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PRISM.json",
+              "sha256": "8ea9fbb19bf3aec657684c06dd526032b7abe29485bd3b8f7bd3cb6819a5d919"
             }
           ],
-          "note": "Parcial: creación, importación local/HTTPS/carpetas estándar, Java/RAM/enlaces, preparación y recuperación conectados y probados. Faltan versiones personalizadas/standalone, operaciones completas, ajustes/diagnóstico integral y partida/descarga real. No cerrar K03 ni la gate."
+          "note": "Parcial: creación/importación estándar y Prism standalone con base completa, Java/RAM/enlaces y lanzamiento/recuperación conectados. Faltan Vanilla personalizada, Prism parcial/alias jar, operaciones completas, ajustes/diagnóstico integral y partida/descarga real; no cerrar K03 ni gate."
         }
       ]
     },
