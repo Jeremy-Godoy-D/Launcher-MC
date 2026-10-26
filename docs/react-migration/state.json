@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Fuente505ea2d y fixturebfd19c6:3 clips Vanilla Overworld/Nether/End licenciados,12s720p24fpssin audio,3,77MB total; precarga solo imagen siguiente,liberación de src,pausa fuera de pantalla y portada propia del pack con etiqueta genérica. STAGE4-AMBIENT-MEDIA:591 unitarias/61 archivos,69 escenarios distintos (66React+1Strict+2Vue),91Axe/0violaciones/162incompletos,9harness,tipos/lint/builds y4capturas congeladas revisadas;3 recorridos repetidos tras congelar póster no se suman. K02/K04/K17 completos. Próximo:rendimiento60s CPU/GPU/conjunto de procesos,poster vs beta.2 y5arranques equivalentes; después cerrar criterios de4 por su evidencia real y continuar5–9. No repetir orden,búsqueda,copias,perfiles,galerías ni buscar más clips. CI previo40396131488 pasó ambos; comprobar propio tras push. Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios.",
+  "nextAction": "Fuente6f31960:benchmark sin grabador,5ventanas60s aprobadas (póster,vídeo,rotación,minimizado,rendimiento). Renderer vídeo1,767% de un núcleo,23,982fps/0perdidos;rotación1,908%;pausas60s verificadas. GPU proceso CPU4,776% con vídeo,utilización física/VRAM todavía no medida. STAGE4-PERFORMANCE-PRELIMINARY conserva entorno/muestras/hash. Tipos/lint producto y591unit/69escenarios previos siguen válidos;defaultRecorder02 repetido3,6s/3WEBM y9harness. E2Eglobal56diagnósticos en archivos sin cambios,nuevas3fuentes0. Próximo:GPU física con UTC,memoria póster comparada con ZIP beta.2 existente y5arranques equivalentes; luego biblioteca extensa/estabilidad y criterios reales de4 antes de5–9. No repetir medios/orden/copias/perfiles. Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios;comprobar CI después de push.",
   "stages": [
     {
       "id": 0,
@@ -397,9 +397,17 @@
             {
               "path": "docs/react-migration/STAGE4-AMBIENT-MEDIA.json",
               "sha256": "629b2376ede2127def12d3e3864f85ed0c2c4974ea78cc5ccbe31372e7258743"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PERFORMANCE-PRELIMINARY.md",
+              "sha256": "0f063d7d1d48464af9e6cfe339ac2962131c47bcf01f0af4be9762b74e2650f4"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PERFORMANCE-PRELIMINARY.json",
+              "sha256": "0fa5bcbbafdd8247b82974b940dfcd2768db4fd7b4cc27799fbe121a30ed1564"
             }
           ],
-          "note": "Orden/identidad,galerías/caché,3clips autorizados,precarga solo siguiente imagen,portada propia junto a ambiente genérico,liberación de fuente y pausa por región invisibles verificados. Fuente505ea2d/fixturebfd19c6,591unitarias/69escenarios. Faltan presupuestos60s CPU/GPU/todos los procesos,memoria comparada y5arranques equivalentes. Etapa4 activa,no publicar."
+          "note": "Medios/orden ya acreditados505ea2d;6f31960 mide5ventanas60s sin grabador. Renderer vídeo1,767% núcleo<8%,23,982fps/0perdidos;minimizado/rendimiento reloj detenido60s. GPU proceso CPU/memoria registrado;faltan GPU física/VRAM,memoria vs beta.2 y5arranques equivalentes. No cerrar gate ni etapa4."
         },
         {
           "id": "library-instance-launch",
