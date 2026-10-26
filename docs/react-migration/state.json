@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Bloque 9cfd14c Vanilla local/herencia/cliente/bibliotecas y latest-release/snapshot verificado (STAGE4-VANILLA):362 unitarias y32 escenarios Electron. Continuar K03 Prism parcial/clientes modificados/alias con aislamiento seguro; después K02/K04 operaciones. Tres gates pendientes. Grimo/datos/proxy/Vue conservados; Microsoft pospuesto, producción sin cambios.",
+  "nextAction": "Bloque ba7c769 clientes modificados/alias Vanilla y Prism standalone aislados (STAGE4-CLIENTS):394 unitarias y34 escenarios Electron finales. Continuar K03 Prism con base incompleta y paridad restante; después K02/K04 operaciones. Tres gates pendientes. Fallos iniciales de actionability documentados, comprobación de foco añadida. Grimo/datos/proxy/Vue conservados; Microsoft pospuesto, producción sin cambios.",
   "stages": [
     {
       "id": 0,
@@ -428,9 +428,17 @@
             {
               "path": "docs/react-migration/STAGE4-VANILLA.json",
               "sha256": "aa0d36489462893936a52c825e0223d841ede6a49dcadde86162bda59401276e"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CLIENTS.md",
+              "sha256": "f2f0d98ebb8d0205f0b33597d7d79ccbecdfc607d996960b93e37525b8e8dd66"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CLIENTS.json",
+              "sha256": "43168ee1419718b46826ea10ee30ed53804302bb08a99959b26dffcec15fe621"
             }
           ],
-          "note": "Parcial: importación estándar, Prism standalone completo y Vanilla local/herencia/latest, Java/RAM/enlaces y lanzamiento/recuperación conectados. Faltan Prism parcial/clientes modificados y alias, operaciones completas, ajustes/diagnóstico integral y partida/descarga real; no cerrar K03 ni gate."
+          "note": "Parcial: importación estándar, Prism standalone completo, Vanilla local/herencia/latest y clientes modificados/alias aislados; Java/RAM/enlaces y lanzamiento/recuperación conectados. Faltan Prism con base incompleta, paridad restante, operaciones completas, ajustes/diagnóstico integral y partida/descarga real; no cerrar K03 ni gate. Dos fallos iniciales de actionability registrados; regresión final con foco explícito aprobada."
         }
       ]
     },
