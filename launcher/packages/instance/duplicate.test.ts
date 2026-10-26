@@ -18,6 +18,24 @@ vi.mock('./files_discovery', () => ({
 import { getInstanceFiles } from './files_discovery'
 
 describe('duplicateInstance', () => {
+  test('a reviewed transfer inventory limits concurrent writes to four and reports completion', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'xmcl-dup-budget-')), src = join(root, 'src'), dest = join(root, 'dest')
+    mkdirSync(src); mkdirSync(dest)
+    const files = Array.from({ length: 12 }, (_, index) => ({ path: `${index}.txt`, hashes: {} }))
+    let active = 0, maximum = 0
+    let release!: () => void
+    const gate = new Promise<void>(resolve => { release = resolve })
+    const progress: number[] = []
+    try {
+      await duplicateInstance({ instancePath: src, newPath: dest, files, transferFile: async () => {
+        maximum = Math.max(maximum, ++active)
+        if (active === 4) release()
+        await gate; active--
+      }, tracker: event => progress.push(event.payload.progress.progress) })
+      expect(maximum).toBeLessThanOrEqual(4); expect(maximum).toBeGreaterThan(1)
+      expect(progress).toEqual(Array.from({ length: 13 }, (_, index) => index))
+    } finally { release(); rmSync(root, { recursive: true, force: true }) }
+  })
   test('does not begin fallback copying if cancellation arrives during a failed content link', async () => {
     const root = mkdtempSync(join(tmpdir(), 'xmcl-dup-link-')), src = join(root, 'src'), dest = join(root, 'dest')
     mkdirSync(join(src, 'mods'), { recursive: true }); mkdirSync(dest); writeFileSync(join(src, 'mods/a.jar'), 'content')

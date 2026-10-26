@@ -75,6 +75,8 @@ import { createTechnicHandler } from './utils/technicHandler'
 import { remapModpackZipDownloads } from './utils/remapZipDownloads'
 import { downloadModpackUrl } from './downloadModpackUrl'
 import { previewInstanceExport, exportReviewedInstance, exportIdentity } from './reviewedExport'
+import { assertInstanceCopyComplete } from '../instance/instanceCopy'
+import { importPathParts } from '../util/importFile'
 import { getArchiveFiles } from './utils/archiveFiles'
 import { deduplicateInstanceFiles } from '~/util/deduplicateInstanceFiles'
 import {
@@ -424,7 +426,7 @@ export class ModpackService extends AbstractService implements IModpackService {
     strictModeInModrinth?: boolean,
   ) {
     requireObject(files)
-    const instance = this.instanceService.state.all[instancePath]
+    const instance = this.instanceService.state.instances.find(instance => instance.path === instancePath)
     if (!instance) {
       throw new TypeError(`Cannot preview unmanaged instance ${instancePath}`)
     }
@@ -566,14 +568,14 @@ export class ModpackService extends AbstractService implements IModpackService {
    * @param options The modpack export options
    */
   async previewInstanceExport(instancePath: string): Promise<InstanceExportPreview> {
-    const instance = this.instanceService.state.all[instancePath]
+    const instance = this.instanceService.state.instances.find(instance => instance.path === instancePath && instance.edition === 'java')
     if (!instance) throw Object.assign(new Error('Instance unavailable'), { name: 'ExportInstanceUnavailable' })
     return previewInstanceExport(instance)
   }
 
   async exportReviewedInstance(options: ReviewedInstanceExport): Promise<string> {
     requireObject(options)
-    const instance = this.instanceService.state.all[options.instancePath]
+    const instance = this.instanceService.state.instances.find(instance => instance.path === options.instancePath && instance.edition === 'java')
     if (!instance) throw Object.assign(new Error('Instance unavailable'), { name: 'ExportInstanceUnavailable' })
     const identity = JSON.stringify(exportIdentity(instance))
     const verify = async () => {
@@ -614,11 +616,14 @@ export class ModpackService extends AbstractService implements IModpackService {
       emitOffline,
     } = options
 
-    const instance = this.instanceService.state.all[instancePath]
+    const instance = this.instanceService.state.instances.find(instance => instance.path === instancePath && instance.edition === 'java')
     if (!instance) {
       this.warn(`Cannot export unmanaged instance ${instancePath}`)
       return {}
     }
+    await assertInstanceCopyComplete(instancePath)
+    if (!Array.isArray(files) || files.length > 100000) throw new TypeError('Invalid export files')
+    for (const file of files) { importPathParts(file.path); if (file.source !== undefined) importPathParts(file.source) }
 
     if (!emitCurseforge && !emitModrinth && !emitOffline) {
       return {}

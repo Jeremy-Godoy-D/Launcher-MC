@@ -10,16 +10,17 @@ import { useLibrary } from './context'
 import type { SavedInstance } from './model'
 import { metadataDraft, metadataEdit } from './operations'
 import { ExportInstance } from './ExportInstance'
+import { DuplicateInstance } from './DuplicateInstance'
 import './operations.css'
 
 type Mode = 'options' | 'edit' | 'duplicate' | 'remove' | 'group' | 'export'
-export function InstanceOperations({ instance, onClose, onCreated, returnFocus }: { instance: SavedInstance; onClose: () => void; onCreated: (path: string) => void; returnFocus: RefObject<HTMLElement | null> }) {
+export function InstanceOperations({ instance, onClose, onCreated, returnFocus, initialMode = 'options' }: { instance: SavedInstance; onClose: () => void; onCreated: (path: string) => void; returnFocus: RefObject<HTMLElement | null>; initialMode?: 'options' | 'duplicate' }) {
   const library = useLibrary()
   const service = useService(InstanceServiceKey)
   const processes = useService(LaunchServiceKey)
   const base = useService(BaseServiceKey)
   const { t } = useI18n()
-  const [mode, setMode] = useState<Mode>('options')
+  const [mode, setMode] = useState<Mode>(initialMode)
   const [draft, setDraft] = useState(() => metadataDraft(instance))
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -60,16 +61,11 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus }
       }}>
         <Dialog.Title>{t(`react.operations.${mode}Title`, { name: instance.name })}</Dialog.Title>
         <Dialog.Description>{t(`react.operations.${mode}Help`)}</Dialog.Description>
-        {mode === 'export' ? <ExportInstance path={instance.path} busy={busy} onBusy={value => { operation.current = value; setBusy(value) }} onBack={() => changeMode('options')} /> : <form className="operation-form" onSubmit={event => {
+        {mode === 'export' ? <ExportInstance path={instance.path} busy={busy} onBusy={value => { operation.current = value; setBusy(value) }} onBack={() => changeMode('options')} /> : mode === 'duplicate' ? <DuplicateInstance path={instance.path} busy={busy} onBusy={value => { operation.current = value; setBusy(value) }} onBack={() => changeMode('options')} onCreated={path => { onCreated(path); onClose() }} /> : <form className="operation-form" onSubmit={event => {
           event.preventDefault()
           if (mode === 'edit') void run(async () => {
             await service.editInstance(metadataEdit(instance, latest, draft, library?.instances || []))
             setSuccess('saved')
-          })
-          if (mode === 'duplicate') void run(async () => {
-            const path = await service.duplicateInstance(instance.path)
-            if (!path) throw new Error('missing')
-            onCreated(path); onClose()
           })
           if (mode === 'remove' && (!deleteData || confirmation === instance.name)) void run(async () => {
             await service.deleteInstance(instance.path, deleteData)
@@ -85,9 +81,9 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus }
             <p className="operation-path">{instance.path}</p>
             {mode === 'options' && <div className="operation-actions">
               <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('edit')}><Pencil size={18} aria-hidden="true" />{t('react.operations.edit')}</button>
-              <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('duplicate')}><Copy size={18} aria-hidden="true" />{t('react.operations.duplicate')}</button>
+              <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('duplicate')}><Copy size={18} aria-hidden="true" />{t(library?.data?.pendingCopies[instance.path] ? 'react.copy.resume' : 'react.operations.duplicate')}</button>
               <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('group')}><Layers size={18} aria-hidden="true" />{t('react.operations.group')}</button>
-              <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('export')}><Download size={18} aria-hidden="true" />{t('react.export.action')}</button>
+              <button type="button" className="button secondary" disabled={busy || unavailable || !!library?.data?.pendingCopies[instance.path]} onClick={() => changeMode('export')}><Download size={18} aria-hidden="true" />{t('react.export.action')}</button>
               <div className="operation-order">
                 {([-1, 1] as const).map(direction => <button key={direction} type="button" className="button secondary" disabled={busy || unavailable} onClick={() => void run(async () => {
                   await library?.move(instance.path, direction)
@@ -106,7 +102,6 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus }
               <label htmlFor="instance-edit-author">{t('react.operations.author')}</label>
               <input id="instance-edit-author" value={draft.author} maxLength={100} disabled={busy || !!success} onChange={event => setDraft({ ...draft, author: event.target.value })} />
             </>}
-            {mode === 'duplicate' && <p>{t('react.operations.duplicateDetail')}</p>}
             {mode === 'group' && <>
               <label htmlFor="instance-group">{t('react.operations.group')}</label>
               <select id="instance-group" value={group} disabled={busy || !!success} onChange={event => setGroup(event.target.value)}>
@@ -128,11 +123,11 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus }
             {unavailable && <p role="alert" className="form-error">{t('react.operations.missing')}</p>}
             {!!error && <p role="alert" className="form-error">{t(`react.operations.${error}`)}</p>}
             {!!success && <p role="status">{t('react.operations.saved')}</p>}
-            {busy && <p role="status">{t('react.operations.busy')}</p>}
+            {busy && !success && <p role="status">{t('react.operations.busy')}</p>}
           </div>
           <div className="dialog-actions">
             <button type="button" className="button secondary" disabled={busy} onClick={() => mode !== 'options' && !success ? changeMode('options') : onClose()}>{t(mode === 'options' || success ? 'react.operations.close' : 'react.operations.back')}</button>
-            {mode !== 'options' && !success && <button type="submit" className="button primary" data-testid="instance-operation-confirm" disabled={busy || unavailable || mode === 'remove' && deleteData && confirmation !== instance.name}>{t(busy ? 'react.operations.busy' : mode === 'edit' || mode === 'group' ? 'react.operations.save' : mode === 'duplicate' ? 'react.operations.confirmDuplicate' : deleteData ? 'react.operations.confirmDelete' : 'react.operations.confirmRemove')}</button>}
+            {mode !== 'options' && !success && <button type="submit" className="button primary" data-testid="instance-operation-confirm" disabled={busy || unavailable || mode === 'remove' && deleteData && confirmation !== instance.name}>{t(busy ? 'react.operations.busy' : mode === 'edit' || mode === 'group' ? 'react.operations.save' : deleteData ? 'react.operations.confirmDelete' : 'react.operations.confirmRemove')}</button>}
           </div>
         </form>}
         <Dialog.Close className="dialog-close" aria-label={t('react.operations.close')} disabled={busy}><X size={20} /></Dialog.Close>

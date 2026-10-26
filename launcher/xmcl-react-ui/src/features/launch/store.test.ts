@@ -103,6 +103,8 @@ function fixture(startup?: () => Promise<any[]>) {
         return instances.raw
       case 'InstanceService.validateInstancePath':
         return undefined
+      case 'InstanceService.getInstanceCopyState':
+        return instances.raw.pendingCopies[args[0]]
       case 'InstanceService.editInstance':
         instances.mutate('instanceEdit', { ...args[0], path: args[0].instancePath })
         return
@@ -206,6 +208,15 @@ function fixture(startup?: () => Promise<any[]>) {
 }
 
 describe('Java launch flow', () => {
+  it('blocks incomplete copies before installing files, Java or starting a process', async () => {
+    const f = fixture()
+    try {
+      f.instances.raw.instanceCopyState({ path: f.path, copy: { sourcePath: '/qa/Source', totalFiles: 3 } })
+      f.flow.open(f.path, 'First', f.profile)
+      await vi.waitFor(() => expect(f.flow.getSnapshot()).toMatchObject({ phase: 'blocked', reason: 'copy' }))
+      expect(f.call.mock.calls.some(([service, method]) => method === 'launch' || service === 'InstanceInstallService' && method === 'applyInstanceInstallManifest' || service === 'VersionInstallService' && method === 'installInstance')).toBe(false)
+    } finally { await f.dispose() }
+  })
   it('works without randomUUID on the packaged HTTP origin and does not resurrect an immediate exit', async () => {
     const f = fixture()
     vi.stubGlobal('crypto', undefined)

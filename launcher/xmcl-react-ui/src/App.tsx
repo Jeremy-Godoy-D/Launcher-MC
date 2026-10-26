@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Compass,
+  Copy,
   ExternalLink,
   FolderOpen,
   Grid2X2,
@@ -151,6 +152,7 @@ function InstanceCard({
   onOptions,
   running,
   busy,
+  copying,
 }: {
   instance: Instance
   view: 'grid' | 'list'
@@ -159,6 +161,7 @@ function InstanceCard({
   onOptions: (instance: Instance) => void
   running?: boolean
   busy?: boolean
+  copying?: boolean
 }) {
   const { t } = useI18n()
   return (
@@ -189,15 +192,15 @@ function InstanceCard({
         <div className="instance-card-actions">
           <span className="ready">
             <span />
-            {t(running ? 'react.launch.running' : busy ? 'react.launch.preparing' : 'react.instances.saved')}
+            {t(copying ? 'react.copy.pending' : running ? 'react.launch.running' : busy ? 'react.launch.preparing' : 'react.instances.saved')}
           </span>
           <button
             className="icon-button"
-            aria-label={`Jugar ${instance.name}`}
+            aria-label={copying ? t('react.copy.action', { name: instance.name }) : `Jugar ${instance.name}`}
             onClick={() => onPlay(instance)}
             disabled={busy}
           >
-            <Play size={17} fill="currentColor" />
+            {copying ? <Copy size={17} aria-hidden="true" /> : <Play size={17} fill="currentColor" />}
           </button>
           <button
             className="icon-button"
@@ -243,6 +246,7 @@ export function App() {
   const [showCredits, setShowCredits] = useState(false)
   const [adding, setAdding] = useState<'create' | 'import'>()
   const [operating, setOperating] = useState<SavedInstance>()
+  const [operatingMode, setOperatingMode] = useState<'options' | 'duplicate'>('options')
   const [managingGroups, setManagingGroups] = useState(false)
   useEffect(() => {
     const requested = new URLSearchParams(location.search).get('add')
@@ -336,6 +340,7 @@ export function App() {
   }, [location.pathname])
   const play = (instance: Instance) => {
     if (!savedLibrary?.select(instance.id)) return
+    if (savedLibrary.data?.pendingCopies[instance.id]) { openOptions(instance, 'duplicate'); return }
     restoreFocus.current = document.activeElement as HTMLElement
     const selected = accounts?.selected
     launch?.store.open(instance.id, instance.name, selected && accounts.profile ? { userId: selected.id, profileId: accounts.profile.id, name: accounts.profile.name } : undefined)
@@ -351,10 +356,11 @@ export function App() {
     restoreFocus.current = document.activeElement as HTMLElement
     setAdding(mode)
   }
-  const openOptions = (item: Instance) => {
+  const openOptions = (item: Instance, mode: 'options' | 'duplicate' = 'options') => {
     const captured = savedLibrary?.instances.find(instance => instance.path === item.id)
     if (!captured) return
     restoreFocus.current = document.activeElement as HTMLElement
+    setOperatingMode(mode)
     setOperating(captured)
   }
   const libraryState = !savedLibrary || savedLibrary.status !== 'ready' || !instances.length ? (
@@ -538,7 +544,7 @@ export function App() {
                   <div className="featured-runtime">
                     <span>
                       <span className="status-dot" />
-                      {t(launch?.running.some(process => process.path === instance.id) ? 'react.launch.running' : 'react.instances.saved')}
+                      {t(savedLibrary?.data?.pendingCopies[instance.id] ? 'react.copy.pending' : launch?.running.some(process => process.path === instance.id) ? 'react.launch.running' : 'react.instances.saved')}
                     </span>
                     <span>
                       {instance.loader} · {instance.version}
@@ -554,8 +560,8 @@ export function App() {
                       onClick={() => play(instance)}
                       disabled={launch?.phase === 'preparing'}
                     >
-                      <Play size={19} fill="currentColor" />
-                      {t(launch?.running.some(process => process.path === instance.id) ? 'react.launch.view' : 'react.launch.play')}
+                      {savedLibrary?.data?.pendingCopies[instance.id] ? <Copy size={19} aria-hidden="true" /> : <Play size={19} fill="currentColor" />}
+                      {t(savedLibrary?.data?.pendingCopies[instance.id] ? 'react.copy.review' : launch?.running.some(process => process.path === instance.id) ? 'react.launch.view' : 'react.launch.play')}
                     </button>
                     <button
                       className="button on-art"
@@ -610,6 +616,7 @@ export function App() {
                       key={instance.id}
                       instance={instance}
                       running={launch?.running.some(process => process.path === instance.id)}
+                      copying={!!savedLibrary?.data?.pendingCopies[instance.id]}
                       busy={launch?.phase === 'preparing'}
                       view="grid"
                       onPlay={play}
@@ -690,6 +697,7 @@ export function App() {
                     key={instance.id}
                     instance={instance}
                     running={launch?.running.some(process => process.path === instance.id)}
+                    copying={!!savedLibrary?.data?.pendingCopies[instance.id]}
                     busy={launch?.phase === 'preparing'}
                     view={view}
                     onPlay={play}
@@ -903,7 +911,7 @@ export function App() {
                 </div>
                 <button className="button primary" disabled={launch?.phase === 'preparing'} onClick={() => play(current)}>
                   <Play size={18} fill="currentColor" />
-                    {t(launch?.running.some(process => process.path === current.id) ? 'react.launch.view' : 'react.launch.play')}
+                    {t(savedLibrary?.data?.pendingCopies[current.id] ? 'react.copy.review' : launch?.running.some(process => process.path === current.id) ? 'react.launch.view' : 'react.launch.play')}
                 </button>
               </div>
               <div className="instance-tabs">
@@ -943,7 +951,7 @@ export function App() {
       </main>
       {launch && <LaunchDialog launch={launch} returnFocus={restoreFocus} />}
       {managingGroups && <GroupsDialog returnFocus={restoreFocus} onClose={() => setManagingGroups(false)} onRemoved={id => { if (group === `id:${id}`) setGroup('') }} />}
-      {operating && <InstanceOperations key={operating.path} instance={operating} onClose={() => setOperating(undefined)} returnFocus={restoreFocus} onCreated={path => {
+      {operating && <InstanceOperations key={operating.path} initialMode={operatingMode} instance={operating} onClose={() => setOperating(undefined)} returnFocus={restoreFocus} onCreated={path => {
         if (savedLibrary?.select(path)) void navigate('/instance')
       }} />}
       {savedLibrary && <AddInstance open={!!adding} initialMode={adding ?? 'create'} onClose={() => setAdding(undefined)} returnFocus={restoreFocus} onCreated={path => {

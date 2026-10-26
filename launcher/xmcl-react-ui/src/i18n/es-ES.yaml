@@ -170,6 +170,7 @@ react:
     reason_memory: La memoria configurada no es válida o supera la RAM del equipo. Revisa los valores de Java y memoria.
     reason_permission: No hay permisos suficientes para preparar o iniciar el juego. Revisa los permisos de sus carpetas y Java.
     reason_disk: No hay espacio suficiente en disco. Libera espacio antes de reintentar.
+    reason_copy: Esta copia no está completa. Vuelve a Biblioteca y elige «Revisar copia» para continuar o conservarla sin iniciar el juego.
     chooseProfile: Elegir perfil
     library: Ir a la biblioteca
     running: En ejecución
@@ -224,7 +225,7 @@ react:
     editTitle: Editar instancia
     editHelp: Cambia sus datos de presentación. Java, versión, archivos y ajustes se conservan.
     duplicateTitle: Duplicar instancia
-    duplicateHelp: Crea una instancia nueva a partir de esta carpeta.
+    duplicateHelp: Copia una instancia o continúa una copia pendiente. La instancia original se conserva.
     removeTitle: Retirar instancia
     removeHelp: Revisa cómo se tratarán los archivos antes de confirmar.
     edit: Editar datos
@@ -234,7 +235,7 @@ react:
     name: Nombre de la instancia
     description: Descripción
     author: Autor
-    duplicateDetail: La copia tendrá una carpeta y mundos independientes. El contenido instalado puede reutilizar archivos mediante enlaces del launcher. No se iniciará Minecraft.
+    duplicateDetail: La copia tendrá archivos y mundos independientes. Las versiones y bibliotecas globales del launcher se conservan. No se iniciará Minecraft.
     keepDetail: Por defecto se retira de la biblioteca y su carpeta administrada se renombra con un punto inicial. Los archivos se conservan. Una carpeta externa solo se retira de la lista.
     deleteFiles: Borrar también los archivos de una instancia administrada
     deleteDetail: Se eliminarán los archivos de la carpeta administrada. Los mundos se trasladan antes a la carpeta compartida de mundos; si ese traslado falla, el borrado se bloquea. Las carpetas externas se conservan.
@@ -310,3 +311,28 @@ react:
     changed: Los grupos cambiaron en otra ventana. Pulsa «Revisar grupos de nuevo» antes de guardar.
     unavailable: La biblioteca no está disponible. Cierra el diálogo y vuelve a intentarlo cuando cargue.
     failed: No se guardó el cambio. Revisa el acceso a los datos del launcher y vuelve a revisar los grupos antes de reintentar.
+  copy:
+    pending: Copia pendiente
+    action: 'Revisar copia de {name}'
+    review: Revisar copia
+    resume: Reanudar copia
+    resumeHelp: Se continúa en esta misma carpeta; no se crea otra instancia. Los archivos ya copiados se verifican antes de reutilizarlos.
+    pendingHelp: Esta instancia no puede iniciar el juego ni exportarse hasta completar la copia. Puedes conservar sus archivos y volver después.
+    verifying: Verificando la integridad de los archivos copiados…
+    reviewing: Revisando los archivos de origen…
+    progress: 'Copiando archivos: {progress} de {total}'
+    progressLabel: Progreso de copia
+    cancel: Cancelar copia
+    cancelling: Terminando la cancelación…
+    cancelled: Copia cancelada. Los archivos completos ya copiados se conservan; puedes reanudar sobre la misma instancia.
+    complete: Copia completada.
+    view: Ver instancia
+    cancelFailed: No se pudo cancelar la tarea. Comprueba su progreso antes de volver a intentarlo.
+    failed: No se completó la copia. Revisa el acceso, espacio disponible y archivos de origen. Las carpetas enlazadas aún no se admiten. Si hay una copia pendiente, reanúdala para conservar el destino.
+    InstanceCopyInvalid: No se puede leer el registro de esta copia. Conserva la carpeta y revisa los diagnósticos; no se iniciará el juego ni se creará otra copia al reintentar.
+    InstanceCopySourceChanged: Un archivo de origen falta o cambió desde la revisión. Restablece los archivos originales antes de reanudar; la copia parcial se conserva.
+    InstanceCopySourceMissing: La instancia original ya no está registrada. Restáurala en su carpeta original antes de reanudar.
+    InstanceCopyConflict: Un archivo del destino tiene otros datos y se ha conservado. Revisa la carpeta antes de reanudar; no se sobrescriben tus cambios.
+    InstanceCopyGameRunning: Cierra la partida de la instancia original o de la copia antes de continuar.
+    InstanceCopyUnsafePath: No se pueden copiar rutas enlazadas o fuera del área administrada. Revisa las carpetas antes de reintentar.
+    InstanceCopyTooLarge: El inventario supera los límites de la copia. Reduce el número de archivos o revisa los diagnósticos antes de reintentar.

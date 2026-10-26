@@ -1,6 +1,5 @@
 import {
   CreateInstanceOptions,
-  duplicateInstance,
   InstanceDataWithTime,
   InstanceSchema,
   computeInstanceEditChanges,
@@ -17,12 +16,13 @@ import {
   DuplicateInstanceTask,
   type InstanceService as IInstanceService,
   type SharedState,
+  type InstanceCopyState,
 } from '@xmcl/runtime-api'
 import { AnyError, isSystemError } from '@xmcl/utils'
 import filenamify from 'filenamify'
 import { fileTypeFromBuffer, fileTypeFromFile } from 'file-type'
 import { existsSync } from 'fs'
-import { ensureDir, lstat, realpath, readdir, readlink, readJson, rename, rm, writeFile, writeJson } from 'fs-extra'
+import { ensureDir, lstat, mkdir, realpath, readdir, readlink, readJson, rename, rm, writeFile, writeJson } from 'fs-extra'
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'path'
 import { Inject, LauncherAppKey, kGameDataPath, type PathResolver } from '~/app'
 import { ImageStorage, kTasks, Tasks } from '~/infra'
@@ -36,6 +36,9 @@ import { requireObject, requireString } from '../util/object'
 import { getTracker } from '~/util/taskHelper'
 import { setTimeout } from 'timers/promises'
 import { writeFile as writeAtomically } from 'atomically'
+import { assertInstanceCopyComplete, prepareInstanceCopy, readInstanceCopy, runInstanceCopy } from './instanceCopy'
+import { saveInstanceCopy, type InstanceCopyJob } from './instanceCopy'
+import type { TaskInstance } from '../infra/task'
 
 const INSTANCES_FOLDER = 'instances'
 
@@ -327,6 +330,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     instance.icon = resolveInstanceIcon(instance.icon, instance.path)
 
     this.state.instanceAdd(instance)
+    await this.#updateCopyState(instance.path)
 
     this.log(`Loaded instance ${instance.path}`)
 
@@ -374,8 +378,8 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     })
     this.state.instanceAdd(instance)
 
-    this.log('Created instance with option')
-    this.log(JSON.stringify(instance, null, 4))
+    await this.#groupsWrite
+    this.log(`Created instance ${instance.path}`)
 
     return instance.path
   }
@@ -468,45 +472,106 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     return toMediaIconUrl(iconPath)
   }
 
-  async duplicateInstance(path: string) {
-    requireString(path)
+  #copyOperations = new Map<string, Promise<string>>()
 
-    if (!this.state.all[path]) {
-      return ''
-    }
-
-    const instance = this.state.all[path]
-    const newPath = this.getCandidatePath(instance.name || basename(path))
-    const newName = basename(newPath)
-
-    await this.createInstance({
-      ...JSON.parse(JSON.stringify(instance)),
-      path: newPath,
-      name: newName,
-    })
-
-    const task = this.tasks.create<DuplicateInstanceTask>({
-      type: 'duplicateInstance',
-      key: `duplicate-instance-${path}`,
-      from: path,
-      to: newPath,
-    })
-
+  async #updateCopyState(path: string): Promise<InstanceCopyState | undefined> {
+    let copy: InstanceCopyState | undefined
     try {
-      await duplicateInstance({
-        instancePath: path,
-        newPath,
-        logger: this,
-        signal: task.controller.signal,
-        tracker: getTracker<DuplicateInstanceTrackerEvents>(task),
-      })
+      const job = await readInstanceCopy(path)
+      if (job) copy = { sourcePath: job.source, totalFiles: job.files.length }
+    } catch { copy = { sourcePath: '', totalFiles: 0, invalid: true } }
+    if (JSON.stringify(this.state.pendingCopies[path]) !== JSON.stringify(copy)) this.state.instanceCopyState({ path, copy })
+    return copy
+  }
+
+  async getInstanceCopyState(path: string) {
+    await this.initialize()
+    requireString(path)
+    if (!this.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceNotFoundError')
+    return this.#updateCopyState(path)
+  }
+
+  async #copyIdle(...paths: string[]) {
+    const { LaunchService } = await import('../launch/LaunchService')
+    const processes = await (await this.app.registry.get(LaunchService)).getGameProcesses()
+    if (processes.some(process => paths.includes(process.options.gameDirectory))) throw new AnyError('InstanceCopyGameRunning')
+  }
+
+  #copyRequest(requestId?: string) {
+    if (requestId !== undefined && (typeof requestId !== 'string' || !/^[a-zA-Z0-9_-]{1,80}$/.test(requestId))) throw new TypeError('Invalid copy request')
+  }
+
+  async #managedCopyPath(path: string) {
+    if (!this.isUnderManaged(path) || (await lstat(path)).isSymbolicLink()) throw new AnyError('InstanceCopyUnsafePath')
+    const root = await realpath(this.getPath(INSTANCES_FOLDER)), actual = await realpath(path), inside = relative(root, actual)
+    if (!inside || inside === '..' || inside.startsWith(`..${sep}`) || isAbsolute(inside)) throw new AnyError('InstanceCopyUnsafePath')
+  }
+
+  async #runCopy(path: string, job: InstanceCopyJob, task: TaskInstance<DuplicateInstanceTask>) {
+    const operation = this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      if (!this.state.instances.some(instance => instance.path === path)) throw new AnyError('InstanceNotFoundError')
+      await this.#copyIdle(job.source, path)
+      await runInstanceCopy(job, path, task.controller.signal, getTracker<DuplicateInstanceTrackerEvents>(task))
+      this.state.instanceCopyState({ path })
+      return path
+    })
+    this.#copyOperations.set(path, operation)
+    try {
+      const result = await operation
       task.complete()
+      return result
     } catch (error) {
       task.fail(error)
-      throw error
+      throw Object.assign(error instanceof Error ? error : new Error('Instance copy failed', { cause: error }), { destinationPath: path, sourcePath: job.source })
+    } finally {
+      this.#copyOperations.delete(path)
+      if (this.state.instances.some(instance => instance.path === path)) await this.#updateCopyState(path)
     }
+  }
 
-    return newPath
+  async duplicateInstance(path: string, requestId?: string) {
+    await this.initialize()
+    requireString(path); this.#copyRequest(requestId)
+    const instance = this.state.instances.find(instance => instance.path === path && instance.edition === 'java')
+    if (!instance) return ''
+    return this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      await this.#copyIdle(path)
+      await assertInstanceCopyComplete(path)
+      const snapshot = JSON.parse(JSON.stringify(instance))
+      const newPath = this.getCandidatePath(instance.name || basename(path))
+      const task = this.tasks.create<DuplicateInstanceTask>({ type: 'duplicateInstance', key: `duplicate-instance-${newPath}`, from: path, to: newPath, requestId })
+      try {
+        const job = await prepareInstanceCopy(path, task.controller.signal)
+        await ensureDir(this.getPath(INSTANCES_FOLDER))
+        await mkdir(newPath)
+        await this.#managedCopyPath(newPath)
+        await saveInstanceCopy(newPath, job)
+        await this.createInstance({ ...snapshot, icon: serializeInstanceIcon(snapshot.icon, path), path: newPath, name: basename(newPath) })
+        await this.#updateCopyState(newPath)
+        return await this.#runCopy(newPath, job, task)
+      } catch (error) {
+        task.fail(error)
+        throw Object.assign(error instanceof Error ? error : new Error('Instance copy failed', { cause: error }), { destinationPath: newPath, sourcePath: path })
+      }
+    })
+  }
+
+  async resumeInstanceCopy(path: string, requestId?: string) {
+    await this.initialize()
+    requireString(path); this.#copyRequest(requestId)
+    const existing = this.#copyOperations.get(path)
+    if (existing) return existing
+    if (!this.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceCopyUnsafePath')
+    await this.#managedCopyPath(path)
+    const job = await readInstanceCopy(path)
+    if (!job) { this.state.instanceCopyState({ path }); return path }
+    if (!this.state.instances.some(instance => instance.path === job.source && instance.edition === 'java')) throw new AnyError('InstanceCopySourceMissing')
+    return this.mutex.of(LockKey.instance(job.source)).runExclusive(async () => {
+      if (!await readInstanceCopy(path)) { this.state.instanceCopyState({ path }); return path }
+      await assertInstanceCopyComplete(job.source)
+      const task = this.tasks.create<DuplicateInstanceTask>({ type: 'duplicateInstance', key: `duplicate-instance-${path}`, from: job.source, to: path, requestId })
+      return this.#runCopy(path, job, task)
+    })
   }
 
   /**
@@ -708,9 +773,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
         const expected = options.expectedMetadata
         if (!['name', 'description', 'author'].every(key => typeof Reflect.get(expected, key) === 'string' && Reflect.get(expected, key) === (Reflect.get(state, key) || ''))) throw Object.assign(new Error('Instance metadata changed'), { name: 'InstanceMetadataChanged' })
       }
-      this.log(
-        `Modify instance ${instancePath} (${options.name}) ${JSON.stringify(result, null, 4)}.`,
-      )
+    this.log(`Modified instance ${instancePath}`)
       // A reset-to-global field is represented as `undefined` in `result`.
       // The mutation payload is broadcast to renderer processes over Electron
       // IPC, whose structured clone serialization silently drops `undefined`

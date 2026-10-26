@@ -27,6 +27,7 @@ import type { LaunchMiddleware } from './LaunchMiddleware'
 import { ensureDir } from '@xmcl/installer/utils'
 import { LaunchHistoryStore } from './LaunchHistoryStore'
 import { runWithInternalSpan } from '../infra/telemetry_context'
+import { assertInstanceCopyComplete } from '../instance/instanceCopy'
 
 type TrackedGameProcess = GameProcess & {
   process: ChildProcess
@@ -287,6 +288,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
   }
 
   async generateArguments(options: LaunchOptions) {
+    await assertInstanceCopyComplete(options.gameDirectory)
     try {
       if (options.side === 'client') {
         const user = options.user
@@ -363,6 +365,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
    * @returns Does this launch request success?
    */
   async launch(options: LaunchOptions) {
+    await assertInstanceCopyComplete(options.gameDirectory)
     // E2E hook: when XMCL_E2E_NO_LAUNCH is set, never spawn a real Java
     // process. Emit synthetic minecraft-start / window-ready events so the
     // renderer reflects a "launched" state, then return a fake pid. The

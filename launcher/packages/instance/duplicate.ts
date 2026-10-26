@@ -3,6 +3,7 @@ import { join, resolve } from 'path'
 import { getInstanceFiles } from './files_discovery'
 import { Logger } from './internal_type'
 import { shouldBeExcluded } from './manifest_generation'
+import type { InstanceFile } from './files'
 
 export interface DuplicateInstanceTrackerEvents {
   'duplicate.progress': { progress: { progress: number; total: number } }
@@ -13,6 +14,10 @@ export interface DuplicateInstanceOptions {
   newPath: string
   logger?: Logger
   signal?: AbortSignal
+  /** A previously reviewed inventory for resumable copies. */
+  files?: InstanceFile[]
+  /** Publish a reviewed file without replacing an existing destination. */
+  transferFile?: (source: string, destination: string) => Promise<void>
   tracker?: <E extends { phase: keyof DuplicateInstanceTrackerEvents; payload: DuplicateInstanceTrackerEvents[keyof DuplicateInstanceTrackerEvents] }>(event: E) => void
 }
 
@@ -25,12 +30,12 @@ export async function duplicateInstance(options: DuplicateInstanceOptions): Prom
     }
   }
 
-  const files = await getInstanceFiles(instancePath, logger, (filePath, fstat) => {
+  const files = options.files || (await getInstanceFiles(instancePath, logger, (filePath, fstat) => {
     if (shouldBeExcluded(filePath, fstat)) {
       return true
     }
     return false
-  })
+  })).map(([file]) => file)
 
   throwIfAborted()
 
@@ -43,12 +48,8 @@ export async function duplicateInstance(options: DuplicateInstanceOptions): Prom
     ? async (src: string, dest: string) =>
         link(src, dest)
           .catch(() => { throwIfAborted(); return copyFile(src, dest) })
-          .then(() => {
-            progress.progress++
-          })
     : async (src: string, dest: string) => {
         await copyFile(src, dest)
-        progress.progress++
       }
 
   // Accumulate per-file failures instead of letting each rejected
@@ -71,23 +72,29 @@ export async function duplicateInstance(options: DuplicateInstanceOptions): Prom
   })
 
   const promises = [] as Promise<void>[]
+  const active = new Set<Promise<void>>()
 
   try {
-    for (const [file] of files) {
+    for (const file of files) {
       throwIfAborted()
       const src = join(instancePath, file.path)
       const dest = join(newPath, file.path)
-      await ensureDir(resolve(dest, '..'))
+      // Reviewed transfers validate each parent before creating it.
+      if (!options.transferFile) await ensureDir(resolve(dest, '..'))
       throwIfAborted()
-      if (
+      const transfer = options.transferFile || (
         file.path.startsWith('mods/') ||
         file.path.startsWith('resourcepacks/') ||
         file.path.startsWith('shaderpacks/')
-      ) {
-        promises.push(safe(src, linkOrCopy(src, dest)))
-      } else {
-        promises.push(safe(src, copyFile(src, dest).then(() => { progress.progress++ })))
-      }
+          ? linkOrCopy : copyFile)
+      const promise = safe(src, transfer(src, dest).then(() => {
+        progress.progress++
+        tracker?.({ phase: 'duplicate.progress', payload: { progress } })
+      }))
+      promises.push(promise)
+      active.add(promise)
+      void promise.then(() => active.delete(promise))
+      if (active.size >= 4) await Promise.race(active)
     }
   } finally {
     // A rejected call must not leave earlier file writes running in the background.

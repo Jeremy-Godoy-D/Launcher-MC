@@ -170,6 +170,7 @@ react:
     reason_memory: The memory configuration is invalid or exceeds the computer RAM. Review Java and memory settings.
     reason_permission: Insufficient permissions to prepare or start the game. Review folder and Java permissions.
     reason_disk: Insufficient disk space. Free space before trying again.
+    reason_copy: This copy is incomplete. Return to Library and choose “Review copy” to continue or preserve it without starting the game.
     chooseProfile: Choose profile
     library: Go to the library
     running: Running
@@ -224,7 +225,7 @@ react:
     editTitle: Edit instance
     editHelp: Change its display details. Java, version, files and settings are preserved.
     duplicateTitle: Duplicate instance
-    duplicateHelp: Create a new instance from this folder.
+    duplicateHelp: Copy an instance or continue a pending copy. The original instance is preserved.
     removeTitle: Remove instance
     removeHelp: Review how files will be handled before confirming.
     edit: Edit details
@@ -234,7 +235,7 @@ react:
     name: Instance name
     description: Description
     author: Author
-    duplicateDetail: The copy has its own folder and worlds. Installed content may reuse files through launcher links. Minecraft will not start.
+    duplicateDetail: The copy has independent files and worlds. Global launcher versions and libraries are preserved. Minecraft will not start.
     keepDetail: By default, the instance leaves the library and its managed folder is renamed with a leading dot. Files are preserved. An external folder is only removed from the list.
     deleteFiles: Also delete files of a managed instance
     deleteDetail: Files in the managed folder will be deleted. Worlds are moved to the shared worlds folder first; deletion is blocked if that move fails. External folders are preserved.
@@ -310,3 +311,28 @@ react:
     changed: Groups changed in another window. Choose “Review groups again” before saving.
     unavailable: The library is unavailable. Close this dialog and retry once it has loaded.
     failed: Could not save the change. Check access to launcher data and review the groups before retrying.
+  copy:
+    pending: Copy pending
+    action: 'Review copy of {name}'
+    review: Review copy
+    resume: Resume copy
+    resumeHelp: Continues in this folder without creating another instance. Previously copied files are verified before reuse.
+    pendingHelp: This instance cannot launch or export until copying finishes. You can preserve its files and return later.
+    verifying: Verifying the integrity of the copied files…
+    reviewing: Reviewing source files…
+    progress: 'Copying files: {progress} of {total}'
+    progressLabel: Copy progress
+    cancel: Cancel copy
+    cancelling: Finishing cancellation…
+    cancelled: Copy cancelled. Complete files already copied are preserved; you can resume the same instance.
+    complete: Copy complete.
+    view: View instance
+    cancelFailed: Could not cancel the task. Check its progress before retrying.
+    failed: Copy did not finish. Check access, free space and source files. Linked directories are not supported yet. Resume a pending copy to preserve its destination.
+    InstanceCopyInvalid: The copy record cannot be read. Preserve the folder and check diagnostics; retrying will not launch the game or create another copy.
+    InstanceCopySourceChanged: A source file is missing or changed since review. Restore the original files before resuming; the partial copy is preserved.
+    InstanceCopySourceMissing: The source instance is no longer registered. Restore it at its original folder before resuming.
+    InstanceCopyConflict: A destination file contains different data and has been preserved. Check the folder before resuming; your changes are not overwritten.
+    InstanceCopyGameRunning: Close the source instance’s or copy’s game before continuing.
+    InstanceCopyUnsafePath: Linked paths or destinations outside the managed area cannot be copied. Check the folders before retrying.
+    InstanceCopyTooLarge: The inventory exceeds copy limits. Reduce the file count or check diagnostics before retrying.

@@ -40,7 +40,7 @@ export function isInstanceInstallPath(path: string) {
   const root = path.replace(/\\/g, '/').split('/')[0].toLowerCase()
   return root === '.install' || root === '.install-profile' || root === '.install-profile.tmp' ||
     root === '.install-manifest' || root === 'instance-lock.json' || root === 'instance-lock.json.tmp' ||
-    root === 'unresolved-files.json'
+    root === 'unresolved-files.json' || root === '.copy-job.json' || root.startsWith('.copy-temp-')
 }
 
 /**

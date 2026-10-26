@@ -12,6 +12,7 @@ import { importPathParts, readImportFile } from '../util/importFile'
 import { writeZipFile, type ZipTrackerEvents } from '../util/zip'
 import type { Tracker } from '@xmcl/installer'
 import { offlineModpackFiles } from './utils/exportOffline'
+import { assertInstanceCopyComplete } from '../instance/instanceCopy'
 
 const credentials = /(^|\/)(\.env(?:\..*)?|launcher_accounts\.json|accounts\.json|user\.json|credentials(?:\..*)?|secrets?(?:\..*)?|tokens?(?:\..*)?)$|\.(pem|key|pfx|p12)$/i
 const defaults = /^(mods|config|defaultconfigs|resourcepacks|shaderpacks|scripts|kubejs|patchouli_books)\//i
@@ -23,6 +24,7 @@ export function exportIdentity(instance: Instance) {
 }
 
 export async function previewInstanceExport(instance: Instance): Promise<InstanceExportPreview> {
+  await assertInstanceCopyComplete(instance.path)
   if (instance.edition === 'bedrock' || !instance.runtime.minecraft) throw failure('ExportInstanceUnavailable')
   const files = (await previewFolderFiles(instance.path)).filter(file => !credentials.test(file.path)).map(file => {
     importPathParts(file.path)

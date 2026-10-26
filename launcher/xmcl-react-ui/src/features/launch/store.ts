@@ -30,6 +30,7 @@ import { validVersionId } from '../library/creation'
 import { readState } from './read'
 
 export type LaunchReason =
+  | 'copy'
   | 'profile'
   | 'path'
   | 'changed'
@@ -209,6 +210,7 @@ export class LaunchStore {
       (instance) => instance.path === path && instance.edition !== 'bedrock',
     )
     if (!instance) throw new Blocked('path')
+    if (await this.client.service(InstanceServiceKey).getInstanceCopyState(path)) throw new Blocked('copy')
     if (
       !instance.runtime.minecraft ||
       Object.values(instance.runtime).some((value) => value && !validVersionId(value)) ||
