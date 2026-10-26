@@ -136,8 +136,9 @@ react:
     folderProfile: Profile to import
     folderScanning: Reviewing source files and integrity…
     folderError: Could not review a valid Java instance. Check format, permissions and local libraries; links, root folders and incomplete versions are not supported.
-    folderHelp: Worlds, mods and configuration will be copied into a new folder. The source is preserved; accounts and personal launch settings are excluded. Prism includes its custom version and local libraries; other formats only copy game files.
+    folderHelp: Worlds, mods and configuration will be copied into a new folder. The source is preserved; accounts and personal launch settings are excluded. Prism and Vanilla include compatible local versions; Modrinth and CurseForge retain game files.
     prismVersion: Custom version reviewed. Confirming will save it with its local libraries without replacing different existing files. Use only trusted packs.
+    vanillaVersion: Local Minecraft version reviewed. Confirming will preserve its inheritance, client and available libraries without replacing different existing files.
     prism_sourceChanged: The source changed since review. Choose the folder again to review its files before confirming.
     prism_conflict: A library or version with different content already exists. Existing files were preserved; this import cannot continue in this data directory.
   launch:

@@ -355,6 +355,12 @@ export function AddInstance({
         if ('error' in prepared) { setError(`react.create.prism_${prepared.error}`); return }
         options.version = prepared.version
       }
+      if (mode === 'import' && preview?.vanillaVersion && !session.current?.path) {
+        const { root, version, fingerprint } = preview.vanillaVersion
+        const prepared = await instanceIO.prepareVanillaVersion(root, version, fingerprint)
+        if ('error' in prepared) { setError(`react.create.prism_${prepared.error}`); return }
+        options.version = prepared.version
+      }
       const controller = (session.current ??= new CreationSession(instances, installs))
       // Publish the retained identity even when installation fails after native creation.
       try {

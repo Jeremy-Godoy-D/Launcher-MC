@@ -27,6 +27,7 @@ import { uploadSSH } from './utils/uploadSSH'
 import { importLauncherInstance } from './utils/importLauncherInstance'
 import { previewFolderFiles } from './utils/previewFolderFiles'
 import { inspectPrismFolderVersion, preparePrismFolderVersion } from './utils/prismFolderVersion'
+import { inspectVanillaFolderVersion, prepareVanillaFolderVersion } from './utils/vanillaFolderVersion'
 
 @ExposeServiceKey(InstanceIOServiceKey)
 export class InstanceIOService extends AbstractService implements IInstanceIOService {
@@ -108,6 +109,23 @@ export class InstanceIOService extends AbstractService implements IInstanceIOSer
         return this.versionService.resolveLocalVersion(id)
       })
       return { version }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'PrismSourceChanged') return { error: 'sourceChanged' as const }
+      if (error instanceof Error && error.name === 'ImportFileConflict') return { error: 'conflict' as const }
+      throw error
+    }
+  }
+  async previewVanillaVersion(root: string, version: string) {
+    const inspected = await inspectVanillaFolderVersion(root, version)
+    return inspected ? { fingerprint: inspected.fingerprint, runtime: inspected.runtime } : undefined
+  }
+  async prepareVanillaVersion(root: string, version: string, fingerprint: string) {
+    try {
+      const id = await prepareVanillaFolderVersion(root, version, fingerprint, this.getPath(), async id => {
+        await this.versionService.refreshVersion(id)
+        return this.versionService.resolveLocalVersion(id)
+      })
+      return { version: id }
     } catch (error) {
       if (error instanceof Error && error.name === 'PrismSourceChanged') return { error: 'sourceChanged' as const }
       if (error instanceof Error && error.name === 'ImportFileConflict') return { error: 'conflict' as const }

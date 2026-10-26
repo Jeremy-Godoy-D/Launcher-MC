@@ -136,8 +136,9 @@ react:
     folderProfile: Perfil que se importará
     folderScanning: Revisando archivos e integridad del origen…
     folderError: No se pudo revisar una instancia Java válida. Comprueba formato, permisos y bibliotecas locales; no se admiten enlaces, carpetas raíz ni versiones incompletas.
-    folderHelp: Se copiarán mundos, mods y configuración a una carpeta nueva. El origen se conserva; no se copian cuentas ni ajustes personales de arranque. Prism incluye su versión personalizada y bibliotecas locales; en otros formatos solo se copian los archivos de juego.
+    folderHelp: Se copiarán mundos, mods y configuración a una carpeta nueva. El origen se conserva; no se copian cuentas ni ajustes personales de arranque. Prism y Vanilla incluyen las versiones locales compatibles; Modrinth y CurseForge conservan los archivos de juego.
     prismVersion: Versión personalizada revisada. Se guardará al confirmar, junto a sus bibliotecas locales, sin reemplazar archivos existentes distintos. Usa solo packs de confianza.
+    vanillaVersion: Versión local de Minecraft revisada. Al confirmar se conservarán su herencia, el cliente y las bibliotecas disponibles, sin reemplazar archivos existentes distintos.
     prism_sourceChanged: El origen cambió desde la revisión. Vuelve a elegir la carpeta para revisar los archivos antes de confirmar.
     prism_conflict: Ya existe una biblioteca o versión con contenido distinto. Se conservaron los archivos existentes; esta importación no puede continuar en este directorio de datos.
   launch:
