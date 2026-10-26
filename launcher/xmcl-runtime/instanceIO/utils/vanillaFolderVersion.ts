@@ -6,6 +6,7 @@ import { isAbsolute, parse, resolve } from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
 import filenamify from 'filenamify'
 import { importPathParts, readImportFile, writeImmutableImportFiles } from '../../util/importFile'
+import { isolateImportedClient } from '../../util/importedClient'
 
 const fields = ['id', 'inheritsFrom', 'jar', 'mainClass', 'minecraftArguments', 'arguments', 'libraries', 'downloads', 'assetIndex', 'assets', 'javaVersion', 'compatibleJavaMajors', 'type', 'time', 'releaseTime', 'minimumLauncherVersion', 'clientVersion', '_minecraftVersion', 'logging'] as const
 const pick = (value: Record<string, unknown>) => Object.fromEntries(fields.filter(key => Object.hasOwn(value, key)).map(key => [key, value[key]])) as unknown as Version
@@ -23,7 +24,7 @@ function validate(value: unknown, depth = 0) {
   for (const [key, item] of Object.entries(value)) {
     if (['__proto__', 'constructor', 'prototype'].includes(key)) throw new Error('Unsafe version metadata key')
     if (key === 'path') { if (typeof item !== 'string') throw new Error('Invalid artifact path'); importPathParts(item) }
-    if (key === 'url') {
+    if (key === 'url' && item !== '') {
       if (typeof item !== 'string') throw new Error('Invalid artifact URL')
       const url = new URL(item)
       if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error('Unsafe artifact URL')
@@ -96,20 +97,20 @@ export async function inspectVanillaFolderVersion(root: string, selected: string
     files.set(destination, data)
     return data
   }
-  const client = await cache(`versions/${jarId}/${jarId}.jar`, `versions/${resolved.minecraftVersion}/${resolved.minecraftVersion}.jar`, resolved.downloads.client, !resolved.downloads.client?.url)
-  if (client) verify(client, chain[chain.length - 1].downloads?.client)
-  // The current launcher addresses clients by Minecraft version; never substitute different alias bytes.
-  if (jarId !== resolved.minecraftVersion && client && !resolved.downloads.client?.sha1) {
-    const base = await readImportFile(root, `versions/${resolved.minecraftVersion}/${resolved.minecraftVersion}.jar`)
-    if (!base?.equals(client)) throw new Error('Unsupported modified client alias')
-  }
+  const alias = chain.some(value => value.jar)
+  const download = alias ? nodes.get(jarId)?.downloads?.client ?? top.downloads?.client : resolved.downloads.client
+  const clientBytes = await readImportFile(root, `versions/${jarId}/${jarId}.jar`)
+  if (clientBytes && (fileBytes += clientBytes.length) > 512 * 1024 * 1024) throw new Error('Imported cache is too large')
+  const client = isolateImportedClient(download, clientBytes)
+  fingerprint.update(`client:${jarId}`).update(JSON.stringify(client.download)).update(client.id)
+  if (clientBytes) files.set(`versions/${client.id}/${client.id}.jar`, clientBytes)
   for (const library of resolved.libraries) {
     importPathParts(library.download.path)
     const local = chain.some(value => value.libraries?.some(item => item.name === library.name && Reflect.get(item, 'MMC-hint') === 'local'))
     await cache(`libraries/${library.download.path}`, `libraries/${library.download.path}`, library.download, local)
   }
   const header = getResolvedVersionHeader(resolved)
-  return { fingerprint: fingerprint.digest('hex'), chain, files, minecraft: resolved.minecraftVersion, runtime: { minecraft: resolved.minecraftVersion, forge: header.forge, fabricLoader: header.fabric, quiltLoader: header.quilt, neoForged: header.neoForged, optifine: header.optifine, labyMod: header.labyMod } }
+  return { fingerprint: fingerprint.digest('hex'), chain, files, client, minecraft: resolved.minecraftVersion, runtime: { minecraft: resolved.minecraftVersion, forge: header.forge, fabricLoader: header.fabric, quiltLoader: header.quilt, neoForged: header.neoForged, optifine: header.optifine, labyMod: header.labyMod } }
 }
 
 export async function prepareVanillaFolderVersion(root: string, selected: string, expected: string, destination: string, refresh: (id: string) => Promise<unknown>) {
@@ -122,6 +123,10 @@ export async function prepareVanillaFolderVersion(root: string, selected: string
     const id = ids.get(value.id)!
     const json = { ...value, id, clientVersion: inspected.minecraft, ...(value.inheritsFrom ? { inheritsFrom: ids.get(value.inheritsFrom)! } : {}) }
     delete json.jar
+    if (value.id === selected) {
+      json.jar = inspected.client.id
+      json.downloads = { ...json.downloads, client: inspected.client.download }
+    }
     const path = `versions/${id}/${id}.json`
     const data = Buffer.from(JSON.stringify(json, null, 2))
     const existing = await readImportFile(destination, path, 1024 * 1024)

@@ -6,6 +6,7 @@ import { basename, dirname, isAbsolute, parse } from 'node:path'
 import { parseCFG } from '../../modpack/utils/cfg'
 import { importPathParts, readImportFile } from '../../util/importFile'
 import { persistMmcStandaloneVersion, resolveMmcStandaloneVersion } from '../../util/mmcStandaloneVersion'
+import { isolateImportedClient } from '../../util/importedClient'
 
 export async function inspectPrismFolderVersion(source: string) {
   if (!isAbsolute(source) || parse(source).root === source || (await lstat(source)).isSymbolicLink()) throw new Error('Invalid Prism source')
@@ -32,6 +33,8 @@ export async function inspectPrismFolderVersion(source: string) {
       const patch = await readJSON(`patches/${name}`)
       if (!patch || typeof patch.uid !== 'string' || !patch.uid || Object.hasOwn(manifest.patches!, patch.uid)) throw new Error('Invalid Prism patch')
       if (patch.order !== undefined && (typeof patch.order !== 'number' || !Number.isFinite(patch.order))) throw new Error('Invalid Prism patch order')
+      // Reject control characters in untrusted import identifiers and arguments.
+      // eslint-disable-next-line no-control-regex
       for (const key of ['+jvmArgs', '+tweakers']) if (patch[key] !== undefined && (!Array.isArray(patch[key]) || !patch[key].every((arg: unknown) => typeof arg === 'string' && arg.length <= 4096 && !/[\x00-\x1f\x7f]/.test(arg)))) throw new Error('Invalid Prism patch arguments')
       manifest.patches![patch.uid] = patch
     }
@@ -41,9 +44,9 @@ export async function inspectPrismFolderVersion(source: string) {
     if (Object.keys(manifest.patches || {}).length) throw new Error('Prism patches do not define a complete standalone version')
     return undefined
   }
-  if (version.jar || !version.downloads?.client) throw new Error('Prism version needs a standalone client download')
+  if (!version.jar && !version.downloads?.client) throw new Error('Prism version needs a standalone client')
   if (version.arguments && !version.arguments.jvm.length) throw new Error('Incomplete Prism JVM arguments')
-  for (const id of [version.clientVersion, version.assets, version.assetIndex?.id, version.javaVersion?.component]) {
+  for (const id of [version.jar, version.clientVersion, version.assets, version.assetIndex?.id, version.javaVersion?.component]) {
     if (id !== undefined && (typeof id !== 'string' || importPathParts(id).length !== 1)) throw new Error('Invalid Prism version identifier')
   }
   for (const library of version.libraries) importPathParts(LibraryInfo.resolve(library).path)
@@ -51,7 +54,8 @@ export async function inspectPrismFolderVersion(source: string) {
     if (!value || typeof value !== 'object') return
     for (const [key, item] of Object.entries(value)) {
       if (key === 'path' && typeof item === 'string') importPathParts(item)
-      if (key === 'url') {
+      if (['__proto__', 'constructor', 'prototype'].includes(key)) throw new Error('Unsafe Prism metadata key')
+      if (key === 'url' && item !== '') {
         if (typeof item !== 'string') throw new Error('Invalid version download')
         const url = new URL(item)
         if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error('Unsafe version download')
@@ -60,6 +64,36 @@ export async function inspectPrismFolderVersion(source: string) {
     }
   }
   validate(version)
+  let clientDownload = version.downloads?.client
+  let clientBytes: Buffer | undefined
+  const gameName = basename(game)
+  if (version.jar) {
+    let id = version.jar
+    const seen = new Set<string>()
+    while (true) {
+      if (seen.has(id) || seen.size >= 64 || id.length > 200 || importPathParts(id).length !== 1) throw new Error('Invalid Prism client alias')
+      seen.add(id)
+      const metadata = await readImportFile(root, `versions/${id}/${id}.json`, 1024 * 1024) ?? await readImportFile(root, `${gameName}/versions/${id}/${id}.json`, 1024 * 1024)
+      if (metadata && (metadataSize += metadata.length) > 8 * 1024 * 1024) throw new Error('Prism metadata is too large')
+      const alias = metadata ? JSON.parse(metadata.toString('utf8')) : undefined
+      if (alias?.jar && alias.jar !== id) { if (typeof alias.jar !== 'string') throw new Error('Invalid Prism client alias'); id = alias.jar; continue }
+      clientDownload = alias?.downloads?.client
+      clientBytes = await readImportFile(root, `versions/${id}/${id}.jar`) ?? await readImportFile(root, `${gameName}/versions/${id}/${id}.jar`)
+      break
+    }
+  } else {
+    const minecraft = manifest.json.components.find(component => component.uid === 'net.minecraft')!.version
+    if (typeof minecraft !== 'string' || importPathParts(minecraft).length !== 1) throw new Error('Invalid Prism Minecraft version')
+    const candidates = [`versions/${minecraft}/${minecraft}.jar`, `${gameName}/versions/${minecraft}/${minecraft}.jar`]
+    const mainJar = Object.values(manifest.patches || {}).find(patch => patch.mainJar)?.mainJar
+    if (mainJar?.name) {
+      const path = LibraryInfo.resolve(mainJar.name).path
+      importPathParts(path)
+      candidates.push(`libraries/${path}`, `${gameName}/libraries/${path}`)
+    }
+    for (const path of candidates) { clientBytes = await readImportFile(root, path); if (clientBytes) break }
+  }
+  const client = isolateImportedClient(clientDownload, clientBytes)
   const libraries = new Map<string, Buffer>()
   let total = 0
   for (const library of getMmcLocalLibraryNames(version)) {
@@ -79,13 +113,14 @@ export async function inspectPrismFolderVersion(source: string) {
     libraries.set(path, data)
   }
   const fingerprint = createHash('sha256').update(JSON.stringify(manifest))
+  fingerprint.update(client.id).update(JSON.stringify(client.download))
   for (const [path, data] of libraries) fingerprint.update(path).update(createHash('sha256').update(data).digest())
-  return { manifest, libraries, fingerprint: fingerprint.digest('hex') }
+  return { manifest, libraries, client, fingerprint: fingerprint.digest('hex') }
 }
 
 export async function preparePrismFolderVersion(source: string, name: string, expected: string, gameDirectory: string, refreshVersion: (id: string) => Promise<unknown>) {
   if (typeof name !== 'string' || name.length > 100 || !/^[a-f0-9]{64}$/.test(expected)) throw new Error('Invalid Prism confirmation')
   const inspected = await inspectPrismFolderVersion(source)
   if (!inspected || inspected.fingerprint !== expected) throw Object.assign(new Error('Prism source changed; review it again'), { name: 'PrismSourceChanged' })
-  return persistMmcStandaloneVersion({ manifest: inspected.manifest, name, gameDirectory, includePatchArguments: true, refreshVersion, readLocalLibrary: async path => inspected.libraries.get(path) })
+  return persistMmcStandaloneVersion({ manifest: inspected.manifest, name, gameDirectory, includePatchArguments: true, client: inspected.client, refreshVersion, readLocalLibrary: async path => inspected.libraries.get(path) })
 }

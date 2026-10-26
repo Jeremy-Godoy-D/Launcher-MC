@@ -167,6 +167,19 @@ test('launch checks profile and physical directory, confirms once, restores proc
   await win.evaluate((win) => win.focus())
   await expect(page.locator('video')).toHaveAttribute('data-state', 'paused')
   await expect.poll(() => page.locator('video').evaluate((video) => video.paused)).toBe(true)
+  await writeFile(testInfo.outputPath('launch-focus-before-interaction.json'), JSON.stringify({
+    native: await win.evaluate(win => ({ focused: win.isFocused(), minimized: win.isMinimized(), contentsFocused: win.webContents.isFocused() })),
+    document: await page.evaluate(() => ({ focused: document.hasFocus(), visibility: document.visibilityState })),
+  }, null, 2))
+  // Restore native and renderer focus before mouse actionability checks on Windows.
+  await win.evaluate(win => {
+    if (win.isMinimized()) win.restore()
+    win.show()
+    win.focus()
+    win.webContents.focus()
+  })
+  await expect.poll(() => win.evaluate(win => win.isFocused() && win.webContents.isFocused())).toBe(true)
+  await expect.poll(() => page.evaluate(() => document.hasFocus())).toBe(true)
   await page.locator('.sidebar-instance button').click()
   await page.getByRole('button', { name: 'Ver partida', exact: true }).click()
   await expect(dialog.getByRole('button', { name: 'Detener partida', exact: true })).toBeEnabled()

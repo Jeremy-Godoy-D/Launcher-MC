@@ -4,6 +4,8 @@ import { dirname, isAbsolute, join } from 'node:path'
 
 export function importPathParts(path: string) {
   const parts = path.split('/')
+  // Reject control characters in untrusted import identifiers and arguments.
+  // eslint-disable-next-line no-control-regex
   if (isAbsolute(path) || parts.some(p => !p || p === '.' || p === '..' || /[\\<>:"|?*\x00-\x1f\x7f]/.test(p) || /[. ]$/.test(p) || /^(CON|PRN|AUX|NUL|COM[0-9]|LPT[0-9])(\.|$)/i.test(p))) throw new Error('Invalid MultiMC local library path')
   return parts
 }

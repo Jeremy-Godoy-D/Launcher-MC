@@ -5,6 +5,7 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { inspectPrismFolderVersion, preparePrismFolderVersion } from './prismFolderVersion'
 import { writeImmutableImportFiles } from '../../util/importFile'
+import { Version } from '@xmcl/core'
 
 describe('confirmed Prism standalone import', () => {
   let root: string, source: string, destination: string
@@ -88,6 +89,24 @@ describe('confirmed Prism standalone import', () => {
     await symlink(join(root, 'external-libraries'), join(source, 'libraries'), 'junction')
     await expect(inspectPrismFolderVersion(source)).rejects.toThrow('Unsafe')
     expect(await readdir(root)).toEqual(['external-libraries', 'source'])
+  })
+  it('isolates a local client alias and detects changes without replacing an official client', async () => {
+    const file = join(source, 'patches/net.minecraft.json')
+    const patch = JSON.parse(await readFile(file, 'utf8'))
+    patch.jar = 'custom-client'
+    await writeFile(file, JSON.stringify(patch))
+    await mkdir(join(source, 'versions/custom-client'), { recursive: true })
+    await writeFile(join(source, 'versions/custom-client/custom-client.jar'), 'modified client')
+    await mkdir(join(destination, 'versions/1.7.10'), { recursive: true })
+    await writeFile(join(destination, 'versions/1.7.10/1.7.10.jar'), 'keep official')
+    const preview = await inspectPrismFolderVersion(source)
+    const id = await preparePrismFolderVersion(source, 'Alias pack', preview!.fingerprint, destination, refresh)
+    const version = await Version.parse(destination, id!)
+    expect(version.minecraftVersion).toBe('1.7.10')
+    expect(await readFile(join(destination, `versions/${version.clientJar}/${version.clientJar}.jar`), 'utf8')).toBe('modified client')
+    expect(await readFile(join(destination, 'versions/1.7.10/1.7.10.jar'), 'utf8')).toBe('keep official')
+    await writeFile(join(source, 'versions/custom-client/custom-client.jar'), 'changed source')
+    await expect(preparePrismFolderVersion(source, 'Alias pack', preview!.fingerprint, destination, refresh)).rejects.toThrow('source changed')
   })
   it.each(['asset', 'url', 'argument', 'order', 'checksum'])('rejects unsafe %s metadata before confirmation', async kind => {
     const file = join(source, 'patches', 'net.minecraft.json')

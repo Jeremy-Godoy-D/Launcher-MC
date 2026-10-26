@@ -3,6 +3,7 @@ import { getMmcLocalLibraryNames, getMmcVersionFromManifest, type MMCModpackMani
 import { createHash } from 'crypto'
 import filenamify from 'filenamify'
 import { importPathParts, writeImmutableImportFiles } from './importFile'
+import type { isolateImportedClient } from './importedClient'
 
 export interface MmcStandaloneVersionOptions {
   manifest: MMCModpackManifest
@@ -11,6 +12,7 @@ export interface MmcStandaloneVersionOptions {
   readLocalLibrary: (mavenPath: string) => Promise<Buffer | undefined>
   refreshVersion: (id: string) => Promise<unknown>
   includePatchArguments?: boolean
+  client?: ReturnType<typeof isolateImportedClient>
 }
 
 export function resolveMmcStandaloneVersion(manifest: MMCModpackManifest, includePatchArguments = false) {
@@ -33,10 +35,14 @@ export function resolveMmcStandaloneVersion(manifest: MMCModpackManifest, includ
  * ZIP and directory imports share IDs, local-library validation and registration.
  */
 export async function persistMmcStandaloneVersion({
-  manifest, name, gameDirectory, readLocalLibrary, refreshVersion, includePatchArguments,
+  manifest, name, gameDirectory, readLocalLibrary, refreshVersion, includePatchArguments, client,
 }: MmcStandaloneVersionOptions): Promise<string | undefined> {
   const version = resolveMmcStandaloneVersion(manifest, includePatchArguments)
   if (!version) return undefined
+  if (client) {
+    version.jar = client.id
+    version.downloads = { ...version.downloads, client: client.download }
+  }
 
   // Names alone collide across packs (and with installed vanilla versions).
   const hash = createHash('sha256').update(JSON.stringify(version)).digest('hex').slice(0, 16)
@@ -44,6 +50,7 @@ export async function persistMmcStandaloneVersion({
   version.id = id
 
   const files: { path: string; data: Buffer }[] = []
+  if (client?.data) files.push({ path: `versions/${client.id}/${client.id}.jar`, data: client.data })
   for (const library of getMmcLocalLibraryNames(version)) {
     const mavenPath = LibraryInfo.resolve(library).path
     importPathParts(mavenPath)
