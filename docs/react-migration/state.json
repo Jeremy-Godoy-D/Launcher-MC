@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Bloque 1e231a4 gestión de grupos verificada (STAGE4-GROUPS): 466 unitarias/51 archivos y 45 escenarios Electron. Continuar progreso/cancelación/recuperación de copia; revisar espera de operaciones en vuelo al cancelar el duplicador. Después virtualización, enlaces compartidos de exportación y auditoría K03/etapa 4. Revisar CI de PR4 tras corregir URL temporal 8.3 del test. Tres gates pendientes. Usuario autorizó trabajo autónomo/publicación al cumplir criterios; Microsoft pospuesto, Vue predeterminado, producción sin cambios.",
+  "nextAction": "Bloque d161d36 espera de copia corregida (STAGE4-COPY-CANCEL): 471 unitarias/51 archivos, 3 Electron afectados y 2 Vue; regresión completa previa45 en STAGE4-GROUPS. Conectar progreso/cancelación y recuperación explícita de copia parcial, sin repetir el arreglo de espera ni crear copias nuevas automáticamente. Después virtualización, exportación de enlaces compartidos y auditoría K03/etapa4. CI segundo intento pasó466 unitarias/9 harness pero faltó baseline en shallow checkout: fetch-depth0 corregido, verificar siguiente run de PR4. Tres gates pendientes; autonomía/publicación autorizadas al cumplir criterios; Microsoft pospuesto y producción sin cambios.",
   "stages": [
     {
       "id": 0,
@@ -468,9 +468,17 @@
             {
               "path": "docs/react-migration/STAGE4-GROUPS.json",
               "sha256": "00d13fb020b6fd6aa16ab0a3cfea6c8a1a0af98f4d28550496707e6dfc6fc529"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-COPY-CANCEL.md",
+              "sha256": "cfca77f20ebee7697bda64c75e3bf1e8220aabf4ab28e8131db0f679694fe207"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-COPY-CANCEL.json",
+              "sha256": "215bcad8d2caeada5c004389c32b027136a893451bbb2ca8d0411ca4087bc731"
             }
           ],
-          "note": "Parcial: renombrar/disolver grupos existentes añadido a exportación y operaciones. Faltan tareas/recuperación de copia, virtualización, enlaces compartidos de exportación, auditoría K03 y demás criterios. Tres gates/K02/K03/K04 pendientes. CI remoto requiere nueva verificación; juego/Java reales no certificados."
+          "note": "Parcial: espera de copias iniciadas y cancelación final corregidas. Faltan UX de tareas/recuperación de copia, virtualización, enlaces compartidos de exportación, auditoría K03 y demás criterios. Tres gates pendientes; verificar CI remoto tras fetch completo de baseline."
         }
       ]
     },
