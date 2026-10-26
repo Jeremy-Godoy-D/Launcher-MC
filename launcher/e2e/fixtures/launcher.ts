@@ -143,6 +143,8 @@ export interface LauncherFixture {
 }
 
 export interface LauncherOptions {
+  /** Disable the recorder only for calibrated performance measurements. */
+  recordVideo?: boolean
   /**
    * If true, skip writing the `root` file so the launcher shows the bootstrap
    * (first-launch) wizard. Default: false.
@@ -219,7 +221,7 @@ export const test = base.extend<{
         FORCE_COLOR: '0',
       },
       timeout: 60_000,
-      recordVideo: { dir: testInfo.outputDir },
+      recordVideo: launcherOptions.recordVideo === false ? undefined : { dir: testInfo.outputDir },
     })
 
     // Mirror the electron child process stdio into the test output so CI
