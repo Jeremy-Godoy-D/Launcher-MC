@@ -1,0 +1,41 @@
+import { expect, test } from 'vitest'
+import { InstanceSchema } from '../../../../packages/instance/instance'
+import { assignGroup, manualOrder, metadataDraft, metadataEdit, moveInGroups } from './operations'
+
+const original = { ...InstanceSchema.parse({ name: 'Original', path: 'C:/instances/original', description: 'Before', author: 'QA', runtime: { minecraft: '1.21.1' }, java: 'keep-java', vmOptions: ['keep-argument'] }), path: 'C:/instances/original', creationDate: 1, lastPlayedDate: 0, lastAccessDate: 1, playtime: 0 }
+test('edits only captured metadata and supplies a main-process comparison without overwriting runtime settings', () => {
+  const draft = { name: ' Renamed ', description: 'After', author: 'Author' }
+  expect(metadataEdit(original, { ...original, java: 'new-java' }, draft, [original])).toEqual({ instancePath: original.path, name: 'Renamed', description: 'After', author: 'Author', expectedMetadata: metadataDraft(original) })
+  expect(original.java).toBe('keep-java')
+})
+test('blocks missing, changed and duplicate instances instead of using a new selection', () => {
+  const draft = { ...metadataDraft(original), name: 'Renamed' }
+  expect(() => metadataEdit(original, undefined, draft, [])).toThrow('missing')
+  expect(() => metadataEdit(original, { ...original, path: 'other' }, draft, [])).toThrow('missing')
+  expect(() => metadataEdit(original, { ...original, description: 'changed elsewhere' }, draft, [original])).toThrow('changed')
+  expect(() => metadataEdit(original, original, draft, [original, { ...original, path: 'other', name: 'RENAMED' }])).toThrow('duplicateName')
+})
+test.each(['', '../outside', 'CON', 'a\nb', 'x'.repeat(101)])('rejects invalid instance name %j', name => {
+  expect(() => metadataEdit(original, original, { ...metadataDraft(original), name }, [original])).toThrow('invalid')
+})
+test('manual ordering follows groups, deduplicates visible paths and appends new instances', () => {
+  const b = { ...original, path: 'b' }, c = { ...original, path: 'c' }
+  expect(manualOrder([original, b, c], ['b', { instances: [original.path, 'bedrock', original.path] }]).map(instance => instance.path)).toEqual(['b', original.path, 'c'])
+})
+test('group moves retain unrelated data, unknown edition members and group properties', () => {
+  const groups = [{ id: 'old', name: 'Old', color: '#123456', instances: [original.path, 'bedrock'] }, 'other']
+  const added = assignGroup(groups, original.path, 'new', 'Friends', 'new-id')
+  expect(added).toEqual([{ id: 'old', name: 'Old', color: '#123456', instances: ['bedrock'] }, 'other', { id: 'new-id', name: 'Friends', color: '', instances: [original.path] }])
+  expect(groups[0]).toMatchObject({ instances: [original.path, 'bedrock'] })
+  const restored = assignGroup(added, original.path, 'id:old', '', '')
+  expect(restored[0]).toMatchObject({ instances: ['bedrock', original.path] })
+  expect(assignGroup(restored, original.path, '', '', '').at(-1)).toBe(original.path)
+  expect(() => assignGroup(groups, original.path, 'id:missing', '', '')).toThrow('changed')
+  expect(() => assignGroup(groups, original.path, 'new', 'OLD', 'new-id')).toThrow('invalidGroup')
+})
+test('manual movement stays within an assigned group and keeps other groups intact', () => {
+  const groups = [{ id: 'group', name: 'Group', color: '', instances: [original.path, 'b'] }, 'external']
+  expect(moveInGroups(groups, [original], original.path, 1)[0]).toMatchObject({ instances: ['b', original.path] })
+  expect(groups[0]).toMatchObject({ instances: [original.path, 'b'] })
+  expect(moveInGroups(['b'], [original], original.path, -1)).toEqual([original.path, 'b'])
+})

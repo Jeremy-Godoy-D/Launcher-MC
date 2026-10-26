@@ -216,3 +216,53 @@ react:
     saving: Preparando…
     minimize: Minimizar
     maximize: Maximizar
+  operations:
+    optionsTitle: 'Opciones de {name}'
+    optionsHelp: Administra esta instancia. Las acciones se aplican a la carpeta indicada.
+    editTitle: Editar instancia
+    editHelp: Cambia sus datos de presentación. Java, versión, archivos y ajustes se conservan.
+    duplicateTitle: Duplicar instancia
+    duplicateHelp: Crea una instancia nueva a partir de esta carpeta.
+    removeTitle: Retirar instancia
+    removeHelp: Revisa cómo se tratarán los archivos antes de confirmar.
+    edit: Editar datos
+    duplicate: Duplicar
+    openFolder: Abrir carpeta
+    remove: Retirar o eliminar
+    name: Nombre de la instancia
+    description: Descripción
+    author: Autor
+    duplicateDetail: La copia tendrá una carpeta y mundos independientes. El contenido instalado puede reutilizar archivos mediante enlaces del launcher. No se iniciará Minecraft.
+    keepDetail: Por defecto se retira de la biblioteca y su carpeta administrada se renombra con un punto inicial. Los archivos se conservan. Una carpeta externa solo se retira de la lista.
+    deleteFiles: Borrar también los archivos de una instancia administrada
+    deleteDetail: Se eliminarán los archivos de la carpeta administrada. Los mundos se trasladan antes a la carpeta compartida de mundos; si ese traslado falla, el borrado se bloquea. Las carpetas externas se conservan.
+    typeName: 'Escribe «{name}» para confirmar el borrado'
+    close: Cerrar
+    back: Volver
+    save: Guardar cambios
+    confirmDuplicate: Crear copia
+    confirmRemove: Retirar y conservar archivos
+    confirmDelete: Eliminar archivos
+    saved: Cambios guardados.
+    busy: Procesando…
+    missing: La instancia ya no está disponible. Cierra este diálogo y revisa la biblioteca.
+    changed: Los datos cambiaron en otra ventana. Cierra y vuelve a abrir para revisar la versión actual antes de editar.
+    invalid: Revisa el nombre, la descripción y el autor. Usa un nombre válido de hasta 100 caracteres.
+    duplicateName: Ya existe una instancia con ese nombre. Elige otro.
+    running: Cierra la partida de esta instancia antes de realizar esta operación.
+    failed: No se completó la operación. Revisa la carpeta y los diagnósticos antes de reintentar. Si estabas copiando, puede haber quedado una copia incompleta en la biblioteca.
+    groupTitle: Organizar instancia
+    groupHelp: El grupo y el orden se guardan en el launcher y conservan las instancias de otras ediciones.
+    group: Grupo
+    ungrouped: Sin grupo
+    newGroup: Crear grupo
+    groupName: Nombre del grupo
+    invalidGroup: Usa un nombre de grupo de hasta 100 caracteres que todavía no exista.
+    moveUp: Subir en orden manual
+    moveDown: Bajar en orden manual
+    sort: Ordenar instancias
+    sortmanual: Orden manual
+    sortname: Nombre
+    sortrecent: Más recientes
+    filterGroup: Filtrar por grupo
+    allGroups: Todos los grupos

@@ -5,7 +5,6 @@ import {
   InstanceSchema,
   computeInstanceEditChanges,
   createInstance,
-  type EditInstanceOptions,
   DuplicateInstanceTrackerEvents,
 } from '@xmcl/instance'
 import {
@@ -13,6 +12,7 @@ import {
   InstanceServiceKey,
   InstanceState,
   InstancesSchema,
+  InstanceGroupDataOrStringArray,
   LockKey,
   DuplicateInstanceTask,
   type InstanceService as IInstanceService,
@@ -22,8 +22,8 @@ import { AnyError, isSystemError } from '@xmcl/utils'
 import filenamify from 'filenamify'
 import { fileTypeFromBuffer, fileTypeFromFile } from 'file-type'
 import { existsSync } from 'fs'
-import { ensureDir, readdir, readlink, readJson, rename, rm, writeFile, writeJson } from 'fs-extra'
-import { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'path'
+import { ensureDir, lstat, realpath, readdir, readlink, readJson, rename, rm, writeFile, writeJson } from 'fs-extra'
+import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'path'
 import { Inject, LauncherAppKey, kGameDataPath, type PathResolver } from '~/app'
 import { ImageStorage, kTasks, Tasks } from '~/infra'
 import { VersionMetadataService } from '~/install/VersionMetadataService'
@@ -35,6 +35,7 @@ import { getMediaIconPath, resolveInstanceIcon, serializeInstanceIcon, toMediaIc
 import { requireObject, requireString } from '../util/object'
 import { getTracker } from '~/util/taskHelper'
 import { setTimeout } from 'timers/promises'
+import { writeFile as writeAtomically } from 'atomically'
 
 const INSTANCES_FOLDER = 'instances'
 
@@ -50,6 +51,8 @@ export class InstanceService extends StatefulService<InstanceState> implements I
   // the install/delete cancellation handshake.
   #removeHandlers: Record<string, Array<() => Promise<void> | void>> = {}
   #onRenamedInstancePath?: (oldPath: string, newPath: string) => void
+  #groupsWrite: Promise<void> = Promise.resolve()
+  #instanceWrites = new Map<string, Promise<void>>()
 
   constructor(
     @Inject(LauncherAppKey) app: LauncherApp,
@@ -166,8 +169,8 @@ export class InstanceService extends StatefulService<InstanceState> implements I
           })
         }
 
-        this.state.subscribe('instanceGroupsSet', async () => {
-          await writeJson(instancesPath, {
+        this.state.subscribe('instanceGroupsSet', () => {
+          const data = JSON.stringify({
             selectedInstance,
             instances: this.state.instances.map((s) => s.path).map(normalizeInstancePath),
             groups: this.state.groups.map((g) =>
@@ -176,13 +179,17 @@ export class InstanceService extends StatefulService<InstanceState> implements I
                 : { ...g, instances: g.instances.map(normalizeInstancePath) },
             ),
           })
+          this.#groupsWrite = this.#groupsWrite.catch(() => {}).then(() => writeAtomically(instancesPath, data))
+          void this.#groupsWrite.catch(error => this.error(error))
         })
 
-        this.state.subscribe('instanceEdit', async ({ path }) => {
+        this.state.subscribe('instanceEdit', ({ path }) => {
           const inst = this.state.all[path]
           const persisted = { ...inst, icon: serializeInstanceIcon(inst.icon, path) }
-          await writeFile(join(path, 'instance.json'), JSON.stringify(persisted, null, 2))
-          this.log(`Saved instance ${path}`)
+          const data = JSON.stringify(persisted, null, 2)
+          const write = (this.#instanceWrites.get(path) || Promise.resolve()).catch(() => {}).then(() => writeAtomically(join(path, 'instance.json'), data))
+          this.#instanceWrites.set(path, write)
+          void write.catch(error => this.error(error))
         })
       },
     )
@@ -210,6 +217,16 @@ export class InstanceService extends StatefulService<InstanceState> implements I
   async getSharedInstancesState(): Promise<SharedState<InstanceState>> {
     await this.initialize()
     return this.state
+  }
+
+  async updateInstanceGroups(previous: InstanceState['groups'], next: InstanceState['groups']) {
+    await this.initialize()
+    if (!Array.isArray(previous) || !Array.isArray(next) || previous.length > 10000 || next.length > 10000) throw new TypeError('Invalid instance groups')
+    const expected = InstanceGroupDataOrStringArray.parse(previous)
+    const groups = InstanceGroupDataOrStringArray.parse(next)
+    if (JSON.stringify(this.state.groups) !== JSON.stringify(expected)) throw Object.assign(new Error('Instance groups changed'), { name: 'InstanceGroupsChanged' })
+    this.state.instanceGroupsSet(groups)
+    await this.#groupsWrite
   }
 
   protected getPathUnder(...ps: string[]) {
@@ -257,6 +274,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     }
 
     let option: InstanceDataWithTime
+    let hasStoredPath = false
 
     if (!(await isDirectory(path))) {
       return false
@@ -265,6 +283,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     this.log(`Start load instance under ${path}`)
     try {
       option = await readJson(join(path, 'instance.json')).then(InstanceSchema.parse)
+      hasStoredPath = !!option.path
       delete option.path
     } catch (e) {
       this.warn(`Cannot load instance json ${path}`)
@@ -285,7 +304,8 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     const expectPath = this.getPathUnder(filenamify(name, { replacement: '_' }))
 
     try {
-      if (this.isUnderManaged(path) && expectPath !== path && !existsSync(expectPath)) {
+      // Persisted paths are stable identities; editing the display name must not move them on restart.
+      if (!hasStoredPath && this.isUnderManaged(path) && expectPath !== path && !existsSync(expectPath)) {
         this.log(`Migrate instance ${path} -> ${expectPath}`)
         await rename(path, expectPath)
         // const failed = await Promise.race([
@@ -509,7 +529,6 @@ export class InstanceService extends StatefulService<InstanceState> implements I
       await ensureDir(sharedSaves)
       const saves = await readdir(instanceSaves)
       for (const saveName of saves) {
-        if (saveName.startsWith('.')) continue
         const savePath = join(instanceSaves, saveName)
         // Skip individually linked saves
         if (await readlink(savePath).catch(() => '')) continue
@@ -517,10 +536,10 @@ export class InstanceService extends StatefulService<InstanceState> implements I
         if (existsSync(dest)) {
           dest = join(sharedSaves, `${saveName}-${Date.now()}`)
         }
-        await rename(savePath, dest).catch((e) => this.warn(`Fail to move save ${savePath} to shared: ${e}`))
+        await rename(savePath, dest)
       }
     } catch (e) {
-      this.warn(`Fail to move instance saves to shared for ${path}: ${e}`)
+      throw new Error('Cannot preserve instance worlds before deletion', { cause: e })
     }
   }
 
@@ -531,14 +550,17 @@ export class InstanceService extends StatefulService<InstanceState> implements I
   async deleteInstance(path: string, deleteData = true) {
     await this.initialize()
     requireString(path)
+    if (typeof deleteData !== 'boolean') throw new TypeError('deleteData must be a boolean')
 
     const instance = this.state.instances.find(i => i.path === path)
+    if (!instance) throw new AnyError('InstanceNotFoundError')
     const isBedrock = instance?.edition === 'bedrock'
 
     const isManaged = this.isUnderManaged(path)
     const lock = this.mutex.of(LockKey.instanceRemove(path))
     const instanceLock = this.mutex.of(LockKey.instance(path))
     if (isManaged && (await exists(path))) {
+      if ((await lstat(path)).isSymbolicLink() || !this.isUnderManaged(await realpath(path))) throw new Error('Unsafe managed instance directory')
       await lock.runExclusive(async () => {
         // Reject any install requests currently waiting for the instance
         // lock so they don't start work that we are about to wipe out.
@@ -568,6 +590,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
           // abort) to complete. allSettled so a buggy handler can't
           // block deletion.
           await Promise.allSettled(handlerPromises)
+          await this.#instanceWrites.get(path)
 
           if (isBedrock && process.platform === 'win32') {
             try {
@@ -589,7 +612,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
             try {
               await rm(path, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 })
             } catch (e) {
-              if (isSystemError(e) && (e.code === ENOENT_ERROR || e.code === 'EPERM')) {
+              if (isSystemError(e) && e.code === ENOENT_ERROR) {
                 this.warn(`Fail to remove instance ${path}: ${e}`)
               } else {
                 if (e instanceof Error && e.name === 'Error') {
@@ -602,7 +625,8 @@ export class InstanceService extends StatefulService<InstanceState> implements I
             // Rename to hidden
             const name = basename(path)
             const newPath = join(dirname(path), '.' + name)
-            await rename(path, newPath).catch(() => undefined)
+              if (await exists(newPath)) throw new Error('Retired instance destination already exists')
+              await rename(path, newPath)
           }
 
           this.#removeHandlers[path] = []
@@ -611,17 +635,26 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     }
 
     this.state.instanceRemove(path)
+    this.#instanceWrites.delete(path)
+    this.state.instanceGroupsSet(this.state.groups.filter(group => group !== path).map(group => typeof group === 'string' ? group : { ...group, instances: group.instances.filter(member => member !== path) }))
+    await this.#groupsWrite
   }
 
   /**
    * Edit the instance. If the `path` is not present, it will edit the current selected instance.
    * Otherwise, it will edit the instance on the provided path
    */
-  async editInstance(options: EditInstanceOptions & { instancePath: string }) {
+  async editInstance(options: Parameters<IInstanceService['editInstance']>[0]) {
     await this.initialize()
-
     requireObject(options)
+    if (options.expectedMetadata) {
+      requireString(options.instancePath)
+      return this.mutex.of(LockKey.instance(options.instancePath)).runExclusive(() => this.#editInstanceFields(options))
+    }
+    return this.#editInstanceFields(options)
+  }
 
+  async #editInstanceFields(options: Parameters<IInstanceService['editInstance']>[0]) {
     const instancePath = options.instancePath
 
     if (!instancePath) {
@@ -652,6 +685,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
         const newPath = join(dirname(instancePath), options.name)
         if (newPath !== instancePath) {
           if (this.state.instances.some((i) => i.path === newPath)) {
+            if (options.expectedMetadata) throw Object.assign(new Error('Instance name already exists'), { name: 'InstanceNameDuplicatedError' })
             options.name = undefined
             this.error(new AnyError('InstanceNameDuplicatedError'))
           }
@@ -670,6 +704,10 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     }
 
     if (Object.keys(result).length > 0) {
+      if (options.expectedMetadata) {
+        const expected = options.expectedMetadata
+        if (!['name', 'description', 'author'].every(key => typeof Reflect.get(expected, key) === 'string' && Reflect.get(expected, key) === (Reflect.get(state, key) || ''))) throw Object.assign(new Error('Instance metadata changed'), { name: 'InstanceMetadataChanged' })
+      }
       this.log(
         `Modify instance ${instancePath} (${options.name}) ${JSON.stringify(result, null, 4)}.`,
       )
@@ -685,11 +723,13 @@ export class InstanceService extends StatefulService<InstanceState> implements I
         payload[key] = value === undefined ? null : value
       }
       this.state.instanceEdit(payload as any)
+      if (options.expectedMetadata) await this.#instanceWrites.get(instancePath)
     }
   }
 
   isUnderManaged(path: string) {
-    return resolve(path).startsWith(resolve(this.getPathUnder()))
+    const child = relative(resolve(this.getPathUnder()), resolve(path))
+    return !!child && child !== '..' && !child.startsWith(`..${sep}`) && !isAbsolute(child)
   }
 
   async acquireInstanceById(id: string): Promise<string> {

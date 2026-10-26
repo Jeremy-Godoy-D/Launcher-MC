@@ -103,11 +103,13 @@ export interface InstanceService {
    * Duplicate the instance.
    */
   duplicateInstance(path: string): Promise<string>
+  /** Replace group/order data only when it still matches the reviewed snapshot. */
+  updateInstanceGroups(previous: InstanceState['groups'], next: InstanceState['groups']): Promise<void>
   /**
    * Edit the instance. If the `path` is not present, it will edit the current selected instance.
    * Otherwise, it will edit the instance on the provided path.
    */
-  editInstance(options: EditInstanceOptions & { instancePath: string }): Promise<void>
+  editInstance(options: EditInstanceOptions & { instancePath: string; expectedMetadata?: { name: string; description: string; author: string } }): Promise<void>
   /**
    * Get or create a MANAGED instance via your unique id
    * @param id The unique id, can be any string, but it will convert to a string can be file name

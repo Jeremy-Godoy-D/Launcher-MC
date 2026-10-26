@@ -49,6 +49,7 @@ import { instanceIcon, loaderName, type SavedInstance } from './features/library
 import { AddInstance } from './features/library/AddInstance'
 import { useLaunch } from './features/launch/context'
 import { LaunchDialog } from './features/launch/LaunchDialog'
+import { InstanceOperations } from './features/library/InstanceOperations'
 
 declare global {
   interface Window {
@@ -160,7 +161,9 @@ function InstanceCard({
 }) {
   const { t } = useI18n()
   return (
-    <article key={instance.id} className={`instance-card ${view === 'list' ? 'instance-row' : ''}`}>
+    <article key={instance.id} className={`instance-card ${view === 'list' ? 'instance-row' : ''}`} onContextMenu={event => { event.preventDefault(); event.currentTarget.querySelector<HTMLButtonElement>('.instance-card-actions button:last-child')?.focus(); onOptions(instance) }} onKeyDown={event => {
+      if (event.key === 'ContextMenu' || event.key === 'F10' && event.shiftKey) { event.preventDefault(); onOptions(instance) }
+    }}>
       <button
         className="instance-art"
         onClick={() => onManage(instance)}
@@ -223,6 +226,7 @@ export function App() {
   const [featuredPath, setFeaturedPath] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [loader, setLoader] = useState('')
+  const [group, setGroup] = useState('')
   const restoreFocus = useRef<HTMLElement | null>(null)
   const view = preferences.libraryView
   const setView = (libraryView: 'grid' | 'list') => setPreferences({ libraryView })
@@ -237,6 +241,7 @@ export function App() {
   const [dialog, setDialog] = useState<{ title: string; message: string } | null>(null)
   const [showCredits, setShowCredits] = useState(false)
   const [adding, setAdding] = useState<'create' | 'import'>()
+  const [operating, setOperating] = useState<SavedInstance>()
   useEffect(() => {
     const requested = new URLSearchParams(location.search).get('add')
     if (savedLibrary?.status === 'ready' && (requested === 'create' || requested === 'import')) {
@@ -271,7 +276,7 @@ export function App() {
     reducedMotion,
     performanceMode,
     interacting: hovered || focusWithin,
-    dialogOpen: !!dialog || showCredits || !!adding || !!launch?.dialog || !!launch?.running.length,
+    dialogOpen: !!dialog || showCredits || !!adding || !!operating || !!launch?.dialog || !!launch?.running.length,
     manuallyPaused: paused,
   })
 
@@ -317,13 +322,15 @@ export function App() {
   }
   const matchesInstance = (instance: Instance) =>
     instance.name.toLowerCase().includes(query.toLowerCase()) &&
-    (!loader || instance.loader === loader)
+    (!loader || instance.loader === loader) &&
+    (!group || (group === 'ungrouped' ? !savedLibrary?.data?.groups.some(entry => typeof entry !== 'string' && entry.instances.includes(instance.id)) : savedLibrary?.data?.groups.some(entry => typeof entry !== 'string' && `id:${entry.id}` === group && entry.instances.includes(instance.id))))
   const matchingProjects = projects.filter((project) =>
     `${project.title} ${project.description}`.toLowerCase().includes(query.toLowerCase()),
   )
   useEffect(() => {
     setQuery('')
     setLoader('')
+    setGroup('')
   }, [location.pathname])
   const play = (instance: Instance) => {
     if (!savedLibrary?.select(instance.id)) return
@@ -341,6 +348,12 @@ export function App() {
   const openCreation = (mode: 'create' | 'import' = 'create') => {
     restoreFocus.current = document.activeElement as HTMLElement
     setAdding(mode)
+  }
+  const openOptions = (item: Instance) => {
+    const captured = savedLibrary?.instances.find(instance => instance.path === item.id)
+    if (!captured) return
+    restoreFocus.current = document.activeElement as HTMLElement
+    setOperating(captured)
   }
   const libraryState = !savedLibrary || savedLibrary.status !== 'ready' || !instances.length ? (
     <div className="empty" role={!savedLibrary || savedLibrary.status === 'error' ? 'alert' : 'status'} data-testid="library-state">
@@ -599,7 +612,7 @@ export function App() {
                       view="grid"
                       onPlay={play}
                       onManage={manage}
-                      onOptions={(item) => preview(`Opciones de ${item.name}`)}
+                      onOptions={openOptions}
                     />
                   ))}
                 </div>
@@ -660,9 +673,17 @@ export function App() {
                     <List size={19} />
                   </button>
                 </div>
+                <select aria-label={t('react.operations.sort')} value={savedLibrary?.sort || 'manual'} onChange={event => savedLibrary?.setSort(event.target.value)}>
+                  {['manual', 'name', 'recent'].map(order => <option key={order} value={order}>{t(`react.operations.sort${order}`)}</option>)}
+                </select>
+                <select aria-label={t('react.operations.filterGroup')} value={group} onChange={event => setGroup(event.target.value)}>
+                  <option value="">{t('react.operations.allGroups')}</option>
+                  <option value="ungrouped">{t('react.operations.ungrouped')}</option>
+                  {(savedLibrary?.data?.groups || []).flatMap(group => typeof group === 'string' ? [] : [<option key={group.id} value={`id:${group.id}`}>{group.name}</option>])}
+                </select>
               </div>
               <div className={`instance-grid ${view === 'list' ? 'list-view' : ''}`}>
-                {instances.filter(matchesInstance).map((instance) => (
+                {(savedLibrary?.ordered || []).map(presentInstance).filter(matchesInstance).map((instance) => (
                   <InstanceCard
                     key={instance.id}
                     instance={instance}
@@ -671,7 +692,7 @@ export function App() {
                     view={view}
                     onPlay={play}
                     onManage={manage}
-                    onOptions={(item) => preview(`Opciones de ${item.name}`)}
+                    onOptions={openOptions}
                   />
                 ))}
               </div>
@@ -685,6 +706,7 @@ export function App() {
                     onClick={() => {
                       setQuery('')
                       setLoader('')
+                      setGroup('')
                     }}
                   >
                     Limpiar búsqueda
@@ -918,6 +940,9 @@ export function App() {
         </div>
       </main>
       {launch && <LaunchDialog launch={launch} returnFocus={restoreFocus} />}
+      {operating && <InstanceOperations key={operating.path} instance={operating} onClose={() => setOperating(undefined)} returnFocus={restoreFocus} onCreated={path => {
+        if (savedLibrary?.select(path)) void navigate('/instance')
+      }} />}
       {savedLibrary && <AddInstance open={!!adding} initialMode={adding ?? 'create'} onClose={() => setAdding(undefined)} returnFocus={restoreFocus} onCreated={path => {
         setAdding(undefined)
         if (savedLibrary.select(path)) void navigate('/instance')

@@ -216,3 +216,53 @@ react:
     saving: Preparing…
     minimize: Minimize
     maximize: Maximize
+  operations:
+    optionsTitle: 'Options for {name}'
+    optionsHelp: Manage this instance. Actions apply to the folder shown below.
+    editTitle: Edit instance
+    editHelp: Change its display details. Java, version, files and settings are preserved.
+    duplicateTitle: Duplicate instance
+    duplicateHelp: Create a new instance from this folder.
+    removeTitle: Remove instance
+    removeHelp: Review how files will be handled before confirming.
+    edit: Edit details
+    duplicate: Duplicate
+    openFolder: Open folder
+    remove: Remove or delete
+    name: Instance name
+    description: Description
+    author: Author
+    duplicateDetail: The copy has its own folder and worlds. Installed content may reuse files through launcher links. Minecraft will not start.
+    keepDetail: By default, the instance leaves the library and its managed folder is renamed with a leading dot. Files are preserved. An external folder is only removed from the list.
+    deleteFiles: Also delete files of a managed instance
+    deleteDetail: Files in the managed folder will be deleted. Worlds are moved to the shared worlds folder first; deletion is blocked if that move fails. External folders are preserved.
+    typeName: 'Type “{name}” to confirm deletion'
+    close: Close
+    back: Back
+    save: Save changes
+    confirmDuplicate: Create copy
+    confirmRemove: Remove and keep files
+    confirmDelete: Delete files
+    saved: Changes saved.
+    busy: Working…
+    missing: This instance is no longer available. Close this dialog and check the library.
+    changed: These details changed in another window. Close and reopen to review the current version before editing.
+    invalid: Check the name, description and author. Use a valid name of up to 100 characters.
+    duplicateName: An instance already uses this name. Choose another one.
+    running: Close this instance’s game before performing this action.
+    failed: The action did not finish. Check the folder and diagnostics before retrying. A failed duplication may have left an incomplete copy in the library.
+    groupTitle: Organize instance
+    groupHelp: Groups and ordering are saved in the launcher and preserve instances of other editions.
+    group: Group
+    ungrouped: Ungrouped
+    newGroup: Create group
+    groupName: Group name
+    invalidGroup: Use a unique group name of up to 100 characters.
+    moveUp: Move up in manual order
+    moveDown: Move down in manual order
+    sort: Sort instances
+    sortmanual: Manual order
+    sortname: Name
+    sortrecent: Most recent
+    filterGroup: Filter by group
+    allGroups: All groups

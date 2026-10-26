@@ -65,7 +65,7 @@ const ELECTRON_BIN = PACKAGED_BINARY || (process.platform === 'win32'
  * elapses, throwing a descriptive error that enumerates every observed
  * window URL so CI logs pinpoint which window the launcher stalled on.
  */
-async function waitForAppWindow(
+export async function waitForAppWindow(
   app: ElectronApplication,
   pattern: RegExp,
   timeoutMs: number,
