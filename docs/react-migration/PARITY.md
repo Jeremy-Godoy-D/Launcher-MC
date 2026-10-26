@@ -9,7 +9,7 @@ Referencia: beta.2, commit `7671c6f1bdc471d42816241920a262a18aca5a44`. Alcance c
 | ID | Función / entrada anterior | Contratos o fuentes existentes | Destino / aceptación | Estado React |
 | --- | --- | --- | --- | --- |
 | K01 | Inicio `/`, LaunchCenter.vue | instances.ts, instanceLaunchCoordinator.ts, LaunchService | Última válida, Jugar explícito, no lanzar al montar; nueva destacada no guarda selección por tick. | pending |
-| K02 | Biblioteca `/me`, LauncherLibrary.vue | InstanceService, instances.ts, instanceGroup.ts | Buscar/filtrar/ordenar/agrupar, selección persistida, cuadrícula/lista. | pending |
+| K02 | Biblioteca `/me`, LauncherLibrary.vue | InstanceService, instances.ts, instanceGroup.ts | Buscar/filtrar/ordenar/agrupar, selección persistida, cuadrícula/lista. | complete |
 | K03 | Crear/importar, AppAddInstanceDialog/AppImportUrlDialog | instanceCreation.ts, InstanceService, InstanceIOService, ModpackService | Vanilla/loaders/ZIP o formatos admitidos; errores conservan campos. No importar temas/launchers/blueprints como funciones nuevas. | pending |
 | K04 | Editar/duplicar/exportar/eliminar, instanceContextMenu.ts | InstanceService, InstanceIOService, ModpackService | Exportación local sí; borrado confirmado y diferenciado de retirar registro. | complete |
 | K05 | Versiones/loaders Java, BaseSettingVersions | version*, instanceVersionInstall*, JavaService | Usar resolución/instalación actual; conservar diagnosticar/reparar. | pending |
@@ -128,3 +128,5 @@ K02 tiene una diferencia concreta: Vue busca nombre/Minecraft/loader+versión co
 Fuente89bd5d8; STAGE4-LIBRARY-PARITY.md/JSON. K04 completo en su alcance de metadatos/icono/duplicación-reanudación/exportación local/retirar o borrar con confirmación, acreditado por informes anteriores y61React de regresión. Incluye grupos nativos y legado, fallo de preferencias sin repetir copia ni sobrescribir el destino. K16 conserva la instalación/actualización pública en etapa6.
 
 K02 recupera búsqueda por nombre/Minecraft/loader+versión y trim; falta comprobar su orden reciente con Inicio frente a últimas partidas. No repetir esos arreglos ni el bloque de galerías/caché. Consumo/migración de grupos heredados en Mods pertenece a etapa5; no borrar el legado antes de confirmar persistencia ni reemplazar datos nativos actuales. Etapa4 sigue parcial.579 unidades/64 escenarios distintos; juego/Java reales y publicación permanecen pendientes.
+
+Bloque93321cf: K02 completo con orden manual/nombre/Última partida y persistencia, sumado a búsqueda/filtros/grupos/vistas/virtualización anteriores. Inicio prioriza seleccionada y después partidas; conserva identidad al reordenar/retirar y rotar no escribe selección/metadatos. STAGE4-RECENT-ORDER:589 unitarias,67 escenarios distintos,9harness;91Axe/0violaciones/162incompletos. Historia E2E sintética, no juego. K01/K03/K06 y dos gates de4 siguen pendientes de medios/rendimiento e instalación/Java/juego reales. No publicar todavía.

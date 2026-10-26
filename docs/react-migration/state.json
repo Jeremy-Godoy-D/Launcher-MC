@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Fuente89bd5d8: búsqueda y grupos de copia/restablecimiento de fuente al reanudar corregidos; STAGE4-LIBRARY-PARITY,579 unitarias/60 archivos y64 escenarios distintos (61React+1Strict+2Vue),91Axe/0violaciones/162incompletos y9harness. Próximo: verificar/fijar orden de Inicio y recientes por seleccionada/últimas partidas; model.selectedInstance y sort reciente aún miran lastAccessDate. Luego3 clips autorizados, precarga del siguiente póster, vídeo Vanilla genérico con portada propia/etiqueta y60s CPU/GPU/memoria/arranque. No repetir búsqueda,modsGrouping,iconos,perfiles,copia,virtualización,galerías/caché. K04 completo; K02/Inicio pendientes; etapas5–9 pendientes. CI anterior40386061680 pasó ambos; comprobar CI propio tras push. Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios; evidencia UTF-8/LF y SHA de Git.",
+  "nextAction": "Fuente93321cf: orden Inicio seleccionada+últimas partidas, identidad estable al reordenar/retirar y Biblioteca Última partida acreditados. STAGE4-RECENT-ORDER:589 unitarias/60 archivos,67 escenarios distintos (64React+1Strict+2Vue),91Axe/0violaciones/162incompletos,9harness,tipos/lint/builds aprobados. K02/K04/K17 completos. Próximo:3 clips autorizados Overworld/Nether/End, precarga siguiente póster, vídeo genérico junto a portada propia/etiqueta y presupuestos60s. Masterclass Xbox México descargado424MB solo en artefactos, probe VP9 1080p~60fps/Opus1314s; revisar segmentos/licencia y preparar derivados, aún sin distribuir. K03/K06,gates restantes y etapas5–9 pendientes. CI previo40391709529 pasó; comprobar propio tras push. Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios.",
   "stages": [
     {
       "id": 0,
@@ -381,9 +381,17 @@
             {
               "path": "docs/react-migration/STAGE4-PROVIDER-MEDIA.json",
               "sha256": "6131046346dddd9c34b90299c4b590f3912cc715f998a483152c1605a13f4cc0"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-RECENT-ORDER.md",
+              "sha256": "0da36f0b407f9c5c5201fa4601dccd11920fa6aa10c6b57b4328a51af0b1d24b"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-RECENT-ORDER.json",
+              "sha256": "2cf048843cc244df2671e8b39bac59ea354a7e5ab7c4b04f90359d78d0a39155"
             }
           ],
-          "note": "Parcial: galerías propias por upstream/ID y caché privada50MiB nativa verificadas, incluidos proveedores públicos, fallback y descarte de respuestas atrasadas. Fuente80c8f3b; STAGE4-PROVIDER-MEDIA. Faltan3 clips autorizados, precarga del siguiente póster, vídeo genérico etiquetado para packs y presupuestos60s. No cerrar esta gate."
+          "note": "Orden seleccionada+últimas partidas e identidad independiente al rotar/reordenar/retirar verificados93321cf; galerías/caché previas. Faltan3 clips autorizados,precarga siguiente póster,vídeo genérico junto a portada propia/etiqueta y presupuestos60s. Etapa4 activa."
         },
         {
           "id": "library-instance-launch",
@@ -532,9 +540,17 @@
             {
               "path": "docs/react-migration/STAGE4-LIBRARY-PARITY.json",
               "sha256": "e852a93a7b7bb67f258c939d1831a18b0b306c6c67945c79d6e478448b7a86de"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-RECENT-ORDER.md",
+              "sha256": "0da36f0b407f9c5c5201fa4601dccd11920fa6aa10c6b57b4328a51af0b1d24b"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-RECENT-ORDER.json",
+              "sha256": "2cf048843cc244df2671e8b39bac59ea354a7e5ab7c4b04f90359d78d0a39155"
             }
           ],
-          "note": "Parcial: búsqueda por nombre/Minecraft/loader+versión con trim, grupos heredados/nativos al duplicar/reanudar y reintento de preferencias sin duplicar archivos verificados. K04 acreditado; K02 conserva orden reciente pendiente de cruce con Inicio. Fuente89bd5d8,579 unitarias/64 escenarios. No repetir búsqueda ni modsGrouping. Instalación/Java/juego reales siguen en sus gates posteriores."
+          "note": "K02 completo: búsqueda/filtros/orden manual,nombre,última partida/grupos/vistas/selección persistida/virtualización. Fuente93321cf y evidencias anteriores. Crear/importar/operar/lanzar vía servicios probado con fixtures; Java/instalación/juego reales aún no acreditados, K03/K06/gate pendientes. No repetir búsqueda,copia ni orden."
         }
       ]
     },
