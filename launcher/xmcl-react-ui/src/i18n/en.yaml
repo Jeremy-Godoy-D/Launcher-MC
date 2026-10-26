@@ -11,6 +11,9 @@ react:
   ambientVideo: Ambient video
   carousel: Automatic presentation
   instances:
+    count: "{count} instances"
+    listLabel: Library instances
+    keyboard: In large libraries, use arrow keys to move between instances, Home and End to reach either end, and Tab to move through their actions.
     saved: Saved on this device
     connected: Local library · migration in progress
     subtitle: Your Minecraft Java instances, in one place.

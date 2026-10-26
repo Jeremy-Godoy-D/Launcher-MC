@@ -1410,6 +1410,9 @@ importers:
       '@radix-ui/react-dialog':
         specifier: 1.3.1
         version: 1.3.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@tanstack/react-virtual':
+        specifier: 3.14.22
+        version: 3.14.22(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@xmcl/runtime-api':
         specifier: workspace:*
         version: link:../xmcl-runtime-api
@@ -3625,8 +3628,17 @@ packages:
     resolution: {integrity: sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==}
     engines: {node: '>=10'}
 
+  '@tanstack/react-virtual@3.14.22':
+    resolution: {integrity: sha512-zNiB9IF3prySTfAUrj9tPHjD/lonBYkfxrPP4v4ITUx+qwHajJR5cY/xirjvwc+KWkur10GX3TpsbKh7JkD8Lw==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
   '@tanstack/virtual-core@3.10.8':
     resolution: {integrity: sha512-PBu00mtt95jbKFi6Llk9aik8bnR3tR/oQP1o3TSi+iG//+Q2RTIzCEgKkHG8BB86kxMNW6O8wku+Lmi+QFR6jA==}
+
+  '@tanstack/virtual-core@3.19.7':
+    resolution: {integrity: sha512-gxy5SvH0mFRJ0YujtrflB/1HAu9Wn1KGvL0bjZfQkYVVMsIpQiwcf1mR06/ViN4NjllUb4HNCjqE9FGwgTvMCQ==}
 
   '@tanstack/vue-virtual@3.10.8':
     resolution: {integrity: sha512-DB5QA8c/LfqOqIUCpSs3RdOTVroRRdqeHMqBkYrcashSZtOzIv8xbiqHgg7RYxDfkH5F3Y+e0MkuuyGNDVB0BQ==}
@@ -8820,7 +8832,15 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
+  '@tanstack/react-virtual@3.14.22(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+    dependencies:
+      '@tanstack/virtual-core': 3.19.7
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+
   '@tanstack/virtual-core@3.10.8': {}
+
+  '@tanstack/virtual-core@3.19.7': {}
 
   '@tanstack/vue-virtual@3.10.8(vue@3.5.33(typescript@5.9.3))':
     dependencies:

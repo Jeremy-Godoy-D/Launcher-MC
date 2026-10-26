@@ -198,7 +198,9 @@ test('launch checks profile and physical directory, confirms once, restores proc
     /"gameRunning":false/,
   )
   await page.keyboard.press('Escape')
-  await page.getByTestId('nav-home').press('Enter')
+  await expect(dialog).toHaveCount(0)
+  await page.getByTestId('nav-home').click()
+  await expect(page.locator('.featured h2')).toHaveText('Caves video QA')
   await page.getByTestId('nav-home').focus()
   await page.mouse.move(70, 20)
   await win.evaluate((win) => win.focus())

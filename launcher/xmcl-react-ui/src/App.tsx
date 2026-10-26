@@ -52,6 +52,7 @@ import { useLaunch } from './features/launch/context'
 import { LaunchDialog } from './features/launch/LaunchDialog'
 import { InstanceOperations } from './features/library/InstanceOperations'
 import { GroupsDialog } from './features/library/GroupsDialog'
+import { LibraryWindow } from './features/library/LibraryWindow'
 
 declare global {
   interface Window {
@@ -330,6 +331,7 @@ export function App() {
     instance.name.toLowerCase().includes(query.toLowerCase()) &&
     (!loader || instance.loader === loader) &&
     (!group || (group === 'ungrouped' ? !savedLibrary?.data?.groups.some(entry => typeof entry !== 'string' && entry.instances.includes(instance.id)) : savedLibrary?.data?.groups.some(entry => typeof entry !== 'string' && `id:${entry.id}` === group && entry.instances.includes(instance.id))))
+  const matchingInstances = (savedLibrary?.ordered || []).map(presentInstance).filter(matchesInstance)
   const matchingProjects = projects.filter((project) =>
     `${project.title} ${project.description}`.toLowerCase().includes(query.toLowerCase()),
   )
@@ -691,8 +693,9 @@ export function App() {
                   {(savedLibrary?.data?.groups || []).flatMap(group => typeof group === 'string' ? [] : [<option key={group.id} value={`id:${group.id}`}>{group.name}</option>])}
                 </select>
               </div>
-              <div className={`instance-grid ${view === 'list' ? 'list-view' : ''}`}>
-                {(savedLibrary?.ordered || []).map(presentInstance).filter(matchesInstance).map((instance) => (
+              <LibraryWindow ids={matchingInstances.map(instance => instance.id)} view={view}>{index => {
+                const instance = matchingInstances[index]
+                return (
                   <InstanceCard
                     key={instance.id}
                     instance={instance}
@@ -704,8 +707,8 @@ export function App() {
                     onManage={manage}
                     onOptions={openOptions}
                   />
-                ))}
-              </div>
+                )
+              }}</LibraryWindow>
               {!!instances.length && !instances.some(matchesInstance) && (
                 <div className="empty">
                   <Search size={28} />

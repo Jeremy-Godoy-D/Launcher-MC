@@ -11,6 +11,9 @@ react:
   ambientVideo: Vídeo ambiental
   carousel: Presentación automática
   instances:
+    count: "{count} instancias"
+    listLabel: Instancias de la biblioteca
+    keyboard: En bibliotecas grandes usa las flechas para recorrer instancias, Inicio y Fin para ir a los extremos, y Tab para recorrer sus acciones.
     saved: Guardada en este equipo
     connected: Biblioteca del equipo · migración en curso
     subtitle: Tus instancias de Minecraft Java, en un solo lugar.
