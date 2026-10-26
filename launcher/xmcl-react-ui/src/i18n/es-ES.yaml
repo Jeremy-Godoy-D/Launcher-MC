@@ -304,7 +304,7 @@ react:
     sort: Ordenar instancias
     sortmanual: Orden manual
     sortname: Nombre
-    sortrecent: Más recientes
+    sortrecent: Última partida
     filterGroup: Filtrar por grupo
     allGroups: Todos los grupos
   export:

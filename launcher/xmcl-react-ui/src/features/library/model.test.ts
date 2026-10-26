@@ -1,10 +1,32 @@
 import { describe, expect, it } from 'vitest'
 import { InstanceSchema } from '../../../../packages/instance/instance'
-import { instanceIcon, javaInstances, loaderName, matchesInstanceQuery, selectedInstance } from './model'
+import { compareRecentInstances, homeOrder, instanceIcon, javaInstances, loaderName, matchesInstanceQuery, selectedInstance } from './model'
 
 const a = { ...InstanceSchema.parse({ name: 'Same', runtime: { minecraft: '1.21.1' } }), path: 'C:\\instances\\a', creationDate: 0, lastPlayedDate: 0, lastAccessDate: 1, playtime: 0 }
 const b = { ...a, path: 'C:\\instances\\b', lastAccessDate: 9 }
 describe('saved Java library', () => {
+  it('prioritizes actual last-played dates over a newer access date without replacing a saved selection', () => {
+    const played = { ...a, lastPlayedDate: 100 }, accessed = { ...b, lastAccessDate: 9999 }
+    const items = [accessed, played], before = structuredClone(items)
+    expect(selectedInstance(items, '')).toBe(played)
+    expect(selectedInstance(items, accessed.path)).toBe(accessed)
+    expect([...items].sort(compareRecentInstances)).toEqual([played, accessed])
+    expect(homeOrder(items, accessed.path)).toEqual([accessed, played])
+    expect(homeOrder(items, 'missing')).toEqual([played, accessed])
+    expect(items).toEqual(before)
+  })
+  it('keeps native Home order for equal unknown play dates and uses historic access/creation only for recency ties', () => {
+    expect(homeOrder([a, b], '')).toEqual([a, b])
+    expect([a, b].sort(compareRecentInstances)).toEqual([b, a])
+    expect(compareRecentInstances({ ...a, lastAccessDate: 0, creationDate: 1 }, { ...b, lastAccessDate: 0, creationDate: 2 })).toBeGreaterThan(0)
+    expect(homeOrder([a, b], b.path)).toEqual([b, a])
+  })
+  it('ignores negative/non-finite legacy activity and supports empty history', () => {
+    for (const lastPlayedDate of [Number.NaN, Number.POSITIVE_INFINITY, -100]) {
+      expect(selectedInstance([{ ...a, lastPlayedDate, lastAccessDate: -1, creationDate: Number.NaN }, b], '')).toBe(b)
+    }
+    expect(homeOrder([], '')).toEqual([])
+  })
   it('matches trimmed names, Minecraft and every loader/version without mutating the instance', () => {
     for (const query of [' same ', ' 1.21.1 ', 'VANILLA', '   ']) expect(matchesInstanceQuery(a, query)).toBe(true)
     expect(matchesInstanceQuery(a, 'Fabric')).toBe(false)

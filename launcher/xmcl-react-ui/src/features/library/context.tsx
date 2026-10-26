@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, ty
 import { InstanceServiceKey, InstanceState } from '@xmcl/runtime-api/src/services/InstanceService'
 import { useService, useSharedStateStore, type StateDescriptor } from '../../runtime'
 import { StoredSelection } from '../accounts/selection'
-import { javaInstances, selectedInstance } from './model'
+import { compareRecentInstances, homeOrder, javaInstances, selectedInstance } from './model'
 import { manualOrder, assignGroup, moveInGroups } from './operations'
 import { createOperationId } from '@xmcl/runtime-api/src/util/launch'
 
@@ -23,11 +23,12 @@ function useLibraryState() {
   const path = useSyncExternalStore(selection.subscribe, selection.getSnapshot, selection.getSnapshot)
   const instances = useMemo(() => javaInstances(snapshot.data?.instances ?? []), [snapshot.data])
   const current = selectedInstance(instances, path)
+  const home = useMemo(() => homeOrder(instances, current?.path || ''), [instances, current?.path])
   const sortValue = useSyncExternalStore(sortSelection.subscribe, sortSelection.getSnapshot, sortSelection.getSnapshot)
   const sort = ['name', 'recent'].includes(sortValue) ? sortValue : 'manual'
   const ordered = manualOrder(instances, snapshot.data?.groups || [])
   if (sort === 'name') ordered.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
-  if (sort === 'recent') ordered.sort((a, b) => b.lastAccessDate - a.lastAccessDate)
+  if (sort === 'recent') ordered.sort(compareRecentInstances)
   async function arrange(target: string, action: (groups: InstanceState['groups']) => InstanceState['groups']) {
     const latest = store.getSnapshot()
     if (latest.status !== 'ready' || !latest.data?.instances.some(instance => instance.path === target && instance.edition !== 'bedrock')) throw new Error('missing')
@@ -43,7 +44,7 @@ function useLibraryState() {
     selection.set(nextPath)
     return true
   }
-  return { ...snapshot, media, instances, ordered, current, path, select, retry: store.revalidate, storageError: selection.failed() || sortSelection.failed(), sort,
+  return { ...snapshot, media, instances, ordered, home, current, path, select, retry: store.revalidate, storageError: selection.failed() || sortSelection.failed(), sort,
     setSort: (value: string) => { if (['manual', 'name', 'recent'].includes(value)) sortSelection.set(value) },
     assignGroup: (path: string, group: string, name: string) => arrange(path, groups => assignGroup(groups, path, group, name, createOperationId())),
     move: (path: string, direction: -1 | 1) => arrange(path, groups => moveInGroups(groups, instances, path, direction)),

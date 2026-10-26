@@ -9,7 +9,19 @@ export function javaInstances(instances: readonly SavedInstance[]) {
 
 export function selectedInstance(instances: readonly SavedInstance[], path: string) {
   if (path) return instances.find(instance => instance.path === path)
-  return [...instances].sort((a, b) => b.lastAccessDate - a.lastAccessDate)[0]
+  return [...instances].sort(compareRecentInstances)[0]
+}
+
+const timestamp = (value: number) => Number.isFinite(value) && value > 0 ? value : 0
+
+export function compareRecentInstances(a: SavedInstance, b: SavedInstance) {
+  return timestamp(b.lastPlayedDate) - timestamp(a.lastPlayedDate) ||
+    timestamp(b.lastAccessDate) - timestamp(a.lastAccessDate) || timestamp(b.creationDate) - timestamp(a.creationDate)
+}
+
+export function homeOrder(instances: readonly SavedInstance[], selectedPath: string) {
+  // Equal/unknown play dates keep native order; do not invent activity for unplayed instances.
+  return [...instances].sort((a, b) => Number(b.path === selectedPath) - Number(a.path === selectedPath) || timestamp(b.lastPlayedDate) - timestamp(a.lastPlayedDate))
 }
 
 export function loaderName({ runtime }: SavedInstance) {

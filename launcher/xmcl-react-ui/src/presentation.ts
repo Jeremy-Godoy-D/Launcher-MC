@@ -29,3 +29,16 @@ export function allowAmbientMotion(state: MotionState) {
 export function nextFeatured(current: number, length: number, direction = 1) {
   return length === 0 ? 0 : (((current + direction) % length) + length) % length
 }
+
+export function resolveFeaturedPath(path: string | null, previous: readonly string[], current: readonly string[]): string | undefined {
+  const valid = new Set(current)
+  if (path && valid.has(path)) return path
+  const index = path ? previous.indexOf(path) : -1
+  if (index >= 0) {
+    for (let offset = 1; offset <= previous.length; offset++) {
+      const candidate = previous[(index + offset) % previous.length]
+      if (valid.has(candidate)) return candidate
+    }
+  }
+  return current[0]
+}

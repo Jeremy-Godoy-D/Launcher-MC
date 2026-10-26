@@ -41,7 +41,7 @@ import caves from './assets/ambient/vanilla-caves.webp'
 import cavesVideo from './assets/ambient/vanilla-caves.mp4'
 import ocean from './assets/ambient/vanilla-ocean.webp'
 import credits from './assets/ambient/credits.json'
-import { allowAmbientMotion, isPlaybackInterruption, nextFeatured, ROTATION_MS } from './presentation'
+import { allowAmbientMotion, isPlaybackInterruption, nextFeatured, resolveFeaturedPath, ROTATION_MS } from './presentation'
 import { usePreferences } from './preferences-context'
 import { useI18n } from './i18n'
 import { Accounts } from './features/accounts/Accounts'
@@ -226,7 +226,7 @@ export function App() {
   const launch = useLaunch()
   const [cover, setCover] = useState<{ path: string; upstream: string; media?: InstancePresentation }>()
   const present = (item: SavedInstance) => presentInstance(item, cover?.path === item.path && cover.upstream === JSON.stringify(item.upstream) ? cover.media : undefined)
-  const instances = (savedLibrary?.status === 'ready' ? savedLibrary.instances : []).map(present)
+  const instances = (savedLibrary?.status === 'ready' ? savedLibrary.home : []).map(present)
   const location = useLocation()
   const navigate = useNavigate()
   const { preferences, set: setPreferences, error: preferencesError } = usePreferences()
@@ -234,6 +234,7 @@ export function App() {
   const theme = preferences.appearance === 'system' ? systemDark ? 'dark' : 'light' : preferences.appearance
   const setTheme = (appearance: 'dark' | 'light' | 'system') => setPreferences({ appearance })
   const [featuredPath, setFeaturedPath] = useState<string | null>(null)
+  const previousOrder = useRef<string[]>([])
   const [query, setQuery] = useState('')
   const [loader, setLoader] = useState('')
   const [group, setGroup] = useState('')
@@ -263,11 +264,15 @@ export function App() {
   }, [location.search, savedLibrary?.status, navigate, location.pathname])
   const reducedMotion = useMediaSetting('(prefers-reduced-motion: reduce)')
   const current = instances.find(instance => instance.id === savedLibrary?.current?.path)
-  const instance = instances.find(instance => instance.id === featuredPath) ?? current ?? instances[0]
+  const ids = instances.map(instance => instance.id)
+  const resolvedPath = resolveFeaturedPath(featuredPath, previousOrder.current, ids)
+  const instance = instances.find(instance => instance.id === resolvedPath)
   const featured = instances.findIndex(item => item.id === instance?.id)
   useEffect(() => {
-    if (featuredPath === null && instance) setFeaturedPath(instance.id)
-  }, [featuredPath, instance?.id])
+    if (savedLibrary?.status !== 'ready') return
+    previousOrder.current = ids
+    if (featuredPath !== (resolvedPath ?? null)) setFeaturedPath(resolvedPath ?? null)
+  }, [featuredPath, resolvedPath, savedLibrary?.status, savedLibrary?.home])
   const home = location.pathname === '/'
   const mediaPath = (home ? instance : current)?.id
   const mediaUpstream = JSON.stringify(savedLibrary?.instances.find(item => item.path === mediaPath)?.upstream)
@@ -330,7 +335,7 @@ export function App() {
       ROTATION_MS,
     )
     return () => clearInterval(interval)
-  }, [home, canMove, preferences.carouselEnabled, featured, savedLibrary?.data])
+  }, [home, canMove, preferences.carouselEnabled, featured, savedLibrary?.home])
   const preview = (
     title: string,
     message = t('react.instances.featurePending'),

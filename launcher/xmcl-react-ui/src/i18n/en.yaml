@@ -304,7 +304,7 @@ react:
     sort: Sort instances
     sortmanual: Manual order
     sortname: Name
-    sortrecent: Most recent
+    sortrecent: Last played
     filterGroup: Filter by group
     allGroups: All groups
   export:
