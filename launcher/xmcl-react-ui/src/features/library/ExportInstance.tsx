@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ModpackServiceKey, type InstanceExportPreview, type LocalExportFormat } from '@xmcl/runtime-api/src/services/ModpackService'
 import { BaseServiceKey } from '@xmcl/runtime-api/src/services/BaseService'
 import { TaskState } from '@xmcl/runtime-api/src/task'
 import { useService, useTasks } from '../../runtime'
 import { useI18n } from '../../i18n'
+import { isOperationCancelled } from './operations'
 
 export function ExportInstance({ path, busy, onBusy, onBack }: { path: string; busy: boolean; onBusy: (value: boolean) => void; onBack: () => void }) {
   const service = useService(ModpackServiceKey), base = useService(BaseServiceKey), tasks = useTasks()
@@ -19,6 +20,8 @@ export function ExportInstance({ path, busy, onBusy, onBack }: { path: string; b
   const [error, setError] = useState('')
   const [query, setQuery] = useState('')
   const running = useRef(false)
+  const errorElement = useRef<HTMLParagraphElement>(null)
+  useLayoutEffect(() => { if (error) errorElement.current?.scrollIntoView({ block: 'nearest' }) }, [error])
   const task = tasks.tasks.find(task => task.type === 'exportModpack' && task.key === `reviewed-export-${path}` && task.state === TaskState.Running)
   useEffect(() => {
     let current = true
@@ -36,7 +39,7 @@ export function ExportInstance({ path, busy, onBusy, onBack }: { path: string; b
     try { setResult(await service.exportReviewedInstance({ instancePath: path, fingerprint: preview.fingerprint, files: [...selected], format, version, destinationDirectory: directory })) }
     catch (failure) {
       const name = failure && typeof failure === 'object' && 'name' in failure && typeof failure.name === 'string' ? failure.name : ''
-      setError(['ExportSourceChanged', 'ExportDestinationExists', 'ExportNeedsOffline', 'ExportMissingRuntime', 'ExportGameRunning', 'ExportInvalid', 'ExportInstanceUnavailable'].includes(name) ? name : 'failed')
+      setError(isOperationCancelled(failure) ? 'cancelled' : ['ExportSourceChanged', 'ExportDestinationExists', 'ExportNeedsOffline', 'ExportMissingRuntime', 'ExportGameRunning', 'ExportInvalid', 'ExportInstanceUnavailable'].includes(name) ? name : 'failed')
     } finally { running.current = false; onBusy(false) }
   }
   const visible = (preview?.files || []).filter(file => file.path.toLowerCase().includes(query.trim().toLowerCase()))
@@ -76,7 +79,7 @@ export function ExportInstance({ path, busy, onBusy, onBack }: { path: string; b
         {!busy && <button type="button" className="button secondary" disabled={loading} onClick={() => setAttempt(value => value + 1)}>{t('react.export.reviewAgain')}</button>}
       </>}
       {result && <><p role="status">{t('react.export.saved')}</p><p className="operation-path" data-testid="export-result">{result}</p><button type="button" className="button secondary" onClick={async () => { try { await base.showItemInDirectory(result) } catch { setError('failed') } }}>{t('react.export.reveal')}</button></>}
-      {error && <p role="alert" className="form-error">{t(`react.export.${error}`)}</p>}
+      {error && <p ref={errorElement} role="alert" className="form-error">{t(`react.export.${error}`)}</p>}
       {busy && <p role="status">{t('react.export.working')}</p>}
     </div>
     <div className="dialog-actions">

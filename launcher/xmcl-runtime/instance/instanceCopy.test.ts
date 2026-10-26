@@ -2,8 +2,14 @@ import { createHash } from 'node:crypto'
 import { mkdir, mkdtemp, readFile, readdir, rm, stat, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join, parse } from 'node:path'
-import { afterEach, beforeEach, expect, test } from 'vitest'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { assertInstanceCopyComplete, COPY_JOB, prepareInstanceCopy, readInstanceCopy, runInstanceCopy, saveInstanceCopy } from './instanceCopy'
+import { readImportFile } from '../util/importFile'
+
+vi.mock('../util/importFile', async original => {
+  const files = await original<typeof import('../util/importFile')>()
+  return { ...files, readImportFile: vi.fn(files.readImportFile) }
+})
 
 let root: string, source: string, target: string
 const fresh = () => new AbortController().signal
@@ -31,6 +37,21 @@ test('copies independent files and removes the pending marker only after the sna
   expect(await readInstanceCopy(target)).toBeUndefined()
   await file(join(target, 'saves/World/level.dat'), 'copy-only')
   expect(await readFile(join(source, 'saves/World/level.dat'), 'utf8')).toBe('world-snapshot')
+})
+
+test('cancelling during the final job read keeps the completed files and resumable marker', async () => {
+  const job = await prepareInstanceCopy(source, fresh()); await saveInstanceCopy(target, job)
+  const controller = new AbortController(), native = await vi.importActual<typeof import('../util/importFile')>('../util/importFile')
+  vi.mocked(readImportFile).mockImplementationOnce(async (...args) => {
+    const bytes = await native.readImportFile(...args)
+    controller.abort()
+    return bytes
+  })
+  await expect(runInstanceCopy(job, target, controller.signal)).rejects.toMatchObject({ name: 'AbortError' })
+  expect(await readInstanceCopy(target)).toEqual(job)
+  expect(await readFile(join(target, 'saves/World/level.dat'), 'utf8')).toBe('world-snapshot')
+  await runInstanceCopy(job, target, fresh())
+  expect(await readInstanceCopy(target)).toBeUndefined()
 })
 test('cancelled copies retain a durable job, publish only complete files and resume in the same folder', async () => {
   for (let index = 0; index < 8; index++) await file(join(source, `mods/${index}.jar`), Buffer.alloc(1024 * 1024, index))
@@ -61,6 +82,22 @@ test('source changes fail before publishing changed bytes and allow retry after 
   expect(await readInstanceCopy(target)).toEqual(job)
   await file(join(source, 'config/qa.txt'), 'config-snapshot')
   await runInstanceCopy(job, target, fresh())
+})
+
+test('trusted shared worlds become independent files and a retargeted source cannot escape on resume', async () => {
+  const shared = join(root, 'data'), outside = join(root, 'outside')
+  await mkdir(shared); await mkdir(outside)
+  await rm(join(source, 'saves'), { recursive: true })
+  await file(join(shared, 'saves/World/level.dat'), 'shared-world')
+  await symlink(join(shared, 'saves'), join(source, 'saves'), 'junction')
+  const job = await prepareInstanceCopy(source, fresh(), shared); await saveInstanceCopy(target, job)
+  await rm(join(source, 'saves')); await symlink(outside, join(source, 'saves'), 'junction')
+  await expect(runInstanceCopy(job, target, fresh(), undefined, shared)).rejects.toMatchObject({ name: 'InstanceCopySourceChanged' })
+  expect(await readInstanceCopy(target)).toEqual(job)
+  await rm(join(source, 'saves')); await symlink(join(shared, 'saves'), join(source, 'saves'), 'junction')
+  await runInstanceCopy(job, target, fresh(), undefined, shared)
+  await file(join(target, 'saves/World/level.dat'), 'copy-only')
+  expect(await readFile(join(shared, 'saves/World/level.dat'), 'utf8')).toBe('shared-world')
 })
 test('foreign destination bytes survive retry conflicts and job data remains available', async () => {
   const job = await prepareInstanceCopy(source, fresh()); await saveInstanceCopy(target, job)

@@ -8,6 +8,7 @@ import { writeFile as writeAtomically } from 'atomically'
 import { duplicateInstance, isInstanceInstallPath, type DuplicateInstanceTrackerEvents } from '@xmcl/instance'
 import { previewFolderFiles } from '../instanceIO/utils/previewFolderFiles'
 import { importPathParts, readImportFile } from '../util/importFile'
+import { instanceFileSource } from '../instanceIO/utils/instanceFileSource'
 
 export const COPY_JOB = '.copy-job.json'
 export interface InstanceCopyJob {
@@ -23,9 +24,9 @@ export async function assertInstanceCopyComplete(path: string) {
   throw failure('InstanceCopyIncomplete')
 }
 
-export async function prepareInstanceCopy(source: string, signal: AbortSignal): Promise<InstanceCopyJob> {
+export async function prepareInstanceCopy(source: string, signal: AbortSignal, sharedRoot?: string): Promise<InstanceCopyJob> {
   await assertInstanceCopyComplete(source)
-  const files = await previewFolderFiles(source)
+  const files = await previewFolderFiles(source, undefined, { signal, sharedRoot })
   signal.throwIfAborted()
   const job: InstanceCopyJob = { version: 1, id: randomUUID(), source, files: files.map(file => ({ path: file.path, size: file.size!, sha256: file.hashes.sha256 })) }
   if (Buffer.byteLength(JSON.stringify(job)) > 32 * 1024 * 1024) throw failure('InstanceCopyTooLarge')
@@ -71,7 +72,7 @@ async function matches(file: string, expected: InstanceCopyJob['files'][number],
   return hash.digest('hex') === expected.sha256
 }
 
-export async function runInstanceCopy(job: InstanceCopyJob, destination: string, signal: AbortSignal, tracker?: <E extends { phase: keyof DuplicateInstanceTrackerEvents; payload: DuplicateInstanceTrackerEvents[keyof DuplicateInstanceTrackerEvents] }>(event: E) => void) {
+export async function runInstanceCopy(job: InstanceCopyJob, destination: string, signal: AbortSignal, tracker?: <E extends { phase: keyof DuplicateInstanceTrackerEvents; payload: DuplicateInstanceTrackerEvents[keyof DuplicateInstanceTrackerEvents] }>(event: E) => void, sharedRoot?: string) {
   destination = resolve(destination)
   const root = await realpath(destination), source = await realpath(job.source)
   if (root === source) throw failure('InstanceCopyUnsafePath')
@@ -91,7 +92,7 @@ export async function runInstanceCopy(job: InstanceCopyJob, destination: string,
           if (await matches(target, file, combined)) return
           throw failure('InstanceCopyConflict')
         } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error }
-        const input = await checkedFile(job.source, path).catch(error => { throw failure('InstanceCopySourceChanged', error) })
+        const input = await instanceFileSource(job.source, path, sharedRoot).then(source => checkedFile(source.root, source.path)).catch(error => { throw failure('InstanceCopySourceChanged', error) })
         temporary = await mkdtemp(join(destination, `.copy-temp-${job.id}-`))
         if (dirname(temporary) !== destination || !temporary.startsWith(join(destination, `.copy-temp-${job.id}-`))) throw failure('InstanceCopyUnsafePath')
         const staged = join(temporary, 'file'), hash = createHash('sha256')
@@ -120,6 +121,7 @@ export async function runInstanceCopy(job: InstanceCopyJob, destination: string,
   signal.throwIfAborted()
   for (const file of job.files) if (!await matches(await checkedFile(destination, file.path), file, signal)) throw failure('InstanceCopyConflict')
   if (JSON.stringify(await readInstanceCopy(destination)) !== JSON.stringify(job)) throw failure('InstanceCopyInvalid')
+  signal.throwIfAborted()
   await unlink(join(destination, COPY_JOB))
 }
 

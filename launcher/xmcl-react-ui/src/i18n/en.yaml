@@ -273,6 +273,7 @@ react:
     filterGroup: Filter by group
     allGroups: All groups
   export:
+    cancelled: Export cancelled. Source files are preserved; you can try again.
     action: Export files
     format: Archive format
     offline: Local copy with game (.zip)
@@ -294,14 +295,14 @@ react:
     save: Save copy
     cancel: Cancel export
     working: Preparing and compressing the copy…
-    reviewFailed: Could not review the files. Check folder access; linked directories cannot be exported. Choose “Review files again” to retry.
+    reviewFailed: Could not review the files. Check folder access; only the launcher's own shared folders are supported. Choose “Review files again” to retry.
     failed: The copy was not saved. It may have been cancelled, or access, disk space or game files may be missing. Check the destination and review again before retrying.
     ExportSourceChanged: Files or details changed since review. Choose “Review files again” before saving.
     ExportDestinationExists: A copy with this name already exists. Change its version or destination folder.
     ExportNeedsOffline: This version needs the local copy format to preserve its custom client.
     ExportMissingRuntime: The game version is not installed. Install or repair its files before making this copy.
     ExportGameRunning: Close this instance’s game before exporting.
-    ExportInvalid: Check the version and destination. Choose a folder outside the instance.
+    ExportInvalid: Check the version and destination. Choose a folder outside the instance and its shared folders.
     ExportInstanceUnavailable: This instance is no longer available. Close the dialog and check the library.
   groups:
     title: Manage groups
@@ -315,6 +316,7 @@ react:
     unavailable: The library is unavailable. Close this dialog and retry once it has loaded.
     failed: Could not save the change. Check access to launcher data and review the groups before retrying.
   copy:
+    details: Copy files and status
     pending: Copy pending
     action: 'Review copy of {name}'
     review: Review copy
@@ -327,11 +329,11 @@ react:
     progressLabel: Copy progress
     cancel: Cancel copy
     cancelling: Finishing cancellation…
-    cancelled: Copy cancelled. Complete files already copied are preserved; you can resume the same instance.
+    cancelled: Copy cancelled. Any complete files already copied are preserved. Pending copies can resume in the same destination.
     complete: Copy complete.
     view: View instance
     cancelFailed: Could not cancel the task. Check its progress before retrying.
-    failed: Copy did not finish. Check access, free space and source files. Linked directories are not supported yet. Resume a pending copy to preserve its destination.
+    failed: Copy did not finish. Check access, free space and source files. Only the launcher's own shared folders are supported. Resume a pending copy to preserve its destination.
     InstanceCopyInvalid: The copy record cannot be read. Preserve the folder and check diagnostics; retrying will not launch the game or create another copy.
     InstanceCopySourceChanged: A source file is missing or changed since review. Restore the original files before resuming; the partial copy is preserved.
     InstanceCopySourceMissing: The source instance is no longer registered. Restore it at its original folder before resuming.

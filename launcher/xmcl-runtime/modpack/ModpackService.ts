@@ -570,7 +570,7 @@ export class ModpackService extends AbstractService implements IModpackService {
   async previewInstanceExport(instancePath: string): Promise<InstanceExportPreview> {
     const instance = this.instanceService.state.instances.find(instance => instance.path === instancePath && instance.edition === 'java')
     if (!instance) throw Object.assign(new Error('Instance unavailable'), { name: 'ExportInstanceUnavailable' })
-    return previewInstanceExport(instance)
+    return previewInstanceExport(instance, this.getPath())
   }
 
   async exportReviewedInstance(options: ReviewedInstanceExport): Promise<string> {

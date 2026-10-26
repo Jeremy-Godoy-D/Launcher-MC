@@ -56,6 +56,35 @@ test('preview excludes known credentials and launcher data, defaults content on 
   instance.lastAccessDate++
   expect((await previewInstanceExport(instance)).fingerprint).toBe(preview.fingerprint)
 })
+
+test('shared folders export reviewed bytes without following arbitrary links or including shared credentials', async () => {
+  await rm(join(instance.path, 'saves'), { recursive: true })
+  await file(join(root, 'saves/World/level.dat'), 'shared-world')
+  await file(join(root, 'resourcepacks/public.zip'), 'shared-pack')
+  await file(join(root, 'resourcepacks/token.json'), 'private-token')
+  await symlink(join(root, 'saves'), join(instance.path, 'saves'), 'junction')
+  await symlink(join(root, 'resourcepacks'), join(instance.path, 'resourcepacks'), 'junction')
+  await expect(previewInstanceExport(instance)).rejects.toThrow('link')
+  const preview = await previewInstanceExport(instance, root)
+  expect(preview.files.some(file => file.path.includes('token'))).toBe(false)
+  const request: ReviewedInstanceExport = { instancePath: instance.path, fingerprint: preview.fingerprint, files: preview.files.map(file => file.path), format: 'modrinth', version: 'shared', destinationDirectory: destination }
+  const result = await entries(await exportReviewedInstance(instance, root, request, new AbortController().signal))
+  expect(result['overrides/saves/World/level.dat']).toBe('shared-world')
+  expect(result['overrides/resourcepacks/public.zip']).toBe('shared-pack')
+  expect(Object.keys(result).some(path => path.includes('token'))).toBe(false)
+  expect(await readFile(join(root, 'saves/World/level.dat'), 'utf8')).toBe('shared-world')
+  await rm(join(instance.path, 'saves')); await symlink(destination, join(instance.path, 'saves'), 'junction')
+  await expect(previewInstanceExport(instance, root)).rejects.toThrow('link')
+})
+
+test.each(['saves', 'resourcepacks', 'shaderpacks'])('does not stage or publish inside shared source %s even when it is empty', async name => {
+  await rm(join(instance.path, name), { recursive: true, force: true })
+  await mkdir(join(root, name)); await symlink(join(root, name), join(instance.path, name), 'junction')
+  const preview = await previewInstanceExport(instance, root)
+  const request: ReviewedInstanceExport = { instancePath: instance.path, fingerprint: preview.fingerprint, files: preview.files.map(file => file.path), format: 'modrinth', version: 'shared', destinationDirectory: join(root, name) }
+  await expect(exportReviewedInstance(instance, root, request, new AbortController().signal)).rejects.toMatchObject({ name: 'ExportInvalid' })
+  expect(await readdir(join(root, name))).toEqual([])
+})
 test.each(['modrinth', 'curseforge'] as const)('writes a parseable %s archive with only reviewed selected bytes and no launcher settings', async format => {
   instance.vmOptions = ['-Dsecret=personal']; instance.java = 'C:/private/java.exe'
   const output = await exportReviewedInstance(instance, root, await options(format), new AbortController().signal)

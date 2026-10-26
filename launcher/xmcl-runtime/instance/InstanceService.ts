@@ -511,7 +511,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     const operation = this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
       if (!this.state.instances.some(instance => instance.path === path)) throw new AnyError('InstanceNotFoundError')
       await this.#copyIdle(job.source, path)
-      await runInstanceCopy(job, path, task.controller.signal, getTracker<DuplicateInstanceTrackerEvents>(task))
+      await runInstanceCopy(job, path, task.controller.signal, getTracker<DuplicateInstanceTrackerEvents>(task), this.getPath())
       this.state.instanceCopyState({ path })
       return path
     })
@@ -541,7 +541,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
       const newPath = this.getCandidatePath(instance.name || basename(path))
       const task = this.tasks.create<DuplicateInstanceTask>({ type: 'duplicateInstance', key: `duplicate-instance-${newPath}`, from: path, to: newPath, requestId })
       try {
-        const job = await prepareInstanceCopy(path, task.controller.signal)
+        const job = await prepareInstanceCopy(path, task.controller.signal, this.getPath())
         await ensureDir(this.getPath(INSTANCES_FOLDER))
         await mkdir(newPath)
         await this.#managedCopyPath(newPath)

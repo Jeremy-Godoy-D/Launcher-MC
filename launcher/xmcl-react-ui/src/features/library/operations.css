@@ -4,6 +4,7 @@
   .operation-actions .button { justify-content: flex-start; }
   .operation-order { display: flex; flex-wrap: wrap; gap: 8px; }
   .operation-path { overflow-wrap: anywhere; color: var(--muted); font-size: 13px; margin: 0 0 8px; }
+  .operation-form .form-error { scroll-margin-block: 8px; }
   .operation-dialog h2 { overflow-wrap: anywhere; }
   .operation-dialog .dialog-actions { flex-shrink: 0; flex-wrap: wrap; }
   .danger-text { color: var(--ink); }

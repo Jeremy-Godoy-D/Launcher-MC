@@ -53,3 +53,10 @@ export function metadataEdit(original: SavedInstance, latest: SavedInstance | un
   if (instances.some(instance => instance.path !== original.path && instance.name.toLocaleLowerCase() === name.toLocaleLowerCase())) throw new Error('duplicateName')
   return { instancePath: original.path, name, description: draft.description, author: draft.author, expectedMetadata: metadataDraft(original) }
 }
+
+export function isOperationCancelled(error: unknown) {
+  if (!error || typeof error !== 'object') return false
+  if ('name' in error && error.name === 'AbortError' || 'message' in error && error.message === 'aborted') return true
+  const exception = 'exception' in error ? error.exception : undefined
+  return !!exception && typeof exception === 'object' && 'type' in exception && exception.type === 'cancelled'
+}

@@ -1,15 +1,20 @@
 import { InstanceSchema } from '@xmcl/instance'
 import { InstanceState } from '@xmcl/runtime-api'
 import { Mutex } from 'async-mutex'
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { lstat, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { COPY_JOB } from './instanceCopy'
+import { createReadStream } from 'node:fs'
 
 vi.mock('~/app', () => ({ Inject: () => () => {}, LauncherAppKey: Symbol('app'), PathResolver: class {}, kGameDataPath: Symbol('path') }))
 vi.mock('~/infra', () => ({ ImageStorage: class {}, Tasks: class {}, kTasks: Symbol('tasks') }))
 vi.mock('../launch/LaunchService', () => ({ LaunchService: class {} }))
+vi.mock('node:fs', async original => {
+  const fs = await original<typeof import('node:fs')>()
+  return { ...fs, createReadStream: vi.fn(fs.createReadStream) }
+})
 const { InstanceService } = await import('./InstanceService')
 let root: string, source: string, state: InstanceState, service: InstanceType<typeof InstanceService>, processes: any[], tasks: any[], cancelAtFirst: boolean
 async function file(path: string, data: string | Buffer) { await mkdir(dirname(path), { recursive: true }); await writeFile(path, data) }
@@ -42,6 +47,25 @@ test('native duplication preserves metadata and independent worlds with no pendi
   expect(state.all[copy].java).toBe('C:/custom-java.exe'); expect(state.all[copy].vmOptions).toEqual(['-Dkeep=1'])
   await file(join(copy, 'saves/World/level.dat'), 'copy-only')
   expect(await readFile(join(source, 'saves/World/level.dat'), 'utf8')).toBe('world-source')
+})
+
+test('native cancellation during source review closes its stream without registering or creating a partial instance', async () => {
+  const native = await vi.importActual<typeof import('node:fs')>('node:fs')
+  await file(join(source, 'a-large.bin'), Buffer.alloc(8 * 1024 * 1024, 0x41))
+  let stream: ReturnType<typeof createReadStream> | undefined
+  vi.mocked(createReadStream).mockImplementationOnce((...args) => {
+    stream = native.createReadStream(...args)
+    stream.once('data', () => tasks.at(-1).controller.abort())
+    return stream
+  })
+  const error = await service.duplicateInstance(source, 'cancel-review').then(() => undefined, error => error)
+  expect(error).toMatchObject({ name: 'AbortError', sourcePath: source })
+  await vi.waitFor(() => expect(stream?.closed).toBe(true))
+  expect(stream?.bytesRead).toBeLessThan(8 * 1024 * 1024)
+  expect(state.instances).toHaveLength(1); expect(state.pendingCopies).toEqual({})
+  await expect(readFile(join(error.destinationPath, 'instance.json'))).rejects.toMatchObject({ code: 'ENOENT' })
+  await expect(lstat(error.destinationPath)).rejects.toMatchObject({ code: 'ENOENT' })
+  expect(await readFile(join(source, 'config/qa.txt'), 'utf8')).toBe('config-source')
 })
 async function interrupted() {
   for (let index = 0; index < 8; index++) await file(join(source, `mods/${index}.jar`), Buffer.alloc(1024 * 1024, index))

@@ -1,6 +1,13 @@
 import { expect, test } from 'vitest'
 import { InstanceSchema } from '../../../../packages/instance/instance'
-import { assignGroup, changeGroup, manualOrder, metadataDraft, metadataEdit, moveInGroups } from './operations'
+import { assignGroup, changeGroup, manualOrder, metadataDraft, metadataEdit, moveInGroups, isOperationCancelled } from './operations'
+
+test.each([new DOMException('Stopped', 'AbortError'), new Error('aborted'), { name: 'CancelledException', exception: { type: 'cancelled' } }, { name: 'minified-name', exception: { type: 'cancelled' } }])('recognizes raw and normalized operation cancellation %j', error => {
+  expect(isOperationCancelled(error)).toBe(true)
+})
+test.each([undefined, null, 'cancelled', { exception: null }, { exception: { type: 'networkException' } }, new Error('The operation was aborted')])('does not mistake other failures for cancellation %j', error => {
+  expect(isOperationCancelled(error)).toBe(false)
+})
 
 const original = { ...InstanceSchema.parse({ name: 'Original', path: 'C:/instances/original', description: 'Before', author: 'QA', runtime: { minecraft: '1.21.1' }, java: 'keep-java', vmOptions: ['keep-argument'] }), path: 'C:/instances/original', creationDate: 1, lastPlayedDate: 0, lastAccessDate: 1, playtime: 0 }
 

@@ -13,6 +13,7 @@ import { writeZipFile, type ZipTrackerEvents } from '../util/zip'
 import type { Tracker } from '@xmcl/installer'
 import { offlineModpackFiles } from './utils/exportOffline'
 import { assertInstanceCopyComplete } from '../instance/instanceCopy'
+import { instanceFileSource, SHARED_INSTANCE_FOLDERS } from '../instanceIO/utils/instanceFileSource'
 
 const credentials = /(^|\/)(\.env(?:\..*)?|launcher_accounts\.json|accounts\.json|user\.json|credentials(?:\..*)?|secrets?(?:\..*)?|tokens?(?:\..*)?)$|\.(pem|key|pfx|p12)$/i
 const defaults = /^(mods|config|defaultconfigs|resourcepacks|shaderpacks|scripts|kubejs|patchouli_books)\//i
@@ -23,10 +24,10 @@ export function exportIdentity(instance: Instance) {
   return { name: instance.name, description: instance.description, author: instance.author, runtime: instance.runtime, version: instance.version }
 }
 
-export async function previewInstanceExport(instance: Instance): Promise<InstanceExportPreview> {
+export async function previewInstanceExport(instance: Instance, sharedRoot?: string, signal?: AbortSignal): Promise<InstanceExportPreview> {
   await assertInstanceCopyComplete(instance.path)
   if (instance.edition === 'bedrock' || !instance.runtime.minecraft) throw failure('ExportInstanceUnavailable')
-  const files = (await previewFolderFiles(instance.path)).filter(file => !credentials.test(file.path)).map(file => {
+  const files = (await previewFolderFiles(instance.path, undefined, { sharedRoot, signal })).filter(file => !credentials.test(file.path)).map(file => {
     importPathParts(file.path)
     return { path: file.path, size: file.size!, sha256: file.hashes.sha256, selected: defaults.test(file.path) }
   }).sort((a, b) => a.path.localeCompare(b.path))
@@ -37,7 +38,7 @@ export async function previewInstanceExport(instance: Instance): Promise<Instanc
 /** Stage reviewed bytes, then publish one complete archive without replacing any destination. */
 export async function exportReviewedInstance(instance: Instance, root: string, options: ReviewedInstanceExport, signal: AbortSignal, tracker?: Tracker<ZipTrackerEvents>, resolved?: ResolvedVersion, verify?: () => Promise<void>) {
   if (!options || !['modrinth', 'curseforge', 'offline'].includes(options.format) || typeof options.version !== 'string' || !options.version.trim() || options.version.length > 80 || typeof options.destinationDirectory !== 'string' || !isAbsolute(options.destinationDirectory) || !Array.isArray(options.files) || options.files.length > 100000 || options.files.some(path => typeof path !== 'string')) throw failure('ExportInvalid')
-  const preview = await previewInstanceExport(instance)
+  const preview = await previewInstanceExport(instance, root, signal)
   if (options.fingerprint !== preview.fingerprint) throw failure('ExportSourceChanged')
   if (options.format !== 'offline' && (!preview.portable || resolved?.clientJar)) throw failure('ExportNeedsOffline')
   const selected = new Set(options.files)
@@ -47,6 +48,13 @@ export async function exportReviewedInstance(instance: Instance, root: string, o
   if (!(await lstat(parent)).isDirectory()) throw failure('ExportInvalid')
   const insideInstance = relative(await realpath(instance.path), parent)
   if (!insideInstance || insideInstance !== '..' && !insideInstance.startsWith('../') && !insideInstance.startsWith('..\\') && !isAbsolute(insideInstance)) throw failure('ExportInvalid')
+  for (const name of SHARED_INSTANCE_FOLDERS) {
+    const info = await lstat(join(instance.path, name)).catch(error => { if (error.code !== 'ENOENT') throw error })
+    if (!info?.isSymbolicLink()) continue
+    const source = await instanceFileSource(instance.path, name, root)
+    const inside = relative(await realpath(join(source.root, source.path)), parent)
+    if (!inside || inside !== '..' && !inside.startsWith('../') && !inside.startsWith('..\\') && !isAbsolute(inside)) throw failure('ExportInvalid')
+  }
   const name = filenamify(instance.name, { replacement: '_', maxLength: 100 }) || 'instance'
   const version = filenamify(options.version.trim(), { replacement: '_', maxLength: 80 })
   if (!version) throw failure('ExportInvalid')
@@ -67,7 +75,10 @@ export async function exportReviewedInstance(instance: Instance, root: string, o
       await writeFile(staged, data, { flag: 'wx' })
       zip.addFile(staged, entry)
     }
-    for (const file of preview.files) if (selected.has(file.path)) await stage(instance.path, file.path, `${options.format === 'offline' ? '' : 'overrides/'}${file.path}`, file)
+    for (const file of preview.files) if (selected.has(file.path)) {
+      const source = await instanceFileSource(instance.path, file.path, root)
+      await stage(source.root, source.path, `${options.format === 'offline' ? '' : 'overrides/'}${file.path}`, file)
+    }
     if (options.format === 'offline') {
       if (!resolved) throw failure('ExportMissingRuntime')
       for (const file of await offlineModpackFiles(root, resolved)) await stage(root, file.path, file.path, file)
