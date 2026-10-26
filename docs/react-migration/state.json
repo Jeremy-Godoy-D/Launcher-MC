@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Bloque 4ab24c7 Prism standalone completo verificado (STAGE4-PRISM):349 unitarias y30 escenarios Electron. Continuar K03 Vanilla personalizada/herencia/JAR/bibliotecas y Prism parcial/alias jar; después K02/K04 operaciones. Tres gates pendientes. Grimo/datos/proxy/Vue conservados; Microsoft pospuesto y producción sin cambios.",
+  "nextAction": "Bloque 9cfd14c Vanilla local/herencia/cliente/bibliotecas y latest-release/snapshot verificado (STAGE4-VANILLA):362 unitarias y32 escenarios Electron. Continuar K03 Prism parcial/clientes modificados/alias con aislamiento seguro; después K02/K04 operaciones. Tres gates pendientes. Grimo/datos/proxy/Vue conservados; Microsoft pospuesto, producción sin cambios.",
   "stages": [
     {
       "id": 0,
@@ -420,9 +420,17 @@
             {
               "path": "docs/react-migration/STAGE4-PRISM.json",
               "sha256": "8ea9fbb19bf3aec657684c06dd526032b7abe29485bd3b8f7bd3cb6819a5d919"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-VANILLA.md",
+              "sha256": "44f5e994b65c5a534b1b18b0204483e99e205335dcd7648e2d479f939d8f7b52"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-VANILLA.json",
+              "sha256": "aa0d36489462893936a52c825e0223d841ede6a49dcadde86162bda59401276e"
             }
           ],
-          "note": "Parcial: creación/importación estándar y Prism standalone con base completa, Java/RAM/enlaces y lanzamiento/recuperación conectados. Faltan Vanilla personalizada, Prism parcial/alias jar, operaciones completas, ajustes/diagnóstico integral y partida/descarga real; no cerrar K03 ni gate."
+          "note": "Parcial: importación estándar, Prism standalone completo y Vanilla local/herencia/latest, Java/RAM/enlaces y lanzamiento/recuperación conectados. Faltan Prism parcial/clientes modificados y alias, operaciones completas, ajustes/diagnóstico integral y partida/descarga real; no cerrar K03 ni gate."
         }
       ]
     },

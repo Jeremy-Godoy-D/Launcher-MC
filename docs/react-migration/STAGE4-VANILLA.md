@@ -1,0 +1,33 @@
+# Etapa 4 parcial — versiones locales de Vanilla
+
+Código `9cfd14c6b024b4882811b3589776c37600196a9f`, 2026-10-25. K03 incorpora la revisión y confirmación de versiones locales Vanilla con herencia, cliente y bibliotecas referenciadas. Las tres gates de etapa 4 y K03 permanecen pendientes; Vue sigue predeterminado y producción no cambia.
+
+## Comportamiento
+
+El origen de las versiones es la carpeta del launcher elegida, aunque el perfil tenga su `gameDir` en otra ubicación. Los archivos de juego se revisan/copian desde ese `gameDir`; los metadatos, el cliente y las bibliotecas se leen desde la raíz de versiones. El formulario muestra el Minecraft y loader resueltos, conservando el nombre e identidad del perfil de origen en el selector.
+
+`inspectVanillaFolderVersion` recorre únicamente las dependencias necesarias: herencia y alias de cliente, sin enumerar/copiar todas las versiones o bibliotecas del launcher. La revisión no publica archivos. Se rechazan ciclos, padres ausentes, rutas/identificadores peligrosos, enlaces/junctions, URL distintas de HTTP/HTTPS o con credenciales, campos de contaminación de prototipos y artefactos con tamaño/hash incorrecto. Los ajustes personales del launcher, las cuentas, comandos y Java del perfil no se incorporan a la instancia ni a la definición publicada.
+
+Al confirmar se vuelve a inspeccionar el origen y se comprueba su huella. Las definiciones JSON obtienen IDs propios `vanilla-*`, reescribiendo la herencia y conservando la identidad Minecraft que necesita la resolución existente. No se sustituye el JSON original de una versión instalada. Cliente y bibliotecas usan las ubicaciones de caché existentes y la publicación inmutable del bloque Prism: un contenido distinto bloquea la importación antes de escribir; los iguales permiten reintentar. Los nuevos archivos quedan independientes del origen. Los archivos de caché ausentes que tienen descarga declarada se dejan al instalador normal al jugar; el cliente local sin descarga declarada y las bibliotecas marcadas como locales deben estar presentes.
+
+Se mantienen límites de 64 nodos de grafo, 1 MiB por JSON/8 MiB total, 10000 bibliotecas resueltas y 512 MiB de datos cacheados en buffers. No se hace copia masiva de assets. La huella cubre los metadatos interpretados y presencia/bytes de los artefactos referenciados; no las marcas de tiempo. La resolución, comprobación de versión registrada y confirmación se ejecutan en main, manteniendo el cliente de renderer y la selección persistida anteriores.
+
+Los perfiles `latest-release` y `latest-snapshot` se resuelven a IDs concretos mediante el proveedor existente. Una versión sin JSON local solo continúa si aparece en el catálogo de Minecraft; una versión personalizada desconocida queda bloqueada, en lugar de crear una configuración que después no puede instalarse. Las consultas pueden necesitar red si el catálogo no está cacheado. Cambios del origen y conflictos usan los mensajes recuperables existentes; el diálogo conserva sus campos y permite revisar otra vez.
+
+## Verificación
+
+- 362 unitarias en 37 archivos, 15,18 s. Trece casos nuevos prueban revisión sin escrituras, herencia/runtime, IDs estables, filtrado de ajustes, cliente antiguo sin descarga, alias compatible, conflictos, checksum, ciclos, padre ausente, protocolo/ruta, claves de prototipos y directorios enlazados/raíces normalizadas. Se conservan las regresiones de Prism, perfiles, Java y actualizador.
+- 29 recorridos Electron React, 1,6 min; uno Strict Mode, 4,3 s; dos Vue, 9,9 s: **32 escenarios distintos**. Los dos de spec 16 se repitieron tras los últimos guards nativos, 10,0 s; son escenarios solapados, no adicionales.
+- El nuevo recorrido utiliza inspección, registro/resolución, cliente/bibliotecas y mundo nativos, con `gameDir` separado. Comprueba huella cambiada antes de crear, persistencia tras recarga, copia de mundo independiente y conflicto que conserva el destino. El segundo recorrido verifica release/snapshot concretos, fallo del proveedor y versión desconocida bloqueada. Las listas de versiones son fixtures; no se ejecuta el JAR de prueba ni se realiza una partida/descarga real de Java o cliente.
+- Tipos raíz aprobados y runtime repetido tras los últimos guards; lint sin errores/avisos; nueve tests del harness. Renderer y host Windows construidos/empaquetados para React y Vue. Dist termina en Vue. Workflow ampliado, todavía no ejecutado en GitHub.
+- Pantalla revisada en 1200×720 y 800×400, claro/oscuro, con scroll/foco y confirmación accesibles. Regresión: 45 resultados Axe, cero violaciones/82 incompletos. Repetición final del área: cuatro resultados, cero violaciones/12 incompletos, solapados con la regresión. No es certificación manual AA/RTL. Detector textual de FolderImport sin hallazgos; no se conectó DevTools CLI/CDP ni se ejecutaron sus reglas de página parseada.
+
+Comandos desde `launcher`: conjunto Vitest de `.github/workflows/react-migration.yml`, `pnpm check`, `pnpm --prefix xmcl-runtime check`, `pnpm lint`, `LAUNCHER_RENDERER=react pnpm gen:testids`, build renderer/host React y specs 01/02/05/06/07/09/10/11/12/13/14/15/16 sobre su EXE empaquetado. Spec 04 con `XMCL_REACT_CLIENT_HARNESS=1`; build renderer/host Vue y specs 03/08. Nueve pruebas del harness y su check. Todas las raíces de prueba son temporales; no se ejecuta un instalador sobre datos habituales.
+
+`STAGE4-VANILLA.json` registra el commit, 12 hashes de archivos Git y 52 artefactos ignorados. Las cuatro capturas de esta pantalla están conservadas en `launcher/e2e/artifacts/vanilla-final-area/visual`.
+
+## Límites y siguiente acción
+
+K03 sigue parcial. Falta resolver Prism con metadatos base incompletos y los clientes modificados/alias que necesitan aislamiento distinto del direccionamiento actual del cliente por versión Minecraft. Los alias Vanilla compatibles con los bytes de la base se conservan; los distintos se rechazan, sin sustituir silenciosamente el cliente compartido. Los padres del grafo local deben existir: no se reconstruye una dependencia personalizada ausente. Después siguen las operaciones de biblioteca K02/K04 y los demás criterios de etapa 4.
+
+No se verificaron juego/Java/cliente reales, NSIS, actualización/delta aislada, firma, publicación ni rendimiento 60 s. La publicación exclusiva sigue validada en Windows/NTFS; otros sistemas de archivos/plataformas no se probaron. Una preparación confirmada puede dejar archivos reutilizables si falla la creación posterior; no hay rollback destructivo. Cerrar ignora resultados obsoletos pero no cancela una lectura nativa iniciada. Microsoft continúa pospuesto, proxy/datos/identificadores conservados y `ANALISIS_ARQUITECTURA.md` intacto.
