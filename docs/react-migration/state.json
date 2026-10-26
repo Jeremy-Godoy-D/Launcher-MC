@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Código70c70d8 verificado: carpetas compartidas confiables en copia/exportación, cancelación de revisión y avisos accesibles a800×400. STAGE4-SHARED-CONTENT:514 unitarias/53 archivos,53 escenarios distintos (50React+1Strict+2Vue),8 afectados finales solapados,9 harness; tipos/lint/builds. CI previo40287929295 pasó React/Vue sobre e4a60c0; verificar nuevo CI tras push. Continuar auditoría K03/K04 y edición/apariencia de perfiles; después medios/galerías/caché y rendimiento60s. No repetir copia reanudable, virtualización ni enlaces compartidos/cancelación. Tres gates de etapa4 pendientes; Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios. Publicación autorizada solo al cumplir el plan completo.",
+  "nextAction": "Código fa9fff5: apariencia local y conservación de cuentas tras reiniciar verificadas. STAGE4-PROFILE-APPEARANCE:523 unitarias/56 archivos,55 escenarios distintos (52React+1Strict+2Vue),4 afectados finales solapados,9 harness; tipos/lint/builds y6 capturas. onboarding-accounts passed; etapa4 activa con home-carousel/library-instance-launch pendientes. Continuar auditoría fuente/recorridos K02/K03/K04, y medios/galerías/caché/tres clips/rendimiento60s de Inicio. No repetir perfiles, copia reanudable, virtualización ni enlaces compartidos/cancelación. CI previo40327122067 pasó React/Vue sobre58c78ab; verificar nuevo CI tras push. Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios; etapas5–9 pendientes.",
   "stages": [
     {
       "id": 0,
@@ -301,7 +301,7 @@
       "gates": [
         {
           "id": "onboarding-accounts",
-          "status": "pending",
+          "status": "passed",
           "evidence": [
             {
               "path": "docs/react-migration/STAGE4-ACCOUNTS.md",
@@ -334,9 +334,17 @@
             {
               "path": "docs/react-migration/STAGE4-BRANDING.json",
               "sha256": "9c5593a4b74e695b378e5f915bfe90edae65c3f6ccf8c3cf8c086e6c5c2c0899"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PROFILE-APPEARANCE.md",
+              "sha256": "4c00f66fd2dffd6065e800e2c25542a2e81bf56123cd2b08dea79872c12152d6"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PROFILE-APPEARANCE.json",
+              "sha256": "8c399f6f81295d55fb40f0c32a93ea3234a1048e31e7223d787a38ee18ff5fc5"
             }
           ],
-          "note": "Parcial: onboarding, perfiles locales básicos y las acciones Crear/Importar locales del final verificadas. Falta edición/apariencia de perfiles; no cerrar el criterio."
+          "note": "Onboarding por servicios, alta/selección/eliminación y edición de apariencia local verificados, incluidos errores, foco, persistencia y reinicio del EXE. La equivalencia exacta de OFFLINE conserva la selección local; nuevos perfiles posteriores al reinicio conservan los anteriores. Nombre/UUID de juego estables, cuentas externas intactas, Microsoft deferred. El aspecto dentro de Minecraft se valida con el juego en etapa9; aquí se acredita la gestión local y los bytes guardados."
         },
         {
           "id": "home-carousel",
