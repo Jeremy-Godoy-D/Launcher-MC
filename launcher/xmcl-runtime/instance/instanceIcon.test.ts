@@ -12,6 +12,13 @@ describe('instanceIcon', () => {
   const instancePath = join('/games', 'my-instance')
 
   describe('getMediaIconPath', () => {
+    it('encodes special filename characters for the real media protocol and round-trips them', () => {
+      const path = join(instancePath, 'icon #&% espacio.png')
+      const url = toMediaIconUrl(path)
+      expect(new URL(url).searchParams.get('path')).toBe(path)
+      expect(new URL(url).hash).toBe('')
+      expect(getMediaIconPath(url)).toBe(path)
+    })
     it('extracts the path from a media url', () => {
       const p = join(instancePath, 'icon.png')
       expect(getMediaIconPath(MEDIA_URL_PREFIX + p)).toBe(p)

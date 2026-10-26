@@ -49,6 +49,13 @@ describe('read-only folder import preview', () => {
     await writeFile(join(dir, '..cache'), 'safe')
     expect((await previewFolderFiles(dir))[0].path).toBe('..cache')
   })
+  it('omits launcher metadata atomic temporaries but retains similarly named user files', async () => {
+    await writeFile(join(dir, 'instance.json.tmp-0123456789abcdef'), 'private-launcher-metadata')
+    await writeFile(join(dir, 'instance.json.tmp-custom'), 'user-file')
+    await mkdir(join(dir, 'config'))
+    await writeFile(join(dir, 'config/instance.json.tmp-0123456789abcdef'), 'mod-config')
+    expect((await previewFolderFiles(dir)).map(file => file.path).sort()).toEqual(['config/instance.json.tmp-0123456789abcdef', 'instance.json.tmp-custom'])
+  })
   it('aborts an in-flight hash stream and closes it before rejecting the review', async () => {
     const native = await vi.importActual<typeof import('node:fs')>('node:fs')
     await writeFile(join(dir, 'large.jar'), Buffer.alloc(8 * 1024 * 1024))

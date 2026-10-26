@@ -245,6 +245,16 @@ react:
     minimize: Minimizar
     maximize: Maximizar
   operations:
+    iconFailed: No se pudo guardar el icono. Comprueba el formato, el límite de 8 MiB y que el archivo siga disponible. Puedes elegir otra imagen y volver a intentar.
+    changeIcon: Cambiar icono
+    iconTitle: 'Icono de {name}'
+    iconHelp: Elige un PNG, JPEG, GIF o WebP de hasta 8 MiB. Se guarda una copia en la instancia; el archivo original se conserva.
+    iconFields: Icono de la instancia
+    iconPreview: Vista previa del icono
+    chooseIcon: Elegir imagen
+    resetIcon: Restablecer icono
+    iconResetHelp: Al guardar se usará la presentación predeterminada. Tus archivos se conservan.
+    iconPreviewFailed: No se pudo mostrar la imagen. Comprueba el formato y que el archivo siga disponible.
     exportTitle: Exportar instancia
     exportHelp: Revisa qué archivos se guardarán en una copia local.
     optionsTitle: 'Opciones de {name}'

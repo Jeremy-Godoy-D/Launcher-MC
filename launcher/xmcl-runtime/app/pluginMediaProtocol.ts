@@ -11,15 +11,18 @@ import { LauncherAppPlugin } from '~/app'
 export const pluginMediaProtocol: LauncherAppPlugin = (app) => {
   const normalizePath = (path: string) => {
     if (app.platform.os === 'windows') {
-      return decodeURIComponent(path.startsWith('/') ? path.substring(1) : path)
+      return path.startsWith('/') ? path.substring(1) : path
     }
-    return decodeURIComponent(path.startsWith('//') ? path.substring(1) : path)
+    return path.startsWith('//') ? path.substring(1) : path
   }
 
   app.protocol.registerHandler('http', async ({ request, response }) => {
-    if (request.url.host === 'launcher' && request.url.pathname.startsWith('/media')) {
+    if (request.url.host === 'launcher' && request.url.pathname === '/media') {
       // Absolute image path
-      const pathname = normalizePath(request.url.searchParams.get('path')!)
+      const decoded = request.url.searchParams.get('path')
+      if (!decoded) { response.status = 400; return }
+      // URLSearchParams already decoded the query; a literal percent must survive.
+      const pathname = normalizePath(decoded)
       const { fileTypeFromFile: fromFile } = await import('file-type')
       await fromFile(pathname).then((type) => {
         if (type && (type.mime.startsWith('image/') || type.mime.startsWith('video/') || type.mime.startsWith('audio/'))) {
@@ -40,7 +43,7 @@ export const pluginMediaProtocol: LauncherAppPlugin = (app) => {
     }
     // http://launcher/theme-media/${assetName}
     if (request.url.host === 'launcher' && request.url.pathname.startsWith('/theme-media')) {
-      const pathname = join(app.appDataPath, 'theme-media', normalizePath(request.url.pathname.substring('/theme-media'.length)))
+      const pathname = join(app.appDataPath, 'theme-media', normalizePath(decodeURIComponent(request.url.pathname.substring('/theme-media'.length))))
       const { fileTypeFromFile: fromFile } = await import('file-type')
       await fromFile(pathname).then((type) => {
         if (type && (type.mime.startsWith('image/') || type.mime.startsWith('video/') || type.mime.startsWith('audio/') || type.mime.startsWith('font/'))) {
@@ -58,7 +61,7 @@ export const pluginMediaProtocol: LauncherAppPlugin = (app) => {
     if (request.url.host === 'launcher' && request.url.pathname.startsWith('/instance-theme-media')) {
       const instancePath = request.url.searchParams.get('instancePath')
       if (instancePath) {
-        const rawFileName = normalizePath(request.url.pathname.substring('/instance-theme-media'.length))
+        const rawFileName = normalizePath(decodeURIComponent(request.url.pathname.substring('/instance-theme-media'.length)))
         // Prevent path traversal by using only the basename
         const fileName = basename(rawFileName)
         if (!fileName || fileName === '.' || fileName === '..') {

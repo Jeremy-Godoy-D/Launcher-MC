@@ -1,19 +1,19 @@
-import { useRef, useState, type RefObject } from 'react'
+import { useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
-import { ArrowDown, ArrowUp, Copy, Download, FolderOpen, Layers, Pencil, Trash2, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, Copy, Download, FolderOpen, Image, Layers, Pencil, Trash2, X } from 'lucide-react'
 import { InstanceServiceKey } from '@xmcl/runtime-api/src/services/InstanceService'
 import { LaunchServiceKey } from '@xmcl/runtime-api/src/services/LaunchService'
 import { BaseServiceKey } from '@xmcl/runtime-api/src/services/BaseService'
 import { useService } from '../../runtime'
 import { useI18n } from '../../i18n'
 import { useLibrary } from './context'
-import type { SavedInstance } from './model'
+import { instanceIcon, type SavedInstance } from './model'
 import { metadataDraft, metadataEdit } from './operations'
 import { ExportInstance } from './ExportInstance'
 import { DuplicateInstance } from './DuplicateInstance'
 import './operations.css'
 
-type Mode = 'options' | 'edit' | 'duplicate' | 'remove' | 'group' | 'export'
+type Mode = 'options' | 'edit' | 'icon' | 'duplicate' | 'remove' | 'group' | 'export'
 export function InstanceOperations({ instance, onClose, onCreated, returnFocus, initialMode = 'options' }: { instance: SavedInstance; onClose: () => void; onCreated: (path: string) => void; returnFocus: RefObject<HTMLElement | null>; initialMode?: 'options' | 'duplicate' }) {
   const library = useLibrary()
   const service = useService(InstanceServiceKey)
@@ -27,6 +27,11 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus, 
   const [deleteData, setDeleteData] = useState(false)
   const [confirmation, setConfirmation] = useState('')
   const [success, setSuccess] = useState('')
+  const [icon, setIcon] = useState<string>()
+  const [previewFailed, setPreviewFailed] = useState(false)
+  const chooseIcon = useRef<HTMLButtonElement>(null), alert = useRef<HTMLParagraphElement>(null)
+  useLayoutEffect(() => { if (mode === 'icon') chooseIcon.current?.focus() }, [mode])
+  useLayoutEffect(() => { if (error) alert.current?.scrollIntoView({ block: 'nearest' }) }, [error])
   const [group, setGroup] = useState(() => {
     const entry = library?.data?.groups.find(group => typeof group !== 'string' && group.instances.includes(instance.path))
     return entry && typeof entry !== 'string' ? `id:${entry.id}` : ''
@@ -35,6 +40,7 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus, 
   const operation = useRef(false)
   const latest = library?.instances.find(item => item.path === instance.path)
   const unavailable = !latest || library?.status !== 'ready'
+  const preview = instanceIcon(success ? latest?.icon || '' : icon ?? instance.icon)
   function changeMode(value: Mode) { setMode(value); setError(''); setSuccess('') }
   async function run(action: () => Promise<void>, checkIdle = true) {
     if (operation.current) return
@@ -47,7 +53,7 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus, 
       const name = failure && typeof failure === 'object' && 'name' in failure && typeof failure.name === 'string' ? failure.name : ''
       const message = failure && typeof failure === 'object' && 'message' in failure && typeof failure.message === 'string' ? failure.message : ''
       const reason = ['InstanceMetadataChanged', 'InstanceGroupsChanged'].includes(name) ? 'changed' : name === 'InstanceNameDuplicatedError' ? 'duplicateName' : message
-      setError(['missing', 'changed', 'invalid', 'invalidGroup', 'duplicateName', 'running'].includes(reason) ? reason : 'failed')
+      setError(['missing', 'changed', 'invalid', 'invalidGroup', 'duplicateName', 'running'].includes(reason) ? reason : mode === 'icon' ? 'iconFailed' : 'failed')
     } finally { operation.current = false; setBusy(false) }
   }
   return <Dialog.Root open onOpenChange={open => { if (!open && !operation.current) onClose() }}>
@@ -67,6 +73,10 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus, 
             await service.editInstance(metadataEdit(instance, latest, draft, library?.instances || []))
             setSuccess('saved')
           })
+          if (mode === 'icon' && icon !== undefined) void run(async () => {
+            await service.editInstance({ instancePath: instance.path, icon, expectedMetadata: { ...metadataDraft(instance), icon: instance.icon || '' } })
+            setSuccess('saved')
+          })
           if (mode === 'remove' && (!deleteData || confirmation === instance.name)) void run(async () => {
             await service.deleteInstance(instance.path, deleteData)
             onClose()
@@ -77,10 +87,11 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus, 
             setSuccess('saved')
           }, false)
         }}>
-          <div className="creation-body">
-            <p className="operation-path">{instance.path}</p>
+          <div className="creation-body" role={mode === 'icon' ? 'region' : undefined} tabIndex={mode === 'icon' ? 0 : undefined} aria-label={mode === 'icon' ? t('react.operations.iconFields') : undefined}>
+            {mode !== 'icon' && <p className="operation-path">{instance.path}</p>}
             {mode === 'options' && <div className="operation-actions">
               <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('edit')}><Pencil size={18} aria-hidden="true" />{t('react.operations.edit')}</button>
+              <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('icon')}><Image size={18} aria-hidden="true" />{t('react.operations.changeIcon')}</button>
               <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('duplicate')}><Copy size={18} aria-hidden="true" />{t(library?.data?.pendingCopies[instance.path] ? 'react.copy.resume' : 'react.operations.duplicate')}</button>
               <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('group')}><Layers size={18} aria-hidden="true" />{t('react.operations.group')}</button>
               <button type="button" className="button secondary" disabled={busy || unavailable || !!library?.data?.pendingCopies[instance.path]} onClick={() => changeMode('export')}><Download size={18} aria-hidden="true" />{t('react.export.action')}</button>
@@ -102,6 +113,24 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus, 
               <label htmlFor="instance-edit-author">{t('react.operations.author')}</label>
               <input id="instance-edit-author" value={draft.author} maxLength={100} disabled={busy || !!success} onChange={event => setDraft({ ...draft, author: event.target.value })} />
             </>}
+            {mode === 'icon' && <>
+              <div className="instance-icon-editor">
+              <div className="instance-icon-preview" role="img" aria-label={t('react.operations.iconPreview')}>
+                {preview && !previewFailed ? <img key={preview} src={preview} alt={t('react.operations.iconPreview')} onError={() => setPreviewFailed(true)} /> : <Image size={40} aria-hidden="true" />}
+              </div>
+              <div className="instance-icon-actions">
+              <button ref={chooseIcon} type="button" className="button secondary" data-testid="instance-icon-choose" disabled={busy || !!success || unavailable} onClick={() => {
+                void window.windowController?.showOpenDialog?.({ properties: ['openFile'], filters: [{ name: 'PNG, JPEG, GIF, WebP', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'] }] }).then(result => {
+                  if (!result.canceled && result.filePaths[0]) { setIcon(`http://launcher/media?path=${encodeURIComponent(result.filePaths[0])}`); setPreviewFailed(false); setError('') }
+                }).catch(() => setError('failed'))
+              }}>{t('react.operations.chooseIcon')}</button>
+              <button type="button" className="button secondary" disabled={busy || !!success || unavailable} onClick={() => { setIcon(''); setPreviewFailed(false); setError('') }}>{t('react.operations.resetIcon')}</button>
+              </div>
+              </div>
+              {icon === '' && <p>{t('react.operations.iconResetHelp')}</p>}
+              {previewFailed && <p>{t('react.operations.iconPreviewFailed')}</p>}
+              {icon && <p className="operation-path" title={decodeURIComponent(icon.split('?path=')[1] || '')}>{decodeURIComponent(icon.split('?path=')[1] || '').split(/[/\\]/).pop()}</p>}
+            </>}
             {mode === 'group' && <>
               <label htmlFor="instance-group">{t('react.operations.group')}</label>
               <select id="instance-group" value={group} disabled={busy || !!success} onChange={event => setGroup(event.target.value)}>
@@ -121,13 +150,13 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus, 
               </>}
             </>}
             {unavailable && <p role="alert" className="form-error">{t('react.operations.missing')}</p>}
-            {!!error && <p role="alert" className="form-error">{t(`react.operations.${error}`)}</p>}
+            {!!error && <p ref={alert} role="alert" className="form-error">{t(`react.operations.${error}`)}</p>}
             {!!success && <p role="status">{t('react.operations.saved')}</p>}
             {busy && !success && <p role="status">{t('react.operations.busy')}</p>}
           </div>
           <div className="dialog-actions">
             <button type="button" className="button secondary" disabled={busy} onClick={() => mode !== 'options' && !success ? changeMode('options') : onClose()}>{t(mode === 'options' || success ? 'react.operations.close' : 'react.operations.back')}</button>
-            {mode !== 'options' && !success && <button type="submit" className="button primary" data-testid="instance-operation-confirm" disabled={busy || unavailable || mode === 'remove' && deleteData && confirmation !== instance.name}>{t(busy ? 'react.operations.busy' : mode === 'edit' || mode === 'group' ? 'react.operations.save' : deleteData ? 'react.operations.confirmDelete' : 'react.operations.confirmRemove')}</button>}
+            {mode !== 'options' && !success && <button type="submit" className="button primary" data-testid="instance-operation-confirm" disabled={busy || unavailable || mode === 'icon' && icon === undefined || mode === 'remove' && deleteData && confirmation !== instance.name}>{t(busy ? 'react.operations.busy' : mode === 'edit' || mode === 'icon' || mode === 'group' ? 'react.operations.save' : deleteData ? 'react.operations.confirmDelete' : 'react.operations.confirmRemove')}</button>}
           </div>
         </form>}
         <Dialog.Close className="dialog-close" aria-label={t('react.operations.close')} disabled={busy}><X size={20} /></Dialog.Close>

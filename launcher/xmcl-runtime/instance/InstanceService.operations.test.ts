@@ -98,6 +98,14 @@ test('main rejects stale metadata without overwriting current fields', async () 
   expect(state.all[path].name).toBe('Original')
   expect(state.all[path].description).toBe('Changed elsewhere')
 })
+
+test('a stale reviewed icon is rejected before image I/O and does not overwrite the current bytes', async () => {
+  const icon = join(path, 'icon.png'); await writeFile(icon, 'keep-original')
+  state.instanceEdit({ path, icon: 'current-icon' })
+  await expect(service.editInstance({ instancePath: path, icon: 'https://example.com/new.png', expectedMetadata: { name: 'Original', description: '', author: '', icon: 'stale-icon' } })).rejects.toMatchObject({ name: 'InstanceMetadataChanged' })
+  expect(await readFile(icon, 'utf8')).toBe('keep-original')
+  expect(state.all[path].icon).toBe('current-icon')
+})
 test('concurrent reviewed metadata edits serialize and reject the obsolete writer', async () => {
   const expectedMetadata = { name: 'Original', description: '', author: '' }
   const outcomes = await Promise.allSettled([

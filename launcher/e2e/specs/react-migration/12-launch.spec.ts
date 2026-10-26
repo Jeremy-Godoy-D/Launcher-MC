@@ -181,7 +181,10 @@ test('launch checks profile and physical directory, confirms once, restores proc
   await expect.poll(() => win.evaluate(win => win.isFocused() && win.webContents.isFocused())).toBe(true)
   await expect.poll(() => page.evaluate(() => document.hasFocus())).toBe(true)
   await page.locator('.sidebar-instance button').click()
-  await page.getByRole('button', { name: 'Ver partida', exact: true }).click()
+  const viewGame = page.getByRole('button', { name: 'Ver partida', exact: true })
+  await viewGame.focus()
+  await expect(viewGame).toBeFocused()
+  await viewGame.press('Enter')
   await expect(dialog.getByRole('button', { name: 'Detener partida', exact: true })).toBeEnabled()
   await win.evaluate((win) => {
     win.show()

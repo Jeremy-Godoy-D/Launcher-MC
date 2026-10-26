@@ -20,9 +20,10 @@ import {
 } from '@xmcl/runtime-api'
 import { AnyError, isSystemError } from '@xmcl/utils'
 import filenamify from 'filenamify'
-import { fileTypeFromBuffer, fileTypeFromFile } from 'file-type'
+import { fileTypeFromBuffer } from 'file-type'
+import { createHash } from 'node:crypto'
 import { existsSync } from 'fs'
-import { ensureDir, lstat, mkdir, realpath, readdir, readlink, readJson, rename, rm, writeFile, writeJson } from 'fs-extra'
+import { ensureDir, lstat, mkdir, realpath, readdir, readlink, readJson, rename, rm, writeJson } from 'fs-extra'
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'path'
 import { Inject, LauncherAppKey, kGameDataPath, type PathResolver } from '~/app'
 import { ImageStorage, kTasks, Tasks } from '~/infra'
@@ -30,7 +31,8 @@ import { VersionMetadataService } from '~/install/VersionMetadataService'
 import { ExposeServiceKey, ServiceStateManager, Singleton, StatefulService } from '~/service'
 import { validateDirectory } from '~/util/validate'
 import { LauncherApp } from '../app/LauncherApp'
-import { ENOENT_ERROR, exists, isDirectory, isPathDiskRootPath, linkOrCopyFile, readdirEnsured } from '../util/fs'
+import { ENOENT_ERROR, exists, isDirectory, isPathDiskRootPath, readdirEnsured } from '../util/fs'
+import { readBoundedLocalFile } from '../util/readBoundedLocalFile'
 import { getMediaIconPath, resolveInstanceIcon, serializeInstanceIcon, toMediaIconUrl } from './instanceIcon'
 import { requireObject, requireString } from '../util/object'
 import { getTracker } from '~/util/taskHelper'
@@ -385,24 +387,14 @@ export class InstanceService extends StatefulService<InstanceState> implements I
   }
 
   /**
-   * Ensure an incoming icon value is stored inside the instance folder when it
-    * is a local or remote image, returning the in-memory (absolute) media URL
-    * to display it. Every non-empty icon is owned by the instance afterwards.
+   * Import absolute image sources as independent instance files, while retaining
+   * portable relative references used by pending modpack installations.
    */
   async #resolveIncomingInstanceIcon(instancePath: string, icon: string | undefined): Promise<string> {
     if (!icon) return ''
     const mediaPath = getMediaIconPath(icon)
     if (mediaPath) {
-      // Already inside the instance folder: keep the absolute media URL.
-      const rel = relative(instancePath, mediaPath)
-      if (rel && !rel.startsWith('..') && !isAbsolute(rel)) {
-        return icon
-      }
-      // A local file outside the folder: copy it in.
-      if (existsSync(mediaPath)) {
-        return this.#storeInstanceIcon(instancePath, mediaPath)
-      }
-      return icon
+      return this.#storeInstanceIcon(instancePath, mediaPath)
     }
     if (icon.startsWith('http://launcher/image/')) {
       const imageName = basename(new URL(icon).pathname)
@@ -424,14 +416,25 @@ export class InstanceService extends StatefulService<InstanceState> implements I
       if (contentLength > 8 * 1024 * 1024) {
         throw new Error('Instance icon exceeds maximum size of 8 MB')
       }
-      const data = Buffer.from(await response.arrayBuffer())
-      if (data.byteLength > 8 * 1024 * 1024) {
-        throw new Error('Instance icon exceeds maximum size of 8 MB')
-      }
+      if (!response.body) throw new Error('Empty instance icon response')
+      const reader = response.body.getReader(), chunks: Uint8Array[] = []
+      let size = 0
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          size += value.byteLength
+          if (size > 8 * 1024 * 1024) throw new Error('Instance icon exceeds maximum size of 8 MB')
+          chunks.push(value)
+        }
+      } finally { await reader.cancel().catch(() => {}) }
+      const data = Buffer.concat(chunks)
       return this.#storeInstanceIconData(instancePath, data, response.headers.get('content-type') || '')
     }
     // No scheme: a relative reference resolved against the instance folder.
     if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(icon)) {
+      const inside = relative(instancePath, resolve(instancePath, icon))
+      if (inside === '..' || inside.startsWith(`..${sep}`) || isAbsolute(inside)) throw new Error('Instance icon escapes its folder')
       return resolveInstanceIcon(icon, instancePath)
     }
     throw new Error('Unsupported instance icon URL')
@@ -439,37 +442,25 @@ export class InstanceService extends StatefulService<InstanceState> implements I
 
   async #storeInstanceIconData(instancePath: string, data: Buffer, contentType: string): Promise<string> {
     const fileType = await fileTypeFromBuffer(data).catch(() => undefined)
-    const isSvg = contentType.startsWith('image/svg+xml') || data.subarray(0, 512).toString().includes('<svg')
+    const isSvg = contentType.startsWith('image/svg+xml')
     if (!fileType?.mime.startsWith('image/') && !isSvg) {
       throw new Error('Instance icon is not an image')
     }
     const ext = isSvg ? 'svg' : (fileType?.ext || 'png')
-    const iconPath = join(instancePath, `icon.${ext}`)
+    const iconPath = join(instancePath, `icon-${createHash('sha256').update(data).digest('hex')}.${ext}`)
     await ensureDir(instancePath)
-    await writeFile(iconPath, data)
+    await writeAtomically(iconPath, data)
     return toMediaIconUrl(iconPath)
   }
 
   /**
-   * Copy the image at `source` into the instance folder as `icon.<ext>` and
-   * return the in-memory media URL used to display it.
+   * Own the validated bytes under a content hash, so edits cannot overwrite
+   * a legacy link or change the image belonging to an older review.
    */
   async #storeInstanceIcon(instancePath: string, source: string): Promise<string> {
-    let ext = extname(source).replace(/^\./, '').toLowerCase()
-    if (ext !== 'svg') {
-      const fileType = await fileTypeFromFile(source).catch(() => undefined)
-      if (fileType?.ext) {
-        ext = fileType.ext
-      }
-    }
-    if (!ext) ext = 'png'
-    const iconPath = join(instancePath, `icon.${ext}`)
-    if (resolve(source) !== resolve(iconPath)) {
-      await ensureDir(instancePath)
-      await rm(iconPath, { force: true }).catch(() => undefined)
-      await linkOrCopyFile(source, iconPath)
-    }
-    return toMediaIconUrl(iconPath)
+    const data = await readBoundedLocalFile(source, 8 * 1024 * 1024)
+    const svg = extname(source).toLowerCase() === '.svg' && data.subarray(0, 512).toString().includes('<svg')
+    return this.#storeInstanceIconData(instancePath, data, svg ? 'image/svg+xml' : '')
   }
 
   #copyOperations = new Map<string, Promise<string>>()
@@ -728,6 +719,8 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     let state =
       this.state.all[instancePath] || this.state.instances.find((i) => i.path === instancePath)
 
+    if (options.expectedMetadata && (!state || state.edition === 'bedrock')) throw new AnyError('InstanceNotFoundError')
+
     if (!state) {
       // Try to force load the instance
       await this.loadInstance(instancePath).catch(() => false)
@@ -758,21 +751,18 @@ export class InstanceService extends StatefulService<InstanceState> implements I
       }
     }
 
-    const result = await computeInstanceEditChanges(state, options, async (path: string) =>
-      this.#storeInstanceIcon(instancePath, path).catch((e) => {
-        this.error(e)
-        return ''
-      }),
-    )
+    const checkMetadata = () => {
+      const expected = options.expectedMetadata
+      if (expected && !['name', 'description', 'author', ...(Object.hasOwn(expected, 'icon') ? ['icon'] : [])].every(key => typeof Reflect.get(expected, key) === 'string' && Reflect.get(expected, key) === (Reflect.get(state, key) || ''))) throw Object.assign(new Error('Instance metadata changed'), { name: 'InstanceMetadataChanged' })
+    }
+    checkMetadata()
+    const result = await computeInstanceEditChanges(state, options, async (path: string) => toMediaIconUrl(path))
     if (result.icon) {
       result.icon = await this.#resolveIncomingInstanceIcon(instancePath, result.icon)
     }
 
     if (Object.keys(result).length > 0) {
-      if (options.expectedMetadata) {
-        const expected = options.expectedMetadata
-        if (!['name', 'description', 'author'].every(key => typeof Reflect.get(expected, key) === 'string' && Reflect.get(expected, key) === (Reflect.get(state, key) || ''))) throw Object.assign(new Error('Instance metadata changed'), { name: 'InstanceMetadataChanged' })
-      }
+      checkMetadata()
     this.log(`Modified instance ${instancePath}`)
       // A reset-to-global field is represented as `undefined` in `result`.
       // The mutation payload is broadcast to renderer processes over Electron
@@ -786,7 +776,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
         payload[key] = value === undefined ? null : value
       }
       this.state.instanceEdit(payload as any)
-      if (options.expectedMetadata) await this.#instanceWrites.get(instancePath)
+      await this.#instanceWrites.get(instancePath)
     }
   }
 

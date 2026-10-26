@@ -29,7 +29,7 @@ export async function previewFolderFiles(source: string, type?: InstanceType, op
       if (++entries > 100000) throw new Error('Import directory is too large')
       const file = join(dir, entry)
       const name = prefix + entry
-      if (omitted.has(name.split('/')[0].toLowerCase()) || isInstanceInstallPath(name)) continue
+      if (omitted.has(name.split('/')[0].toLowerCase()) || depth === 0 && /^instance\.json\.tmp-[a-f0-9]{16}$/i.test(name) || isInstanceInstallPath(name)) continue
       let info = await lstat(file), actual = await realpath(file), branch = anchor
       if (info.isSymbolicLink()) {
         if (depth !== 0 || !options.sharedRoot) throw new Error('Import contains a link outside its source')

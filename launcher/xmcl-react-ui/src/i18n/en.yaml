@@ -245,6 +245,16 @@ react:
     minimize: Minimize
     maximize: Maximize
   operations:
+    iconFailed: Could not save the icon. Check its format, the 8 MiB limit and that the file is still available. Choose another image and try again.
+    changeIcon: Change icon
+    iconTitle: 'Icon for {name}'
+    iconHelp: Choose a PNG, JPEG, GIF or WebP up to 8 MiB. A copy is saved inside the instance; the original file is kept.
+    iconFields: Instance icon
+    iconPreview: Icon preview
+    chooseIcon: Choose image
+    resetIcon: Reset icon
+    iconResetHelp: Saving restores the default presentation. Your files are kept.
+    iconPreviewFailed: Could not display this image. Check the format and that the file is still available.
     exportTitle: Export instance
     exportHelp: Review the files to save in a local copy.
     optionsTitle: 'Options for {name}'
