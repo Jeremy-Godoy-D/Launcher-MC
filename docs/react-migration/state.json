@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Código a41a322: cambiar/restablecer iconos nativos y conservación de originales, imágenes con hash, límite8MiB y rutas especiales verificados; exportación excluye temporales privados y editInstance espera persistencia. STAGE4-INSTANCE-ICONS:543 unitarias/58 archivos,57 escenarios distintos (54React+1Strict+2Vue),9 harness, tipos/lint/builds y5 capturas. No repetir iconos, perfiles, copia reanudable ni virtualización. Continuar cruce de entradas/fuentes K02/K03/K04 con pruebas, manteniendo actualización de contenido/ajustes en5–7; después resolvedor de galerías propias, caché50MiB, tres clips autorizados y rendimiento60s de Inicio. Dos gates pendientes; cuentas aprobadas. CI40332397490 falló lanzamiento/actionability y exportación temporal; correcciones locales comprobadas, verificar nuevo CI tras push. Evidencias UTF-8/LF y SHA contra Git; Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios; etapas5–9 pendientes.",
+  "nextAction": "Fuente80c8f3b: resolvedor de galerías propias y caché50MiB completos en STAGE4-PROVIDER-MEDIA;569 unitarias/60 archivos,63 escenarios distintos (57React+1Strict+2Vue+3proveedores reales),87Axe/0violaciones/154incompletos y9harness. Corregir primero K02: React busca solo nombre, Vue también Minecraft y loader/versión con trim; reproducir y probar esa paridad. Revisar modsGrouping al duplicar/reanudar K04/K08. Después3 clips autorizados, siguiente póster, vídeo genérico etiquetado para packs y60s de rendimiento. No repetir iconos/perfiles/copia/virtualización/galerías/caché. Cuentas aprobadas; Inicio/Biblioteca pendientes; etapas5–9 pendientes. CI anterior40339662076 pasó ambos; verificar CI propio tras push. Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios. Evidencias UTF-8/LF y SHA de Git.",
   "stages": [
     {
       "id": 0,
@@ -373,9 +373,17 @@
             {
               "path": "docs/react-migration/STAGE4-BRANDING.json",
               "sha256": "9c5593a4b74e695b378e5f915bfe90edae65c3f6ccf8c3cf8c086e6c5c2c0899"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PROVIDER-MEDIA.md",
+              "sha256": "b184261540f93e82bc259ddb18a7181e9681312fa295029160e1ba2ae2730a7d"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PROVIDER-MEDIA.json",
+              "sha256": "6131046346dddd9c34b90299c4b590f3912cc715f998a483152c1605a13f4cc0"
             }
           ],
-          "note": "Parcial: selección real y pausa/reanudación del vídeo con proceso sintético verificadas; galerías/caché y rendimiento medido pendientes."
+          "note": "Parcial: galerías propias por upstream/ID y caché privada50MiB nativa verificadas, incluidos proveedores públicos, fallback y descarte de respuestas atrasadas. Fuente80c8f3b; STAGE4-PROVIDER-MEDIA. Faltan3 clips autorizados, precarga del siguiente póster, vídeo genérico etiquetado para packs y presupuestos60s. No cerrar esta gate."
         },
         {
           "id": "library-instance-launch",
@@ -518,7 +526,7 @@
               "sha256": "df983cdd33d78919cca93798c2032ea00d833278eeb5a636e6ca2da142de5d0f"
             }
           ],
-          "note": "Parcial: biblioteca/creación/importaciones/lanzamiento coordinado, operaciones y cambiar/restablecer iconos probados. Falta cerrar auditoría de paridad K02/K03/K04; actualización de contenido y ajustes completos siguen en sus etapas. Fuente a41a322,543 unitarias/57 escenarios distintos. No certificar juego/Java reales ni CI nuevo antes de sus resultados."
+          "note": "Parcial: biblioteca/creación/importaciones/lanzamiento coordinado/operaciones/iconos y regresión57React aprobados. Auditoría detecta una diferencia concreta K02: buscar Minecraft y loader/versión con trim además de nombre; corregir a continuación. Revisar conservación de modsGrouping al duplicar/reanudar. Actualización de contenido y ajustes completos siguen en6/5. No certificar juego/Java reales."
         }
       ]
     },
