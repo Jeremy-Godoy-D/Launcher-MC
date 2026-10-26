@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Bloque 4c49a74 copias reanudables verificado (STAGE4-COPY-RESUME):493 unitarias/53 archivos,48 escenarios distintos (45React+1Strict+2Vue),9 harness; tipos/lint/builds. Continuar virtualización de biblioteca con teclado, enlaces compartidos confiables de exportación/copia, cancelación durante escaneo y auditoría K03/resto de etapa4. No repetir recuperación tras cancelación/reinicio ni crear otro destino al reintentar. CI previo40277370887 pasó React/Vue sobrefb2fee1; comprobar nuevo CI de PR4 después del push. Tres gates pendientes; Vue predeterminado/dist Vue, Microsoft pospuesto y producción sin cambios. Autonomía/publicación autorizadas solo al cumplir todos los criterios.",
+  "nextAction": "Bloques4c49a74/14c0399 verificados: copias reanudables y biblioteca virtualizada con1000 instancias/teclado. STAGE4-VIRTUAL-LIBRARY:493 unitarias/53 archivos,49 escenarios distintos (46React+1Strict+2Vue),7 afectados repetidos tras ajustes finales,9 harness; tipos/lint/builds. Continuar cancelación durante escaneo inicial y enlaces compartidos confiables de copia/exportación, después auditoría K03/resto de etapa4 (perfiles,medios/caché/rendimiento). No repetir virtualización ni recuperación de copia tras cancelación/reinicio. CI40284702907 pasó Vue/44React pero falló fixture de foco/navegación vídeo; corregida manteniendo reloj real, verificar nuevo CI de PR4. Tres gates pendientes; autonomía/publicación autorizadas solo al cumplir criterios. Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios.",
   "stages": [
     {
       "id": 0,
@@ -484,9 +484,17 @@
             {
               "path": "docs/react-migration/STAGE4-COPY-RESUME.json",
               "sha256": "ae185a08903299bddbc74577bc65bfe2c4199674723dda684eb0ed581565cebf"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-VIRTUAL-LIBRARY.md",
+              "sha256": "12df1601539a416a0df3b862898ecf46b816990c772e7d3e7846b918ad4e2c8b"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-VIRTUAL-LIBRARY.json",
+              "sha256": "2e1ae724a7678c44c4d690239fa6802d19d32b0edf648a46a55ac8a973c309db"
             }
           ],
-          "note": "Parcial: progreso/cancelación/recuperación de copias en mismo destino, integridad y bloqueo nativo verificados. Faltan virtualización, enlaces compartidos de exportación/copia, cancelación del escaneo, auditoría K03 y criterios restantes. Tres gates pendientes; CI previo React/Vue aprobado, nuevo bloque pendiente remoto."
+          "note": "Parcial: biblioteca extensa1000/teclado y copias reanudables verificadas; faltan cancelación del escaneo, enlaces compartidos de copia/exportación, auditoría K03 y demás criterios. Tres gates pendientes. Nuevo CI debe verificar foco/navegación del vídeo sin quitar aserción de reproducción."
         }
       ]
     },

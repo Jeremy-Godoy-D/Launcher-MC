@@ -1,0 +1,581 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "timeZone": "America/Bogota",
+  "codeCommit": "14c0399235aa177733ad4d60f1bea28293d67891",
+  "status": "partial-stage-4",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/react-migration.yml",
+      "sha256": "e770e4cd9544c5bd27c23814f3bcaa822cdb18d8f0f88da8949da78ae266c10e"
+    },
+    {
+      "path": "launcher/e2e/TESTIDS.react.md",
+      "sha256": "86521c3c5c1afe62444855609c95188552a70d39d3ffbc6a089de1b52f56e51f"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/12-launch.spec.ts",
+      "sha256": "04ab19ec1d888ab0a706afd327d6d049f5ae9f0a03cdd6c5a2d73fe3f29c1cf2"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/23-large-library.spec.ts",
+      "sha256": "8de3e04cd356d23d7c4987261e6c11f3a19a01111f698b26584be0a4d39217ba"
+    },
+    {
+      "path": "launcher/pnpm-lock.yaml",
+      "sha256": "1c3ed946f0622486e1f74b1d9fa589b4cecd07d739a2e881580762e3682799ff"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/package.json",
+      "sha256": "cb1321922fcded87a2c1c86624f243d57cb18c27720340fb02766d19092ef77e"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/App.tsx",
+      "sha256": "93adccf2e2c1eca6b03848cfbaef4c2bbcc92315e932c886a94d7e369ad099e1"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/library/LibraryWindow.tsx",
+      "sha256": "db621bbdcc1c1584969ee027d45d5b9f4d241ce7afe8338da74b9dc134bec43e"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/library/window.css",
+      "sha256": "9a3bc20a2886ea942dceabbb366cd564babe96c5176a6e52abd33869aa7f39b1"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/en.yaml",
+      "sha256": "58ad764f51ddbd758f78f11d19d16f564c84c66401a428803d1e7ea70f1872dd"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/es-ES.yaml",
+      "sha256": "cd5534ba2d729689488e90fe533a1ab36c94ed34276e125f66733b68d9eb4cff"
+    }
+  ],
+  "validation": {
+    "unit": {
+      "passed": 493,
+      "files": 53,
+      "seconds": 12.49
+    },
+    "electronReactFull": {
+      "passed": 46,
+      "reportedDuration": "2.9m",
+      "note": "Before final same-item Home and idle-row measurement changes; final affected suite follows"
+    },
+    "electronFinalAffected": {
+      "passed": 7,
+      "reportedDuration": "38.3s",
+      "specs": [
+        9,
+        12,
+        23
+      ],
+      "note": "Final Home boundary, row-spacing matrix, native focus and route assertions; seven scenarios overlap full46"
+    },
+    "electronStrict": {
+      "passed": 1,
+      "reportedDuration": "4.5s"
+    },
+    "electronVue": {
+      "passed": 2,
+      "reportedDuration": "9.7s"
+    },
+    "distinctScenarios": 49,
+    "harness": {
+      "passed": 9
+    },
+    "types": "pnpm check, followed by final React check; passed",
+    "lint": "root and final React lint:0 warnings/errors",
+    "builds": [
+      "React renderer and packaged Windows EXE after tests stopped",
+      "Vue renderer/Windows EXE; final dist restored to Vue"
+    ],
+    "designDetector": "Three changed source targets, zero findings; no CDP used",
+    "axeFull": {
+      "reports": 69,
+      "violations": 0,
+      "incomplete": 122
+    },
+    "axeFinalAffected": {
+      "reports": 17,
+      "violations": 0,
+      "incomplete": 22
+    },
+    "visualReview": "Eight large-library captures:dark/light,grid/list,1200x720/800x400. Last card and its actions remain in viewport; keyboard focus visible",
+    "largeNativeFixture": {
+      "instances": 1000,
+      "maxRenderedAssertion": "fewer than40 cards at both tested sizes",
+      "filters": "Fabric500,exact name1,missing0",
+      "keyboard": [
+        "arrows",
+        "Home/End",
+        "Tab/Shift+Tab within and across virtual range",
+        "Shift+F10 and dialog focus return",
+        "manual scrolling preserves focused card; navigation restores viewport",
+        "resize while last card focused",
+        "boundary Home followed by Shift+Tab does not steal filter focus on resize"
+      ],
+      "persistence": "List preference/selected native instance survive renderer reload; no real game launch"
+    },
+    "invalidatedAttempt": {
+      "log": "launcher/e2e/artifacts/library-virtual-react-full.log",
+      "validAsFullRegression": false,
+      "reason": "Packaging began while suite still used same React output; Windows EPERM on DLL, package rebuilt and full46 repeated from scratch"
+    },
+    "initialResizeFailure": "Focused last card remained mounted but offscreen after size change. Measure parent dimensions and re-align through virtualizer; final matrix passes",
+    "remoteCI": {
+      "run": "https://github.com/Jeremy-Godoy-D/Launcher-MC/actions/runs/40284702907",
+      "head": "ec99d25",
+      "vue": "success",
+      "react": "44passed,launch/video fixture failed twice before new code",
+      "evidence": "CI snapshot remained on instance route with reopened launch dialog; test now awaits dialog removal then clicks Home and asserts intended video instance, retaining real playback-clock assertion; final native focus is recovered and checked before pointer actionability",
+      "newRun": "pending after push"
+    },
+    "rowSpacing": "A regression reproduced a visible245px row still allocated260px; idle remeasurement and geometry assertions pass all8 matrices"
+  },
+  "commands": [
+    "pnpm --filter @launcher/react-ui add --save-exact @tanstack/react-virtual@3.14.22",
+    "pnpm check",
+    "pnpm lint",
+    "pnpm exec vitest run <53selectors from workflow>",
+    "node --test launcher/scripts/react-migration.test.mjs",
+    "LAUNCHER_RENDERER=react pnpm gen:testids",
+    "LAUNCHER_RENDERER=react pnpm build:renderer; pnpm --prefix xmcl-electron-app build",
+    "XMCL_E2E_EXECUTABLE=<React EXE> pnpm --dir e2e exec playwright test <46selected by workflow> --reporter=list --output=artifacts/library-virtual-react-confirmed",
+    "XMCL_E2E_EXECUTABLE=<React EXE> pnpm --prefix e2e exec playwright test specs/react-migration/09-library.spec.ts specs/react-migration/12-launch.spec.ts specs/react-migration/23-large-library.spec.ts --output=artifacts/library-virtual-area-verified",
+    "XMCL_REACT_CLIENT_HARNESS=1 pnpm --prefix e2e exec playwright test specs/react-migration/04-client-contracts.spec.ts --output=artifacts/library-virtual-strict",
+    "LAUNCHER_RENDERER=vue pnpm build:renderer; pnpm --prefix xmcl-electron-app build",
+    "XMCL_E2E_EXECUTABLE=<Vue EXE> pnpm --prefix e2e exec playwright test specs/react-migration/03-vue-compatibility.spec.ts specs/react-migration/08-vue-onboarding.spec.ts --output=artifacts/library-virtual-vue",
+    "pnpm --prefix xmcl-react-ui check; pnpm --prefix xmcl-react-ui lint",
+    "Source-only impeccable detect of LibraryWindow.tsx/window.css/App.tsx",
+    "node launcher/scripts/react-migration.mjs check",
+    "XMCL_E2E_EXECUTABLE=<React EXE> pnpm --prefix e2e exec playwright test specs/react-migration/09-library.spec.ts specs/react-migration/12-launch.spec.ts specs/react-migration/23-large-library.spec.ts --output=artifacts/library-virtual-settled"
+  ],
+  "references": [
+    "https://tanstack.com/virtual/latest/docs/api/virtualizer",
+    "https://tanstack.com/virtual/latest/docs/framework/react/react-virtual"
+  ],
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/copy-resume-remote-ci/test-results/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES-retry1/error-context.md",
+      "sha256": "8a3fb0a337e246e6147c704aece46fae5fe867e909c4ab600c5c4d2567cf99cd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-resume-remote-ci/test-results/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES-retry1/launch-focus-before-interaction.json",
+      "sha256": "bef55ed77649d8925f9a04aad00820e5b62cfb5a8a26c35c36a5de725ea3e474"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-resume-remote-ci/test-results/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES/error-context.md",
+      "sha256": "8a3fb0a337e246e6147c704aece46fae5fe867e909c4ab600c5c4d2567cf99cd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-resume-remote-ci/test-results/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES/launch-focus-before-interaction.json",
+      "sha256": "bef55ed77649d8925f9a04aad00820e5b62cfb5a8a26c35c36a5de725ea3e474"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-area-verified.log",
+      "sha256": "91ac8c13159e05be551fefc72e42f3596900ca03a315102c14f54d7d488cace8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-area-verified/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-area-verified/react-migration-09-library-187cb-ever-launches-from-browsing-electron-es-ES/library-accessibility.json",
+      "sha256": "9f5b23f2ba68c7ca4b09853b622373b76d65a37c4576dac878c98b4286604b3c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-area-verified/react-migration-12-launch--7dc1c--launch-before-confirmation-electron-es-ES/java-fallback-accessibility.json",
+      "sha256": "6282ebfaae52f2040bd1f68f6ecd17664beeee4796b382770ce751c1def8f737"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-area-verified/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES/launch-accessibility.json",
+      "sha256": "c1adc1349dd0114385457d7841fb8de5b7fd707ebfea58fb13aa2d5ae698de47"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-area-verified/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-es-ES/large-library-accessibility.json",
+      "sha256": "ab8e40ecb426a98eeefe972f3111b1adb0b586d161973cfd2c7328fad86a2652"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-check.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-copy-ci-failure.log",
+      "sha256": "f89bc9ce058acee7c23966a98d930df3079db458e044c1e17cf6c7bf2fff04ce"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-coverage-final/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-coverage-final/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-es-ES/large-library-accessibility.json",
+      "sha256": "4b06f585ab01c8eb9b0132d8d8e14627156d9976c601ffa55f4e0740cf8aaf2e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-design-final.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-design-settled.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-design-spacing.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-design-verified.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-design.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-electron-area.log",
+      "sha256": "1cc61246a7bc2292dc0cc303d71637037433f7f09d5836f902668cb4b5170e68"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-electron-coverage-final.log",
+      "sha256": "2f8ca36e13b120fb9ce692676aa063f357ef2a069f7365e9130f3262cea3573c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-electron-coverage.log",
+      "sha256": "511e4e040d410758e85d92b4ef3a92a60eb159bfd810ddc30ee91070f1316dd9"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-harness-precommit.log",
+      "sha256": "161849bca366cb0707d554a0b4360a755da3e871240ed2ad7718a07af5165a8b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-harness-tests.log",
+      "sha256": "ed42f30cba85e77fcaa5aae162f4c6ed55f5a434c879ca7f36135c89c83394eb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-harness-verified.log",
+      "sha256": "161849bca366cb0707d554a0b4360a755da3e871240ed2ad7718a07af5165a8b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-install.log",
+      "sha256": "a944a1c0b5b59b84b5cdadf68137f619c23eaaf425e0a678a4a892390d94fd99"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-lint.log",
+      "sha256": "c955f68722c9bbef55c80cb305c20944287e5b7643b3435cb6ac26ebb3f5ece0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-check-final.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-check-settled.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-check-spacing.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-check-verified.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-check.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed.log",
+      "sha256": "0d14311709090c5030a2f5dfdf9f43a6ce493eb2e06436814d5480e81f8a5e08"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/accessibility.json",
+      "sha256": "6aae5e80fb93f9a6c6e9a856d4ea01b20f0d8795e44c66824a6a39d92a1d1bc4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-es-ES/accounts-accessibility.json",
+      "sha256": "b38a49a32edc0997b473827ab3889b14c3e8eff7c5a674af0e3ae75f92f867c0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-es-ES/onboarding-accessibility.json",
+      "sha256": "9f18252ec9cd3d0f084187e460c5621d816c6faca9f96bf947859f9968d98637"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/react-migration-09-library-187cb-ever-launches-from-browsing-electron-es-ES/library-accessibility.json",
+      "sha256": "f44f78f6f76cfc531619b1cb601ddc0b85f456613d7310e9d55dbe3e5c0e1a39"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/react-migration-10-creatio-3c436-s-within-the-minimum-window-electron-es-ES/creation-accessibility.json",
+      "sha256": "7555e2d7f772c3f1b84adea33cc80b08f95f0131683eae343cbef1319bf27bea"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/react-migration-12-launch--7dc1c--launch-before-confirmation-electron-es-ES/java-fallback-accessibility.json",
+      "sha256": "752320da98adea9a9a582c47aa1af4991b50c8449c014ec2b9ed777ca444bb40"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES/launch-accessibility.json",
+      "sha256": "db03f4cc69c50adb06b8126ad82946adf39493e608d4d0c9a87a8de41a111bd7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/react-migration-14-imports-949dd-e-links-without-duplicating-electron-es-ES/imports-accessibility.json",
+      "sha256": "4c2e6c0e7d2c2f1b00cc1f2b0c03a61e69c5ca1e15493b437937b5b7f82b76b1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/react-migration-15-prism-v-6545e-ve-version-libraries-safely-electron-es-ES/prism-accessibility.json",
+      "sha256": "6cedd5ea9b23f7aa4970a8ab1b756e9cf0cc0c082c2a06c0e743672aec4f739d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/react-migration-16-vanilla-986e7--personal-launcher-settings-electron-es-ES/vanilla-accessibility.json",
+      "sha256": "935f9bdc37270405f50fd2fabf69fd4708b99494d5feb6d273ee471f8e7633a4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/react-migration-19-library-98b63-folder-after-a-full-restart-electron-es-ES/operations-accessibility.json",
+      "sha256": "dbae0f8fd13fb21c3862a1117c4d91229017cb73e91f473088aff66553c34856"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/react-migration-20-local-e-45c0f-le-at-both-sizes-and-themes-electron-es-ES/export-accessibility.json",
+      "sha256": "ce7c592769a449d082fe2a07a28206be9dda823ccd2d6394a5c71a828f286e00"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/react-migration-21-group-m-b0126--or-unknown-edition-members-electron-es-ES/groups-accessibility.json",
+      "sha256": "e5ec3673e280df032b37022c1b4eb04b5e2d12f845cb0a0e6d4064437cddd5ac"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/react-migration-22-copy-re-68334-rting-the-packaged-launcher-electron-es-ES/copy-accessibility.json",
+      "sha256": "8995d1ad4149d1471983e8713b774b9fd9c552fc9597a91c786fb288991c7e90"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-confirmed/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-es-ES/large-library-accessibility.json",
+      "sha256": "71a5c2c8d79711bd4b53a420c0e8242919b63eff3c3cbb55a2516d76403fa7ef"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-full.log",
+      "sha256": "edaf691d1a80f513ebbf3f4ccf6d47534f92b15b46f40662c58430c16936ff7e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-lint-final.log",
+      "sha256": "261ec68382fac743cbc61e8127e831a9ea8aa9454795f20cb004630c25b4a927"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-lint-settled.log",
+      "sha256": "9758d20825822d493cb8ddd657d12022f9394d4072fb8318146bc93df9c9e009"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-lint-spacing.log",
+      "sha256": "10b408f3b63219eb58c801e6eba7249438ce09ff33337c4635d3fd40a38d7523"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-lint-verified.log",
+      "sha256": "95d5a5dd10bbb144c0eafb37a8cb7d2443b38bbd5af7bed34e78805e89bff499"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-lint.log",
+      "sha256": "8efa361804f06c2cb5557273188531848e8e854ddc839fa2429c0c97f80ea5bf"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-package-confirmed.log",
+      "sha256": "ee8f7ea307e157ae808413317a32f881da7e64bf8ef2e2e588ba0df00e195743"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-package-final.log",
+      "sha256": "d303e270f70296b5b2263711664b5246540e42cce8d9de9cd40974d943ca358f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-package-rebuilt.log",
+      "sha256": "45a0b6124daec714c98565aee3bc80202e452eb4bf3671076575a35ebbb1fb8a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-package-settled.log",
+      "sha256": "309e602e0dcdc9fea68ad55a044360f58f804479fb485cce34a288f1a0fab0fa"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-package-spacing.log",
+      "sha256": "edfa4ee56e3a9d719ea9149c6bcfa0da9c0526c49474ad3f67de1b533d7eeabd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-package-verified.log",
+      "sha256": "5f42120ddbb1b650a90016784282cef21deffcb9ee8633bd35a27d972130b1f7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-package.log",
+      "sha256": "ab9f89f9667e3a987b997fe4215633638d41a8105c5e323790bca1fef386a16f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-renderer-confirmed.log",
+      "sha256": "c26c97588906230300a48fc5906c80e8b9eec7ae861e31c63d752664d2b1fce5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-renderer-final.log",
+      "sha256": "a7f57b922fa8d63641df1da6335c09a59cfdbf80b77a744211f1bbfbcfb32802"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-renderer-settled.log",
+      "sha256": "6766d8a7231cf32fe111ac7048745185b7468362cac94c7f205194e4d0cdd485"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-renderer-spacing.log",
+      "sha256": "b17e016b73979138828dbb5e3159d0eefe62ce9359474c1d8bc500508e5961d5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-renderer-verified.log",
+      "sha256": "0d806a5cef431823c62f207278802ff684d776e1ceb695e68ab7d5b5b7cc5ed0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-react-renderer.log",
+      "sha256": "67a63d8f6a3eeed5ab53d1751e02c71e617aaac1e4e52c07592e90c08d100f21"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-settled.log",
+      "sha256": "04431a5b103c6b1955dbbd49256627657d0c885b637a90ff2bbbed43249bf744"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-settled/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-settled/react-migration-09-library-187cb-ever-launches-from-browsing-electron-es-ES/library-accessibility.json",
+      "sha256": "d5b8af37f04c595c95a5c17869e59686a200091dae3be57456c90b0649426a4f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-settled/react-migration-12-launch--7dc1c--launch-before-confirmation-electron-es-ES/java-fallback-accessibility.json",
+      "sha256": "fed0e13277c95f9ec6e8ec89a4190f73b9e30b4690fd6e02166d20cef41ca3d3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-settled/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES/launch-accessibility.json",
+      "sha256": "a147442050ef71f9894c7b2f29c0d9f8a8a3a5bae8dff50fd613ba1122837e3f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-settled/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-es-ES/large-library-accessibility.json",
+      "sha256": "9f33a5d4b66e6389e71139cae477ab0cee2553403d7f872ba0655803c331e045"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-spacing-diagnostics.log",
+      "sha256": "24de1cf09f6e5b3ad67d8c1d84652361969224788291dc9d3dd9ad20706c8d1b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-spacing-verified.log",
+      "sha256": "9bae2210989f76232f329bcf6f080fe2e08c6962c06bafa7e31f8c88dd388ed1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-strict.log",
+      "sha256": "365ee00c1ac8e3f3928f3b084553362f3fc1ee2edbb7c093a72dd3fa86f2911f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-strict/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-testids-final.log",
+      "sha256": "0261cc42fbbb618c70c24d8bb6bfd342167fc2fac1126f43aa058b4c21cb6cdf"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-testids-settled.log",
+      "sha256": "0261cc42fbbb618c70c24d8bb6bfd342167fc2fac1126f43aa058b4c21cb6cdf"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-testids-spacing.log",
+      "sha256": "0261cc42fbbb618c70c24d8bb6bfd342167fc2fac1126f43aa058b4c21cb6cdf"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-testids.log",
+      "sha256": "0261cc42fbbb618c70c24d8bb6bfd342167fc2fac1126f43aa058b4c21cb6cdf"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-units.log",
+      "sha256": "50e382433f30d17a480a76a7139a997af3579fa9527252863b2735a2997a88d8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-vue-package.log",
+      "sha256": "ff9d795a05da1ead60cad86dc650f921f159ee6cca068a57c1c22bd613b394f6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-vue-renderer-final.log",
+      "sha256": "bde59c5cdf0d3cc32ffa37d36ca968d089f5e83215cca3eb4ca55fa055d2f30c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-vue-renderer-restored.log",
+      "sha256": "1524f4a4e93d548c13842200fbf91bccc0dc4b75e21e2f68bb27f0a0c85d71db"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-vue-renderer-settled.log",
+      "sha256": "f808ec9aa2e16716903563585c8833ff948d6715bf6f75d4fd77cfaaebfa4a4e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-vue-renderer.log",
+      "sha256": "790c62f3d5759fa8c91d91723d08906648562d114a8b2c6b4f4cd377ba2a1687"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-vue.log",
+      "sha256": "2c59c3a8da2f6e57bc94ca86c2c5f0f68007a3e1d2cb9c5ad3d109c27e902ad6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-virtual-vue/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-23-large-library-spec-ts-a-thousand-native-instances-stay-window/large-library-dark-grid-1200.png",
+      "sha256": "a2d531532c313609fa462068c53e6fa5de61534a84c6b2405c765ffc91bfe85d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-23-large-library-spec-ts-a-thousand-native-instances-stay-window/large-library-dark-grid-800.png",
+      "sha256": "ed79079a13ad7cd450729b61f3285c8f04d66fcbdb4504c47b1a921d137cad39"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-23-large-library-spec-ts-a-thousand-native-instances-stay-window/large-library-dark-list-1200.png",
+      "sha256": "983856ea3693c6ce3f7c809cfa2069c801e605b7021230b61be2f9739a7e89ce"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-23-large-library-spec-ts-a-thousand-native-instances-stay-window/large-library-dark-list-800.png",
+      "sha256": "830b45d4f2202b8b81a88bd09214bc0114bdb34718db64e9c138bbace3c64f95"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-23-large-library-spec-ts-a-thousand-native-instances-stay-window/large-library-grid-1200.png",
+      "sha256": "35e256a6e1fadfd710464e41ed2a669e2790261275a5328d5e9e4d9e55816beb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-23-large-library-spec-ts-a-thousand-native-instances-stay-window/large-library-grid-800.png",
+      "sha256": "4a60bfdb59f043376e0c645ea630860b71a9e54acd609f591d0fa9baecbe36ec"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-23-large-library-spec-ts-a-thousand-native-instances-stay-window/large-library-light-grid-1200.png",
+      "sha256": "35e256a6e1fadfd710464e41ed2a669e2790261275a5328d5e9e4d9e55816beb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-23-large-library-spec-ts-a-thousand-native-instances-stay-window/large-library-light-grid-800.png",
+      "sha256": "6d332d9458a6d970623cba1aa3f3dc7e23c6dc2e6e4ec8fa49c7e9fce907806e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-23-large-library-spec-ts-a-thousand-native-instances-stay-window/large-library-light-list-1200.png",
+      "sha256": "cfec00558476af8dfbf26148c0235e98dd83042daa982ac0821b24e3f3ac8d1c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-23-large-library-spec-ts-a-thousand-native-instances-stay-window/large-library-light-list-800.png",
+      "sha256": "39ab710207e225ee3ff46164cb196b3c607632cf3058fc18542c122aaf795f57"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-23-large-library-spec-ts-a-thousand-native-instances-stay-window/large-library-list-1200.png",
+      "sha256": "cfec00558476af8dfbf26148c0235e98dd83042daa982ac0821b24e3f3ac8d1c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-23-large-library-spec-ts-a-thousand-native-instances-stay-window/large-library-list-800.png",
+      "sha256": "a800fa7c0b9a971a96f15384545a925e50466527ed5a96f3f265cb268e205f66"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-23-large-library-spec-ts-a-thousand-native-instances-stay-window/manifest.json",
+      "sha256": "5a09d689dc0458744501ac0cb0fb098c2f9f0a7ab7e9a648ea53aefc8fc4e9d1"
+    }
+  ],
+  "limits": [
+    "Stage4 and all3 gates still pending",
+    "Virtualization fixture is1000 instances and tested viewport sizes; no100000-instance or60s CPU/GPU/memory certification",
+    "Shared-folder copy/export and mid-discovery cancellation remain pending",
+    "No exhaustive manual AA/RTL validation",
+    "Native Minecraft/Java execution/download,NSIS and isolated updater remain in later validation",
+    "Vue remains default,Microsoft deferred,no production publication"
+  ],
+  "baseCommit": "ec99d25b1b6a7ff6a3ec80f63237b09df22b63e6"
+}
