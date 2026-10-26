@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Bloque 72fec14 operaciones Biblioteca verificadas (STAGE4-OPERATIONS):442 unitarias y39 escenarios Electron, incluido reinicio del EXE. Continuar exportación local K04: revisión/formatos/cliente aislado en exportOffline; luego gestión completa de grupos, progreso/cancelación de copia y resto de K02/K03/K04. Tres gates pendientes. No repetir operaciones ni Prism. Grimo/datos/proxy/Vue conservados; Microsoft pospuesto, producción sin cambios.",
+  "nextAction": "Bloque 4ea5436 exportación revisada verificada (STAGE4-EXPORT):460 unitarias/51 archivos y43 escenarios Electron. Continuar gestión de grupos existentes, progreso/cancelación/recuperación de copia, biblioteca extensa y enlaces compartidos en exportación; auditar resto K03 y etapa4. Tres gates pendientes. No repetir exportación estándar ni Prism/clientes. Usuario autorizó trabajo autónomo y publicación al cumplir gates; Microsoft pospuesto, Vue predeterminado y producción sin cambios.",
   "stages": [
     {
       "id": 0,
@@ -452,9 +452,17 @@
             {
               "path": "docs/react-migration/STAGE4-OPERATIONS.json",
               "sha256": "ee2323ce2303780938e74357d55936d88acb199f3d2ced6093dfd9e97ca98ee7"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-EXPORT.md",
+              "sha256": "e431b7167b1be186571bca454bf2ea605205e3f43963ef1ab2c743912b7bf2a9"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-EXPORT.json",
+              "sha256": "6721f40e3e277d9fb49e6e996e3223db1aadd91031b4a11e7076436ffc12a2d1"
             }
           ],
-          "note": "Parcial: creación/importación/Prism, lanzamiento/recuperación y operaciones de metadatos/copia/retirada/grupos/orden verificadas. Faltan exportación local, gestión completa de grupos/copia, bibliotecas extensas, auditoría K03 y demás criterios; no cerrar K02/K03/K04 ni gate. Juego/Java reales siguen pendientes."
+          "note": "Parcial: exportación/reimportación local revisada añadida a creación, lanzamiento y operaciones. Faltan gestión completa de grupos/copia, bibliotecas extensas, exportación de enlaces compartidos, auditoría K03 y demás criterios. Tres gates/K02/K03/K04 pendientes; juego/Java reales no certificados."
         }
       ]
     },
