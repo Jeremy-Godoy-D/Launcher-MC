@@ -31,6 +31,7 @@ async function seedCovers(launcher: LauncherFixture) {
 
 test('native cached provider covers survive reload, preserve identity and remain usable at both sizes and themes', async ({ launcher }, testInfo) => {
   const page = launcher.main, { paths, cache, urls } = await seedCovers(launcher)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message))
   const backdrop = page.getByTestId('app-backdrop')
   await expect(backdrop).toHaveAttribute('data-media-provider', 'modrinth')
