@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Fuente93321cf: orden Inicio seleccionada+últimas partidas, identidad estable al reordenar/retirar y Biblioteca Última partida acreditados. STAGE4-RECENT-ORDER:589 unitarias/60 archivos,67 escenarios distintos (64React+1Strict+2Vue),91Axe/0violaciones/162incompletos,9harness,tipos/lint/builds aprobados. K02/K04/K17 completos. Próximo:3 clips autorizados Overworld/Nether/End, precarga siguiente póster, vídeo genérico junto a portada propia/etiqueta y presupuestos60s. Masterclass Xbox México descargado424MB solo en artefactos, probe VP9 1080p~60fps/Opus1314s; revisar segmentos/licencia y preparar derivados, aún sin distribuir. K03/K06,gates restantes y etapas5–9 pendientes. CI previo40391709529 pasó; comprobar propio tras push. Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios.",
+  "nextAction": "Fuente505ea2d y fixturebfd19c6:3 clips Vanilla Overworld/Nether/End licenciados,12s720p24fpssin audio,3,77MB total; precarga solo imagen siguiente,liberación de src,pausa fuera de pantalla y portada propia del pack con etiqueta genérica. STAGE4-AMBIENT-MEDIA:591 unitarias/61 archivos,69 escenarios distintos (66React+1Strict+2Vue),91Axe/0violaciones/162incompletos,9harness,tipos/lint/builds y4capturas congeladas revisadas;3 recorridos repetidos tras congelar póster no se suman. K02/K04/K17 completos. Próximo:rendimiento60s CPU/GPU/conjunto de procesos,poster vs beta.2 y5arranques equivalentes; después cerrar criterios de4 por su evidencia real y continuar5–9. No repetir orden,búsqueda,copias,perfiles,galerías ni buscar más clips. CI previo40396131488 pasó ambos; comprobar propio tras push. Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios.",
   "stages": [
     {
       "id": 0,
@@ -389,9 +389,17 @@
             {
               "path": "docs/react-migration/STAGE4-RECENT-ORDER.json",
               "sha256": "2cf048843cc244df2671e8b39bac59ea354a7e5ab7c4b04f90359d78d0a39155"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-AMBIENT-MEDIA.md",
+              "sha256": "b17333174911638eb0fd5ac68d45377bf46e70e9f82c099680a0140a3aa7748c"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-AMBIENT-MEDIA.json",
+              "sha256": "629b2376ede2127def12d3e3864f85ed0c2c4974ea78cc5ccbe31372e7258743"
             }
           ],
-          "note": "Orden seleccionada+últimas partidas e identidad independiente al rotar/reordenar/retirar verificados93321cf; galerías/caché previas. Faltan3 clips autorizados,precarga siguiente póster,vídeo genérico junto a portada propia/etiqueta y presupuestos60s. Etapa4 activa."
+          "note": "Orden/identidad,galerías/caché,3clips autorizados,precarga solo siguiente imagen,portada propia junto a ambiente genérico,liberación de fuente y pausa por región invisibles verificados. Fuente505ea2d/fixturebfd19c6,591unitarias/69escenarios. Faltan presupuestos60s CPU/GPU/todos los procesos,memoria comparada y5arranques equivalentes. Etapa4 activa,no publicar."
         },
         {
           "id": "library-instance-launch",

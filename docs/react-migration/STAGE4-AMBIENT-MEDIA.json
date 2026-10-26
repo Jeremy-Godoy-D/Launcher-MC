@@ -1,0 +1,776 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "codeCommit": "bfd19c6abf9d037ff2810bc5263541e832c2e1b7",
+  "packagedImplementationCommit": "505ea2dc8a372c547aeb62c71a367e5a6458263e",
+  "status": "partial-stage-4",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/react-migration.yml",
+      "sha256": "774a0dfe4b1aadec88614ca14fe1b6ed1a7fe1e4812b49319a99fb1a4bbf8e43"
+    },
+    {
+      "path": "launcher/e2e/TESTIDS.react.md",
+      "sha256": "753b2020ea7893f3254f71f40253f796137ad18a3df8222a413724a0bcaa3324"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/27-provider-covers.spec.ts",
+      "sha256": "c065b63ac6428a9242827ccd8539c0d054ba8dd0f028f884c9c3d75f4d890b2a"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/30-ambient-media.spec.ts",
+      "sha256": "d35a3ba359e8e5b02101e0c05e4c9d0fed8af1ff2245ce2833304a2127198223"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/MEDIA.md",
+      "sha256": "e9afcbc8737e952783927bf3824cc76ab74cea48dd743a78887effbeeb03af9b"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/App.tsx",
+      "sha256": "fcdd3fe98eab6351b61dafb1b8705adfc13db6d1338ef7427e5f2fe5cfda9f30"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/ambient.test.ts",
+      "sha256": "a86540cbf28efd51bf6ca8cba6bd8e44464f96f20704d96ee62162600daef50f"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/ambient.ts",
+      "sha256": "8b00f4ab903b9ea9c9d1c2b6eee634ca9968cfbc445929444be3c4f41367e6de"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/assets/ambient/credits.json",
+      "sha256": "f2588bd6a921a8459cc3a3a25870cf5b86f9ffae651f960b48903f360b8af850"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/assets/ambient/manifest.json",
+      "sha256": "ef3fca8d25e445e47b4ae084feeb507b5a56d96a33bf35d53007ac4c0bfeef0a"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/assets/ambient/vanilla-caves-thumb.webp",
+      "sha256": "09a16cd96ed579a111d0c0a983ad9c59b8f97c3d0fd6a0c4b57a81a543779816"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/assets/ambient/vanilla-end-thumb.webp",
+      "sha256": "80701e39cf6436496959feb5866e0279d6966dd9cad80ccb057c97edc84ce8ec"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/assets/ambient/vanilla-end.mp4",
+      "sha256": "1dafb52337feae0e49673011edbd0f4906b0ca0fbc2758f3c10f285dc48b2b94"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/assets/ambient/vanilla-end.webp",
+      "sha256": "72cd2210037af2dae1fd88a0c77483e8d6aa7afd372a80a0925dd0e09bf9ee8c"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/assets/ambient/vanilla-nether-thumb.webp",
+      "sha256": "0deb6285d505b23f1444ae37038b3643d7fbc9ff60913e243bca15babe344d7f"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/assets/ambient/vanilla-nether.mp4",
+      "sha256": "1e4864ff7f4c6b133348aadd3ab0c09902ae82310d291bf548e937e626af5eb5"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/assets/ambient/vanilla-nether.webp",
+      "sha256": "3fd9ad625f8c373b78d99ede696b307c7990b9f0bb6ce17b8382ecfbe43e42b2"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/en.yaml",
+      "sha256": "799c00b71f1748a087adfdea5cf4bfed03ce3f89c76b5632c2eb60c3a3d8f5ef"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/es-ES.yaml",
+      "sha256": "3eeb7e3179d2fb9bdde75ed6e8f76453a07467b81189972088643def6d8d4611"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/styles.css",
+      "sha256": "7392709756211974b3e4bfad19582127c9d7298616e5caf3618b3c1e6d5eb9b4"
+    }
+  ],
+  "validation": {
+    "unit": {
+      "passed": 591,
+      "files": 61,
+      "seconds": 13.117,
+      "newTestsIncluded": 2
+    },
+    "reactFull": {
+      "passed": 66,
+      "duration": "3.8m"
+    },
+    "strict": {
+      "passed": 1,
+      "duration": "4.2s"
+    },
+    "vue": {
+      "passed": 2,
+      "duration": "9.8s"
+    },
+    "distinctScenarios": 69,
+    "harness": {
+      "passed": 9
+    },
+    "axe": {
+      "reports": 91,
+      "violations": 0,
+      "incomplete": 162
+    },
+    "types": "Root pnpm check passed",
+    "lint": "Root and final React pnpm lint passed; source UI detector[]",
+    "builds": "React renderer/host and Vue host; final shared dist Vue; independent packaged EXEs",
+    "visualReview": "Four final frozen provider-cover captures,1200x720/800x400,dark/light; play fully in viewport. Final3 provider cases rerun7.6s after capture-only reduced-motion fixture correction; overlaps full66. Not manual AA/RTL certification.",
+    "priorLiveProviders": "3 prior real-provider cases in STAGE4-PROVIDER-MEDIA not repeated or double-counted",
+    "frozenPosterRepeat": {
+      "passed": 3,
+      "seconds": 7.6,
+      "overlapsFullSuite": true
+    }
+  },
+  "media": {
+    "manifest": "launcher/xmcl-react-ui/src/assets/ambient/manifest.json",
+    "clips": [
+      {
+        "id": "overworld",
+        "width": 1280,
+        "height": 720,
+        "fps": 24,
+        "durationSeconds": 12,
+        "audioStreams": 0,
+        "video": {
+          "file": "vanilla-caves.mp4",
+          "bytes": 1273812,
+          "sha256": "bfc6f5aaa7152584257112b9c24e87fae0c9542f34e1b5490ccabb2a7d7147da"
+        },
+        "poster": {
+          "file": "vanilla-caves.webp",
+          "bytes": 16990,
+          "sha256": "421d755af38b31b9c3ceaa4790dc5f4d6a523f7ad7135123a87d06eb88728d8b"
+        },
+        "thumbnail": {
+          "file": "vanilla-caves-thumb.webp",
+          "bytes": 2932,
+          "sha256": "09a16cd96ed579a111d0c0a983ad9c59b8f97c3d0fd6a0c4b57a81a543779816"
+        }
+      },
+      {
+        "id": "nether",
+        "width": 1280,
+        "height": 720,
+        "fps": 24,
+        "durationSeconds": 12,
+        "audioStreams": 0,
+        "video": {
+          "file": "vanilla-nether.mp4",
+          "bytes": 1291662,
+          "sha256": "1e4864ff7f4c6b133348aadd3ab0c09902ae82310d291bf548e937e626af5eb5"
+        },
+        "poster": {
+          "file": "vanilla-nether.webp",
+          "bytes": 17056,
+          "sha256": "3fd9ad625f8c373b78d99ede696b307c7990b9f0bb6ce17b8382ecfbe43e42b2"
+        },
+        "thumbnail": {
+          "file": "vanilla-nether-thumb.webp",
+          "bytes": 3030,
+          "sha256": "0deb6285d505b23f1444ae37038b3643d7fbc9ff60913e243bca15babe344d7f"
+        }
+      },
+      {
+        "id": "end",
+        "width": 1280,
+        "height": 720,
+        "fps": 24,
+        "durationSeconds": 12,
+        "audioStreams": 0,
+        "video": {
+          "file": "vanilla-end.mp4",
+          "bytes": 1200941,
+          "sha256": "1dafb52337feae0e49673011edbd0f4906b0ca0fbc2758f3c10f285dc48b2b94"
+        },
+        "poster": {
+          "file": "vanilla-end.webp",
+          "bytes": 27816,
+          "sha256": "72cd2210037af2dae1fd88a0c77483e8d6aa7afd372a80a0925dd0e09bf9ee8c"
+        },
+        "thumbnail": {
+          "file": "vanilla-end-thumb.webp",
+          "bytes": 4854,
+          "sha256": "80701e39cf6436496959feb5866e0279d6966dd9cad80ccb057c97edc84ce8ec"
+        }
+      }
+    ],
+    "totalVideoBytes": 3766415,
+    "sourceAuthor": "Xbox México",
+    "sourceLicense": "CC BY3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Xbox_Masterclass_%E2%80%93_TIPS_y_consejos_para_ser_un_experto_en_Minecraft.webm",
+    "sourceBytes": 424513524,
+    "sourceSha256": "b7e3e59617ea42da54962f056bc6b1ba6722185a0d8fe18715d886a6a3ff7290",
+    "sourceDistribution": "Original ignored,not bundled; local crops/forward-reverse/slowing described in MEDIA.md/credits.json. No AI or shader installation.",
+    "observations": "All3 derivatives:1280x720,H.264,constant24fps,288frames,12s,one video stream,no audio,full decode PASS,no timing anomalies. Skill media-analysis observations separate from artistic decisions.",
+    "thumbnailStatus": "Thumbnails and hashes recorded in source manifest; current UI uses full posters,not thumbnail files."
+  },
+  "behavior": [
+    "Stable decorative scene assignment by instance path; no world reads or inferred dimension/version/gameplay.",
+    "Project metadata/ID still resolve own cover; own cover displayed beside title over generic Vanilla video,with explicit generic ambience label. Failed own images hidden,not replaced as project identity.",
+    "Only one local video element; previous src cleared/load released on unmount,including StrictMode cleanup/setup. No remote video source.",
+    "Only next image preload link; removed off Home,in performance,reduced motion or disabled carousel. No second video preload.",
+    "IntersectionObserver pauses both video and timer outside the viewport; existing focus,interaction,dialog,game,minimize,reduced-motion and manual pause policies preserved.",
+    "Disabled video or corrupt local MP4 retain decoded image and usable launch controls."
+  ],
+  "regressions": [
+    "First native pass caught partially clipped Play at800x400 after adding56px cover; fixed40px default/32px compact cover without removing viewport assertion.",
+    "New test reload initially stayed in Library; fixture now explicitly navigates Home. Scroll target corrected to actual page-scroll region.",
+    "Playwright route did not intercept custom protocol video; decoder negative now loads an invalid local MP4 Blob and observes real decoder error. Not a claim of network-failure coverage.",
+    "Final focused5 passed12.8s; overlaps full66,not counted twice."
+  ],
+  "commands": {
+    "unit": "Exact workflow Vitest command plus --reporter=json --outputFile=e2e/artifacts/ambient-units-full.json",
+    "react": "Exact workflow React smoke command plus --output=artifacts/ambient-react-full",
+    "strict": "XMCL_REACT_CLIENT_HARNESS=1; pnpm --dir e2e exec playwright test specs/react-migration/04-client-contracts.spec.ts --reporter=line",
+    "vue": "pnpm --dir e2e exec playwright test specs/react-migration/03-vue-compatibility.spec.ts specs/react-migration/08-vue-onboarding.spec.ts --reporter=line",
+    "checks": [
+      "pnpm check",
+      "pnpm lint",
+      "pnpm --dir xmcl-react-ui lint",
+      "LAUNCHER_RENDERER=react; pnpm gen:testids",
+      "node --test launcher/scripts/react-migration.test.mjs",
+      "node launcher/scripts/react-migration.mjs check"
+    ],
+    "media": "media-analysis analyze <bundled clip> --kind media_probe --kind video_format --kind stream_layout --kind integrity --kind timing --json; actual cli via from media_analysis.cli import main and explicit workspace/input/cache roots"
+  },
+  "acceptedParityRows": [],
+  "remaining": [
+    "Stage4 performance60s CPU/GPU/all processes,memory versus beta.2 and5 equivalent starts; no consumption certification here.",
+    "K01/K03/K06 and stage4 gates still pending; stages5–9,real Java/game,disposable NSIS/delta,manual AA/RTL and production release pending. Microsoft deferred; Vue default.",
+    "Instance-header video belongs to stage5. Thumbnail files are source metadata,not consumed by UI yet."
+  ],
+  "previousRemoteCI": {
+    "run": "https://github.com/Jeremy-Godoy-D/Launcher-MC/actions/runs/40396131488",
+    "head": "834fdc39bcdd9703c10e12d8767e3f38bde88f0a",
+    "conclusion": "success React and Vue"
+  },
+  "currentRemoteCI": "pending after push",
+  "packages": [
+    {
+      "renderer": "react",
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/Grimo Launcher.exe",
+      "bytes": 238238720,
+      "sha256": "9476739eca3bb2e5da4435a51d29053c3f7d24a7456d6a1336677b58b05a7925"
+    },
+    {
+      "renderer": "react",
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/resources/app.asar",
+      "bytes": 26335117,
+      "sha256": "0714474733fe2012ea98d71b401f7932a46a1b24a6ca54c1dbabf65bb399b9f5"
+    },
+    {
+      "renderer": "vue",
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/Grimo Launcher.exe",
+      "bytes": 238238720,
+      "sha256": "13b8b46859deac9edec754c764ac8dfe3c68e41126a301481cae94b353c8ed0c"
+    },
+    {
+      "renderer": "vue",
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/resources/app.asar",
+      "bytes": 23864810,
+      "sha256": "16601ce9d4c0103a0827cadde5c4d8591fc199c24823f0dd18af633d369458fd"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/ambient-analysis-doctor.json",
+      "bytes": 7456,
+      "sha256": "3e5a7fc1cf6dec4640951106184dbecb8089e670c1de578ddeb1f98048872ac8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-check.log",
+      "bytes": 40,
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-confirmed/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-confirmed/react-migration-27-provide-2a1a8-le-at-both-sizes-and-themes-electron-es-ES/provider-cover-accessibility.json",
+      "bytes": 657331,
+      "sha256": "616eb969cc479cd278f8d2ddaeba94b2a67f19ffa967e47bba5afcc054414dcb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-confirmed/react-migration-30-ambient-10b87-nd-old-sources-are-released-electron-es-ES/ambient-decode.json",
+      "bytes": 744,
+      "sha256": "15bddae64f4ce8c15122acb00f3e8e52c8cbc4189138758784018dd8520c2d67"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-confirmed.log",
+      "bytes": 3150,
+      "sha256": "f42f14211c3a7f900be12ea1105d0f9d55c81aad2bca018f8e99c4a300606c2c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-contact-dimensions.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-contact-dimensions.png",
+      "bytes": 1001102,
+      "sha256": "5fd086a12493b6fb0775293cc9b69ab2e7d494581a97abd22b337edec6db61e5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-contact-end.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-contact-end.png",
+      "bytes": 2054514,
+      "sha256": "9c254eb502c483d271d93d76bd22a199392a901570162044ec5a2d8463bb733e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-detector.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-end-analysis.json",
+      "bytes": 9633,
+      "sha256": "a25e39bc53453369db941dd44f779819a1c14ebbe28761dfd54f9b42bbc08661"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-end-encode.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-end-review.png",
+      "bytes": 173928,
+      "sha256": "b839768287e6304a02b670900d5609400f9b4ffee74af60cf1a3af309df1de32"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-final-caves-analysis.json",
+      "bytes": 22386,
+      "sha256": "cd3946f0d3ae60596d4fa9579db514f15de757a04f7703842b338ae891cb1db5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-final-end-analysis.json",
+      "bytes": 21803,
+      "sha256": "feb7436ac2be2ad772c0c04c69c985544dd1725c297a154791da2a7db9ce1d17"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-final-nether-analysis.json",
+      "bytes": 21829,
+      "sha256": "447da49c6c3ef391ceb6084b71bba092b4d41cd7e3efcaae1438bd3b7e9acaae"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-harness-tests.log",
+      "bytes": 827,
+      "sha256": "c40670362fdd54bd98edbb2c4f26b104ed738e07ab0e349c82a7ce77b583bf88"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-lint-final.log",
+      "bytes": 162,
+      "sha256": "453ba1137ff7bb0450bda3ab655d614b7346489d7d66514ae7fe089b78de0ceb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-lint-root.log",
+      "bytes": 1145,
+      "sha256": "19243e96dbb6689e38909340ed5c68dbf5ec6630bd67023a678d49c0d4ba238d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-lint.log",
+      "bytes": 162,
+      "sha256": "94b2310bf00e31f82d6ecd09251b5c7edbc06912650dff8ad5305aafef9c9861"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-masterclass-contact-1100.png",
+      "bytes": 1634450,
+      "sha256": "ec8b782c466eb0e8ece88be14716f67fd2c8b361dfbbcc4a8656d78b270eb0fe"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-masterclass-contact.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-masterclass-download.log",
+      "bytes": 79,
+      "sha256": "d4344e98ede9e3acfd3c593ff09033fb17885165b75e97ffd44e73fcb489fbd2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-masterclass-metadata.json",
+      "bytes": 7531,
+      "sha256": "ef3d367cc545ba99566c0232de994489b4206a0d0f99fa61ec71247b8e9e8da3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-masterclass-probe.json",
+      "bytes": 4970,
+      "sha256": "71d68f925624d81720ab0d30eb000b2e463707677b7a9f469e4ff04b0c6b4e8d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-masterclass-source.webm",
+      "bytes": 424513524,
+      "sha256": "b7e3e59617ea42da54962f056bc6b1ba6722185a0d8fe18715d886a6a3ff7290"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-narrow-fixed.log",
+      "bytes": 6237,
+      "sha256": "4b037f8bac6e83a41fe1317dbc285dc25a2c568fcad0519208071a3200025275"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-narrow.log",
+      "bytes": 11539,
+      "sha256": "55223337970805477070515547a8c8c574bc6dfcf1067c85eec99d818d6e1ee3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-nether-analysis.json",
+      "bytes": 9643,
+      "sha256": "94f184ef9d496ee9fa26a90b02bd94659caccb8cb397de50011a0b7b9281344e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-nether-encode.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-nether-review.png",
+      "bytes": 238110,
+      "sha256": "f924a26c4e449a214b108a7ada5a343694aee6d2ff3e6630b3bb82cd0a5379f4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-package-build.log",
+      "bytes": 2580,
+      "sha256": "bbd00e7ab3df2af0e2500d0217248d344fda18035cd4ce260f692617f65e31cf"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-package-final.log",
+      "bytes": 2580,
+      "sha256": "73daf60c33127cdf2f26cf717827d73cadc1398a72e2f82e0be320b8dc78a371"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-posters-final/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-posters-final/react-migration-27-provide-2a1a8-le-at-both-sizes-and-themes-electron-es-ES/provider-cover-accessibility.json",
+      "bytes": 652949,
+      "sha256": "bedfa4f6ee2276d4a6af09a6d91727487b6f3d94806728b092ec876eed5d0bed"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-posters-final.log",
+      "bytes": 2045,
+      "sha256": "a2fb55527d2fb9185e654a1c0c593704c4174583f6e6d5fc4603c772d342c1bd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/accessibility.json",
+      "bytes": 277024,
+      "sha256": "c4cb9d4785b1d56bf837effede3ffd37e76faa97c8de72076aaf57bcd0e8a706"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-1200-catalog.png",
+      "bytes": 487297,
+      "sha256": "1622780c7af71e10b0a6e9c43d1110a26e15a4b56539abbac0ff325a648e2209"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-1200-home.png",
+      "bytes": 562224,
+      "sha256": "2949e3e23543959197324a6f3c21af0cfca50ca711d72a496bc0e6573cee5858"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-1200-library.png",
+      "bytes": 373280,
+      "sha256": "1d8d5f4d32282d0355c673622c2e6b20a8fbeac0c541598513e6c695b17fc5b1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-800-catalog.png",
+      "bytes": 199350,
+      "sha256": "9fffac40ec8ebb9c8cdfdc5515af08073fa1a4ade7da61aa997e74e97635a3c7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-800-home.png",
+      "bytes": 268381,
+      "sha256": "1ae2b282e54d1ebc12471327f39c1fd2999778d7717a414c487f73dc10f2df9f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-800-library.png",
+      "bytes": 174920,
+      "sha256": "cd0ea816a37c1950f5af8cfae471e1be4bf70f9c4f34ae316f15d61dfca22f7b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-1200-catalog.png",
+      "bytes": 450315,
+      "sha256": "2f46fffe8c5ecad057c056eec17eff8858873a3cd65f7c609f835343328ca872"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-1200-home.png",
+      "bytes": 536560,
+      "sha256": "ed3471482b2ccd7830ea57b50dca4fd79216c050137807a44518dd0954bc025b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-1200-library.png",
+      "bytes": 324586,
+      "sha256": "32def8e06dcaca4266914eb7f6e6926cab449e7e9e5302014f4628b4a46bf426"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-800-catalog.png",
+      "bytes": 175208,
+      "sha256": "4b4e6e1c454e0c7af9f12c94b6e5d30604a45909a45fd6a06eb1ebc22b6f7eac"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-800-home.png",
+      "bytes": 250408,
+      "sha256": "c77f8df14063817e24b9c6edff1085472183ed42e7e20a0e5527a89b4bcf1b30"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-800-library.png",
+      "bytes": 147547,
+      "sha256": "f6eadd32e9674737d2ec41efc19cfc7021f19b5923064ac88faac7181f0bf47a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-02-package-ecf1f-d-decodes-its-shipped-video-electron-es-ES/package-smoke.json",
+      "bytes": 277,
+      "sha256": "7f9f489555761c6192eaf2f00dec5d7fbf09c708319f0328e316c672a0cf93d6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-05-prefere-fb385-windows-and-runtime-locales-electron-es-ES/preferences-i18n.json",
+      "bytes": 320,
+      "sha256": "b47fb38f873fc32fb1e15510fa777b4a484ff521335547ba87b8a32318f373a3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-es-ES/accounts-accessibility.json",
+      "bytes": 879176,
+      "sha256": "b8524abf17be389e32fa9dd76eefe1fe81a9238e4f38cd396d7bfed809f59f3b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-es-ES/accounts.json",
+      "bytes": 214,
+      "sha256": "52734c150ac2fc6295bb147075c7cbd36571bbbcf77233aea80a515c200de297"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-es-ES/onboarding-accessibility.json",
+      "bytes": 492318,
+      "sha256": "9dd7e3595a547e905d251d8fa601f8b87e75b7edb265074575fb1cebd997a1f2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-es-ES/onboarding.json",
+      "bytes": 226,
+      "sha256": "9dfafd8d6db47338f002649ba668d7f5c6758aceb74862282633b25087ef5d3b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-09-library-187cb-ever-launches-from-browsing-electron-es-ES/library-accessibility.json",
+      "bytes": 1349596,
+      "sha256": "d09e831f57127dfc835245c918536c459467dddbeae999c69c460f0d10da225f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-10-creatio-3c436-s-within-the-minimum-window-electron-es-ES/creation-accessibility.json",
+      "bytes": 737412,
+      "sha256": "bc2bbdef48826d443f86a7444ad43442e524ee6ac42aef7411eefa03df22836d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-12-launch--7dc1c--launch-before-confirmation-electron-es-ES/java-fallback-accessibility.json",
+      "bytes": 108038,
+      "sha256": "3adb119c4e2de377713df0939485519eaccdab725d82567b7e4dcf56774e68fe"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES/launch-accessibility.json",
+      "bytes": 455462,
+      "sha256": "ecbd9889f16b7445c075f533696b425b7c0a931c1f70bdf2251b0a26f932de1d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES/launch-focus-before-interaction.json",
+      "bytes": 164,
+      "sha256": "0f4a606700229749245ba9881cf1e379eb3d666ee749631595f314f3641d2d3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-13-brandin-3fe98-eeps-existing-launcher-data-electron-es-ES/branding.json",
+      "bytes": 316,
+      "sha256": "e8cced0d84d13db3d475202ecc52fc2503cce117ee79bf9a8433f1fd662e07b1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-14-imports-949dd-e-links-without-duplicating-electron-es-ES/imports-accessibility.json",
+      "bytes": 966976,
+      "sha256": "7c192940a22ebcb71730fb7d0c63c9f1212647b74ca4f039ed2f4591353da6c9"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-15-prism-v-6545e-ve-version-libraries-safely-electron-es-ES/prism-accessibility.json",
+      "bytes": 854668,
+      "sha256": "6ce601936e8f21e2c478e3eb5ca51162b1f6049547a5c28cb9f102b7e1b8d7b6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-16-vanilla-986e7--personal-launcher-settings-electron-es-ES/vanilla-accessibility.json",
+      "bytes": 856303,
+      "sha256": "bee46e787f6a2aa2b4b4f5d34b4d0cf0abfa8bcfcf5a5ea6c158ec8a80761058"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-19-library-98b63-folder-after-a-full-restart-electron-es-ES/operations-accessibility.json",
+      "bytes": 597910,
+      "sha256": "53feddc884b384648901d623c2855e46eff32e6e721d58648071f1610f2a928c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-20-local-e-45c0f-le-at-both-sizes-and-themes-electron-es-ES/export-accessibility.json",
+      "bytes": 706601,
+      "sha256": "50b48c9fd442a3980355977c8d11249c166b96ad57e583875313310660c3ddcc"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-21-group-m-b0126--or-unknown-edition-members-electron-es-ES/groups-accessibility.json",
+      "bytes": 604150,
+      "sha256": "32b923d792512d3d9e325c56aae957abb10794d9d52d3563740a4f76111ca5c3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-22-copy-re-68334-rting-the-packaged-launcher-electron-es-ES/copy-accessibility.json",
+      "bytes": 615240,
+      "sha256": "aad3a448b3394f7420b9870371bcd71644083ccb1b498d3aeb7730d0d8f13b89"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-es-ES/large-library-accessibility.json",
+      "bytes": 4347600,
+      "sha256": "dfe6ba41f0763ef8a5eb35f0f0a21569e0950d4365330853f2e29a354e4f5398"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-24-shared--263ba-ublishing-a-partial-archive-electron-es-ES/cancel-export-accessibility.json",
+      "bytes": 151204,
+      "sha256": "59fc1c6568a98a9e60e37326a0f91d583a4bd8ebca465d181f638e1e0224968d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-24-shared--c1d8a--export-only-reviewed-bytes-electron-es-ES/shared-accessibility.json",
+      "bytes": 789589,
+      "sha256": "f57e4db8bfac3ce063fff2ea8e026d18de70cbbeb672a81ab16bda0f9fef0c91"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-24-shared--cf04b-fore-any-destination-exists-electron-es-ES/cancel-copy-accessibility.json",
+      "bytes": 126038,
+      "sha256": "d0f9544bda94281c2502bb3b978a3b283034ef6aa7616f686e0cba6f42ad8797"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-25-profile-b4fcc--including-packaged-restart-electron-es-ES/profile-appearance-accessibility.json",
+      "bytes": 593030,
+      "sha256": "0a4d047e13d6434c222bbf5db8cc182153470cd3be8e777de5ed9e055e7fe0aa"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-26-instanc-ea455-iginals-identity-and-worlds-electron-es-ES/instance-icon-accessibility.json",
+      "bytes": 617422,
+      "sha256": "ffb5268468f8920acac146a48499320a96346d2b40b872b23cbace03c5a97e19"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-27-provide-2a1a8-le-at-both-sizes-and-themes-electron-es-ES/provider-cover-accessibility.json",
+      "bytes": 657331,
+      "sha256": "bab0a376b1e8c60d5c90bf94933794460aabdeed2354d368e07f6ecf0872f928"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-28-library-0aea5-replacing-destination-edits-electron-es-ES/legacy-groups-accessibility.json",
+      "bytes": 372495,
+      "sha256": "70f1394d50fc21fbeae54abca0ce22c0ca36f173cab1b908b15bbcda7886a7aa"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full/react-migration-30-ambient-10b87-nd-old-sources-are-released-electron-es-ES/ambient-decode.json",
+      "bytes": 744,
+      "sha256": "9e996741d2984d2124a39f79f675a2bbcde38c75e44bb75afc5d19a5a8bca6ca"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-react-full.log",
+      "bytes": 15627,
+      "sha256": "6c9e83e97d9d36d87ef76a6d465a9f7ee4dfa8cba938d604b218bce830ec179b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-renderer-build.log",
+      "bytes": 3994,
+      "sha256": "361995c9908508154a6f5c2a0fab95daf7b6337a91c2963dfb77c597f8539eff"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-renderer-final.log",
+      "bytes": 3994,
+      "sha256": "da9371f06feb73167dbdf5806f4f2d34e4c556748ba0b317f66ced9b5291d076"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-strict/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-strict/react-migration-04-client--bbc79--and-releases-all-consumers-electron-es-ES/client-contracts.json",
+      "bytes": 282,
+      "sha256": "95f93e0be1f7594c7e08435db0cb6ee691c5709e6b7fdc9939918582981294d5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-strict.log",
+      "bytes": 1442,
+      "sha256": "1813651e54c369a0c591c123df2a9ec48630a744e491aa60a1a9c75620ddf6ed"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-testids-final.log",
+      "bytes": 86,
+      "sha256": "15e12f252d3efd087fab95bb9e8a3a56979afb942f7be780d5b091a5c4d37f91"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-testids.log",
+      "bytes": 86,
+      "sha256": "15e12f252d3efd087fab95bb9e8a3a56979afb942f7be780d5b091a5c4d37f91"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-types-root.log",
+      "bytes": 562,
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-units-full.json",
+      "bytes": 205077,
+      "sha256": "b11bbf980820e07dc68e6d4a3b9184364ca4419b8369dfcb343a152f650c4a19"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-units-full.log",
+      "bytes": 116,
+      "sha256": "2a0e8fe0aebc48d206a05cb86d5eca4c291cf0f002c7edddb00979c4113bc3a3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-units-narrow.log",
+      "bytes": 245,
+      "sha256": "3eef5e2be5ff21271409013abb1ee6396225afda19da7840bf044212b573ca0d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-vue/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-vue-package.log",
+      "bytes": 2545,
+      "sha256": "3d2376ec715cc957df4be1be0ae79c5b80d2296c90479570e6fdfb7ad2a5d6d7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-vue.log",
+      "bytes": 1448,
+      "sha256": "fec8a49fc35676d4ac1ae0f4a9384cbd32aafefae2a87c78f293e659cb2ed3a4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-27-provider-covers-spec-ts-native-cached-provider-covers-survive/provider-cover-dark-1200.png",
+      "bytes": 529693,
+      "sha256": "f4a1b1dd2a01359531fe00e3fb4c432791a41c145ddefc697f4ac2d00e8ee825"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-27-provider-covers-spec-ts-native-cached-provider-covers-survive/provider-cover-dark-800.png",
+      "bytes": 224286,
+      "sha256": "55ed52d61ab65f5f0142da6ab953a9448f12f2fae634207f4187ca80405969cd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-27-provider-covers-spec-ts-native-cached-provider-covers-survive/provider-cover-light-1200.png",
+      "bytes": 505129,
+      "sha256": "2882aea07a095c27c843555b5aa869cd15fb02e56caba4c4bd2c50089df298ee"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-27-provider-covers-spec-ts-native-cached-provider-covers-survive/provider-cover-light-800.png",
+      "bytes": 210157,
+      "sha256": "c9150f8c83dedce90c258f1ad910a78a85481c256ba0be2d1adfbe70e9446a43"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ambient-harness-final.log",
+      "sha256": "161849bca366cb0707d554a0b4360a755da3e871240ed2ad7718a07af5165a8b",
+      "bytes": 142
+    }
+  ]
+}
