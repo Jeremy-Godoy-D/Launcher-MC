@@ -108,6 +108,52 @@ describe('confirmed Prism standalone import', () => {
     await writeFile(join(source, 'versions/custom-client/custom-client.jar'), 'changed source')
     await expect(preparePrismFolderVersion(source, 'Alias pack', preview!.fingerprint, destination, refresh)).rejects.toThrow('source changed')
   })
+  const base = () => ({ id: '1.7.10', mainClass: 'vanilla.Main', minecraftArguments: '--username ${auth_player_name}', libraries: [{ name: 'base:library:1' }], downloads: { client: { url: 'https://example.com/client.jar', sha1: 'a'.repeat(40), size: 10 } }, javaVersion: { majorVersion: 8, component: 'jre-legacy' } })
+  async function partial() {
+    await writeFile(join(source, 'patches/net.minecraft.json'), JSON.stringify({ uid: 'net.minecraft', mainClass: 'custom.Main', '+jvmArgs': ['-Dcustom=true'], '+tweakers': ['custom.Tweaker'], compatibleJavaMajors: [17, 21], libraries: [{ name: 'example:local:1', 'MMC-hint': 'local' }] }))
+  }
+  it.each(['source', 'managed'])('completes partial patches from a %s base and pins it at confirmation', async location => {
+    await partial()
+    const file = join(source, '.minecraft/versions/1.7.10/1.7.10.json')
+    const resolve = vi.fn().mockResolvedValue(Buffer.from(JSON.stringify(base())))
+    if (location === 'source') { await mkdir(join(source, '.minecraft/versions/1.7.10'), { recursive: true }); await writeFile(file, JSON.stringify(base())) }
+    const preview = await inspectPrismFolderVersion(source, resolve)
+    expect(await readdir(root)).toEqual(['source'])
+    expect(resolve).toHaveBeenCalledTimes(location === 'source' ? 0 : 1)
+    const id = await preparePrismFolderVersion(source, 'Partial', preview!.fingerprint, destination, refresh, resolve)
+    const version = await Version.parse(destination, id!)
+    expect(version.mainClass).toBe('custom.Main')
+    expect(version.minecraftVersion).toBe('1.7.10')
+    expect(version.javaVersion.majorVersion).toBe(17)
+    expect(version.arguments.game).toEqual(['--username', '${auth_player_name}', '--tweakClass', 'custom.Tweaker'])
+    expect(version.arguments.jvm).toContain('${classpath}')
+    expect(version.arguments.jvm).toContain('-Dcustom=true')
+    expect(version.libraries.map(library => library.name)).toEqual(['base:library:1', 'example:local:1'])
+    const changed = { ...base(), mainClass: 'changed.Main' }
+    if (location === 'source') await writeFile(file, JSON.stringify(changed))
+    else resolve.mockResolvedValue(Buffer.from(JSON.stringify(changed)))
+    await expect(preparePrismFolderVersion(source, 'Partial', preview!.fingerprint, destination, refresh, resolve)).rejects.toThrow('source changed')
+    expect(refresh).toHaveBeenCalledTimes(1)
+  })
+  it('does not fetch metadata for complete patches and rejects missing loader patches', async () => {
+    const resolve = vi.fn()
+    await inspectPrismFolderVersion(source, resolve)
+    expect(resolve).not.toHaveBeenCalled()
+    await partial()
+    await writeFile(join(source, 'mmc-pack.json'), JSON.stringify({ formatVersion: 1, components: [{ uid: 'net.minecraft', version: '1.7.10' }, { uid: 'net.minecraftforge', version: '10' }] }))
+    await expect(inspectPrismFolderVersion(source, resolve)).rejects.toThrow('Missing Prism component')
+    expect(resolve).not.toHaveBeenCalled()
+  })
+  it.each(['identity', 'inheritance', 'protocol', 'deep'])('rejects an invalid partial %s base', async kind => {
+    await partial()
+    const value: any = base()
+    if (kind === 'identity') value.id = 'wrong'
+    if (kind === 'inheritance') value.inheritsFrom = 'missing'
+    if (kind === 'protocol') value.downloads.client.url = 'file:///private'
+    if (kind === 'deep') { let node = value; for (let i = 0; i < 66; i++) node = node.nested = {} }
+    await expect(inspectPrismFolderVersion(source, async () => Buffer.from(JSON.stringify(value)))).rejects.toThrow()
+    expect(await readdir(root)).toEqual(['source'])
+  })
   it.each(['asset', 'url', 'argument', 'order', 'checksum'])('rejects unsafe %s metadata before confirmation', async kind => {
     const file = join(source, 'patches', 'net.minecraft.json')
     const patch = JSON.parse(await readFile(file, 'utf8'))

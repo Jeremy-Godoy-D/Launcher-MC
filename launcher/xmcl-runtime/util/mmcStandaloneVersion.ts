@@ -13,13 +13,31 @@ export interface MmcStandaloneVersionOptions {
   refreshVersion: (id: string) => Promise<unknown>
   includePatchArguments?: boolean
   client?: ReturnType<typeof isolateImportedClient>
+  baseVersion?: Version
 }
 
-export function resolveMmcStandaloneVersion(manifest: MMCModpackManifest, includePatchArguments = false) {
-  const version = getMmcVersionFromManifest(manifest, 'mmc')
-  if (!version || !includePatchArguments) return version
+export function resolveMmcStandaloneVersion(manifest: MMCModpackManifest, includePatchArguments = false, baseVersion?: Version) {
   const ordered = manifest.json.components.map((component, index) => ({ patch: manifest.patches?.[component.uid], index }))
     .filter(item => !!item.patch).sort((a, b) => (a.patch!.order ?? a.index) - (b.patch!.order ?? b.index))
+  let merged = manifest
+  if (baseVersion) {
+    const uid = 'grimo.minecraft.base'
+    if (manifest.json.components.some(component => component.uid === uid)) throw new Error('Reserved Prism base component')
+    const legacy = ordered.map(({ patch }) => patch!.minecraftArguments).filter(value => typeof value === 'string').at(-1)
+    const arguments_ = Version.normalizeVersionJson(JSON.stringify(baseVersion), '').arguments
+    if (legacy !== undefined) arguments_.game = Version.normalizeVersionJson(JSON.stringify({ id: 'base', minecraftArguments: legacy }), '').arguments.game
+    merged = {
+      ...manifest,
+      json: { ...manifest.json, components: [{ uid }, ...manifest.json.components] },
+      patches: {
+        ...Object.fromEntries(Object.entries(manifest.patches || {}).map(([key, patch]) => [key, patch.downloads ? { ...patch, downloads: { ...baseVersion.downloads, ...patch.downloads } } : patch])),
+        [uid]: { ...baseVersion, uid, order: -Number.MAX_VALUE, minecraftArguments: undefined, arguments: arguments_ },
+      },
+    }
+  }
+  const version = getMmcVersionFromManifest(merged, 'mmc')
+  if (version && baseVersion?.logging) version.logging = baseVersion.logging
+  if (!version || !includePatchArguments) return version
   const extraJvm = ordered.flatMap(({ patch }) => patch!['+jvmArgs'] || [])
   const tweakers = ordered.flatMap(({ patch }) => patch!['+tweakers'] || [])
   if (extraJvm.length || tweakers.length) {
@@ -35,9 +53,9 @@ export function resolveMmcStandaloneVersion(manifest: MMCModpackManifest, includ
  * ZIP and directory imports share IDs, local-library validation and registration.
  */
 export async function persistMmcStandaloneVersion({
-  manifest, name, gameDirectory, readLocalLibrary, refreshVersion, includePatchArguments, client,
+  manifest, name, gameDirectory, readLocalLibrary, refreshVersion, includePatchArguments, client, baseVersion,
 }: MmcStandaloneVersionOptions): Promise<string | undefined> {
-  const version = resolveMmcStandaloneVersion(manifest, includePatchArguments)
+  const version = resolveMmcStandaloneVersion(manifest, includePatchArguments, baseVersion)
   if (!version) return undefined
   if (client) {
     version.jar = client.id
