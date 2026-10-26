@@ -217,6 +217,8 @@ react:
     minimize: Minimizar
     maximize: Maximizar
   operations:
+    exportTitle: Exportar instancia
+    exportHelp: Revisa qué archivos se guardarán en una copia local.
     optionsTitle: 'Opciones de {name}'
     optionsHelp: Administra esta instancia. Las acciones se aplican a la carpeta indicada.
     editTitle: Editar instancia
@@ -266,3 +268,34 @@ react:
     sortrecent: Más recientes
     filterGroup: Filtrar por grupo
     allGroups: Todos los grupos
+  export:
+    action: Exportar archivos
+    format: Formato del archivo
+    offline: Copia local con juego (.zip)
+    offlineHelp: Incluye la versión, cliente, bibliotecas y assets ya instalados. Requiere todos esos archivos disponibles. Para recuperar la copia, descomprímela e importa la carpeta Vanilla; la importación actual puede necesitar volver a descargar assets. Java se administra por separado.
+    portableHelp: Incluye los archivos seleccionados dentro del paquete. Minecraft y los loaders se descargarán al importarlo. Esta acción guarda un archivo local.
+    customVersion: Esta versión personalizada necesita la copia local para conservar su cliente y metadatos.
+    version: Versión de la copia
+    chooseFolder: Elegir carpeta de destino
+    privacy: Mundos y otros archivos personales empiezan desmarcados. Se excluyen cuentas y credenciales conocidas. Revisa también tus archivos de configuración antes de compartir la copia. No se sobrescriben archivos existentes.
+    reviewing: Revisando archivos…
+    count: '{selected} de {total} archivos seleccionados'
+    search: Buscar archivos para exportar
+    files: Archivos de la instancia
+    refine: Se muestran los primeros 200 resultados. Escribe una búsqueda más precisa para encontrar el resto.
+    empty: No hay archivos que coincidan.
+    reviewAgain: Volver a revisar archivos
+    saved: Copia guardada.
+    reveal: Mostrar archivo en su carpeta
+    save: Guardar copia
+    cancel: Cancelar exportación
+    working: Preparando y comprimiendo la copia…
+    reviewFailed: No se pudieron revisar los archivos. Comprueba el acceso a la carpeta; los enlaces a otras carpetas no se exportan. Pulsa «Volver a revisar archivos» para reintentar.
+    failed: No se guardó la copia. Puede haberse cancelado o faltar acceso, espacio o archivos del juego. Comprueba el destino y vuelve a revisar antes de reintentar.
+    ExportSourceChanged: Los archivos o datos cambiaron desde la revisión. Pulsa «Volver a revisar archivos» antes de guardar.
+    ExportDestinationExists: Ya existe una copia con ese nombre. Cambia la versión o la carpeta de destino.
+    ExportNeedsOffline: Esta versión necesita el formato «Copia local con juego» para conservar su cliente personalizado.
+    ExportMissingRuntime: La versión del juego no está instalada. Instálala o repara sus archivos antes de crear esta copia.
+    ExportGameRunning: Cierra la partida de esta instancia antes de exportarla.
+    ExportInvalid: Revisa la versión y el destino. Elige una carpeta fuera de la instancia.
+    ExportInstanceUnavailable: La instancia ya no está disponible. Cierra el diálogo y revisa la biblioteca.

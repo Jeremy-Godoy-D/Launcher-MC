@@ -104,6 +104,21 @@ export interface ExportModpackResult {
   offline?: string
 }
 
+export type LocalExportFormat = 'modrinth' | 'curseforge' | 'offline'
+export interface InstanceExportPreview {
+  fingerprint: string
+  files: { path: string; size: number; sha256: string; selected: boolean }[]
+  portable: boolean
+}
+export interface ReviewedInstanceExport {
+  instancePath: string
+  fingerprint: string
+  files: string[]
+  format: LocalExportFormat
+  version: string
+  destinationDirectory: string
+}
+
 export interface ModrinthLinkagePreviewEntry {
   /** The instance-relative path of the file, e.g. `mods/sodium.jar`. */
   path: string
@@ -233,6 +248,8 @@ export class ModpackState {
  * For json format modpack like FTB, you can use the `InstanceIOService` to do the actual install operation.
  */
 export interface ModpackService {
+  previewInstanceExport(instancePath: string): Promise<InstanceExportPreview>
+  exportReviewedInstance(options: ReviewedInstanceExport): Promise<string>
   /**
    * Install the modpack from market to local cache.
    * @returns The installed modpack path

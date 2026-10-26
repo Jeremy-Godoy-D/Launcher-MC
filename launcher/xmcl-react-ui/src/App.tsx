@@ -161,7 +161,7 @@ function InstanceCard({
 }) {
   const { t } = useI18n()
   return (
-    <article key={instance.id} className={`instance-card ${view === 'list' ? 'instance-row' : ''}`} onContextMenu={event => { event.preventDefault(); event.currentTarget.querySelector<HTMLButtonElement>('.instance-card-actions button:last-child')?.focus(); onOptions(instance) }} onKeyDown={event => {
+    <article key={instance.id} data-instance-path={instance.id} className={`instance-card ${view === 'list' ? 'instance-row' : ''}`} onContextMenu={event => { event.preventDefault(); event.currentTarget.querySelector<HTMLButtonElement>('.instance-card-actions button:last-child')?.focus(); onOptions(instance) }} onKeyDown={event => {
       if (event.key === 'ContextMenu' || event.key === 'F10' && event.shiftKey) { event.preventDefault(); onOptions(instance) }
     }}>
       <button

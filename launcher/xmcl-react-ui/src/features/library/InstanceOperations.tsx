@@ -1,6 +1,6 @@
 import { useRef, useState, type RefObject } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
-import { ArrowDown, ArrowUp, Copy, FolderOpen, Layers, Pencil, Trash2, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, Copy, Download, FolderOpen, Layers, Pencil, Trash2, X } from 'lucide-react'
 import { InstanceServiceKey } from '@xmcl/runtime-api/src/services/InstanceService'
 import { LaunchServiceKey } from '@xmcl/runtime-api/src/services/LaunchService'
 import { BaseServiceKey } from '@xmcl/runtime-api/src/services/BaseService'
@@ -9,9 +9,10 @@ import { useI18n } from '../../i18n'
 import { useLibrary } from './context'
 import type { SavedInstance } from './model'
 import { metadataDraft, metadataEdit } from './operations'
+import { ExportInstance } from './ExportInstance'
 import './operations.css'
 
-type Mode = 'options' | 'edit' | 'duplicate' | 'remove' | 'group'
+type Mode = 'options' | 'edit' | 'duplicate' | 'remove' | 'group' | 'export'
 export function InstanceOperations({ instance, onClose, onCreated, returnFocus }: { instance: SavedInstance; onClose: () => void; onCreated: (path: string) => void; returnFocus: RefObject<HTMLElement | null> }) {
   const library = useLibrary()
   const service = useService(InstanceServiceKey)
@@ -42,7 +43,9 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus }
       if (checkIdle && (await processes.getGameProcesses()).some(process => process.options.gameDirectory === instance.path)) throw new Error('running')
       await action()
     } catch (failure) {
-      const reason = failure instanceof Error ? ['InstanceMetadataChanged', 'InstanceGroupsChanged'].includes(failure.name) ? 'changed' : failure.name === 'InstanceNameDuplicatedError' ? 'duplicateName' : failure.message : ''
+      const name = failure && typeof failure === 'object' && 'name' in failure && typeof failure.name === 'string' ? failure.name : ''
+      const message = failure && typeof failure === 'object' && 'message' in failure && typeof failure.message === 'string' ? failure.message : ''
+      const reason = ['InstanceMetadataChanged', 'InstanceGroupsChanged'].includes(name) ? 'changed' : name === 'InstanceNameDuplicatedError' ? 'duplicateName' : message
       setError(['missing', 'changed', 'invalid', 'invalidGroup', 'duplicateName', 'running'].includes(reason) ? reason : 'failed')
     } finally { operation.current = false; setBusy(false) }
   }
@@ -51,12 +54,13 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus }
       <Dialog.Overlay className="dialog-backdrop" />
       <Dialog.Content className="dialog creation-dialog operation-dialog" data-testid="instance-operations" onPointerDownOutside={event => event.preventDefault()} onEscapeKeyDown={event => { if (busy) event.preventDefault() }} onCloseAutoFocus={event => {
         event.preventDefault()
-        const target = returnFocus.current?.isConnected ? returnFocus.current : document.querySelector<HTMLElement>('main h1')
+        const card = Array.from(document.querySelectorAll<HTMLElement>('[data-instance-path]')).find(card => card.dataset.instancePath === instance.path)
+        const target = returnFocus.current?.isConnected ? returnFocus.current : card?.querySelector<HTMLElement>('.instance-card-actions button:last-child') || document.querySelector<HTMLElement>('main h1')
         if (target) { if (target.tagName === 'H1') target.tabIndex = -1; target.focus() }
       }}>
         <Dialog.Title>{t(`react.operations.${mode}Title`, { name: instance.name })}</Dialog.Title>
         <Dialog.Description>{t(`react.operations.${mode}Help`)}</Dialog.Description>
-        <form className="operation-form" onSubmit={event => {
+        {mode === 'export' ? <ExportInstance path={instance.path} busy={busy} onBusy={value => { operation.current = value; setBusy(value) }} onBack={() => changeMode('options')} /> : <form className="operation-form" onSubmit={event => {
           event.preventDefault()
           if (mode === 'edit') void run(async () => {
             await service.editInstance(metadataEdit(instance, latest, draft, library?.instances || []))
@@ -83,6 +87,7 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus }
               <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('edit')}><Pencil size={18} aria-hidden="true" />{t('react.operations.edit')}</button>
               <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('duplicate')}><Copy size={18} aria-hidden="true" />{t('react.operations.duplicate')}</button>
               <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('group')}><Layers size={18} aria-hidden="true" />{t('react.operations.group')}</button>
+              <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('export')}><Download size={18} aria-hidden="true" />{t('react.export.action')}</button>
               <div className="operation-order">
                 {([-1, 1] as const).map(direction => <button key={direction} type="button" className="button secondary" disabled={busy || unavailable} onClick={() => void run(async () => {
                   await library?.move(instance.path, direction)
@@ -129,7 +134,7 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus }
             <button type="button" className="button secondary" disabled={busy} onClick={() => mode !== 'options' && !success ? changeMode('options') : onClose()}>{t(mode === 'options' || success ? 'react.operations.close' : 'react.operations.back')}</button>
             {mode !== 'options' && !success && <button type="submit" className="button primary" data-testid="instance-operation-confirm" disabled={busy || unavailable || mode === 'remove' && deleteData && confirmation !== instance.name}>{t(busy ? 'react.operations.busy' : mode === 'edit' || mode === 'group' ? 'react.operations.save' : mode === 'duplicate' ? 'react.operations.confirmDuplicate' : deleteData ? 'react.operations.confirmDelete' : 'react.operations.confirmRemove')}</button>}
           </div>
-        </form>
+        </form>}
         <Dialog.Close className="dialog-close" aria-label={t('react.operations.close')} disabled={busy}><X size={20} /></Dialog.Close>
       </Dialog.Content>
     </Dialog.Portal>

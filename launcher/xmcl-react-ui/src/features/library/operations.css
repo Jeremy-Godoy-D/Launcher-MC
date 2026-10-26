@@ -7,4 +7,7 @@
   .operation-dialog h2 { overflow-wrap: anywhere; }
   .operation-dialog .dialog-actions { flex-shrink: 0; flex-wrap: wrap; }
   .danger-text { color: var(--ink); }
+  .export-files { min-width: 0; margin: 0; padding: 12px; border: 1px solid var(--line); }
+  .export-files .creation-check { align-items: flex-start; overflow-wrap: anywhere; padding-block: 4px; }
+  .export-files small { color: var(--muted); }
 }

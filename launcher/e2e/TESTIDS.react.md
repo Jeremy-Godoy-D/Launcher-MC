@@ -6,19 +6,22 @@ This file is the contract between the launcher UI in `xmcl-react-ui/` and the Pl
 
 Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testids` with the selected LAUNCHER_RENDERER. Computed IDs are not resolved by this static registry.
 
-**Total anchors:** 23 (in 17 Vue/TSX files)
+**Total anchors:** 26 (in 18 Vue/TSX files)
 
 | Test ID | Defined in |
 |---|---|
 | `accounts-page` | [`xmcl-react-ui/src/features/accounts/Accounts.tsx#L84`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L84) |
 | `app-backdrop` | [`xmcl-react-ui/src/App.tsx#L371`](../xmcl-react-ui/src/App.tsx#L371) |
 | `app-sidebar` | [`xmcl-react-ui/src/App.tsx#L405`](../xmcl-react-ui/src/App.tsx#L405) |
+| `export-confirm` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L85`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L85) |
+| `export-result` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L78`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L78) |
 | `featured-play` | [`xmcl-react-ui/src/App.tsx#L551`](../xmcl-react-ui/src/App.tsx#L551) |
 | `instance-create-confirm` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L720`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L720) |
+| `instance-export` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L43`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L43) |
 | `instance-minecraft` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L515`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L515) |
 | `instance-name` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L490`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L490) |
-| `instance-operation-confirm` | [`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L130`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L130) |
-| `instance-operations` | [`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L52`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L52) |
+| `instance-operation-confirm` | [`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L132`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L132) |
+| `instance-operations` | [`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L53`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L53) |
 | `launch-confirm` | [`xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157`](../xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157) |
 | `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L633`](../xmcl-react-ui/src/App.tsx#L633) |
 | `library-state` | [`xmcl-react-ui/src/App.tsx#L359`](../xmcl-react-ui/src/App.tsx#L359) |

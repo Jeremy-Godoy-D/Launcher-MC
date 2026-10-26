@@ -217,6 +217,8 @@ react:
     minimize: Minimize
     maximize: Maximize
   operations:
+    exportTitle: Export instance
+    exportHelp: Review the files to save in a local copy.
     optionsTitle: 'Options for {name}'
     optionsHelp: Manage this instance. Actions apply to the folder shown below.
     editTitle: Edit instance
@@ -266,3 +268,34 @@ react:
     sortrecent: Most recent
     filterGroup: Filter by group
     allGroups: All groups
+  export:
+    action: Export files
+    format: Archive format
+    offline: Local copy with game (.zip)
+    offlineHelp: Includes the installed version, client, libraries and assets. All these files must be available. To restore, extract the archive and import it as a Vanilla folder; importing may currently download assets again. Java is managed separately.
+    portableHelp: Embeds the selected files in the package. Minecraft and loaders are downloaded when importing it. This action saves a local archive.
+    customVersion: This custom version needs a local copy to preserve its client and metadata.
+    version: Copy version
+    chooseFolder: Choose destination folder
+    privacy: Worlds and other personal files start unchecked. Known accounts and credentials are excluded. Review your configuration files before sharing the copy. Existing files are never replaced.
+    reviewing: Reviewing files…
+    count: '{selected} of {total} files selected'
+    search: Search files to export
+    files: Instance files
+    refine: Showing the first 200 results. Refine the search to find the remaining files.
+    empty: No matching files.
+    reviewAgain: Review files again
+    saved: Copy saved.
+    reveal: Show archive in folder
+    save: Save copy
+    cancel: Cancel export
+    working: Preparing and compressing the copy…
+    reviewFailed: Could not review the files. Check folder access; linked directories cannot be exported. Choose “Review files again” to retry.
+    failed: The copy was not saved. It may have been cancelled, or access, disk space or game files may be missing. Check the destination and review again before retrying.
+    ExportSourceChanged: Files or details changed since review. Choose “Review files again” before saving.
+    ExportDestinationExists: A copy with this name already exists. Change its version or destination folder.
+    ExportNeedsOffline: This version needs the local copy format to preserve its custom client.
+    ExportMissingRuntime: The game version is not installed. Install or repair its files before making this copy.
+    ExportGameRunning: Close this instance’s game before exporting.
+    ExportInvalid: Check the version and destination. Choose a folder outside the instance.
+    ExportInstanceUnavailable: This instance is no longer available. Close the dialog and check the library.
