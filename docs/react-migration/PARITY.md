@@ -11,7 +11,7 @@ Referencia: beta.2, commit `7671c6f1bdc471d42816241920a262a18aca5a44`. Alcance c
 | K01 | Inicio `/`, LaunchCenter.vue | instances.ts, instanceLaunchCoordinator.ts, LaunchService | Última válida, Jugar explícito, no lanzar al montar; nueva destacada no guarda selección por tick. | pending |
 | K02 | Biblioteca `/me`, LauncherLibrary.vue | InstanceService, instances.ts, instanceGroup.ts | Buscar/filtrar/ordenar/agrupar, selección persistida, cuadrícula/lista. | pending |
 | K03 | Crear/importar, AppAddInstanceDialog/AppImportUrlDialog | instanceCreation.ts, InstanceService, InstanceIOService, ModpackService | Vanilla/loaders/ZIP o formatos admitidos; errores conservan campos. No importar temas/launchers/blueprints como funciones nuevas. | pending |
-| K04 | Editar/duplicar/exportar/eliminar, instanceContextMenu.ts | InstanceService, InstanceIOService, ModpackService | Exportación local sí; borrado confirmado y diferenciado de retirar registro. | pending |
+| K04 | Editar/duplicar/exportar/eliminar, instanceContextMenu.ts | InstanceService, InstanceIOService, ModpackService | Exportación local sí; borrado confirmado y diferenciado de retirar registro. | complete |
 | K05 | Versiones/loaders Java, BaseSettingVersions | version*, instanceVersionInstall*, JavaService | Usar resolución/instalación actual; conservar diagnosticar/reparar. | pending |
 | K06 | Lanzar/estado/salida/error | LaunchService, launchTask, launchException, instanceLaunch | Instancia/usuario capturados, estado proceso, no doble lanzamiento por Strict Mode. | pending |
 | K07 | Resumen `/instance`, Home.vue | InstanceService/VersionService, instanceJavaDiagnose | Runtime/última partida/acciones del núcleo y diagnóstico. | pending |
@@ -122,3 +122,9 @@ Bloque a41a322: K04 añade elegir/previsualizar/restablecer iconos locales, sin 
 Fuente80c8f3b; STAGE4-PROVIDER-MEDIA.md/JSON. K24 ahora tiene galerías propias Modrinth/CurseForge por ID y caché privada50MiB, probadas con proveedores reales y fixtures; sigue pendiente por clips/precarga/vídeo genérico etiquetado/rendimiento. API de limpiar caché lista, entrada de Ajustes en K18/etapa7. Regresión569 unitarias y63 escenarios distintos; Vue conserva la predeterminada. No se cierra etapa4.
 
 K02 tiene una diferencia concreta: Vue busca nombre/Minecraft/loader+versión con trim; React solo nombre. Corregirla con regresión antes de marcar paridad. K04/K08: cruzar la copia anterior de modsGrouping con duplicación/reanudación, sin destruir datos. K03 conserva la cobertura de formatos/loaders ya registrada; argumentos/resolución/servidor pertenecen a K12/etapa5 y la actualización de contenido/acción desde Biblioteca a K16/etapa6. No convertir esos pendientes en aprobación global ni repetir los bloques ya verificados.
+
+## Búsqueda y duplicación — 2026-10-26
+
+Fuente89bd5d8; STAGE4-LIBRARY-PARITY.md/JSON. K04 completo en su alcance de metadatos/icono/duplicación-reanudación/exportación local/retirar o borrar con confirmación, acreditado por informes anteriores y61React de regresión. Incluye grupos nativos y legado, fallo de preferencias sin repetir copia ni sobrescribir el destino. K16 conserva la instalación/actualización pública en etapa6.
+
+K02 recupera búsqueda por nombre/Minecraft/loader+versión y trim; falta comprobar su orden reciente con Inicio frente a últimas partidas. No repetir esos arreglos ni el bloque de galerías/caché. Consumo/migración de grupos heredados en Mods pertenece a etapa5; no borrar el legado antes de confirmar persistencia ni reemplazar datos nativos actuales. Etapa4 sigue parcial.579 unidades/64 escenarios distintos; juego/Java reales y publicación permanecen pendientes.

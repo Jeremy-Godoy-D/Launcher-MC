@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Fuente80c8f3b: resolvedor de galerías propias y caché50MiB completos en STAGE4-PROVIDER-MEDIA;569 unitarias/60 archivos,63 escenarios distintos (57React+1Strict+2Vue+3proveedores reales),87Axe/0violaciones/154incompletos y9harness. Corregir primero K02: React busca solo nombre, Vue también Minecraft y loader/versión con trim; reproducir y probar esa paridad. Revisar modsGrouping al duplicar/reanudar K04/K08. Después3 clips autorizados, siguiente póster, vídeo genérico etiquetado para packs y60s de rendimiento. No repetir iconos/perfiles/copia/virtualización/galerías/caché. Cuentas aprobadas; Inicio/Biblioteca pendientes; etapas5–9 pendientes. CI anterior40339662076 pasó ambos; verificar CI propio tras push. Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios. Evidencias UTF-8/LF y SHA de Git.",
+  "nextAction": "Fuente89bd5d8: búsqueda y grupos de copia/restablecimiento de fuente al reanudar corregidos; STAGE4-LIBRARY-PARITY,579 unitarias/60 archivos y64 escenarios distintos (61React+1Strict+2Vue),91Axe/0violaciones/162incompletos y9harness. Próximo: verificar/fijar orden de Inicio y recientes por seleccionada/últimas partidas; model.selectedInstance y sort reciente aún miran lastAccessDate. Luego3 clips autorizados, precarga del siguiente póster, vídeo Vanilla genérico con portada propia/etiqueta y60s CPU/GPU/memoria/arranque. No repetir búsqueda,modsGrouping,iconos,perfiles,copia,virtualización,galerías/caché. K04 completo; K02/Inicio pendientes; etapas5–9 pendientes. CI anterior40386061680 pasó ambos; comprobar CI propio tras push. Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios; evidencia UTF-8/LF y SHA de Git.",
   "stages": [
     {
       "id": 0,
@@ -524,9 +524,17 @@
             {
               "path": "docs/react-migration/STAGE4-INSTANCE-ICONS.json",
               "sha256": "df983cdd33d78919cca93798c2032ea00d833278eeb5a636e6ca2da142de5d0f"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LIBRARY-PARITY.md",
+              "sha256": "dc6f7c59dee6e6975df52622e1e65f6671a90f7477dbadab2ebaf438c027b8cd"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LIBRARY-PARITY.json",
+              "sha256": "e852a93a7b7bb67f258c939d1831a18b0b306c6c67945c79d6e478448b7a86de"
             }
           ],
-          "note": "Parcial: biblioteca/creación/importaciones/lanzamiento coordinado/operaciones/iconos y regresión57React aprobados. Auditoría detecta una diferencia concreta K02: buscar Minecraft y loader/versión con trim además de nombre; corregir a continuación. Revisar conservación de modsGrouping al duplicar/reanudar. Actualización de contenido y ajustes completos siguen en6/5. No certificar juego/Java reales."
+          "note": "Parcial: búsqueda por nombre/Minecraft/loader+versión con trim, grupos heredados/nativos al duplicar/reanudar y reintento de preferencias sin duplicar archivos verificados. K04 acreditado; K02 conserva orden reciente pendiente de cruce con Inicio. Fuente89bd5d8,579 unitarias/64 escenarios. No repetir búsqueda ni modsGrouping. Instalación/Java/juego reales siguen en sus gates posteriores."
         }
       ]
     },
