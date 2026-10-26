@@ -341,7 +341,7 @@
             },
             {
               "path": "docs/react-migration/STAGE4-PROFILE-APPEARANCE.json",
-              "sha256": "8c399f6f81295d55fb40f0c32a93ea3234a1048e31e7223d787a38ee18ff5fc5"
+              "sha256": "24ce9e09365740dc99e40a9c01e0b71d47901ae91168ccb24e5779b4aa05279d"
             }
           ],
           "note": "Onboarding por servicios, alta/selección/eliminación y edición de apariencia local verificados, incluidos errores, foco, persistencia y reinicio del EXE. La equivalencia exacta de OFFLINE conserva la selección local; nuevos perfiles posteriores al reinicio conservan los anteriores. Nombre/UUID de juego estables, cuentas externas intactas, Microsoft deferred. El aspecto dentro de Minecraft se valida con el juego en etapa9; aquí se acredita la gestión local y los bytes guardados."
@@ -491,7 +491,7 @@
             },
             {
               "path": "docs/react-migration/STAGE4-COPY-RESUME.json",
-              "sha256": "ae185a08903299bddbc74577bc65bfe2c4199674723dda684eb0ed581565cebf"
+              "sha256": "3bd5681656fa8144f48a2da56dd83b902440689754bf42c19e5870bf13539b5b"
             },
             {
               "path": "docs/react-migration/STAGE4-VIRTUAL-LIBRARY.md",
@@ -499,7 +499,7 @@
             },
             {
               "path": "docs/react-migration/STAGE4-VIRTUAL-LIBRARY.json",
-              "sha256": "2e1ae724a7678c44c4d690239fa6802d19d32b0edf648a46a55ac8a973c309db"
+              "sha256": "18b01e007af3da06dca0a37dc5d6d127b80dbb4f73b4d64a3bfa2044d75f6cdc"
             },
             {
               "path": "docs/react-migration/STAGE4-SHARED-CONTENT.md",
@@ -507,7 +507,7 @@
             },
             {
               "path": "docs/react-migration/STAGE4-SHARED-CONTENT.json",
-              "sha256": "234b8687469f187a435a436ec68e7a005d5c65844f6ca159d300dde80a6c4638"
+              "sha256": "4d4bdd707744b4f1ed858335261071c50cbfca5f4ca7a44d973d07e55feaac59"
             }
           ],
           "note": "Parcial: creación/importaciones, lanzamiento preparado, operaciones, grupos, copia reanudable, biblioteca virtualizada y enlaces compartidos/cancelación verificados. Falta auditoría K03/K04/resto de paridad; no cerrar el criterio. Evidencia final70c70d8:514 unitarias,53 escenarios distintos;8 afectados finales solapados. CI de este bloque pendiente tras push."
