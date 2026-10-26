@@ -20,6 +20,7 @@ react:
     subtitle: Tus instancias de Minecraft Java, en un solo lugar.
     description: Continúa tu aventura o administra esta instancia.
     ambient: Paisaje ambiental de Minecraft Vanilla.
+    genericAmbient: Ambiente Vanilla genérico; no representa este modpack.
     runtimeRequired: Abre Grimo Launcher para ver tus instancias guardadas.
     loading: Cargando tus instancias…
     loadError: No se pudo cargar la biblioteca. Reintenta para recuperar tus instancias.

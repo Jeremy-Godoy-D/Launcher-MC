@@ -6,19 +6,20 @@ This file is the contract between the launcher UI in `xmcl-react-ui/` and the Pl
 
 Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testids` with the selected LAUNCHER_RENDERER. Computed IDs are not resolved by this static registry.
 
-**Total anchors:** 37 (in 22 Vue/TSX files)
+**Total anchors:** 38 (in 22 Vue/TSX files)
 
 | Test ID | Defined in |
 |---|---|
 | `accounts-page` | [`xmcl-react-ui/src/features/accounts/Accounts.tsx#L86`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L86) |
-| `app-backdrop` | [`xmcl-react-ui/src/App.tsx#L400`](../xmcl-react-ui/src/App.tsx#L400) |
-| `app-sidebar` | [`xmcl-react-ui/src/App.tsx#L435`](../xmcl-react-ui/src/App.tsx#L435) |
+| `app-backdrop` | [`xmcl-react-ui/src/App.tsx#L428`](../xmcl-react-ui/src/App.tsx#L428) |
+| `app-sidebar` | [`xmcl-react-ui/src/App.tsx#L463`](../xmcl-react-ui/src/App.tsx#L463) |
 | `copy-cancel` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L75`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L75) |
 | `copy-finish` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76) |
 | `copy-path` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L62`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L62) |
 | `export-confirm` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L88`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L88) |
 | `export-result` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L81`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L81) |
-| `featured-play` | [`xmcl-react-ui/src/App.tsx#L581`](../xmcl-react-ui/src/App.tsx#L581) |
+| `featured-play` | [`xmcl-react-ui/src/App.tsx#L613`](../xmcl-react-ui/src/App.tsx#L613) |
+| `featured-project-cover` | [`xmcl-react-ui/src/App.tsx#L605`](../xmcl-react-ui/src/App.tsx#L605) |
 | `group-confirm` | [`xmcl-react-ui/src/features/library/GroupsDialog.tsx#L69`](../xmcl-react-ui/src/features/library/GroupsDialog.tsx#L69) |
 | `instance-copy` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L58`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L58) |
 | `instance-create-confirm` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L720`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L720) |
@@ -29,21 +30,21 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `instance-operation-confirm` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76)<br>[`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L159`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L159) |
 | `instance-operations` | [`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L62`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L62) |
 | `launch-confirm` | [`xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157`](../xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157) |
-| `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L664`](../xmcl-react-ui/src/App.tsx#L664) |
-| `library-groups` | [`xmcl-react-ui/src/App.tsx#L660`](../xmcl-react-ui/src/App.tsx#L660) |
+| `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L696`](../xmcl-react-ui/src/App.tsx#L696) |
+| `library-groups` | [`xmcl-react-ui/src/App.tsx#L692`](../xmcl-react-ui/src/App.tsx#L692) |
 | `library-groups-dialog` | [`xmcl-react-ui/src/features/library/GroupsDialog.tsx#L41`](../xmcl-react-ui/src/features/library/GroupsDialog.tsx#L41) |
-| `library-state` | [`xmcl-react-ui/src/App.tsx#L388`](../xmcl-react-ui/src/App.tsx#L388) |
+| `library-state` | [`xmcl-react-ui/src/App.tsx#L416`](../xmcl-react-ui/src/App.tsx#L416) |
 | `library-window` | [`xmcl-react-ui/src/features/library/LibraryWindow.tsx#L96`](../xmcl-react-ui/src/features/library/LibraryWindow.tsx#L96) |
 | `local-profile-name` | [`xmcl-react-ui/src/features/accounts/Accounts.tsx#L50`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L50)<br>[`xmcl-react-ui/src/features/accounts/Accounts.tsx#L179`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L179)<br>[`xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35`](../xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35) |
-| `nav-accounts` | [`xmcl-react-ui/src/App.tsx#L489`](../xmcl-react-ui/src/App.tsx#L489) |
-| `nav-home` | [`xmcl-react-ui/src/App.tsx#L446`](../xmcl-react-ui/src/App.tsx#L446) |
-| `nav-library` | [`xmcl-react-ui/src/App.tsx#L447`](../xmcl-react-ui/src/App.tsx#L447) |
-| `nav-settings` | [`xmcl-react-ui/src/App.tsx#L481`](../xmcl-react-ui/src/App.tsx#L481) |
-| `nav-store` | [`xmcl-react-ui/src/App.tsx#L448`](../xmcl-react-ui/src/App.tsx#L448) |
+| `nav-accounts` | [`xmcl-react-ui/src/App.tsx#L517`](../xmcl-react-ui/src/App.tsx#L517) |
+| `nav-home` | [`xmcl-react-ui/src/App.tsx#L474`](../xmcl-react-ui/src/App.tsx#L474) |
+| `nav-library` | [`xmcl-react-ui/src/App.tsx#L475`](../xmcl-react-ui/src/App.tsx#L475) |
+| `nav-settings` | [`xmcl-react-ui/src/App.tsx#L509`](../xmcl-react-ui/src/App.tsx#L509) |
+| `nav-store` | [`xmcl-react-ui/src/App.tsx#L476`](../xmcl-react-ui/src/App.tsx#L476) |
 | `profile-appearance` | [`xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35`](../xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35) |
 | `profile-appearance-save` | [`xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L75`](../xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L75) |
-| `react-prototype` | [`xmcl-react-ui/src/App.tsx#L397`](../xmcl-react-ui/src/App.tsx#L397) |
+| `react-prototype` | [`xmcl-react-ui/src/App.tsx#L425`](../xmcl-react-ui/src/App.tsx#L425) |
 | `setup-next` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L345`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L345) |
 | `setup-path` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L233`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L233) |
 | `setup-root` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L153`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L153) |
-| `store-search` | [`xmcl-react-ui/src/App.tsx#L783`](../xmcl-react-ui/src/App.tsx#L783) |
+| `store-search` | [`xmcl-react-ui/src/App.tsx#L815`](../xmcl-react-ui/src/App.tsx#L815) |

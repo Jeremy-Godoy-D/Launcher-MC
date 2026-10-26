@@ -38,9 +38,9 @@ import projects from './project-fixtures.json'
 import brandIcon from '../../branding/copper/app-64.png'
 import sunset from './assets/ambient/vanilla-shaders.webp'
 import caves from './assets/ambient/vanilla-caves.webp'
-import cavesVideo from './assets/ambient/vanilla-caves.mp4'
 import ocean from './assets/ambient/vanilla-ocean.webp'
 import credits from './assets/ambient/credits.json'
+import { ambientScene } from './ambient'
 import { allowAmbientMotion, isPlaybackInterruption, nextFeatured, resolveFeaturedPath, ROTATION_MS } from './presentation'
 import { usePreferences } from './preferences-context'
 import { useI18n } from './i18n'
@@ -72,6 +72,7 @@ function presentInstance(instance: SavedInstance, media?: InstancePresentation) 
   const icon = instanceIcon(instance.icon)
   const caveScene = instance.runtime.minecraft.startsWith('1.20.')
   const pack = !!instance.upstream && instance.upstream.type !== 'server'
+  const scene = ambientScene(instance.path)
   return {
     id: instance.path, name: instance.name,
     version: instance.runtime.minecraft || instance.version,
@@ -79,7 +80,7 @@ function presentInstance(instance: SavedInstance, media?: InstancePresentation) 
     image: media?.image || (pack && icon ? icon : caveScene ? caves : sunset),
     ambientImage: media?.image || (caveScene ? caves : sunset),
     media,
-    video: !pack && caveScene ? cavesVideo : undefined,
+    video: scene.video, videoPoster: scene.poster, sceneId: scene.id, pack, projectImage: pack && !!(media?.image || icon),
     description: instance.description,
     ambientFallback: !media,
   }
@@ -110,6 +111,12 @@ function Ambient({ instance, playing, videoEnabled, onImageError }: { instance: 
   useEffect(() => {
     const element = video.current
     if (!element) return
+    element.setAttribute('src', instance.video)
+    return () => { element.pause(); element.removeAttribute('src'); element.load() }
+  }, [instance.video, videoEnabled])
+  useEffect(() => {
+    const element = video.current
+    if (!element) return
     let active = true
     if (playing && !failed) void element.play().catch(error => {
       if (active && !isPlaybackInterruption(error)) setFailed(true)
@@ -136,11 +143,12 @@ function Ambient({ instance, playing, videoEnabled, onImageError }: { instance: 
           loop
           playsInline
           preload="metadata"
-          poster={instance.ambientImage}
+          poster={instance.videoPoster}
           onLoadedData={() => setReady(true)}
           onError={() => setFailed(true)}
           data-state={playing && !failed ? 'playing' : 'paused'}
           data-error={failed}
+          data-scene={instance.sceneId}
           style={{ opacity: ready && playing && !failed ? 1 : 0 }}
         />
       )}
@@ -249,6 +257,8 @@ export function App() {
   const [focused, setFocused] = useState(() => document.hasFocus())
   const [nativeActive, setNativeActive] = useState(true)
   const [visible, setVisible] = useState(() => !document.hidden)
+  const featuredRegion = useRef<HTMLElement>(null)
+  const [regionVisible, setRegionVisible] = useState(false)
   const [dialog, setDialog] = useState<{ title: string; message: string } | null>(null)
   const [showCredits, setShowCredits] = useState(false)
   const [adding, setAdding] = useState<'create' | 'import'>()
@@ -274,6 +284,24 @@ export function App() {
     if (featuredPath !== (resolvedPath ?? null)) setFeaturedPath(resolvedPath ?? null)
   }, [featuredPath, resolvedPath, savedLibrary?.status, savedLibrary?.home])
   const home = location.pathname === '/'
+  const hasFeatured = !!instance
+  useEffect(() => {
+    const element = featuredRegion.current
+    if (!home || !element) { setRegionVisible(false); return }
+    const observer = new IntersectionObserver(([entry]) => setRegionVisible(entry.isIntersecting))
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [home, hasFeatured])
+  const nextInstance = instances.length > 1 ? instances[nextFeatured(featured, instances.length)] : undefined
+  const nextPoster = preferences.backgroundVideoEnabled && !nextInstance?.pack ? nextInstance?.videoPoster : nextInstance?.ambientImage
+  useEffect(() => {
+    if (!home || !nextPoster || reducedMotion || performanceMode || !preferences.carouselEnabled) return
+    const link = document.createElement('link')
+    link.rel = 'preload'; link.as = 'image'; link.href = nextPoster
+    link.dataset.ambientPreload = 'true'
+    document.head.append(link)
+    return () => link.remove()
+  }, [home, nextPoster, reducedMotion, performanceMode, preferences.carouselEnabled])
   const mediaPath = (home ? instance : current)?.id
   const mediaUpstream = JSON.stringify(savedLibrary?.instances.find(item => item.path === mediaPath)?.upstream)
   useEffect(() => {
@@ -299,7 +327,7 @@ export function App() {
           : accountsPage ? t('react.accounts.title') : 'Tu instancia'
   const canMove = allowAmbientMotion({
     focused: focused && nativeActive,
-    visible,
+    visible: visible && regionVisible,
     reducedMotion,
     performanceMode,
     interacting: hovered || focusWithin,
@@ -394,7 +422,7 @@ export function App() {
   ) : null
 
   return (
-    <div className="app" data-testid="react-prototype" data-performance={performanceMode} data-motion-state={JSON.stringify({ focused, nativeActive, visible, reducedMotion, hovered, focusWithin, paused, gameRunning: !!launch?.running.length })}>
+    <div className="app" data-testid="react-prototype" data-performance={performanceMode} data-motion-state={JSON.stringify({ focused, nativeActive, visible, regionVisible, reducedMotion, hovered, focusWithin, paused, gameRunning: !!launch?.running.length })}>
       <div
         className="app-backdrop"
         data-testid="app-backdrop"
@@ -550,6 +578,7 @@ export function App() {
               </div>
               {libraryState}
               {instance && <section
+                ref={featuredRegion}
                 className="featured"
                 aria-label="Instancia destacada"
                 onMouseEnter={() => setHovered(true)}
@@ -572,9 +601,12 @@ export function App() {
                       {instance.loader} · {instance.version}
                     </span>
                   </div>
-                  <h2>{instance.name}</h2>
+                  <div className="featured-identity">
+                    {instance.projectImage && <img key={instance.image} data-testid="featured-project-cover" src={instance.image} alt="" onError={event => { event.currentTarget.style.display = 'none' }} />}
+                    <h2>{instance.name}</h2>
+                  </div>
                   <p>{instance.description || t('react.instances.description')}</p>
-                  {instance.ambientFallback && <p>{t('react.instances.ambient')}</p>}
+                  {(instance.pack || instance.ambientFallback) && <p>{t(instance.pack ? 'react.instances.genericAmbient' : 'react.instances.ambient')}</p>}
                   <div className="featured-actions">
                     <button
                       className="button primary"

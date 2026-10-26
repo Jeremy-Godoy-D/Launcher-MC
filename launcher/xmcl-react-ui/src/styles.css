@@ -566,6 +566,19 @@
     max-width: 590px;
     overflow-wrap: anywhere;
   }
+  .featured-identity {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .featured-identity > img {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--glass-rim);
+  }
   .featured-copy > p {
     max-width: 350px;
     font-size: 13px;
@@ -1150,6 +1163,10 @@
     }
     .featured h2 {
       font-size: 33px;
+    }
+    .featured-identity > img {
+      width: 32px;
+      height: 32px;
     }
     .featured-copy > p {
       margin-top: 10px;

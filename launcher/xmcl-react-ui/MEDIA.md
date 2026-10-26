@@ -1,6 +1,6 @@
-# Medios del prototipo React
+# Medios de la interfaz React
 
-Alcance: etapa 1, fixtures de presentación. Vanilla usa material real obtenido de internet; los modpacks usan recursos propios de sus metadatos. No se incorpora la imagen IA generada antes de la corrección del usuario. La preferencia por shaders está representada por la captura principal; no se instala ni ejecuta un shader en el launcher.
+Alcance: presentación ambiental React; servicios y datos integrados por etapas. Vanilla usa material real obtenido de internet; los modpacks usan recursos propios de sus metadatos. No se incorpora la imagen IA generada antes de la corrección del usuario. La preferencia por shaders está representada por la captura principal; no se instala ni ejecuta un shader en el launcher.
 
 | Archivo | Procedencia y permiso | Preparación |
 | --- | --- | --- |
@@ -14,10 +14,23 @@ Las cifras exactas y hashes se registran en STAGE1.json; esta tabla redondea las
 
 `src/project-fixtures.json` contiene una muestra pública de los endpoints `https://api.modrinth.com/v2/project/{id}`: Fabulously Optimized (1KVo5zza), Sodium (AANobbMI), Iris (YL57xq9U). Los iconos y galerías se consumen desde sus URLs de metadatos en cdn.modrinth.com; no se buscaron sustitutos en bancos de imágenes. El pack utiliza su propia destacada «Sunrise behind a hill». El catálogo de esta etapa no es una búsqueda real ni conecta CurseForge.
 
+## Tres ambientes empaquetados
+
+`src/assets/ambient/manifest.json` registra Overworld (`vanilla-caves`), Nether y End: vídeo,póster,miniatura,dimensiones,duración,fps,ausencia de audio,bytes y SHA-256.12s,1280×720,H.26424fps,sin audio; total3766415bytes,menos de5MiB/clip y15MiB total. `credits.json` atribuye también pósteres/miniaturas. Unidades comprueban integridad/atribuciones; FFprobe y decodificación completa verifican propiedades reales.
+
+Nether/End: [Xbox Masterclass — Xbox México](https://commons.wikimedia.org/wiki/File:Xbox_Masterclass_%E2%80%93_TIPS_y_consejos_para_ser_un_experto_en_Minecraft.webm), [CC BY3.0](https://creativecommons.org/licenses/by/3.0/). La ficha identifica canal,fuente YouTube y revisión de licencia. Original SHA-256 `b7e3e59617ea42da54962f056bc6b1ba6722185a0d8fe18715d886a6a3ff7290`,424513524bytes; solo en artefactos ignorados,no distribuido. VP9 1920×1080~59,948fps,Opus,1314,164s.
+
+- Nether:1120,05–1122,85s; recorte1536×864 en192,108,escalado720p,ida/vuelta y tiempo×15/7 para12s. MP4 1291662bytes.
+- End:1130–1133s; mismo recorte/escalado,ida/vuelta y tiempo×2 para12s. MP4 1200941bytes.
+
+El recorte retira subtítulos/HUD de esas panorámicas. Inversión/ralentización forman bucles de material real,sin IA ni shaders en estos clips. Overworld conserva el fragmento promocional Caves & Cliffs documentado arriba. Las imágenes con shaders siguen como fallback/paisaje de ventana. No representan partidas de las instancias ni implican aval de Xbox/Mojang.
+
+Asignación decorativa estable por ruta: no lee mundos ni infiere dimensión/versión/contenido. Packs conservan imagen propia del proveedor como fondo de ventana y portada junto al título; vídeo local con etiqueta «Ambiente Vanilla genérico; no representa este modpack». Sin portada válida no se inventa identidad. No buscar imágenes de packs ni reproducir vídeo remoto arbitrario.
+
 ## Reproducción y límites
 
-Solo Inicio reproduce un vídeo y únicamente en la instancia ficticia Bajo la superficie. Un elemento video activo; fuente local, sin audio, poster ante fallo. Pausa por movimiento reducido, rendimiento, interacción, diálogo, pausa manual, pérdida de foco/visibilidad y evento nativo window-active. Rotación a 30 s y selección independiente. Las pruebas verifican avance real de currentTime y pausa efectiva del elemento; el evento nativo evita confundir foco emulado por automatización con una ventana minimizada.
+Solo Inicio reproduce un vídeo; las otras áreas son estáticas. Cabecera de instancia en etapa5. El elemento anterior pausa/libera src al desmontar; nuevo usa póster local y fallos mantienen imagen. Precarga solo imagen siguiente,nunca otro vídeo; se retira fuera de Inicio o en rendimiento/movimiento reducido/presentación desactivada. Caché pública conserva garantías nativas50MiB.
 
-FFprobe confirmó 1280×720, 24/1 fps, 12 segundos y ausencia de stream de audio; FFmpeg decodificó el archivo completo sin errores. Las mediciones completas de CPU/GPU/memoria durante 60 s y la pausa por proceso de juego quedan para las etapas de integración/performance: este prototipo no lanza Minecraft. El vídeo genérico tampoco sustituye recursos de packs.
+Pausa por región fuera de pantalla,movimiento reducido,rendimiento,interacción/foco dentro,diálogo,pausa manual,juego,pérdida de foco/visibilidad/minimizar. Carrusel30s y selección independiente. Sin streaming YouTube ni audio.
 
-Antes de ampliar el manifiesto a Overworld/Nether/End, repetir la comprobación de permisos, hash, tamaño, decodificación y pausa. No asumir que cualquier imagen pública admite redistribución; los permisos aquí corresponden a estas fuentes concretas.
+Análisis fuente/derivados ignorados; informe de etapa con hashes. Presupuestos60s CPU/GPU/memoria/arranque pendientes junto a revisión manual AA/RTL. Formato/pausa no acreditan consumo.

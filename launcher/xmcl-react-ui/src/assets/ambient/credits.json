@@ -34,5 +34,101 @@
     "sourceSha256": "c53add0574ee065f8219691f6381896bf4169d8083d320a240ade94d8558ee10",
     "sha256": "bfc6f5aaa7152584257112b9c24e87fae0c9542f34e1b5490ccabb2a7d7147da",
     "changes": "Fragmento 30–36s a media velocidad, 1280×720 H.264 24fps, sin audio, difuminado suave sigma 0.35; poster WebP del primer frame. Es vídeo promocional, no gameplay de una instancia."
+  },
+  {
+    "file": "vanilla-nether.mp4",
+    "title": "Xbox Masterclass – TIPS y consejos para ser un experto en Minecraft · Nether",
+    "author": "Xbox México",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Xbox_Masterclass_%E2%80%93_TIPS_y_consejos_para_ser_un_experto_en_Minecraft.webm",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/9/96/Xbox_Masterclass_%E2%80%93_TIPS_y_consejos_para_ser_un_experto_en_Minecraft.webm",
+    "sourceSha256": "b7e3e59617ea42da54962f056bc6b1ba6722185a0d8fe18715d886a6a3ff7290",
+    "sha256": "1e4864ff7f4c6b133348aadd3ab0c09902ae82310d291bf548e937e626af5eb5",
+    "changes": "Fragmento 1120.05–1122.85s, recorte central1536×864 (192,108) sin subtítulos/HUD, ida/vuelta y tiempo×15/7, escalado1280×720,H.26424fps12s,sin audio. Bucle ambiental de material Vanilla real; no partida de una instancia, sin shaders ni aval de Xbox."
+  },
+  {
+    "file": "vanilla-nether.webp",
+    "title": "Xbox Masterclass – TIPS y consejos para ser un experto en Minecraft · Nether",
+    "author": "Xbox México",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Xbox_Masterclass_%E2%80%93_TIPS_y_consejos_para_ser_un_experto_en_Minecraft.webm",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/9/96/Xbox_Masterclass_%E2%80%93_TIPS_y_consejos_para_ser_un_experto_en_Minecraft.webm",
+    "sourceSha256": "b7e3e59617ea42da54962f056bc6b1ba6722185a0d8fe18715d886a6a3ff7290",
+    "sha256": "3fd9ad625f8c373b78d99ede696b307c7990b9f0bb6ce17b8382ecfbe43e42b2",
+    "changes": "Fragmento 1120.05–1122.85s, recorte central1536×864 (192,108) sin subtítulos/HUD, ida/vuelta y tiempo×15/7, escalado1280×720,H.26424fps12s,sin audio. WebP del primer frame."
+  },
+  {
+    "file": "vanilla-nether-thumb.webp",
+    "title": "Xbox Masterclass – TIPS y consejos para ser un experto en Minecraft · Nether",
+    "author": "Xbox México",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Xbox_Masterclass_%E2%80%93_TIPS_y_consejos_para_ser_un_experto_en_Minecraft.webm",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/9/96/Xbox_Masterclass_%E2%80%93_TIPS_y_consejos_para_ser_un_experto_en_Minecraft.webm",
+    "sourceSha256": "b7e3e59617ea42da54962f056bc6b1ba6722185a0d8fe18715d886a6a3ff7290",
+    "sha256": "0deb6285d505b23f1444ae37038b3643d7fbc9ff60913e243bca15babe344d7f",
+    "changes": "Fragmento 1120.05–1122.85s, recorte central1536×864 (192,108) sin subtítulos/HUD, ida/vuelta y tiempo×15/7, escalado1280×720,H.26424fps12s,sin audio. WebP del primer frame a320×180."
+  },
+  {
+    "file": "vanilla-end.mp4",
+    "title": "Xbox Masterclass – TIPS y consejos para ser un experto en Minecraft · End",
+    "author": "Xbox México",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Xbox_Masterclass_%E2%80%93_TIPS_y_consejos_para_ser_un_experto_en_Minecraft.webm",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/9/96/Xbox_Masterclass_%E2%80%93_TIPS_y_consejos_para_ser_un_experto_en_Minecraft.webm",
+    "sourceSha256": "b7e3e59617ea42da54962f056bc6b1ba6722185a0d8fe18715d886a6a3ff7290",
+    "sha256": "1dafb52337feae0e49673011edbd0f4906b0ca0fbc2758f3c10f285dc48b2b94",
+    "changes": "Fragmento 1130–1133s, recorte central1536×864 (192,108) sin subtítulos/HUD, ida/vuelta y tiempo×2, escalado1280×720,H.26424fps12s,sin audio. Bucle ambiental de material Vanilla real; no partida de una instancia, sin shaders ni aval de Xbox."
+  },
+  {
+    "file": "vanilla-end.webp",
+    "title": "Xbox Masterclass – TIPS y consejos para ser un experto en Minecraft · End",
+    "author": "Xbox México",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Xbox_Masterclass_%E2%80%93_TIPS_y_consejos_para_ser_un_experto_en_Minecraft.webm",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/9/96/Xbox_Masterclass_%E2%80%93_TIPS_y_consejos_para_ser_un_experto_en_Minecraft.webm",
+    "sourceSha256": "b7e3e59617ea42da54962f056bc6b1ba6722185a0d8fe18715d886a6a3ff7290",
+    "sha256": "72cd2210037af2dae1fd88a0c77483e8d6aa7afd372a80a0925dd0e09bf9ee8c",
+    "changes": "Fragmento 1130–1133s, recorte central1536×864 (192,108) sin subtítulos/HUD, ida/vuelta y tiempo×2, escalado1280×720,H.26424fps12s,sin audio. WebP del primer frame."
+  },
+  {
+    "file": "vanilla-end-thumb.webp",
+    "title": "Xbox Masterclass – TIPS y consejos para ser un experto en Minecraft · End",
+    "author": "Xbox México",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Xbox_Masterclass_%E2%80%93_TIPS_y_consejos_para_ser_un_experto_en_Minecraft.webm",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/9/96/Xbox_Masterclass_%E2%80%93_TIPS_y_consejos_para_ser_un_experto_en_Minecraft.webm",
+    "sourceSha256": "b7e3e59617ea42da54962f056bc6b1ba6722185a0d8fe18715d886a6a3ff7290",
+    "sha256": "80701e39cf6436496959feb5866e0279d6966dd9cad80ccb057c97edc84ce8ec",
+    "changes": "Fragmento 1130–1133s, recorte central1536×864 (192,108) sin subtítulos/HUD, ida/vuelta y tiempo×2, escalado1280×720,H.26424fps12s,sin audio. WebP del primer frame a320×180."
+  },
+  {
+    "file": "vanilla-caves.webp",
+    "title": "Minecraft Caves & Cliffs: Part II",
+    "author": "Xbox MENA",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:إعلان_تحديث_–_Minecraft_Caves_%26_Cliffs_–_Part_II.webm",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a4/%D8%A5%D8%B9%D9%84%D8%A7%D9%86_%D8%AA%D8%AD%D8%AF%D9%8A%D8%AB_%E2%80%93_Minecraft_Caves_%26_Cliffs_%E2%80%93_Part_II.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "sourceSha256": "c53add0574ee065f8219691f6381896bf4169d8083d320a240ade94d8558ee10",
+    "sha256": "421d755af38b31b9c3ceaa4790dc5f4d6a523f7ad7135123a87d06eb88728d8b",
+    "changes": "Fragmento 30–36s a media velocidad, 1280×720 H.264 24fps, sin audio, difuminado suave sigma 0.35; poster WebP del primer frame. Es vídeo promocional, no gameplay de una instancia. WebP del primer frame del clip adaptado."
+  },
+  {
+    "file": "vanilla-caves-thumb.webp",
+    "title": "Minecraft Caves & Cliffs: Part II",
+    "author": "Xbox MENA",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:إعلان_تحديث_–_Minecraft_Caves_%26_Cliffs_–_Part_II.webm",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a4/%D8%A5%D8%B9%D9%84%D8%A7%D9%86_%D8%AA%D8%AD%D8%AF%D9%8A%D8%AB_%E2%80%93_Minecraft_Caves_%26_Cliffs_%E2%80%93_Part_II.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "sourceSha256": "c53add0574ee065f8219691f6381896bf4169d8083d320a240ade94d8558ee10",
+    "sha256": "09a16cd96ed579a111d0c0a983ad9c59b8f97c3d0fd6a0c4b57a81a543779816",
+    "changes": "Fragmento 30–36s a media velocidad, 1280×720 H.264 24fps, sin audio, difuminado suave sigma 0.35; poster WebP del primer frame. Es vídeo promocional, no gameplay de una instancia. Miniatura320×180 del primer frame del clip adaptado."
   }
 ]

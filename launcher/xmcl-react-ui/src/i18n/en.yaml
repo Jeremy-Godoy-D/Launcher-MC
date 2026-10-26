@@ -20,6 +20,7 @@ react:
     subtitle: Your Minecraft Java instances, in one place.
     description: Continue your adventure or manage this instance.
     ambient: Minecraft Vanilla ambient scenery.
+    genericAmbient: Generic Vanilla ambience; does not represent this modpack.
     runtimeRequired: Open Grimo Launcher to view your saved instances.
     loading: Loading your instances…
     loadError: Could not load the library. Try again to recover your instances.
