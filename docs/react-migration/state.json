@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Bloque d161d36 espera de copia corregida (STAGE4-COPY-CANCEL): 471 unitarias/51 archivos, 3 Electron afectados y 2 Vue; regresión completa previa45 en STAGE4-GROUPS. Conectar progreso/cancelación y recuperación explícita de copia parcial, sin repetir el arreglo de espera ni crear copias nuevas automáticamente. Después virtualización, exportación de enlaces compartidos y auditoría K03/etapa4. CI segundo intento pasó466 unitarias/9 harness pero faltó baseline en shallow checkout: fetch-depth0 corregido, verificar siguiente run de PR4. Tres gates pendientes; autonomía/publicación autorizadas al cumplir criterios; Microsoft pospuesto y producción sin cambios.",
+  "nextAction": "Bloque 4c49a74 copias reanudables verificado (STAGE4-COPY-RESUME):493 unitarias/53 archivos,48 escenarios distintos (45React+1Strict+2Vue),9 harness; tipos/lint/builds. Continuar virtualización de biblioteca con teclado, enlaces compartidos confiables de exportación/copia, cancelación durante escaneo y auditoría K03/resto de etapa4. No repetir recuperación tras cancelación/reinicio ni crear otro destino al reintentar. CI previo40277370887 pasó React/Vue sobrefb2fee1; comprobar nuevo CI de PR4 después del push. Tres gates pendientes; Vue predeterminado/dist Vue, Microsoft pospuesto y producción sin cambios. Autonomía/publicación autorizadas solo al cumplir todos los criterios.",
   "stages": [
     {
       "id": 0,
@@ -476,9 +476,17 @@
             {
               "path": "docs/react-migration/STAGE4-COPY-CANCEL.json",
               "sha256": "215bcad8d2caeada5c004389c32b027136a893451bbb2ca8d0411ca4087bc731"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-COPY-RESUME.md",
+              "sha256": "1afbf9dbf393e13b04a387cb290e9ad7c3f64ac641a5b8d55455630e7405f4a1"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-COPY-RESUME.json",
+              "sha256": "ae185a08903299bddbc74577bc65bfe2c4199674723dda684eb0ed581565cebf"
             }
           ],
-          "note": "Parcial: espera de copias iniciadas y cancelación final corregidas. Faltan UX de tareas/recuperación de copia, virtualización, enlaces compartidos de exportación, auditoría K03 y demás criterios. Tres gates pendientes; verificar CI remoto tras fetch completo de baseline."
+          "note": "Parcial: progreso/cancelación/recuperación de copias en mismo destino, integridad y bloqueo nativo verificados. Faltan virtualización, enlaces compartidos de exportación/copia, cancelación del escaneo, auditoría K03 y criterios restantes. Tres gates pendientes; CI previo React/Vue aprobado, nuevo bloque pendiente remoto."
         }
       ]
     },
