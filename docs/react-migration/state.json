@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Siguiente hallazgo concreto de auditoría: Cambiar icono de instancia falta en React; antes de conectarlo, reproducir y proteger almacenamiento separado de InstanceService (linkOrCopyFile local/escritura directa remota) para no modificar un original enlazado. ImageStorage de perfiles ya corregido. Revisar correspondencia de pins y modsGrouping en sus áreas del plan. Código fa9fff5: apariencia local y conservación de cuentas tras reiniciar verificadas. STAGE4-PROFILE-APPEARANCE:523 unitarias/56 archivos,55 escenarios distintos (52React+1Strict+2Vue),4 afectados finales solapados,9 harness; tipos/lint/builds y6 capturas. onboarding-accounts passed; etapa4 activa con home-carousel/library-instance-launch pendientes. Continuar auditoría fuente/recorridos K02/K03/K04, y medios/galerías/caché/tres clips/rendimiento60s de Inicio. No repetir perfiles, copia reanudable, virtualización ni enlaces compartidos/cancelación. CI nuevo40331579209 sobre3132b6b en curso; anterior40327122067 aprobado. Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios; etapas5–9 pendientes.",
+  "nextAction": "Código a41a322: cambiar/restablecer iconos nativos y conservación de originales, imágenes con hash, límite8MiB y rutas especiales verificados; exportación excluye temporales privados y editInstance espera persistencia. STAGE4-INSTANCE-ICONS:543 unitarias/58 archivos,57 escenarios distintos (54React+1Strict+2Vue),9 harness, tipos/lint/builds y5 capturas. No repetir iconos, perfiles, copia reanudable ni virtualización. Continuar cruce de entradas/fuentes K02/K03/K04 con pruebas, manteniendo actualización de contenido/ajustes en5–7; después resolvedor de galerías propias, caché50MiB, tres clips autorizados y rendimiento60s de Inicio. Dos gates pendientes; cuentas aprobadas. CI40332397490 falló lanzamiento/actionability y exportación temporal; correcciones locales comprobadas, verificar nuevo CI tras push. Evidencias UTF-8/LF y SHA contra Git; Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios; etapas5–9 pendientes.",
   "stages": [
     {
       "id": 0,
@@ -508,9 +508,17 @@
             {
               "path": "docs/react-migration/STAGE4-SHARED-CONTENT.json",
               "sha256": "4d4bdd707744b4f1ed858335261071c50cbfca5f4ca7a44d973d07e55feaac59"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-INSTANCE-ICONS.md",
+              "sha256": "66354079c857cb71a0e0689ed60a24dfe814f9d3028f0dc0b087b8e16a12a6e2"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-INSTANCE-ICONS.json",
+              "sha256": "df983cdd33d78919cca93798c2032ea00d833278eeb5a636e6ca2da142de5d0f"
             }
           ],
-          "note": "Parcial: creación/importaciones, lanzamiento preparado, operaciones, grupos, copia reanudable, biblioteca virtualizada y enlaces compartidos/cancelación verificados. Falta auditoría K03/K04/resto de paridad; no cerrar el criterio. Evidencia final70c70d8:514 unitarias,53 escenarios distintos;8 afectados finales solapados. CI de este bloque pendiente tras push."
+          "note": "Parcial: biblioteca/creación/importaciones/lanzamiento coordinado, operaciones y cambiar/restablecer iconos probados. Falta cerrar auditoría de paridad K02/K03/K04; actualización de contenido y ajustes completos siguen en sus etapas. Fuente a41a322,543 unitarias/57 escenarios distintos. No certificar juego/Java reales ni CI nuevo antes de sus resultados."
         }
       ]
     },
