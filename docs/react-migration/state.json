@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Bloque 4ea5436 exportación revisada verificada (STAGE4-EXPORT):460 unitarias/51 archivos y43 escenarios Electron. Continuar gestión de grupos existentes, progreso/cancelación/recuperación de copia, biblioteca extensa y enlaces compartidos en exportación; auditar resto K03 y etapa4. Tres gates pendientes. No repetir exportación estándar ni Prism/clientes. Usuario autorizó trabajo autónomo y publicación al cumplir gates; Microsoft pospuesto, Vue predeterminado y producción sin cambios.",
+  "nextAction": "Bloque 1e231a4 gestión de grupos verificada (STAGE4-GROUPS): 466 unitarias/51 archivos y 45 escenarios Electron. Continuar progreso/cancelación/recuperación de copia; revisar espera de operaciones en vuelo al cancelar el duplicador. Después virtualización, enlaces compartidos de exportación y auditoría K03/etapa 4. Revisar CI de PR4 tras corregir URL temporal 8.3 del test. Tres gates pendientes. Usuario autorizó trabajo autónomo/publicación al cumplir criterios; Microsoft pospuesto, Vue predeterminado, producción sin cambios.",
   "stages": [
     {
       "id": 0,
@@ -460,9 +460,17 @@
             {
               "path": "docs/react-migration/STAGE4-EXPORT.json",
               "sha256": "6721f40e3e277d9fb49e6e996e3223db1aadd91031b4a11e7076436ffc12a2d1"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-GROUPS.md",
+              "sha256": "73fb1ff4990db02a4f552cc6c36d6d7091205a37bfadf4e464680d99b7c1fdaf"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-GROUPS.json",
+              "sha256": "00d13fb020b6fd6aa16ab0a3cfea6c8a1a0af98f4d28550496707e6dfc6fc529"
             }
           ],
-          "note": "Parcial: exportación/reimportación local revisada añadida a creación, lanzamiento y operaciones. Faltan gestión completa de grupos/copia, bibliotecas extensas, exportación de enlaces compartidos, auditoría K03 y demás criterios. Tres gates/K02/K03/K04 pendientes; juego/Java reales no certificados."
+          "note": "Parcial: renombrar/disolver grupos existentes añadido a exportación y operaciones. Faltan tareas/recuperación de copia, virtualización, enlaces compartidos de exportación, auditoría K03 y demás criterios. Tres gates/K02/K03/K04 pendientes. CI remoto requiere nueva verificación; juego/Java reales no certificados."
         }
       ]
     },
