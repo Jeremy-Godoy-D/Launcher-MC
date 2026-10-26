@@ -42,7 +42,7 @@ export async function duplicateInstance(options: DuplicateInstanceOptions): Prom
   const linkOrCopy = isSameDisk
     ? async (src: string, dest: string) =>
         link(src, dest)
-          .catch(() => copyFile(src, dest))
+          .catch(() => { throwIfAborted(); return copyFile(src, dest) })
           .then(() => {
             progress.progress++
           })
@@ -72,23 +72,28 @@ export async function duplicateInstance(options: DuplicateInstanceOptions): Prom
 
   const promises = [] as Promise<void>[]
 
-  for (const [file] of files) {
-    throwIfAborted()
-    const src = join(instancePath, file.path)
-    const dest = join(newPath, file.path)
-    await ensureDir(resolve(dest, '..'))
-    if (
-      file.path.startsWith('mods/') ||
-      file.path.startsWith('resourcepacks/') ||
-      file.path.startsWith('shaderpacks/')
-    ) {
-      promises.push(safe(src, linkOrCopy(src, dest)))
-    } else {
-      promises.push(safe(src, copyFile(src, dest).then(() => { progress.progress++ })))
+  try {
+    for (const [file] of files) {
+      throwIfAborted()
+      const src = join(instancePath, file.path)
+      const dest = join(newPath, file.path)
+      await ensureDir(resolve(dest, '..'))
+      throwIfAborted()
+      if (
+        file.path.startsWith('mods/') ||
+        file.path.startsWith('resourcepacks/') ||
+        file.path.startsWith('shaderpacks/')
+      ) {
+        promises.push(safe(src, linkOrCopy(src, dest)))
+      } else {
+        promises.push(safe(src, copyFile(src, dest).then(() => { progress.progress++ })))
+      }
     }
+  } finally {
+    // A rejected call must not leave earlier file writes running in the background.
+    await Promise.all(promises)
   }
-
-  await Promise.all(promises)
+  throwIfAborted()
 
   if (missingSources.length > 0) {
     logger?.warn(
