@@ -35,6 +35,13 @@ describe('local accounts', () => {
     expect(selectedAccount([external, local], '')).toBe(local)
     expect(profileEntries([local])[0]).toMatchObject({ id: 'a', name: 'PlayerOne' })
   })
+  it('resolves only the exact legacy local account alias after native ID normalization', () => {
+    const canonical = { ...local, id: 'x://OFFLINE@dev' }
+    expect(selectedAccount([canonical, external], 'OFFLINE')).toBe(canonical)
+    expect(selectedAccount([{ ...external, id: canonical.id }], 'OFFLINE')).toBeUndefined()
+    expect(selectedAccount([canonical], 'missing')).toBeUndefined()
+    expect(selectedAccount([local, canonical], 'OFFLINE')).toBe(local)
+  })
   it('shares selection, preserves the legacy key format and refreshes after an unmounted window interval', () => {
     const values = new Map([['selectedUserId', 'external']])
     const storage = {

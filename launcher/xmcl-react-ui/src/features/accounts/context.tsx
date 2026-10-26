@@ -7,7 +7,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react'
-import { UserServiceKey, UserState } from '@xmcl/runtime-api/src/services/UserService'
+import { UserServiceKey, UserState, type SkinPayload } from '@xmcl/runtime-api/src/services/UserService'
 import { AUTHORITY_DEV } from '@xmcl/runtime-api/src/util/authority'
 import type { UserProfile } from '@xmcl/runtime-api/src/entities/user.schema'
 import { useService, useSharedState, type StateDescriptor } from '../../runtime'
@@ -38,7 +38,7 @@ function useAccountState() {
   const profile = selected?.profiles[selected.selectedProfile]
   const entries = profileEntries(users)
   useEffect(() => {
-    if (!selectedId && selected) selection.set(selected.id)
+    if (selected && selectedId !== selected.id) selection.set(selected.id)
   }, [selectedId, selected?.id])
 
   async function run<T>(action: () => Promise<T>) {
@@ -83,6 +83,8 @@ function useAccountState() {
         throw new Error('Only local profiles can be removed here')
       await service.removeUserGameProfile(structuredClone(entry.user) as UserProfile, entry.id)
     })
+  const appearance = (entry: ProfileEntry, payload: SkinPayload) =>
+    run(() => service.setLocalProfileAppearance({ ...payload, userId: entry.user.id, gameProfileId: entry.id }))
   return {
     ...snapshot,
     users,
@@ -96,6 +98,7 @@ function useAccountState() {
     add,
     select,
     remove,
+    appearance,
   }
 }
 

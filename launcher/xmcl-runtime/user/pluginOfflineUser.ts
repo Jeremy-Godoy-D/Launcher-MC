@@ -1,4 +1,4 @@
-import { AUTHORITY_DEV, AuthorityMetadata, UserProfile } from '@xmcl/runtime-api'
+import { AUTHORITY_DEV, AuthorityMetadata, UserProfile, normalizeUserId } from '@xmcl/runtime-api'
 import { offline } from '@xmcl/user'
 import { LauncherAppPlugin } from '~/app'
 import { ImageStorage } from '~/infra'
@@ -8,39 +8,23 @@ import { getUUID } from './utils/offlineUser'
 import { isValidLocalProfileName } from '@xmcl/runtime-api/src/util/offlineUser'
 
 export const pluginOffineUser: LauncherAppPlugin = async (app) => {
-  const OFFLINE_USER_ID = 'OFFLINE'
+  const OFFLINE_USER_ID = normalizeUserId('OFFLINE', AUTHORITY_DEV)
 
   const userService = await app.registry.get(UserService)
   const userTokenStorage = await app.registry.get(kUserTokenStorage)
   const imageStore = await app.registry.get(ImageStorage)
-  userService.getUserState().then((state) => {
-    const offlineUsers = state.users[OFFLINE_USER_ID]
-    if (offlineUsers) {
-      let modified = false
-      for (const [k, v] of Object.entries(offlineUsers.profiles)) {
-        const expectedUUID = getUUID(v.name)
-        if (k !== expectedUUID) {
-          modified = true
-          v.id = expectedUUID
-          delete offlineUsers.profiles[k]
-          offlineUsers.profiles[expectedUUID] = v
-        }
-      }
-      if (modified) {
-        state.userProfile(offlineUsers)
-      }
-    }
-  })
+  // Persisted UUIDs identify world data; loading or editing appearance must not recalculate them.
   userService.registerAccountSystem(AUTHORITY_DEV, {
     async login({ username, properties }) {
       if (!isValidLocalProfileName(username)) throw new TypeError('Invalid local profile name')
+      await userService.initialize()
       const auth = offline(username, properties?.uuid)
       auth.selectedProfile.id = getUUID(username)
 
       const existed = userService.state.users[OFFLINE_USER_ID]
       const profiles = existed ? { ...existed.profiles } : {}
       for (const p of auth.availableProfiles) {
-        profiles[p.id] = {
+        profiles[p.id] ??= {
           name: p.name,
           id: p.id,
           uploadable: ['cape', 'skin'],
@@ -60,7 +44,7 @@ export const pluginOffineUser: LauncherAppPlugin = async (app) => {
         profiles,
         expiredAt: Number.MAX_SAFE_INTEGER / 100 * 95,
         authority: AUTHORITY_DEV,
-        username: OFFLINE_USER_ID,
+        username: 'OFFLINE',
       }
       await userTokenStorage.put(profile, auth.accessToken)
 

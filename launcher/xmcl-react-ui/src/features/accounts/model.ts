@@ -14,6 +14,8 @@ export function selectedAccount(users: readonly Account[], selected: string) {
   // A saved external account remains selected; never silently replace it with a local identity.
   return (
     users.find((user) => user.id === selected) ??
+    // Chromium on Windows parses the single-letter x: authority as a drive, unlike Node URL.
+    (selected === 'OFFLINE' ? users.find(user => user.authority === AUTHORITY_DEV && user.id === 'x://OFFLINE@dev') : undefined) ??
     (!selected ? users.find((user) => user.authority === AUTHORITY_DEV) : undefined)
   )
 }

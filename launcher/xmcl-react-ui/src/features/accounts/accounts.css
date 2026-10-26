@@ -72,4 +72,21 @@
     justify-content: flex-end;
     gap: 12px;
   }
+  .profile-appearance-form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    gap: 16px;
+  }
+  .profile-appearance-form fieldset {
+    border: 0;
+    padding: 12px 0;
+    margin: 0;
+    min-width: 0;
+    display: grid;
+    gap: 10px;
+  }
+  .profile-texture-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .profile-texture-source { overflow-wrap: anywhere; font-size: 13px; line-height: 1.6; }
+  .profile-appearance-form .form-error { scroll-margin-block: 8px; }
 }

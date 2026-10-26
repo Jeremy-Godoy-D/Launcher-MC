@@ -73,7 +73,8 @@ test('local profiles create, select, persist and remove with confirmation withou
     const data = await readFile(userFile, 'utf8').catch(error => { if (error.code === 'ENOENT') return null; throw error })
     if (!data) return null
     const users = JSON.parse(data).users
-    return Object.values(users.OFFLINE?.profiles ?? {}).map((profile: any) => profile.name)
+    const local = Object.values(users).find((user: any) => user.authority === 'x://dev') as any
+    return Object.values(local?.profiles ?? {}).map((profile: any) => profile.name)
   }).toEqual(['PlayerA_QA'])
   await snap(launcher, 'accounts-minimum', 'Cuentas reales en 800×400: selección persistente, validación y eliminación confirmada; perfil temporal.')
   await page.getByRole('button', { name: 'Eliminar PlayerA_QA', exact: true }).click()

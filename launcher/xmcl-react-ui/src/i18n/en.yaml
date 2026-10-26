@@ -32,6 +32,30 @@ react:
     launchPending: 'Selected “{name}”. Launching is not connected in React yet. Minecraft will not start.'
     featurePending: This feature is still pending in the React migration. Your saved instances are preserved.
   accounts:
+    appearance: Appearance
+    appearanceName: 'Appearance of {name}'
+    appearanceTitle: 'Appearance of {name}'
+    appearanceHelp: Choose local files. A copy is saved on this computer without uploading it to a service.
+    appearanceFields: Local profile appearance
+    identityHelp: Your profile name and UUID stay the same. Changing appearance keeps the identity used for your saved games.
+    skin: Skin
+    skinHelp: 64×64 or 64×32 PNG, up to 1 MiB.
+    chooseSkin: Choose skin PNG
+    resetSkin: Reset skin
+    defaultSkin: Default skin
+    savedTexture: Texture saved in this profile
+    willReset: Will reset when saved
+    model: Character model
+    classic: Classic · wide arms
+    slim: Slim · narrow arms
+    cape: Cape
+    capeHelp: 64×32 PNG, up to 1 MiB. In-game display depends on local skin support in the instance.
+    chooseCape: Choose cape PNG
+    resetCape: Remove cape
+    noCape: No cape
+    saveAppearance: Save appearance
+    profileMissing: This profile is no longer available. Close the editor and select another one.
+    appearanceError: Could not save. Check that the files are PNGs with the required dimensions and are still available. If another window changed this profile, reopen the editor.
     title: Accounts
     saved: Profiles saved on this device
     description: Choose the profile you will use to play. Each local name keeps its identity.

@@ -31,6 +31,8 @@ import { kUserTokenStorage, type UserTokenStorage } from './userTokenStore'
 import { getModrinthAccessToken, loginModrinth } from './utils/loginModrinth'
 import { ensureLauncherProfile, preprocessUserData } from './utils/userData'
 import { UserPersistence, type UserPersistenceIntent } from './UserPersistence'
+import { ImageStorage } from '~/infra'
+import { readLocalProfileTexture } from './utils/localProfileTexture'
 
 @ExposeServiceKey(UserServiceKey)
 export class UserService extends StatefulService<UserState> implements IUserService {
@@ -206,6 +208,39 @@ export class UserService extends StatefulService<UserState> implements IUserServ
 
   registerAccountSystem(authority: string, system: UserAccountSystem) {
     this.accountSystems[authority] = system
+  }
+
+  @Lock('uploadSkin')
+  async setLocalProfileAppearance(options: UploadSkinOptions): Promise<void> {
+    requireObject(options)
+    requireString(options.userId)
+    requireString(options.gameProfileId)
+    const user = Object.hasOwn(this.state.users, options.userId) ? this.state.users[options.userId] : undefined
+    const profile = user && Object.hasOwn(user.profiles, options.gameProfileId) ? user.profiles[options.gameProfileId] : undefined
+    if (!user || user.authority !== AUTHORITY_DEV || !profile) throw new TypeError('Local profile not found')
+    const original = JSON.stringify(profile.textures)
+    const textures = structuredClone(profile.textures)
+    const store = await this.app.registry.get(ImageStorage)
+    if (options.skin !== undefined) {
+      if (options.skin === null) textures.SKIN = { url: '' }
+      else {
+        requireObject(options.skin)
+        requireString(options.skin.url)
+        if (typeof options.skin.slim !== 'boolean') throw new TypeError('Invalid skin model')
+        const url = options.skin.url === profile.textures.SKIN.url && options.skin.url
+          ? options.skin.url
+          : await store.addImage(await readLocalProfileTexture(options.skin.url, 'skin'))
+        textures.SKIN = { url, metadata: { model: options.skin.slim ? 'slim' : 'steve' } }
+      }
+    }
+    if (options.cape !== undefined) {
+      requireString(options.cape)
+      if (!options.cape) delete textures.CAPE
+      else textures.CAPE = { url: await store.addImage(await readLocalProfileTexture(options.cape, 'cape')) }
+    }
+    // File validation may yield while another window removes or edits this profile.
+    if (this.state.users[user.id] !== user || user.profiles[profile.id] !== profile || JSON.stringify(profile.textures) !== original) throw new Error('Local profile changed; reopen the editor')
+    this.state.gameProfileUpdate({ userId: user.id, profile: { ...profile, textures } })
   }
 
   @Lock('uploadSkin')

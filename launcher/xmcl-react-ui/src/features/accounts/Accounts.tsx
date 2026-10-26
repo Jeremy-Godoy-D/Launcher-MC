@@ -6,6 +6,7 @@ import { useI18n } from '../../i18n'
 import { useAccounts } from './context'
 import { validLocalName, type ProfileEntry } from './model'
 import './accounts.css'
+import { ProfileAppearance } from './ProfileAppearance'
 
 export function LocalProfileForm({ onCreated }: { onCreated?: () => void }) {
   const accounts = useAccounts()
@@ -79,6 +80,7 @@ export function Accounts() {
   const accounts = useAccounts()
   const { t } = useI18n()
   const [removing, setRemoving] = useState<ProfileEntry | null>(null)
+  const [editing, setEditing] = useState<ProfileEntry | null>(null)
   const trigger = useRef<HTMLElement | null>(null)
   return (
     <section className="accounts-page" data-testid="accounts-page">
@@ -129,6 +131,9 @@ export function Accounts() {
                     </button>
                   )}
                   {local && (
+                    <button className="button secondary" disabled={accounts.busy} aria-label={t('react.accounts.appearanceName', { name: entry.name })} onClick={event => { trigger.current = event.currentTarget; setEditing(entry) }}>{t('react.accounts.appearance')}</button>
+                  )}
+                  {local && (
                     <button
                       className="button secondary"
                       disabled={accounts.busy}
@@ -155,6 +160,7 @@ export function Accounts() {
           <p className="form-help">{t('react.accounts.microsoftDeferred')}</p>
         </>
       )}
+      {editing && <ProfileAppearance entry={editing} onClose={() => setEditing(null)} returnFocus={trigger} />}
       <Dialog.Root
         open={!!removing}
         onOpenChange={(open) => {

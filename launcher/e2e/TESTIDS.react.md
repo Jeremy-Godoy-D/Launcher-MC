@@ -6,11 +6,11 @@ This file is the contract between the launcher UI in `xmcl-react-ui/` and the Pl
 
 Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testids` with the selected LAUNCHER_RENDERER. Computed IDs are not resolved by this static registry.
 
-**Total anchors:** 33 (in 21 Vue/TSX files)
+**Total anchors:** 35 (in 22 Vue/TSX files)
 
 | Test ID | Defined in |
 |---|---|
-| `accounts-page` | [`xmcl-react-ui/src/features/accounts/Accounts.tsx#L84`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L84) |
+| `accounts-page` | [`xmcl-react-ui/src/features/accounts/Accounts.tsx#L86`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L86) |
 | `app-backdrop` | [`xmcl-react-ui/src/App.tsx#L381`](../xmcl-react-ui/src/App.tsx#L381) |
 | `app-sidebar` | [`xmcl-react-ui/src/App.tsx#L415`](../xmcl-react-ui/src/App.tsx#L415) |
 | `copy-cancel` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L67`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L67) |
@@ -32,12 +32,14 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `library-groups-dialog` | [`xmcl-react-ui/src/features/library/GroupsDialog.tsx#L41`](../xmcl-react-ui/src/features/library/GroupsDialog.tsx#L41) |
 | `library-state` | [`xmcl-react-ui/src/App.tsx#L369`](../xmcl-react-ui/src/App.tsx#L369) |
 | `library-window` | [`xmcl-react-ui/src/features/library/LibraryWindow.tsx#L96`](../xmcl-react-ui/src/features/library/LibraryWindow.tsx#L96) |
-| `local-profile-name` | [`xmcl-react-ui/src/features/accounts/Accounts.tsx#L49`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L49)<br>[`xmcl-react-ui/src/features/accounts/Accounts.tsx#L173`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L173) |
+| `local-profile-name` | [`xmcl-react-ui/src/features/accounts/Accounts.tsx#L50`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L50)<br>[`xmcl-react-ui/src/features/accounts/Accounts.tsx#L179`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L179)<br>[`xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35`](../xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35) |
 | `nav-accounts` | [`xmcl-react-ui/src/App.tsx#L469`](../xmcl-react-ui/src/App.tsx#L469) |
 | `nav-home` | [`xmcl-react-ui/src/App.tsx#L426`](../xmcl-react-ui/src/App.tsx#L426) |
 | `nav-library` | [`xmcl-react-ui/src/App.tsx#L427`](../xmcl-react-ui/src/App.tsx#L427) |
 | `nav-settings` | [`xmcl-react-ui/src/App.tsx#L461`](../xmcl-react-ui/src/App.tsx#L461) |
 | `nav-store` | [`xmcl-react-ui/src/App.tsx#L428`](../xmcl-react-ui/src/App.tsx#L428) |
+| `profile-appearance` | [`xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35`](../xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35) |
+| `profile-appearance-save` | [`xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L75`](../xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L75) |
 | `react-prototype` | [`xmcl-react-ui/src/App.tsx#L378`](../xmcl-react-ui/src/App.tsx#L378) |
 | `setup-next` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L345`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L345) |
 | `setup-path` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L233`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L233) |

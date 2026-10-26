@@ -32,6 +32,30 @@ react:
     launchPending: 'Se ha seleccionado «{name}». El lanzamiento todavía no está conectado en React. No se inicia Minecraft.'
     featurePending: Esta función sigue pendiente en la migración a React. Tus instancias guardadas se conservan.
   accounts:
+    appearance: Apariencia
+    appearanceName: 'Apariencia de {name}'
+    appearanceTitle: 'Apariencia de {name}'
+    appearanceHelp: Elige archivos locales. Se guardará una copia en este equipo, sin subirlos a ningún servicio.
+    appearanceFields: Apariencia del perfil local
+    identityHelp: El nombre y el UUID del perfil se conservan. Cambiar la apariencia no cambia la identidad de tus partidas.
+    skin: Skin
+    skinHelp: PNG de 64×64 o 64×32 píxeles, hasta 1 MiB.
+    chooseSkin: Elegir skin PNG
+    resetSkin: Restablecer skin
+    defaultSkin: Skin predeterminada
+    savedTexture: Textura guardada en el perfil
+    willReset: Se restablecerá al guardar
+    model: Modelo del personaje
+    classic: Clásico · brazos anchos
+    slim: Slim · brazos estrechos
+    cape: Capa
+    capeHelp: PNG de 64×32 píxeles, hasta 1 MiB. La visualización en el juego depende del soporte de skins locales de la instancia.
+    chooseCape: Elegir capa PNG
+    resetCape: Retirar capa
+    noCape: Sin capa
+    saveAppearance: Guardar apariencia
+    profileMissing: Este perfil ya no está disponible. Cierra el editor y selecciona otro.
+    appearanceError: No se pudo guardar. Comprueba que los archivos sean PNG con las dimensiones indicadas y sigan disponibles. Si el perfil cambió en otra ventana, vuelve a abrir el editor.
     title: Cuentas
     saved: Perfiles guardados en este equipo
     description: Elige el perfil que usarás al jugar. Cada nombre local conserva su identidad.
