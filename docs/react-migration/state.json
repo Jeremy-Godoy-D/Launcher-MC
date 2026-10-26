@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 4,
-  "nextAction": "Bloque ba7c769 clientes modificados/alias Vanilla y Prism standalone aislados (STAGE4-CLIENTS):394 unitarias y34 escenarios Electron finales. Continuar K03 Prism con base incompleta y paridad restante; después K02/K04 operaciones. Tres gates pendientes. Fallos iniciales de actionability documentados, comprobación de foco añadida. Grimo/datos/proxy/Vue conservados; Microsoft pospuesto, producción sin cambios.",
+  "nextAction": "Bloque 7ea3348 base Minecraft parcial de Prism cubierta desde origen/caché/oficial verificado (STAGE4-PRISM-BASE):409 unitarias y36 escenarios Electron. Continuar K02/K04 operaciones de Biblioteca y auditoría restante de K03; no repetir base Minecraft ni clientes aislados. Componentes Prism adicionales sin parche se bloquean. Tres gates pendientes; Grimo/datos/proxy/Vue conservados, Microsoft pospuesto, producción sin cambios.",
   "stages": [
     {
       "id": 0,
@@ -436,9 +436,17 @@
             {
               "path": "docs/react-migration/STAGE4-CLIENTS.json",
               "sha256": "43168ee1419718b46826ea10ee30ed53804302bb08a99959b26dffcec15fe621"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PRISM-BASE.md",
+              "sha256": "bb3316ecd54f69b7a5a2ec4c34fa837b4698ce4a154bf9d7d64b563bcaa65369"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PRISM-BASE.json",
+              "sha256": "fc914f909b7a51720dba1aaad77d46b69c02dc160db47ecd6213604988938f88"
             }
           ],
-          "note": "Parcial: importación estándar, Prism standalone completo, Vanilla local/herencia/latest y clientes modificados/alias aislados; Java/RAM/enlaces y lanzamiento/recuperación conectados. Faltan Prism con base incompleta, paridad restante, operaciones completas, ajustes/diagnóstico integral y partida/descarga real; no cerrar K03 ni gate. Dos fallos iniciales de actionability registrados; regresión final con foco explícito aprobada."
+          "note": "Parcial: creación/importación, Vanilla/herencia/latest, clientes aislados y base Minecraft parcial de Prism conectados; Java/RAM/enlaces y lanzamiento/recuperación. Faltan auditoría K03 (componentes adicionales sin parche bloqueados), operaciones K02/K04, ajustes/diagnóstico integral y partida/descarga real. No cerrar K03 ni gate."
         }
       ]
     },
