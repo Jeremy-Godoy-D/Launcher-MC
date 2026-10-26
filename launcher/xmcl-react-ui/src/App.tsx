@@ -50,6 +50,7 @@ import { AddInstance } from './features/library/AddInstance'
 import { useLaunch } from './features/launch/context'
 import { LaunchDialog } from './features/launch/LaunchDialog'
 import { InstanceOperations } from './features/library/InstanceOperations'
+import { GroupsDialog } from './features/library/GroupsDialog'
 
 declare global {
   interface Window {
@@ -242,6 +243,7 @@ export function App() {
   const [showCredits, setShowCredits] = useState(false)
   const [adding, setAdding] = useState<'create' | 'import'>()
   const [operating, setOperating] = useState<SavedInstance>()
+  const [managingGroups, setManagingGroups] = useState(false)
   useEffect(() => {
     const requested = new URLSearchParams(location.search).get('add')
     if (savedLibrary?.status === 'ready' && (requested === 'create' || requested === 'import')) {
@@ -276,7 +278,7 @@ export function App() {
     reducedMotion,
     performanceMode,
     interacting: hovered || focusWithin,
-    dialogOpen: !!dialog || showCredits || !!adding || !!operating || !!launch?.dialog || !!launch?.running.length,
+    dialogOpen: !!dialog || showCredits || !!adding || !!operating || managingGroups || !!launch?.dialog || !!launch?.running.length,
     manuallyPaused: paused,
   })
 
@@ -626,7 +628,7 @@ export function App() {
                   <h1>Tu biblioteca</h1>
                   <p>{t('react.instances.subtitle')}</p>
                 </div>
-                <button
+                <div className="operation-order"><button className="button secondary" data-testid="library-groups" disabled={savedLibrary?.status !== 'ready'} onClick={event => { restoreFocus.current = event.currentTarget; setManagingGroups(true) }}><Layers size={18} aria-hidden="true" />{t('react.groups.title')}</button><button
                   className="button primary"
                   onClick={() => openCreation('create')}
                   disabled={savedLibrary?.status !== 'ready'}
@@ -634,7 +636,7 @@ export function App() {
                 >
                   <Plus size={18} />
                   Añadir instancia
-                </button>
+                </button></div>
               </div>
               {libraryState}
               <div className="filterbar">
@@ -940,6 +942,7 @@ export function App() {
         </div>
       </main>
       {launch && <LaunchDialog launch={launch} returnFocus={restoreFocus} />}
+      {managingGroups && <GroupsDialog returnFocus={restoreFocus} onClose={() => setManagingGroups(false)} onRemoved={id => { if (group === `id:${id}`) setGroup('') }} />}
       {operating && <InstanceOperations key={operating.path} instance={operating} onClose={() => setOperating(undefined)} returnFocus={restoreFocus} onCreated={path => {
         if (savedLibrary?.select(path)) void navigate('/instance')
       }} />}

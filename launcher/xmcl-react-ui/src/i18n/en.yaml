@@ -299,3 +299,14 @@ react:
     ExportGameRunning: Close this instance’s game before exporting.
     ExportInvalid: Check the version and destination. Choose a folder outside the instance.
     ExportInstanceUnavailable: This instance is no longer available. Close the dialog and check the library.
+  groups:
+    title: Manage groups
+    help: Rename or dissolve a group. Its instances and files are preserved.
+    dissolve: Dissolve this group
+    keep: Instances will leave this group and keep their relative order. They are not removed and their folders are preserved.
+    empty: No groups yet. Create one from an instance’s options under “Group”.
+    refresh: Review groups again
+    confirmDissolve: Dissolve and keep instances
+    changed: Groups changed in another window. Choose “Review groups again” before saving.
+    unavailable: The library is unavailable. Close this dialog and retry once it has loaded.
+    failed: Could not save the change. Check access to launcher data and review the groups before retrying.

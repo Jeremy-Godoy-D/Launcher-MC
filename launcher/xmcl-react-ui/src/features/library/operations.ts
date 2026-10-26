@@ -3,6 +3,19 @@ import type { SavedInstance } from './model'
 import type { InstanceState } from '@xmcl/runtime-api/src/services/InstanceService'
 
 type Groups = InstanceState['groups']
+export function changeGroup(groups: Groups, id: string, name?: string): Groups {
+  const index = groups.findIndex(group => typeof group !== 'string' && group.id === id)
+  const group = groups[index]
+  if (!group || typeof group === 'string') throw new Error('changed')
+  const result = structuredClone(groups)
+  if (name === undefined) result.splice(index, 1, ...group.instances)
+  else {
+    const value = name.trim()
+    if (!value || value.length > 100 || groups.some(other => typeof other !== 'string' && other.id !== id && other.name.toLocaleLowerCase() === value.toLocaleLowerCase())) throw new Error('invalidGroup')
+    result[index] = { ...group, name: value }
+  }
+  return result
+}
 export function manualOrder(instances: readonly SavedInstance[], groups: readonly (string | { readonly instances: readonly string[] })[]) {
   const paths = [...new Set([...groups.flatMap(group => typeof group === 'string' ? [group] : [...group.instances]), ...instances.map(instance => instance.path)])]
   const byPath = new Map(instances.map(instance => [instance.path, instance]))

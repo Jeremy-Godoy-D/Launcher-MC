@@ -1,8 +1,25 @@
 import { expect, test } from 'vitest'
 import { InstanceSchema } from '../../../../packages/instance/instance'
-import { assignGroup, manualOrder, metadataDraft, metadataEdit, moveInGroups } from './operations'
+import { assignGroup, changeGroup, manualOrder, metadataDraft, metadataEdit, moveInGroups } from './operations'
 
 const original = { ...InstanceSchema.parse({ name: 'Original', path: 'C:/instances/original', description: 'Before', author: 'QA', runtime: { minecraft: '1.21.1' }, java: 'keep-java', vmOptions: ['keep-argument'] }), path: 'C:/instances/original', creationDate: 1, lastPlayedDate: 0, lastAccessDate: 1, playtime: 0 }
+
+const groups = ['before', { id: 'friends', name: 'Friends', color: '#123456', instances: ['java', 'unknown-edition'] }, { id: 'other', name: 'Other', color: '', instances: ['another'] }, 'after']
+test('group rename preserves order, members, other editions and color without mutating the snapshot', () => {
+  expect(changeGroup(groups, 'friends', '  FRIENDS  ')[1]).toEqual({ id: 'friends', name: 'FRIENDS', color: '#123456', instances: ['java', 'unknown-edition'] })
+  expect(groups[1]).toMatchObject({ name: 'Friends' })
+})
+test('dissolving a group keeps every member at its original position and preserves all other groups', () => {
+  expect(changeGroup(groups, 'friends')).toEqual(['before', 'java', 'unknown-edition', groups[2], 'after'])
+  expect(groups).toHaveLength(4)
+})
+test.each(['', 'oThEr', 'x'.repeat(101)])('rejects invalid or conflicting group name %j', name => {
+  expect(() => changeGroup(groups, 'friends', name)).toThrow('invalidGroup')
+})
+test('missing groups require a fresh review', () => {
+  expect(() => changeGroup(groups, 'missing', 'Rename')).toThrow('changed')
+  expect(() => changeGroup(groups, 'missing')).toThrow('changed')
+})
 test('edits only captured metadata and supplies a main-process comparison without overwriting runtime settings', () => {
   const draft = { name: ' Renamed ', description: 'After', author: 'Author' }
   expect(metadataEdit(original, { ...original, java: 'new-java' }, draft, [original])).toEqual({ instancePath: original.path, name: 'Renamed', description: 'After', author: 'Author', expectedMetadata: metadataDraft(original) })

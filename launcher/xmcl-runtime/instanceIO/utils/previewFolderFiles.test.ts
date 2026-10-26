@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, parse } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -16,7 +16,7 @@ describe('read-only folder import preview', () => {
     for (const path of ['launcher_accounts.json', 'instance.json', '.install-manifest']) await writeFile(join(dir, path), 'private')
     await mkdir(join(dir, 'libraries')); await writeFile(join(dir, 'libraries', 'cache.jar'), 'cache')
     const files = await previewFolderFiles(dir)
-    expect(files).toEqual([{ path: 'saves/world/level.dat', size: 14, hashes: { sha1: createHash('sha1').update('world sentinel').digest('hex'), sha256: createHash('sha256').update('world sentinel').digest('hex') }, downloads: [pathToFileURL(join(dir, 'saves', 'world', 'level.dat')).href] }])
+    expect(files).toEqual([{ path: 'saves/world/level.dat', size: 14, hashes: { sha1: createHash('sha1').update('world sentinel').digest('hex'), sha256: createHash('sha256').update('world sentinel').digest('hex') }, downloads: [pathToFileURL(await realpath(join(dir, 'saves', 'world', 'level.dat'))).href] }])
     expect(await readFile(join(dir, 'launcher_accounts.json'), 'utf8')).toBe('private')
     expect(await readFile(join(dir, 'saves', 'world', 'level.dat'), 'utf8')).toBe('world sentinel')
   })

@@ -299,3 +299,14 @@ react:
     ExportGameRunning: Cierra la partida de esta instancia antes de exportarla.
     ExportInvalid: Revisa la versión y el destino. Elige una carpeta fuera de la instancia.
     ExportInstanceUnavailable: La instancia ya no está disponible. Cierra el diálogo y revisa la biblioteca.
+  groups:
+    title: Administrar grupos
+    help: Renombra o disuelve un grupo. Sus instancias y archivos se conservan.
+    dissolve: Disolver este grupo
+    keep: Las instancias quedarán sin este grupo y mantendrán su orden relativo. No se retiran ni se borran sus carpetas.
+    empty: No hay grupos. Puedes crear uno desde las opciones de una instancia, en «Grupo».
+    refresh: Revisar grupos de nuevo
+    confirmDissolve: Disolver y conservar instancias
+    changed: Los grupos cambiaron en otra ventana. Pulsa «Revisar grupos de nuevo» antes de guardar.
+    unavailable: La biblioteca no está disponible. Cierra el diálogo y vuelve a intentarlo cuando cargue.
+    failed: No se guardó el cambio. Revisa el acceso a los datos del launcher y vuelve a revisar los grupos antes de reintentar.
