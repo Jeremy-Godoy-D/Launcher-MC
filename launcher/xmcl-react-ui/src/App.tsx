@@ -47,7 +47,7 @@ import { useI18n } from './i18n'
 import { Accounts } from './features/accounts/Accounts'
 import { useAccounts } from './features/accounts/context'
 import { useLibrary } from './features/library/context'
-import { instanceIcon, loaderName, type SavedInstance } from './features/library/model'
+import { instanceIcon, loaderName, matchesInstanceQuery, type SavedInstance } from './features/library/model'
 import { AddInstance } from './features/library/AddInstance'
 import { useLaunch } from './features/launch/context'
 import { LaunchDialog } from './features/launch/LaunchDialog'
@@ -343,10 +343,9 @@ export function App() {
     setShowCredits(true)
   }
   const matchesInstance = (instance: Instance) =>
-    instance.name.toLowerCase().includes(query.toLowerCase()) &&
     (!loader || instance.loader === loader) &&
     (!group || (group === 'ungrouped' ? !savedLibrary?.data?.groups.some(entry => typeof entry !== 'string' && entry.instances.includes(instance.id)) : savedLibrary?.data?.groups.some(entry => typeof entry !== 'string' && `id:${entry.id}` === group && entry.instances.includes(instance.id))))
-  const matchingInstances = (savedLibrary?.ordered || []).map(present).filter(matchesInstance)
+  const matchingInstances = (savedLibrary?.ordered || []).filter(item => matchesInstanceQuery(item, query)).map(present).filter(matchesInstance)
   const matchingProjects = projects.filter((project) =>
     `${project.title} ${project.description}`.toLowerCase().includes(query.toLowerCase()),
   )
@@ -670,7 +669,7 @@ export function App() {
                   <input
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Buscar una instancia…"
+                    placeholder={t('react.instances.searchPlaceholder')}
                     aria-label="Buscar instancias"
                   />
                 </label>
@@ -725,7 +724,7 @@ export function App() {
                   />
                 )
               }}</LibraryWindow>
-              {!!instances.length && !instances.some(matchesInstance) && (
+              {!!instances.length && !matchingInstances.length && (
                 <div className="empty">
                   <Search size={28} />
                   <h2>No encontramos esa instancia</h2>

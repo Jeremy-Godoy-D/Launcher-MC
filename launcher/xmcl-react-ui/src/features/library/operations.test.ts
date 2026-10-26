@@ -1,6 +1,42 @@
 import { expect, test } from 'vitest'
 import { InstanceSchema } from '../../../../packages/instance/instance'
-import { assignGroup, changeGroup, manualOrder, metadataDraft, metadataEdit, moveInGroups, isOperationCancelled } from './operations'
+import { assignGroup, changeGroup, copyLegacyModGroups, manualOrder, metadataDraft, metadataEdit, moveInGroups, isOperationCancelled } from './operations'
+
+function legacyStorage(value: unknown) {
+  let raw = typeof value === 'string' ? value : JSON.stringify(value)
+  let writes = 0
+  return { getItem: () => raw, setItem: (_key: string, value: string) => { writes++; raw = value }, writes: () => writes }
+}
+
+test('legacy mod groups copy only the captured source and retain unrelated and destination data on retry', () => {
+  const source = { 'a.jar': 'Explorar', 'b.jar.disabled': 'Rápido' }
+  const storage = legacyStorage({ source, other: { untouched: ['unknown data'] } })
+  copyLegacyModGroups('source', 'copy', storage)
+  expect(JSON.parse(storage.getItem())).toEqual({ source, copy: source, other: { untouched: ['unknown data'] } })
+  copyLegacyModGroups('source', 'copy', storage)
+  expect(storage.writes()).toBe(1)
+  storage.setItem('modsGrouping', JSON.stringify({ source, copy: { 'edited.jar': 'My group' } }))
+  copyLegacyModGroups('source', 'copy', storage)
+  expect(JSON.parse(storage.getItem()).copy).toEqual({ 'edited.jar': 'My group' })
+  expect(storage.writes()).toBe(2)
+})
+
+test.each(['{bad', 'null', '[]', '42', '{"source":null}', '{"source":[]}', '{"source":{"a.jar":7}}'])('malformed legacy groups are kept byte-for-byte: %s', raw => {
+  const storage = legacyStorage(raw)
+  expect(() => copyLegacyModGroups('source', 'copy', storage)).toThrow()
+  expect(storage.getItem()).toBe(raw); expect(storage.writes()).toBe(0)
+})
+
+test('missing groups and an existing destination require no storage write; access/quota failures propagate without deletion', () => {
+  for (const raw of ['', '{}', '{"copy":null,"source":{"bad":7}}']) {
+    const storage = legacyStorage(raw)
+    copyLegacyModGroups('source', 'copy', storage)
+    expect(storage.getItem()).toBe(raw); expect(storage.writes()).toBe(0)
+  }
+  expect(() => copyLegacyModGroups('a', 'b', { getItem() { throw new Error('access') }, setItem() { throw new Error('unused') } })).toThrow('access')
+  const raw = '{"source":{"a.jar":"A"}}'
+  expect(() => copyLegacyModGroups('source', 'copy', { getItem: () => raw, setItem() { throw new Error('quota') } })).toThrow('quota')
+})
 
 test.each([new DOMException('Stopped', 'AbortError'), new Error('aborted'), { name: 'CancelledException', exception: { type: 'cancelled' } }, { name: 'minified-name', exception: { type: 'cancelled' } }])('recognizes raw and normalized operation cancellation %j', error => {
   expect(isOperationCancelled(error)).toBe(true)

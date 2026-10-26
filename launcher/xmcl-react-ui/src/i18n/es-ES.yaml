@@ -11,6 +11,7 @@ react:
   ambientVideo: Vídeo ambiental
   carousel: Presentación automática
   instances:
+    searchPlaceholder: Nombre, versión o loader…
     count: "{count} instancias"
     listLabel: Instancias de la biblioteca
     keyboard: En bibliotecas grandes usa las flechas para recorrer instancias, Inicio y Fin para ir a los extremos, y Tab para recorrer sus acciones.
@@ -350,6 +351,9 @@ react:
     unavailable: La biblioteca no está disponible. Cierra el diálogo y vuelve a intentarlo cuando cargue.
     failed: No se guardó el cambio. Revisa el acceso a los datos del launcher y vuelve a revisar los grupos antes de reintentar.
   copy:
+    filesComplete: Los archivos ya están copiados. Solo falta guardar los grupos de mods; al reintentar no se vuelve a copiar la instancia.
+    groupsFailed: La instancia ya se copió, pero sus grupos de mods no se pudieron copiar. Los datos anteriores se conservan. Reintenta o vuelve a Biblioteca.
+    retryGroups: Reintentar grupos
     details: Archivos y estado de copia
     pending: Copia pendiente
     action: 'Revisar copia de {name}'

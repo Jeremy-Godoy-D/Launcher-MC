@@ -11,6 +11,7 @@ react:
   ambientVideo: Ambient video
   carousel: Automatic presentation
   instances:
+    searchPlaceholder: Name, version or loader…
     count: "{count} instances"
     listLabel: Library instances
     keyboard: In large libraries, use arrow keys to move between instances, Home and End to reach either end, and Tab to move through their actions.
@@ -350,6 +351,9 @@ react:
     unavailable: The library is unavailable. Close this dialog and retry once it has loaded.
     failed: Could not save the change. Check access to launcher data and review the groups before retrying.
   copy:
+    filesComplete: The files are already copied. Only the mod groups remain to be saved; retrying will not copy the instance again.
+    groupsFailed: The instance was copied, but its mod groups could not be copied. Previous data is preserved. Retry or return to Library.
+    retryGroups: Retry groups
     details: Copy files and status
     pending: Copy pending
     action: 'Review copy of {name}'

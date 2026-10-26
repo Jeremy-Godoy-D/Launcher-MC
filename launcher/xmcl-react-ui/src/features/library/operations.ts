@@ -3,6 +3,18 @@ import type { SavedInstance } from './model'
 import type { InstanceState } from '@xmcl/runtime-api/src/services/InstanceService'
 
 type Groups = InstanceState['groups']
+
+export function copyLegacyModGroups(source: string, destination: string, storage: Pick<Storage, 'getItem' | 'setItem'>) {
+  const raw = storage.getItem('modsGrouping')
+  if (!raw || source === destination) return
+  const groups = JSON.parse(raw)
+  if (!groups || typeof groups !== 'object' || Array.isArray(groups)) throw new Error('invalid_groups')
+  // A completed/retried copy can already have user edits; never replace its preferences.
+  if (Object.hasOwn(groups, destination) || !Object.hasOwn(groups, source)) return
+  const files = groups[source]
+  if (!files || typeof files !== 'object' || Array.isArray(files) || Object.values(files).some(value => typeof value !== 'string')) throw new Error('invalid_groups')
+  storage.setItem('modsGrouping', JSON.stringify({ ...groups, [destination]: files }))
+}
 export function changeGroup(groups: Groups, id: string, name?: string): Groups {
   const index = groups.findIndex(group => typeof group !== 'string' && group.id === id)
   const group = groups[index]

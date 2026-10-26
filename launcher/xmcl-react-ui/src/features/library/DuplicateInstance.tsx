@@ -6,12 +6,13 @@ import { createOperationId } from '@xmcl/runtime-api/src/util/launch'
 import { useService, useTasks } from '../../runtime'
 import { useI18n } from '../../i18n'
 import { useLibrary } from './context'
-import { isOperationCancelled } from './operations'
+import { copyLegacyModGroups, isOperationCancelled } from './operations'
 
 export function DuplicateInstance({ path, busy, onBusy, onBack, onCreated }: { path: string; busy: boolean; onBusy: (busy: boolean) => void; onBack: () => void; onCreated: (path: string) => void }) {
   const library = useLibrary(), service = useService(InstanceServiceKey), base = useService(BaseServiceKey), tasks = useTasks(), { t } = useI18n()
   const initial = library?.data?.pendingCopies[path]
-  const source = initial?.sourcePath || path
+  const source = useRef(initial?.sourcePath || path).current
+  const [finished, setFinished] = useState('')
   const [partial, setPartial] = useState(initial ? path : '')
   const [invalid, setInvalid] = useState(!!initial?.invalid)
   const [error, setError] = useState('')
@@ -24,13 +25,20 @@ export function DuplicateInstance({ path, busy, onBusy, onBack, onCreated }: { p
   const completed = !!partial && library?.status === 'ready' && !library.data?.pendingCopies[partial] && current?.state === TaskState.Succeed && !busy && !active
   useLayoutEffect(() => { if (current?.requestId === request.current) destination.current = current.to }, [current])
   useLayoutEffect(() => { if (error) errorElement.current?.scrollIntoView({ block: 'nearest' }) }, [error])
+  function finish(result: string) {
+    setFinished(result); setPartial(result)
+    try { copyLegacyModGroups(source, result, window.localStorage) }
+    catch { setError('groupsFailed'); return }
+    onCreated(result)
+  }
   async function start() {
+    if (finished) { finish(finished); return }
     if (running.current || active || invalid) return
     running.current = true; request.current = createOperationId(); destination.current = partial; onBusy(true); setError(''); setCancelling(false)
     try {
       const result = partial ? await service.resumeInstanceCopy(partial, request.current) : await service.duplicateInstance(path, request.current)
       if (!result) throw new Error('missing')
-      onCreated(result)
+      finish(result)
     } catch (failure) {
       const details = failure && typeof failure === 'object' ? failure : {}
       const name = 'name' in details && typeof details.name === 'string' ? details.name : ''
@@ -49,10 +57,10 @@ export function DuplicateInstance({ path, busy, onBusy, onBack, onCreated }: { p
   }
   return <form className="operation-form" data-testid="instance-copy" onSubmit={event => { event.preventDefault(); void start() }}>
     <div className="creation-body" role="region" aria-label={t('react.copy.details')} tabIndex={0}>
-      <p>{t(partial ? 'react.copy.resumeHelp' : 'react.operations.duplicateDetail')}</p>
+      <p>{t(finished ? 'react.copy.filesComplete' : partial ? 'react.copy.resumeHelp' : 'react.operations.duplicateDetail')}</p>
       <p className="operation-path">{source}</p>
       {(partial || current?.to) && <p className="operation-path" data-testid="copy-path">{partial || current?.to}</p>}
-      {partial && <p>{t('react.copy.pendingHelp')}</p>}
+      {partial && !finished && !completed && <p>{t('react.copy.pendingHelp')}</p>}
       {!!active || busy ? <div role="status" aria-live="polite">
         <p>{t(cancelling || current?.state === TaskState.Cancelled ? 'react.copy.cancelling' : progress && progress.total > 0 ? progress.progress >= progress.total ? 'react.copy.verifying' : 'react.copy.progress' : 'react.copy.reviewing', { progress: progress?.progress || 0, total: progress?.total || 0 })}</p>
         <progress aria-label={t('react.copy.progressLabel')} max={progress && progress.total > 0 ? progress.total : undefined} value={progress && progress.total > 0 ? progress.progress : undefined} />
@@ -65,7 +73,7 @@ export function DuplicateInstance({ path, busy, onBusy, onBack, onCreated }: { p
     <div className="dialog-actions">
       <button type="button" className="button secondary" disabled={busy} onClick={onBack}>{t('react.operations.back')}</button>
       {!!active && <button type="button" className="button secondary" disabled={cancelling} data-testid="copy-cancel" onClick={() => void cancel()}>{t(cancelling ? 'react.copy.cancelling' : 'react.copy.cancel')}</button>}
-      {completed ? <button type="button" className="button primary" onClick={() => onCreated(partial)}>{t('react.copy.view')}</button> : <button type="submit" className="button primary" data-testid="instance-operation-confirm" disabled={busy || !!active || invalid}>{t(partial ? 'react.copy.resume' : 'react.operations.confirmDuplicate')}</button>}
+      {finished || completed ? <button type="button" className="button primary" data-testid="copy-finish" onClick={() => finish(finished || partial)}>{t(error === 'groupsFailed' ? 'react.copy.retryGroups' : 'react.copy.view')}</button> : <button type="submit" className="button primary" data-testid="instance-operation-confirm" disabled={busy || !!active || invalid}>{t(partial ? 'react.copy.resume' : 'react.operations.confirmDuplicate')}</button>}
     </div>
   </form>
 }

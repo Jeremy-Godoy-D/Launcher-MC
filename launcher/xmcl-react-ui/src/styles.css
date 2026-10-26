@@ -123,13 +123,7 @@
   ::-webkit-scrollbar-track {
     background: transparent;
   }
-  .button,
-  .icon-button,
-  .nav-item {
-    transition:
-      background 160ms ease-out,
-      color 160ms ease-out;
-  }
+  /* Theme text and surface colors switch together to preserve their contrast. */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

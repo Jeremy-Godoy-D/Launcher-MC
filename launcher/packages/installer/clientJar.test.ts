@@ -1,16 +1,20 @@
 import { MinecraftFolder, Version } from '@xmcl/core'
 import { createHash } from 'node:crypto'
 import { createWriteStream } from 'node:fs'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { pipeline } from 'node:stream/promises'
-import { expect, test } from 'vitest'
+import { expect, onTestFinished, test } from 'vitest'
 import { ZipFile } from 'yazl'
 import { resolveMinecraftJarInstallFile } from './minecraft'
 import { diagnoseInstallation } from './installer'
 import { executeInstallManifest } from './installManifest'
 import { createDefaultNodeInstallRuntime } from './installManifest.default'
 
-test('checks an isolated offline client without downloading or touching the vanilla client', async ({ temp }) => {
+test('checks an isolated offline client without downloading or touching the vanilla client', async () => {
+  const temp = await mkdtemp(join(tmpdir(), 'grimo-installer-client-'))
+  onTestFinished(() => rm(temp, { recursive: true, force: true }))
   const folder = MinecraftFolder.from(temp)
   await mkdir(folder.getVersionRoot('client-private'), { recursive: true })
   const zip = new ZipFile()

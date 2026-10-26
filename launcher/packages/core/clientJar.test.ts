@@ -1,11 +1,15 @@
 import { createHash } from 'node:crypto'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { expect, test } from 'vitest'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { expect, onTestFinished, test } from 'vitest'
 import { generateArguments, LaunchPrecheck } from './launch'
 import { MinecraftFolder } from './folder'
 import { Version } from './version'
 
-test('client aliases affect only the JAR, preserving Minecraft identity and launch placeholders', async ({ temp }) => {
+test('client aliases affect only the JAR, preserving Minecraft identity and launch placeholders', async () => {
+  const temp = await mkdtemp(join(tmpdir(), 'grimo-core-client-'))
+  onTestFinished(() => rm(temp, { recursive: true, force: true }))
   const folder = MinecraftFolder.from(temp)
   const data = Buffer.from('custom-client')
   const profile = { id: 'modded', clientVersion: '1.21.1', jar: 'client-private', mainClass: 'custom.Main', libraries: [], arguments: { game: ['--version', '${version_name}'], jvm: ['-cp', '${classpath}'] }, downloads: { client: { sha1: createHash('sha1').update(data).digest('hex'), size: data.length, url: '' } } }
