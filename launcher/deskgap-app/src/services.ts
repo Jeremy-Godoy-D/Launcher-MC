@@ -1,3 +1,4 @@
+import { PresentationService } from '@xmcl/runtime/presentation/PresentationService'
 import { BaseService } from '@xmcl/runtime/app'
 import { AgentService } from '@xmcl/runtime/agent'
 import { AuthlibInjectorService } from '@xmcl/runtime/authlibInjector'
@@ -37,6 +38,7 @@ import { MinecraftFriendsService, OfficialUserService, UserService } from '@xmcl
 import { XmclAccountService } from '@xmcl/runtime/xmclAccount'
 
 export const definedServices = [
+  PresentationService,
   ExternalCredentialService,
   AgentService,
   VersionMetadataService,

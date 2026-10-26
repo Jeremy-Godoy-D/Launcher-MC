@@ -103,3 +103,4 @@ export * from './src/util/LockKey'
 export * from './src/util/versionRange'
 
 export * from './src/commands'
+export * from './src/services/PresentationService'

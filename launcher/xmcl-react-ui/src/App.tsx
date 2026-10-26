@@ -1,3 +1,4 @@
+import type { InstancePresentation } from '@xmcl/runtime-api/src/services/PresentationService'
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router'
 import * as Dialog from '@radix-ui/react-dialog'
@@ -67,7 +68,7 @@ declare global {
   }
 }
 
-function presentInstance(instance: SavedInstance) {
+function presentInstance(instance: SavedInstance, media?: InstancePresentation) {
   const icon = instanceIcon(instance.icon)
   const caveScene = instance.runtime.minecraft.startsWith('1.20.')
   const pack = !!instance.upstream && instance.upstream.type !== 'server'
@@ -75,11 +76,12 @@ function presentInstance(instance: SavedInstance) {
     id: instance.path, name: instance.name,
     version: instance.runtime.minecraft || instance.version,
     loader: loaderName(instance), icon,
-    // shortcut: use the pack's stored icon as its cover; resolve provider galleries in the catalog/media block.
-    image: pack && icon ? icon : caveScene ? caves : sunset,
+    image: media?.image || (pack && icon ? icon : caveScene ? caves : sunset),
+    ambientImage: media?.image || (caveScene ? caves : sunset),
+    media,
     video: !pack && caveScene ? cavesVideo : undefined,
     description: instance.description,
-    ambientFallback: !pack || !icon,
+    ambientFallback: !media,
   }
 }
 type Instance = ReturnType<typeof presentInstance>
@@ -101,7 +103,7 @@ function useMediaSetting(query: string) {
   return matches
 }
 
-function Ambient({ instance, playing, videoEnabled }: { instance: Instance; playing: boolean; videoEnabled: boolean }) {
+function Ambient({ instance, playing, videoEnabled, onImageError }: { instance: Instance; playing: boolean; videoEnabled: boolean; onImageError: () => void }) {
   const video = useRef<HTMLVideoElement>(null)
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -118,11 +120,12 @@ function Ambient({ instance, playing, videoEnabled }: { instance: Instance; play
   return (
     <div className="ambient" aria-hidden="true">
       <img
-        src={instance.image}
+        src={instance.ambientImage}
         alt=""
         onError={(event) => {
           event.currentTarget.onerror = null
           event.currentTarget.src = sunset
+          onImageError()
         }}
       />
       {instance.video && videoEnabled && (
@@ -133,7 +136,7 @@ function Ambient({ instance, playing, videoEnabled }: { instance: Instance; play
           loop
           playsInline
           preload="metadata"
-          poster={instance.image}
+          poster={instance.ambientImage}
           onLoadedData={() => setReady(true)}
           onError={() => setFailed(true)}
           data-state={playing && !failed ? 'playing' : 'paused'}
@@ -221,7 +224,9 @@ export function App() {
   const accounts = useAccounts()
   const savedLibrary = useLibrary()
   const launch = useLaunch()
-  const instances = (savedLibrary?.status === 'ready' ? savedLibrary.instances : []).map(presentInstance)
+  const [cover, setCover] = useState<{ path: string; upstream: string; media?: InstancePresentation }>()
+  const present = (item: SavedInstance) => presentInstance(item, cover?.path === item.path && cover.upstream === JSON.stringify(item.upstream) ? cover.media : undefined)
+  const instances = (savedLibrary?.status === 'ready' ? savedLibrary.instances : []).map(present)
   const location = useLocation()
   const navigate = useNavigate()
   const { preferences, set: setPreferences, error: preferencesError } = usePreferences()
@@ -264,6 +269,16 @@ export function App() {
     if (featuredPath === null && instance) setFeaturedPath(instance.id)
   }, [featuredPath, instance?.id])
   const home = location.pathname === '/'
+  const mediaPath = (home ? instance : current)?.id
+  const mediaUpstream = JSON.stringify(savedLibrary?.instances.find(item => item.path === mediaPath)?.upstream)
+  useEffect(() => {
+    if (!mediaPath || !mediaUpstream || !savedLibrary?.media) return
+    let active = true
+    void savedLibrary.media.resolveInstanceMedia(mediaPath).then(media => {
+      if (active) setCover({ path: mediaPath, upstream: mediaUpstream, media })
+    }).catch(() => { /* Presentation failures must not block instance actions. */ })
+    return () => { active = false }
+  }, [mediaPath, mediaUpstream, savedLibrary?.media])
   const library = location.pathname === '/me'
   const catalog = location.pathname.startsWith('/store')
   const settings = location.pathname === '/setting'
@@ -331,7 +346,7 @@ export function App() {
     instance.name.toLowerCase().includes(query.toLowerCase()) &&
     (!loader || instance.loader === loader) &&
     (!group || (group === 'ungrouped' ? !savedLibrary?.data?.groups.some(entry => typeof entry !== 'string' && entry.instances.includes(instance.id)) : savedLibrary?.data?.groups.some(entry => typeof entry !== 'string' && `id:${entry.id}` === group && entry.instances.includes(instance.id))))
-  const matchingInstances = (savedLibrary?.ordered || []).map(presentInstance).filter(matchesInstance)
+  const matchingInstances = (savedLibrary?.ordered || []).map(present).filter(matchesInstance)
   const matchingProjects = projects.filter((project) =>
     `${project.title} ${project.description}`.toLowerCase().includes(query.toLowerCase()),
   )
@@ -379,8 +394,9 @@ export function App() {
       <div
         className="app-backdrop"
         data-testid="app-backdrop"
+        data-media-provider={(home ? instance : current)?.media?.provider}
         aria-hidden="true"
-        style={{ backgroundImage: `url(${JSON.stringify((home ? instance?.image : current?.image) ?? sunset)}), url(${JSON.stringify(sunset)})` }}
+        style={{ backgroundImage: `url(${JSON.stringify((home ? instance?.ambientImage : current?.ambientImage) ?? sunset)}), url(${JSON.stringify(sunset)})` }}
       />
       <header className="titlebar">
         <div className="titlebar-left">
@@ -540,7 +556,7 @@ export function App() {
                     setFocusWithin(false)
                 }}
               >
-                <Ambient key={`${instance.id}-${instance.image}-${instance.video}-${preferences.backgroundVideoEnabled}`} instance={instance} playing={canMove} videoEnabled={preferences.backgroundVideoEnabled} />
+                <Ambient key={`${instance.id}-${instance.image}-${instance.video}-${preferences.backgroundVideoEnabled}`} instance={instance} playing={canMove} videoEnabled={preferences.backgroundVideoEnabled} onImageError={() => setCover(cover => cover?.path === instance.id ? { ...cover, media: undefined } : cover)} />
                 <div className="featured-shade" />
                 <div className="featured-copy">
                   <div className="featured-runtime">
@@ -988,6 +1004,12 @@ export function App() {
             </Dialog.Description>
             {showCredits && (
               <ul className="credits-list">
+                {(home ? instance : current)?.media && <li>
+                  <strong>{(home ? instance : current)?.name}</strong>
+                  <span>{t('react.media.providerCover')}</span>
+                  <a href={(home ? instance : current)?.media?.projectUrl} target="_blank" rel="noreferrer">{t('react.media.project')}<ExternalLink size={13} /></a>
+                  <a href={(home ? instance : current)?.media?.sourceUrl} target="_blank" rel="noreferrer">{t('react.media.source')}<ExternalLink size={13} /></a>
+                </li>}
                 {credits.map((credit) => (
                   <li key={credit.file}>
                     <strong>{credit.title}</strong>

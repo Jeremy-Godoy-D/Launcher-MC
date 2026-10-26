@@ -375,3 +375,8 @@ react:
     InstanceCopyGameRunning: Cierra la partida de la instancia original o de la copia antes de continuar.
     InstanceCopyUnsafePath: No se pueden copiar rutas enlazadas o fuera del área administrada. Revisa las carpetas antes de reintentar.
     InstanceCopyTooLarge: El inventario supera los límites de la copia. Reduce el número de archivos o revisa los diagnósticos antes de reintentar.
+
+  media:
+    providerCover: Portada proporcionada por el proyecto.
+    project: Ver proyecto
+    source: Ver imagen original

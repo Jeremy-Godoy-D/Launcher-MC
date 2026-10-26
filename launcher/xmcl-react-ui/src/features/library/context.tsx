@@ -1,3 +1,4 @@
+import { PresentationServiceKey } from '@xmcl/runtime-api/src/services/PresentationService'
 import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from 'react'
 import { InstanceServiceKey, InstanceState } from '@xmcl/runtime-api/src/services/InstanceService'
 import { useService, useSharedStateStore, type StateDescriptor } from '../../runtime'
@@ -17,6 +18,7 @@ const Context = createContext<ReturnType<typeof useLibraryState> | null>(null)
 function useLibraryState() {
   const store = useSharedStateStore(descriptor)
   const service = useService(InstanceServiceKey)
+  const media = useService(PresentationServiceKey)
   const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
   const path = useSyncExternalStore(selection.subscribe, selection.getSnapshot, selection.getSnapshot)
   const instances = useMemo(() => javaInstances(snapshot.data?.instances ?? []), [snapshot.data])
@@ -41,7 +43,7 @@ function useLibraryState() {
     selection.set(nextPath)
     return true
   }
-  return { ...snapshot, instances, ordered, current, path, select, retry: store.revalidate, storageError: selection.failed() || sortSelection.failed(), sort,
+  return { ...snapshot, media, instances, ordered, current, path, select, retry: store.revalidate, storageError: selection.failed() || sortSelection.failed(), sort,
     setSort: (value: string) => { if (['manual', 'name', 'recent'].includes(value)) sortSelection.set(value) },
     assignGroup: (path: string, group: string, name: string) => arrange(path, groups => assignGroup(groups, path, group, name, createOperationId())),
     move: (path: string, direction: -1 | 1) => arrange(path, groups => moveInGroups(groups, instances, path, direction)),

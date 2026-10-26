@@ -375,3 +375,8 @@ react:
     InstanceCopyGameRunning: Close the source instance’s or copy’s game before continuing.
     InstanceCopyUnsafePath: Linked paths or destinations outside the managed area cannot be copied. Check the folders before retrying.
     InstanceCopyTooLarge: The inventory exceeds copy limits. Reduce the file count or check diagnostics before retrying.
+
+  media:
+    providerCover: Cover supplied by the project.
+    project: View project
+    source: View original image
