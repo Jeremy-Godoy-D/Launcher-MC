@@ -67,6 +67,13 @@ test('a thousand native instances stay windowed, searchable and keyboard accessi
       await expect(last).toBeFocused(); await expect(last).toBeInViewport({ ratio: 1 })
       await expect(page.getByRole('button', { name: 'Opciones de Window 0999', exact: true })).toBeInViewport({ ratio: 1 })
       await expect.poll(() => cards.count()).toBeLessThan(40)
+      try { await expect.poll(() => list.locator('.virtual-library-row').evaluateAll(rows => {
+        const visible = rows.map(row => row.getBoundingClientRect()).filter(rect => rect.top >= 90 && rect.bottom <= innerHeight).sort((a, b) => a.top - b.top)
+        return Math.max(0, ...visible.slice(1).map((row, index) => Math.abs(row.top - visible[index].bottom)))
+      })).toBeLessThan(1) } catch (error) {
+        await writeFile(testInfo.outputPath('row-spacing-failure.json'), JSON.stringify({ appearance, view, width, rows: await list.locator('.virtual-library-row').evaluateAll(rows => rows.map(row => ({ index: row.getAttribute('data-index'), ...row.getBoundingClientRect().toJSON() }))) }, null, 2))
+        throw error
+      }
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
       await page.evaluate(axe.source)
       const report = await page.evaluate(async () => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }))

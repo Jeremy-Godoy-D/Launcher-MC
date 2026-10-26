@@ -199,6 +199,10 @@ test('launch checks profile and physical directory, confirms once, restores proc
   )
   await page.keyboard.press('Escape')
   await expect(dialog).toHaveCount(0)
+  await expect.poll(() => win.evaluate(win => {
+    win.show(); win.focus(); win.webContents.focus()
+    return win.isFocused() && win.webContents.isFocused()
+  })).toBe(true)
   await page.getByTestId('nav-home').click()
   await expect(page.locator('.featured h2')).toHaveText('Caves video QA')
   await page.getByTestId('nav-home').focus()

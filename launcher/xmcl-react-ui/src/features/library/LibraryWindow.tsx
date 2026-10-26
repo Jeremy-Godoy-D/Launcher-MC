@@ -50,6 +50,8 @@ export function LibraryWindow({ ids, view, children }: { ids: string[]; view: 'g
     }
   }, [columns, view, layout.width, layout.height])
   useLayoutEffect(() => {
+    // A layout reset can happen while scrolling skips synchronous ref measurements.
+    if (!virtualizer.isScrolling) host.current?.querySelectorAll<HTMLDivElement>('.virtual-library-row').forEach(row => virtualizer.measureElement(row))
     const target = pendingFocus.current
     if (!target) return
     const card = Array.from(host.current?.querySelectorAll<HTMLElement>('[data-instance-path]') || []).find(card => card.dataset.instancePath === target.id)

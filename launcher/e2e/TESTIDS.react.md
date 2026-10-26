@@ -31,7 +31,7 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `library-groups` | [`xmcl-react-ui/src/App.tsx#L640`](../xmcl-react-ui/src/App.tsx#L640) |
 | `library-groups-dialog` | [`xmcl-react-ui/src/features/library/GroupsDialog.tsx#L41`](../xmcl-react-ui/src/features/library/GroupsDialog.tsx#L41) |
 | `library-state` | [`xmcl-react-ui/src/App.tsx#L369`](../xmcl-react-ui/src/App.tsx#L369) |
-| `library-window` | [`xmcl-react-ui/src/features/library/LibraryWindow.tsx#L94`](../xmcl-react-ui/src/features/library/LibraryWindow.tsx#L94) |
+| `library-window` | [`xmcl-react-ui/src/features/library/LibraryWindow.tsx#L96`](../xmcl-react-ui/src/features/library/LibraryWindow.tsx#L96) |
 | `local-profile-name` | [`xmcl-react-ui/src/features/accounts/Accounts.tsx#L49`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L49)<br>[`xmcl-react-ui/src/features/accounts/Accounts.tsx#L173`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L173) |
 | `nav-accounts` | [`xmcl-react-ui/src/App.tsx#L469`](../xmcl-react-ui/src/App.tsx#L469) |
 | `nav-home` | [`xmcl-react-ui/src/App.tsx#L426`](../xmcl-react-ui/src/App.tsx#L426) |
