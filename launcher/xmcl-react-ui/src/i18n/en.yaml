@@ -410,7 +410,7 @@ react:
   content:
     add: "Add files"
     remove: "Remove selected"
-    removeTitle: "Remove {count} mods"
+    removeTitle: "Remove one mod | Remove {count} mods"
     removeHelp: "These files will be deleted from this instance’s mods folder. They will not go to the recycle bin. Worlds and original files in other folders are kept. If a mod changed after selection, cancel and refresh before reviewing again."
     cancelRemove: "Cancel removal"
     confirmRemove: "Delete these files"

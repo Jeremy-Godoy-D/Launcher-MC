@@ -410,7 +410,7 @@ react:
   content:
     add: "Añadir archivos"
     remove: "Retirar seleccionados"
-    removeTitle: "Retirar {count} mods"
+    removeTitle: "Retirar un mod | Retirar {count} mods"
     removeHelp: "Se eliminarán estos archivos de la carpeta de mods de esta instancia. No se envían a la papelera. No se borran mundos ni archivos originales de otras carpetas. Si un mod cambió desde la selección, cancela y vuelve a leer antes de revisar otra vez."
     cancelRemove: "Cancelar retirada"
     confirmRemove: "Eliminar estos archivos"
