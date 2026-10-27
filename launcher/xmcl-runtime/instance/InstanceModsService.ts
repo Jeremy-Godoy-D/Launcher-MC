@@ -11,6 +11,8 @@ import { AbstractInstanceDomainService } from './AbstractInstanceDomainService'
 import { setModsEnabled } from './utils/setModsEnabled'
 import { InstanceService } from './InstanceService'
 import { AnyError } from '@xmcl/utils'
+import { installLocalMods, uninstallLocalMods } from './utils/localMods'
+import { LaunchService } from '../launch/LaunchService'
 
 /**
  * Provide the abilities to import mods and resource packs files to instance
@@ -24,13 +26,31 @@ export class InstanceModsService extends AbstractInstanceDomainService implement
   }
 
   async enable({ files, path }: UpdateInstanceResourcesOptions): Promise<void> {
-    await this.#assertJavaInstance(path)
-    await setModsEnabled(path, files, true)
+    await this.#changeMods(path, () => setModsEnabled(path, files, true))
   }
 
   async disable({ files, path }: UpdateInstanceResourcesOptions): Promise<void> {
+    await this.#changeMods(path, () => setModsEnabled(path, files, false))
+  }
+
+  async #changeMods<T>(path: string, operation: () => Promise<T>): Promise<T> {
     await this.#assertJavaInstance(path)
-    await setModsEnabled(path, files, false)
+    return this.mutex.of(`mods-files://${path}`).runExclusive(async () => {
+      await this.#assertJavaInstance(path)
+      const launch = await this.app.registry.get(LaunchService)
+      if ((await launch.getGameProcesses()).some(process => process.options.gameDirectory === path)) throw new AnyError('InstanceRunningError')
+      return operation()
+    })
+  }
+
+  async install({ files, path }: UpdateInstanceResourcesOptions): Promise<string[]> {
+    const destinations = await this.#changeMods(path, () => installLocalMods(path, files))
+    if (!this.resourceManager.getWatched(join(path, 'mods'))) this.resolveMarketMetadata(destinations).catch(error => this.warn(error))
+    return destinations
+  }
+
+  async uninstall({ files, path, expectedHashes }: UpdateInstanceResourcesOptions & { expectedHashes?: Record<string, string> }): Promise<void> {
+    await this.#changeMods(path, () => uninstallLocalMods(path, files, expectedHashes))
   }
 
   async #assertJavaInstance(path: string) {
@@ -44,7 +64,7 @@ export class InstanceModsService extends AbstractInstanceDomainService implement
     const modsDir = join(options.path, 'server', 'mods')
     await ensureDir(modsDir)
     await emptyDir(modsDir)
-    await this.install({ ...options, path: join(options.path, 'server') })
+    await super.install({ ...options, path: join(options.path, 'server') })
   }
 
   async getServerInstanceMods(path: string): Promise<Array<{ fileName: string; ino: number }>> {

@@ -10,6 +10,10 @@ export function getInstanceModStateKey(path: string) {
  * Provide the abilities to import/export mods files to instance
  */
 export interface InstanceModsService extends InstanceResourcesService {
+  /** Import regular mod archives without replacing an existing destination. */
+  install(options: UpdateInstanceResourcesOptions): Promise<string[]>
+  /** Remove direct mod files; reviewed hashes reject files changed after confirmation. */
+  uninstall(options: UpdateInstanceResourcesOptions & { expectedHashes?: Record<string, string> }): Promise<void>
   /**
    * Mark mods enabled
    */

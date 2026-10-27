@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
-import { FolderOpen, RefreshCw, Search } from 'lucide-react'
+import { FolderOpen, Plus, RefreshCw, Search } from 'lucide-react'
 import { ResourceState } from '@xmcl/runtime-api/src/entities/resource'
 import { InstanceModsServiceKey, getInstanceModStateKey } from '@xmcl/runtime-api/src/services/InstanceModsService'
 import { LaunchServiceKey } from '@xmcl/runtime-api/src/services/LaunchService'
@@ -11,6 +11,7 @@ import { useContentGroups } from './useContentGroups'
 import { ContentGroupsEditor } from './ContentGroupsEditor'
 import { assignContentGroup, contentGroupMemberships } from './contentGroups'
 import { normalizeModFileName } from '@xmcl/runtime-api/src/services/InstanceModsGroupService'
+import { RemoveModsDialog, type ReviewedMod } from './RemoveModsDialog'
 
 export function InstanceMods({ path, runtime, running }: { path: string; runtime: SavedInstance['runtime']; running: boolean }) {
   const { t } = useI18n(), service = useService(InstanceModsServiceKey), processes = useService(LaunchServiceKey)
@@ -27,6 +28,8 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
   const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
   const [query, setQuery] = useState(''), [filter, setFilter] = useState('all'), [selected, setSelected] = useState<string[]>([])
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('')
+  const [removing, setRemoving] = useState<ReviewedMod[] | null>(null)
+  const removeButton = useRef<HTMLButtonElement>(null)
   const active = useRef(true), pending = useRef(false)
   useEffect(() => { active.current = true; return () => { active.current = false } }, [])
   const files = (snapshot.data?.files || []).map(file => { const identity = modIdentity(file, runtime); return { ...file, name: identity.name, resourceVersion: identity.version } })
@@ -40,10 +43,10 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
     try {
       if (mutating && (await processes.getGameProcesses()).some(process => process.options.gameDirectory === path)) throw new Error('running')
       if (!active.current) return
-      await action()
-      if (active.current && mutating) { setSelected([]); setNotice(t('react.content.applied')) }
+      const result = await action()
+      if (active.current && mutating && result !== false) { setSelected([]); setNotice(t('react.content.applied')) }
     } catch (failure) {
-      if (active.current) setError(t(failure instanceof Error && failure.message === 'running' ? 'react.content.running' : 'react.content.failed'))
+      if (active.current) setError(t(failure instanceof Error && (failure.message === 'running' || failure.name === 'InstanceRunningError') ? 'react.content.running' : 'react.content.failed'))
     } finally { pending.current = false; if (active.current) setBusy(false) }
   }
   function toggle(targets: typeof files, enabled: boolean) {
@@ -57,8 +60,21 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
       }
     }, true)
   }
+  async function refreshFiles() {
+    if (!active.current) return
+    await store.revalidate()
+    if (store.getSnapshot().status === 'error') throw new Error('refresh')
+  }
+  function closeRemoval() { setRemoving(null) }
   return <section aria-labelledby="instance-mods-title" data-testid="instance-mods" data-instance-path={path} aria-busy={busy || snapshot.status === 'loading'}>
     <div className="section-heading"><h2 id="instance-mods-title">{t('react.workspace.mods')}</h2><div className="content-actions">
+      <button className="button primary" disabled={busy || running || !window.windowController?.showOpenDialog} onClick={() => void run(async () => {
+        const chosen = await window.windowController!.showOpenDialog!({ properties: ['openFile', 'multiSelections'], filters: [{ name: 'Minecraft mods', extensions: ['jar', 'zip', 'litemod'] }] })
+        if (!chosen.canceled && chosen.filePaths.length && active.current) {
+          await service.install({ path, files: chosen.filePaths })
+          await refreshFiles()
+        } else return false
+      }, true)}><Plus size={16} aria-hidden="true" />{t('react.content.add')}</button>
       <button className="button secondary" disabled={busy} onClick={() => void run(() => service.showDirectory(path))}><FolderOpen size={16} aria-hidden="true" />{t('react.content.folder')}</button>
       <button ref={manageGroups} className="button secondary" disabled={busy || !groupReady} aria-expanded={editingGroups} onClick={() => setEditingGroups(true)}>{t('react.contentGroups.manage')}</button>
       <button className="button secondary" disabled={busy} onClick={() => void run(async () => { await store.revalidate(); await grouping.refresh() })}><RefreshCw size={16} aria-hidden="true" />{t('react.content.refresh')}</button>
@@ -75,12 +91,13 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
     {snapshot.status === 'loading' && <p role="status">{t('react.content.loading')}</p>}
     {snapshot.status === 'error' && <p role="alert" className="form-error">{t('react.content.loadFailed')}</p>}
     {running && <p role="status">{t('react.content.running')}</p>}
-    {error && <p role="alert" className="form-error">{error}</p>}
+    {error && !removing && <p role="alert" className="form-error">{error}</p>}
     {notice && <p role="status">{notice}</p>}
     {!!snapshot.data?.errors.length && <div role="alert" className="form-error"><p>{t('react.content.parseFailed')}</p><ul>{snapshot.data.errors.map(file => <li key={file.path}>{file.path.split(/[\\/]/).pop()} · {file.code}</li>)}</ul></div>}
     {!!selection.length && <div className="content-selection" role="group" aria-label={t('react.content.selection')}><span>{t('react.content.selected', { count: selection.length })}</span>
       <button className="button secondary" disabled={busy || running || snapshot.status !== 'ready' || !selection.some(file => file.fileName.endsWith('.disabled'))} onClick={() => toggle(selection, true)}>{t('react.content.enable')}</button>
       <button className="button secondary" disabled={busy || running || snapshot.status !== 'ready' || !selection.some(file => !file.fileName.endsWith('.disabled'))} onClick={() => toggle(selection, false)}>{t('react.content.disable')}</button>
+      <button ref={removeButton} className="button secondary" disabled={busy || running || snapshot.status !== 'ready'} onClick={() => { setError(''); setRemoving(selection.map(file => ({ path: file.path, fileName: file.fileName, hash: file.hash }))) }}>{t('react.content.remove')}</button>
       <select aria-label={t('react.contentGroups.assignment')} disabled={busy || !groupReady} value={assignTo} onChange={event => setAssignTo(event.target.value)}><option value="">{t('react.contentGroups.none')}</option>{Object.keys(groups).map(name => <option key={name} value={`name:${name}`}>{name}</option>)}</select>
       <button className="button secondary" disabled={busy || !groupReady} onClick={() => void run(async () => {
         const previous = structuredClone(groups)
@@ -100,5 +117,10 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
         <button className="button secondary" aria-label={t(disabled ? 'react.content.enableName' : 'react.content.disableName', { name: file.name || file.fileName })} disabled={busy || running || snapshot.status !== 'ready'} onClick={() => toggle([file], disabled)}>{t(disabled ? 'react.content.enable' : 'react.content.disable')}</button>
       </li>
     })}</ul>
+    {removing && <RemoveModsDialog files={removing} busy={busy} error={error} close={closeRemoval} returnFocus={() => { (removeButton.current || searchInput.current)?.focus() }} remove={() => void run(async () => {
+      await service.uninstall({ path, files: removing.map(file => file.path), expectedHashes: Object.fromEntries(removing.map(file => [file.path, file.hash])) })
+      await refreshFiles()
+      if (active.current) setRemoving(null)
+    }, true)} />}
   </section>
 }
