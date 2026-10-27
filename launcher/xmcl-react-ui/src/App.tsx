@@ -54,6 +54,7 @@ import { LaunchDialog } from './features/launch/LaunchDialog'
 import { InstanceOperations } from './features/library/InstanceOperations'
 import { GroupsDialog } from './features/library/GroupsDialog'
 import { LibraryWindow } from './features/library/LibraryWindow'
+import { InstanceWorkspace } from './features/instance/InstanceWorkspace'
 
 declare global {
   interface Window {
@@ -284,14 +285,17 @@ export function App() {
     if (featuredPath !== (resolvedPath ?? null)) setFeaturedPath(resolvedPath ?? null)
   }, [featuredPath, resolvedPath, savedLibrary?.status, savedLibrary?.home])
   const home = location.pathname === '/'
-  const hasFeatured = !!instance
+  const instancePage = location.pathname === '/instance' || location.pathname.startsWith('/instance/')
+  const hasFeatured = home ? !!instance : instancePage && !!current
   useEffect(() => {
     const element = featuredRegion.current
-    if (!home || !element) { setRegionVisible(false); return }
+    if (!hasFeatured || !element) { setRegionVisible(false); return }
+    setHovered(element.matches(':hover'))
+    setFocusWithin(element.contains(document.activeElement))
     const observer = new IntersectionObserver(([entry]) => setRegionVisible(entry.isIntersecting))
     observer.observe(element)
     return () => observer.disconnect()
-  }, [home, hasFeatured])
+  }, [home, hasFeatured, instancePage, current?.id])
   const nextInstance = instances.length > 1 ? instances[nextFeatured(featured, instances.length)] : undefined
   const nextPoster = preferences.backgroundVideoEnabled && !nextInstance?.pack ? nextInstance?.videoPoster : nextInstance?.ambientImage
   useEffect(() => {
@@ -955,46 +959,13 @@ export function App() {
           )}
           {accountsPage && <Accounts />}
           {!home && !library && !catalog && !settings && !accountsPage && !current && <div className="empty" role="status"><h1>{t('react.instances.noneSelected')}</h1><Link className="button secondary" to="/me">{t('react.instances.choose')}</Link></div>}
-          {!home && !library && !catalog && !settings && !accountsPage && current && (
-            <section className="instance-page">
-              <div className="page-heading">
-                <div>
-                  <h1>{current.name}</h1>
-                  <p>
-                    Minecraft {current.version} · {current.loader}
-                  </p>
-                </div>
-                <button className="button primary" disabled={launch?.phase === 'preparing'} onClick={() => play(current)}>
-                  <Play size={18} fill="currentColor" />
-                    {t(savedLibrary?.data?.pendingCopies[current.id] ? 'react.copy.review' : launch?.running.some(process => process.path === current.id) ? 'react.launch.view' : 'react.launch.play')}
-                </button>
-              </div>
-              <div className="instance-tabs">
-                {['Resumen', 'Mods', 'Packs', 'Shaders', 'Mundos', 'Ajustes', 'Consola'].map(
-                  (label) => (
-                    <button key={label} onClick={() => preview(label)}>
-                      {label}
-                    </button>
-                  ),
-                )}
-              </div>
-              <StoredImage className="instance-cover" src={current.image} alt="" />
-              <div className="section-heading">
-                <h2>Tu próxima aventura empieza aquí.</h2>
-                <button
-                  className="button secondary"
-                  onClick={() => preview('Carpeta de instancia')}
-                >
-                  <FolderOpen size={17} />
-                  Abrir carpeta
-                </button>
-                <button className="button secondary" onClick={() => preview('Consola')}>
-                  <Terminal size={17} />
-                  Consola
-                </button>
-              </div>
-            </section>
-          )}
+          {instancePage && current && savedLibrary?.current && <InstanceWorkspace key={current.id}
+            instance={savedLibrary.current} cover={current.projectImage ? current.image : undefined} headerRef={featuredRegion}
+            media={<Ambient key={current.id} instance={current} playing={canMove && preferences.backgroundVideoEnabled} videoEnabled={!reducedMotion && !performanceMode && preferences.backgroundVideoEnabled} onImageError={() => setCover(cover => cover?.path === current.id ? { ...cover, media: undefined } : cover)} />}
+            play={() => play(current)} options={() => openOptions(current, 'options')}
+            running={!!launch?.running.some(process => process.path === current.id)} busy={launch?.phase === 'preparing'} copyPending={!!savedLibrary.data?.pendingCopies[current.id]}
+            onHover={setHovered} onFocus={setFocusWithin}
+          />}
           <footer className="page-footer">
             <span>
               <Check size={13} />

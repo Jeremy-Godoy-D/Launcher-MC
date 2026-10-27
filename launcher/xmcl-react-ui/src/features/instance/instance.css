@@ -1,0 +1,40 @@
+@layer components {
+  .instance-header { position: relative; isolation: isolate; display: flex; align-items: end; justify-content: space-between; gap: 16px; min-height: 184px; padding: 24px; overflow: hidden; border-radius: 14px; background: var(--surface); margin-bottom: 12px; }
+  .instance-header .ambient::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, color-mix(in srgb, #0e1117 96%, transparent), color-mix(in srgb, #0e1117 50%, transparent)); }
+  .instance-identity, .instance-header-actions { position: relative; display: flex; gap: 12px; align-items: center; z-index: 1; }
+  .instance-identity { min-width: 0; color: #f3f6fc; }
+  .instance-identity > div { min-width: 0; }
+  .instance-identity h1 { font-size: 40px; overflow-wrap: anywhere; }
+  .instance-identity p, .instance-identity span { display: block; margin-top: 6px; color: #f3f6fc; }
+  .instance-identity span, .instance-identity small { font-size: 13px; }
+  .instance-identity small { display: block; margin-top: 6px; color: #f3f6fc; }
+  .instance-logo { width: 56px; height: 56px; border-radius: 14px; object-fit: contain; }
+  .instance-header-actions { flex-shrink: 0; }
+  .instance-tabs a { white-space: nowrap; color: var(--muted); font-size: 13px; padding: 12px 0; }
+  .instance-tabs a[aria-current='page'] { color: var(--accent-ink); border-bottom: 2px solid var(--accent-ink); }
+  .instance-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin: 24px 0; }
+  .instance-details dt, .instance-path { color: var(--muted); }
+  .instance-details dd { margin: 6px 0 0; font-size: 18px; }
+  .instance-path, .instance-description { overflow-wrap: anywhere; line-height: 1.6; }
+  .content-actions, .content-filters, .content-selection { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .content-filters { margin: 16px 0; }
+  .content-filters .search { flex: 1; min-width: 180px; }
+  .content-filters input { width: 100%; min-width: 0; }
+  .content-filters select { padding: 9px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; }
+  .content-selection { padding: 12px 0; }
+  .content-list { list-style: none; padding: 0; margin: 12px 0; }
+  .content-list li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .content-list input[type='checkbox'] { accent-color: var(--accent); width: 18px; height: 18px; }
+  .content-file { display: grid; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
+  .content-file span, .content-file small, .content-state { color: var(--muted); font-size: 13px; }
+}
+@layer responsive {
+  @media (max-width: 900px) {
+    .instance-header { min-height: 140px; padding: 16px; }
+    .instance-logo { width: 40px; height: 40px; }
+    .instance-identity h1 { font-size: 26px; }
+    .instance-header-actions { gap: 6px; }
+    .content-state { display: none; }
+    .content-list li { grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; }
+  }
+}

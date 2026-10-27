@@ -1,0 +1,189 @@
+import { test, expect, snap } from '../../helpers/scratch'
+import { seedReactLibrary } from '../../helpers/react-library'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { createRequire } from 'node:module'
+import { createWriteStream } from 'node:fs'
+import { pipeline } from 'node:stream/promises'
+import axe from 'axe-core'
+
+test.use({ launcherOptions: { locale: 'es-ES' } })
+
+async function mod(path: string, name: string, title: string) {
+  await mkdir(join(path, 'mods'), { recursive: true })
+  const require = createRequire(new URL('../../../xmcl-runtime/package.json', import.meta.url)), { ZipFile } = require('yazl'), zip = new ZipFile()
+  zip.addBuffer(Buffer.from(JSON.stringify({ schemaVersion: 1, id: name, name: title, version: '1.0.0', environment: '*', depends: { minecraft: '>=1.20' } })), 'fabric.mod.json')
+  zip.end()
+  await pipeline(zip.outputStream, createWriteStream(join(path, 'mods', `${name}.jar`)))
+}
+
+test('instance routes expose native mods, filters and safe multi-selection without mixing instances', async ({ launcher }, testInfo) => {
+  const page = launcher.main, errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const [a, b] = await seedReactLibrary(page)
+  await mod(a, 'example', 'Alpha local'); await mod(a, 'second', 'Segundo mod'); await mod(b, 'example', 'Beta local')
+  await page.getByTestId('nav-library').click()
+  await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Mi mundo', exact: true })).toBeVisible()
+  await expect(page.getByRole('navigation', { name: 'Secciones de la instancia' }).getByRole('link', { name: 'Resumen' })).toHaveAttribute('aria-current', 'page')
+  await page.getByRole('link', { name: 'Mods', exact: true }).click()
+  const list = page.getByTestId('instance-mods')
+  await expect(list).toHaveAttribute('data-instance-path', a)
+  await expect(list.locator('li')).toHaveCount(2)
+  await expect(list.getByText('Alpha local', { exact: true })).toBeVisible()
+  await list.getByLabel('Buscar mods instalados').fill('  segundo  ')
+  await expect(list.locator('li')).toHaveCount(1)
+  await list.getByLabel('Buscar mods instalados').fill('absent')
+  await expect(list.getByText('Ningún mod coincide con la búsqueda y el filtro.')).toBeVisible()
+  await list.getByLabel('Buscar mods instalados').fill('')
+  await list.getByLabel('Seleccionar Alpha local', { exact: true }).check()
+  await list.getByLabel('Seleccionar Segundo mod', { exact: true }).check()
+  await list.getByRole('group', { name: 'Acciones para mods seleccionados' }).getByRole('button', { name: 'Desactivar', exact: true }).click()
+  await expect(list.locator('[data-file-name$=".disabled"]')).toHaveCount(2)
+  await expect(readFile(join(a, 'mods', 'example.jar'))).rejects.toMatchObject({ code: 'ENOENT' })
+  expect((await readFile(join(a, 'mods', 'example.jar.disabled'))).length).toBeGreaterThan(50)
+  await list.getByLabel('Filtrar por estado').selectOption('enabled')
+  await expect(list.locator('li')).toHaveCount(0)
+  await list.getByLabel('Filtrar por estado').selectOption('disabled')
+  await list.getByRole('button', { name: 'Activar Alpha local', exact: true }).click()
+  await expect(list.locator('[data-file-name="example.jar.disabled"]')).toHaveCount(0)
+  await list.getByLabel('Filtrar por estado').selectOption('all')
+  for (const theme of ['dark', 'light']) {
+    await page.evaluate(theme => { const key = 'launcher.react.preferences', prefs = JSON.parse(localStorage.getItem(key) || '{}'); localStorage.setItem(key, JSON.stringify({ ...prefs, appearance: theme })) }, theme)
+    await page.reload()
+    await expect(list.getByText('Alpha local', { exact: true })).toBeVisible()
+    for (const size of [[1200, 720], [800, 400]]) {
+      const win = await launcher.app.browserWindow(page)
+      await win.evaluate((win, size) => win.setContentSize(size[0], size[1]), size)
+      await page.locator('.page-scroll').evaluate(element => { element.scrollTop = 0 })
+      await expect(page.locator('.instance-header').getByRole('button', { name: 'Jugar', exact: true })).toBeInViewport({ ratio: 1 })
+      await snap(launcher, `header-${theme}-${size[0]}`, 'Persistent instance identity and play action at the top of every section.')
+      await page.locator('.page-scroll').evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect(list.getByRole('button', { name: 'Desactivar Alpha local' })).toBeInViewport({ ratio: 1 })
+      await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+      await page.addScriptTag({ content: axe.source })
+      const accessibility = await page.evaluate(async () => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } }))
+      await writeFile(testInfo.outputPath(`axe-${theme}-${size[0]}.json`), JSON.stringify(accessibility, null, 2))
+      expect(accessibility.violations).toEqual([])
+      await snap(launcher, `mods-${theme}-${size[0]}`, 'Native mods, enabled state and bulk selection in the instance workspace.')
+    }
+  }
+  await page.getByTestId('nav-library').click()
+  await page.getByRole('button', { name: 'Administrar Fabric QA', exact: true }).click()
+  await page.getByRole('link', { name: 'Mods', exact: true }).click()
+  await expect(list).toHaveAttribute('data-instance-path', b)
+  await expect(list.getByText('Beta local', { exact: true })).toBeVisible()
+  await expect(list.locator('li')).toHaveCount(1)
+  await expect(list.getByLabel('Buscar mods instalados')).toHaveValue('')
+  await expect(list.getByRole('checkbox')).not.toBeChecked()
+  await page.goBack(); await expect(page.getByRole('heading', { name: 'Resumen', exact: true })).toBeVisible()
+  await page.goForward(); await expect(list.getByText('Beta local', { exact: true })).toBeVisible()
+  expect(errors).toEqual([])
+})
+
+test('native collision errors stay recoverable and a delayed operation cannot affect the next instance', async ({ launcher }) => {
+  const page = launcher.main, [a, b] = await seedReactLibrary(page)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await mod(a, 'example', 'Alpha local'); await mod(b, 'example', 'Beta local')
+  await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click(); await page.getByRole('link', { name: 'Mods', exact: true }).click()
+  const list = page.getByTestId('instance-mods')
+  await expect(list.getByText('Alpha local', { exact: true })).toBeVisible()
+  await writeFile(join(a, 'mods', 'example.jar.disabled'), 'collision sentinel')
+  await list.getByRole('button', { name: 'Desactivar Alpha local', exact: true }).click()
+  await expect(list.getByRole('alert').filter({ hasText: 'No se pudo completar' })).toBeVisible()
+  expect(await readFile(join(a, 'mods', 'example.jar.disabled'), 'utf8')).toBe('collision sentinel')
+  expect((await readFile(join(a, 'mods', 'example.jar'))).length).toBeGreaterThan(50)
+  await launcher.app.evaluate(({ ipcMain }) => {
+    const original = (ipcMain as any)._invokeHandlers.get('service-call')
+    ipcMain.removeHandler('service-call')
+    ipcMain.handle('service-call', async (event: unknown, service: string, method: string, ...args: unknown[]) => {
+      if (service === 'InstanceModsService' && method === 'disable') {
+        ;(globalThis as any).__modsTarget = args[0]
+        await new Promise<void>(resolve => { (globalThis as any).__releaseMods = resolve })
+      }
+      return original(event, service, method, ...args)
+    })
+  })
+  await list.getByRole('button', { name: 'Desactivar Alpha local', exact: true }).click()
+  await expect.poll(() => launcher.app.evaluate(() => (globalThis as any).__modsTarget?.path)).toBe(a)
+  await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Fabric QA', exact: true }).click(); await page.getByRole('link', { name: 'Mods', exact: true }).click()
+  await expect(list.getByText('Beta local', { exact: true })).toBeVisible()
+  await launcher.app.evaluate(() => (globalThis as any).__releaseMods())
+  await expect(list.getByRole('alert')).toHaveCount(0)
+  await expect(list.getByRole('status')).toHaveCount(0)
+  await expect(list.locator('[data-file-name="example.jar"]')).toHaveCount(1)
+  expect((await readFile(join(b, 'mods', 'example.jar'))).length).toBeGreaterThan(50)
+  await list.getByRole('button', { name: 'Volver a leer' }).click()
+  await expect(list.getByText('Beta local', { exact: true })).toBeVisible()
+})
+
+
+test('mods watch failure retries, broken archives remain identifiable and missing selection never falls back', async ({ launcher }) => {
+  const page = launcher.main, [path] = await seedReactLibrary(page)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await launcher.app.evaluate(({ ipcMain }) => {
+    const original = (ipcMain as any)._invokeHandlers.get('service-call')
+    let fail = true
+    ipcMain.removeHandler('service-call')
+    ipcMain.handle('service-call', (event: unknown, service: string, method: string, ...args: unknown[]) => {
+      if (service === 'InstanceModsService' && method === 'watch' && fail) { fail = false; throw new Error('Fixture watch unavailable') }
+      return original(event, service, method, ...args)
+    })
+  })
+  await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click(); await page.getByRole('link', { name: 'Mods', exact: true }).click()
+  const list = page.getByTestId('instance-mods')
+  await expect(list.getByRole('alert')).toContainText('No se pudieron leer')
+  await list.getByRole('button', { name: 'Volver a leer' }).click()
+  await expect(list.getByText('Esta instancia todavía no tiene mods. Puedes añadir archivos a su carpeta.')).toBeVisible()
+  await writeFile(join(path, 'mods', 'broken.jar'), 'not a zip archive')
+  await list.getByRole('button', { name: 'Volver a leer' }).click()
+  await expect(list.getByRole('alert')).toContainText('broken.jar')
+  await expect(list.locator('.content-list li')).toHaveCount(0)
+  await page.evaluate(() => { localStorage.setItem('selectedInstancePath', 'C:\\missing-instance') })
+  await page.reload()
+  await expect(page.getByTestId('instance-workspace')).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Elegir en la biblioteca', exact: true })).toBeVisible()
+  expect(await page.evaluate(() => localStorage.getItem('selectedInstancePath'))).toBe('C:\\missing-instance')
+})
+
+
+test('the instance header shares one ambient decoder and pauses offscreen, in dialogs, when minimized and in performance mode', async ({ launcher }) => {
+  const page = launcher.main, [path] = await seedReactLibrary(page), errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  for (let index = 0; index < 8; index++) await mod(path, `header_${index}`, `Header mod ${index}`)
+  await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click(); await page.getByRole('link', { name: 'Mods', exact: true }).click()
+  await expect(page.locator('.content-list li')).toHaveCount(8)
+  const win = await launcher.app.browserWindow(page)
+  await win.evaluate(win => { win.setContentSize(800, 400); win.show(); win.focus(); win.webContents.focus() })
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await page.getByTestId('nav-library').focus(); await page.mouse.move(20, 20)
+  const video = page.locator('video')
+  await expect(video).toHaveCount(1)
+  await expect.poll(() => video.evaluate((video: HTMLVideoElement) => video.currentTime)).toBeGreaterThan(0.15)
+  await expect(page.locator('link[data-ambient-preload]')).toHaveCount(0)
+  await page.locator('.page-scroll').evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => video.evaluate((video: HTMLVideoElement) => video.paused)).toBe(true)
+  await page.locator('.page-scroll').evaluate(element => { element.scrollTop = 0 })
+  await expect.poll(() => video.evaluate((video: HTMLVideoElement) => video.paused)).toBe(false)
+  await page.getByRole('button', { name: 'Opciones de Mi mundo', exact: true }).click()
+  await expect(page.getByTestId('instance-operations')).toBeVisible()
+  await expect.poll(() => video.evaluate((video: HTMLVideoElement) => video.paused)).toBe(true)
+  await page.keyboard.press('Escape')
+  await page.getByTestId('nav-library').focus(); await page.mouse.move(20, 20)
+  await expect.poll(() => video.evaluate((video: HTMLVideoElement) => video.paused)).toBe(false)
+  await win.evaluate(win => win.minimize())
+  await expect.poll(() => video.evaluate((video: HTMLVideoElement) => video.paused)).toBe(true)
+  await win.evaluate(win => { win.restore(); win.focus(); win.webContents.focus() })
+  await expect.poll(() => video.evaluate((video: HTMLVideoElement) => video.paused)).toBe(false)
+  await page.getByTestId('nav-settings').click(); await page.getByRole('checkbox', { name: 'Modo rendimiento', exact: true }).check()
+  await page.evaluate(() => { location.hash = '#/instance/mods' })
+  await expect(video).toHaveCount(0)
+  await expect(page.locator('.instance-header').getByRole('button', { name: 'Jugar', exact: true })).toBeEnabled()
+  await page.getByTestId('nav-settings').click(); await page.getByRole('checkbox', { name: 'Modo rendimiento', exact: true }).uncheck()
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.evaluate(() => { location.hash = '#/instance/mods' })
+  await expect(video).toHaveCount(0)
+  expect(await page.evaluate(() => localStorage.getItem('selectedInstancePath'))).toBe(path)
+  expect(errors).toEqual([])
+})

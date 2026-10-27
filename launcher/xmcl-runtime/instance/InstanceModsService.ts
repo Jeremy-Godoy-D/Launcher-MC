@@ -1,13 +1,14 @@
 import { Resource, ResourceDomain, ResourceManager } from '@xmcl/resource'
 import { InstanceModsService as IInstanceModsService, InstanceModsServiceKey, UpdateInstanceResourcesOptions } from '@xmcl/runtime-api'
-import { emptyDir, ensureDir, rename, stat } from 'fs-extra'
-import { dirname, join } from 'path'
+import { emptyDir, ensureDir, stat } from 'fs-extra'
+import { join } from 'path'
 import { Inject, LauncherAppKey } from '~/app'
 import { kResourceManager } from '~/resource'
 import { ExposeServiceKey } from '~/service'
 import { LauncherApp } from '../app/LauncherApp'
 import { readdirIfPresent } from '../util/fs'
 import { AbstractInstanceDomainService } from './AbstractInstanceDomainService'
+import { setModsEnabled } from './utils/setModsEnabled'
 
 /**
  * Provide the abilities to import mods and resource packs files to instance
@@ -20,39 +21,12 @@ export class InstanceModsService extends AbstractInstanceDomainService implement
     super(app, ResourceDomain.Mods)
   }
 
-  async enable({ files: mods, path }: UpdateInstanceResourcesOptions): Promise<void> {
-    this.log(`Enable ${mods.length} mods from ${path}`)
-    const promises: Promise<void>[] = []
-    const instanceModsDir = join(path, ResourceDomain.Mods)
-    for (const resource of mods) {
-      if (dirname(resource) !== instanceModsDir) {
-        this.warn(`Skip to enable unmanaged mod file on ${resource}!`)
-      } else if (!resource.endsWith('.disabled')) {
-        this.warn(`Skip to enable enabled mod file on ${resource}!`)
-      } else {
-        promises.push(rename(resource, resource.substring(0, resource.length - '.disabled'.length)).catch(e => {
-        }))
-      }
-    }
-    await Promise.all(promises)
+  async enable({ files, path }: UpdateInstanceResourcesOptions): Promise<void> {
+    await setModsEnabled(path, files, true)
   }
 
-  async disable({ files: mods, path }: UpdateInstanceResourcesOptions) {
-    this.log(`Disable ${mods.length} mods from ${path}`)
-    const promises: Promise<void>[] = []
-    const instanceModsDir = join(path, ResourceDomain.Mods)
-    for (const resource of mods) {
-      if (dirname(resource) !== instanceModsDir) {
-        this.warn(`Skip to disable unmanaged mod file on ${resource}!`)
-      } else if (resource.endsWith('.disabled')) {
-        this.warn(`Skip to disable disabled mod file on ${resource}!`)
-      } else {
-        promises.push(rename(resource, resource + '.disabled').catch(e => {
-          this.warn(e)
-        }))
-      }
-    }
-    await Promise.all(promises)
+  async disable({ files, path }: UpdateInstanceResourcesOptions): Promise<void> {
+    await setModsEnabled(path, files, false)
   }
 
   async installToServerInstance(options: UpdateInstanceResourcesOptions): Promise<void> {
