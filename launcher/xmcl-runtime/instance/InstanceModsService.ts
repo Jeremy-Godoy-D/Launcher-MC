@@ -24,16 +24,16 @@ export class InstanceModsService extends AbstractInstanceDomainService implement
   }
 
   async enable({ files, path }: UpdateInstanceResourcesOptions): Promise<void> {
-    await this.assertJavaInstance(path)
+    await this.#assertJavaInstance(path)
     await setModsEnabled(path, files, true)
   }
 
   async disable({ files, path }: UpdateInstanceResourcesOptions): Promise<void> {
-    await this.assertJavaInstance(path)
+    await this.#assertJavaInstance(path)
     await setModsEnabled(path, files, false)
   }
 
-  private async assertJavaInstance(path: string) {
+  async #assertJavaInstance(path: string) {
     const instances = await this.app.registry.get(InstanceService)
     await instances.initialize()
     if (typeof path !== 'string' || !instances.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceNotFoundError')
