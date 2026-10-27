@@ -19,8 +19,8 @@
     ],
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
-  "currentStage": 4,
-  "nextAction": "Fuente6f31960:benchmark sin grabador,5ventanas60s aprobadas (póster,vídeo,rotación,minimizado,rendimiento). Renderer vídeo1,767% de un núcleo,23,982fps/0perdidos;rotación1,908%;pausas60s verificadas. GPU proceso CPU4,776% con vídeo,utilización física/VRAM todavía no medida. STAGE4-PERFORMANCE-PRELIMINARY conserva entorno/muestras/hash. Tipos/lint producto y591unit/69escenarios previos siguen válidos;defaultRecorder02 repetido3,6s/3WEBM y9harness. E2Eglobal56diagnósticos en archivos sin cambios,nuevas3fuentes0. Próximo:GPU física con UTC,memoria póster comparada con ZIP beta.2 existente y5arranques equivalentes; luego biblioteca extensa/estabilidad y criterios reales de4 antes de5–9. No repetir medios/orden/copias/perfiles. Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios;comprobar CI después de push.",
+  "currentStage": 5,
+  "nextAction": "Etapa4 de integración cerrada por6e3b83d;STAGE4-CLOSURE. Dos líneas corrigen excepciones por icono vacío y1000tarjetas de recientes en Inicio (ahora3;Biblioteca/carrusel completos). Pico observado tras40recorridos1494→292MiB,finalidle178MiB.591unit/61archivos,69escenarios funcionales+4rendimiento candidata+1referencia,9harness;tipos/lint producto y4benchmarks aprobados,91Axe/0violaciones/162incompletos. Renderer vídeo2,042%núcleo/23,994fps;memoria120,80 vs170,29MiB y5reinicios mediana0,853 vs1,001s;GPU física registrada. Etapa5 ACTIVA:conectar cabecera/Resumen/rutas/pestañas y Mods reales,reutilizando servicios/cliente;aislar por ruta de instancia. No repetir calibración sin cambios que la afecten. K01/K02/K04/K17 completos,K03/K05/K06 finales pendientes;Java/juego/instalador reales siguen9,no certificados por fixtures. Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios;E2Eglobal56diagnósticos antiguos,nuevos4archivos0. Comprobar CI tras push.",
   "stages": [
     {
       "id": 0,
@@ -297,7 +297,7 @@
     {
       "id": 4,
       "title": "Recorrido principal",
-      "status": "active",
+      "status": "complete",
       "gates": [
         {
           "id": "onboarding-accounts",
@@ -348,7 +348,7 @@
         },
         {
           "id": "home-carousel",
-          "status": "pending",
+          "status": "passed",
           "evidence": [
             {
               "path": "docs/react-migration/STAGE4-LIBRARY.md",
@@ -405,13 +405,21 @@
             {
               "path": "docs/react-migration/STAGE4-PERFORMANCE-PRELIMINARY.json",
               "sha256": "0fa5bcbbafdd8247b82974b940dfcd2768db4fd7b4cc27799fbe121a30ed1564"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CLOSURE.md",
+              "sha256": "590a3a9f137d410bed5744d3b0e1ed9fcd3e2a7207a525b7f8eb6d3d4e73021c"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CLOSURE.json",
+              "sha256": "411fc2911171c8ebad9c49cd290d8c6d2a83489ccd0df42fb38681e5486b2052"
             }
           ],
-          "note": "Medios/orden ya acreditados505ea2d;6f31960 mide5ventanas60s sin grabador. Renderer vídeo1,767% núcleo<8%,23,982fps/0perdidos;minimizado/rendimiento reloj detenido60s. GPU proceso CPU/memoria registrado;faltan GPU física/VRAM,memoria vs beta.2 y5arranques equivalentes. No cerrar gate ni etapa4."
+          "note": "Integración de Inicio/carrusel y presupuesto de referencia aceptados:orden/selección independiente,medios/caché/pausas/ticks reales,CPU<8%,24fps,memoria/arranque comparados yGPU física. Recientes limitados3 yBiblioteca1000virtualizada. Fuente6e3b83d/STAGE4-CLOSURE. Tareas7 ycabecera5 no se declaran implementadas."
         },
         {
           "id": "library-instance-launch",
-          "status": "pending",
+          "status": "passed",
           "evidence": [
             {
               "path": "docs/react-migration/STAGE4-LIBRARY.md",
@@ -564,16 +572,24 @@
             {
               "path": "docs/react-migration/STAGE4-RECENT-ORDER.json",
               "sha256": "2cf048843cc244df2671e8b39bac59ea354a7e5ab7c4b04f90359d78d0a39155"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CLOSURE.md",
+              "sha256": "590a3a9f137d410bed5744d3b0e1ed9fcd3e2a7207a525b7f8eb6d3d4e73021c"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CLOSURE.json",
+              "sha256": "411fc2911171c8ebad9c49cd290d8c6d2a83489ccd0df42fb38681e5486b2052"
             }
           ],
-          "note": "K02 completo: búsqueda/filtros/orden manual,nombre,última partida/grupos/vistas/selección persistida/virtualización. Fuente93321cf y evidencias anteriores. Crear/importar/operar/lanzar vía servicios probado con fixtures; Java/instalación/juego reales aún no acreditados, K03/K06/gate pendientes. No repetir búsqueda,copia ni orden."
+          "note": "PLAN5.4 exige crear/importar/lanzar vía servicios en4;contratos React/IPC,archivos,diagnósticos/captura/reintento/procesos probados por informes registrados. Se acepta esa integración;Java/loaders/partida reales continúan pendientes enK03/K05/K06 y aceptación9. Las notas previas confundían validación física final con esta gate;PLAN/SCOPE no cambian. Fuente6e3b83d/STAGE4-CLOSURE,no publicación."
         }
       ]
     },
     {
       "id": 5,
       "title": "Espacio de instancia",
-      "status": "pending",
+      "status": "active",
       "gates": [
         {
           "id": "instance-content",
