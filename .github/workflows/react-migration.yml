@@ -73,7 +73,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $env:XMCL_E2E_EXECUTABLE=(Resolve-Path 'xmcl-electron-app/build/output/win-unpacked/Grimo Launcher.exe').Path
           $env:XMCL_E2E_LOCALES='es-ES'
-          pnpm --dir e2e exec playwright test specs/react-migration/03-vue-compatibility.spec.ts specs/react-migration/08-vue-onboarding.spec.ts --reporter=line --output=artifacts/react-migration/vue
+          pnpm --dir e2e exec playwright test specs/react-migration/03-vue-compatibility.spec.ts specs/react-migration/08-vue-onboarding.spec.ts specs/react-migration/33-vue-content-groups.spec.ts --reporter=line --output=artifacts/react-migration/vue
       - uses: actions/upload-artifact@v4
         if: always() && matrix.renderer == 'react'
         with:
