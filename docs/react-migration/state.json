@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 parcial: STAGE5-WORKSPACE(5c79ece) + STAGE5-AUTHORITY(a5f3ed7/app,5614fcd/harness). Cabecera/Resumen/rutas y Mods leer/filtrar/lote/activar/desactivar aislados;main exige Java registrado yno pisa archivos. Icono se recupera tras fallo/URL nueva. Base597unit/70React+1Strict+2Vue;actual11React focales y2Vue,6repeticiones31+5portada+1capturas sin sumar como funciones nuevas. CI40453332395(db85) pasó React/Vue. Capturas nuevas por ejecución ysalidasCI separadas;5PNG históricos compartidos perdidos se marcan como tales,3 recuperados. Siguiente: grupos nativos/migración legacy con ack ypersistencia real (archivo existente incluso vacío prevalece),luego resto de contenido,packs/shaders,mundos/ajustes/consola. No cerrar gates/K. Vue default/distVue,MS pospuesto,prod intacta;56diagnósticos E2E antiguos/fixture-spec31 cero. Comprobar nuevo CI al subir.",
+  "nextAction": "Etapa5 parcial: grupos persistidos/CAS/migración por ruta y UI React verificados (aplicación63209cf, pruebas59193b7). 608unitarias,78React+1Strict+3Vue; tipos/lint raíz y9harness aprobados. 140PNG conservados,99Axe sin violaciones/170incomplete; detalle STAGE5-GROUPS. Dist/default Vue restaurados, producción intacta. Siguiente: instalar/retirar local con autoridad/colisiones/errores; luego info/dependencias/actualizar,packs/shaders,mundos/ajustes/consola. Gates5/K08 siguen pendientes; etapas6–9 y Microsoft pospuesto sin cambios. CI anterior40456972986(deaed88) éxito; verificar nueva corrida tras push.",
   "stages": [
     {
       "id": 0,
@@ -610,9 +610,17 @@
             {
               "path": "docs/react-migration/STAGE5-AUTHORITY.json",
               "sha256": "a0b0b99940ec80de9911655e5f93580668ac3c48e31459fc0efb94ab0dc42afe"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-GROUPS.md",
+              "sha256": "0b37ec01e096b5766754b49b815a220168135c0d3aae697ffaadf231842fae5b"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-GROUPS.json",
+              "sha256": "1717fc3be1d141a3ecf7c4fce0cd90b7de6a6a2cc30c9c07fbdd6e62526353de"
             }
           ],
-          "note": "Avance parcial;ver WORKSPACE/AUTHORITY. Main Java registrado yerrores de archivos/capturas verificados. Grupos,instalar/retirar/info/actualizar/diagnósticos,packs/shaders siguen pendientes."
+          "note": "Avance parcial; WORKSPACE/AUTHORITY/GROUPS. Grupos locales persistidos y migración por ruta verificados; faltan instalar/retirar/info/actualizar/diagnósticos,packs/shaders y resto de etapa5. Ninguna gate completada."
         },
         {
           "id": "worlds-settings",
