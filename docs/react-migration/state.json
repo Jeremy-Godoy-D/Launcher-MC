@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa4 de integración cerrada por6e3b83d;STAGE4-CLOSURE. Dos líneas corrigen excepciones por icono vacío y1000tarjetas de recientes en Inicio (ahora3;Biblioteca/carrusel completos). Pico observado tras40recorridos1494→292MiB,finalidle178MiB.591unit/61archivos,69escenarios funcionales+4rendimiento candidata+1referencia,9harness;tipos/lint producto y4benchmarks aprobados,91Axe/0violaciones/162incompletos. Renderer vídeo2,042%núcleo/23,994fps;memoria120,80 vs170,29MiB y5reinicios mediana0,853 vs1,001s;GPU física registrada. Etapa5 ACTIVA:conectar cabecera/Resumen/rutas/pestañas y Mods reales,reutilizando servicios/cliente;aislar por ruta de instancia. No repetir calibración sin cambios que la afecten. K01/K02/K04/K17 completos,K03/K05/K06 finales pendientes;Java/juego/instalador reales siguen9,no certificados por fixtures. Vue predeterminado/dist Vue,Microsoft pospuesto,producción sin cambios;E2Eglobal56diagnósticos antiguos,nuevos4archivos0. Comprobar CI tras push.",
+  "nextAction": "Etapa5 parcial5c79ece: cabecera/Resumen/rutas y Mods reales (lectura/errores/filtro/lote/activar/desactivar) aislados por ruta;toggle exclusivo no oculta errores ni pisa colisiones,con copia exclusiva si no hay hard links.597unit/63archivos,70React+1Strict+2Vue=73flujos,tipos/lint producto y9harness pasados;95Axe/0violaciones/166incompletos. Ver STAGE5-WORKSPACE.md/json. No cerrar gates/K: faltan instalar/retirar/info/actualizar,dependencias/grupos,packs/shaders,mundos/ajustes/consola. Siguiente: completar contenido y autoridad de ruta registrada en main;grupos existentes incluso vacíos prevalecen,legacy solo tras acuse persistido. Corregir key de logo y esperar ambos registros al capturar tras reload. Vue predeterminado/distVue,Microsoft pospuesto,producción intacta;56diagnósticos E2E antiguos/spec31 cero. CI40443327845(58fc914) éxito;comprobar nuevo CI al subir este bloque.",
   "stages": [
     {
       "id": 0,
@@ -594,7 +594,17 @@
         {
           "id": "instance-content",
           "status": "pending",
-          "evidence": []
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE5-WORKSPACE.md",
+              "sha256": "cee177690740aa004b3260fee45eeb54631311521da3674cdfaa30a20b5baac6"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-WORKSPACE.json",
+              "sha256": "b902b3c42e82b57630c99619ed57e07431dbbbc209524f753efde0b90ea646c2"
+            }
+          ],
+          "note": "Avance parcial5c79ece;sin cerrar aceptación. Cabecera común/rutas,Resumen ylectura/activación de Mods con73flujos de regresión. Faltan operaciones locales restantes,grupos,diagnósticos,actualizaciones ypacks/shaders."
         },
         {
           "id": "worlds-settings",
