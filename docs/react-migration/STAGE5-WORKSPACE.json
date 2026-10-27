@@ -104,53 +104,40 @@
   "packageFiles": [
     {
       "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/Grimo Launcher.exe",
-      "sha256": "6651e85ae1330b804a4e68742265410a26258ff5204af1a10b4794d626383990"
+      "sha256": "6651e85ae1330b804a4e68742265410a26258ff5204af1a10b4794d626383990",
+      "availability": "historical-build-output-may-be-rebuilt-at-original-path"
     },
     {
       "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/resources/app.asar",
-      "sha256": "034f9390c55904a98d5de5d3a11a987a17699cfc4f6df82d4e10811f23d6c64c"
+      "sha256": "034f9390c55904a98d5de5d3a11a987a17699cfc4f6df82d4e10811f23d6c64c",
+      "availability": "historical-build-output-may-be-rebuilt-at-original-path"
     },
     {
       "path": "launcher/xmcl-electron-app/build/output/win-unpacked/Grimo Launcher.exe",
-      "sha256": "8892bee746ccddb0eef03cd6baf3cb09764b6ca4a86dcd93021b65f397fe71c1"
+      "sha256": "8892bee746ccddb0eef03cd6baf3cb09764b6ca4a86dcd93021b65f397fe71c1",
+      "availability": "historical-build-output-may-be-rebuilt-at-original-path"
     },
     {
       "path": "launcher/xmcl-electron-app/build/output/win-unpacked/resources/app.asar",
-      "sha256": "80335854c505facfb817e48d59e708cd27b2598be0fdc6f72f4bf479efbc1ebb"
+      "sha256": "80335854c505facfb817e48d59e708cd27b2598be0fdc6f72f4bf479efbc1ebb",
+      "availability": "historical-build-output-may-be-rebuilt-at-original-path"
     }
   ],
   "artifacts": [
     {
-      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/header-dark-1200.png",
-      "sha256": "595d4119e4b84fc92e9b6ac3408c29133accfbc3fba8e781fd0751026ede439a"
+      "path": "launcher/e2e/artifacts/stage5-5c79ece-recovered-screenshots/header-dark-800.png",
+      "sha256": "82de2ad1e1f4a8de6707c096efa77f0dc44654e8a5d4b1ed45a106dc206a9bb0",
+      "originalSharedPath": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/header-dark-800.png"
     },
     {
-      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/header-dark-800.png",
-      "sha256": "82de2ad1e1f4a8de6707c096efa77f0dc44654e8a5d4b1ed45a106dc206a9bb0"
+      "path": "launcher/e2e/artifacts/stage5-5c79ece-recovered-screenshots/header-light-800.png",
+      "sha256": "df07f9382f47bf608e6e8d61555fe9f9875729284aa37b9cb8e4d341eb906286",
+      "originalSharedPath": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/header-light-800.png"
     },
     {
-      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/header-light-1200.png",
-      "sha256": "96b9c75b7e582d52d2a9e6b533fff036a12e21900c38bc7753f55c1880bceec5"
-    },
-    {
-      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/header-light-800.png",
-      "sha256": "df07f9382f47bf608e6e8d61555fe9f9875729284aa37b9cb8e4d341eb906286"
-    },
-    {
-      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/mods-dark-1200.png",
-      "sha256": "595d4119e4b84fc92e9b6ac3408c29133accfbc3fba8e781fd0751026ede439a"
-    },
-    {
-      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/mods-dark-800.png",
-      "sha256": "080547bab92c7161b4700e58453661644d359d4ba435d29a2b46070466f70c15"
-    },
-    {
-      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/mods-light-1200.png",
-      "sha256": "96b9c75b7e582d52d2a9e6b533fff036a12e21900c38bc7753f55c1880bceec5"
-    },
-    {
-      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/mods-light-800.png",
-      "sha256": "9647a2a82de2b9e939d4c8c95368583d5f96c95266d43efa9206be4533779cfc"
+      "path": "launcher/e2e/artifacts/stage5-5c79ece-recovered-screenshots/mods-light-800.png",
+      "sha256": "9647a2a82de2b9e939d4c8c95368583d5f96c95266d43efa9206be4533779cfc",
+      "originalSharedPath": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/mods-light-800.png"
     },
     {
       "path": "launcher/e2e/artifacts/stage5-5c79ece-package.log",
@@ -322,5 +309,33 @@
     "No 60-second recalibration repeated; this block does not recertify stage 4 performance.",
     "Axe incomplete checks require manual follow-up; no full AA certification.",
     "Vue remains default; shared dist restored to Vue; production and release unchanged."
-  ]
+  ],
+  "historicalArtifacts": [
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/header-dark-1200.png",
+      "sha256": "595d4119e4b84fc92e9b6ac3408c29133accfbc3fba8e781fd0751026ede439a",
+      "availability": "historical-hash-shared-path-overwritten-by-later-run"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/header-light-1200.png",
+      "sha256": "96b9c75b7e582d52d2a9e6b533fff036a12e21900c38bc7753f55c1880bceec5",
+      "availability": "historical-hash-shared-path-overwritten-by-later-run"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/mods-dark-1200.png",
+      "sha256": "595d4119e4b84fc92e9b6ac3408c29133accfbc3fba8e781fd0751026ede439a",
+      "availability": "historical-hash-shared-path-overwritten-by-later-run"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/mods-dark-800.png",
+      "sha256": "080547bab92c7161b4700e58453661644d359d4ba435d29a2b46070466f70c15",
+      "availability": "historical-hash-shared-path-overwritten-by-later-run"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-31-instance-mods-spec-ts-instance-routes-expose-native-mods-filt/mods-light-1200.png",
+      "sha256": "96b9c75b7e582d52d2a9e6b533fff036a12e21900c38bc7753f55c1880bceec5",
+      "availability": "historical-hash-shared-path-overwritten-by-later-run"
+    }
+  ],
+  "artifactRetentionNote": "Five original shared screenshots were overwritten by a later run. Their original hashes remain recorded as unavailable; three byte-identical original captures were recovered to a unique folder. Original logs/Axe JSON remain in unique run folders. New fixture1769d88 preserves screenshots per run. Package paths identify historical build outputs and may be rebuilt; their hashes are capture-time identities, not claims that the old output remains on disk."
 }

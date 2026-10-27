@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 parcial5c79ece: cabecera/Resumen/rutas y Mods reales (lectura/errores/filtro/lote/activar/desactivar) aislados por ruta;toggle exclusivo no oculta errores ni pisa colisiones,con copia exclusiva si no hay hard links.597unit/63archivos,70React+1Strict+2Vue=73flujos,tipos/lint producto y9harness pasados;95Axe/0violaciones/166incompletos. Ver STAGE5-WORKSPACE.md/json. No cerrar gates/K: faltan instalar/retirar/info/actualizar,dependencias/grupos,packs/shaders,mundos/ajustes/consola. Siguiente: completar contenido y autoridad de ruta registrada en main;grupos existentes incluso vacíos prevalecen,legacy solo tras acuse persistido. Corregir key de logo y esperar ambos registros al capturar tras reload. Vue predeterminado/distVue,Microsoft pospuesto,producción intacta;56diagnósticos E2E antiguos/spec31 cero. CI40443327845(58fc914) éxito;comprobar nuevo CI al subir este bloque.",
+  "nextAction": "Etapa5 parcial: STAGE5-WORKSPACE(5c79ece) + STAGE5-AUTHORITY(a5f3ed7/app,5614fcd/harness). Cabecera/Resumen/rutas y Mods leer/filtrar/lote/activar/desactivar aislados;main exige Java registrado yno pisa archivos. Icono se recupera tras fallo/URL nueva. Base597unit/70React+1Strict+2Vue;actual11React focales y2Vue,6repeticiones31+5portada+1capturas sin sumar como funciones nuevas. CI40453332395(db85) pasó React/Vue. Capturas nuevas por ejecución ysalidasCI separadas;5PNG históricos compartidos perdidos se marcan como tales,3 recuperados. Siguiente: grupos nativos/migración legacy con ack ypersistencia real (archivo existente incluso vacío prevalece),luego resto de contenido,packs/shaders,mundos/ajustes/consola. No cerrar gates/K. Vue default/distVue,MS pospuesto,prod intacta;56diagnósticos E2E antiguos/fixture-spec31 cero. Comprobar nuevo CI al subir.",
   "stages": [
     {
       "id": 0,
@@ -597,14 +597,22 @@
           "evidence": [
             {
               "path": "docs/react-migration/STAGE5-WORKSPACE.md",
-              "sha256": "cee177690740aa004b3260fee45eeb54631311521da3674cdfaa30a20b5baac6"
+              "sha256": "23db1fc1a4a8ef3bc7350bd92e5dfff04b998db62b8b1ba9570934787641e982"
             },
             {
               "path": "docs/react-migration/STAGE5-WORKSPACE.json",
-              "sha256": "b902b3c42e82b57630c99619ed57e07431dbbbc209524f753efde0b90ea646c2"
+              "sha256": "2d377b776a6d9d86edc58a7f8e62e617679ad63c70311fce0b05e0d000769521"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-AUTHORITY.md",
+              "sha256": "75cb69bd6fd1da76f1c44cb4c2e6c09080f9d60243b67b88e567e359ea2cebf2"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-AUTHORITY.json",
+              "sha256": "a0b0b99940ec80de9911655e5f93580668ac3c48e31459fc0efb94ab0dc42afe"
             }
           ],
-          "note": "Avance parcial5c79ece;sin cerrar aceptación. Cabecera común/rutas,Resumen ylectura/activación de Mods con73flujos de regresión. Faltan operaciones locales restantes,grupos,diagnósticos,actualizaciones ypacks/shaders."
+          "note": "Avance parcial;ver WORKSPACE/AUTHORITY. Main Java registrado yerrores de archivos/capturas verificados. Grupos,instalar/retirar/info/actualizar/diagnósticos,packs/shaders siguen pendientes."
         },
         {
           "id": "worlds-settings",

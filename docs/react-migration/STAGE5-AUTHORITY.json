@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-27",
+  "applicationCommit": "a5f3ed7c2893aa2a6f3353773626808a159e50b7",
+  "verificationCommit": "5614fcd83af0405eaaf3b609675629d572f998a3",
+  "baselineFullRegression": "5c79ece3ef2375375a44b5f3999e087e40b66347",
+  "status": "stage-5-partial-authority-artwork-evidence",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/react-migration.yml",
+      "sha256": "f10c93216bf591fde2510ec70ed4144e9a43067ae5380be8383cac4703211ddd"
+    },
+    {
+      "path": "launcher/e2e/fixtures/launcher.ts",
+      "sha256": "725cc7b92035259623514d6bc2f19672130741075fb7a8470556242a114a3281"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/27-provider-covers.spec.ts",
+      "sha256": "0e5dd3a54355dbf782039a46b5f0390ae1cab4df1c33a2d5891be7201873832a"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/31-instance-mods.spec.ts",
+      "sha256": "c89531dbb320f94ad5a00d343566b68f555b2abc97c7d483ceef9248783babc7"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx",
+      "sha256": "2549d64f0cc6ebbe20301ba6921f4d829bcdf0bddea2b1e3827ce54e0d0e2461"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instance/InstanceModsService.ts",
+      "sha256": "8cd57b2021777708a2057bf88bf58b020ab778943f0f9ebdc4efabed0f79ae2e"
+    }
+  ],
+  "validation": {
+    "focusedReact": {
+      "distinctCases": 11,
+      "seconds": 32.4
+    },
+    "captureFixtureRepeat": {
+      "cases": 6,
+      "seconds": 18.3,
+      "preservedScreenshots": 8
+    },
+    "delayedCoverRepeat": {
+      "cases": 5,
+      "seconds": 12.1,
+      "distinctAdditionalCases": 0
+    },
+    "vue": {
+      "cases": 2,
+      "seconds": 10.6
+    },
+    "types": "runtime/react passed; E2E global 56 existing, fixture/spec31 zero",
+    "lint": "product full on cc0fe70 and React on a5f3ed7 passed",
+    "sourceDetectorFindings": 0,
+    "harness": "passed, stage5 gates remain pending",
+    "precedingCI": {
+      "run": 40453332395,
+      "head": "db85a03706dbe5820c09d28e3c44d000b811ed4b",
+      "react": "success",
+      "vue": "success"
+    },
+    "finalCaptureFixtureCheck": {
+      "cases": 1,
+      "seconds": 8.8,
+      "preservedScreenshots": 8
+    },
+    "finalVue": {
+      "cases": 2,
+      "seconds": 9.7
+    },
+    "evidenceCodeLint": "0 warnings / 0 errors; fixture and specs27/31",
+    "ciOutputDirectories": [
+      "artifacts/react-migration/react",
+      "artifacts/react-migration/strict",
+      "artifacts/react-migration/vue"
+    ]
+  },
+  "packageFiles": [
+    {
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/Grimo Launcher.exe",
+      "sha256": "4800e855bad27bdc72ea84e839b0039040642cc3ed46a76a2d148461e332c229",
+      "availability": "capture-time build identity; path may later be rebuilt"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/resources/app.asar",
+      "sha256": "3b4c76ebc6786faac6017fc169a9fbeea1ab587149c20b10438c79acb0952a0b",
+      "availability": "capture-time build identity; path may later be rebuilt"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/Grimo Launcher.exe",
+      "sha256": "5c094e9d4f167ac44179423c71a9f811dbcde8068a960f3374ad1000ce736de8",
+      "availability": "capture-time build identity; path may later be rebuilt"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/resources/app.asar",
+      "sha256": "b733e577fc5dcbda9ff9402b19e078f784ea11e0ce76d0a60642082bfd41f09b",
+      "availability": "capture-time build identity; path may later be rebuilt"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-captures.log",
+      "sha256": "50bcc73ccb28266a0b3c1307a3f3e62089d66e4430732178297fc12ee30d3846"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-captures/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-captures/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/axe-dark-1200.json",
+      "sha256": "9ade6f0580fb6f06d1c919f99110e0db5993856b7a74f2f0eb09284805e40f6d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-captures/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/axe-dark-800.json",
+      "sha256": "ea4fe359cdb304971313ac36a382d204094a36a8cfff2d998c8cb1595a98eb74"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-captures/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/axe-light-1200.json",
+      "sha256": "7e31956d9393ad152b9f1913f08efc9348de19031dde6355ce5ec7718281bd3b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-captures/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/axe-light-800.json",
+      "sha256": "6733a2cac4ccb301cb2ead70d36421d650a2ef702bf9d44d18d4d3add2cacd9b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-captures/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/header-dark-1200.png",
+      "sha256": "16649a9f1308a0ae5777c117ce9b796e811e824e0d9b41516f9875b3ea674fb3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-captures/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/header-dark-800.png",
+      "sha256": "82de2ad1e1f4a8de6707c096efa77f0dc44654e8a5d4b1ed45a106dc206a9bb0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-captures/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/header-light-1200.png",
+      "sha256": "465a289d12f47228489a4dca6d4680c6b9af4781250a0da81902e05c49e19826"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-captures/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/header-light-800.png",
+      "sha256": "df07f9382f47bf608e6e8d61555fe9f9875729284aa37b9cb8e4d341eb906286"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-captures/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/manifest.json",
+      "sha256": "6046639ee22f0363d8a47c19c7baa78b538cb7d21963fb641baff1fdf0af6459"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-captures/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/mods-dark-1200.png",
+      "sha256": "054605aed076757d659f41ecf00d5e093a9c2a662cff7431fb7abb09d0253c7d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-captures/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/mods-dark-800.png",
+      "sha256": "2b71d4e61037d5e1d255e5cafe2687629d02338477b9e88d5ad7150aa4cc14cb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-captures/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/mods-light-1200.png",
+      "sha256": "5249caa7b30cdcb489077eb661d33741880c1e103f7573cd78582936720c5711"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-captures/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/mods-light-800.png",
+      "sha256": "9647a2a82de2b9e939d4c8c95368583d5f96c95266d43efa9206be4533779cfc"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-delayed-repeat.log",
+      "sha256": "851e76bcb5c18ba76bf5b970417efbbe2c8fd289144cc0f6243f5b2da3de27d0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-vue-package.log",
+      "sha256": "ddd0081a8b3d39790c38d7fdf04e7099d15790487bb1ce4fbf2867a4fdab1775"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-1769d88-vue.log",
+      "sha256": "3503863f4e49fb2749e417db5997af2428eea0361503e1a2adfeeecd638f2441"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-detector.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-package.log",
+      "sha256": "9d1fe3b4b7d10b502923605b3b3bd7643d3ef4c5db35e51efd53f19dd72e63b9"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-react-lint.log",
+      "sha256": "4f0686eb9f93003e66c117dc046d7a9c394c0003b0d32595cc1e10a63d297fff"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-react-types.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-runtime-types.log",
+      "sha256": "014a891360e8bf3c856c604e13ba0dee2eeaf7aa4121c9cb1a2ef4796a223b4c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-screenshots/header-dark-1200.png",
+      "sha256": "16649a9f1308a0ae5777c117ce9b796e811e824e0d9b41516f9875b3ea674fb3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-screenshots/header-dark-800.png",
+      "sha256": "82de2ad1e1f4a8de6707c096efa77f0dc44654e8a5d4b1ed45a106dc206a9bb0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-screenshots/header-light-1200.png",
+      "sha256": "465a289d12f47228489a4dca6d4680c6b9af4781250a0da81902e05c49e19826"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-screenshots/header-light-800.png",
+      "sha256": "df07f9382f47bf608e6e8d61555fe9f9875729284aa37b9cb8e4d341eb906286"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-screenshots/mods-dark-1200.png",
+      "sha256": "054605aed076757d659f41ecf00d5e093a9c2a662cff7431fb7abb09d0253c7d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-screenshots/mods-dark-800.png",
+      "sha256": "2b71d4e61037d5e1d255e5cafe2687629d02338477b9e88d5ad7150aa4cc14cb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-screenshots/mods-light-1200.png",
+      "sha256": "5249caa7b30cdcb489077eb661d33741880c1e103f7573cd78582936720c5711"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-screenshots/mods-light-800.png",
+      "sha256": "9647a2a82de2b9e939d4c8c95368583d5f96c95266d43efa9206be4533779cfc"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-targeted.log",
+      "sha256": "7298452e80f7508b4bc1a6d30825f3fe99df6f971f667f548a98cca5eabdd267"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-targeted/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-targeted/react-migration-26-instanc-ea455-iginals-identity-and-worlds-electron-es-ES/instance-icon-accessibility.json",
+      "sha256": "3f9a088bee7226b52c73b995b4e718ad65e3c869ce29881851e68db4cde3c582"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-targeted/react-migration-27-provide-2a1a8-le-at-both-sizes-and-themes-electron-es-ES/provider-cover-accessibility.json",
+      "sha256": "a98dc70a7211aca78e7466770768a5a29a42ad74f7d21a7a0545d21c8c057cc9"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-targeted/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/axe-dark-1200.json",
+      "sha256": "745202c5a36063edaac7fac3ac2c9b863cec721bff6d16156d4a454e267529be"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-targeted/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/axe-dark-800.json",
+      "sha256": "5ca739fda5695ef6cb26c01f0060c5d0c99155cf58ba809470046977ddc43fd7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-targeted/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/axe-light-1200.json",
+      "sha256": "0026d2f5ba2398208b40c94b219d49955bace54e7a115db9263206095cdf858e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-a5f3ed7-targeted/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/axe-light-800.json",
+      "sha256": "5d7291a48c26c7923be31edd79dae8b939fbaab3faeb38b0186fd9aec18884d4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-authority-fix-renderer.log",
+      "sha256": "4a3d84bb2e94ee10e9dd4ab24f52c59360d038670779e5daf821909afb704677"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-authority-harness.log",
+      "sha256": "6af923993bb5ca5f59eb9baaad3ce3588831b2730de87656da829c90e52b7174"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-evidence-e2e-types.log",
+      "sha256": "47efe23f541affc4c8e52d6c3b30ba91a6f17655bbad76807f5212cf42f8e19f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-capture.log",
+      "sha256": "2d638be4f1e6aeffa58961f2e6a67c347a01cce191d3eb72b5895a6f2738f20f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-vue.log",
+      "sha256": "373abf0dc849a9079583649b2936fe9c8a8f8213b883cafe87b0603d93a892a0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-e2e-types.log",
+      "sha256": "47efe23f541affc4c8e52d6c3b30ba91a6f17655bbad76807f5212cf42f8e19f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-evidence-lint-final.log",
+      "sha256": "89f85419f53eabb92462a1e06579becccab1028d35234131be150c17bde3c921"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-cc0fe70-lint.log",
+      "sha256": "0d88283526f06b5d8277b16513df76d7df187fd57a76342330bcb70072ea76e0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-capture/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-capture/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/axe-dark-1200.json",
+      "sha256": "bb6a960d76aa6db20d552be2417c7532bb9b94d7837944011fdd76df62586a5a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-capture/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/axe-dark-800.json",
+      "sha256": "449dc6573745d5c79b62775675d81b194216f7d73e6675fd88a6523cbfb82c5d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-capture/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/axe-light-1200.json",
+      "sha256": "3b909332900cbc9b9453dc180c4843bc23424fe33da42a5a442241a11ab6fe06"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-capture/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/axe-light-800.json",
+      "sha256": "9c7e8e31f9d50d48f5fa9e1af63d3bc8fbbf4831c8905410a276cc6add6e99b4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-capture/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/header-dark-1200.png",
+      "sha256": "16649a9f1308a0ae5777c117ce9b796e811e824e0d9b41516f9875b3ea674fb3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-capture/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/header-dark-800.png",
+      "sha256": "82de2ad1e1f4a8de6707c096efa77f0dc44654e8a5d4b1ed45a106dc206a9bb0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-capture/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/header-light-1200.png",
+      "sha256": "465a289d12f47228489a4dca6d4680c6b9af4781250a0da81902e05c49e19826"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-capture/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/header-light-800.png",
+      "sha256": "df07f9382f47bf608e6e8d61555fe9f9875729284aa37b9cb8e4d341eb906286"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-capture/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/manifest.json",
+      "sha256": "b368df02def2b3749385baed858acac1ed6798e5ad97c5394e45f87c5c4ead3b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-capture/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/mods-dark-1200.png",
+      "sha256": "054605aed076757d659f41ecf00d5e093a9c2a662cff7431fb7abb09d0253c7d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-capture/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/mods-dark-800.png",
+      "sha256": "2b71d4e61037d5e1d255e5cafe2687629d02338477b9e88d5ad7150aa4cc14cb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-capture/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/mods-light-1200.png",
+      "sha256": "5249caa7b30cdcb489077eb661d33741880c1e103f7573cd78582936720c5711"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-5614fcd-capture/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-es-ES/screenshots/mods-light-800.png",
+      "sha256": "9647a2a82de2b9e939d4c8c95368583d5f96c95266d43efa9206be4533779cfc"
+    }
+  ],
+  "limits": [
+    "No stage5 gate or parity row completed by this follow-up.",
+    "Latest complete 70React+1Strict+2Vue and597units remain the5c79ece checkpoint; current app changes use focused validation rather than claiming a fresh full regression.",
+    "First targeted cc0fe70 run had two failures; a5f3ed7 fixes artwork hiding and strengthens native focus/enabled keyboard preconditions. Five delayed-cover repetitions pass; the old trace lacks DOM/focus evidence to prove the original physical cause.",
+    "Two GPU command-buffer messages occurred during Electron shutdown in the first successful a5f3ed7 targeted run; no page-error failure, subsequent6-case run passed. This is not a new GPU/performance certification.",
+    "Five historic5c shared PNGs no longer available; their original hashes are recorded separately and never relabeled as current captures. Logs/AxeJSON remain. New fixture copies shots/manifests into each test output directory.",
+    "Java/game/installer/update and remaining scope still pending; Vue default/dist restored, production unchanged.",
+    "Final fixture moves artifact-error reporting outside finally so a body failure is not replaced; runtime cleanup runs first. CI output paths are distinct for React, StrictMode and Vue to avoid a later command deleting previous results."
+  ],
+  "applicationSourcesUnchangedSinceCommit": true
+}
