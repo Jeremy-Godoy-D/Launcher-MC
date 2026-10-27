@@ -1,7 +1,7 @@
 import { test, expect, snap } from '../../helpers/scratch'
 import { seedReactLibrary } from '../../helpers/react-library'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import { createRequire } from 'node:module'
 import { createWriteStream } from 'node:fs'
 import { pipeline } from 'node:stream/promises'
@@ -53,6 +53,7 @@ test('instance routes expose native mods, filters and safe multi-selection witho
     await page.evaluate(theme => { const key = 'launcher.react.preferences', prefs = JSON.parse(localStorage.getItem(key) || '{}'); localStorage.setItem(key, JSON.stringify({ ...prefs, appearance: theme })) }, theme)
     await page.reload()
     await expect(list.getByText('Alpha local', { exact: true })).toBeVisible()
+    await expect(list.locator('.content-list li')).toHaveCount(2)
     for (const size of [[1200, 720], [800, 400]]) {
       const win = await launcher.app.browserWindow(page)
       await win.evaluate((win, size) => win.setContentSize(size[0], size[1]), size)
@@ -186,4 +187,39 @@ test('the instance header shares one ambient decoder and pauses offscreen, in di
   await expect(video).toHaveCount(0)
   expect(await page.evaluate(() => localStorage.getItem('selectedInstancePath'))).toBe(path)
   expect(errors).toEqual([])
+})
+
+
+test('native toggles reject an unregistered directory without modifying its files', async ({ launcher }) => {
+  const page = launcher.main, path = join(launcher.gameDataPath, 'unregistered')
+  await mod(path, 'outside', 'Unregistered mod')
+  const file = join(path, 'mods', 'outside.jar'), before = await readFile(file)
+  for (const method of ['disable', 'enable']) {
+    const rejected = await page.evaluate(async ({ path, file, method }) => {
+      try { await (window as any).serviceChannels.open('InstanceModsService').call(method, { path, files: [file] }); return false }
+      catch { return true }
+    }, { path, file, method })
+    expect(rejected).toBe(true)
+    expect(await readFile(file)).toEqual(before)
+  }
+  await expect(readFile(`${file}.disabled`)).rejects.toMatchObject({ code: 'ENOENT' })
+})
+
+test('a changed native instance icon recovers after the previous image failed', async ({ launcher }) => {
+  const page = launcher.main, [path] = await seedReactLibrary(page)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const bytes = await readFile(resolve('../xmcl-keystone-ui/src/assets/steve_skin.png'))
+  for (const name of ['first.png', 'replacement.png']) await writeFile(join(path, name), bytes)
+  const editIcon = async (icon: string) => page.evaluate(async ({ path, icon }) => (window as any).serviceChannels.open('InstanceService').call('editInstance', { instancePath: path, icon }), { path, icon })
+  await editIcon('first.png')
+  await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click()
+  const icon = page.getByTestId('instance-workspace').locator('.instance-logo')
+  await expect.poll(() => icon.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true)
+  const previous = await icon.getAttribute('src')
+  await icon.evaluate(image => image.dispatchEvent(new Event('error')))
+  await expect(icon).toBeHidden()
+  await editIcon('replacement.png')
+  await expect(icon).not.toHaveAttribute('src', previous!)
+  await expect(icon).toBeVisible()
+  await expect.poll(() => icon.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true)
 })

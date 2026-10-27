@@ -9,6 +9,8 @@ import { LauncherApp } from '../app/LauncherApp'
 import { readdirIfPresent } from '../util/fs'
 import { AbstractInstanceDomainService } from './AbstractInstanceDomainService'
 import { setModsEnabled } from './utils/setModsEnabled'
+import { InstanceService } from './InstanceService'
+import { AnyError } from '@xmcl/utils'
 
 /**
  * Provide the abilities to import mods and resource packs files to instance
@@ -22,11 +24,19 @@ export class InstanceModsService extends AbstractInstanceDomainService implement
   }
 
   async enable({ files, path }: UpdateInstanceResourcesOptions): Promise<void> {
+    await this.assertJavaInstance(path)
     await setModsEnabled(path, files, true)
   }
 
   async disable({ files, path }: UpdateInstanceResourcesOptions): Promise<void> {
+    await this.assertJavaInstance(path)
     await setModsEnabled(path, files, false)
+  }
+
+  private async assertJavaInstance(path: string) {
+    const instances = await this.app.registry.get(InstanceService)
+    await instances.initialize()
+    if (typeof path !== 'string' || !instances.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceNotFoundError')
   }
 
   async installToServerInstance(options: UpdateInstanceResourcesOptions): Promise<void> {

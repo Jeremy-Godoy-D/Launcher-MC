@@ -29,7 +29,7 @@ export function InstanceWorkspace({ instance, media, cover, headerRef, play, opt
   return <section className="instance-page" data-testid="instance-workspace" data-instance-path={instance.path}>
     <header className="instance-header" ref={headerRef} onPointerEnter={() => onHover(true)} onPointerLeave={() => onHover(false)} onFocusCapture={() => onFocus(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) onFocus(false) }}>
       {media}
-      <div className="instance-identity">{icon && <img className="instance-logo" src={icon} alt="" onError={event => { event.currentTarget.hidden = true }} />}
+      <div className="instance-identity">{icon && <img key={icon} className="instance-logo" src={icon} alt="" onError={event => { event.currentTarget.hidden = true }} />}
         <div><h1>{instance.name}</h1><p>Minecraft {instance.runtime.minecraft || instance.version} · {loaderName(instance)}</p><span>{t(copyPending ? 'react.workspace.copyPending' : running ? 'react.workspace.running' : 'react.workspace.stopped')}</span>{instance.upstream && instance.upstream.type !== 'server' && <small>{t('react.instances.genericAmbient')}</small>}</div>
       </div>
       <div className="instance-header-actions"><button className="button primary" disabled={busy} onClick={play}><Play size={18} fill="currentColor" aria-hidden="true" />{t(copyPending ? 'react.copy.review' : running ? 'react.launch.view' : 'react.launch.play')}</button>
