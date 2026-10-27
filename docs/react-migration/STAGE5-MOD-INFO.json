@@ -1,0 +1,1480 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-27",
+  "applicationCommit": "c6d74307cb0525ff73c8dc5053ccadff85e2e58e",
+  "verificationCommit": "c6d74307cb0525ff73c8dc5053ccadff85e2e58e",
+  "status": "stage-5-partial-local-mod-information",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/react-migration.yml",
+      "sha256": "4baaebfcfafc2ddd8f0d8734dd1dd5a5b239de4ea9039fb47edf270703955406"
+    },
+    {
+      "path": "launcher/e2e/helpers/react-content.ts",
+      "sha256": "7ab9d8412b7d37729cc1e0becb96ca96a286610859e3b5561268581c22571da2"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/35-mod-information.spec.ts",
+      "sha256": "efde849ef199884c4ef7766c6a546f61d51f2a83ae420322ea1b64fbf81ca194"
+    },
+    {
+      "path": "launcher/pnpm-lock.yaml",
+      "sha256": "73cb88c1fc844b2a831c9c6565975ebd45bf324c86f978c2b0c468c238a44949"
+    },
+    {
+      "path": "launcher/xmcl-keystone-ui/src/util/mod.test.ts",
+      "sha256": "5c87d6a338d3508c1c350b4bf2eb382feb33617e059c28ee2384fa0c1d6be7ec"
+    },
+    {
+      "path": "launcher/xmcl-keystone-ui/src/util/mod.ts",
+      "sha256": "ee681fd96f002f9504ebf156ea860ab35f5941984c266d44aa91660d066c314a"
+    },
+    {
+      "path": "launcher/xmcl-keystone-ui/src/util/modCompatible.ts",
+      "sha256": "c66f5c521b8b7c827551a71f41f18fe77a24b3636471591143ffc973feecb8f7"
+    },
+    {
+      "path": "launcher/xmcl-keystone-ui/src/util/modDependencies.ts",
+      "sha256": "74671e0049fa4f1350b7bbae9c90c54d8dcb452cc1f4581572355aa6032ef016"
+    },
+    {
+      "path": "launcher/xmcl-keystone-ui/src/util/search.ts",
+      "sha256": "619636a68caa69114a3f2e7a22093dc02b9dc9be2a2fecf4608f7826934fd271"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/instance/InstanceMods.tsx",
+      "sha256": "6eeb2d51720aca07a61a5d06dc901f3992025ca5aebeef50e7c71fc7117915f4"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/instance/ModDetails.tsx",
+      "sha256": "776394f4c59d30f570bccd4a1815fe0a88e9d416293766c8325b033a085a6254"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/instance/instance.css",
+      "sha256": "28d5fe81d620cbe1c2d579cdecc34c26f07b4d81bc5b3363023fd7f0e525aa40"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/en.yaml",
+      "sha256": "d0720aa44b5edcfa062162311f1da327dfcf61668b8033da73c2e1d885bb68a1"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/es-ES.yaml",
+      "sha256": "f361f68ae90513e9291fec6be68552f1940f039691da14279f324776f58a0bf7"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/package.json",
+      "sha256": "9746ec64ba3f7675c2ed5f3a80f1d1bab9c71dc892eb6a9b74a3675477cf9654"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/util/mod.test.ts",
+      "sha256": "0d52b40aa9a60f23aedb1c02de322bf02a4eb778e6b9f8431e7d944519104f05"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/util/mod.ts",
+      "sha256": "3a8248fa30c99824561b1594b7f8b74d96669f08cde9b7cd5ccb955ff632623b"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/util/modCompatible.ts",
+      "sha256": "74dd48ec00a0df137266f0d266dcba057da7336368c47ef51193a75cc54bfe34"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/util/modDependencies.ts",
+      "sha256": "95fd50574cd551bc2ec5516bf00a9168dd6bac0bd21188d98a56530b67e79137"
+    }
+  ],
+  "validation": {
+    "react": {
+      "cases": 87,
+      "time": "4.6m"
+    },
+    "strict": {
+      "cases": 1,
+      "seconds": 4.3
+    },
+    "vue": {
+      "cases": 3,
+      "seconds": 18.5
+    },
+    "distinctFunctionalCases": 91,
+    "focusedRepeat": {
+      "cases": 9,
+      "seconds": 27.1,
+      "additionalDistinctCases": 0
+    },
+    "unit": {
+      "cases": 627,
+      "files": 71,
+      "seconds": 14.19,
+      "newCases": 7,
+      "existingAdditionalCasesIncluded": 2
+    },
+    "types": "full root check passed, source identical to c6d7430",
+    "lint": "full root lint passed, source identical to c6d7430",
+    "e2eTypes": "56 existing global diagnostics; new35/helper zero",
+    "harnessTests": 9,
+    "sourceDetectorFindings": 0,
+    "axe": {
+      "audits": 107,
+      "violations": 0,
+      "incomplete": 182
+    },
+    "reactPerTestPreservedPngs": 152,
+    "allRetainedPngsIncludingFocusedRepeat": 186,
+    "visualReview": [
+      "info-dark-1200.png",
+      "info-dependencies-light-800.png"
+    ],
+    "precedingCI": {
+      "run": 40504806956,
+      "head": "61f86c75ae896e869eda5ca1008b0a08df5987c7",
+      "conclusion": "success"
+    }
+  },
+  "commands": [
+    "pnpm install --lockfile-only --ignore-scripts --offline; pnpm install --frozen-lockfile --ignore-scripts",
+    "pnpm check",
+    "pnpm lint",
+    "pnpm exec vitest run [explicit selection at c6d7430 in .github/workflows/react-migration.yml]",
+    "LAUNCHER_RENDERER=react pnpm build:renderer; LAUNCHER_RENDERER=react pnpm --prefix=xmcl-electron-app build",
+    "XMCL_E2E_EXECUTABLE=<React package> pnpm --dir e2e exec playwright test specs/react-migration/31-instance-mods.spec.ts specs/react-migration/35-mod-information.spec.ts --reporter=line --output=artifacts/stage5-c6d7430-info",
+    "XMCL_E2E_EXECUTABLE=<React package> pnpm --dir e2e exec playwright test [exact workflow React list,87 cases] --reporter=line --output=artifacts/stage5-c6d7430-react",
+    "XMCL_REACT_CLIENT_HARNESS=1 XMCL_E2E_EXECUTABLE=<React package> pnpm --dir e2e exec playwright test specs/react-migration/04-client-contracts.spec.ts --reporter=line --output=artifacts/stage5-c6d7430-strict",
+    "LAUNCHER_RENDERER=vue pnpm build:renderer; LAUNCHER_RENDERER=vue pnpm --prefix=xmcl-electron-app build",
+    "XMCL_E2E_EXECUTABLE=<Vue package> pnpm --dir e2e exec playwright test specs/react-migration/03-vue-compatibility.spec.ts specs/react-migration/08-vue-onboarding.spec.ts specs/react-migration/33-vue-content-groups.spec.ts --reporter=line --output=artifacts/stage5-c6d7430-vue",
+    "pnpm --dir e2e exec tsc --noEmit (known global diagnostics inspected)",
+    "node --test launcher/scripts/react-migration.test.mjs",
+    "impeccable detect launcher/xmcl-react-ui/src/features/instance --json (source only)",
+    "node launcher/scripts/react-migration.mjs check"
+  ],
+  "packagesAtCapture": [
+    {
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/Grimo Launcher.exe",
+      "sha256": "8511e04a62ecc251c4251efa1b08f4e338aa5491baf004ba19a683b21835373d"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/resources/app.asar",
+      "sha256": "446cf665fceac2e6c726f2c167305f41203b9829c8c9824d6040561ddc285b17"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/Grimo Launcher.exe",
+      "sha256": "2f95339a251cf3d0868345e42ddd98e9ead19e3e1004bb5814972e042f9c7606"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/resources/app.asar",
+      "sha256": "b01210cc92bd4a4df271c0c7692214f9eea63902b7d370319051fe79a6371fd2"
+    }
+  ],
+  "packageAvailability": "Mutable build output paths; hashes identify this capture. Vue dist/default restored, production unchanged.",
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-axe-summary.json",
+      "sha256": "4675d792e9bd316d9cff579b4b5342089d093e3cfcd35a0fed44e7f0164de249"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-e2e-types.log",
+      "sha256": "47efe23f541affc4c8e52d6c3b30ba91a6f17655bbad76807f5212cf42f8e19f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-harness-tests.log",
+      "sha256": "f398fd8a532c7ab869e5a3f98d65980cab4d29567b7a17e3082b55703ea9d400"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/axe-dark-1200.json",
+      "sha256": "6c00822d8eb1d64e726e66ffa16bc669364a88cfbbd5b4427d9da2e97de0d8de"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/axe-dark-800.json",
+      "sha256": "166492b76a3293d378c6176220c6851fc5c0c2143fde0399919c752416a0bf81"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/axe-light-1200.json",
+      "sha256": "4c4bf5a59b553fb5befb46e3970b11b0b94d2890434e8aaeeaa6268fd3bde301"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/axe-light-800.json",
+      "sha256": "ebdf9a939997d028c13d3d2465d86013e7399730c7384108745c6073ac58d631"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/header-dark-1200.png",
+      "sha256": "4965a6cb958f1585e0fb09189f46c257f2a3bf164ad251fb4924848581bfc210"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/header-dark-800.png",
+      "sha256": "c1bfd13b37ca97ff3605ee3b284150dc97aa3bc2df7179d97602e95d4d5690e4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/header-light-1200.png",
+      "sha256": "c7fd47d4ad38716ab5ad1074aae4ac4faadbabb9f76bb0b51913acb8a75cb4cd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/header-light-800.png",
+      "sha256": "f36435f1fc1f3e035fd2db461ce20cbf6f98a74ff8db795bc54d46d3fe4ae4e1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/manifest.json",
+      "sha256": "3f2e5a567d95a497a77bca4a0f94c7bbfc9c8267b903c23499ac2528aa565287"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/mods-dark-1200.png",
+      "sha256": "ba342e5b3680eb3ecbb9310db11a8a3b81480ccf8a2a47089672797c71f16388"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/mods-dark-800.png",
+      "sha256": "138243bc6caee35171682323890c17d46bf9262fd173a29a6b4e4b965a7937d2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/mods-light-1200.png",
+      "sha256": "f35d5a4110cb320e19daacdd12466ae36682be29f2f1feea30abcd3708e894af"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/mods-light-800.png",
+      "sha256": "9a52e7f8db3568c39618b1d6569de8e8ab5b0722ec3b3fb66784d8de4290a159"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/info-axe-dark-1200.json",
+      "sha256": "53114f78e8a0ef105d3c25b7cd3c4c427b534a6c160fd03e17a7da38193fc3bb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/info-axe-dark-800.json",
+      "sha256": "ea74ad83477c37ef2549a9caf53576995d8411c28fe685e97f5dbdcc3a8fc157"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/info-axe-light-1200.json",
+      "sha256": "470ea2776ad3c1f84dce1ab19c9023378d842a9449f24235da41df1825435e4e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/info-axe-light-800.json",
+      "sha256": "e75ede3c32f78a999aeedb962643b8a9ab01114b11eae1cb67d4c941be12db43"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-dark-1200.png",
+      "sha256": "74a686c08972f863a7360be64de3dfbc92754a1b6274c19185e8f017b2457156"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-dark-800.png",
+      "sha256": "3e764d37ea0a966b7fc5b5034d1a7acd3feb58f20f2d568e3a64ae158b4c10c2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-dependencies-dark-1200.png",
+      "sha256": "f5a4818dbed470d2a8de11e96d44c378546c91c06874f593fb5ea51351798a0e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-dependencies-dark-800.png",
+      "sha256": "06b139e348c6a42bdc9b4bf8a0cb31ae061b294d803def64e266fb7e3a5cf597"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-dependencies-light-1200.png",
+      "sha256": "2adb0bc9713323b8c415bde7406b6150a8db830fee8351f96a46fec49be68f51"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-dependencies-light-800.png",
+      "sha256": "595326c137ea0bc8419622a253ce3a7a41c5161009b961ce97faaef5db725382"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-light-1200.png",
+      "sha256": "2adb0bc9713323b8c415bde7406b6150a8db830fee8351f96a46fec49be68f51"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-light-800.png",
+      "sha256": "57de649ad6a9f37f6cb2f23ab8fc951264a520e5697e18f2fc9d767996601ebc"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/manifest.json",
+      "sha256": "ff061e03e2d2c60b0b961716d027b0faa904773d46a2f6fa303b4183d578a1ba"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-info.log",
+      "sha256": "ac22444a4bec070451f802e46376fcc558f3da4da8e62a8038c3347e6848787a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/accessibility.json",
+      "sha256": "72dd5fdf9cfa49d302625ad7b39ba2955ff481e58db113e4cbc6c2e949337470"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/prototype-dark-1200-catalog.png",
+      "sha256": "1622780c7af71e10b0a6e9c43d1110a26e15a4b56539abbac0ff325a648e2209"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/prototype-dark-1200-home.png",
+      "sha256": "7f7dbd50828df05d76fe7efa8c6722cbbfeda0e4b8878203766d5f0c15c2f5db"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/prototype-dark-1200-library.png",
+      "sha256": "8eb895b9cabf319102b886ec768f4ac2c784e97b47286b55477736610a9feda3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/prototype-dark-800-catalog.png",
+      "sha256": "8e578ae5087f3d1cb37225d0331a576775124905e6ef2b0069b48a501405d651"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/prototype-dark-800-home.png",
+      "sha256": "703cc2a3c5f00c8a33310f01ff4d97330335b453c58a6fa5d4adf6040c6b2eaa"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/prototype-dark-800-library.png",
+      "sha256": "836302f5d731ecf8001b5aef93a7e7d7f813670589245c7fc9c0e17a238c9076"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/prototype-light-1200-catalog.png",
+      "sha256": "2f46fffe8c5ecad057c056eec17eff8858873a3cd65f7c609f835343328ca872"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/prototype-light-1200-home.png",
+      "sha256": "31db93b5357f57b73c954668770fdb6fd30ff050ccc019e30701b57373dbcb0e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/prototype-light-1200-library.png",
+      "sha256": "fc006979921ebd6350c37377c7c03fbee168ba1cb80d7c94bd6e392a12a2fb8b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/prototype-light-800-catalog.png",
+      "sha256": "9fe70f0dd4457765d813a7403d7ee99b29b9bcdd43399cbaf5525f93d0ef362e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/prototype-light-800-home.png",
+      "sha256": "f8653758f4b84d610a771660e9db6322be33c1b7f579748546708a5197af0792"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/prototype-light-800-library.png",
+      "sha256": "1cd6210639adde46f6b45643c863576badbb3aa7feb3e7c6fe44521261df26de"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/screenshots/manifest.json",
+      "sha256": "fdfaeb1b211b38710908fec16183f083e0538128e606eea60681c4ca66c45ab1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/screenshots/prototype-dark-1200-catalog.png",
+      "sha256": "1622780c7af71e10b0a6e9c43d1110a26e15a4b56539abbac0ff325a648e2209"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/screenshots/prototype-dark-1200-home.png",
+      "sha256": "7f7dbd50828df05d76fe7efa8c6722cbbfeda0e4b8878203766d5f0c15c2f5db"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/screenshots/prototype-dark-1200-library.png",
+      "sha256": "8eb895b9cabf319102b886ec768f4ac2c784e97b47286b55477736610a9feda3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/screenshots/prototype-dark-800-catalog.png",
+      "sha256": "8e578ae5087f3d1cb37225d0331a576775124905e6ef2b0069b48a501405d651"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/screenshots/prototype-dark-800-home.png",
+      "sha256": "703cc2a3c5f00c8a33310f01ff4d97330335b453c58a6fa5d4adf6040c6b2eaa"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/screenshots/prototype-dark-800-library.png",
+      "sha256": "836302f5d731ecf8001b5aef93a7e7d7f813670589245c7fc9c0e17a238c9076"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/screenshots/prototype-light-1200-catalog.png",
+      "sha256": "2f46fffe8c5ecad057c056eec17eff8858873a3cd65f7c609f835343328ca872"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/screenshots/prototype-light-1200-home.png",
+      "sha256": "31db93b5357f57b73c954668770fdb6fd30ff050ccc019e30701b57373dbcb0e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/screenshots/prototype-light-1200-library.png",
+      "sha256": "fc006979921ebd6350c37377c7c03fbee168ba1cb80d7c94bd6e392a12a2fb8b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/screenshots/prototype-light-800-catalog.png",
+      "sha256": "9fe70f0dd4457765d813a7403d7ee99b29b9bcdd43399cbaf5525f93d0ef362e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/screenshots/prototype-light-800-home.png",
+      "sha256": "f8653758f4b84d610a771660e9db6322be33c1b7f579748546708a5197af0792"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-en/screenshots/prototype-light-800-library.png",
+      "sha256": "1cd6210639adde46f6b45643c863576badbb3aa7feb3e7c6fe44521261df26de"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-babab-ocus-and-actual-video-pause-electron-en/screenshots/manifest.json",
+      "sha256": "4cf42b7bec1419059cac08bc667d133f7bdd29d7b3af87af6472e9750b7a3ef4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-01-prototy-babab-ocus-and-actual-video-pause-electron-en/screenshots/prototype-800-credits.png",
+      "sha256": "dc44f7c6824d7c63219f4bb2e83f8a5d72c5f048dfd80021375745606bf6fb91"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-02-package-ecf1f-d-decodes-its-shipped-video-electron-en/package-smoke.json",
+      "sha256": "7f9f489555761c6192eaf2f00dec5d7fbf09c708319f0328e316c672a0cf93d6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-02-package-ecf1f-d-decodes-its-shipped-video-electron-en/screenshots/manifest.json",
+      "sha256": "294735c5ff57f8ce8e63595edae505bf72abe67ee0ce0c97403714baaa294519"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-02-package-ecf1f-d-decodes-its-shipped-video-electron-en/screenshots/react-package-home.png",
+      "sha256": "ae08d1de9f790e0b53e67e886318610e26b557c24fad4c57d372d3218ed51386"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-02-package-ecf1f-d-decodes-its-shipped-video-electron-en/screenshots/react-package-logger.png",
+      "sha256": "36508e6928ef63e95f21ede38a3e9f6f42fe346668555a4428e8c5b8df2be0a9"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-02-package-ecf1f-d-decodes-its-shipped-video-electron-en/screenshots/react-package-migration.png",
+      "sha256": "60cca24176cfe1bd7e630d654f570b21849ec0b3bd316b2e9c42c2d8455dff4a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-05-prefere-fb385-windows-and-runtime-locales-electron-en/preferences-i18n.json",
+      "sha256": "b47fb38f873fc32fb1e15510fa777b4a484ff521335547ba87b8a32318f373a3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-05-prefere-fb385-windows-and-runtime-locales-electron-en/screenshots/manifest.json",
+      "sha256": "2eeefc3b4cd0cbd97d7148605a5aafdf96f18b940af69fbcdb819e64b3ba2a24"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-05-prefere-fb385-windows-and-runtime-locales-electron-en/screenshots/preferences-minimum-credits.png",
+      "sha256": "b7dc36ea8bee59de518f3c09082499125e9757ca9f8ad2fc2151d4dd9fcd98a8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-05-prefere-fb385-windows-and-runtime-locales-electron-en/screenshots/preferences-minimum-synced.png",
+      "sha256": "7911bbf9af1e33076d3825ca07187216be60a374114dba03fcadb2972aba5649"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-en/accounts-accessibility.json",
+      "sha256": "0619bd97daef203bedef345242709bada27bbf6adced428da32fdb1294fbffa3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-en/accounts.json",
+      "sha256": "52734c150ac2fc6295bb147075c7cbd36571bbbcf77233aea80a515c200de297"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-en/screenshots/accounts-dark-1200.png",
+      "sha256": "be49024fa8b67e16e95a7f3bfd7ea9a225aa739571232ce59a76a8c8315b5f6a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-en/screenshots/accounts-dark-800.png",
+      "sha256": "30baed0c398f949cee2473f64619959b1706555f4e25fabf01c9bebc4966ef32"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-en/screenshots/accounts-light-1200.png",
+      "sha256": "dc995474a31850c67a663d6c64976098a73b1375111771d61d5885702cde4fc2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-en/screenshots/accounts-light-800.png",
+      "sha256": "ad3340908857ab4644fbbe2ec0a9d29c21881f56017a85c3232c0e37c2089eed"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-en/screenshots/accounts-minimum.png",
+      "sha256": "dfc0c03a8cd5d66d089b1d25426cb9a5701fbd99068a63ef6a758428a04ead8d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-en/screenshots/manifest.json",
+      "sha256": "fd2b7dc1a168fe6b3e406879895d0ee50bef7c1f04ec9073df8b8a42a366a9f8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-en/onboarding-accessibility.json",
+      "sha256": "dec035de10b1c80400a153b9370879e8fa84d0419de8c160ad6f5f6deef36926"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-en/onboarding.json",
+      "sha256": "9dfafd8d6db47338f002649ba668d7f5c6758aceb74862282633b25087ef5d3b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-en/screenshots/manifest.json",
+      "sha256": "d875406d9515369185d9e99fb3369e73fcb3e0809011dc9b3bcd26668c6d6314"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-en/screenshots/onboarding-location-dark-1200.png",
+      "sha256": "762a4936d57f39eb44e156e9aa41df717028f967dd799c9f59eb39d2a4575847"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-en/screenshots/onboarding-location-dark-800.png",
+      "sha256": "19c5ea2902d9e0a200e3f6da4b4ca1c10c181ca15b8e6b251fb98a58320a1c06"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-en/screenshots/onboarding-location-light-1200.png",
+      "sha256": "b55725043d42597984115470c6c86aee86e6fe9a2c4097ab3b795243bc6b336d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-en/screenshots/onboarding-location-light-800.png",
+      "sha256": "31d378d7768d7bbcdbed71f9624a32486c8acb029d44d7453be762c21bb0d3d5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-en/screenshots/onboarding-profile-minimum.png",
+      "sha256": "667225403a42c0e88f0e44aadf400031875242ef21bcdd96668c19b8fac31740"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-09-library-187cb-ever-launches-from-browsing-electron-en/library-accessibility.json",
+      "sha256": "53ae065c6abce14e632a55a31e5722bdda479fd75f17eea416c816dcfbee2941"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-09-library-187cb-ever-launches-from-browsing-electron-en/screenshots/library-empty-800.png",
+      "sha256": "e26931054764326b199f8e134d6c6acbb943c27478236fc908b1e662357c8234"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-09-library-187cb-ever-launches-from-browsing-electron-en/screenshots/library-real-dark-1200.png",
+      "sha256": "b028ebaf510cb59375e38d8ea096b06eaa876ebadee56b21bd8f46b2a571b619"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-09-library-187cb-ever-launches-from-browsing-electron-en/screenshots/library-real-dark-800.png",
+      "sha256": "202b9df023746445db30a6b6f908a01933442db4bc0e795d3a365423ee2ee087"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-09-library-187cb-ever-launches-from-browsing-electron-en/screenshots/library-real-light-1200.png",
+      "sha256": "a6ab774f72d1fd79848c95264bb7c3aec2b7da33732de00c145041079f9f9a68"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-09-library-187cb-ever-launches-from-browsing-electron-en/screenshots/library-real-light-800.png",
+      "sha256": "a152e1c61eb9f84af91aca55681462ca84763235ad0d24bde7ec97eee4bc09e4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-09-library-187cb-ever-launches-from-browsing-electron-en/screenshots/manifest.json",
+      "sha256": "5035da9b6f4f9f405a0c2b65ea68b89ec3a3ae639a8fe30940a3bf48d8e76908"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-10-creatio-3c436-s-within-the-minimum-window-electron-en/creation-accessibility.json",
+      "sha256": "ad1000c67e2c33b4a07709f88d1f51ebb2d21888d47f12c5ae1b005e920663f2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-10-creatio-3c436-s-within-the-minimum-window-electron-en/screenshots/create-dark-1200.png",
+      "sha256": "1ede8cd6c344d3f4445727123fb48379ae1dd0cbf6b83530ece729f9b8e0ada2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-10-creatio-3c436-s-within-the-minimum-window-electron-en/screenshots/create-dark-800.png",
+      "sha256": "f68c8178270eb2774d676d07e39d7cae9edbf620453bc8afd50fcfb481e089ec"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-10-creatio-3c436-s-within-the-minimum-window-electron-en/screenshots/create-light-1200.png",
+      "sha256": "7c870e9996a7602ad4bc2fd6ab71e8afd6d60d8906a4e8108e2e2973a4cde578"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-10-creatio-3c436-s-within-the-minimum-window-electron-en/screenshots/create-light-800.png",
+      "sha256": "1f5835b78cba550f642070f488e09c954f6dd10f2a5ad6de8e31d1654a9b156f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-10-creatio-3c436-s-within-the-minimum-window-electron-en/screenshots/manifest.json",
+      "sha256": "b978a6aa82919815edf9a33dc0031e8c600284eb2cb291bcee81a57ae19d0383"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-10-creatio-fddf4-into-the-same-native-folder-electron-en/screenshots/import-native-retained-success.png",
+      "sha256": "dac1f2ec9c796101cdb7e5f67ab5544c26a2e7f963aa01dcdf6499f24aedb933"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-10-creatio-fddf4-into-the-same-native-folder-electron-en/screenshots/manifest.json",
+      "sha256": "04e1c4cb94d0ff73fb4ae347290c7bdcdf660947d80d5992b0a0a6fa84cccb8f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-11-onboard-47c0b-e-and-never-starts-the-game-electron-en/screenshots/manifest.json",
+      "sha256": "cd5f592579b0ed7989103df8007a4e698ee0d82f9a9c140a90a79619a94f58fe"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-11-onboard-47c0b-e-and-never-starts-the-game-electron-en/screenshots/setup-next-create-800.png",
+      "sha256": "8dcbd94a4125084a72c9cbb31e57bd10f55acc73431915c68db4fb53749bb869"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-11-onboard-8badd-t-and-never-starts-the-game-electron-en/screenshots/manifest.json",
+      "sha256": "4333a694c259a0fc348967b45a245209963b411ecb52024c511d35afb495cc5a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-11-onboard-8badd-t-and-never-starts-the-game-electron-en/screenshots/setup-next-import-800.png",
+      "sha256": "ba94bc6346a60b5ea7cbe46eba72d02509778b3c2fa93a691609694d0e9d1187"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-12-launch--7dc1c--launch-before-confirmation-electron-en/java-fallback-accessibility.json",
+      "sha256": "ba77f9f93b0971af7e3a1d34e28f16418e9243b44807ca99a2c962028ed8e5d5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-12-launch--7dc1c--launch-before-confirmation-electron-en/screenshots/java-manual-fallback-800.png",
+      "sha256": "7976495c53866cf36f5500c5ec83ef56fea4fd18325b8a9b61321c874af9326a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-12-launch--7dc1c--launch-before-confirmation-electron-en/screenshots/manifest.json",
+      "sha256": "89a2ffeb6836e65ed1559775d4729156d85884b45170e89a8b3966c62e5c3fbd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-12-launch--e78f5-ut-duplicating-the-instance-electron-en/screenshots/launch-import-recovered.png",
+      "sha256": "5d565eb2f7e93dc28fa4714a50320a9f7d100fa42f632a060f5c95762891f994"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-12-launch--e78f5-ut-duplicating-the-instance-electron-en/screenshots/manifest.json",
+      "sha256": "addcdd3792d13d94e1182dffa19b082f38fc5968471fe18b22cd9850f6ed8a86"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-en/launch-accessibility.json",
+      "sha256": "ec49f189ca70191f905230cd9bc7dbfa6f4a9a58383ed9bf195f438e68925530"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-en/launch-focus-before-interaction.json",
+      "sha256": "0f4a606700229749245ba9881cf1e379eb3d666ee749631595f314f3641d2d3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-en/screenshots/launch-dark-1200.png",
+      "sha256": "a2106dfecdf15cc5dc4ec4eabb13286e2959bd3f13a9e2fa34c4ba6cf591ebe1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-en/screenshots/launch-dark-800.png",
+      "sha256": "482ba22eea377696c72571a4da03e031c8486a666b06154202a9aa4e517356a7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-en/screenshots/launch-light-1200.png",
+      "sha256": "97e89a86d0e0cecedc2a2f48938278c617fbd6b620b05d492e0f004578928058"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-en/screenshots/launch-light-800.png",
+      "sha256": "fdf70eef3323ab864998a576acb539bb49a67b8a53bc7542bae01f90b22c2efd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-en/screenshots/manifest.json",
+      "sha256": "07ea5b43408b640664fdb6596b247300ad142c5fc169b57beb3cbc5429695245"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-13-brandin-3fe98-eeps-existing-launcher-data-electron-en/branding.json",
+      "sha256": "b41753b466a9b24f12e500905ed806329337ea2e2268a33c81d2e851330865ca"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-13-brandin-3fe98-eeps-existing-launcher-data-electron-en/screenshots/grimo-dark-1200.png",
+      "sha256": "de4fb2845bd2393076de8bd9a3b58d38d8bdb806d337a13a9563c5da543a2c32"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-13-brandin-3fe98-eeps-existing-launcher-data-electron-en/screenshots/grimo-dark-800.png",
+      "sha256": "bda8a8c8dcb39f44a0206d2a6af7d9ce9a49b93a7ebb8f6d4f885eb008d6ebb4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-13-brandin-3fe98-eeps-existing-launcher-data-electron-en/screenshots/grimo-light-1200.png",
+      "sha256": "3f5bde20f4a29b9b170a2d0b150dc26747ff3c1c64dee6b756cdad0062c6f337"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-13-brandin-3fe98-eeps-existing-launcher-data-electron-en/screenshots/grimo-light-800.png",
+      "sha256": "179e3f7ea8a4ff43e73e10101de47860cc1fb1a1bb9f91aff96f60616fb2704b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-13-brandin-3fe98-eeps-existing-launcher-data-electron-en/screenshots/manifest.json",
+      "sha256": "6344adcbc8a9e8d4af3326327786c148aea15244e58eb112d3879af3da9eb145"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-13-brandin-f7796--controls-at-minimum-height-electron-en/screenshots/grimo-setup-dark-1200.png",
+      "sha256": "6c3b07b71b1838839996a2118f399d5c103ced623786fc5ad799f30e38476324"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-13-brandin-f7796--controls-at-minimum-height-electron-en/screenshots/grimo-setup-dark-800.png",
+      "sha256": "8d46631090ccc98016f017aab8f35d9b9e3e31cc1eeb6e9cc4272390097a03bb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-13-brandin-f7796--controls-at-minimum-height-electron-en/screenshots/grimo-setup-light-1200.png",
+      "sha256": "eee3ddd0a602d45af5e5f9fb4d0c3898b7d696145190309a43ba08b726d97628"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-13-brandin-f7796--controls-at-minimum-height-electron-en/screenshots/grimo-setup-light-800.png",
+      "sha256": "2e806d65c7b0dd4eb8d9ebbad17957f19d2eaacd96743645dd2b6e73755be95d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-13-brandin-f7796--controls-at-minimum-height-electron-en/screenshots/manifest.json",
+      "sha256": "d143e9b16008c0d1f421bbc7ab5a28d257d8de4d8a980ce557c8adc2006bc5be"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-14-imports-949dd-e-links-without-duplicating-electron-en/imports-accessibility.json",
+      "sha256": "195a9013e451c2c0a1de774057d1dabd848335eae6416089e43a149f25c6f074"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-14-imports-949dd-e-links-without-duplicating-electron-en/screenshots/advanced-dark-1200.png",
+      "sha256": "9439b40e2fb777d29b0ef6699b2fad900f237619f03b6d67d148a9d4f7d9ad58"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-14-imports-949dd-e-links-without-duplicating-electron-en/screenshots/advanced-dark-800.png",
+      "sha256": "098bf46dabb04cea131899c69b3f8c83c3dbb311a25af5a21824a11eac999d53"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-14-imports-949dd-e-links-without-duplicating-electron-en/screenshots/advanced-java-dark.png",
+      "sha256": "29a88fbd538b69eaa6388b74ce5a72dc3ef914ece9e7135a62ab83daaf9f5299"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-14-imports-949dd-e-links-without-duplicating-electron-en/screenshots/advanced-java-light.png",
+      "sha256": "d60a9630b563edf2c367b0e35d8661eabe5ba957df7d24b40ed4089ee9f52314"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-14-imports-949dd-e-links-without-duplicating-electron-en/screenshots/advanced-light-1200.png",
+      "sha256": "2dd81d414c846442a18d92b7a4bb45d569f9a8892f3d53cde7fc8bbc9152895c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-14-imports-949dd-e-links-without-duplicating-electron-en/screenshots/advanced-light-800.png",
+      "sha256": "165a6ef2ebc7ba82670b6dbf3e0ba1b8bed5e66a1c3e08047012586545338da6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-14-imports-949dd-e-links-without-duplicating-electron-en/screenshots/manifest.json",
+      "sha256": "6559d708df95eb84dc389471de475d8d1d0ff6e38b67207656b478d499250cb4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-14-imports-adda2-pendently-and-refuses-links-electron-en/screenshots/folder-reviewed.png",
+      "sha256": "c9a30b66c681960fdcfc954f1ef3ce02ee89ccf0682542a2ae7900bb5bf2c6f7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-14-imports-adda2-pendently-and-refuses-links-electron-en/screenshots/manifest.json",
+      "sha256": "536c6454478bd7db22c8922be801353c5d89a659156a5850d4a2aaed2602abd8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-14-imports-d0769--before-native-confirmation-electron-en/screenshots/https-reviewed.png",
+      "sha256": "fb5e402f5a840d24838da6277e88b4b4303c238e6806e12aaa09e6ca96efa6b8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-14-imports-d0769--before-native-confirmation-electron-en/screenshots/manifest.json",
+      "sha256": "190817295fd465d83596155e305334b7de9c87109dcc6b3a6a5d34dec676bcc1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-15-prism-v-6545e-ve-version-libraries-safely-electron-en/prism-accessibility.json",
+      "sha256": "185cad37da21af47b13cd597f75d67d48b8c8e9e76d55cf3785f487fc270695f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-15-prism-v-6545e-ve-version-libraries-safely-electron-en/screenshots/manifest.json",
+      "sha256": "8306f74006f320977735c8fbdaad6d499c62a867392a655a4af4544ae0783bc7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-15-prism-v-6545e-ve-version-libraries-safely-electron-en/screenshots/prism-reviewed-dark-1200.png",
+      "sha256": "77460bf93f90e665ee236f60b1337d4c4f4650e65fc28aa4d27125c12770ee5c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-15-prism-v-6545e-ve-version-libraries-safely-electron-en/screenshots/prism-reviewed-dark-800.png",
+      "sha256": "b56c21fbfec402930b94dcf51c4b3a305e5b9559f70938fe9b1997b2cae26f28"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-15-prism-v-6545e-ve-version-libraries-safely-electron-en/screenshots/prism-reviewed-light-1200.png",
+      "sha256": "d66d2e6798f5b24f653aa3908a0774220b2631ee1669d091f0a6a636413f17c0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-15-prism-v-6545e-ve-version-libraries-safely-electron-en/screenshots/prism-reviewed-light-800.png",
+      "sha256": "f80379cd9116adac9a5fed40377a1604bbe407f6b0acff312420a5e36e5aff51"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-16-vanilla-986e7--personal-launcher-settings-electron-en/screenshots/manifest.json",
+      "sha256": "a19edad341c4a32870ff0a844508ce2593c735527d67e986ef87566c42ea960c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-16-vanilla-986e7--personal-launcher-settings-electron-en/screenshots/vanilla-dark-1200.png",
+      "sha256": "c6af787bdfc93de0b23ea660df81a97f74ba738bf723d7bf247fdb7366a869cd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-16-vanilla-986e7--personal-launcher-settings-electron-en/screenshots/vanilla-dark-800.png",
+      "sha256": "99fc264a4b4326cec988fecc65f9dc59bd80f853628b014cc24be664ec258a67"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-16-vanilla-986e7--personal-launcher-settings-electron-en/screenshots/vanilla-light-1200.png",
+      "sha256": "63898529f6fefc910f9e09efb60206e2b3be7fe8b5c7a3f83fbb3b060c6d7c86"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-16-vanilla-986e7--personal-launcher-settings-electron-en/screenshots/vanilla-light-800.png",
+      "sha256": "a584690b882f64a55393948491cdc2a9b323c76ce1de2d12d0f044fb1a209129"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-16-vanilla-986e7--personal-launcher-settings-electron-en/vanilla-accessibility.json",
+      "sha256": "4eb3a383fa27d79674033e5f010278794311384d3af129e0b44d235bb6712670"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-17-client--6e73d-e-launch-argument-generator-electron-en/screenshots/manifest.json",
+      "sha256": "31794fabe4e5875978a9b78ac9ec54b04808479cf59ade27fdadcd5fe1c425f6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-17-client--6e73d-e-launch-argument-generator-electron-en/screenshots/prism-client-isolated.png",
+      "sha256": "1bde30ed29455182bdb82eded60df540ed512f1487f623f3d46ab510aba666f8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-17-client--beb16-e-launch-argument-generator-electron-en/screenshots/manifest.json",
+      "sha256": "8391057197ce991ac60f4f2749aeeb8a5c3f1b010d18208713e9fd0d7813579f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-17-client--beb16-e-launch-argument-generator-electron-en/screenshots/vanilla-client-isolated.png",
+      "sha256": "1165abfce30f40d7626ca4ec126284d7f34f293862f1d7e0ee911050919cfbbc"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-18-prism-p-3707a-ith-loader-patches-natively-electron-en/screenshots/manifest.json",
+      "sha256": "8c2c49d8c271e2a2bedeb16fa4809a6f7d81d7d0f1b6951c43c9c693dd522d8d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-18-prism-p-3707a-ith-loader-patches-natively-electron-en/screenshots/prism-partial-managed-800.png",
+      "sha256": "7f8e6ccb2e90cf53b4bcfab4c5bef553da65c967aee5479650825bb421e88ad5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-18-prism-p-61cbf-ith-loader-patches-natively-electron-en/screenshots/manifest.json",
+      "sha256": "4e60fb7135a68e989431d5bf8d76abbe10c2d9767eccaa14e84c199cc7493253"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-18-prism-p-61cbf-ith-loader-patches-natively-electron-en/screenshots/prism-partial-source-800.png",
+      "sha256": "362171184e0bf55bb14057558b1da9cf27e2747f4ee0960c5e795699244c4a13"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-19-library-98b63-folder-after-a-full-restart-electron-en/operations-accessibility.json",
+      "sha256": "9d7b34d34b81fc85ee5bbe4d4a1353667846874d785d6863aae4e0166444768f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-19-library-98b63-folder-after-a-full-restart-electron-en/screenshots/edit-dark-1200.png",
+      "sha256": "e7c056735adf99af8949a78d239e5388c396a3896f61901003295d3dbae55049"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-19-library-98b63-folder-after-a-full-restart-electron-en/screenshots/edit-dark-800.png",
+      "sha256": "663bf77ca51f7542931792857a896d08386fb8158dfb20d9d361d70bbe70181d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-19-library-98b63-folder-after-a-full-restart-electron-en/screenshots/edit-light-1200.png",
+      "sha256": "42aa6db0874b8525678ed24b41f03519feb9f10ff4bfec3a06e4a0ebf6f0e000"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-19-library-98b63-folder-after-a-full-restart-electron-en/screenshots/edit-light-800.png",
+      "sha256": "7028f9470ba601919037a1864136ac23f02e5cdc58e9df6c221f1fbddcf93d28"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-19-library-98b63-folder-after-a-full-restart-electron-en/screenshots/manifest.json",
+      "sha256": "8838f732df964d444354db825232d4e1ccc7f7461b91604a4db5a2d35c443ed2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-20-local-e-45c0f-le-at-both-sizes-and-themes-electron-en/export-accessibility.json",
+      "sha256": "c611bf5eb1b78348a1f873e31626692a04f97a57dd586585c89fe7f71a8661a2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-20-local-e-45c0f-le-at-both-sizes-and-themes-electron-en/screenshots/export-dark-1200.png",
+      "sha256": "38f02d95ab2e6f185c93ed6bedf816c0a4a2abbb18751d4addfa9e753cec5dca"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-20-local-e-45c0f-le-at-both-sizes-and-themes-electron-en/screenshots/export-dark-800.png",
+      "sha256": "990cd6cdb43b17479ced15998e652cd3b834143a8597764f855d05154ed7a150"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-20-local-e-45c0f-le-at-both-sizes-and-themes-electron-en/screenshots/export-light-1200.png",
+      "sha256": "648d63c08616478fecb7affc8481cdfacd7febb7b9a5336adcb21a05037285e3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-20-local-e-45c0f-le-at-both-sizes-and-themes-electron-en/screenshots/export-light-800.png",
+      "sha256": "6824ac9bda700e97f9fea6e1c63a50b9a39f8acd927f72e3c80adc5615b168ba"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-20-local-e-45c0f-le-at-both-sizes-and-themes-electron-en/screenshots/manifest.json",
+      "sha256": "952acded4a3da3cc2c2b168caf49a1f864baa6439605c45c5e506e54eca2257f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-20-local-e-7264c-ding-worlds-unless-selected-electron-en/screenshots/manifest.json",
+      "sha256": "d7cb67ad62949b009f3c48f5e556a95a9e484676a103b184276a183cc9d3af9b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-20-local-e-7264c-ding-worlds-unless-selected-electron-en/screenshots/offline-export-saved.png",
+      "sha256": "2cf6ac9da2c546c245002e13643e7bb7076c4a54926183c5479228395c177f1a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-21-group-m-b0126--or-unknown-edition-members-electron-en/groups-accessibility.json",
+      "sha256": "8d5611c8204f0bb985dd8960aa5596161043b194ecfe9f49eb5387766a2ee843"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-21-group-m-b0126--or-unknown-edition-members-electron-en/screenshots/groups-dark-1200.png",
+      "sha256": "bbd5ddafd5f7c501de4e5a6a479505230d3ceb4a24f03715a5d93660032c0a31"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-21-group-m-b0126--or-unknown-edition-members-electron-en/screenshots/groups-dark-800.png",
+      "sha256": "13448e374029b7ebff5148e1f2a60df434dd3da69d16ce0c40a415d4699ba151"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-21-group-m-b0126--or-unknown-edition-members-electron-en/screenshots/groups-light-1200.png",
+      "sha256": "086865b8f5e6ff599ca94455365a3467bdf12d6bc4025d7ba1676260fbf7ba24"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-21-group-m-b0126--or-unknown-edition-members-electron-en/screenshots/groups-light-800.png",
+      "sha256": "b9e5220b2ef6a9b3024fe9f2b9ef2cf977dcd9a538f12e905781b52947cfebcb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-21-group-m-b0126--or-unknown-edition-members-electron-en/screenshots/manifest.json",
+      "sha256": "5509a56eb9ff2b82640a80e42474fec3f3167ca8cc60c521dbe8d58998fd02d0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-22-copy-re-68334-rting-the-packaged-launcher-electron-en/copy-accessibility.json",
+      "sha256": "e39c14ead208c86aa2f98a681cea9b6057c20033e321f39ab69f703e4213d9e0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-22-copy-re-68334-rting-the-packaged-launcher-electron-en/screenshots/copy-recovery-dark-1200.png",
+      "sha256": "a372dfe84e3f30b795ddf0b5d46947c8b29cdd827448030e7d309d86b8de87dc"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-22-copy-re-68334-rting-the-packaged-launcher-electron-en/screenshots/copy-recovery-dark-800.png",
+      "sha256": "5e443ccd3f2d076747aa4e8c29a9c785691e5838583590b54494a3c4a3ce6fce"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-22-copy-re-68334-rting-the-packaged-launcher-electron-en/screenshots/copy-recovery-light-1200.png",
+      "sha256": "de7d982fd0dc0bac08ae36442975dcc9626ba48ded53349c7e2e1ae27d1a41ca"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-22-copy-re-68334-rting-the-packaged-launcher-electron-en/screenshots/copy-recovery-light-800.png",
+      "sha256": "2067384b6f7e4655ac5311b7e9f965ae5e72054e027a22803fed98d1d65aa8fb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-22-copy-re-68334-rting-the-packaged-launcher-electron-en/screenshots/manifest.json",
+      "sha256": "e133eaf21eee1ca60eab456033d6a6b23845bd7a1cc3475b24ac68700e5347b0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-en/large-library-accessibility.json",
+      "sha256": "0a182ed1b8cb9c0140d76b20ce8e20bccd8ce6956a56e9c4e75cc55d34aa14ce"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-en/screenshots/large-library-dark-grid-1200.png",
+      "sha256": "cbbd4fcaa97a9d884f3c4820281e9c1667d929cf2512f55b0c4f34761602f931"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-en/screenshots/large-library-dark-grid-800.png",
+      "sha256": "691bee55ba4beafcb19334aaf043235999a3187f3eb94d9b0387e98c58f82656"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-en/screenshots/large-library-dark-list-1200.png",
+      "sha256": "0e9bc05ab751dbec22d9eac95526457cd48e67b601746b42518176f4a04e990b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-en/screenshots/large-library-dark-list-800.png",
+      "sha256": "b3567dec34658980d5c5ba2ad560f09f1035d6f351308ec33c6048883fce5ef1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-en/screenshots/large-library-light-grid-1200.png",
+      "sha256": "24134c78be5fd50e96a80afd90339b3edb0048400935bc88f6323ac3276c3cfd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-en/screenshots/large-library-light-grid-800.png",
+      "sha256": "55e699a580d757a69c55249a922f9a363ce7df8223e3280cd41183c4d8297a7d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-en/screenshots/large-library-light-list-1200.png",
+      "sha256": "d3b938c195c4fa7ea923df7033273c6b2a0afda5943954434467afdf86617545"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-en/screenshots/large-library-light-list-800.png",
+      "sha256": "2b5786bd9f4f50dab9b0ac570c1181c4062d3a5fbdba977325292cf314481c53"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-en/screenshots/manifest.json",
+      "sha256": "d5945627bf0b7102a876fd900a00632cd84b957aa1d18405a82835a1fa6328c0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-24-shared--263ba-ublishing-a-partial-archive-electron-en/cancel-export-accessibility.json",
+      "sha256": "fb07a2400e6e484418e58e4cea5141463497e87822cb3dc2a5ddd37593d64dc1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-24-shared--263ba-ublishing-a-partial-archive-electron-en/screenshots/cancel-export-review-800.png",
+      "sha256": "5784cf2f35d6a7a03a3ed1f69f7988aacfb0d44966cccaf11e0b3ff2fefdddf6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-24-shared--263ba-ublishing-a-partial-archive-electron-en/screenshots/manifest.json",
+      "sha256": "7ce471f4831c3c16b906ff44b84fa0a3e89c61083cf32eee18d463e8ff30442c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-24-shared--c1d8a--export-only-reviewed-bytes-electron-en/screenshots/manifest.json",
+      "sha256": "849553a0930004362449412b1fde71f70b2fb86b03204ddf58a4d3a53a7ad85d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-24-shared--c1d8a--export-only-reviewed-bytes-electron-en/screenshots/shared-export-dark-1200.png",
+      "sha256": "b9f512893b1f0c3e48b7b05639843bb8142e4980d72bfacdad1cc6f36eb7f255"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-24-shared--c1d8a--export-only-reviewed-bytes-electron-en/screenshots/shared-export-dark-800.png",
+      "sha256": "cde6aee4407790c384dea716c947596c00227bfbd8e9371b244061ede0939cf5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-24-shared--c1d8a--export-only-reviewed-bytes-electron-en/screenshots/shared-export-light-1200.png",
+      "sha256": "45c2fbddefaa54c93879e68232282ca4700dd355772d586c1ba304673af6ab1a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-24-shared--c1d8a--export-only-reviewed-bytes-electron-en/screenshots/shared-export-light-800.png",
+      "sha256": "7011da0124dfde5ebcc46bd17649c18e1d458da8ec529a9030ed3d69f46ff3e3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-24-shared--c1d8a--export-only-reviewed-bytes-electron-en/shared-accessibility.json",
+      "sha256": "1b004cd9d60b3d711736e09117aa6a1cfa448a2f2306e825b2df36418927f99b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-24-shared--cf04b-fore-any-destination-exists-electron-en/cancel-copy-accessibility.json",
+      "sha256": "f05069e3c1e299fb3635c12a5fc09f53305fbc377d6fe4442c4de364c71e0962"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-24-shared--cf04b-fore-any-destination-exists-electron-en/screenshots/cancel-source-review-800.png",
+      "sha256": "616b6bfa1e68e1d6c0de09dc373c74a5e0169e47919e50876fa7c95453980937"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-24-shared--cf04b-fore-any-destination-exists-electron-en/screenshots/manifest.json",
+      "sha256": "30c3a76eff9f5db044768d39dd77443d1fba0064ebb0b58a32b87496869b9421"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-25-profile-0156d-ther-window-disables-saving-electron-en/screenshots/manifest.json",
+      "sha256": "0a9a07f726fd5b77423985113b8af73c6e55fecca1d73827d6e6dadbaa8c86a5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-25-profile-0156d-ther-window-disables-saving-electron-en/screenshots/profile-missing-file-800.png",
+      "sha256": "7d9e6d977a4299186f1f9c0dcf77871444b032cba45baac01dd7f5a9de4a1e4f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-25-profile-b4fcc--including-packaged-restart-electron-en/profile-appearance-accessibility.json",
+      "sha256": "c7455c6e0e530030f97678fffdc3c1a8867e9e8b8e018ec04821833ed78c97bf"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-25-profile-b4fcc--including-packaged-restart-electron-en/screenshots/manifest.json",
+      "sha256": "7923ae43dc2feeaa402e54bebfee91b64e5faaf985e7348d4268b34ae91fa129"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-25-profile-b4fcc--including-packaged-restart-electron-en/screenshots/profile-appearance-dark-1200.png",
+      "sha256": "bbf014374c0ba1a8ef98a38a8ca79963ca76f6ac059a30a5690eab1beac6a191"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-25-profile-b4fcc--including-packaged-restart-electron-en/screenshots/profile-appearance-dark-800.png",
+      "sha256": "7a343ab68956b1d1d54b9542e957e5d7a49c9a2f5a268468b61042159469e7cf"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-25-profile-b4fcc--including-packaged-restart-electron-en/screenshots/profile-appearance-light-1200.png",
+      "sha256": "5612444ccecf7d90299f2e477b1d5fc76941a2ad52c90f58dd819e323ab8ac2e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-25-profile-b4fcc--including-packaged-restart-electron-en/screenshots/profile-appearance-light-800.png",
+      "sha256": "c7214f9dd20a1d599f3162c539cf4d7a731034499e0dbad47f357ce0163a6578"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-25-profile-b4fcc--including-packaged-restart-electron-en/screenshots/profile-invalid-png.png",
+      "sha256": "975a2dd1c5ebda43b8e8c76e606d7314ac00fceaee373dcfd81175c080dd1e87"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-26-instanc-9eab8-another-window’s-saved-icon-electron-en/screenshots/instance-icon-error-800.png",
+      "sha256": "4143bc26efdebd4dd44888aae227dd277c4a6abce6d54f98c2e5eca5a319870a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-26-instanc-9eab8-another-window’s-saved-icon-electron-en/screenshots/manifest.json",
+      "sha256": "6b89dfd7f1567e970af9175bc118b6fa2450369e8976d1a3ad6b529b8e12fab4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-26-instanc-ea455-iginals-identity-and-worlds-electron-en/instance-icon-accessibility.json",
+      "sha256": "5dcdc74db95397abb77281bccefed664f52a5b13209a77d52327c1fafb99e768"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-26-instanc-ea455-iginals-identity-and-worlds-electron-en/screenshots/instance-icon-dark-1200.png",
+      "sha256": "5492d38ec7297346280c25c04b427c35e6c981c9342be025ebc68c5e7cbc3cfb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-26-instanc-ea455-iginals-identity-and-worlds-electron-en/screenshots/instance-icon-dark-800.png",
+      "sha256": "71207f73cfde6d2f0b63c0fa2a43fbfbcc1db1fe6eeae6f62e4f71415740fcd3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-26-instanc-ea455-iginals-identity-and-worlds-electron-en/screenshots/instance-icon-light-1200.png",
+      "sha256": "fa69048be86341038789fe7199ca04a9e35571e967909ea6d8f1df34b2c1d2a3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-26-instanc-ea455-iginals-identity-and-worlds-electron-en/screenshots/instance-icon-light-800.png",
+      "sha256": "2084b03cf15d2de053496a9bf01740f28ae45b6260d6d55f6a0d30a295db51ec"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-26-instanc-ea455-iginals-identity-and-worlds-electron-en/screenshots/manifest.json",
+      "sha256": "4a96bc54141ea4b45b9d5e97e6c0215f0b9f58584e1f3d0e18c084561be61de8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-27-provide-2a1a8-le-at-both-sizes-and-themes-electron-en/provider-cover-accessibility.json",
+      "sha256": "a29fd9698185898d80ab05da06f3dfdcf6352726677a6f46df0d9463d3d605a0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-27-provide-2a1a8-le-at-both-sizes-and-themes-electron-en/screenshots/manifest.json",
+      "sha256": "04082936a25d916e88cff7835faa2f65fbf1f5478539c4187eddcfc160d0458f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-27-provide-2a1a8-le-at-both-sizes-and-themes-electron-en/screenshots/provider-cover-dark-1200.png",
+      "sha256": "551bfe4a6f3eca53595898c4cdd8b8c33d655d82ad43f9aeee480c38e7764f30"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-27-provide-2a1a8-le-at-both-sizes-and-themes-electron-en/screenshots/provider-cover-dark-800.png",
+      "sha256": "a0e244350f4c816a467922e361abc5e044d5499ca579eb77604b472c296a0432"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-27-provide-2a1a8-le-at-both-sizes-and-themes-electron-en/screenshots/provider-cover-light-1200.png",
+      "sha256": "2c80c0ab090b50d5c4d3485f049231c6f8db1071f6c0e7f53b6e7ab4889d79c9"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-27-provide-2a1a8-le-at-both-sizes-and-themes-electron-en/screenshots/provider-cover-light-800.png",
+      "sha256": "c8f77a94c5f5a01bf166dc14036550b46ee621d52dee744aeb1bec57f10a094f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-28-library-0aea5-replacing-destination-edits-electron-en/legacy-groups-accessibility.json",
+      "sha256": "c1b962257b2a8462759a9623052b00feb100576fd734fcc5f231d7db7d5881df"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-28-library-0aea5-replacing-destination-edits-electron-en/screenshots/legacy-groups-retry-dark-1200.png",
+      "sha256": "5601290741616dd9e9d7b17e940ec9e457b047fe998b535e13c414ac0cd9bc35"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-28-library-0aea5-replacing-destination-edits-electron-en/screenshots/legacy-groups-retry-dark-800.png",
+      "sha256": "99aaa7ba68aa2410929275165ca588c43ad64017eeea72b3b5858ff1eeb34c55"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-28-library-0aea5-replacing-destination-edits-electron-en/screenshots/legacy-groups-retry-light-1200.png",
+      "sha256": "ebfe5625feabf82fcb93e04fd0bfede8fe5816adf366874f17d8d734b09a0290"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-28-library-0aea5-replacing-destination-edits-electron-en/screenshots/legacy-groups-retry-light-800.png",
+      "sha256": "ee0c664d9f0cd1e964da5e523f00d96c7e61d1e56c121dc315d6f624600f26a5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-28-library-0aea5-replacing-destination-edits-electron-en/screenshots/manifest.json",
+      "sha256": "fe2c9e33def2c21ef34d6e15926e3ae187c467cf6985c61fc9b77355df35aaec"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-30-ambient-10b87-nd-old-sources-are-released-electron-en/ambient-decode.json",
+      "sha256": "5e57aa93cb44dfe8b9f7cf16fbac5fd9e385fa0ad3d58ef8a92cae0a745f01b3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/axe-dark-1200.json",
+      "sha256": "66cc904534a65d2ff8e6877353df35d1659d603067930d20a652f3d79467a7a0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/axe-dark-800.json",
+      "sha256": "20cd7339fe1d8f7230c7f674afdfa8240fbab3d5cf5339157edd7dc1293b82f5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/axe-light-1200.json",
+      "sha256": "63898b432325f43d3effc9e3bc5b258de2bb2b9c9a930d17fdd1aded9f5e6cc8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/axe-light-800.json",
+      "sha256": "b5dbb37744629aa6ac4631843eaabf6cacadb527c6de3b2666939792eddf9e4d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/header-dark-1200.png",
+      "sha256": "4965a6cb958f1585e0fb09189f46c257f2a3bf164ad251fb4924848581bfc210"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/header-dark-800.png",
+      "sha256": "c1bfd13b37ca97ff3605ee3b284150dc97aa3bc2df7179d97602e95d4d5690e4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/header-light-1200.png",
+      "sha256": "c7fd47d4ad38716ab5ad1074aae4ac4faadbabb9f76bb0b51913acb8a75cb4cd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/header-light-800.png",
+      "sha256": "f36435f1fc1f3e035fd2db461ce20cbf6f98a74ff8db795bc54d46d3fe4ae4e1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/manifest.json",
+      "sha256": "e7e16c63ae6a8353ba24a52626eaf81ecae542430bbf49ec3d04481aa27b8178"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/mods-dark-1200.png",
+      "sha256": "ba342e5b3680eb3ecbb9310db11a8a3b81480ccf8a2a47089672797c71f16388"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/mods-dark-800.png",
+      "sha256": "138243bc6caee35171682323890c17d46bf9262fd173a29a6b4e4b965a7937d2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/mods-light-1200.png",
+      "sha256": "f35d5a4110cb320e19daacdd12466ae36682be29f2f1feea30abcd3708e894af"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-31-instanc-96c28-on-without-mixing-instances-electron-en/screenshots/mods-light-800.png",
+      "sha256": "9a52e7f8db3568c39618b1d6569de8e8ab5b0722ec3b3fb66784d8de4290a159"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-32-content-86a24-s-color-or-unknown-metadata-electron-en/groups-axe-dark-1200.json",
+      "sha256": "e9a8a41af426e52bb23d134474534f3834cf9aece9d5acceb9ab2b8248d55f7f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-32-content-86a24-s-color-or-unknown-metadata-electron-en/groups-axe-dark-800.json",
+      "sha256": "f003f65cbc54e20e308f15a30a344dec6764ee0b5851715a3682ea8d66bc1bfa"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-32-content-86a24-s-color-or-unknown-metadata-electron-en/groups-axe-light-1200.json",
+      "sha256": "ea65702e7d42d50fd0574777cb8ff00870908647b0da203d7d9e58dd85e4392b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-32-content-86a24-s-color-or-unknown-metadata-electron-en/groups-axe-light-800.json",
+      "sha256": "d625d494cc6f7e9060cbc517313018b8a122774bc708cb8fb2f6076e680e4223"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-32-content-86a24-s-color-or-unknown-metadata-electron-en/screenshots/groups-dark-1200.png",
+      "sha256": "87c5b0ff42ce35523dae931324380e4c7604f244dcc846bf754bc14ef27bf56b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-32-content-86a24-s-color-or-unknown-metadata-electron-en/screenshots/groups-dark-800.png",
+      "sha256": "95dc6fd5eec1f5f12551a517c8293f2c01641fc170017aa3e380fb08f2949721"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-32-content-86a24-s-color-or-unknown-metadata-electron-en/screenshots/groups-light-1200.png",
+      "sha256": "c704a90666ffa551762991519bbe468e3c44917bb8d5f84dec9d768b4e5b81d2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-32-content-86a24-s-color-or-unknown-metadata-electron-en/screenshots/groups-light-800.png",
+      "sha256": "6c2cdfda2dbe76a1dab75226288be515130c028d8ed617006bd2be8e76a1509b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-32-content-86a24-s-color-or-unknown-metadata-electron-en/screenshots/groups-top-dark-1200.png",
+      "sha256": "87c5b0ff42ce35523dae931324380e4c7604f244dcc846bf754bc14ef27bf56b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-32-content-86a24-s-color-or-unknown-metadata-electron-en/screenshots/groups-top-dark-800.png",
+      "sha256": "642d51e8bc54a32321564c2ef65cd3c557b8532ee0d79804d18e1ea3c0e7428f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-32-content-86a24-s-color-or-unknown-metadata-electron-en/screenshots/groups-top-light-1200.png",
+      "sha256": "c704a90666ffa551762991519bbe468e3c44917bb8d5f84dec9d768b4e5b81d2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-32-content-86a24-s-color-or-unknown-metadata-electron-en/screenshots/groups-top-light-800.png",
+      "sha256": "6476f0ec3077764e7bbe26dbead5476a8b09ccf97a84c21d5386709c02101f0b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-32-content-86a24-s-color-or-unknown-metadata-electron-en/screenshots/manifest.json",
+      "sha256": "40d6fdbd1d97506dc968195506073e416a948077b634e5307b53900e46eacba0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-34-local-m-1a23a--keyboard-actions-reachable-electron-en/remove-axe-dark-1200.json",
+      "sha256": "81e8e4c1a942139070807ec243b859db511f12ed67c091d89fb93d8e1babdb4c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-34-local-m-1a23a--keyboard-actions-reachable-electron-en/remove-axe-dark-800.json",
+      "sha256": "bc3f3d601ececca220ebfcf9df77ed4150ab69f4b048a177582794fca478ee15"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-34-local-m-1a23a--keyboard-actions-reachable-electron-en/remove-axe-light-1200.json",
+      "sha256": "107398398f160b801732d19a8c51a71101127dccf8e0b77137adf77817c93dbf"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-34-local-m-1a23a--keyboard-actions-reachable-electron-en/remove-axe-light-800.json",
+      "sha256": "4e0691fa81aed1e0803206e9e8653bae6c3df3a06dbb9d03fc3c90957facc256"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-34-local-m-1a23a--keyboard-actions-reachable-electron-en/screenshots/manifest.json",
+      "sha256": "e096c8cd21f326574b211538f6aad0bd17c23865a392bf231b14e99c6b8af4a7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-34-local-m-1a23a--keyboard-actions-reachable-electron-en/screenshots/remove-dark-1200.png",
+      "sha256": "417c40291bc7328c7edd412f647c49073cbd341af02e0b35e38a29718ecc5d99"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-34-local-m-1a23a--keyboard-actions-reachable-electron-en/screenshots/remove-dark-800.png",
+      "sha256": "edc85b11a87d2b1eb8746175c04736b5f26f20d2f0be149e6ef88c3481e4be66"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-34-local-m-1a23a--keyboard-actions-reachable-electron-en/screenshots/remove-light-1200.png",
+      "sha256": "2f0acc37960d94c9aae9927acbe04ea39b7d51b43198788935f7f82b1003f779"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-34-local-m-1a23a--keyboard-actions-reachable-electron-en/screenshots/remove-light-800.png",
+      "sha256": "bd52b29c03a71135ba1dc5485b48d0c1f1f53fac1c0ba5471b5633e6c0d264ba"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/info-axe-dark-1200.json",
+      "sha256": "4621808af05eef37f08df48bb3affa97e2bcb6d0918ef67c83c481cf0d1099be"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/info-axe-dark-800.json",
+      "sha256": "981b63f5b928e61bfbfc6d6f361a9c78f22c1121ecb5d6fd29c8c9612c69c6d6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/info-axe-light-1200.json",
+      "sha256": "7f94dd8d6a240ad9d5b14a06fbc40d04f701970eaff54c53e2d34f09cd8ce16c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/info-axe-light-800.json",
+      "sha256": "09e941cf56304fb5e935e6080065ccb769c533e98b7255f11fa0c97c6be1ea36"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-dark-1200.png",
+      "sha256": "f749b1c9192b35e27a2cf9cf12dd6701897ab4ff4f612f22ddcb81dd6e467a96"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-dark-800.png",
+      "sha256": "3e764d37ea0a966b7fc5b5034d1a7acd3feb58f20f2d568e3a64ae158b4c10c2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-dependencies-dark-1200.png",
+      "sha256": "6a07f7a4c34581dcab3be9a8382c389d3a0064b86a6097ad87905c014bc06662"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-dependencies-dark-800.png",
+      "sha256": "06b139e348c6a42bdc9b4bf8a0cb31ae061b294d803def64e266fb7e3a5cf597"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-dependencies-light-1200.png",
+      "sha256": "a9894f0c1c673b583df40bf7dbe986bece402c0c7af0cd4a8d68e61752661af0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-dependencies-light-800.png",
+      "sha256": "595326c137ea0bc8419622a253ce3a7a41c5161009b961ce97faaef5db725382"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-light-1200.png",
+      "sha256": "a9894f0c1c673b583df40bf7dbe986bece402c0c7af0cd4a8d68e61752661af0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/info-light-800.png",
+      "sha256": "57de649ad6a9f37f6cb2f23ab8fc951264a520e5697e18f2fc9d767996601ebc"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react/react-migration-35-mod-inf-1b0a2-oth-themes-and-window-sizes-electron-en/screenshots/manifest.json",
+      "sha256": "53e1062ff549a4ab0282e3ff5bbd64e1b1f879c194aa15ccd7d875226978c9fa"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-react.log",
+      "sha256": "db0e9025f4fd640111dd3e13ef389636ca7e2f89c33cb2e9ac25a359add462ee"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-strict/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-strict/react-migration-04-client--bbc79--and-releases-all-consumers-electron-en/client-contracts.json",
+      "sha256": "95f93e0be1f7594c7e08435db0cb6ee691c5709e6b7fdc9939918582981294d5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-strict/react-migration-04-client--bbc79--and-releases-all-consumers-electron-en/screenshots/client-native-shared-state.png",
+      "sha256": "a492d722a73e8824285adb7209e5caf62c6cf4386479261d9668a90cf365950c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-strict/react-migration-04-client--bbc79--and-releases-all-consumers-electron-en/screenshots/manifest.json",
+      "sha256": "558e83fdf94411d711ca6356668b229cdd7b1e0e2c49642e519c8203ea9f2682"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-strict.log",
+      "sha256": "f7ddf9ce996f322e205367351092d4a456898c5b92b4a94cdf8738efd6696356"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-units.log",
+      "sha256": "953a8b6c5e922505e7bc2fb365c0fd418381696bd0259e968becf9fdfe560cbb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-vue/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-vue/react-migration-03-vue-com-b7f6c-ing-instance-launcher-shell-electron-en/screenshots/manifest.json",
+      "sha256": "b5774f0234db88320f26253e22a846ff861231a8142ee196225438fa30163cfd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-vue/react-migration-03-vue-com-b7f6c-ing-instance-launcher-shell-electron-en/screenshots/vue-default-existing.png",
+      "sha256": "b3580e91a7e0e882844b715417c21ee1f94c2e2c400ad3a7a90802db45f6df5e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-vue/react-migration-08-vue-onb-68c25-alidated-bootstrap-contract-electron-en/screenshots/01-locale.png",
+      "sha256": "03b7285917626bed1cb528572ffa62fe72cce6d96ac4288b8cdc433069a8e2dd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-vue/react-migration-08-vue-onb-68c25-alidated-bootstrap-contract-electron-en/screenshots/02-account.png",
+      "sha256": "eced1bf202dbd7890230f847dcfb704c948bb14cc49dfe20e6ff621071a96bd4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-vue/react-migration-08-vue-onb-68c25-alidated-bootstrap-contract-electron-en/screenshots/03-ready.png",
+      "sha256": "a9be1d7ad526d1f79d9e902c24266c7b7969caa86717f8bf139548e80037b1f0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-vue/react-migration-08-vue-onb-68c25-alidated-bootstrap-contract-electron-en/screenshots/04-library.png",
+      "sha256": "4378f77537ef8ad812e22a60759975b8bc5bf99882042a52cb5a73ab7d731a9b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-vue/react-migration-08-vue-onb-68c25-alidated-bootstrap-contract-electron-en/screenshots/manifest.json",
+      "sha256": "4689db60e55bd40fece8c2a974629788cf2458fc34ac48273bb195f748907d16"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-vue-package.log",
+      "sha256": "a3f0c1d6530b03bce9f9701729a8980becc1f44fafc85753e1ab752c9d826b04"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-vue-renderer.log",
+      "sha256": "5858622d232f91ffbc2e8125ed597d0b0b7af11866021b837304d57fba05b860"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-c6d7430-vue.log",
+      "sha256": "d71444d3bbbcc217eb2cbbed416a4f17a97b13f54ce3efb1b12195e2e9dae3fb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-info-all-units.log",
+      "sha256": "c7b53bfdf3ed19c9320c337d58b3bfd37f1462e5cb3be2bb9b154dd9c7988c91"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-info-detector.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-info-detector2.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-info-e2e-types.log",
+      "sha256": "47efe23f541affc4c8e52d6c3b30ba91a6f17655bbad76807f5212cf42f8e19f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-info-focused-lint.log",
+      "sha256": "bc8028115758ee7bfe266503b3ab29be4e89b0370066293aba9d5f0db600b627"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-info-lint2.log",
+      "sha256": "6b5bb5a65fa9649ac78d9b2d10b5980253014920cbc7c291ae126732713ec771"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-info-package.log",
+      "sha256": "49123c4881a81b1f4e2956fcd24bd3287bba988c94245358f1f1d776269f331e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-info-react-types.log",
+      "sha256": "4557d02f7167afb44b2ece869d71a623b9814669eaafccc32c240e8a3adee567"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-info-react-types2.log",
+      "sha256": "40321be0ab5751332cbea62c88bfc37bc7e57a0f0fd4a68ee0f966b88f9fa150"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-info-react-types3.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-info-react-types4.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-info-renderer.log",
+      "sha256": "51cffa1dc4f2eca2598888e0f8fa5fd42515871bed2f417661d9ab3e2337e831"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-info-types.log",
+      "sha256": "ab318146ed8a416da2e8121ccb6036ad0aaae9d3742663e75b81bdf49d08acdc"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-info-types2.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-model-api-types.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-model-frozen-install.log",
+      "sha256": "eac2b1e8f6cdf70ef8153a7e8804c2ba4b8f2dd737f840efa81dfc11ec5d140a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-model-install.log",
+      "sha256": "cfb1b18a575356d2f8f590c0818d30f162e22fef777772aa4198405dcf714967"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-model-lock.log",
+      "sha256": "21cc8a68306efff184861a26ccf2a5642c0a3e1fb9fe559a29d629ff1fc3d162"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-model-units.log",
+      "sha256": "cae1d4e519d5131f4c4766c52278963d64599a6b322fc21fe4e0f15c6e11fca6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-model-units2.log",
+      "sha256": "03fa53cf07da273fb6ab33adc78d6aefa44659dc511f16ce93a13c0fcf42c433"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-model-units3.log",
+      "sha256": "c41a91be0a6361351df62c5a6757fcdfaecf5580547d29732f6642a9c7d1f6a1"
+    }
+  ],
+  "preparationCorrections": [
+    "Offline install initially lacked an already-pinned tarball; frozen online install completed. Lockfile diff contains only3 lines adding existing internal workspace semver link, no third-party version update.",
+    "A new test incorrectly expected maybe for invalid semantic input; it now records existing false behavior and separately checks unknown(empty range). Production predicate was not changed.",
+    "Fixture type checks required the complete existing File fields and RuntimeVersionsSchema defaults; fixed fixtures instead of weakening compiler settings. React uses existing ResourceState element type for its private clone, no direct undeclared resource dependency."
+  ],
+  "limits": [
+    "All stage5 gates/K08 remain pending; declared dependency information is not the full compatibility diagnostic/update workflow.",
+    "Copied legacy algorithms intentionally retained, including known parser limitations. The current getModDependencies helper enumerates Fabric/Forge/NeoForge; do not claim complete Quilt/LiteLoader dependency diagnostics from this panel.",
+    "The panel does not activate metadata links or render HTML. Text rendering tested with an HTML/event-handler description. This is not the final whole-app security audit.",
+    "No service/file mutation introduced by information reads; normalization uses a private copy of the frozen native snapshot. Legacy Vue wrappers retain raw objects/arrays and matching JSON data.",
+    "Axe incomplete/manual AA review, final security/bootstrap audit, remaining stages6–9, actual Minecraft/Java/NSIS/delta and calibrated performance of the final release remain pending.",
+    "No new calibrated performance measurement; new panel is read-only with keyboard-scrollable description. Microsoft deferred; no credentials or DevTools/CDP access used."
+  ]
+}
