@@ -1763,6 +1763,9 @@ importers:
       '@xmcl/resourcepack':
         specifier: workspace:*
         version: link:../packages/resourcepack
+      '@xmcl/semver':
+        specifier: workspace:*
+        version: link:../packages/semver
       '@xmcl/system':
         specifier: workspace:*
         version: link:../packages/system

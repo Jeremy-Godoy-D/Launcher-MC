@@ -12,6 +12,7 @@ import { ContentGroupsEditor } from './ContentGroupsEditor'
 import { assignContentGroup, contentGroupMemberships } from './contentGroups'
 import { normalizeModFileName } from '@xmcl/runtime-api/src/services/InstanceModsGroupService'
 import { RemoveModsDialog, type ReviewedMod } from './RemoveModsDialog'
+import { ModDetails } from './ModDetails'
 
 export function InstanceMods({ path, runtime, running }: { path: string; runtime: SavedInstance['runtime']; running: boolean }) {
   const { t } = useI18n(), service = useService(InstanceModsServiceKey), processes = useService(LaunchServiceKey)
@@ -29,6 +30,8 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
   const [query, setQuery] = useState(''), [filter, setFilter] = useState('all'), [selected, setSelected] = useState<string[]>([])
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('')
   const [removing, setRemoving] = useState<ReviewedMod[] | null>(null)
+  const [detailsPath, setDetailsPath] = useState('')
+  const detailsTrigger = useRef<HTMLButtonElement | null>(null)
   const removeButton = useRef<HTMLButtonElement>(null)
   const active = useRef(true), pending = useRef(false)
   useEffect(() => { active.current = true; return () => { active.current = false } }, [])
@@ -37,6 +40,9 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
   const fileGroups = (file: typeof files[number]) => memberships.get(normalizeModFileName(file.fileName)) || []
   const matches = files.filter(file => `${file.name} ${file.fileName}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()) && (filter === 'all' || file.fileName.endsWith('.disabled') === (filter === 'disabled')) && (!groupReady || groupFilter === 'all' || (groupFilter === 'none' ? !fileGroups(file).length : fileGroups(file).includes(groupFilter.slice(5)))))
   const selection = files.filter(file => selected.includes(file.path))
+  const detailsFile = files.find(file => file.path === detailsPath)
+  useEffect(() => { if (snapshot.status === 'ready' && detailsPath && !detailsFile) closeDetails() }, [snapshot, detailsPath])
+  function closeDetails() { setDetailsPath(''); (detailsTrigger.current?.isConnected ? detailsTrigger.current : searchInput.current)?.focus() }
   async function run(action: () => Promise<unknown>, mutating = false) {
     if (pending.current) return
     pending.current = true; setBusy(true); setError(''); setNotice('')
@@ -76,13 +82,14 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
         } else return false
       }, true)}><Plus size={16} aria-hidden="true" />{t('react.content.add')}</button>
       <button className="button secondary" disabled={busy} onClick={() => void run(() => service.showDirectory(path))}><FolderOpen size={16} aria-hidden="true" />{t('react.content.folder')}</button>
-      <button ref={manageGroups} className="button secondary" disabled={busy || !groupReady} aria-expanded={editingGroups} onClick={() => setEditingGroups(true)}>{t('react.contentGroups.manage')}</button>
+      <button ref={manageGroups} className="button secondary" disabled={busy || !groupReady} aria-expanded={editingGroups} onClick={() => { setDetailsPath(''); setEditingGroups(true) }}>{t('react.contentGroups.manage')}</button>
       <button className="button secondary" disabled={busy} onClick={() => void run(async () => { await store.revalidate(); await grouping.refresh() })}><RefreshCw size={16} aria-hidden="true" />{t('react.content.refresh')}</button>
     </div></div>
     {grouping.migrating && <p role="status">{t('react.contentGroups.migrating')}</p>}
     {grouping.migrationError && <p role="alert" className="form-error">{t('react.contentGroups.migrationFailed')} <button className="button secondary" disabled={busy || grouping.migrating} onClick={() => void grouping.migrate()}>{t('react.contentGroups.retryMigration')}</button></p>}
     {(grouping.status === 'error' || grouping.data?.error) && <p role="alert" className="form-error">{t(grouping.data?.error === 'write' ? 'react.contentGroups.failed' : grouping.data?.error === 'changed' ? 'react.contentGroups.changed' : 'react.contentGroups.readFailed')}</p>}
     {editingGroups && <ContentGroupsEditor grouping={grouping} close={() => { setEditingGroups(false); (manageGroups.current?.disabled ? searchInput.current : manageGroups.current)?.focus() }} />}
+    {detailsFile && <ModDetails key={detailsFile.path} file={detailsFile} runtime={runtime} close={closeDetails} />}
     <div className="content-filters">
       <label className="search"><Search size={16} aria-hidden="true" /><input ref={searchInput} aria-label={t('react.content.search')} placeholder={t('react.content.search')} value={query} onChange={event => setQuery(event.target.value)} /></label>
       <select aria-label={t('react.content.filter')} value={filter} onChange={event => setFilter(event.target.value)}><option value="all">{t('react.content.all')}</option><option value="enabled">{t('react.content.enabled')}</option><option value="disabled">{t('react.content.disabled')}</option></select>
@@ -112,7 +119,7 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
       const disabled = file.fileName.endsWith('.disabled')
       return <li key={file.path} data-file-name={file.fileName}>
         <input type="checkbox" aria-label={t('react.content.select', { name: file.name || file.fileName })} checked={selected.includes(file.path)} disabled={busy} onChange={event => setSelected(value => event.target.checked ? [...value, file.path] : value.filter(path => path !== file.path))} />
-        <div className="content-file"><strong>{file.name || file.fileName}</strong><span>{file.fileName}{file.resourceVersion && ` · ${file.resourceVersion}`}</span><small>{file.metadata.modrinth ? 'Modrinth' : file.metadata.curseforge ? 'CurseForge' : t('react.content.local')}</small>{!!fileGroups(file).length && <div className="content-group-labels">{fileGroups(file).map(name => <span className="content-group-label" key={name}><span className="content-group-dot" aria-hidden="true" style={{ backgroundColor: /^#[0-9a-f]{6}$/i.test(groups[name].color) ? groups[name].color : 'var(--accent)' }} />{name}</span>)}</div>}</div>
+        <div className="content-file"><button className="content-file-name" aria-label={t('react.modInfo.open', { name: file.name || file.fileName })} aria-expanded={detailsPath === file.path} onClick={event => { detailsTrigger.current = event.currentTarget; if (detailsPath === file.path) closeDetails(); else { setEditingGroups(false); setDetailsPath(file.path) } }}>{file.name || file.fileName}</button><span>{file.fileName}{file.resourceVersion && ` · ${file.resourceVersion}`}</span><small>{file.metadata.modrinth ? 'Modrinth' : file.metadata.curseforge ? 'CurseForge' : t('react.content.local')}</small>{!!fileGroups(file).length && <div className="content-group-labels">{fileGroups(file).map(name => <span className="content-group-label" key={name}><span className="content-group-dot" aria-hidden="true" style={{ backgroundColor: /^#[0-9a-f]{6}$/i.test(groups[name].color) ? groups[name].color : 'var(--accent)' }} />{name}</span>)}</div>}</div>
         <span className="content-state">{t(disabled ? 'react.content.disabled' : 'react.content.enabled')}</span>
         <button className="button secondary" aria-label={t(disabled ? 'react.content.enableName' : 'react.content.disableName', { name: file.name || file.fileName })} disabled={busy || running || snapshot.status !== 'ready'} onClick={() => toggle([file], disabled)}>{t(disabled ? 'react.content.enable' : 'react.content.disable')}</button>
       </li>

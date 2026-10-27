@@ -1,3 +1,4 @@
+import type { ProjectFile } from '@xmcl/runtime-api/src/util/mod'
 import { Mod } from '@xmcl/curseforge'
 import { SearchResultHit } from '@xmcl/modrinth'
 import { ResourceSourceCurseforge, ResourceSourceModrinth } from '@xmcl/resource'
@@ -52,11 +53,4 @@ export interface ProjectEntry<T extends ProjectFile = ProjectFile> {
   files?: T[]
 }
 
-export interface ProjectFile {
-  path: string
-  version: string
-  mtime: number
-  enabled: boolean
-  modrinth?: ResourceSourceModrinth
-  curseforge?: ResourceSourceCurseforge
-}
+export type { ProjectFile } from '@xmcl/runtime-api/src/util/mod'
