@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { FolderOpen, RefreshCw, Search } from 'lucide-react'
 import { ResourceState } from '@xmcl/runtime-api/src/entities/resource'
 import { InstanceModsServiceKey, getInstanceModStateKey } from '@xmcl/runtime-api/src/services/InstanceModsService'
@@ -7,9 +7,22 @@ import { useService, useSharedStateStore } from '../../runtime'
 import { useI18n } from '../../i18n'
 import type { SavedInstance } from '../library/model'
 import { modIdentity } from './modIdentity'
+import { useContentGroups } from './useContentGroups'
+import { ContentGroupsEditor } from './ContentGroupsEditor'
+import { assignContentGroup, contentGroupMemberships } from './contentGroups'
+import { normalizeModFileName } from '@xmcl/runtime-api/src/services/InstanceModsGroupService'
 
 export function InstanceMods({ path, runtime, running }: { path: string; runtime: SavedInstance['runtime']; running: boolean }) {
   const { t } = useI18n(), service = useService(InstanceModsServiceKey), processes = useService(LaunchServiceKey)
+  const grouping = useContentGroups(path)
+  const [groupFilter, setGroupFilter] = useState('all'), [assignTo, setAssignTo] = useState(''), [editingGroups, setEditingGroups] = useState(false)
+  const manageGroups = useRef<HTMLButtonElement>(null), searchInput = useRef<HTMLInputElement>(null)
+  const groups = grouping.data?.groups || {}, groupReady = grouping.status === 'ready' && !grouping.data?.error && !grouping.migrating
+  useEffect(() => {
+    if (grouping.status !== 'ready') return
+    if (groupFilter.startsWith('name:') && !Object.hasOwn(groups, groupFilter.slice(5))) setGroupFilter('all')
+    if (assignTo.startsWith('name:') && !Object.hasOwn(groups, assignTo.slice(5))) setAssignTo('')
+  }, [grouping.data, groupFilter, assignTo])
   const store = useSharedStateStore({ key: getInstanceModStateKey(path), Type: ResourceState, load: client => client.service(InstanceModsServiceKey).watch(path) })
   const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
   const [query, setQuery] = useState(''), [filter, setFilter] = useState('all'), [selected, setSelected] = useState<string[]>([])
@@ -17,7 +30,9 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
   const active = useRef(true), pending = useRef(false)
   useEffect(() => { active.current = true; return () => { active.current = false } }, [])
   const files = (snapshot.data?.files || []).map(file => { const identity = modIdentity(file, runtime); return { ...file, name: identity.name, resourceVersion: identity.version } })
-  const matches = files.filter(file => `${file.name} ${file.fileName}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()) && (filter === 'all' || file.fileName.endsWith('.disabled') === (filter === 'disabled')))
+  const memberships = useMemo(() => contentGroupMemberships(groups), [grouping.data?.groups])
+  const fileGroups = (file: typeof files[number]) => memberships.get(normalizeModFileName(file.fileName)) || []
+  const matches = files.filter(file => `${file.name} ${file.fileName}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()) && (filter === 'all' || file.fileName.endsWith('.disabled') === (filter === 'disabled')) && (!groupReady || groupFilter === 'all' || (groupFilter === 'none' ? !fileGroups(file).length : fileGroups(file).includes(groupFilter.slice(5)))))
   const selection = files.filter(file => selected.includes(file.path))
   async function run(action: () => Promise<unknown>, mutating = false) {
     if (pending.current) return
@@ -45,11 +60,17 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
   return <section aria-labelledby="instance-mods-title" data-testid="instance-mods" data-instance-path={path} aria-busy={busy || snapshot.status === 'loading'}>
     <div className="section-heading"><h2 id="instance-mods-title">{t('react.workspace.mods')}</h2><div className="content-actions">
       <button className="button secondary" disabled={busy} onClick={() => void run(() => service.showDirectory(path))}><FolderOpen size={16} aria-hidden="true" />{t('react.content.folder')}</button>
-      <button className="button secondary" disabled={busy} onClick={() => void run(() => store.revalidate())}><RefreshCw size={16} aria-hidden="true" />{t('react.content.refresh')}</button>
+      <button ref={manageGroups} className="button secondary" disabled={busy || !groupReady} aria-expanded={editingGroups} onClick={() => setEditingGroups(true)}>{t('react.contentGroups.manage')}</button>
+      <button className="button secondary" disabled={busy} onClick={() => void run(async () => { await store.revalidate(); await grouping.refresh() })}><RefreshCw size={16} aria-hidden="true" />{t('react.content.refresh')}</button>
     </div></div>
+    {grouping.migrating && <p role="status">{t('react.contentGroups.migrating')}</p>}
+    {grouping.migrationError && <p role="alert" className="form-error">{t('react.contentGroups.migrationFailed')} <button className="button secondary" disabled={busy || grouping.migrating} onClick={() => void grouping.migrate()}>{t('react.contentGroups.retryMigration')}</button></p>}
+    {(grouping.status === 'error' || grouping.data?.error) && <p role="alert" className="form-error">{t(grouping.data?.error === 'write' ? 'react.contentGroups.failed' : grouping.data?.error === 'changed' ? 'react.contentGroups.changed' : 'react.contentGroups.readFailed')}</p>}
+    {editingGroups && <ContentGroupsEditor grouping={grouping} close={() => { setEditingGroups(false); (manageGroups.current?.disabled ? searchInput.current : manageGroups.current)?.focus() }} />}
     <div className="content-filters">
-      <label className="search"><Search size={16} aria-hidden="true" /><input aria-label={t('react.content.search')} placeholder={t('react.content.search')} value={query} onChange={event => setQuery(event.target.value)} /></label>
+      <label className="search"><Search size={16} aria-hidden="true" /><input ref={searchInput} aria-label={t('react.content.search')} placeholder={t('react.content.search')} value={query} onChange={event => setQuery(event.target.value)} /></label>
       <select aria-label={t('react.content.filter')} value={filter} onChange={event => setFilter(event.target.value)}><option value="all">{t('react.content.all')}</option><option value="enabled">{t('react.content.enabled')}</option><option value="disabled">{t('react.content.disabled')}</option></select>
+      <select aria-label={t('react.contentGroups.filter')} value={groupFilter} disabled={!groupReady} onChange={event => setGroupFilter(event.target.value)}><option value="all">{t('react.contentGroups.all')}</option><option value="none">{t('react.contentGroups.none')}</option>{Object.keys(groups).map(name => <option key={name} value={`name:${name}`}>{name}</option>)}</select>
     </div>
     {snapshot.status === 'loading' && <p role="status">{t('react.content.loading')}</p>}
     {snapshot.status === 'error' && <p role="alert" className="form-error">{t('react.content.loadFailed')}</p>}
@@ -60,6 +81,12 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
     {!!selection.length && <div className="content-selection" role="group" aria-label={t('react.content.selection')}><span>{t('react.content.selected', { count: selection.length })}</span>
       <button className="button secondary" disabled={busy || running || snapshot.status !== 'ready' || !selection.some(file => file.fileName.endsWith('.disabled'))} onClick={() => toggle(selection, true)}>{t('react.content.enable')}</button>
       <button className="button secondary" disabled={busy || running || snapshot.status !== 'ready' || !selection.some(file => !file.fileName.endsWith('.disabled'))} onClick={() => toggle(selection, false)}>{t('react.content.disable')}</button>
+      <select aria-label={t('react.contentGroups.assignment')} disabled={busy || !groupReady} value={assignTo} onChange={event => setAssignTo(event.target.value)}><option value="">{t('react.contentGroups.none')}</option>{Object.keys(groups).map(name => <option key={name} value={`name:${name}`}>{name}</option>)}</select>
+      <button className="button secondary" disabled={busy || !groupReady} onClick={() => void run(async () => {
+        const previous = structuredClone(groups)
+        await grouping.save(assignContentGroup(previous, selection.map(file => file.fileName), assignTo ? assignTo.slice(5) : undefined), previous)
+        if (active.current) { setSelected([]); setNotice(t('react.contentGroups.applied')) }
+      })}>{t('react.contentGroups.assign')}</button>
       <button className="button secondary" disabled={busy} onClick={() => setSelected([])}>{t('react.content.clear')}</button>
     </div>}
     {snapshot.status === 'ready' && !files.length && <p className="empty">{t('react.content.empty')}</p>}
@@ -68,7 +95,7 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
       const disabled = file.fileName.endsWith('.disabled')
       return <li key={file.path} data-file-name={file.fileName}>
         <input type="checkbox" aria-label={t('react.content.select', { name: file.name || file.fileName })} checked={selected.includes(file.path)} disabled={busy} onChange={event => setSelected(value => event.target.checked ? [...value, file.path] : value.filter(path => path !== file.path))} />
-        <div className="content-file"><strong>{file.name || file.fileName}</strong><span>{file.fileName}{file.resourceVersion && ` · ${file.resourceVersion}`}</span><small>{file.metadata.modrinth ? 'Modrinth' : file.metadata.curseforge ? 'CurseForge' : t('react.content.local')}</small></div>
+        <div className="content-file"><strong>{file.name || file.fileName}</strong><span>{file.fileName}{file.resourceVersion && ` · ${file.resourceVersion}`}</span><small>{file.metadata.modrinth ? 'Modrinth' : file.metadata.curseforge ? 'CurseForge' : t('react.content.local')}</small>{!!fileGroups(file).length && <div className="content-group-labels">{fileGroups(file).map(name => <span className="content-group-label" key={name}><span className="content-group-dot" aria-hidden="true" style={{ backgroundColor: /^#[0-9a-f]{6}$/i.test(groups[name].color) ? groups[name].color : 'var(--accent)' }} />{name}</span>)}</div>}</div>
         <span className="content-state">{t(disabled ? 'react.content.disabled' : 'react.content.enabled')}</span>
         <button className="button secondary" aria-label={t(disabled ? 'react.content.enableName' : 'react.content.disableName', { name: file.name || file.fileName })} disabled={busy || running || snapshot.status !== 'ready'} onClick={() => toggle([file], disabled)}>{t(disabled ? 'react.content.enable' : 'react.content.disable')}</button>
       </li>

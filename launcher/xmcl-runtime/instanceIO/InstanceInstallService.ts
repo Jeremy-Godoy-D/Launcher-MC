@@ -45,6 +45,7 @@ import { Inject, LauncherApp, LauncherAppKey } from '~/app'
 import { ZipManager, kTasks, type Tasks } from '~/infra'
 import { InstanceService } from '~/instance/InstanceService'
 import { InstanceModsGroupService } from '~/instance/InstanceModsGroupService'
+import { readContentGroups } from '../instance/utils/contentGroupsFile'
 import { kDownloadOptions } from '~/network'
 import { kPeerFacade } from '~/peer'
 import { kResourceManager, kResourceWorker, type ResourceWorker } from '~/resource'
@@ -1117,10 +1118,13 @@ export class InstanceInstallService extends AbstractService implements IInstance
     if (Object.keys(mappings).length === 0) return
 
     try {
-      const service = await this.app.registry.get(InstanceModsGroupService)
-      const state = await service.getGroupState(instancePath)
-      const migrated = migrateModGroupFilenames(state.groups, mappings)
-      if (migrated !== state.groups) await service.updateModsGroups(instancePath, migrated)
+      const previous = await readContentGroups(instancePath, 'mods')
+      if (!previous) return
+      const migrated = migrateModGroupFilenames(previous, mappings)
+      if (migrated !== previous) {
+        const service = await this.app.registry.get(InstanceModsGroupService)
+        await service.updateModsGroups(instancePath, migrated, 'mods', previous)
+      }
     } catch (error) {
       this.warn(`Failed to migrate mod group filenames for ${instancePath}`, error)
     }

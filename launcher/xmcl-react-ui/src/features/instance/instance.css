@@ -1,4 +1,14 @@
 @layer components {
+  .content-groups-editor { padding: 16px; margin: 16px 0; border-radius: 14px; background: var(--glass-elevated); }
+  .content-groups-editor p { color: var(--muted); line-height: 1.6; }
+  .content-groups-editor form { display: grid; gap: 8px; margin-top: 16px; }
+  .content-groups-editor input:not([type='color']) { padding: 10px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; }
+  .content-groups-editor input[type='color'] { width: 56px; height: 40px; }
+  .content-groups-editor .content-actions { margin-top: 8px; }
+  .content-group-labels { display: flex; gap: 8px; flex-wrap: wrap; }
+  .content-group-label { display: inline-flex; gap: 4px; align-items: center; color: var(--muted); font-size: 13px; }
+  .content-group-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
   .instance-header { position: relative; isolation: isolate; display: flex; align-items: end; justify-content: space-between; gap: 16px; min-height: 184px; padding: 24px; overflow: hidden; border-radius: 14px; background: var(--surface); margin-bottom: 12px; }
   .instance-header .ambient::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, color-mix(in srgb, #0e1117 96%, transparent), color-mix(in srgb, #0e1117 50%, transparent)); }
   .instance-identity, .instance-header-actions { position: relative; display: flex; gap: 12px; align-items: center; z-index: 1; }

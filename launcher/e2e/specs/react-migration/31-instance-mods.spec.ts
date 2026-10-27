@@ -1,21 +1,12 @@
 import { test, expect, snap } from '../../helpers/scratch'
 import { seedReactLibrary } from '../../helpers/react-library'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { makeReactMod as mod } from '../../helpers/react-content'
+import { readFile, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import { createRequire } from 'node:module'
-import { createWriteStream } from 'node:fs'
-import { pipeline } from 'node:stream/promises'
 import axe from 'axe-core'
 
 test.use({ launcherOptions: { locale: 'es-ES' } })
 
-async function mod(path: string, name: string, title: string) {
-  await mkdir(join(path, 'mods'), { recursive: true })
-  const require = createRequire(new URL('../../../xmcl-runtime/package.json', import.meta.url)), { ZipFile } = require('yazl'), zip = new ZipFile()
-  zip.addBuffer(Buffer.from(JSON.stringify({ schemaVersion: 1, id: name, name: title, version: '1.0.0', environment: '*', depends: { minecraft: '>=1.20' } })), 'fabric.mod.json')
-  zip.end()
-  await pipeline(zip.outputStream, createWriteStream(join(path, 'mods', `${name}.jar`)))
-}
 
 test('instance routes expose native mods, filters and safe multi-selection without mixing instances', async ({ launcher }, testInfo) => {
   const page = launcher.main, errors: string[] = []
