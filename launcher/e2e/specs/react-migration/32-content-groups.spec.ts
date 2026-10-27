@@ -83,6 +83,7 @@ test('groups can be created, assigned, renamed and dissolved without losing mods
       expect(accessibility.violations).toEqual([])
       await editor.evaluate(element => element.scrollIntoView({ block: 'start' }))
       await snap(launcher, `groups-top-${theme}-${size[0]}`, 'Group editor title and reviewed fields; scroll remains available for its actions.')
+      await editor.getByRole('button', { name: 'Guardar grupo', exact: true }).scrollIntoViewIfNeeded()
       await editor.getByRole('button', { name: 'Guardar grupo', exact: true }).focus()
       await expect(editor.getByRole('button', { name: 'Guardar grupo', exact: true })).toBeInViewport({ ratio: 1 })
       await snap(launcher, `groups-${theme}-${size[0]}`, 'Groups editor with native persistence and explicit dissolution, before saving.')
