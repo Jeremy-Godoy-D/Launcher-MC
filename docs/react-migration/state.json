@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 parcial: grupos persistidos/CAS/migración por ruta y UI React verificados (aplicación63209cf, pruebas59193b7). 608unitarias,78React+1Strict+3Vue; tipos/lint raíz y9harness aprobados. 140PNG conservados,99Axe sin violaciones/170incomplete; detalle STAGE5-GROUPS. Dist/default Vue restaurados, producción intacta. Siguiente: instalar/retirar local con autoridad/colisiones/errores; luego info/dependencias/actualizar,packs/shaders,mundos/ajustes/consola. Gates5/K08 siguen pendientes; etapas6–9 y Microsoft pospuesto sin cambios. CI anterior40456972986(deaed88) éxito; verificar nueva corrida tras push.",
+  "nextAction": "Etapa5 parcial: STAGE5-LOCAL-FILES verifica862c9d6(importar sin sobrescribir,retirada confirmada por hash,guardasJava/proceso ybloqueo común).618unitarias/68archivos,84React+1Strict+3Vue,tipos/lint raíz,9harness;103Axe0violaciones/178incomplete,144PNG por test. Dist/defaultVue restaurados,producción intacta. STAGE5-GROUPS conserva bloque anterior. Siguiente: información/dependencias/incompatibilidades/actualizar (reutilizar utilmod/modDependencies/modCompatible libres deVue/Node), después packs/shaders,mundos/ajustes/consola. Todas gates5/K08 pendientes y6–9 necesarias;MS pospuesto. CI40502027721(1a355a2) éxito; verificar nuevo push.",
   "stages": [
     {
       "id": 0,
@@ -618,9 +618,17 @@
             {
               "path": "docs/react-migration/STAGE5-GROUPS.json",
               "sha256": "1717fc3be1d141a3ecf7c4fce0cd90b7de6a6a2cc30c9c07fbdd6e62526353de"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-LOCAL-FILES.md",
+              "sha256": "e560d8ef3eaa6122745fa6ad84726660620b2d2a98179096f5be078b21519b4f"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-LOCAL-FILES.json",
+              "sha256": "d399fae5ab04da270700735053e81e05a3c42c5080355885d4a19bd8e2fb2fd9"
             }
           ],
-          "note": "Avance parcial; WORKSPACE/AUTHORITY/GROUPS. Grupos locales persistidos y migración por ruta verificados; faltan instalar/retirar/info/actualizar/diagnósticos,packs/shaders y resto de etapa5. Ninguna gate completada."
+          "note": "Avance parcial; WORKSPACE/AUTHORITY/GROUPS/LOCAL-FILES. Mods: lectura,toggle,grupos,instalación yretirada local verificados. Info/dependencias/incompatibilidades/actualizar,packs/shaders yresto de etapa5 pendientes. Ninguna gate completada."
         },
         {
           "id": "worlds-settings",
