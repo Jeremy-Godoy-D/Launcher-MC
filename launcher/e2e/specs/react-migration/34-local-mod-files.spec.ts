@@ -101,7 +101,7 @@ test('a pending import keeps its captured instance when the user navigates elsew
   await expect.poll(() => launcher.app.evaluate(() => (globalThis as any).__importPath)).toBe(a)
   await openMods(page, 'Fabric QA')
   await launcher.app.evaluate(() => (globalThis as any).__releaseImport())
-  await expect.poll(async () => (await readFile(join(a, 'mods/alpha.jar'))).length).toBeGreaterThan(0)
+  await expect.poll(async () => (await readFile(join(a, 'mods/alpha.jar')).catch(error => { if (error.code !== 'ENOENT') throw error; return Buffer.alloc(0) })).length).toBeGreaterThan(0)
   await expect(readFile(join(b, 'mods/alpha.jar'))).rejects.toMatchObject({ code: 'ENOENT' })
   await expect(list.getByText('Imported A', { exact: true })).toHaveCount(0)
   await expect(list.getByRole('alert')).toHaveCount(0)
