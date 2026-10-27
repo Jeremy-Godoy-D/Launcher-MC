@@ -665,7 +665,7 @@ export function App() {
                   </Link>
                 </div>
                 <div className="instance-grid">
-                  {instances.map((instance) => (
+                  {instances.slice(0, 3).map((instance) => (
                     <InstanceCard
                       key={instance.id}
                       instance={instance}

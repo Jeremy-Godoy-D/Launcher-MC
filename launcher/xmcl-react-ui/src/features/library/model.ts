@@ -45,6 +45,7 @@ export function matchesInstanceQuery(instance: SavedInstance, query: string) {
 }
 
 export function instanceIcon(icon: string) {
+  if (!icon) return ''
   try {
     const url = new URL(icon)
     if (url.username || url.password) return ''

@@ -1,5 +1,7 @@
 import { cpus, release, totalmem } from 'node:os'
-import { writeFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
+import { join } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 import { test, expect } from '../../helpers/scratch'
 import { seedReactLibrary } from '../../helpers/react-library'
@@ -15,7 +17,9 @@ test.use({ launcherOptions: { locale: 'es-ES', recordVideo: false }, trace: 'off
 test('reference Windows: five 60-second Home workloads without recorder, including GPU and all app processes', async ({ launcher }, testInfo) => {
   test.setTimeout(420_000)
   const page = launcher.main
-  await seedReactLibrary(page)
+  const paths = await seedReactLibrary(page)
+  const metadataHashes = () => Promise.all(paths.map(async path => createHash('sha256').update(await readFile(join(path, 'instance.json'))).digest('hex')))
+  const initialMetadata = await metadataHashes()
   const win = await launcher.app.browserWindow(page)
   await win.evaluate(win => { win.setContentSize(1200, 720); win.show(); win.focus(); win.webContents.focus() })
   await page.emulateMedia({ reducedMotion: 'no-preference' })
@@ -37,7 +41,7 @@ test('reference Windows: five 60-second Home workloads without recorder, includi
     return { at, processes,
       media: await page.evaluate(() => {
         const video = document.querySelector('video')
-        return { featured: document.querySelector('.featured h2')?.textContent, src: video?.getAttribute('src'), scene: video?.dataset.scene, paused: video?.paused,
+        return { featured: document.querySelector('.featured h2')?.textContent, selectedPath: localStorage.getItem('selectedInstancePath'), src: video?.getAttribute('src'), scene: video?.dataset.scene, paused: video?.paused,
           time: video?.currentTime, frames: video?.getVideoPlaybackQuality().totalVideoFrames, dropped: video?.getVideoPlaybackQuality().droppedVideoFrames,
           state: JSON.parse(document.querySelector('[data-motion-state]')!.getAttribute('data-motion-state')!) }
       }) }
@@ -84,6 +88,11 @@ test('reference Windows: five 60-second Home workloads without recorder, includi
       expect.soft(samples.every(sample => sample.media.paused)).toBe(true)
       expect.soft(Math.abs(last.media.time! - first.media.time!)).toBeLessThan(0.05)
     }
+    if (workload === 'rotation') {
+      expect.soft(new Set(samples.map(sample => sample.media.featured)).size).toBeGreaterThan(1)
+      expect.soft(samples.every(sample => sample.media.selectedPath === paths[0])).toBe(true)
+    }
     if (workload === 'minimized') await win.evaluate(win => win.restore())
   }
+  expect(await metadataHashes()).toEqual(initialMetadata)
 })
