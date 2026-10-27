@@ -1,5 +1,5 @@
 import { Resource, ResourceDomain, ResourceManager } from '@xmcl/resource'
-import { InstanceModsService as IInstanceModsService, InstanceModsServiceKey, UpdateInstanceResourcesOptions } from '@xmcl/runtime-api'
+import { InstanceModsService as IInstanceModsService, InstanceModsServiceKey, LockKey, UpdateInstanceResourcesOptions } from '@xmcl/runtime-api'
 import { emptyDir, ensureDir, stat } from 'fs-extra'
 import { join } from 'path'
 import { Inject, LauncherAppKey } from '~/app'
@@ -35,7 +35,7 @@ export class InstanceModsService extends AbstractInstanceDomainService implement
 
   async #changeMods<T>(path: string, operation: () => Promise<T>): Promise<T> {
     await this.#assertJavaInstance(path)
-    return this.mutex.of(`mods-files://${path}`).runExclusive(async () => {
+    return this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
       await this.#assertJavaInstance(path)
       const launch = await this.app.registry.get(LaunchService)
       if ((await launch.getGameProcesses()).some(process => process.options.gameDirectory === path)) throw new AnyError('InstanceRunningError')
