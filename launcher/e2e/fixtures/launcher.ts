@@ -282,10 +282,10 @@ export const test = base.extend<{
       file: testInfo.file,
     })
 
+    let artifactError: unknown
     try {
       await use({ app, main, gameDataPath, appDataPath, locale, manifest })
     } finally {
-      let artifactError: unknown
       try {
         await flushJourneyManifest(manifest)
         if (manifest.shots.length) {
@@ -325,8 +325,8 @@ export const test = base.extend<{
       if (!persistent) {
         await rm(tempRoot, { recursive: true, force: true }).catch(() => {})
       }
-      if (artifactError !== undefined) throw artifactError
     }
+    if (artifactError !== undefined) throw artifactError
   },
 })
 
