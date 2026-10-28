@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa. Fuente 5bddad9/REVIEWED-UPGRADES: Native valida revisión exacta, hashes y configuración antes y durante aplicación, persiste guardas y reconoce progreso propio al reanudar; preview y apply comparten supersession de planes. 727 unitarias/79 archivos, tipos/lint aprobados; 4 Native nuevos +16 React+3 Vue focales pasan, ambos paquetes reconstruidos y dist/default Vue restaurados. CI40723599113 pasó ambos sobre690eaae/0ae267c; nuevo source requiere CI. Próximo: conectar consultas/selección/revisión de updates React con review.snapshot/changes, progreso/cancelación/reanudación y recuperación tras reinicio sin aplicar cola ajena. Consulta CF sin clave por proxy existente; Modrinth permite version_types opcional. Después packs/shaders,mundos,ajustes,consola y6–9. K08/gates5 pendientes, MS pospuesto, PR4 borrador, producción/proxy intactos. No DevTools/CDP, ANALISIS ni reintentos de limpieza denegada .progressive-install-test-s7GPKa.",
+  "nextAction": "Etapa5 activa. Fuente98c7604/MOD-UPDATES: UI React de consulta, filtros/política/canal, selección y revisión Native conectada; conserva.disabled, usa guardas snapshot/changes, tareas y reanudación dirigida a operationId. getModSources lee IDs persistidos sin depender del evento500ms; evita carrera real CF.747unitarias/80archivos, tipos/lint raíz aprobados;34React+2LIVE+3Vue=39escenarios distintos y4UI repetidos tras ajuste mínimo. LIVE ambos proveedores actualizaron ModMenu11.0.4→11.0.5, SHA512 verificado, desactivado y archivo mundo preservados.26Axe/0violaciones/52incomplete;9harness;E2Eglobal56previos/0en39–41. Dist/defaultVue restaurados. CI40732582108 verde para9b0c117/5bddad9; comprobar CI del nuevo source tras push. Próximo: cerrar recuperación/revisión de planes parciales tras cambios, UX cancelación/reintento y aislamiento A→B; después packs/shaders,mundos,ajustes,consola y6–9. K08/gates5 pendientes, PR4borrador, producción/proxy intactos, Microsoft pospuesto. No DevTools/CDP, ANALISIS ni reintentar limpiezas denegadas.",
   "stages": [
     {
       "id": 0,
@@ -686,6 +686,10 @@
             {
               "path": "docs/react-migration/STAGE5-REVIEWED-UPGRADES.md",
               "sha256": "ddae6228489dcf3fe543b7cddb2f7bb3c937e85999404ab0f6dd416f44040c06"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-MOD-UPDATES.md",
+              "sha256": "6ab6c87a93833b68e539c6bcd9e4d9103a06fc59133da8771258f5bad8185a5b"
             }
           ],
           "note": "Avance parcial hasta UPGRADE-MANIFEST (0ae267c): 717 unitarias y 19 recorridos Native focales, tipos/lint pasan. CI 40721432762 aprueba ambos renderers sobre f27c286/9d6ad2b; source nuevo requiere CI. Pendientes consultas/revisión de updates React y guardas vigentes, packs/shaders y resto de etapa 5. K08/gates5 siguen pending."
