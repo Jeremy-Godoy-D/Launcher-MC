@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa. Fuente f25aab4/INSTALL-PATHS valida workspace/backup/profile persistidos y sus ancestros, conserva legacy externo y vuelve a preparar privadamente; reserva.backups.701unitarias/77archivos,tipos raíz/lint pasan;14React+3Vue empaquetados(35,2s/21,7s),ambos renderers/hosts reconstruidos ydistVue restaurado. CI40617567629(5158c1c/33ef2a3) falló2timeouts de5000ms; solo esos2tests ahora15000ms conservando aserciones. Verificar CI nuevo traspush. Siguiente obligatorio: validar cada ruta hija de destino/workspace/backup antes de leer/preparar/publicar, respetando shared links propios de packs/shaders/saves. Reutilizar instanceFileSource/importPathParts; considerar allowMissing para destinos ausentes sin cambiar contrato lector; callback commitReadyFiles puede recibir el archivo para validar uno por operación, evitar O(N²). Después mover buildModUpgradeManifest aAPIcompartida, conservar.disabled, conectar updates/revisión/proveedores/cola; luego packs/shaders,mundos/ajustes/consola y6–9. No anidar lock de mods alrededor del instalador. K08/gates5 pendientes;MS pospuesto,PR4borrador,producción/proxy intactos;sin DevTools/CDP ni ANALISIS.",
+  "nextAction": "Etapa 5 activa. Fuente 9d6ad2b/INSTALL-TARGETS: destinos y rutas hijas de staging/backup comprobados; enlaces compartidos propios conservados, externos/anidados rechazados. Staging inválido se desvincula antes de descargar. Orden de solicitudes reservado antes del primer await; descargas paralelas y progreso parcial conservados. 709 unitarias/77 archivos; tipos y lint aprobados; 16 React + 3 Vue empaquetados (32,0 s/19,1 s), dist/default Vue restaurados. CI 40717537004 sobre 1da8953/f25aab4 pasó ambos; comprobar CI nuevo. Siguiente: compartir buildModUpgradeManifest desde API y preservar .disabled, conectar actualización/revisión/proveedores/cola y guardas nativas de hashes/configuración antes de publicar; luego packs/shaders, mundos, ajustes, consola y 6–9. No envolver installInstanceFiles con otro LockKey.instance. K08/gates5 pendientes; Microsoft pospuesto; PR4 borrador, producción/proxy intactos. No DevTools/CDP ni ANALISIS; limpieza de .progressive-install-test-s7GPKa rechazada: no reintentar ni eludir.",
   "stages": [
     {
       "id": 0,
@@ -674,9 +674,13 @@
             {
               "path": "docs/react-migration/STAGE5-INSTALL-PATHS.json",
               "sha256": "a4c99f7758a04961a322ecb145a236afc04247e9ad71b755892d10fc778e5721"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-INSTALL-TARGETS.md",
+              "sha256": "bbc64003cf00f5f00066aecc59bd19bc781a32816d10058f3ce34499ef59241a"
             }
           ],
-          "note": "Avance parcial hasta INSTALL-PATHS(f25aab4):701unitarias y17recorridos Native focales,tipos/lint pasan. CI40617567629 falló2timeouts: límites afectados ampliados sin quitar aserciones, requiere CI nuevo. Falta validar hijos de destino/staging/backup antes de updates; después packs/shaders/resto5. K08/gates5 pending."
+          "note": "Avance parcial hasta INSTALL-TARGETS (9d6ad2b): 709 unitarias y 19 recorridos Native focales, tipos/lint pasan. CI anterior 40717537004 verde en React/Vue; nuevo requerido. Pendientes actualización de contenido con revisión y guardas vigentes, packs/shaders y resto de etapa 5. K08/gates5 siguen pending."
         },
         {
           "id": "worlds-settings",
