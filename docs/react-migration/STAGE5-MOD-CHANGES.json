@@ -257,5 +257,14 @@
     "reactFailed": 1,
     "vuePassed": 3,
     "cause": "Radix returned focus to header options after the test had focused the sidebar; video correctly stayed paused. The test now waits for close and focus restoration before moving focus, with all playback/pause assertions retained."
+  },
+  "subsequentCI": {
+    "run": 40612683266,
+    "head": "0d3ae7e77e3475e5b2c9d127cf4f3c4bbb0a6f74",
+    "conclusion": "success",
+    "renderers": [
+      "react",
+      "vue"
+    ]
   }
 }

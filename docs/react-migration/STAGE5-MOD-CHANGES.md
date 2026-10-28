@@ -28,3 +28,5 @@ CI40610051490 sobre `c5f9df9` terminó con Vue aprobado y React89/90: el caso de
 ## Pendiente
 
 Actualización de contenido con proveedores/manifiestos, packs/shaders, mundos, ajustes/consola y etapas6–9. Las propuestas evalúan metadatos de archivos instalados; Java efectivo, contenido extenso, juego real, fallos de instalación, NSIS/delta, seguridad/accesibilidad finales y presupuestos de rendimiento aún requieren sus recorridos. La huella estadística/configuración y los hashes seleccionados no constituyen una transacción de todo el lote frente a fallos IO, procesos externos o pérdida de energía; un fallo parcial exige volver a leer y revisar el estado. Microsoft pospuesto; datos, proxy, secretos y producción conservados.
+
+CI posterior40612683266 sobre0d3ae7e aprobó ambos renderers, incluida la sincronización de foco corregida. Este resultado corresponde a fuente f6e78e5; los cambios siguientes requieren su propia validación.
