@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa; bloque DIAGNOSTICS verificado sobre 590217d. 669 unitarias/75 archivos; tipos raíz/lint aprobados; 90 React +1 Strict +3 Vue =94 escenarios distintos;111 auditorías Axe sin violaciones/186 incomplete;172 PNG React propios. Inventario nativo +huella de configuración y hashes seleccionados, diagnóstico Fabric/Forge/NeoForge/Quilt/LiteLoader, lectura pendiente sin éxito prematuro. Vue recompilado, dist/default Vue restaurados; producción intacta. Próximo: propuesta/revisión de dependencias al activar/desactivar y actualizaciones de mods; después packs/shaders, mundos/ajustes/consola. Ninguna gate5/K08 cerrada. Java automático debe incorporar requisitos de mods en ajustes. Publicar solo tras etapas6–9 y pruebas finales; Microsoft pospuesto, sin DevTools/CDP, no tocar ANALISIS. Preparar push de informe y verificar CI de ese nuevo head.",
+  "nextAction": "Etapa5 activa. Bloque MOD-CHANGES verificado en fuente local f6e78e5: propuestas/revisión de dependencias conectadas, preservación de selección/bytes al cancelar, guardas de revisión y errores Native serializados. 678 unitarias/76 archivos; tipos raíz y lint aprobados;93 React+1 Strict+3 Vue=97 escenarios distintos;115 Axe sin violaciones/194 incomplete;176 PNG React. Vue recompilado y dist/default Vue restaurados. CI previo40610051490(c5f9df9) falló React89/90 por retorno de foco de Radix en test de medios; snapshots muestran Opciones activo. Se sincronizó cierre/retorno sin quitar aserciones y3 repeticiones pasan; hace falta CI del nuevo push. Preparar push del informe y verificarlo. Próxima implementación: actualización de mods con proveedores/manifiestos y revisión, conservando desactivados/datos y guardas Native; estudiar modUpgrade.ts/modUpgradeManifest.ts/useInstanceInstallOperation y InstanceInstallService antes de reutilizar. Después packs/shaders, mundos, ajustes/consola y etapas6–9. Gates5 y K08 siguen pending; ninguna publicación. Microsoft pospuesto; secretos/proxy intactos; no DevTools/CDP ni cambios en ANALISIS.",
   "stages": [
     {
       "id": 0,
@@ -642,9 +642,17 @@
             {
               "path": "docs/react-migration/STAGE5-DIAGNOSTICS.json",
               "sha256": "63fe5b9d15f6b35c3170e92b0b47d43f552c1ff33e69985a15d636f786e0c150"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-MOD-CHANGES.md",
+              "sha256": "fe0dfd64d3b9ac0d5a0c984c2ef057aed02cd2577d68d157ce6670514138d3f2"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-MOD-CHANGES.json",
+              "sha256": "4239e733e9941a557aaab7070381f29633fa16f355801ed2704ecb93c84f0246"
             }
           ],
-          "note": "Avance parcial: WORKSPACE/AUTHORITY/GROUPS/LOCAL-FILES/MOD-INFO/DIAGNOSTICS. Lectura, toggle protegido, grupos, archivos locales, información y diagnóstico de metadatos verificados. Faltan propuesta/revisión de dependencias, actualizaciones, packs/shaders y resto5. No certifica todos los modpacks ni cierra K08."
+          "note": "Avance parcial: WORKSPACE/AUTHORITY/GROUPS/LOCAL-FILES/MOD-INFO/DIAGNOSTICS/MOD-CHANGES. Lectura, toggle, grupos, archivos locales, información, diagnóstico y revisión de dependencias verificados localmente. Faltan actualizaciones, packs/shaders y resto5; K08/gates5 pending. Revisar nuevo CI tras corregir la sincronización de foco del test de medios."
         },
         {
           "id": "worlds-settings",

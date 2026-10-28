@@ -1,0 +1,261 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-27",
+  "applicationCommit": "f6e78e5d7e04cfde2a150a44d4db2f844c70c83d",
+  "verificationCommit": "f6e78e5d7e04cfde2a150a44d4db2f844c70c83d",
+  "status": "stage-5-partial-reviewed-mod-changes",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/react-migration.yml",
+      "sha256": "0f5fd0a3824e7f22c2f798c85c3986d529afbe28c2c635a90442ef30fe7d5158"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/31-instance-mods.spec.ts",
+      "sha256": "dcd21d1495be86baae57d6a1088d548aa0f9104782667c9705b11429afea4c1f"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/37-mod-changes.spec.ts",
+      "sha256": "4e35f013bf72142755890a888a3f6e3e56a5b8d1c1815d1adbe0f9670ae22d57"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/instance/InstanceMods.tsx",
+      "sha256": "48ed8d5bcf624118f4000cbd37d53a262d4fa965911ea46c73d51282e25ec118"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/instance/ModChangesDialog.tsx",
+      "sha256": "7c33d5f4cb39f66c48b6b1ad23fec57554f83a6cfdaea3d0347bd922c5cb8839"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/instance/instance.css",
+      "sha256": "a801a9f792bc4008f5b827e0110e9be5c9814f929aa4e4593ea93128cfc8b910"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/en.yaml",
+      "sha256": "742321108ecc58974724df877bc22c5ce23de1e67ecaad447a0b08f75974d509"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/es-ES.yaml",
+      "sha256": "785e4ec1cfff68f2f1aa23237330b101c6bad35c331b426feecded3d818db842"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/util/modChanges.test.ts",
+      "sha256": "ade823362838f98269ae353175fd2fbc112c4bf4bc20749e27f396f7a1c00546"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/util/modChanges.ts",
+      "sha256": "0b69357656af4629546a056b9ae1c48d1f1695bbc39bdceb5300501cd812e3c8"
+    }
+  ],
+  "validation": {
+    "react": {
+      "cases": 93,
+      "time": "5.0m"
+    },
+    "strict": {
+      "cases": 1,
+      "time": "4.1s"
+    },
+    "vue": {
+      "cases": 3,
+      "time": "18.4s"
+    },
+    "distinctFunctionalCases": 97,
+    "focusedRepeat": {
+      "cases": 15,
+      "time": "57.2s",
+      "additionalDistinctCases": 0
+    },
+    "unit": {
+      "cases": 678,
+      "files": 76,
+      "seconds": 15.46,
+      "newCases": 9,
+      "existingAdditionalCasesIncluded": 0
+    },
+    "types": "full root check passed",
+    "lint": "full root lint passed, zero warnings/errors",
+    "e2eTypes": "56 existing global diagnostics; spec37 zero",
+    "harnessTests": 9,
+    "sourceDetectorFindings": 0,
+    "axe": {
+      "audits": 115,
+      "violations": 0,
+      "incomplete": 194
+    },
+    "reactPerTestPreservedPngs": 176,
+    "retainedPngsIncludingFocusedRepeat": 210,
+    "visualReview": [
+      "changes-dark-1200.png",
+      "changes-light-800.png"
+    ],
+    "precedingCI": {
+      "run": 40508508568,
+      "head": "b585c49bf720095cb20273cda340c4d951eaca71",
+      "conclusion": "success"
+    },
+    "nativeFocusRegression": {
+      "cases": 3,
+      "time": "11.5s",
+      "additionalDistinctCases": 0
+    }
+  },
+  "commands": [
+    "pnpm check",
+    "pnpm lint",
+    "pnpm exec vitest run [exact explicit list in .github/workflows/react-migration.yml at f6e78e5]",
+    "LAUNCHER_RENDERER=react pnpm build:renderer; pnpm --prefix=xmcl-electron-app build",
+    "XMCL_E2E_EXECUTABLE=<React package> pnpm --dir e2e exec playwright test [workflow React list,93 cases] --reporter=line --output=artifacts/stage5-mod-changes-react",
+    "XMCL_REACT_CLIENT_HARNESS=1 XMCL_E2E_EXECUTABLE=<React package> pnpm --dir e2e exec playwright test specs/react-migration/04-client-contracts.spec.ts --reporter=line --output=artifacts/stage5-mod-changes-strict",
+    "LAUNCHER_RENDERER=vue pnpm build:renderer; pnpm --prefix=xmcl-electron-app build",
+    "XMCL_E2E_EXECUTABLE=<Vue package> pnpm --dir e2e exec playwright test specs/react-migration/03-vue-compatibility.spec.ts specs/react-migration/08-vue-onboarding.spec.ts specs/react-migration/33-vue-content-groups.spec.ts --reporter=line --output=artifacts/stage5-mod-changes-vue",
+    "pnpm --dir e2e exec tsc --noEmit (existing global diagnostics inspected)",
+    "node --test launcher/scripts/react-migration.test.mjs",
+    "impeccable detect launcher/xmcl-react-ui/src/features/instance --json (source only)",
+    "node launcher/scripts/react-migration.mjs check"
+  ],
+  "packagesAtCapture": [
+    {
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/Grimo Launcher.exe",
+      "sha256": "719200ba0975375b025709125dad40ce1e78dbfeb99106425d752437ba449938"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/resources/app.asar",
+      "sha256": "1910b99ad7261752523d3840b5ea0685d91e4f4d7679eaca09036154b22d4be1"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/Grimo Launcher.exe",
+      "sha256": "3b4f7e6965df3a25f646b0a707158f03459b1230dc46efb8710c3fa26055b337"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/resources/app.asar",
+      "sha256": "b1ab85e3f52375b4ca2a6a04d654888292292bd574786b797fff49bae60ed3a5"
+    }
+  ],
+  "packageAvailability": "Mutable output paths. Hashes identify the binaries at this capture; Vue dist/default restored, production unchanged.",
+  "artifactManifest": {
+    "path": "launcher/e2e/artifacts/stage5-mod-changes-artifact-manifest.json",
+    "sha256": "00b25810aaf03b8009c65bcab29a9cd4c3d5554bbc83fab1978ca61977b0f70f"
+  },
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-all-units.log",
+      "sha256": "6350839bf73d14c56c69947d01934a57083fc836ce4f57f2ebad5752c2dad298"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-build.log",
+      "sha256": "c8dd3e59d8b394bef0163b3a5543f59975c1d71bd674f6555642d80097371e4c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-build2.log",
+      "sha256": "31ae1bbe0d289a422f8e5116508dc2f82e2321a09a8724046945c76f198511e6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-e2e-types.log",
+      "sha256": "47efe23f541affc4c8e52d6c3b30ba91a6f17655bbad76807f5212cf42f8e19f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-engine.log",
+      "sha256": "f7a6d048f0b1bff3ebec01fab3f8d7a4f38ee9d20ca9f04c0c02b90007255672"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-engine2.log",
+      "sha256": "cdd93727dee1fa6b1179c946106cc9946f9cbd08cd4511d38e69b6ea9249e852"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-engine3.log",
+      "sha256": "472b4fa8219bb5f8fc78fa6922a25a8d22f067fb44bdaa8ea8219dcb45510f2d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-focus-order.log",
+      "sha256": "14dbd19677d12c8860718b6ab66175e470e9f71f027666b3f6a1d9789d5259b1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-focus.log",
+      "sha256": "2a44e045342ad74d1466cf3c7ddab7b011a70fd31642700d2774adefe7de96c9"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-focus2.log",
+      "sha256": "e468e820ccb4e6ffed3cdf5f1234df02f020713535cdbe3d1c99a4d8ec4e2f3b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-harness.log",
+      "sha256": "82ca458a7e5baec391ef24eb41d209d04a1c1607e5cb221b19b3fd6a7030b105"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-lint.log",
+      "sha256": "5a507692fa4ceff88e67a30f878d55adb5568963a05352f524e963a34a355d2d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-react-types.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-react.log",
+      "sha256": "9ae0e74fd2f79273f7f07f800f8597b5d54059fb8ad657fdd18836b941287d63"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-renderer.log",
+      "sha256": "0f09de9af8d4acdafc2aa4885686f041f761e7a66a630a81bf630d971f36b618"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-renderer2.log",
+      "sha256": "35eb72959e456f2a962bdfe9414004c9c379f48f7480d8035710eac67262d7ef"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-strict.log",
+      "sha256": "539b08eed8527be84638d9313f397bed24b3c638f4ca219dff31b8f5ba56d466"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-types.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-vue-build.log",
+      "sha256": "c78f4d99d67a6e1640d4384e07fc06f9ba4403f4927687a3c7c9929b18ba63fb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-vue-renderer.log",
+      "sha256": "d0be12ab1ff890d5e1208e5897e101cfd29750b66dffdee80cf3399b1fa09376"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-vue.log",
+      "sha256": "3a4b243a04551690cff3fd5eae7aea2cfb65ac5eb583414929b700735462d467"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-changes-detector.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-ci-failed.log",
+      "sha256": "f0fa3a41769ca520e175c5a54d9d9906997299ab14c24dec400c058b796ff89f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ci-40610051490/react-migration/react/react-migration-31-instanc-93e39-zed-and-in-performance-mode-electron-es-ES/error-context.md",
+      "sha256": "dfad9084796b5d3361e4d4d1d97d01107a7a587bd86499803c1565fb9ca9029d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/ci-40610051490/react-migration/react/react-migration-31-instanc-93e39-zed-and-in-performance-mode-electron-es-ES-retry1/error-context.md",
+      "sha256": "5736facfe41f51930cec47f6f66eb4d0e112e6ae38edc0182db985c187b71a9f"
+    }
+  ],
+  "limits": [
+    "No stage5 gate or K08 closure: content upgrades, packs/shaders, worlds, settings and console remain pending.",
+    "Proposals cover installed files; ambiguous providers and unknown requirements are not chosen automatically. Incomplete metadata restricts changes to the explicit selection and requires review.",
+    "Unresolved requirements are shown for explicit review, not certified as a working game. Java selection/download, actual Minecraft, NSIS/delta, final security and accessibility are not certified by these fixtures.",
+    "Native stat/config fingerprint and selected SHA-1 checks are reused; no whole-batch IO, external-process or power-loss transaction guarantee. Unsupported/missing metadata is not universal compatibility.",
+    "Initial local focal run13/15 failed: navigation attempted behind a busy modal, and native serialized errors fell through instanceof. The test now navigates Back before switching, and the UI reads the domain error name without changing the transport contract. The final focal15/15 and full93 regression passed.",
+    "CI40610051490 failure is retained with exact head and snapshots showing header options active. A fresh CI on the next pushed head is required; three local repetitions are not a substitute.",
+    "No new calibrated 60s CPU/GPU/memory result; previous stage4 budget measurements remain scoped to their source.",
+    "Removal still deletes only explicitly confirmed files, without automatically deleting dependents. Microsoft deferred; credentials/proxy and production unchanged; no DevTools/CDP and no user ANALISIS edits."
+  ],
+  "priorCI": {
+    "run": 40610051490,
+    "head": "c5f9df98eb32fd59b5eb17c961c43d341a0d39fc",
+    "conclusion": "failure",
+    "reactPassed": 89,
+    "reactFailed": 1,
+    "vuePassed": 3,
+    "cause": "Radix returned focus to header options after the test had focused the sidebar; video correctly stayed paused. The test now waits for close and focus restoration before moving focus, with all playback/pause assertions retained."
+  }
+}
