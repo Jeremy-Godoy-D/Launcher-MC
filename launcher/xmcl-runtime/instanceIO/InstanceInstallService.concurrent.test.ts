@@ -27,6 +27,8 @@ vi.mock('~/instance/InstanceModsGroupService', () => ({
   InstanceModsGroupService: class InstanceModsGroupService {},
 }))
 
+vi.mock('../launch/LaunchService', () => ({ LaunchService: class LaunchService {} }))
+
 vi.mock('~/peer', () => ({
   kPeerFacade: Symbol('kPeerFacade'),
 }))
@@ -41,6 +43,7 @@ vi.mock('./utils/resolveInstanceFiles', () => ({
 
 const { InstanceInstallService } = await import('./InstanceInstallService')
 const { InstanceService } = await import('~/instance/InstanceService')
+const { LaunchService } = await import('../launch/LaunchService')
 
 describe('InstanceInstallService concurrent diff installs', () => {
   const roots: string[] = []
@@ -71,7 +74,7 @@ describe('InstanceInstallService concurrent diff installs', () => {
     })
 
     const logger = { log: vi.fn(), warn: vi.fn(), error: vi.fn() }
-    const instanceService = { registerRemoveHandler: vi.fn(() => vi.fn()) }
+    const instanceService = { initialize: async () => {}, state: { instances: [{ path: instancePath, edition: 'java' }] }, registerRemoveHandler: vi.fn(() => vi.fn()) }
     const app = {
       appDataPath: root,
       minecraftDataPath: root,
@@ -80,7 +83,7 @@ describe('InstanceInstallService concurrent diff installs', () => {
       platform: { os: 'windows' },
       registry: {
         getOrCreate: vi.fn(async () => ({})),
-        get: vi.fn(async (key) => key === kDownloadOptions ? {} : key === InstanceService ? instanceService : undefined),
+        get: vi.fn(async (key) => key === kDownloadOptions ? {} : key === InstanceService ? instanceService : key === LaunchService ? { getGameProcesses: async () => [] } : undefined),
         getIfPresent: vi.fn(async () => undefined),
       },
     } as any

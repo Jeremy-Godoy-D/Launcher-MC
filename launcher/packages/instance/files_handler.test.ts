@@ -181,7 +181,7 @@ describe('InstanceFileOperationHandler', () => {
     }
   })
 
-  it.each(['.install/op.json', 'config/../.install-profile', '.INSTALL\\op\\files\\a'])(
+  it.each(['.install/op.json', 'config/../.install-profile', '.INSTALL\\op\\files\\a', 'instance.json', 'config/../INSTANCE.JSON', 'instance.json.tmp-0123456789abcdef', '.install-state-old.tmp'])(
     'rejects files targeting installer state: %s', async (path) => {
       const { root, instance, workspace, backup } = await setupDirs()
       try {

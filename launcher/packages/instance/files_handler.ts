@@ -74,6 +74,13 @@ export function assertNoCaseInsensitivePathCollisions(
   }
 }
 
+export function assertInstanceInstallPaths(instancePath: string, paths: Iterable<string>) {
+  for (const path of paths) {
+    const normalized = relative(instancePath, join(instancePath, path))
+    if (!normalized || isAbsolute(path) || normalized === '..' || normalized.startsWith(`..\\`) || normalized.startsWith('../') || isInstanceInstallPath(normalized)) throw new Error(`Invalid instance install path: ${path}`)
+  }
+}
+
 export function assertNoCaseInsensitiveUpdatePathCollisions(
   updates: Iterable<InstanceFileUpdate>,
   caseInsensitive = process.platform === 'win32',
@@ -197,14 +204,7 @@ export class InstanceFileOperationHandler {
 
   #validateUpdates(updates: InstanceFileUpdate[]) {
     assertNoCaseInsensitiveUpdatePathCollisions(updates)
-    for (const { file: { path } } of updates) {
-      const normalized = relative(this.instancePath, join(this.instancePath, path))
-      if (!normalized || isAbsolute(path) || normalized === '..' ||
-          normalized.startsWith(`..\\`) || normalized.startsWith('../') ||
-          isInstanceInstallPath(normalized)) {
-        throw new Error(`Invalid instance install path: ${path}`)
-      }
-    }
+    assertInstanceInstallPaths(this.instancePath, updates.map(update => update.file.path))
   }
 
   /**
