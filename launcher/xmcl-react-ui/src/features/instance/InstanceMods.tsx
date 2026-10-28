@@ -15,6 +15,7 @@ import { RemoveModsDialog, type ReviewedMod } from './RemoveModsDialog'
 import { ModDetails } from './ModDetails'
 import { ModDiagnostics } from './ModDiagnostics'
 import { ModChangesDialog } from './ModChangesDialog'
+import { ModUpdates } from './ModUpdates'
 import { modModel } from './modModel'
 import { planModChanges } from '@xmcl/runtime-api/src/util/modChanges'
 
@@ -115,6 +116,7 @@ export function InstanceMods({ path, runtime, running, configuredJava }: { path:
         void run(async () => { const inventory = await service.getModFilesSnapshot(path); await refreshFiles(); if (active.current) { setDetailsPath(''); setEditingGroups(false); setDiagnostics(inventory) } })
       }}><ShieldCheck size={16} aria-hidden="true" />{t('react.modDiagnostics.open')}</button>
       <button className="button secondary" disabled={busy} onClick={() => void run(async () => { await refreshFiles(); await grouping.refresh() })}><RefreshCw size={16} aria-hidden="true" />{t('react.content.refresh')}</button>
+      <ModUpdates path={path} runtime={runtime} getFiles={() => store.getSnapshot().data?.files || []} disabled={busy || snapshot.status !== 'ready'} running={running} refresh={refreshFiles} onBusy={setBusy} />
     </div></div>
     {grouping.migrating && <p role="status">{t('react.contentGroups.migrating')}</p>}
     {grouping.migrationError && <p role="alert" className="form-error">{t('react.contentGroups.migrationFailed')} <button className="button secondary" disabled={busy || grouping.migrating} onClick={() => void grouping.migrate()}>{t('react.contentGroups.retryMigration')}</button></p>}

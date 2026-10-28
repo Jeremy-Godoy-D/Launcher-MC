@@ -41,6 +41,16 @@ export class InstanceModsService extends AbstractInstanceDomainService implement
     })
   }
 
+  async getModSources(path: string) {
+    await this.#assertJavaInstance(path)
+    const state = this.resourceManager.getWatched(join(path, 'mods'))?.state
+    if (!state) throw new Error('Mods are not watched')
+    const hashes = state.files.map(file => file.hash)
+    if (hashes.length > 10000) throw new Error('Too many mod sources')
+    const selected = new Set(hashes), metadata = await this.resourceManager.getMetadataByHashes(hashes)
+    return metadata.flatMap(value => value && selected.has(value.sha1) ? [{ hash: value.sha1, modrinth: value.modrinth, curseforge: value.curseforge }] : [])
+  }
+
   async #changeMods<T>(path: string, operation: (configuration: ModReviewConfiguration) => Promise<T>): Promise<T> {
     await this.#assertJavaInstance(path)
     return this.mutex.of(LockKey.instance(path)).runExclusive(async () => {

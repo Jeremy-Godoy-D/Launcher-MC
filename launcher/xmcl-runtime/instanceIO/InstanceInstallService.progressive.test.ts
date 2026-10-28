@@ -919,6 +919,7 @@ describe('InstanceInstallService progressive installation', () => {
       () => f.service.installInstanceFiles({ path, oldFiles: [], files: [] }),
       () => f.service.previewInstanceFiles({ path, oldFiles: [], files: [] }),
       () => f.service.getInstanceInstallManifest(path),
+      () => f.service.getReviewedModInstalls(path),
       () => f.service.stageInstanceFiles({ path, oldFiles: [], files: [] }),
       () => f.service.setInstanceInstallManifest({ path, oldFiles: [], files: [] }),
       () => f.service.applyInstanceInstallManifest(path),
@@ -1222,4 +1223,28 @@ describe('InstanceInstallService progressive installation', () => {
     expect(await readdir(join(f.instancePath, 'mods'))).toHaveLength(1)
     expect(await readPendingInstalls(f.instancePath)).toEqual([])
   })
+  it('lists reviewed active operations without private state and resumes only the explicitly selected one', async () => {
+    const f = await fixture(), old = f.file('mods/old.jar', 'OLD'), next = f.file('mods/new.jar', 'NEW'), other = f.file('mods/other.jar', 'OTHER')
+    await f.write(join(f.instancePath, old.path), 'OLD')
+    mockedDownload.mockRejectedValue(new Error('offline'))
+    await expect(f.service.installInstanceFiles(await f.review([old], [next]))).rejects.toThrow('offline')
+    await expect(f.service.installInstanceFiles({ path: f.instancePath, oldFiles: [], files: [other] })).rejects.toThrow('offline')
+    const service = f.createService(), plans = await service.getReviewedModInstalls(f.instancePath)
+    expect(plans).toHaveLength(1)
+    expect(Object.keys(plans[0]).sort()).toEqual(['files', 'oldFiles', 'operationId'])
+    expect(plans[0].files).toEqual([next]); expect(plans[0].oldFiles).toEqual([old])
+    await expect(service.resumeInstanceInstall(f.instancePath, undefined, '../invalid')).rejects.toThrow('Invalid reviewed install')
+    await expect(service.resumeInstanceInstall(f.instancePath, [], plans[0].operationId)).rejects.toThrow('Invalid reviewed install')
+    const attempts = mockedDownload.mock.calls.length
+    await expect(service.resumeInstanceInstall(f.instancePath, [{ ...next, hashes: { sha1: 'c'.repeat(40) } }])).rejects.toThrow('requires a new review')
+    expect(mockedDownload).toHaveBeenCalledTimes(attempts)
+    mockedDownload.mockImplementation(f.downloadAll)
+    await service.resumeInstanceInstall(f.instancePath, undefined, plans[0].operationId)
+    expect(await readFile(join(f.instancePath, next.path), 'utf8')).toBe('NEW')
+    expect(await pathExists(join(f.instancePath, other.path))).toBe(false)
+    expect(await service.getReviewedModInstalls(f.instancePath)).toEqual([])
+    expect(await readPendingInstalls(f.instancePath)).toHaveLength(1)
+    await expect(service.resumeInstanceInstall(f.instancePath, undefined, plans[0].operationId)).rejects.toThrow('no longer pending')
+  })
+
 })

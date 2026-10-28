@@ -958,17 +958,31 @@ export class InstanceInstallService extends AbstractService implements IInstance
     }))
   }
 
+  async getReviewedModInstalls(path: string) {
+    await this.#javaDirectory(path)
+    return this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      await this.#javaDirectory(path)
+      return (await readPendingInstalls(path)).flatMap(({ state }) => state.review && state.operationId && state.oldFiles && hasInstallWork(state)
+        ? [{ operationId: state.operationId, files: activeInstallFiles(state), oldFiles: activeInstallFiles(state, true) }] : [])
+    })
+  }
+
   async resumeInstanceInstall(
     instancePath: string,
     overrides?: InstanceFile[],
+    reviewedOperationId?: string,
   ): Promise<void | InstallFileError[]> {
+    if (reviewedOperationId !== undefined && (typeof reviewedOperationId !== 'string' || !/^[a-f0-9-]{36}$/.test(reviewedOperationId) || overrides !== undefined)) throw new Error('Invalid reviewed install')
     await this.#idleJavaDirectory(instancePath)
     if (overrides) this.#validateFiles(instancePath, overrides)
     return this.mutex.of(`${LockKey.instance(instancePath)}:resume`).runExclusive(async () => {
       await this.#idleJavaDirectory(instancePath)
       const profiles = await readPendingInstalls(instancePath)
-      for (const profile of profiles) {
-        const result = await this.#resumeInstallProfile(instancePath, profile.path, profile.state, overrides)
+      const selected = reviewedOperationId === undefined ? profiles : profiles.filter(profile => profile.state.review && profile.state.operationId === reviewedOperationId && hasInstallWork(profile.state))
+      if (reviewedOperationId !== undefined && !selected.length) throw new Error('Reviewed install no longer pending')
+      if (overrides && selected.some(profile => profile.state.review)) throw new Error('Reviewed install requires a new review')
+      for (const profile of selected) {
+        const result = await this.#resumeInstallProfile(instancePath, profile.path, profile.state, overrides, reviewedOperationId)
         if (result) return result
       }
     })
@@ -979,12 +993,14 @@ export class InstanceInstallService extends AbstractService implements IInstance
     currentStatePath: string,
     currentState: InstanceInstallLock,
     overrides?: InstanceFile[],
+    taskId?: string,
   ): Promise<void | InstallFileError[]> {
     const lockFilePath = join(instancePath, 'instance-lock.json')
     const lockState = await readJson(lockFilePath)
       .then(InstanceLockSchema.parse)
       .catch(() => undefined)
 
+    if (overrides && currentState.review) throw new Error('Reviewed install requires a new review')
     if (overrides) {
       currentState.files = currentState.files.map(
         (f) => overrides.find((o) => o.path === f.path) ?? f,
@@ -997,7 +1013,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
         currentState.oldFiles = []
       }
       const installed = await this.#install(
-        instancePath, lockState, currentState, undefined, currentState.oldFiles !== undefined, currentStatePath, true,
+        instancePath, lockState, currentState, taskId, currentState.oldFiles !== undefined, currentStatePath, true,
       )
       if (!installed) return
       if (currentState.oldFiles) {

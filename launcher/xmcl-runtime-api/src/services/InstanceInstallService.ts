@@ -75,6 +75,12 @@ export type InstallInstanceOptions = {
   id?: string
 }
 
+export interface ReviewedModInstall {
+  operationId: string
+  files: InstanceFile[]
+  oldFiles: InstanceFile[]
+}
+
 export class InstanceInstallStatus {
   instance = ''
 
@@ -147,7 +153,9 @@ export interface InstanceInstallService {
    *
    * This method might return the errors all the errors are checksum not matched.
    */
-  resumeInstanceInstall(path: string, overrides?: InstanceFile[]): Promise<InstallFileError[] | void>
+  resumeInstanceInstall(path: string, overrides?: InstanceFile[], reviewedOperationId?: string): Promise<InstallFileError[] | void>
+  /** Read only active reviewed mod plans, without exposing private workspace paths. */
+  getReviewedModInstalls(path: string): Promise<ReviewedModInstall[]>
   /**
    * Check if this instance has any pending install
    *

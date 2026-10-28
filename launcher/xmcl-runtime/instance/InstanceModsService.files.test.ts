@@ -15,6 +15,7 @@ const { InstanceModsService } = await import('./InstanceModsService')
 const { InstanceService } = await import('./InstanceService')
 const { LaunchService } = await import('../launch/LaunchService')
 let instances: { path: string; edition: string }[], processes: { options: { gameDirectory: string } }[], lock: Mutex
+let resources: { getMetadataByHashes: ReturnType<typeof vi.fn>; getWatched: ReturnType<typeof vi.fn> }
 let service: InstanceType<typeof InstanceModsService>, of: ReturnType<typeof vi.fn>
 beforeEach(() => {
   instances = [{ path: 'managed', edition: 'java' }]; processes = []; lock = new Mutex(); of = vi.fn(() => lock)
@@ -23,13 +24,14 @@ beforeEach(() => {
     if (key === LaunchService) return { getGameProcesses: async () => processes }
     throw new Error('unexpected registry access')
   } } }
-  service = new InstanceModsService(app as any, {} as any)
+  resources = { getMetadataByHashes: vi.fn(), getWatched: vi.fn() }
+  service = new InstanceModsService(app as any, resources as any)
 })
 const operations = (path = 'managed') => [() => service.install({ path, files: [] }), () => service.uninstall({ path, files: [] }), () => service.enable({ path, files: [] }), () => service.disable({ path, files: [] })]
 it('rejects absent and Bedrock records before any filesystem operation', async () => {
-  for (const op of [...operations('unregistered'), () => service.getModFilesSnapshot('unregistered')]) await expect(op()).rejects.toHaveProperty('name', 'InstanceNotFoundError')
+  for (const op of [...operations('unregistered'), () => service.getModFilesSnapshot('unregistered'), () => service.getModSources('unregistered')]) await expect(op()).rejects.toHaveProperty('name', 'InstanceNotFoundError')
   instances[0].edition = 'bedrock'
-  for (const op of [...operations(), () => service.getModFilesSnapshot('managed')]) await expect(op()).rejects.toHaveProperty('name', 'InstanceNotFoundError')
+  for (const op of [...operations(), () => service.getModFilesSnapshot('managed'), () => service.getModSources('managed')]) await expect(op()).rejects.toHaveProperty('name', 'InstanceNotFoundError')
   expect(of).not.toHaveBeenCalled()
 })
 it('blocks every file mutation while this instance has a tracked game process', async () => {
@@ -50,4 +52,12 @@ it('checks a game started while waiting for the instance lock before writing', a
   const result = expect(pending).rejects.toHaveProperty('name', 'InstanceRunningError')
   await vi.waitFor(() => expect(of).toHaveBeenCalled())
   processes.push({ options: { gameDirectory: 'managed' } }); release(); await result
+})
+
+it('reads provider IDs from committed metadata rather than a pending resource-state event', async () => {
+  const hash = 'a'.repeat(40), source = { projectId: 11, fileId: 22 }
+  resources.getWatched.mockReturnValue({ state: { files: [{ hash, metadata: {} }] } })
+  resources.getMetadataByHashes.mockResolvedValue([{ sha1: hash, curseforge: source, name: 'extra fields are not exposed', secret: 'fixture-only' }, { sha1: 'b'.repeat(40), curseforge: source }])
+  expect(await service.getModSources('managed')).toEqual([{ hash, curseforge: source, modrinth: undefined }])
+  expect(resources.getMetadataByHashes).toHaveBeenCalledWith([hash])
 })

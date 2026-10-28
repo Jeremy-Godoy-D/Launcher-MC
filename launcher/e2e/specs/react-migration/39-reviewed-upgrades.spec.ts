@@ -86,3 +86,24 @@ for (const change of ['file', 'configuration']) test(`native review rejects ${ch
     await new Promise<void>(resolve => server.close(() => resolve()))
   }
 })
+
+
+test('Native reviewed recovery survives renderer reload and resumes its operation without applying another pending plan', async ({ launcher }) => {
+  const page = launcher.main, [path] = await seedReactLibrary(page), source = join(launcher.gameDataPath, 'source')
+  await makeReactMod(path, 'old', 'Old'); await makeReactMod(source, 'next', 'New')
+  const original = await readFile(join(path, 'mods/old.jar')), next = await readFile(join(source, 'mods/next.jar'))
+  const sourceFile = join(source, 'mods/next.jar'), savedSource = join(source, 'mods/held.jar')
+  await rename(sourceFile, savedSource)
+  const options = await reviewed(page, path, { path: 'mods/old.jar', hashes: hash(original) }, { path: 'mods/next.jar', hashes: hash(next), downloads: [pathToFileURL(sourceFile).href] })
+  expect((await apply(page, options)).error).toBeDefined()
+  const other = { path, oldFiles: [], files: [{ path: 'mods/unrelated.jar', hashes: { sha1: 'c'.repeat(40) }, downloads: [pathToFileURL(join(source, 'missing.jar')).href] }] }
+  expect((await apply(page, other)).error).toBeDefined()
+  await rename(savedSource, sourceFile); await page.reload()
+  const plans = await page.evaluate(async path => (window as any).serviceChannels.open('InstanceInstallService').call('getReviewedModInstalls', path), path)
+  expect(plans).toHaveLength(1); expect(Object.keys(plans[0]).sort()).toEqual(['files', 'oldFiles', 'operationId'])
+  const result = await page.evaluate(async ({ path, id }) => (window as any).serviceChannels.open('InstanceInstallService').call('resumeInstanceInstall', path, undefined, id), { path, id: plans[0].operationId })
+  expect(result).toBeUndefined(); expect(await readFile(join(path, 'mods/next.jar'))).toEqual(next)
+  await expect(readFile(join(path, 'mods/old.jar'))).rejects.toMatchObject({ code: 'ENOENT' })
+  await expect(readFile(join(path, 'mods/unrelated.jar'))).rejects.toMatchObject({ code: 'ENOENT' })
+  expect(await page.evaluate(async path => (window as any).serviceChannels.open('InstanceInstallService').call('getReviewedModInstalls', path), path)).toEqual([])
+})

@@ -7,6 +7,8 @@ export function getInstanceModStateKey(path: string) {
   return `instance-mods://${path}`
 }
 
+export type ModSource = Pick<Resource, 'hash'> & Pick<Resource['metadata'], 'modrinth' | 'curseforge'>
+
 export interface ModFilesSnapshot {
   fingerprint: string
   configuration?: ModReviewConfiguration
@@ -29,6 +31,8 @@ export interface InstanceModsService extends InstanceResourcesService {
   uninstall(options: ReviewedModChanges): Promise<void>
   /** Capture directory identities for a reviewed operation, without reading every archive. */
   getModFilesSnapshot(path: string): Promise<ModFilesSnapshot>
+  /** Read committed public provider identifiers without waiting for batched UI events. */
+  getModSources(path: string): Promise<ModSource[]>
   /**
    * Mark mods enabled
    */
