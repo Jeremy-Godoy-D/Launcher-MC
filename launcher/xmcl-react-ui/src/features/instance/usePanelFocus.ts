@@ -1,8 +1,8 @@
 import { useLayoutEffect, type RefObject } from 'react'
 
-export function usePanelFocus(panel: RefObject<HTMLElement | null>, first: RefObject<HTMLElement | null>) {
+export function usePanelFocus(panel: RefObject<HTMLElement | null>, first?: RefObject<HTMLElement | null>) {
   useLayoutEffect(() => {
-    first.current?.focus()
+    first?.current?.focus()
     let frame = 0
     const resize = () => {
       cancelAnimationFrame(frame)

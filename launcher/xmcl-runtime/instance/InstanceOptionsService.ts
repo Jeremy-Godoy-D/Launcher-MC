@@ -6,6 +6,8 @@ import {
   getInstanceGameOptionKey,
   type InstanceOptionsService as IInstanceOptionsService,
   InstanceOptionsServiceKey,
+  LockKey,
+  type ResourcePackSelection,
   parseShaderOptions,
   stringifyShaderOptions,
 } from '@xmcl/runtime-api'
@@ -26,6 +28,9 @@ import {
 
 import { requireString } from '../util/object'
 import { existsSync } from 'fs'
+import { InstanceService } from './InstanceService'
+import { LaunchService } from '../launch/LaunchService'
+import { readResourcePackSelection, writeResourcePackSelection } from './utils/resourcePackSelection'
 
 /**
  * Top-level files under `<instance>/server/` that the agent / UI may read &
@@ -52,6 +57,29 @@ export class InstanceOptionsService extends AbstractService implements IInstance
     @Inject(kGameDataPath) private getPath: PathResolver,
   ) {
     super(app)
+  }
+
+  async #javaInstance(path: string) {
+    const instances = await this.app.registry.get(InstanceService)
+    await instances.initialize()
+    if (!instances.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceNotFoundError')
+  }
+
+  async getResourcePackSelection(path: string) {
+    await this.#javaInstance(path)
+    return readResourcePackSelection(path)
+  }
+
+  async editResourcePackSelection(path: string, selection: ResourcePackSelection) {
+    await this.#javaInstance(path)
+    return this.mutex.of('resource-pack-options').runExclusive(() => this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      await this.#javaInstance(path)
+      const launch = await this.app.registry.get(LaunchService)
+      const processes = await launch.getGameProcesses()
+      if (processes.some(process => process.options.gameDirectory === path)) throw new AnyError('InstanceRunningError')
+      if (processes.length && await this.isGameOptionsLinked(path) && (await Promise.all(processes.map(process => this.isGameOptionsLinked(process.options.gameDirectory)))).some(Boolean)) throw new AnyError('SharedOptionsRunningError')
+      return writeResourcePackSelection(path, selection, this.getPath('resourcepacks'), this.getPath('options.txt'))
+    }))
   }
 
   getServerProperties(instancePath: string): Promise<Record<string, string>> {

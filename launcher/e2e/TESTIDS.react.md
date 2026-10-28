@@ -6,14 +6,14 @@ This file is the contract between the launcher UI in `xmcl-react-ui/` and the Pl
 
 Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testids` with the selected LAUNCHER_RENDERER. Computed IDs are not resolved by this static registry.
 
-**Total anchors:** 41 (in 25 Vue/TSX files)
+**Total anchors:** 42 (in 31 Vue/TSX files)
 
 | Test ID | Defined in |
 |---|---|
 | `accounts-page` | [`xmcl-react-ui/src/features/accounts/Accounts.tsx#L86`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L86) |
 | `app-backdrop` | [`xmcl-react-ui/src/App.tsx#L432`](../xmcl-react-ui/src/App.tsx#L432) |
 | `app-sidebar` | [`xmcl-react-ui/src/App.tsx#L467`](../xmcl-react-ui/src/App.tsx#L467) |
-| `content-groups-editor` | [`xmcl-react-ui/src/features/instance/ContentGroupsEditor.tsx#L34`](../xmcl-react-ui/src/features/instance/ContentGroupsEditor.tsx#L34) |
+| `content-groups-editor` | [`xmcl-react-ui/src/features/instance/ContentGroupsEditor.tsx#L46`](../xmcl-react-ui/src/features/instance/ContentGroupsEditor.tsx#L46) |
 | `copy-cancel` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L75`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L75) |
 | `copy-finish` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76) |
 | `copy-path` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L62`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L62) |
@@ -27,11 +27,12 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `instance-export` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L46`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L46) |
 | `instance-icon-choose` | [`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L122`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L122) |
 | `instance-minecraft` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L515`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L515) |
-| `instance-mods` | [`xmcl-react-ui/src/features/instance/InstanceMods.tsx#L60`](../xmcl-react-ui/src/features/instance/InstanceMods.tsx#L60) |
+| `instance-mods` | [`xmcl-react-ui/src/features/instance/InstanceMods.tsx#L103`](../xmcl-react-ui/src/features/instance/InstanceMods.tsx#L103) |
 | `instance-name` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L490`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L490) |
 | `instance-operation-confirm` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76)<br>[`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L159`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L159) |
 | `instance-operations` | [`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L62`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L62) |
-| `instance-workspace` | [`xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L29`](../xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L29) |
+| `instance-resourcepacks` | [`xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L69`](../xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L69) |
+| `instance-workspace` | [`xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L30`](../xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L30) |
 | `launch-confirm` | [`xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157`](../xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157) |
 | `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L700`](../xmcl-react-ui/src/App.tsx#L700) |
 | `library-groups` | [`xmcl-react-ui/src/App.tsx#L696`](../xmcl-react-ui/src/App.tsx#L696) |

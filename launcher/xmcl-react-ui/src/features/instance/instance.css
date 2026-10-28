@@ -87,3 +87,11 @@
   .mod-update-pending .button { flex-shrink: 0; }
   .mod-update-changes li { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px; }
 }
+
+@layer components {
+  .packs-help { max-width: 75ch; line-height: 1.6; color: var(--muted); margin: 16px 0; }
+  .pack-heading { margin: 24px 0 12px; }
+  .pack-list { list-style: none; padding: 0; margin: 12px 0 24px; }
+  .pack-list li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .pack-list .content-actions, .pack-list > li > .button { flex-shrink: 0; }
+}

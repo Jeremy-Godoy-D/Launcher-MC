@@ -7,6 +7,7 @@ import { instanceIcon, loaderName } from '../library/model'
 import { useService } from '../../runtime'
 import { useI18n } from '../../i18n'
 import { InstanceMods } from './InstanceMods'
+import { InstanceResourcePacks } from './InstanceResourcePacks'
 import './instance.css'
 
 const tabs = [['summary', '/instance'], ['mods', '/instance/mods'], ['packs', '/instance/resourcepacks'], ['shaders', '/instance/shaderpacks'], ['worlds', '/instance/save'], ['settings', '/instance/base-setting'], ['console', '/instance/console']] as const
@@ -46,6 +47,6 @@ export function InstanceWorkspace({ instance, media, cover, headerRef, play, opt
         <div><dt>{t('react.workspace.playtime')}</dt><dd>{t('react.workspace.minutes', { value: n(Math.floor(instance.playtime / 60000)) })}</dd></div>
       </dl>
       <p className="instance-path">{t('react.workspace.folder')}: {instance.path}</p>
-    </section> : tab === 'mods' ? <InstanceMods key={instance.path} path={instance.path} runtime={instance.runtime} running={running} configuredJava={instance.java} /> : tab ? <div role="status" className="empty"><h2>{t(`react.workspace.${tab}`)}</h2><p>{t('react.instances.featurePending')}</p></div> : <div className="empty"><h2>{t('react.workspace.notFound')}</h2><Link to="/instance" className="button secondary">{t('react.workspace.summary')}</Link></div>}
+    </section> : tab === 'mods' ? <InstanceMods key={instance.path} path={instance.path} runtime={instance.runtime} running={running} configuredJava={instance.java} /> : tab === 'packs' ? <InstanceResourcePacks key={instance.path} path={instance.path} running={running} /> : tab ? <div role="status" className="empty"><h2>{t(`react.workspace.${tab}`)}</h2><p>{t('react.instances.featurePending')}</p></div> : <div className="empty"><h2>{t('react.workspace.notFound')}</h2><Link to="/instance" className="button secondary">{t('react.workspace.summary')}</Link></div>}
   </section>
 }
