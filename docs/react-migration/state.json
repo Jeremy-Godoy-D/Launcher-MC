@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa. Último CI40612683266 sobre0d3ae7e(fuente f6e78e5/MOD-CHANGES) éxito React/Vue:97funcionales. Fuente local nueva cf2b77d/INSTALL-STATE: temporal aleatorio wx, padre directo/destino regulares, JSON completo y limpieza de temporal propio;5 nuevas pruebas,683unitarias/77archivos;tipos runtime/lint pasan;8React+3Vue focales(23,4s/19,4s). Ambos hosts recompilados; renderers f6 sin cambios;dist/defaultVue restaurados. Preparar push del informe y comprobar CI nuevo. Siguiente tarea obligatoria antes de updates React: cerrar registro Java/ruta/proceso y workspaces/estado persistido de InstanceInstallService bajo sus locks; sus métodos genéricos aún no equivalen a InstanceModsService. Revisados ModpackService/instanceCreation: crean instancia antes de instalar; mocks progressive/concurrent carecen de initialize/edition/LaunchService y necesitarán fixtures válidas. No anidar lock de mods alrededor de installInstanceFiles (él ya toma el mismo lock). Después preservar .disabled en buildModUpgradeManifest, proveedores/actualización, packs/shaders/mundos/ajustes/consola y6–9. No cerrar K08/gates5;MS pospuesto;producción/proxy intactos;sin DevTools/CDP;no tocar ANALISIS.",
+  "nextAction": "Etapa5 activa. Fuente33ef2a3/INSTALL-AUTHORITY: registro Java, raíz absoluta/directa y proceso revalidados bajo locks; manifiestos seguros y lectores internos privados. 694unitarias/77archivos,tipos raíz/lint pasan;11React+3Vue empaquetados(24,5s/18,8s), ambos renderers/hosts reconstruidos ydistVue restaurado. CI anterior40615348161(fdce3bc/cf2b77d) éxito ambos; comprobar CI nuevo tras push. Próximo bloque obligatorio antes de updates: validar workspace/backup/profile persistidos y ancestros antes de ensureDir/move/remove/lecturas, preservar shared links autorizados. No mover/borrar workspace legacy externo por prefijo JSON. Luego preservar.disabled y conectar actualización de mods/proveedores/revisión/cola, packs/shaders,mundos/ajustes/consola y6–9. No anidar lock de mods alrededor de installInstanceFiles. K08/gates5 pendientes;MS pospuesto;PR4 borrador,producción/proxy intactos;sin DevTools/CDP;no tocar ANALISIS.",
   "stages": [
     {
       "id": 0,
@@ -658,9 +658,17 @@
             {
               "path": "docs/react-migration/STAGE5-INSTALL-STATE.json",
               "sha256": "74edad2288d35995312fb44c63a0784a61a0f517d717a3c359c3ca44daa44a8c"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-INSTALL-AUTHORITY.md",
+              "sha256": "45038e209cd77fb092b8a06635abf8c5337d4440bd25b345fba2a17c118e49aa"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-INSTALL-AUTHORITY.json",
+              "sha256": "b0a54382f506081afce2b1803d3cd57638243ec1ff658af39fffece8ebacd367"
             }
           ],
-          "note": "Avance parcial: WORKSPACE/AUTHORITY/GROUPS/LOCAL-FILES/MOD-INFO/DIAGNOSTICS/MOD-CHANGES/INSTALL-STATE. Revisión de dependencias y escritor de perfiles protegidos. CI40612683266 aprueba fuente f6e78e5/0d3ae7e; cf2b77d tiene683unitarias y11 escenarios empaquetados focales, pendiente CI nuevo. Faltan autorización/workspaces del instalador antes de conectar actualizaciones, luego packs/shaders y resto5. K08/gates5 pending."
+          "note": "Avance parcial: WORKSPACE/AUTHORITY/GROUPS/LOCAL-FILES/MOD-INFO/DIAGNOSTICS/MOD-CHANGES/INSTALL-STATE/INSTALL-AUTHORITY. Fuente33ef2a3:694unitarias y14recorridos empaquetados;CI previo40615348161 verde, nuevo pendiente. Faltan workspace/estado/ancestros del instalador antes de updates; después packs/shaders/resto5. K08/gates5 pending."
         },
         {
           "id": "worlds-settings",
