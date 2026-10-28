@@ -40,7 +40,7 @@ import { FSWatcher } from 'chokidar'
 import { randomUUID } from 'crypto'
 import filenamify from 'filenamify'
 import { unwatchFile, watchFile, type Stats } from 'fs'
-import { ensureDir, lstat, pathExists, readJSON, readJson, remove, rename, rmdir, stat, unlink } from 'fs-extra'
+import { ensureDir, lstat, pathExists, readJSON, readJson, remove, rmdir, unlink } from 'fs-extra'
 import { basename, dirname, isAbsolute, join, relative, resolve } from 'path'
 import { Inject, LauncherApp, LauncherAppKey } from '~/app'
 import { ZipManager, kTasks, type Tasks } from '~/infra'
@@ -57,7 +57,7 @@ import { unzipInstanceFiles } from './utils/unzipInstanceFiles'
 import { deduplicateInstanceFiles } from '~/util/deduplicateInstanceFiles'
 import { resolveInstanceFiles } from './utils/resolveInstanceFiles'
 import { getTracker } from '~/util/taskHelper'
-import { readPendingInstalls, writeInstallState } from './utils/pendingInstall'
+import { assertInstallStatePaths, isLegacyInstallWorkspace, readPendingInstalls, writeInstallState } from './utils/pendingInstall'
 import { activeInstallFiles, hasInstallWork, installPathKey, supersedeInstallPlans } from './utils/installPlan'
 
 /**
@@ -248,12 +248,11 @@ export class InstanceInstallService extends AbstractService implements IInstance
         targetState = { ...saved, files: targetState.files, oldFiles: targetState.oldFiles }
         await this.mutex.of(LockKey.instance(instancePath)).runExclusive(async () => {
           await this.#idleJavaDirectory(instancePath)
-          if (dirname(targetState.workspace) === dirname(instancePath) &&
-              basename(targetState.workspace).startsWith(`.${basename(instancePath)}-install-`)) {
-            const workspace = join(instancePath, '.install', randomUUID(), 'files')
-            await ensureDir(dirname(workspace))
-            if (await pathExists(targetState.workspace)) await rename(targetState.workspace, workspace)
-            targetState.workspace = workspace
+          await assertInstallStatePaths(instancePath, profilePath, targetState, true)
+          if (isLegacyInstallWorkspace(instancePath, profilePath, targetState)) {
+            // Persisted JSON cannot authorize moving or deleting an external directory.
+            targetState.workspace = join(instancePath, '.install', randomUUID(), 'files')
+            targetState.finishedPath = []
             await writeInstallState(profilePath, targetState)
           }
         })
@@ -278,6 +277,12 @@ export class InstanceInstallService extends AbstractService implements IInstance
     const lockFilePath = join(instancePath, 'instance-lock.json')
     const currentStatePath = profilePath
     const originalDirectory = await this.#idleJavaDirectory(instancePath)
+    await assertInstallStatePaths(instancePath, profilePath, targetState)
+    const workspacePath = targetState.workspace, backupPath = targetState.backup
+    const checkStatePaths = async () => {
+      if (targetState.workspace !== workspacePath || targetState.backup !== backupPath) throw new Error('Install state paths changed')
+      await assertInstallStatePaths(instancePath, profilePath, targetState)
+    }
 
     const curseforgeClient = this.curseforgeClient
     const modrinthClient = this.modrinthClient
@@ -351,6 +356,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
         task.controller.abort()
         throw task.controller.signal.reason
       }
+      await checkStatePaths()
     }
     const onDirectoryChange = (current: Stats) => {
       if (current.nlink === 0 || current.ino !== originalDirectory.ino) void abortOnRemove()
@@ -519,6 +525,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
         throw new DOMException('Installation superseded by a newer plan', 'AbortError')
       }
       targetState = current.state
+      await checkStatePaths()
       // Also covers a crash between publishing a newer plan and recording its
       // ownership transfers in the older profiles.
       for (const newer of profiles.filter(profile =>
@@ -552,6 +559,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
       const profiles = await readPendingInstalls(instancePath)
       const saved = profiles.find(profile => profile.path === profilePath)?.state
       if (saved) targetState = { ...targetState, ...saved, files: targetState.files }
+      await checkStatePaths()
       if (!noLock && lockState && !isUpstreamIsSameOrigin(lockState.upstream, targetState.upstream)) {
         throw new AnyError('InstanceUpstreamError', 'The instance is locked by another upstream')
       }
@@ -583,7 +591,10 @@ export class InstanceInstallService extends AbstractService implements IInstance
           if (active) {
             active.abort(new DOMException('Installation superseded by a newer plan', 'AbortError'))
           } else {
-            await remove(older.state.workspace)
+            if (!isLegacyInstallWorkspace(instancePath, older.path, older.state)) {
+              await assertInstallStatePaths(instancePath, older.path, older.state)
+              await remove(older.state.workspace)
+            }
             if (dirname(dirname(older.state.workspace)) === join(instancePath, '.install')) {
               await rmdir(dirname(older.state.workspace)).catch((error) => {
                 if (!isSystemError(error) || !['ENOENT', 'ENOTEMPTY'].includes(error.code)) throw error
@@ -678,6 +689,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
       await cleanup()
     }
     const cleanup = async () => {
+      await checkStatePaths()
       await remove(targetState.workspace)
       await unlink(currentStatePath).catch((error) => {
         if (!isSystemError(error) || error.code !== 'ENOENT') throw error

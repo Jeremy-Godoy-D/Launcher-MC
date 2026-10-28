@@ -38,7 +38,7 @@ export type InstanceFile = z.infer<typeof InstanceFile>
 
 export function isInstanceInstallPath(path: string) {
   const root = path.replace(/\\/g, '/').split('/')[0].toLowerCase()
-  return root === '.install' || root === '.install-profile' || root === '.install-profile.tmp' ||
+  return root === '.install' || root === '.backups' || root === '.install-profile' || root === '.install-profile.tmp' ||
     root === 'instance.json' || /^instance\.json\.tmp-[a-f0-9]{16}$/.test(root) || root.startsWith('.install-state-') ||
     root === '.install-manifest' || root === 'instance-lock.json' || root === 'instance-lock.json.tmp' ||
     root === 'unresolved-files.json' || root === '.copy-job.json' || root.startsWith('.copy-temp-')

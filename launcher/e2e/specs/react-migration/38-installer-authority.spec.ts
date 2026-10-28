@@ -60,3 +60,36 @@ test('native metadata writes preserve linked originals and cannot replace launch
   expect(await readFile(outside, 'utf8')).toBe(data)
   expect(await readFile(join(path, 'instance.json'))).toEqual(original)
 })
+
+for (const name of ['.install', '.backups']) test(`native installer refuses a linked ${name} before staging`, async ({ launcher }) => {
+  const page = launcher.main, [path] = await seedReactLibrary(page), outside = join(launcher.gameDataPath, 'outside')
+  await mkdir(outside); await writeFile(join(outside, 'keep'), 'KEEP')
+  await symlink(outside, join(path, name), 'junction')
+  const result = await call(page, 'installInstanceFiles', { path, oldFiles: [], files: [{ path: 'mods/next.jar', hashes: {} }] })
+  expect(result.error?.message).toContain('Unsafe install directory')
+  expect(await readdir(outside)).toEqual(['keep'])
+  expect(await readFile(join(outside, 'keep'), 'utf8')).toBe('KEEP')
+})
+
+test('native resume rejects external state paths and recovers legacy metadata without moving its external workspace', async ({ launcher }) => {
+  const page = launcher.main, [path] = await seedReactLibrary(page), outside = join(launcher.gameDataPath, 'outside'), profile = join(path, '.install-profile')
+  await mkdir(outside); await writeFile(join(outside, 'keep'), 'KEEP')
+  const state = { version: 1, mtime: 1, upstream: { type: 'peer', id: '' }, oldFiles: [], files: [], finishedPath: [], workspace: join(path, '.install/op/files'), backup: join(path, '.backups/op') }
+  for (const field of ['workspace', 'backup']) {
+    const data = JSON.stringify({ ...state, [field]: outside })
+    await writeFile(profile, data)
+    expect((await call(page, 'resumeInstanceInstall', path)).error?.message).toContain('Unsafe install state paths')
+    expect(await readFile(profile, 'utf8')).toBe(data)
+    expect(await readdir(outside)).toEqual(['keep'])
+  }
+  const { basename, dirname } = await import('node:path'), legacy = join(dirname(path), `.${basename(path)}-install-legacy`)
+  // All resources belong to this isolated launcher fixture.
+  expect(legacy.startsWith(launcher.gameDataPath)).toBe(true)
+  await mkdir(legacy); await writeFile(join(legacy, 'keep'), 'LEGACY')
+  await writeFile(profile, JSON.stringify({ ...state, workspace: legacy }))
+  expect((await call(page, 'resumeInstanceInstall', path)).error).toBeUndefined()
+  await expect(readFile(profile)).rejects.toMatchObject({ code: 'ENOENT' })
+  expect(await readdir(legacy)).toEqual(['keep'])
+  expect(await readFile(join(legacy, 'keep'), 'utf8')).toBe('LEGACY')
+  expect(await readFile(join(outside, 'keep'), 'utf8')).toBe('KEEP')
+})

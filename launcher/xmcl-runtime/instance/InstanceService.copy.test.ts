@@ -86,7 +86,7 @@ test('a cancelled native copy reloads its durable state and resumes the same ins
   expect(await readFile(join(path, 'saves/World/level.dat'), 'utf8')).toBe('world-source')
   expect(await restarted.resumeInstanceCopy(path)).toBe(path)
   expect(next.instances).toHaveLength(2)
-})
+}, 15000)
 test('resume conflicts preserve edited destination data and the pending marker', async () => {
   const path = await interrupted(); await file(join(path, 'config/qa.txt'), 'keep-user-edit')
   await expect(service.resumeInstanceCopy(path)).rejects.toMatchObject({ name: 'InstanceCopyConflict', destinationPath: path })

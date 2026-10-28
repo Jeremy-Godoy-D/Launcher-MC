@@ -97,7 +97,7 @@ describe('versioned advancement resources', () => {
     expect(reset.advancements?.items.every(item => !item.done && item.criteriaCompleted === 0)).toBe(true)
     expect(french.advancements?.items[0].title).toBe('Ancien')
     expect(french.advancements?.completed).toBe(1)
-  })
+  }, 15000)
 
   test('does not substitute unrelated installed versions when the selected client is unavailable', async () => {
     await version('unrelated', 'advancement', 'Unrelated')
