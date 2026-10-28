@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa. Fuente 9d6ad2b/INSTALL-TARGETS: destinos y rutas hijas de staging/backup comprobados; enlaces compartidos propios conservados, externos/anidados rechazados. Staging inválido se desvincula antes de descargar. Orden de solicitudes reservado antes del primer await; descargas paralelas y progreso parcial conservados. 709 unitarias/77 archivos; tipos y lint aprobados; 16 React + 3 Vue empaquetados (32,0 s/19,1 s), dist/default Vue restaurados. CI 40717537004 sobre 1da8953/f25aab4 pasó ambos; comprobar CI nuevo. Siguiente: compartir buildModUpgradeManifest desde API y preservar .disabled, conectar actualización/revisión/proveedores/cola y guardas nativas de hashes/configuración antes de publicar; luego packs/shaders, mundos, ajustes, consola y 6–9. No envolver installInstanceFiles con otro LockKey.instance. K08/gates5 pendientes; Microsoft pospuesto; PR4 borrador, producción/proxy intactos. No DevTools/CDP ni ANALISIS; limpieza de .progressive-install-test-s7GPKa rechazada: no reintentar ni eludir.",
+  "nextAction": "Etapa 5 activa. Fuente 0ae267c/UPGRADE-MANIFEST: constructor puro compartido en API, wrapper Vue conservado; preserva .disabled sin modificar planes ni trasladar esa semántica a packs/shaders. 717 unitarias/79 archivos y ocho focales; tipos/lint aprobados; 16 React + 3 Vue empaquetados (31,0 s/18,3 s), ambos renderers/hosts reconstruidos, dist/default Vue restaurados. CI 40721432762 sobre f27c286/9d6ad2b pasó ambos; comprobar CI de este nuevo source tras push. Próximo: conectar consultas/revisión de updates React y guardas Native de hashes/configuración antes de publicar, cola/progreso/reanudación/cancelación y errores recuperables. Reutilizar readModFilesSnapshot/validateModFileChanges sin lock anidado. CF vacío en renderer pasa por ElectronSession HTTPS y pluginApiFallback hacia Worker; no copiar extras de clients.ts. Después packs/shaders, mundos, ajustes, consola y 6–9. K08/gates5 pendientes; MS pospuesto; PR4 borrador, producción/proxy intactos. No DevTools/CDP ni ANALISIS; no reintentar limpieza denegada de .progressive-install-test-s7GPKa.",
   "stages": [
     {
       "id": 0,
@@ -678,9 +678,13 @@
             {
               "path": "docs/react-migration/STAGE5-INSTALL-TARGETS.md",
               "sha256": "bbc64003cf00f5f00066aecc59bd19bc781a32816d10058f3ce34499ef59241a"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-UPGRADE-MANIFEST.md",
+              "sha256": "52ad4317158be582f1e385667d0fc789e15df268d0ea51b64914f0fecd4275c7"
             }
           ],
-          "note": "Avance parcial hasta INSTALL-TARGETS (9d6ad2b): 709 unitarias y 19 recorridos Native focales, tipos/lint pasan. CI anterior 40717537004 verde en React/Vue; nuevo requerido. Pendientes actualización de contenido con revisión y guardas vigentes, packs/shaders y resto de etapa 5. K08/gates5 siguen pending."
+          "note": "Avance parcial hasta UPGRADE-MANIFEST (0ae267c): 717 unitarias y 19 recorridos Native focales, tipos/lint pasan. CI 40721432762 aprueba ambos renderers sobre f27c286/9d6ad2b; source nuevo requiere CI. Pendientes consultas/revisión de updates React y guardas vigentes, packs/shaders y resto de etapa 5. K08/gates5 siguen pending."
         },
         {
           "id": "worlds-settings",
