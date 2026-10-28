@@ -525,3 +525,15 @@ react:
       recommends: "Recommended"
       breaks: "Incompatibilities"
       conflicts: "Conflicts"
+
+  modChanges:
+    title: "Review mod changes"
+    cancel: "Cancel changes"
+    apply: "Apply these changes"
+    files: "Changed files and requirements"
+    requested: "Requested selection"
+    additional: "Dependency changes"
+    warnings: "Requirements to review"
+    enableHelp: "These files will be enabled. Review dependencies and requirements before continuing."
+    disableHelp: "These files will be disabled, including affected dependents and dependencies no remaining mod needs."
+    incomplete: "Some metadata is pending or could not be interpreted. Only your selection will change; no dependency changes were added."

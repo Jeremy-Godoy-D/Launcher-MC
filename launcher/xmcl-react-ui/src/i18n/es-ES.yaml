@@ -525,3 +525,15 @@ react:
       recommends: "Recomendadas"
       breaks: "Incompatibilidades"
       conflicts: "Conflictos"
+
+  modChanges:
+    title: "Revisar cambios de mods"
+    cancel: "Cancelar cambios"
+    apply: "Aplicar estos cambios"
+    files: "Archivos y requisitos de los cambios"
+    requested: "Selección solicitada"
+    additional: "Cambios de dependencias"
+    warnings: "Requisitos por revisar"
+    enableHelp: "Se activarán estos archivos. Revisa las dependencias y los requisitos antes de continuar."
+    disableHelp: "Se desactivarán estos archivos, incluidos dependientes afectados y dependencias que ya no necesita otro mod."
+    incomplete: "Hay metadatos pendientes o archivos que no se pudieron interpretar. Solo se cambiará tu selección; no se añadieron cambios de dependencias."

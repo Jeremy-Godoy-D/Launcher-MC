@@ -14,6 +14,11 @@ import { normalizeModFileName } from '@xmcl/runtime-api/src/services/InstanceMod
 import { RemoveModsDialog, type ReviewedMod } from './RemoveModsDialog'
 import { ModDetails } from './ModDetails'
 import { ModDiagnostics } from './ModDiagnostics'
+import { ModChangesDialog } from './ModChangesDialog'
+import { modModel } from './modModel'
+import { planModChanges } from '@xmcl/runtime-api/src/util/modChanges'
+
+type ModChangeReview = { plan: ReturnType<typeof planModChanges>; inventory: ModFilesSnapshot; revision: number; enable: boolean; incomplete: boolean }
 
 export function InstanceMods({ path, runtime, running, configuredJava }: { path: string; runtime: SavedInstance['runtime']; running: boolean; configuredJava?: SavedInstance['java'] }) {
   const { t } = useI18n(), service = useService(InstanceModsServiceKey), processes = useService(LaunchServiceKey)
@@ -31,6 +36,7 @@ export function InstanceMods({ path, runtime, running, configuredJava }: { path:
   const [query, setQuery] = useState(''), [filter, setFilter] = useState('all'), [selected, setSelected] = useState<string[]>([])
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('')
   const [removing, setRemoving] = useState<ReviewedMod[] | null>(null)
+  const [reviewing, setReviewing] = useState<ModChangeReview | null>(null), reviewTrigger = useRef<HTMLElement | null>(null)
   const [detailsPath, setDetailsPath] = useState('')
   const [diagnostics, setDiagnostics] = useState<ModFilesSnapshot | null>(null), diagnosticsButton = useRef<HTMLButtonElement>(null)
   const detailsTrigger = useRef<HTMLButtonElement | null>(null)
@@ -54,20 +60,33 @@ export function InstanceMods({ path, runtime, running, configuredJava }: { path:
       const result = await action()
       if (active.current && mutating && result !== false) { setSelected([]); setNotice(t('react.content.applied')) }
     } catch (failure) {
-      if (active.current) setError(t(failure instanceof Error && (failure.message === 'running' || failure.name === 'InstanceRunningError') ? 'react.content.running' : failure instanceof Error && failure.name === 'ModFilesChangedError' ? 'react.content.changed' : 'react.content.failed'))
+      const details = failure && typeof failure === 'object' ? failure : {}
+      const name = 'name' in details && typeof details.name === 'string' ? details.name : ''
+      const running = name === 'InstanceRunningError' || 'message' in details && details.message === 'running'
+      if (active.current) setError(t(running ? 'react.content.running' : name === 'ModFilesChangedError' ? 'react.content.changed' : 'react.content.failed'))
     } finally { pending.current = false; if (active.current) setBusy(false) }
   }
-  function toggle(targets: typeof files, enabled: boolean) {
+  async function applyReview(review: ModChangeReview) {
+    if (store.getSnapshot().revision !== review.revision) throw Object.assign(new Error('Mods changed'), { name: 'ModFilesChangedError' })
+    const options = { path, files: review.plan.files.map(file => file.path), expectedSnapshot: review.inventory.fingerprint, expectedHashes: Object.fromEntries(review.plan.files.map(file => [file.path, file.hash])) }
+    if (review.enable) await service.enable(options)
+    else await service.disable(options)
+    if (active.current) { await refreshFiles(); setReviewing(null) }
+  }
+  function toggle(targets: typeof files, enabled: boolean, trigger: HTMLElement) {
+    reviewTrigger.current = trigger
     const changes = targets.filter(file => file.fileName.endsWith('.disabled') === enabled).map(file => file.path)
     if (changes.length) void run(async () => {
-      const review = await service.getModFilesSnapshot(path)
+      const inventory = await service.getModFilesSnapshot(path), current = store.getSnapshot()
       if (!active.current) return false
-      const options = { path, files: changes, expectedSnapshot: review.fingerprint, expectedHashes: Object.fromEntries(targets.filter(file => changes.includes(file.path)).map(file => [file.path, file.hash])) }
-      if (enabled) await service.enable(options)
-      else await service.disable(options)
-      if (active.current) {
-        await refreshFiles()
-      }
+      const nextRuntime = inventory.configuration?.runtime || runtime, entries = new Map(inventory.entries.map(file => [file.path, file]))
+      const records = (current.data?.files || []).filter(file => { const entry = entries.get(file.path); return entry && !entry.directory && file.size === entry.size && file.mtime === entry.mtime })
+      const models = records.flatMap(file => { const model = modModel(file, nextRuntime); return model ? [model] : [] })
+      if (changes.some(path => !models.some(file => file.path === path && file.hash === targets.find(target => target.path === path)?.hash))) throw Object.assign(new Error('Mods changed'), { name: 'ModFilesChangedError' })
+      const incomplete = !!current.data?.errors.length || inventory.entries.some(entry => entry.directory || !models.some(file => file.path === entry.path))
+      const plan = planModChanges(models, nextRuntime, changes, enabled, !incomplete), review = { plan, inventory, revision: current.revision, enable: enabled, incomplete }
+      if (plan.additional.length || plan.issues.length || incomplete) { setReviewing(review); return false }
+      await applyReview(review)
     }, true)
   }
   async function refreshFiles() {
@@ -111,12 +130,12 @@ export function InstanceMods({ path, runtime, running, configuredJava }: { path:
     {snapshot.status === 'loading' && <p role="status">{t('react.content.loading')}</p>}
     {snapshot.status === 'error' && <p role="alert" className="form-error">{t('react.content.loadFailed')}</p>}
     {running && <p role="status">{t('react.content.running')}</p>}
-    {error && !removing && <p role="alert" className="form-error">{error}</p>}
+    {error && !removing && !reviewing && <p role="alert" className="form-error">{error}</p>}
     {notice && <p role="status">{notice}</p>}
     {!!snapshot.data?.errors.length && <div role="alert" className="form-error"><p>{t('react.content.parseFailed')}</p><ul>{snapshot.data.errors.map(file => <li key={file.path}>{file.path.split(/[\\/]/).pop()} · {file.code}</li>)}</ul></div>}
     {!!selection.length && <div className="content-selection" role="group" aria-label={t('react.content.selection')}><span>{t('react.content.selected', { count: selection.length })}</span>
-      <button className="button secondary" disabled={busy || running || snapshot.status !== 'ready' || !selection.some(file => file.fileName.endsWith('.disabled'))} onClick={() => toggle(selection, true)}>{t('react.content.enable')}</button>
-      <button className="button secondary" disabled={busy || running || snapshot.status !== 'ready' || !selection.some(file => !file.fileName.endsWith('.disabled'))} onClick={() => toggle(selection, false)}>{t('react.content.disable')}</button>
+      <button className="button secondary" disabled={busy || running || snapshot.status !== 'ready' || !selection.some(file => file.fileName.endsWith('.disabled'))} onClick={event => toggle(selection, true, event.currentTarget)}>{t('react.content.enable')}</button>
+      <button className="button secondary" disabled={busy || running || snapshot.status !== 'ready' || !selection.some(file => !file.fileName.endsWith('.disabled'))} onClick={event => toggle(selection, false, event.currentTarget)}>{t('react.content.disable')}</button>
       <button ref={removeButton} className="button secondary" disabled={busy || running || snapshot.status !== 'ready'} onClick={() => { setError(''); setRemoving(selection.map(file => ({ path: file.path, fileName: file.fileName, hash: file.hash }))) }}>{t('react.content.remove')}</button>
       <select aria-label={t('react.contentGroups.assignment')} disabled={busy || !groupReady} value={assignTo} onChange={event => setAssignTo(event.target.value)}><option value="">{t('react.contentGroups.none')}</option>{Object.keys(groups).map(name => <option key={name} value={`name:${name}`}>{name}</option>)}</select>
       <button className="button secondary" disabled={busy || !groupReady} onClick={() => void run(async () => {
@@ -134,9 +153,10 @@ export function InstanceMods({ path, runtime, running, configuredJava }: { path:
         <input type="checkbox" aria-label={t('react.content.select', { name: file.name || file.fileName })} checked={selected.includes(file.path)} disabled={busy} onChange={event => setSelected(value => event.target.checked ? [...value, file.path] : value.filter(path => path !== file.path))} />
         <div className="content-file"><button className="content-file-name" aria-label={t('react.modInfo.open', { name: file.name || file.fileName })} aria-expanded={detailsPath === file.path} onClick={event => { detailsTrigger.current = event.currentTarget; if (detailsPath === file.path) closeDetails(); else { setEditingGroups(false); setDiagnostics(null); setDetailsPath(file.path) } }}>{file.name || file.fileName}</button><span>{file.fileName}{file.resourceVersion && ` · ${file.resourceVersion}`}</span><small>{file.metadata.modrinth ? 'Modrinth' : file.metadata.curseforge ? 'CurseForge' : t('react.content.local')}</small>{!!fileGroups(file).length && <div className="content-group-labels">{fileGroups(file).map(name => <span className="content-group-label" key={name}><span className="content-group-dot" aria-hidden="true" style={{ backgroundColor: /^#[0-9a-f]{6}$/i.test(groups[name].color) ? groups[name].color : 'var(--accent)' }} />{name}</span>)}</div>}</div>
         <span className="content-state">{t(disabled ? 'react.content.disabled' : 'react.content.enabled')}</span>
-        <button className="button secondary" aria-label={t(disabled ? 'react.content.enableName' : 'react.content.disableName', { name: file.name || file.fileName })} disabled={busy || running || snapshot.status !== 'ready'} onClick={() => toggle([file], disabled)}>{t(disabled ? 'react.content.enable' : 'react.content.disable')}</button>
+        <button className="button secondary" aria-label={t(disabled ? 'react.content.enableName' : 'react.content.disableName', { name: file.name || file.fileName })} disabled={busy || running || snapshot.status !== 'ready'} onClick={event => toggle([file], disabled, event.currentTarget)}>{t(disabled ? 'react.content.enable' : 'react.content.disable')}</button>
       </li>
     })}</ul>
+    {reviewing && <ModChangesDialog plan={reviewing.plan} enable={reviewing.enable} incomplete={reviewing.incomplete} busy={busy} error={error} close={() => setReviewing(null)} apply={() => void run(() => applyReview(reviewing), true)} returnFocus={() => { (reviewTrigger.current?.isConnected && !('disabled' in reviewTrigger.current && reviewTrigger.current.disabled) ? reviewTrigger.current : searchInput.current)?.focus() }} />}
     {removing && <RemoveModsDialog files={removing} busy={busy} error={error} close={closeRemoval} returnFocus={() => { (removeButton.current || searchInput.current)?.focus() }} remove={() => void run(async () => {
       await service.uninstall({ path, files: removing.map(file => file.path), expectedHashes: Object.fromEntries(removing.map(file => [file.path, file.hash])) })
       await refreshFiles()
