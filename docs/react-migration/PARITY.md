@@ -160,3 +160,7 @@ Bloque etapa5 `98c7604`, MOD-UPDATES: consultas/selección/revisión React conec
 ### Recuperación de actualizaciones revisadas (dbc4473)
 
 STAGE5-MOD-RECOVERY.md: vista previa Native de solo lectura, confirmación fresca, cancelación/reintento y aislamiento A→B; conserva backups/otra cola/mundo. Fix Windows de alias por mayúsculas con archivo editado.770unitarias/81archivos y15escenarios empaquetados distintos;E2Eglobal56previos/0en39/40/42. K08/etapa5 pendientes para comprobación completa. Siguiente:packs/shaders,mundos/ajustes/consola.
+
+### Selección y prioridad de resource packs (d63be84)
+
+STAGE5-RESOURCE-PACK-SELECTION.md: lista/búsqueda/activación/prioridad en React, entradas Minecraft/legacy/carpetas conservadas y guardado Native con snapshot, límites y guardas de procesos. Ajustes compartidos advertidos y conservados.792unitarias/83archivos y9escenarios empaquetados distintos; K09/gates5 pendientes de importación/retirada, información/grupos/compartidos/updates y aceptación completa. Shaders/mundos/ajustes/consola y6–9 pendientes. No equivale a etapa5 terminada.
