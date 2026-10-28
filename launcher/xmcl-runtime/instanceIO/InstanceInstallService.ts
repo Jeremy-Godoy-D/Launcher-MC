@@ -42,7 +42,7 @@ import filenamify from 'filenamify'
 import { unwatchFile, watchFile, type Stats } from 'fs'
 import { ensureDir, lstat, pathExists, readJSON, readJson, remove, rmdir, unlink } from 'fs-extra'
 import { basename, dirname, isAbsolute, join, relative, resolve } from 'path'
-import { Inject, LauncherApp, LauncherAppKey } from '~/app'
+import { Inject, LauncherApp, LauncherAppKey, kGameDataPath } from '~/app'
 import { ZipManager, kTasks, type Tasks } from '~/infra'
 import { InstanceService } from '~/instance/InstanceService'
 import { InstanceModsGroupService } from '~/instance/InstanceModsGroupService'
@@ -57,7 +57,8 @@ import { unzipInstanceFiles } from './utils/unzipInstanceFiles'
 import { deduplicateInstanceFiles } from '~/util/deduplicateInstanceFiles'
 import { resolveInstanceFiles } from './utils/resolveInstanceFiles'
 import { getTracker } from '~/util/taskHelper'
-import { assertInstallStatePaths, isLegacyInstallWorkspace, readPendingInstalls, writeInstallState } from './utils/pendingInstall'
+import { assertInstallDirectory, assertInstallStatePaths, isLegacyInstallWorkspace, readPendingInstalls, writeInstallState } from './utils/pendingInstall'
+import { instanceFileSource } from './utils/instanceFileSource'
 import { activeInstallFiles, hasInstallWork, installPathKey, supersedeInstallPlans } from './utils/installPlan'
 
 /**
@@ -89,6 +90,16 @@ export class InstanceInstallService extends AbstractService implements IInstance
   #validateFiles(path: string, files: InstanceFile[]) {
     InstanceFile.array().max(100000).parse(files)
     assertInstanceInstallPaths(path, files.map(file => file.path))
+  }
+
+  async #validateTargets(path: string, files: InstanceFile[], allowDirectoryConflicts = false) {
+    this.#validateFiles(path, files)
+    const getPath = await this.app.registry.get(kGameDataPath)
+    for (const file of files) {
+      const target = await instanceFileSource(path, file.path.replace(/\\/g, '/'), getPath(), true)
+      const info = await lstat(join(target.root, target.path)).catch(error => { if (error.code !== 'ENOENT') throw error })
+      if (info && !info.isFile() && !(allowDirectoryConflicts && info.isDirectory())) throw new Error('Unsafe instance file')
+    }
   }
 
   constructor(
@@ -183,8 +194,8 @@ export class InstanceInstallService extends AbstractService implements IInstance
     newUpstream: InstanceUpstream,
     newFiles: InstanceFile[],
   ) {
-    this.#validateFiles(instancePath, newFiles)
-    if (lockState) this.#validateFiles(instancePath, lockState.files)
+    await this.#validateTargets(instancePath, newFiles)
+    if (lockState) await this.#validateTargets(instancePath, lockState.files)
     let fileDelta: InstanceFileUpdate[] = []
     const fs = { getFile: this.#getInstallFile, getSha1: this.#getSha1, getCrc32: this.#getCrc32, getChecksum: this.#getChecksum, join }
 
@@ -205,7 +216,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
       const legacy = await this.getLegacyLock(instancePath)
       if (legacy) {
         const { upstream, files } = legacy
-        this.#validateFiles(instancePath, files)
+        await this.#validateTargets(instancePath, files)
         if (isUpstreamIsSameOrigin(newUpstream, upstream)) {
           fileDelta = await computeFileUpdates(instancePath, files, newFiles, undefined, fs)
         } else {
@@ -227,17 +238,9 @@ export class InstanceInstallService extends AbstractService implements IInstance
     profilePath = join(instancePath, '.install-profile'),
     resuming = false,
     legacyBaseline?: { upstream: InstanceUpstream; files: InstanceFile[] } | null,
+    releaseRegistration: () => void = () => {},
   ) {
-    await this.#idleJavaDirectory(instancePath)
-    const previousRegistration = this.installRegistrations.get(instancePath)
-    const registered = Promise.withResolvers<void>()
-    if (!resuming) this.installRegistrations.set(instancePath, registered.promise)
-    const releaseRegistration = () => {
-      registered.resolve()
-      if (this.installRegistrations.get(instancePath) === registered.promise) this.installRegistrations.delete(instancePath)
-    }
     return this.mutex.of(`instance-install-operation:${profilePath}`).runExclusive(async () => {
-      if (!resuming) await previousRegistration
       await this.#idleJavaDirectory(instancePath)
       if (resuming) {
         const saved = await readJson(profilePath).then(InstanceInstallLock.parse).catch((error) => {
@@ -282,6 +285,15 @@ export class InstanceInstallService extends AbstractService implements IInstance
     const checkStatePaths = async () => {
       if (targetState.workspace !== workspacePath || targetState.backup !== backupPath) throw new Error('Install state paths changed')
       await assertInstallStatePaths(instancePath, profilePath, targetState)
+    }
+    const checkFile = async (file: InstanceFile) => {
+      await this.#validateTargets(instancePath, [file])
+      for (const area of [workspacePath, backupPath]) {
+        const path = join(area, file.path)
+        await assertInstallDirectory(instancePath, dirname(path))
+        const info = await lstat(path).catch(error => { if (error.code !== 'ENOENT') throw error })
+        if (info && !info.isFile()) throw new Error('Unsafe staged instance file')
+      }
     }
 
     const curseforgeClient = this.curseforgeClient
@@ -539,15 +551,16 @@ export class InstanceInstallService extends AbstractService implements IInstance
         throw new DOMException('Installation superseded by a newer plan', 'AbortError')
       }
     }
-    const delta = (ready?: Set<string>) => {
-      const files = deduplicateInstanceFiles(activeInstallFiles(targetState))
-      const baseline = deduplicateInstanceFiles(activeInstallFiles(targetState, true))
-      this.#validateFiles(instancePath, files)
-      this.#validateFiles(instancePath, baseline)
+    const delta = async (ready?: Set<string>) => {
+      const files = deduplicateInstanceFiles(activeInstallFiles(targetState)).filter(file => !ready || ready.has(file.path))
+      const baseline = deduplicateInstanceFiles(activeInstallFiles(targetState, true)).filter(file => !ready || ready.has(file.path))
+      // A new directory collision fails only that file at commit, preserving other ready files.
+      await this.#validateTargets(instancePath, files, true)
+      await this.#validateTargets(instancePath, baseline, true)
       return computeFileUpdates(
         instancePath,
-        ready ? baseline.filter(file => ready.has(file.path)) : baseline,
-        ready ? files.filter(file => ready.has(file.path)) : files,
+        baseline,
+        files,
         noLock ? undefined : targetState.baseline?.mtime,
         { getFile: this.#getInstallFile, getSha1: this.#getSha1, getCrc32: this.#getCrc32, getChecksum: this.#getChecksum },
       )
@@ -621,6 +634,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
         task.controller.signal.throwIfAborted()
         preparing = true
         acceptingReady = true
+        for (const update of updates) await checkFile(update.file)
         await handler.prepareInstallFiles(updates, task.controller.signal, true)
         task.controller.signal.throwIfAborted()
       } catch (error) {
@@ -634,7 +648,10 @@ export class InstanceInstallService extends AbstractService implements IInstance
     const commit = async (updates: InstanceFileUpdate[], final: boolean) => {
       await checkInstance()
       try {
-        await handler.commitReadyFiles(updates, final && errors.length === 0 && !task.controller.signal.aborted, checkInstance)
+        await handler.commitReadyFiles(updates, final && errors.length === 0 && !task.controller.signal.aborted, async file => {
+          await checkInstance()
+          await checkFile(file)
+        })
       } catch (error) {
         errors.push(error)
       }
@@ -818,8 +835,8 @@ export class InstanceInstallService extends AbstractService implements IInstance
   async previewInstanceFiles(options: InstallInstanceOptions): Promise<InstanceFileUpdate[]> {
     const { path: instancePath } = options
     await this.#javaDirectory(instancePath)
-    this.#validateFiles(instancePath, options.files)
-    if ('oldFiles' in options) this.#validateFiles(instancePath, options.oldFiles)
+    await this.#validateTargets(instancePath, options.files)
+    if ('oldFiles' in options) await this.#validateTargets(instancePath, options.oldFiles)
     const lockFilePath = join(instancePath, 'instance-lock.json')
     const lockState = await readJson(lockFilePath)
       .then(InstanceLockSchema.parse)
@@ -1108,77 +1125,89 @@ export class InstanceInstallService extends AbstractService implements IInstance
     legacyBaseline?: { upstream: InstanceUpstream; files: InstanceFile[] } | null,
   ): Promise<void> {
     const { path: instancePath, id } = options
-    await this.#idleJavaDirectory(instancePath)
-    this.#validateFiles(instancePath, options.files)
-    if ('oldFiles' in options) this.#validateFiles(instancePath, options.oldFiles)
-    const files = deduplicateInstanceFiles(options.files)
-
-    const timestamp = Date.now()
-    this.log('Install instance files', instancePath, id)
-
-    if ('upstream' in options) {
-      const operationId = randomUUID()
-      const upstream = options.upstream
-      const currentState: InstanceInstallLock = {
-        version: 0,
-        files,
-        upstream,
-        mtime: timestamp,
-        backup: join(
-          instancePath,
-          '.backups',
-          `${filenamify(new Date().toLocaleString(), { replacement: '-' })}-${operationId}`,
-        ),
-        workspace: join(instancePath, '.install', operationId, 'files'),
-        finishedPath: [],
-        operationId,
-      }
-
-      this.log('Install instance files with upstream')
-      await this.#install(
-        instancePath, undefined, currentState, id, false, join(instancePath, '.install', `${operationId}.json`),
-        false, legacyBaseline,
-      )
-    } else {
-      const oldFiles = options.oldFiles
-      const operationId = randomUUID()
-
-      const lockState: InstanceLockSchema = {
-        version: 1,
-        files: oldFiles,
-        upstream: {
-          type: 'peer',
-          id: '',
-        },
-        mtime: timestamp,
-      }
-
-      const currentState: InstanceInstallLock = {
-        version: 1,
-        files,
-        upstream: {
-          type: 'peer',
-          id: '',
-        },
-        mtime: timestamp,
-        backup: join(
-          instancePath,
-          '.backups',
-          operationId,
-        ),
-        workspace: join(instancePath, '.install', operationId, 'files'),
-        finishedPath: [],
-        oldFiles,
-        manifestUpdatedAt,
-        operationId,
-      }
-
-      this.log('Install instance files with diff')
-      await this.#install(
-        instancePath, lockState, currentState, id, true, join(instancePath, '.install', `${operationId}.json`),
-      )
-      await this.#migrateModGroupFilenames(instancePath, oldFiles, files)
+    // Reserve order before asynchronous validation; downloads are released after initialization.
+    const previousRegistration = this.installRegistrations.get(instancePath)
+    const registered = Promise.withResolvers<void>()
+    this.installRegistrations.set(instancePath, registered.promise)
+    const releaseRegistration = () => {
+      registered.resolve()
+      if (this.installRegistrations.get(instancePath) === registered.promise) this.installRegistrations.delete(instancePath)
     }
+    try {
+      await previousRegistration
+      await this.#idleJavaDirectory(instancePath)
+      await this.#validateTargets(instancePath, options.files)
+      if ('oldFiles' in options) await this.#validateTargets(instancePath, options.oldFiles)
+      const files = deduplicateInstanceFiles(options.files)
+
+      const timestamp = Date.now()
+      this.log('Install instance files', instancePath, id)
+
+      if ('upstream' in options) {
+        const operationId = randomUUID()
+        const upstream = options.upstream
+        const currentState: InstanceInstallLock = {
+          version: 0,
+          files,
+          upstream,
+          mtime: timestamp,
+          backup: join(
+            instancePath,
+            '.backups',
+            `${filenamify(new Date().toLocaleString(), { replacement: '-' })}-${operationId}`,
+          ),
+          workspace: join(instancePath, '.install', operationId, 'files'),
+          finishedPath: [],
+          operationId,
+        }
+
+        this.log('Install instance files with upstream')
+        await this.#install(
+          instancePath, undefined, currentState, id, false, join(instancePath, '.install', `${operationId}.json`),
+          false, legacyBaseline, releaseRegistration,
+        )
+      } else {
+        const oldFiles = options.oldFiles
+        const operationId = randomUUID()
+
+        const lockState: InstanceLockSchema = {
+          version: 1,
+          files: oldFiles,
+          upstream: {
+            type: 'peer',
+            id: '',
+          },
+          mtime: timestamp,
+        }
+
+        const currentState: InstanceInstallLock = {
+          version: 1,
+          files,
+          upstream: {
+            type: 'peer',
+            id: '',
+          },
+          mtime: timestamp,
+          backup: join(
+            instancePath,
+            '.backups',
+            operationId,
+          ),
+          workspace: join(instancePath, '.install', operationId, 'files'),
+          finishedPath: [],
+          oldFiles,
+          manifestUpdatedAt,
+          operationId,
+        }
+
+        this.log('Install instance files with diff')
+        await this.#install(
+          instancePath, lockState, currentState, id, true, join(instancePath, '.install', `${operationId}.json`),
+          false, undefined, releaseRegistration,
+        )
+        await this.#migrateModGroupFilenames(instancePath, oldFiles, files)
+      }
+    } finally { releaseRegistration() }
   }
 
   async #migrateModGroupFilenames(instancePath: string, oldFiles: readonly InstanceFile[], files: readonly InstanceFile[]) {

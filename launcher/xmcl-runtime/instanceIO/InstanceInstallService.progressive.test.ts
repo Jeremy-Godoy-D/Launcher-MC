@@ -15,6 +15,7 @@ vi.mock('~/app', () => ({
   Inject: () => () => {},
   LauncherApp: class LauncherApp {},
   LauncherAppKey: Symbol('LauncherAppKey'),
+  kGameDataPath: Symbol('kGameDataPath'),
 }))
 
 vi.mock('~/infra', () => ({
@@ -47,6 +48,7 @@ vi.mock('./utils/resolveInstanceFiles', () => ({
 const { InstanceInstallService } = await import('./InstanceInstallService')
 const { InstanceService } = await import('~/instance/InstanceService')
 const { LaunchService } = await import('../launch/LaunchService')
+const { kGameDataPath } = await import('~/app')
 
 const sha1 = (content: string | Buffer) => createHash('sha1').update(content).digest('hex')
 const mockedDownload = vi.mocked(downloadInstanceFiles)
@@ -127,6 +129,7 @@ describe('InstanceInstallService progressive installation', () => {
         getOrCreate: vi.fn(async () => ({})),
         get: vi.fn(async key => {
           if (key === kDownloadOptions) return {}
+          if (key === kGameDataPath) return (...parts: string[]) => join(root, ...parts)
           if (key === InstanceService) return instanceService
           if (key === LaunchService) return { getGameProcesses: async () => processes }
           if (key === ServiceStateManager) return stateManager
@@ -1063,5 +1066,55 @@ describe('InstanceInstallService progressive installation', () => {
     expect(await pathExists(join(f.instancePath, file.path))).toBe(false)
     expect(await readdir(outside)).toEqual(['keep'])
     expect(await readFile(join(outside, 'keep'), 'utf8')).toBe('KEEP')
+  })
+
+  it.each(['mods/next.jar', 'config/deep/next.txt'])('refuses a linked destination ancestor for %s before reading or creating a task', async path => {
+    const f = await fixture(), outside = join(f.root, 'outside'), parent = dirname(join(f.instancePath, path)), file = f.file(path)
+    await ensureDir(outside); await writeFile(join(outside, basename(path)), 'KEEP')
+    await ensureDir(dirname(parent)); await symlink(outside, parent, 'junction')
+    const options = { path: f.instancePath, oldFiles: [], files: [file] }
+    await expect(f.service.previewInstanceFiles(options)).rejects.toThrow(/link|Unsafe/)
+    await expect(f.service.installInstanceFiles(options)).rejects.toThrow(/link|Unsafe/)
+    expect(f.worker.checksum).not.toHaveBeenCalled(); expect(f.tasks.create).not.toHaveBeenCalled()
+    expect(await readFile(join(outside, basename(path)), 'utf8')).toBe('KEEP')
+  })
+
+  it.each(['resourcepacks', 'shaderpacks', 'saves'])('preserves the native shared %s root while rejecting its nested links', async name => {
+    const f = await fixture(), shared = join(f.root, name), outside = join(f.root, 'outside'), file = f.file(`${name}/next.zip`)
+    await ensureDir(shared); await writeFile(join(shared, 'keep'), 'KEEP')
+    await symlink(shared, join(f.instancePath, name), 'junction')
+    await expect(f.service.previewInstanceFiles({ path: f.instancePath, oldFiles: [], files: [f.file(name)] })).rejects.toThrow('Unsafe instance file')
+    mockedDownload.mockImplementation(f.downloadAll)
+    await f.service.installInstanceFiles({ path: f.instancePath, oldFiles: [], files: [file] })
+    expect(await readFile(join(shared, 'next.zip'), 'utf8')).toBe(file.path)
+    expect(await readFile(join(shared, 'keep'), 'utf8')).toBe('KEEP')
+    await ensureDir(outside); await writeFile(join(outside, 'keep'), 'OUTSIDE')
+    await symlink(outside, join(shared, 'nested'), 'junction')
+    await expect(f.service.previewInstanceFiles({ path: f.instancePath, oldFiles: [], files: [f.file(`${name}/nested/keep`)] })).rejects.toThrow('Unsafe instance file')
+    expect(await readFile(join(outside, 'keep'), 'utf8')).toBe('OUTSIDE')
+  })
+
+  it('rejects a destination redirected after download without publishing into its target', async () => {
+    const f = await fixture(), outside = join(f.root, 'outside'), file = f.file('mods/next.jar')
+    await ensureDir(outside); await writeFile(join(outside, 'next.jar'), 'KEEP')
+    mockedDownload.mockImplementation(async (downloads, finished) => {
+      await f.materialize(downloads[0], finished)
+      await symlink(outside, join(f.instancePath, 'mods'), 'junction')
+    })
+    await expect(f.service.installInstanceFiles({ path: f.instancePath, oldFiles: [], files: [file] })).rejects.toThrow('Untrusted instance link')
+    expect(await readFile(join(outside, 'next.jar'), 'utf8')).toBe('KEEP')
+  })
+
+  it('rejects a backup child redirected after preparation, preserving both current and outside files', async () => {
+    const f = await fixture(), outside = join(f.root, 'outside'), old = f.file('config/next.txt', 'CURRENT'), file = f.file(old.path, 'NEW')
+    await f.write(join(f.instancePath, old.path), 'CURRENT'); await ensureDir(outside); await writeFile(join(outside, 'next.txt'), 'KEEP')
+    mockedDownload.mockImplementation(async (downloads, finished) => {
+      await f.materialize(downloads[0], finished)
+      const [profile] = await readPendingInstalls(f.instancePath)
+      await ensureDir(profile.state.backup); await symlink(outside, join(profile.state.backup, 'config'), 'junction')
+    })
+    await expect(f.service.installInstanceFiles({ path: f.instancePath, oldFiles: [old], files: [file] })).rejects.toThrow('Unsafe install directory')
+    expect(await readFile(join(f.instancePath, old.path), 'utf8')).toBe('CURRENT')
+    expect(await readFile(join(outside, 'next.txt'), 'utf8')).toBe('KEEP')
   })
 })

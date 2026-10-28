@@ -12,6 +12,7 @@ vi.mock('~/app', () => ({
   Inject: () => () => {},
   LauncherApp: class LauncherApp {},
   LauncherAppKey: Symbol('LauncherAppKey'),
+  kGameDataPath: Symbol('kGameDataPath'),
 }))
 
 vi.mock('~/infra', () => ({
@@ -44,6 +45,7 @@ vi.mock('./utils/resolveInstanceFiles', () => ({
 const { InstanceInstallService } = await import('./InstanceInstallService')
 const { InstanceService } = await import('~/instance/InstanceService')
 const { LaunchService } = await import('../launch/LaunchService')
+const { kGameDataPath } = await import('~/app')
 
 describe('InstanceInstallService concurrent diff installs', () => {
   const roots: string[] = []
@@ -83,7 +85,7 @@ describe('InstanceInstallService concurrent diff installs', () => {
       platform: { os: 'windows' },
       registry: {
         getOrCreate: vi.fn(async () => ({})),
-        get: vi.fn(async (key) => key === kDownloadOptions ? {} : key === InstanceService ? instanceService : key === LaunchService ? { getGameProcesses: async () => [] } : undefined),
+        get: vi.fn(async (key) => key === kDownloadOptions ? {} : key === InstanceService ? instanceService : key === LaunchService ? { getGameProcesses: async () => [] } : key === kGameDataPath ? (...parts: string[]) => join(root, ...parts) : undefined),
         getIfPresent: vi.fn(async () => undefined),
       },
     } as any
@@ -149,7 +151,14 @@ describe('InstanceInstallService concurrent diff installs', () => {
     expect(await pathExists(join(instancePath, 'mods', 'first.jar'))).toBe(true)
     expect(await pathExists(join(instancePath, 'mods', 'second.jar'))).toBe(true)
 
-    const overlapping = await Promise.allSettled([
+    const getService = app.registry.get.getMockImplementation()!
+    const validation = Promise.withResolvers<void>()
+    let validationCalls = 0
+    app.registry.get.mockImplementation(async (key: unknown) => {
+      if (key === kGameDataPath && ++validationCalls === 1) await validation.promise
+      return getService(key)
+    })
+    const installingOverlapping = Promise.allSettled([
       install({
         path: 'mods/shared.jar',
         hashes: { sha1: 'first-version' },
@@ -162,7 +171,11 @@ describe('InstanceInstallService concurrent diff installs', () => {
       }),
     ])
 
-    expect(overlapping[1].status).toBe('fulfilled')
+    try { await vi.waitFor(() => expect(validationCalls).toBe(1)) }
+    finally { validation.resolve() }
+    const overlapping = await installingOverlapping
+
+    expect(overlapping[1]).toMatchObject({ status: 'fulfilled' })
     if (overlapping[0].status === 'rejected') expect(overlapping[0].reason.name).toBe('AbortError')
     expect(await readFile(join(instancePath, 'mods', 'shared.jar'), 'utf8')).toBe('second-version')
   })
