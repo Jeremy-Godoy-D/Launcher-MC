@@ -3,6 +3,7 @@ import {
   InstanceFileOperationHandler as InstanceFileOperationHandlerV2,
   InstanceInstallManifest,
   InstanceInstallLock,
+  InstanceModInstallReview,
   InstanceLockSchema,
   computeFileUpdates,
   assertInstanceInstallPaths,
@@ -33,6 +34,7 @@ import {
   type InstallInstanceOptions,
   type InstanceFileUpdate,
   type SharedState,
+  type ModInstallReview,
 } from '@xmcl/runtime-api'
 import { Tracker } from '@xmcl/installer'
 import { AnyError, isSystemError } from '@xmcl/utils'
@@ -59,6 +61,7 @@ import { resolveInstanceFiles } from './utils/resolveInstanceFiles'
 import { getTracker } from '~/util/taskHelper'
 import { assertInstallDirectory, assertInstallStatePaths, isLegacyInstallWorkspace, readPendingInstalls, writeInstallState } from './utils/pendingInstall'
 import { instanceFileSource } from './utils/instanceFileSource'
+import { prepareModInstallReview } from './utils/reviewedModInstall'
 import { activeInstallFiles, hasInstallWork, installPathKey, supersedeInstallPlans } from './utils/installPlan'
 
 /**
@@ -99,6 +102,23 @@ export class InstanceInstallService extends AbstractService implements IInstance
       const target = await instanceFileSource(path, file.path.replace(/\\/g, '/'), getPath(), true)
       const info = await lstat(join(target.root, target.path)).catch(error => { if (error.code !== 'ENOENT') throw error })
       if (info && !info.isFile() && !(allowDirectoryConflicts && info.isDirectory())) throw new Error('Unsafe instance file')
+    }
+  }
+
+  #localInstallPlan(options: Extract<InstallInstanceOptions, { oldFiles: InstanceFile[] }>, manifestUpdatedAt?: number): InstanceInstallLock {
+    const operationId = randomUUID()
+    return {
+      version: 1,
+      files: deduplicateInstanceFiles(options.files),
+      upstream: { type: 'peer', id: '' },
+      mtime: Date.now(),
+      backup: join(options.path, '.backups', operationId),
+      workspace: join(options.path, '.install', operationId, 'files'),
+      finishedPath: [],
+      oldFiles: options.oldFiles,
+      manifestUpdatedAt,
+      operationId,
+      review: options.review === undefined ? undefined : InstanceModInstallReview.parse({ snapshot: options.review.snapshot, changes: options.review.changes }),
     }
   }
 
@@ -313,6 +333,11 @@ export class InstanceInstallService extends AbstractService implements IInstance
 
     const instanceService = await this.app.registry.get(InstanceService)
     const inst = instanceService.state?.all?.[instancePath]
+    const reviewConfiguration = () => {
+      const instance = instanceService.state.all[instancePath]
+      return { runtime: { ...instance.runtime }, java: instance.java, version: instance.version }
+    }
+    let reviewGuard: Awaited<ReturnType<typeof prepareModInstallReview>>
     const singleFile = targetState.files && targetState.files.length === 1 ? targetState.files[0] : undefined
     const singleFileIcon = singleFile ? (singleFile as any)?.icon : undefined
     const singleFileName = singleFile ? basename(singleFile.path) : undefined
@@ -594,6 +619,8 @@ export class InstanceInstallService extends AbstractService implements IInstance
         (profile.state.revision ?? 0) < targetState.revision!)
       const transfer = supersedeInstallPlans(targetState, previous)
       targetState = transfer.plan
+      const updates = await delta()
+      reviewGuard = await prepareModInstallReview(instancePath, () => targetState, updates, reviewConfiguration, (path, algorithm) => this.worker.checksum(path, algorithm))
       await ensureDir(dirname(currentStatePath))
       await ensureDir(targetState.workspace)
       await writeInstallState(currentStatePath, targetState)
@@ -619,7 +646,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
       }
       await loadCurrentPlan()
       await refreshStatus()
-      return delta()
+      return updates
     }
     const prepare = async (updates: InstanceFileUpdate[]) => {
       try {
@@ -634,7 +661,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
         task.controller.signal.throwIfAborted()
         preparing = true
         acceptingReady = true
-        for (const update of updates) await checkFile(update.file)
+        for (const update of updates) { await checkFile(update.file); await reviewGuard?.(update.file, update.operation) }
         await handler.prepareInstallFiles(updates, task.controller.signal, true)
         task.controller.signal.throwIfAborted()
       } catch (error) {
@@ -647,10 +674,12 @@ export class InstanceInstallService extends AbstractService implements IInstance
     }
     const commit = async (updates: InstanceFileUpdate[], final: boolean) => {
       await checkInstance()
+      for (const update of updates) await reviewGuard?.(update.file, update.operation)
       try {
-        await handler.commitReadyFiles(updates, final && errors.length === 0 && !task.controller.signal.aborted, async file => {
+        await handler.commitReadyFiles(updates, final && errors.length === 0 && !task.controller.signal.aborted, async (file, operation) => {
           await checkInstance()
           await checkFile(file)
+          await reviewGuard?.(file, operation)
         })
       } catch (error) {
         errors.push(error)
@@ -847,8 +876,11 @@ export class InstanceInstallService extends AbstractService implements IInstance
       return delta
     }
 
+    const plan = supersedeInstallPlans(this.#localInstallPlan(options), await readPendingInstalls(instancePath)).plan
+    const baseline = activeInstallFiles(plan, true)
+    await this.#validateTargets(instancePath, baseline)
     const fs = { getFile: this.#getInstallFile, getSha1: this.#getSha1, getCrc32: this.#getCrc32, getChecksum: this.#getChecksum, join }
-    return await computeFileUpdates(instancePath, options.oldFiles, options.files, Date.now(), fs)
+    return await computeFileUpdates(instancePath, baseline, plan.files, undefined, fs)
   }
 
   async getInstanceInstallManifest(path: string): Promise<InstanceInstallManifest | undefined> {
@@ -896,7 +928,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
     }))
   }
 
-  async applyInstanceInstallManifest(path: string, id?: string): Promise<void> {
+  async applyInstanceInstallManifest(path: string, id?: string, review?: ModInstallReview): Promise<void> {
     await this.#idleJavaDirectory(path)
     const lock = this.mutex.of(LockKey.instanceManifest(path))
     await lock.runExclusive(async () => {
@@ -907,6 +939,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
         oldFiles: manifest.oldFiles,
         files: manifest.files,
         id,
+        review,
       }, manifest.updatedAt)
       await this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
         await this.#idleJavaDirectory(path)
@@ -1168,37 +1201,9 @@ export class InstanceInstallService extends AbstractService implements IInstance
         )
       } else {
         const oldFiles = options.oldFiles
-        const operationId = randomUUID()
-
-        const lockState: InstanceLockSchema = {
-          version: 1,
-          files: oldFiles,
-          upstream: {
-            type: 'peer',
-            id: '',
-          },
-          mtime: timestamp,
-        }
-
-        const currentState: InstanceInstallLock = {
-          version: 1,
-          files,
-          upstream: {
-            type: 'peer',
-            id: '',
-          },
-          mtime: timestamp,
-          backup: join(
-            instancePath,
-            '.backups',
-            operationId,
-          ),
-          workspace: join(instancePath, '.install', operationId, 'files'),
-          finishedPath: [],
-          oldFiles,
-          manifestUpdatedAt,
-          operationId,
-        }
+        const currentState = this.#localInstallPlan({ ...options, files }, manifestUpdatedAt)
+        const operationId = currentState.operationId!
+        const lockState: InstanceLockSchema = { version: 1, files: oldFiles, upstream: currentState.upstream, mtime: timestamp }
 
         this.log('Install instance files with diff')
         await this.#install(

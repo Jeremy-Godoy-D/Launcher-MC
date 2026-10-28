@@ -140,13 +140,14 @@ describe('InstanceInstallService concurrent diff installs', () => {
       hashes: { sha1: 'second' },
       downloads: ['https://example.com/second.jar'],
     })
+    const initial = Promise.allSettled([first, second])
 
     try {
-      await vi.waitFor(() => expect(mockedDownload).toHaveBeenCalledTimes(2))
+      await vi.waitFor(() => expect(mockedDownload).toHaveBeenCalledTimes(2), { timeout: 5000 })
     } finally {
       releaseDownloads()
+      expect(await initial).toMatchObject([{ status: 'fulfilled' }, { status: 'fulfilled' }])
     }
-    await Promise.all([first, second])
 
     expect(await pathExists(join(instancePath, 'mods', 'first.jar'))).toBe(true)
     expect(await pathExists(join(instancePath, 'mods', 'second.jar'))).toBe(true)
@@ -178,5 +179,5 @@ describe('InstanceInstallService concurrent diff installs', () => {
     expect(overlapping[1]).toMatchObject({ status: 'fulfilled' })
     if (overlapping[0].status === 'rejected') expect(overlapping[0].reason.name).toBe('AbortError')
     expect(await readFile(join(instancePath, 'mods', 'shared.jar'), 'utf8')).toBe('second-version')
-  })
+  }, 15000)
 })

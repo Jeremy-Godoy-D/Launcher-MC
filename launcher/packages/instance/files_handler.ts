@@ -212,7 +212,7 @@ export class InstanceFileOperationHandler {
    * file intact; removals are deferred until all target files are available.
    * The caller persists `committed`/`removed` even if this method rejects.
    */
-  async commitReadyFiles(updates: InstanceFileUpdate[], complete: boolean, checkInstance: (file: InstanceFile) => Promise<void>) {
+  async commitReadyFiles(updates: InstanceFileUpdate[], complete: boolean, checkInstance: (file: InstanceFile, operation: InstanceFileUpdate['operation']) => Promise<void>) {
     this.committed.clear()
     this.removed.clear()
     this.#validateUpdates(updates)
@@ -225,7 +225,7 @@ export class InstanceFileOperationHandler {
       if (operation !== 'add' && operation !== 'backup-add') continue
       if (!this.finished.has(file.path)) continue
       try {
-        await checkInstance(file)
+        await checkInstance(file, operation)
         const src = join(this.workspacePath, file.path)
         const dest = join(this.instancePath, file.path)
         await ensureDir(dirname(dest))
@@ -262,7 +262,7 @@ export class InstanceFileOperationHandler {
           continue
         }
         try {
-          await checkInstance(file)
+          await checkInstance(file, operation)
           const dest = join(this.instancePath, file.path)
           if (operation === 'backup-remove') {
             const backup = join(this.backupPath, file.path)
