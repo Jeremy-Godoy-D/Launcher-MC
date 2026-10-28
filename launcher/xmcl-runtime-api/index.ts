@@ -31,6 +31,7 @@ export * from './src/entities/yggdrasil.schema'
 
 export * from './src/service'
 export * from './src/util/marketInstanceFile'
+export * from './src/util/modUpgradeManifest'
 export * from './src/services/AuthlibInjectorService'
 export * from './src/services/AgentService'
 export * from './src/services/XmclApiEndpoints'
