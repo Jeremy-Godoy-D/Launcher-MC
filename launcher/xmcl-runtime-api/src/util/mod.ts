@@ -1,5 +1,5 @@
 import type { RuntimeVersions } from '@xmcl/instance'
-import type { FabricModMetadata, ForgeModMetadata, ForgeModTOMLData, QuiltModMetadata } from '@xmcl/mod-parser'
+import type { FabricModMetadata, ForgeModMetadata, ForgeModTOMLData, LiteloaderModMetadata, QuiltModMetadata } from '@xmcl/mod-parser'
 import type { Resource, ResourceSourceCurseforge, ResourceSourceModrinth } from '@xmcl/resource'
 import type { ForgeModCommonMetadata, NeoforgeMetadata } from '../entities/mod'
 import { ModDependencies, getModDependencies, getModProvides } from './modDependencies'
@@ -120,6 +120,7 @@ export interface ModFile extends ModMetadata, ProjectFile {
   fabric?: FabricModMetadata | FabricModMetadata[]
   quilt?: QuiltModMetadata
   neoforge?: NeoforgeMetadata
+  liteloader?: LiteloaderModMetadata
 
   ino: number
   size: number
@@ -212,13 +213,14 @@ export function getModSide(mod: ModFile, runtime: 'fabric' | 'forge' | 'neoforge
   }
   if (mod.quilt && runtime === 'quilt') {
     const quilt = mod.quilt
-    if (quilt.quilt_loader.minecraft?.environment === '*') {
+    const environment = quilt.minecraft?.environment || quilt.quilt_loader.minecraft?.environment
+    if (environment === '*') {
       return 'BOTH'
     }
-    if (quilt.quilt_loader.minecraft?.environment === 'client') {
+    if (environment === 'client') {
       return 'CLIENT'
     }
-    if (quilt.quilt_loader.minecraft?.environment === 'dedicated_server') {
+    if (environment === 'dedicated_server') {
       return 'SERVER'
     }
   }
@@ -468,6 +470,7 @@ export function getModFileFromResource(resource: Resource, runtime: RuntimeVersi
     forge: resource.metadata.forge,
     quilt: resource.metadata.quilt,
     neoforge: resource.metadata.neoforge,
+    liteloader: resource.metadata.liteloader,
 
     ino: resource.ino,
     size: resource.size,
@@ -538,7 +541,7 @@ export function getModFileFromResource(resource: Resource, runtime: RuntimeVersi
     modItem.version = meta.quilt_loader.version
     modItem.name = meta.quilt_loader.metadata?.name ?? meta.quilt_loader.id
     modItem.description = meta.quilt_loader.metadata?.description ?? ''
-    modItem.authors = meta.quilt_loader.metadata?.contributors ? Object.values(meta.quilt_loader.metadata?.contributors) : []
+    modItem.authors = meta.quilt_loader.metadata?.contributors ? Object.keys(meta.quilt_loader.metadata.contributors) : []
     modItem.links = getFabricLikeModLinks(meta.quilt_loader.metadata?.contact as any)
     const license = meta.quilt_loader.metadata?.license
     modItem.license = typeof license === 'object'
@@ -551,7 +554,7 @@ export function getModFileFromResource(resource: Resource, runtime: RuntimeVersi
     modItem.name = meta.name
     modItem.version = meta.version ?? ''
     modItem.modId = `${meta.name}`
-    modItem.description = modItem.description ?? ''
+    modItem.description = meta.description ?? ''
     modItem.authors = meta.author ? [meta.author] : []
     if (meta.url) {
       modItem.links = { home: meta.url }

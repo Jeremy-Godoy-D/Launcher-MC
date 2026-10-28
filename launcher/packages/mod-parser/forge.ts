@@ -183,13 +183,16 @@ export interface ForgeModTOMLData {
    */
   dependencies: {
     modId: string
-    mandatory: boolean
+    mandatory?: boolean
+    type?: 'required' | 'optional' | 'incompatible' | 'discouraged'
+    reason?: string
     versionRange: string
     ordering: 'NONE' | 'BEFORE' | 'AFTER'
     side: 'BOTH' | 'CLIENT' | 'SERVER'
   }[]
 
   provides: string[]
+  features?: Record<string, unknown>
   /**
    * The name of the mod loader type to load - for regular FML @Mod mods it should be javafml
    */
@@ -565,6 +568,9 @@ export async function readForgeModToml(
             issueTrackerURL: root.issueTrackerURL as string ?? '',
             clientSideOnly: (root.clientSideOnly as boolean) ?? (tomlMod.clientSideOnly as boolean) ?? false,
           }
+          const rootFeatures = root.features && typeof root.features === 'object' && !Array.isArray(root.features) && Object.hasOwn(root.features, modObject.modid) ? (root.features as Record<string, unknown>)[modObject.modid] : undefined
+          const features = tomlMod.features ?? rootFeatures
+          if (features && typeof features === 'object' && !Array.isArray(features)) modObject.features = Object.fromEntries(Object.entries(features))
           all.push(modObject)
         }
       }

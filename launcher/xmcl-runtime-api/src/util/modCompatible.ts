@@ -60,6 +60,7 @@ export function getModCompatiblity(dep: ModDependency, version: string): Compati
   if (dep.versionRange) {
     // Resolve version range compability
     const versionRange = dep.versionRange
+    if (versionRange === '*' || versionRange === '[*]') return true
     let range: VersionRange | undefined
     let currentVersion: ReturnType<typeof parseVersion> | undefined
     try {
@@ -74,17 +75,12 @@ export function getModCompatiblity(dep: ModDependency, version: string): Compati
     }
     if (range && currentVersion) {
       compatible = range.containsVersion(currentVersion)
-      if (!compatible) {
-        const res = range.restrictions[0]
-        if (Math.abs(res.lowerBound?.compareTo(currentVersion) ?? 100) === 1 ||
-          Math.abs(res.upperBound?.compareTo(currentVersion) ?? 100) === 1) {
-          compatible = 'maybe'
-        }
-      }
     }
     return compatible
   }
   if (dep.semanticVersion) {
+    const expressions = typeof dep.semanticVersion === 'string' ? [dep.semanticVersion] : dep.semanticVersion
+    if (expressions.includes('*')) return true
     try {
       const verison = parseSemanticVersion(version)
       const ranges =
@@ -96,7 +92,10 @@ export function getModCompatiblity(dep: ModDependency, version: string): Compati
         : ranges?.test(verison)
       return compatible ?? false
     } catch {
-      return 'maybe'
+      // Fabric permits opaque version strings; only equality-style predicates apply to them.
+      const literals = expressions.filter(expression => /^[=~^]?[^\s<>=~^]+$/.test(expression))
+      if (literals.some(expression => expression.replace(/^[=~^]/, '') === version)) return true
+      return literals.length === expressions.length ? false : 'maybe'
     }
   }
 
@@ -118,7 +117,7 @@ export function getModsCompatiblity(dependencies: ModDependencies, runtime: Reco
       // No such version
       result.push({
         modId: id,
-        compatible: false,
+        compatible: v.optional ? true : false,
         optional: v.optional,
         requirements: v.versionRange || v.semanticVersion || '[*]',
         version: '',

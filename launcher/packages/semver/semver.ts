@@ -78,14 +78,9 @@ export class FabricSemanticVersion {
         throw new Error('Missing version number component!')
       }
 
-      try {
-        components[i] = parseInt(compStr, 10)
-        if (components[i] < 0) {
-          throw new Error(`Negative version number component '${compStr}'!`)
-        }
-      } catch (e) {
-        throw new Error(`Could not parse version number component '${compStr}'!`)
-      }
+      // parseInt accepts prefixes and NaN; neither is a semantic-version component.
+      if (!/^\d+$/.test(compStr) || !Number.isSafeInteger(Number(compStr))) throw new Error(`Could not parse version number component '${compStr}'!`)
+      components[i] = Number(compStr)
     }
 
     if (

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
-import { FolderOpen, Plus, RefreshCw, Search } from 'lucide-react'
+import { FolderOpen, Plus, RefreshCw, Search, ShieldCheck } from 'lucide-react'
 import { ResourceState } from '@xmcl/runtime-api/src/entities/resource'
-import { InstanceModsServiceKey, getInstanceModStateKey } from '@xmcl/runtime-api/src/services/InstanceModsService'
+import { InstanceModsServiceKey, getInstanceModStateKey, type ModFilesSnapshot } from '@xmcl/runtime-api/src/services/InstanceModsService'
 import { LaunchServiceKey } from '@xmcl/runtime-api/src/services/LaunchService'
 import { useService, useSharedStateStore } from '../../runtime'
 import { useI18n } from '../../i18n'
@@ -13,8 +13,9 @@ import { assignContentGroup, contentGroupMemberships } from './contentGroups'
 import { normalizeModFileName } from '@xmcl/runtime-api/src/services/InstanceModsGroupService'
 import { RemoveModsDialog, type ReviewedMod } from './RemoveModsDialog'
 import { ModDetails } from './ModDetails'
+import { ModDiagnostics } from './ModDiagnostics'
 
-export function InstanceMods({ path, runtime, running }: { path: string; runtime: SavedInstance['runtime']; running: boolean }) {
+export function InstanceMods({ path, runtime, running, configuredJava }: { path: string; runtime: SavedInstance['runtime']; running: boolean; configuredJava?: SavedInstance['java'] }) {
   const { t } = useI18n(), service = useService(InstanceModsServiceKey), processes = useService(LaunchServiceKey)
   const grouping = useContentGroups(path)
   const [groupFilter, setGroupFilter] = useState('all'), [assignTo, setAssignTo] = useState(''), [editingGroups, setEditingGroups] = useState(false)
@@ -31,6 +32,7 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('')
   const [removing, setRemoving] = useState<ReviewedMod[] | null>(null)
   const [detailsPath, setDetailsPath] = useState('')
+  const [diagnostics, setDiagnostics] = useState<ModFilesSnapshot | null>(null), diagnosticsButton = useRef<HTMLButtonElement>(null)
   const detailsTrigger = useRef<HTMLButtonElement | null>(null)
   const removeButton = useRef<HTMLButtonElement>(null)
   const active = useRef(true), pending = useRef(false)
@@ -42,7 +44,7 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
   const selection = files.filter(file => selected.includes(file.path))
   const detailsFile = files.find(file => file.path === detailsPath)
   useEffect(() => { if (snapshot.status === 'ready' && detailsPath && !detailsFile) closeDetails() }, [snapshot, detailsPath])
-  function closeDetails() { setDetailsPath(''); (detailsTrigger.current?.isConnected ? detailsTrigger.current : searchInput.current)?.focus() }
+  function closeDetails() { setDetailsPath(''); (detailsTrigger.current?.isConnected && !detailsTrigger.current.disabled ? detailsTrigger.current : searchInput.current)?.focus() }
   async function run(action: () => Promise<unknown>, mutating = false) {
     if (pending.current) return
     pending.current = true; setBusy(true); setError(''); setNotice('')
@@ -52,17 +54,19 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
       const result = await action()
       if (active.current && mutating && result !== false) { setSelected([]); setNotice(t('react.content.applied')) }
     } catch (failure) {
-      if (active.current) setError(t(failure instanceof Error && (failure.message === 'running' || failure.name === 'InstanceRunningError') ? 'react.content.running' : 'react.content.failed'))
+      if (active.current) setError(t(failure instanceof Error && (failure.message === 'running' || failure.name === 'InstanceRunningError') ? 'react.content.running' : failure instanceof Error && failure.name === 'ModFilesChangedError' ? 'react.content.changed' : 'react.content.failed'))
     } finally { pending.current = false; if (active.current) setBusy(false) }
   }
   function toggle(targets: typeof files, enabled: boolean) {
     const changes = targets.filter(file => file.fileName.endsWith('.disabled') === enabled).map(file => file.path)
     if (changes.length) void run(async () => {
-      if (enabled) await service.enable({ path, files: changes })
-      else await service.disable({ path, files: changes })
+      const review = await service.getModFilesSnapshot(path)
+      if (!active.current) return false
+      const options = { path, files: changes, expectedSnapshot: review.fingerprint, expectedHashes: Object.fromEntries(targets.filter(file => changes.includes(file.path)).map(file => [file.path, file.hash])) }
+      if (enabled) await service.enable(options)
+      else await service.disable(options)
       if (active.current) {
-        await store.revalidate()
-        if (store.getSnapshot().status === 'error') throw new Error('refresh')
+        await refreshFiles()
       }
     }, true)
   }
@@ -70,6 +74,10 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
     if (!active.current) return
     await store.revalidate()
     if (store.getSnapshot().status === 'error') throw new Error('refresh')
+    if (diagnostics) {
+      const inventory = await service.getModFilesSnapshot(path)
+      if (active.current) setDiagnostics(inventory)
+    }
   }
   function closeRemoval() { setRemoving(null) }
   return <section aria-labelledby="instance-mods-title" data-testid="instance-mods" data-instance-path={path} aria-busy={busy || snapshot.status === 'loading'}>
@@ -82,14 +90,19 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
         } else return false
       }, true)}><Plus size={16} aria-hidden="true" />{t('react.content.add')}</button>
       <button className="button secondary" disabled={busy} onClick={() => void run(() => service.showDirectory(path))}><FolderOpen size={16} aria-hidden="true" />{t('react.content.folder')}</button>
-      <button ref={manageGroups} className="button secondary" disabled={busy || !groupReady} aria-expanded={editingGroups} onClick={() => { setDetailsPath(''); setEditingGroups(true) }}>{t('react.contentGroups.manage')}</button>
-      <button className="button secondary" disabled={busy} onClick={() => void run(async () => { await store.revalidate(); await grouping.refresh() })}><RefreshCw size={16} aria-hidden="true" />{t('react.content.refresh')}</button>
+      <button ref={manageGroups} className="button secondary" disabled={busy || !groupReady} aria-expanded={editingGroups} onClick={() => { setDetailsPath(''); setDiagnostics(null); setEditingGroups(true) }}>{t('react.contentGroups.manage')}</button>
+      <button ref={diagnosticsButton} className="button secondary" disabled={busy || snapshot.status !== 'ready'} aria-expanded={!!diagnostics} onClick={() => {
+        if (diagnostics) { setDiagnostics(null); return }
+        void run(async () => { const inventory = await service.getModFilesSnapshot(path); await refreshFiles(); if (active.current) { setDetailsPath(''); setEditingGroups(false); setDiagnostics(inventory) } })
+      }}><ShieldCheck size={16} aria-hidden="true" />{t('react.modDiagnostics.open')}</button>
+      <button className="button secondary" disabled={busy} onClick={() => void run(async () => { await refreshFiles(); await grouping.refresh() })}><RefreshCw size={16} aria-hidden="true" />{t('react.content.refresh')}</button>
     </div></div>
     {grouping.migrating && <p role="status">{t('react.contentGroups.migrating')}</p>}
     {grouping.migrationError && <p role="alert" className="form-error">{t('react.contentGroups.migrationFailed')} <button className="button secondary" disabled={busy || grouping.migrating} onClick={() => void grouping.migrate()}>{t('react.contentGroups.retryMigration')}</button></p>}
     {(grouping.status === 'error' || grouping.data?.error) && <p role="alert" className="form-error">{t(grouping.data?.error === 'write' ? 'react.contentGroups.failed' : grouping.data?.error === 'changed' ? 'react.contentGroups.changed' : 'react.contentGroups.readFailed')}</p>}
     {editingGroups && <ContentGroupsEditor grouping={grouping} close={() => { setEditingGroups(false); (manageGroups.current?.disabled ? searchInput.current : manageGroups.current)?.focus() }} />}
     {detailsFile && <ModDetails key={detailsFile.path} file={detailsFile} runtime={runtime} close={closeDetails} />}
+    {diagnostics && <ModDiagnostics inventory={diagnostics} files={snapshot.data?.files || []} errors={snapshot.data?.errors || []} runtime={runtime} configuredJava={configuredJava} close={() => { setDiagnostics(null); (diagnosticsButton.current?.disabled ? searchInput.current : diagnosticsButton.current)?.focus() }} inspect={file => { detailsTrigger.current = diagnosticsButton.current; setDiagnostics(null); setDetailsPath(file) }} />}
     <div className="content-filters">
       <label className="search"><Search size={16} aria-hidden="true" /><input ref={searchInput} aria-label={t('react.content.search')} placeholder={t('react.content.search')} value={query} onChange={event => setQuery(event.target.value)} /></label>
       <select aria-label={t('react.content.filter')} value={filter} onChange={event => setFilter(event.target.value)}><option value="all">{t('react.content.all')}</option><option value="enabled">{t('react.content.enabled')}</option><option value="disabled">{t('react.content.disabled')}</option></select>
@@ -119,7 +132,7 @@ export function InstanceMods({ path, runtime, running }: { path: string; runtime
       const disabled = file.fileName.endsWith('.disabled')
       return <li key={file.path} data-file-name={file.fileName}>
         <input type="checkbox" aria-label={t('react.content.select', { name: file.name || file.fileName })} checked={selected.includes(file.path)} disabled={busy} onChange={event => setSelected(value => event.target.checked ? [...value, file.path] : value.filter(path => path !== file.path))} />
-        <div className="content-file"><button className="content-file-name" aria-label={t('react.modInfo.open', { name: file.name || file.fileName })} aria-expanded={detailsPath === file.path} onClick={event => { detailsTrigger.current = event.currentTarget; if (detailsPath === file.path) closeDetails(); else { setEditingGroups(false); setDetailsPath(file.path) } }}>{file.name || file.fileName}</button><span>{file.fileName}{file.resourceVersion && ` · ${file.resourceVersion}`}</span><small>{file.metadata.modrinth ? 'Modrinth' : file.metadata.curseforge ? 'CurseForge' : t('react.content.local')}</small>{!!fileGroups(file).length && <div className="content-group-labels">{fileGroups(file).map(name => <span className="content-group-label" key={name}><span className="content-group-dot" aria-hidden="true" style={{ backgroundColor: /^#[0-9a-f]{6}$/i.test(groups[name].color) ? groups[name].color : 'var(--accent)' }} />{name}</span>)}</div>}</div>
+        <div className="content-file"><button className="content-file-name" aria-label={t('react.modInfo.open', { name: file.name || file.fileName })} aria-expanded={detailsPath === file.path} onClick={event => { detailsTrigger.current = event.currentTarget; if (detailsPath === file.path) closeDetails(); else { setEditingGroups(false); setDiagnostics(null); setDetailsPath(file.path) } }}>{file.name || file.fileName}</button><span>{file.fileName}{file.resourceVersion && ` · ${file.resourceVersion}`}</span><small>{file.metadata.modrinth ? 'Modrinth' : file.metadata.curseforge ? 'CurseForge' : t('react.content.local')}</small>{!!fileGroups(file).length && <div className="content-group-labels">{fileGroups(file).map(name => <span className="content-group-label" key={name}><span className="content-group-dot" aria-hidden="true" style={{ backgroundColor: /^#[0-9a-f]{6}$/i.test(groups[name].color) ? groups[name].color : 'var(--accent)' }} />{name}</span>)}</div>}</div>
         <span className="content-state">{t(disabled ? 'react.content.disabled' : 'react.content.enabled')}</span>
         <button className="button secondary" aria-label={t(disabled ? 'react.content.enableName' : 'react.content.disableName', { name: file.name || file.fileName })} disabled={busy || running || snapshot.status !== 'ready'} onClick={() => toggle([file], disabled)}>{t(disabled ? 'react.content.enable' : 'react.content.disable')}</button>
       </li>

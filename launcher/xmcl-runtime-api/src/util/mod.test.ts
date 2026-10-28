@@ -35,9 +35,9 @@ it('retains NeoForge children, Quilt and LiteLoader identities and disabled file
 it('preserves semantic ranges, missing/unknown results and optional diagnostics', () => {
   expect(getModCompatiblity({ modId: 'minecraft', semanticVersion: '>=1.20' }, '1.21.1')).toBe(true)
   expect(getModCompatiblity({ modId: 'minecraft', semanticVersion: '>=1.20' }, '1.19.4')).toBe(false)
-  expect(getModCompatiblity({ modId: 'example', semanticVersion: 'invalid range' }, 'not-a-version')).toBe(false)
+  expect(getModCompatiblity({ modId: 'example', semanticVersion: 'invalid range' }, 'not-a-version')).toBe('maybe')
   expect(getModCompatiblity({ modId: 'unknown', versionRange: '' }, '1.0.0')).toBe('maybe')
-  expect(getModsCompatiblity([{ modId: 'missing', optional: true, semanticVersion: '*' }], {})).toEqual([{ modId: 'missing', optional: true, compatible: false, requirements: '*', version: '' }])
+  expect(getModsCompatiblity([{ modId: 'missing', optional: true, semanticVersion: '*' }], {})).toEqual([{ modId: 'missing', optional: true, compatible: true, requirements: '*', version: '' }])
 })
 it('retains dependency enable/disable closure and keeps dependencies needed by other enabled mods', () => {
   const runtime = RuntimeVersionsSchema.parse({ minecraft: '1.21.1', fabricLoader: '0.16.0' })

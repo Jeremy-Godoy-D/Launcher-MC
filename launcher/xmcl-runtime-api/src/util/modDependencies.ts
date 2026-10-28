@@ -77,16 +77,18 @@ export function getNeoforgeModDependencies(metadata: NeoforgeMetadata): ModDepen
   for (const mod of arr) {
     const deps: ModDependencies = []
     for (const dep of mod.dependencies || []) {
+      const type = dep.type || (dep.mandatory === false ? 'optional' : 'required')
+      if (type !== 'required' && type !== 'optional') continue
       deps.push({
         modId: dep.modId,
         versionRange: dep.versionRange,
-        optional: !dep.mandatory,
+        optional: type === 'optional',
       })
     }
     if (deps.every(d => d.modId !== 'neoforge')) {
       deps.push({
         modId: 'neoforge',
-        versionRange: mod.loaderVersion,
+        semanticVersion: '*',
       })
     }
     mods.push(...deps)
@@ -138,9 +140,9 @@ export function getModDependencies(resource: Resource): Record<string, ModDepend
   return result
 }
 
-export function getModProvides(resource: Resource) {
-  const runtime: Record<string, string> = {}
-  if (isForgeResource(resource)) {
+export function getModProvides(resource: Pick<Resource, 'metadata'>) {
+  const runtime: Record<string, string> = Object.create(null)
+  if (resource.metadata.forge) {
     const meta = resource.metadata.forge
 
     if (meta.manifest?.['Automatic-Module-Name'] === "org.sinytra.connector" ||
@@ -182,7 +184,7 @@ export function getModProvides(resource: Resource) {
     }
   }
 
-  if (isFabricResource(resource)) {
+  if (resource.metadata.fabric) {
     const fabric = resource.metadata.fabric
     if (fabric instanceof Array) {
       for (const mod of fabric) {
@@ -203,14 +205,19 @@ export function getModProvides(resource: Resource) {
     }
   }
 
-  if (isLiteloaderResource(resource)) {
+  if (resource.metadata.liteloader) {
     const meta = resource.metadata.liteloader
     runtime[meta.name] = meta.version ?? ''
   }
 
-  if (isQuiltResource(resource)) {
+  if (resource.metadata.quilt) {
     const meta = resource.metadata.quilt
     runtime[meta.quilt_loader.id] = meta.quilt_loader.version
+    if (meta.quilt_loader.group) runtime[`${meta.quilt_loader.group}:${meta.quilt_loader.id}`] = meta.quilt_loader.version
+    for (const provided of meta.quilt_loader.provides || []) {
+      if (typeof provided === 'string') runtime[provided] = meta.quilt_loader.version
+      else if (provided && typeof provided.id === 'string') runtime[provided.id] = typeof provided.version === 'string' ? provided.version : meta.quilt_loader.version
+    }
   }
 
   return runtime

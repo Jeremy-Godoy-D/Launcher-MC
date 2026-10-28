@@ -1,5 +1,5 @@
 import { Resource, ResourceDomain, ResourceManager } from '@xmcl/resource'
-import { InstanceModsService as IInstanceModsService, InstanceModsServiceKey, LockKey, UpdateInstanceResourcesOptions } from '@xmcl/runtime-api'
+import { InstanceModsService as IInstanceModsService, InstanceModsServiceKey, LockKey, ModReviewConfiguration, ReviewedModChanges, UpdateInstanceResourcesOptions } from '@xmcl/runtime-api'
 import { emptyDir, ensureDir, stat } from 'fs-extra'
 import { join } from 'path'
 import { Inject, LauncherAppKey } from '~/app'
@@ -11,7 +11,7 @@ import { AbstractInstanceDomainService } from './AbstractInstanceDomainService'
 import { setModsEnabled } from './utils/setModsEnabled'
 import { InstanceService } from './InstanceService'
 import { AnyError } from '@xmcl/utils'
-import { installLocalMods, uninstallLocalMods } from './utils/localMods'
+import { installLocalMods, readModFilesSnapshot, uninstallLocalMods, validateModFileChanges } from './utils/localMods'
 import { LaunchService } from '../launch/LaunchService'
 
 /**
@@ -25,21 +25,29 @@ export class InstanceModsService extends AbstractInstanceDomainService implement
     super(app, ResourceDomain.Mods)
   }
 
-  async enable({ files, path }: UpdateInstanceResourcesOptions): Promise<void> {
-    await this.#changeMods(path, () => setModsEnabled(path, files, true))
+  async enable({ files, path, expectedHashes, expectedSnapshot }: ReviewedModChanges): Promise<void> {
+    await this.#changeMods(path, async configuration => { await validateModFileChanges(path, files, expectedHashes, expectedSnapshot, configuration); await setModsEnabled(path, files, true) })
   }
 
-  async disable({ files, path }: UpdateInstanceResourcesOptions): Promise<void> {
-    await this.#changeMods(path, () => setModsEnabled(path, files, false))
+  async disable({ files, path, expectedHashes, expectedSnapshot }: ReviewedModChanges): Promise<void> {
+    await this.#changeMods(path, async configuration => { await validateModFileChanges(path, files, expectedHashes, expectedSnapshot, configuration); await setModsEnabled(path, files, false) })
   }
 
-  async #changeMods<T>(path: string, operation: () => Promise<T>): Promise<T> {
+  async getModFilesSnapshot(path: string) {
     await this.#assertJavaInstance(path)
     return this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
-      await this.#assertJavaInstance(path)
+      const instance = await this.#assertJavaInstance(path)
+      return readModFilesSnapshot(path, { runtime: { ...instance.runtime }, java: instance.java, version: instance.version })
+    })
+  }
+
+  async #changeMods<T>(path: string, operation: (configuration: ModReviewConfiguration) => Promise<T>): Promise<T> {
+    await this.#assertJavaInstance(path)
+    return this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      const instance = await this.#assertJavaInstance(path)
       const launch = await this.app.registry.get(LaunchService)
       if ((await launch.getGameProcesses()).some(process => process.options.gameDirectory === path)) throw new AnyError('InstanceRunningError')
-      return operation()
+      return operation({ runtime: { ...instance.runtime }, java: instance.java, version: instance.version })
     })
   }
 
@@ -49,14 +57,16 @@ export class InstanceModsService extends AbstractInstanceDomainService implement
     return destinations
   }
 
-  async uninstall({ files, path, expectedHashes }: UpdateInstanceResourcesOptions & { expectedHashes?: Record<string, string> }): Promise<void> {
-    await this.#changeMods(path, () => uninstallLocalMods(path, files, expectedHashes))
+  async uninstall({ files, path, expectedHashes, expectedSnapshot }: ReviewedModChanges): Promise<void> {
+    await this.#changeMods(path, configuration => uninstallLocalMods(path, files, expectedHashes, expectedSnapshot, configuration))
   }
 
   async #assertJavaInstance(path: string) {
     const instances = await this.app.registry.get(InstanceService)
     await instances.initialize()
-    if (typeof path !== 'string' || !instances.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceNotFoundError')
+    const instance = typeof path === 'string' ? instances.state.instances.find(instance => instance.path === path && instance.edition === 'java') : undefined
+    if (!instance) throw new AnyError('InstanceNotFoundError')
+    return instance
   }
 
   async installToServerInstance(options: UpdateInstanceResourcesOptions): Promise<void> {

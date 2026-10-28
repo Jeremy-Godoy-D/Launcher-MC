@@ -1,7 +1,9 @@
 import { constants } from 'node:fs'
-import { copyFile, lstat, mkdir, unlink } from 'node:fs/promises'
+import { copyFile, lstat, mkdir, readdir, unlink } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
 import { basename, dirname, isAbsolute, join } from 'node:path'
 import { checksum } from '@xmcl/core'
+import type { ModFilesSnapshot, ModReviewConfiguration } from '@xmcl/runtime-api/src/services/InstanceModsService'
 
 async function modsDirectory(path: string, create = false) {
   if (typeof path !== 'string' || !isAbsolute(path) || !(await lstat(path)).isDirectory()) throw new Error('Unmanaged instance directory')
@@ -33,16 +35,38 @@ export async function installLocalMods(path: string, files: string[]) {
   return changes.map(change => change.destination)
 }
 
-export async function uninstallLocalMods(path: string, files: string[], expectedHashes?: Record<string, string>) {
+export async function readModFilesSnapshot(path: string, configuration?: ModReviewConfiguration): Promise<ModFilesSnapshot> {
+  const directory = await modsDirectory(path), names = await readdir(directory)
+  if (names.length > 10000) throw new Error('Too many mod entries to review')
+  const entries: ModFilesSnapshot['entries'] = []
+  for (const fileName of names.sort()) {
+    const path = join(directory, fileName), stat = await lstat(path)
+    if (!stat.isFile() && !stat.isDirectory()) throw new Error('Unmanaged mod entry')
+    entries.push({ path, fileName, size: stat.size, mtime: stat.mtimeMs, ctime: stat.ctimeMs, ino: stat.ino, dev: stat.dev, directory: stat.isDirectory() })
+  }
+  return { entries, configuration, fingerprint: createHash('sha256').update(JSON.stringify([configuration || null, entries])).digest('hex') }
+}
+
+async function reviewedModFiles(path: string, files: string[], expectedHashes?: Record<string, string>, expectedSnapshot?: string, configuration?: ModReviewConfiguration) {
   const targets = selection(files), directory = await modsDirectory(path)
   if (expectedHashes !== undefined && (!expectedHashes || typeof expectedHashes !== 'object' || Array.isArray(expectedHashes))) throw new Error('Invalid reviewed mods')
   const reviewed = await Promise.all(targets.map(async file => {
     if (dirname(file) !== directory) throw new Error('Unmanaged mod file')
     const stat = await lstat(file)
     if (!stat.isFile()) throw new Error('Unmanaged mod file')
-    if (expectedHashes !== undefined && (!Object.hasOwn(expectedHashes, file) || !/^[a-f0-9]{40}$/i.test(expectedHashes[file]) || await checksum(file, 'sha1') !== expectedHashes[file])) throw new Error('Mod changed since review')
+    if (expectedHashes !== undefined && (!Object.hasOwn(expectedHashes, file) || typeof expectedHashes[file] !== 'string' || !/^[a-f0-9]{40}$/i.test(expectedHashes[file]) || await checksum(file, 'sha1') !== expectedHashes[file])) throw new Error('Mod changed since review')
     return { file, stat }
   }))
+  if (expectedSnapshot !== undefined && (typeof expectedSnapshot !== 'string' || !/^[a-f0-9]{64}$/.test(expectedSnapshot) || (await readModFilesSnapshot(path, configuration)).fingerprint !== expectedSnapshot)) throw Object.assign(new Error('Mod files changed since review'), { name: 'ModFilesChangedError' })
+  return reviewed
+}
+
+export async function validateModFileChanges(path: string, files: string[], expectedHashes?: Record<string, string>, expectedSnapshot?: string, configuration?: ModReviewConfiguration) {
+  await reviewedModFiles(path, files, expectedHashes, expectedSnapshot, configuration)
+}
+
+export async function uninstallLocalMods(path: string, files: string[], expectedHashes?: Record<string, string>, expectedSnapshot?: string, configuration?: ModReviewConfiguration) {
+  const reviewed = await reviewedModFiles(path, files, expectedHashes, expectedSnapshot, configuration)
   for (const { file, stat } of reviewed) {
     const current = await lstat(file)
     if (!current.isFile() || current.ino !== stat.ino || current.dev !== stat.dev || current.size !== stat.size || current.mtimeMs !== stat.mtimeMs) throw new Error('Mod changed since review')

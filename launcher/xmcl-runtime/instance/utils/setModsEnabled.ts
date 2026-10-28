@@ -11,6 +11,10 @@ export async function setModsEnabled(path: string, files: string[], enabled: boo
     if (typeof file !== 'string' || dirname(file) !== directory || !(await lstat(file)).isFile()) throw new Error('Unmanaged mod file')
     if (file.endsWith('.disabled') === enabled) changes.push([file, enabled ? file.slice(0, -9) : `${file}.disabled`])
   }
+  for (const [, destination] of changes) {
+    const existing = await lstat(destination).catch(error => { if (error.code !== 'ENOENT') throw error })
+    if (existing) throw Object.assign(new Error('Mod destination already exists'), { code: 'EEXIST' })
+  }
   for (const [source, destination] of changes) {
     // Exclusive creation preserves both versions if an enabled/disabled name already exists.
     try { await link(source, destination) }

@@ -3,7 +3,8 @@ import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { checksum } from '@xmcl/core'
-import { installLocalMods, uninstallLocalMods } from './localMods'
+import { RuntimeVersionsSchema } from '@xmcl/instance'
+import { installLocalMods, readModFilesSnapshot, uninstallLocalMods, validateModFileChanges } from './localMods'
 
 const roots: string[] = []
 afterEach(async () => { await Promise.all(roots.splice(0).map(path => rm(path, { recursive: true, force: true }))) })
@@ -59,4 +60,48 @@ it('rejects the whole removal selection if one path is outside, missing, linked 
   await expect(uninstallLocalMods(path, [installed], {})).rejects.toThrow('changed')
   expect(await readFile(installed, 'utf8')).toBe('changed')
   expect(await readFile(source, 'utf8')).toBe('original')
+})
+
+it('captures stable directory identities without making reads invalidate the review', async () => {
+  const { path, source, installed } = await fixture(); await installLocalMods(path, [source])
+  await mkdir(join(path, 'mods/development'))
+  const snapshot = await readModFilesSnapshot(path)
+  expect(snapshot.entries.map(file => [file.fileName, file.directory])).toEqual([['development', true], ['example.jar', false]])
+  await readFile(installed)
+  expect((await readModFilesSnapshot(path)).fingerprint).toBe(snapshot.fingerprint)
+  await validateModFileChanges(path, [installed], { [installed]: await checksum(installed, 'sha1') }, snapshot.fingerprint)
+})
+it('rejects reviewed changes when an unrelated entry changes, preserving all originals', async () => {
+  const { path, source, installed } = await fixture(); await installLocalMods(path, [source])
+  const snapshot = await readModFilesSnapshot(path), hashes = { [installed]: await checksum(installed, 'sha1') }
+  await writeFile(join(path, 'mods/another.jar'), 'new dependency context')
+  await expect(validateModFileChanges(path, [installed], hashes, snapshot.fingerprint)).rejects.toThrow('changed since review')
+  await expect(uninstallLocalMods(path, [installed], hashes, snapshot.fingerprint)).rejects.toThrow('changed since review')
+  expect(await readFile(installed, 'utf8')).toBe('original')
+  expect(await readFile(join(path, 'mods/another.jar'), 'utf8')).toBe('new dependency context')
+})
+it('also verifies selected bytes and refuses malformed review tokens', async () => {
+  const { path, source, installed } = await fixture(); await installLocalMods(path, [source])
+  const hashes = { [installed]: await checksum(installed, 'sha1') }
+  await writeFile(installed, 'modified')
+  await expect(validateModFileChanges(path, [installed], hashes, (await readModFilesSnapshot(path)).fingerprint)).rejects.toThrow('Mod changed')
+  for (const invalid of ['', 'a'.repeat(65), {}]) await expect(validateModFileChanges(path, [installed], undefined, invalid as string)).rejects.toThrow('changed since review')
+  expect(await readFile(installed, 'utf8')).toBe('modified')
+})
+it('never follows linked entries when capturing the dependency context', async () => {
+  const { root, path, source } = await fixture(); await installLocalMods(path, [source])
+  await symlink(root, join(path, 'mods/linked'), 'junction')
+  await expect(readModFilesSnapshot(path)).rejects.toThrow('Unmanaged mod entry')
+  expect(await readFile(source, 'utf8')).toBe('original')
+})
+
+it('invalidates a review when the loader, Minecraft or configured Java changes', async () => {
+  const { path, source, installed } = await fixture(); await installLocalMods(path, [source])
+  const configuration = { runtime: RuntimeVersionsSchema.parse({ minecraft: '1.21.1', fabricLoader: '0.16.0' }), java: '', version: '' }
+  const snapshot = await readModFilesSnapshot(path, configuration), hashes = { [installed]: await checksum(installed, 'sha1') }
+  for (const next of [{ ...configuration, java: 'C:/java/bin/java.exe' }, { ...configuration, version: 'custom' }, { ...configuration, runtime: { ...configuration.runtime, fabricLoader: '0.16.1' } }]) {
+    await expect(validateModFileChanges(path, [installed], hashes, snapshot.fingerprint, next)).rejects.toMatchObject({ name: 'ModFilesChangedError' })
+    expect(await readFile(installed, 'utf8')).toBe('original')
+  }
+  await validateModFileChanges(path, [installed], hashes, snapshot.fingerprint, configuration)
 })

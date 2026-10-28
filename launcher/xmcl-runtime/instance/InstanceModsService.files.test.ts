@@ -27,9 +27,9 @@ beforeEach(() => {
 })
 const operations = (path = 'managed') => [() => service.install({ path, files: [] }), () => service.uninstall({ path, files: [] }), () => service.enable({ path, files: [] }), () => service.disable({ path, files: [] })]
 it('rejects absent and Bedrock records before any filesystem operation', async () => {
-  for (const op of operations('unregistered')) await expect(op()).rejects.toHaveProperty('name', 'InstanceNotFoundError')
+  for (const op of [...operations('unregistered'), () => service.getModFilesSnapshot('unregistered')]) await expect(op()).rejects.toHaveProperty('name', 'InstanceNotFoundError')
   instances[0].edition = 'bedrock'
-  for (const op of operations()) await expect(op()).rejects.toHaveProperty('name', 'InstanceNotFoundError')
+  for (const op of [...operations(), () => service.getModFilesSnapshot('managed')]) await expect(op()).rejects.toHaveProperty('name', 'InstanceNotFoundError')
   expect(of).not.toHaveBeenCalled()
 })
 it('blocks every file mutation while this instance has a tracked game process', async () => {

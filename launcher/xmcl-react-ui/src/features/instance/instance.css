@@ -9,6 +9,11 @@
   .content-description { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 180px; overflow: auto; }
   .content-file-name { border: 0; padding: 4px 0; min-height: 32px; background: transparent; color: var(--ink); font: inherit; font-weight: 600; text-align: left; justify-self: start; }
   .content-file-name:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .mod-diagnostic-list { list-style: none; padding: 0; }
+  .mod-diagnostic-list > li { display: flex; align-items: start; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); padding: 16px 0; }
+  .mod-diagnostic-list > li > div { display: grid; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
+  .mod-diagnostic-list small { color: var(--muted); }
+  .mod-diagnostic-list .button { flex-shrink: 0; }
   .content-remove-dialog { max-width: 560px; }
   .content-remove-dialog .content-actions { flex-shrink: 0; }
   .content-remove-files { min-height: 0; max-height: 30vh; overflow: auto; padding-left: 20px; margin: 16px 0; overflow-wrap: anywhere; }
