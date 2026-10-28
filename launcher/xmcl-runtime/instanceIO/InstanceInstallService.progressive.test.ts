@@ -920,6 +920,7 @@ describe('InstanceInstallService progressive installation', () => {
       () => f.service.previewInstanceFiles({ path, oldFiles: [], files: [] }),
       () => f.service.getInstanceInstallManifest(path),
       () => f.service.getReviewedModInstalls(path),
+      () => f.service.previewModInstallRecovery(path, '00000000-0000-0000-0000-000000000000'),
       () => f.service.stageInstanceFiles({ path, oldFiles: [], files: [] }),
       () => f.service.setInstanceInstallManifest({ path, oldFiles: [], files: [] }),
       () => f.service.applyInstanceInstallManifest(path),
@@ -1245,6 +1246,79 @@ describe('InstanceInstallService progressive installation', () => {
     expect(await service.getReviewedModInstalls(f.instancePath)).toEqual([])
     expect(await readPendingInstalls(f.instancePath)).toHaveLength(1)
     await expect(service.resumeInstanceInstall(f.instancePath, undefined, plans[0].operationId)).rejects.toThrow('no longer pending')
+  })
+
+  it('requires a fresh recovery review for edited published files, preserves their backup and another pending plan', async () => {
+    const f = await fixture(), a = f.file('mods/a-old.jar', 'A'), b = f.file('mods/b-old.jar', 'B'), nextA = f.file('mods/a-new.jar', 'NEW A'), nextB = f.file('mods/b-new.jar', 'NEW B'), other = f.file('mods/other.jar', 'OTHER')
+    await f.write(join(f.instancePath, a.path), 'A'); await f.write(join(f.instancePath, b.path), 'B')
+    mockedDownload.mockImplementationOnce(async (downloads, finished) => { await f.materialize(downloads.find(download => download.file.path === nextA.path)!, finished); throw new Error('interrupted') })
+    await expect(f.service.installInstanceFiles(await f.review([a, b], [nextA, nextB]))).rejects.toThrow('interrupted')
+    const [profile] = await readPendingInstalls(f.instancePath)
+    await writeFile(join(f.instancePath, nextA.path), 'USER EDIT')
+    mockedDownload.mockRejectedValueOnce(new Error('other offline'))
+    await expect(f.service.installInstanceFiles({ path: f.instancePath, oldFiles: [], files: [other] })).rejects.toThrow('other offline')
+    const service = f.createService()
+    await expect(service.resumeInstanceInstall(f.instancePath, undefined, profile.state.operationId)).rejects.toHaveProperty('name', 'ModFilesChangedError')
+    const saved = await readFile(profile.path), recovery = await service.previewModInstallRecovery(f.instancePath, profile.state.operationId!)
+    expect(await readFile(profile.path)).toEqual(saved)
+    expect(recovery.configurationChanged).toBe(false)
+    expect(recovery.changes).toContainEqual(expect.objectContaining({ operation: 'backup-add', file: expect.objectContaining({ path: nextA.path }) }))
+    expect(await readFile(join(f.instancePath, nextA.path), 'utf8')).toBe('USER EDIT')
+    mockedDownload.mockImplementation(f.downloadAll)
+    await service.resumeInstanceInstall(f.instancePath, undefined, profile.state.operationId, recovery.review)
+    expect(await readFile(join(f.instancePath, nextA.path), 'utf8')).toBe('NEW A')
+    expect(await readFile(join(f.instancePath, nextB.path), 'utf8')).toBe('NEW B')
+    expect(await readFile(join(profile.state.backup, nextA.path), 'utf8')).toBe('USER EDIT')
+    expect(await pathExists(join(f.instancePath, a.path))).toBe(false); expect(await pathExists(join(f.instancePath, b.path))).toBe(false)
+    expect(await pathExists(join(f.instancePath, other.path))).toBe(false); expect(await readPendingInstalls(f.instancePath)).toHaveLength(1)
+  })
+
+  it.each(['file', 'configuration', 'plan', 'changes'])('rejects a recovery review made stale by %s changes without publishing or renewing confirmation', async change => {
+    const f = await fixture(), old = f.file('mods/old.jar', 'OLD'), next = f.file('mods/new.jar', 'NEW')
+    await f.write(join(f.instancePath, old.path), 'OLD')
+    mockedDownload.mockRejectedValueOnce(new Error('offline'))
+    await expect(f.service.installInstanceFiles(await f.review([old], [next]))).rejects.toThrow('offline')
+    const [profile] = await readPendingInstalls(f.instancePath), recovery = await f.service.previewModInstallRecovery(f.instancePath, profile.state.operationId!)
+    if (change === 'file') await writeFile(join(f.instancePath, old.path), 'USER')
+    else if (change === 'configuration') f.instanceService.state.all[f.instancePath].runtime.minecraft = '1.20.4'
+    else if (change === 'plan') await writeJson(profile.path, { ...profile.state, files: [f.file(next.path, 'DIFFERENT')] })
+    else recovery.review.changes = []
+    const saved = await readFile(profile.path), attempts = mockedDownload.mock.calls.length
+    await expect(f.service.resumeInstanceInstall(f.instancePath, undefined, profile.state.operationId, recovery.review)).rejects.toHaveProperty('name', 'ModFilesChangedError')
+    expect(mockedDownload).toHaveBeenCalledTimes(attempts); expect(await readFile(profile.path)).toEqual(saved)
+    expect(await readFile(join(f.instancePath, old.path), 'utf8')).toBe(change === 'file' ? 'USER' : 'OLD')
+    expect(await pathExists(join(f.instancePath, next.path))).toBe(false)
+  })
+
+  it('reviews a configuration changed since interruption and still rejects changes during the renewed download', async () => {
+    const f = await fixture(), old = f.file('mods/old.jar', 'OLD'), next = f.file('mods/new.jar', 'NEW')
+    await f.write(join(f.instancePath, old.path), 'OLD')
+    mockedDownload.mockRejectedValueOnce(new Error('offline'))
+    await expect(f.service.installInstanceFiles(await f.review([old], [next]))).rejects.toThrow('offline')
+    const [profile] = await readPendingInstalls(f.instancePath)
+    f.instanceService.state.all[f.instancePath].runtime.minecraft = '1.20.4'
+    const recovery = await f.service.previewModInstallRecovery(f.instancePath, profile.state.operationId!)
+    expect(recovery.configurationChanged).toBe(true)
+    mockedDownload.mockImplementation(async (downloads, finished) => { await f.materialize(downloads[0], finished); await writeFile(join(f.instancePath, old.path), 'NEW USER EDIT') })
+    await expect(f.service.resumeInstanceInstall(f.instancePath, undefined, profile.state.operationId, recovery.review)).rejects.toHaveProperty('name', 'ModFilesChangedError')
+    expect(await readFile(join(f.instancePath, old.path), 'utf8')).toBe('NEW USER EDIT')
+    expect(await pathExists(join(f.instancePath, next.path))).toBe(false)
+  })
+
+  it.skipIf(process.platform !== 'win32')('backs up user edits during reviewed recovery of a case-only filename change', async () => {
+    const f = await fixture(), old = f.file('mods/Old.jar', 'ORIGINAL'), next = f.file('mods/old.jar', 'NEW')
+    await f.write(join(f.instancePath, old.path), 'ORIGINAL')
+    mockedDownload.mockRejectedValueOnce(new Error('offline'))
+    await expect(f.service.installInstanceFiles(await f.review([old], [next]))).rejects.toThrow('offline')
+    const [profile] = await readPendingInstalls(f.instancePath)
+    await writeFile(join(f.instancePath, old.path), 'USER')
+    const recovery = await f.service.previewModInstallRecovery(f.instancePath, profile.state.operationId!)
+    expect(recovery.changes).toContainEqual(expect.objectContaining({ file: expect.objectContaining({ path: next.path }), operation: 'backup-add' }))
+    mockedDownload.mockImplementation(f.downloadAll)
+    await f.service.resumeInstanceInstall(f.instancePath, undefined, profile.state.operationId, recovery.review)
+    expect(await readFile(join(f.instancePath, next.path), 'utf8')).toBe('NEW')
+    expect(await readFile(join(profile.state.backup, next.path), 'utf8')).toBe('USER')
+    expect(await readdir(join(f.instancePath, 'mods'))).toHaveLength(1)
   })
 
 })

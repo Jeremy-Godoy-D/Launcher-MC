@@ -539,6 +539,10 @@ react:
     incomplete: "Hay metadatos pendientes o archivos que no se pudieron interpretar. Solo se cambiará tu selección; no se añadieron cambios de dependencias."
 
   modUpdates:
+    recover: "Revisar esta operación"
+    applyRecovery: "Aplicar recuperación revisada"
+    recoveryHelp: "Se conserva el progreso. Los archivos modificados se guardarán en una copia antes de sustituirlos."
+    configurationChanged: "Cambió la configuración de ejecución. Estas versiones se eligieron antes del cambio; comprueba sus requisitos o vuelve a consultar proveedores."
     searchCancelled: "Consulta detenida. Puedes cambiar los filtros y volver a consultar."
     open: "Buscar actualizaciones"
     title: "Actualizar mods"
@@ -559,7 +563,7 @@ react:
     installing: "Aplicando los archivos revisados…"
     progress: "Progreso de la actualización"
     pending: "Actualizaciones pendientes"
-    pendingHelp: "Estas operaciones quedaron guardadas. Reanudar comprueba la revisión original y conserva otros planes pendientes."
+    pendingHelp: "Puedes reanudar la revisión original o revisar de nuevo los archivos actuales. También puedes consultar versiones nuevas."
     resume: "Reanudar esta operación"
     found: "Actualizaciones disponibles: {count}"
     none: "No se encontraron versiones más recientes para los mods identificados y estos filtros."

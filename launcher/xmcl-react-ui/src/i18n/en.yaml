@@ -539,6 +539,10 @@ react:
     incomplete: "Some metadata is pending or could not be interpreted. Only your selection will change; no dependency changes were added."
 
   modUpdates:
+    recover: "Review this operation"
+    applyRecovery: "Apply reviewed recovery"
+    recoveryHelp: "Progress is retained. Modified files will be backed up before replacement."
+    configurationChanged: "The launch configuration changed. These versions were chosen before the change; check their requirements or check providers again."
     searchCancelled: "Check stopped. Change filters and check again."
     open: "Check updates"
     title: "Update mods"
@@ -559,7 +563,7 @@ react:
     installing: "Applying reviewed files…"
     progress: "Update progress"
     pending: "Pending updates"
-    pendingHelp: "These operations were saved. Resuming verifies the original review and preserves other pending plans."
+    pendingHelp: "Resume the original review or review the current files again. You can also check for newer versions."
     resume: "Resume this operation"
     found: "Available updates: {count}"
     none: "No newer versions were found for identified mods with these filters."

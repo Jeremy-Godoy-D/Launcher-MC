@@ -111,12 +111,13 @@ export async function computeFileUpdates(
         return undefined
       }
 
+      const previousFile = oldFilesMap[p] ?? (isCaseOnlyRename && oldPath ? oldFilesMap[oldPath] : undefined)
       // Check if file changed compared to old install
       const isFileChangedComparedToOldFile =
         typeof oldInstallTime === 'number'
           ? oldInstallTime < file.mtime
-          : oldFilesMap[p]
-            ? await isFileDifferentFromManifest(oldFilesMap[p])
+          : previousFile
+            ? await isFileDifferentFromManifest(previousFile)
             : undefined
 
       // Compare the on-disk file against the desired new file. Used both
@@ -143,7 +144,7 @@ export async function computeFileUpdates(
           const isDifferent = await isFileDiffFromNew(toAdd[p])
           result.push({
             file: toAdd[p],
-            operation: isCaseOnlyRename ? 'add' : isDifferent ? 'backup-add' : 'keep',
+            operation: isDifferent ? 'backup-add' : isCaseOnlyRename ? 'add' : 'keep',
           })
         } else {
           result.push({

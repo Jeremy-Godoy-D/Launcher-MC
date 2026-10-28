@@ -75,12 +75,14 @@
   .mod-update-options label { display: flex; gap: 10px; align-items: center; }
   .mod-update-options select { min-width: 0; padding: 9px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; }
   .mod-updates-dialog h3 { margin: 24px 0 12px; }
+  .mod-updates-dialog .mod-update-pending-heading { margin-top: 0; }
   .mod-update-list, .mod-update-pending, .mod-update-changes { list-style: none; padding: 0; }
   .mod-update-list li, .mod-update-pending li, .mod-update-changes li { padding: 12px 0; border-bottom: 1px solid var(--line); }
   .mod-update-list label { display: flex; gap: 12px; align-items: start; }
   .mod-update-list label > span, .mod-update-pending li > div { display: grid; gap: 6px; min-width: 0; }
   .mod-update-list small { color: var(--muted); }
   .mod-updates-dialog input[type='checkbox'] { width: 18px; height: 18px; accent-color: var(--accent); flex-shrink: 0; }
+  .mod-update-pending { margin: 0; }
   .mod-update-pending li { display: flex; gap: 16px; align-items: center; justify-content: space-between; }
   .mod-update-pending .button { flex-shrink: 0; }
   .mod-update-changes li { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px; }

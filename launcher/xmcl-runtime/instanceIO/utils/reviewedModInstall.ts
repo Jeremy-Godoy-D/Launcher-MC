@@ -1,5 +1,6 @@
 import type { InstanceFile, InstanceInstallLock } from '@xmcl/instance'
-import type { InstanceFileUpdate, ModReviewConfiguration } from '@xmcl/runtime-api'
+import type { InstanceFileUpdate, ModReviewConfiguration, ModInstallReview } from '@xmcl/runtime-api'
+import { createHash } from 'node:crypto'
 import { lstat } from 'node:fs/promises'
 import { join } from 'node:path'
 import { importPathParts } from '../../util/importFile'
@@ -16,6 +17,26 @@ function changesKey(changes: Array<{ path: string; operation: string }>) {
   return JSON.stringify(changes.map(change => [modPath(change.path), change.operation]).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))))
 }
 
+async function readModHash(path: string, relative: string, checksum: (path: string, algorithm: string) => Promise<string>) {
+  modPath(relative)
+  if (!(await lstat(join(path, 'mods'))).isDirectory()) throw changed()
+  const file = join(path, relative), info = await lstat(file).catch(error => { if (error.code !== 'ENOENT') throw error })
+  if (!info) return null
+  if (!info.isFile()) throw changed()
+  return (await checksum(file, 'sha1')).toLowerCase()
+}
+
+/** Read-only token binds recovery to the saved plan and current bytes, including edited published files. */
+export async function captureModInstallRecovery(path: string, state: InstanceInstallLock, updates: InstanceFileUpdate[], configuration: ModReviewConfiguration, checksum: (path: string, algorithm: string) => Promise<string>) {
+  if (!state.review || updates.length > 2000) throw new Error('Invalid reviewed recovery')
+  for (const file of [...activeInstallFiles(state), ...activeInstallFiles(state, true)]) modPath(file.path)
+  const inventory = await readModFilesSnapshot(path, configuration), targets: Record<string, string | null> = {}
+  for (const name of [...new Set(updates.map(update => modPath(update.file.path)))].sort()) targets[name] = await readModHash(path, name, checksum)
+  if ((await readModFilesSnapshot(path, configuration)).fingerprint !== inventory.fingerprint) throw changed()
+  const snapshot = createHash('sha256').update(JSON.stringify([inventory.fingerprint, targets, state.operationId, state.revision, state.review.snapshot, activeInstallFiles(state), activeInstallFiles(state, true), changesKey(updates.map(update => ({ path: update.file.path, operation: update.operation })))])).digest('hex')
+  return { snapshot, configuration, targets }
+}
+
 /** Called under the installer's instance lock; never acquires that lock again. */
 export async function prepareModInstallReview(
   path: string,
@@ -23,22 +44,22 @@ export async function prepareModInstallReview(
   updates: InstanceFileUpdate[],
   getConfiguration: () => ModReviewConfiguration,
   checksum: (path: string, algorithm: string) => Promise<string>,
+  recoveryReview?: ModInstallReview,
 ) {
-  const state = getState(), review = state.review
+  const state = getState()
+  let review = state.review
+  if (!review && recoveryReview) throw new Error('Reviewed install no longer pending')
   if (!review) return undefined
   const paths = [...new Set(updates.map(update => modPath(update.file.path)))]
   const wanted = new Map(activeInstallFiles(state).map(file => {
     if (!/^[a-f0-9]{40}$/i.test(file.hashes.sha1 || '')) throw new Error('Reviewed upgrades require SHA-1 hashes')
     return [modPath(file.path), file.hashes.sha1.toLowerCase()]
   }))
-  const readHash = async (relative: string) => {
-    modPath(relative)
-    const directory = await lstat(join(path, 'mods'))
-    if (!directory.isDirectory()) throw changed()
-    const file = join(path, relative), info = await lstat(file).catch(error => { if (error.code !== 'ENOENT') throw error })
-    if (!info) return null
-    if (!info.isFile()) throw changed()
-    return (await checksum(file, 'sha1')).toLowerCase()
+  const readHash = (relative: string) => readModHash(path, relative, checksum)
+  if (recoveryReview) {
+    const capture = await captureModInstallRecovery(path, state, updates, getConfiguration(), checksum)
+    if (recoveryReview.snapshot !== capture.snapshot || changesKey(recoveryReview.changes) !== changesKey(updates.map(update => ({ path: update.file.path, operation: update.operation })))) throw changed()
+    review = state.review = { snapshot: recoveryReview.snapshot, changes: recoveryReview.changes, configuration: capture.configuration, targets: capture.targets }
   }
   if (!!review.configuration !== !!review.targets) throw new Error('Invalid persisted mod review')
   if (!review.configuration) {

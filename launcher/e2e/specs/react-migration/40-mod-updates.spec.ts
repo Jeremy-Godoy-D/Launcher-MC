@@ -129,3 +129,54 @@ test('update selection and review fit both themes and sizes with keyboard and no
   }
   expect(errors).toEqual([])
 })
+
+
+async function holdUpdateResponse(page: Page, ignoreAbort = false) {
+  await page.evaluate(ignoreAbort => {
+    const base = window.fetch.bind(window)
+    ;(window as any).__updateWaiting = false
+    window.fetch = async (input, init) => {
+      if (!String(input).endsWith('/version_files/update')) return base(input, init)
+      ;(window as any).__updateWaiting = true
+      return new Promise<Response>((resolve, reject) => {
+        ;(window as any).__releaseUpdate = () => { void base(input, init).then(resolve, reject) }
+        if (!ignoreAbort) init?.signal?.addEventListener('abort', () => reject(new DOMException('Stopped', 'AbortError')), { once: true })
+      })
+    }
+  }, ignoreAbort)
+}
+
+test('a cancelled provider query can be retried without installing or losing the instance', async ({ launcher }) => {
+  const page = launcher.main, { path, original } = await fixture(launcher), { dialog } = await open(page)
+  await holdUpdateResponse(page)
+  await dialog.getByRole('button', { name: 'Consultar proveedores', exact: true }).click()
+  await expect.poll(() => page.evaluate(() => (window as any).__updateWaiting)).toBe(true)
+  await dialog.getByRole('button', { name: 'Detener operación', exact: true }).click()
+  await expect(dialog.getByRole('alert')).toContainText('Consulta detenida')
+  await expect(dialog.getByRole('button', { name: 'Revisar archivos', exact: true })).toBeDisabled()
+  await page.evaluate(() => { (window as any).__updateWaiting = false })
+  await dialog.getByRole('button', { name: 'Consultar proveedores', exact: true }).click()
+  await expect.poll(() => page.evaluate(() => (window as any).__updateWaiting)).toBe(true)
+  await page.evaluate(() => { (window as any).__releaseUpdate() })
+  await expect(dialog).toContainText('2.0.0'); await expect(dialog.getByRole('button', { name: 'Revisar archivos', exact: true })).toBeEnabled()
+  expect(await launcher.app.evaluate(() => (globalThis as any).__upgradeCalls)).toEqual([])
+  expect(await readFile(join(path, 'mods/alpha.jar.disabled'))).toEqual(original)
+})
+
+test('a late update response from instance A cannot become a selection or action for instance B', async ({ launcher }) => {
+  const page = launcher.main, { path: a, original } = await fixture(launcher)
+  const b = await page.evaluate(async () => (window as any).serviceChannels.open('InstanceService').call('createInstance', { name: 'Other update QA', runtime: { minecraft: '1.21.1', fabricLoader: '0.16.0' } }))
+  await makeReactMod(b, 'beta', 'Beta')
+  const originalB = await readFile(join(b, 'mods/beta.jar')), { dialog } = await open(page)
+  await holdUpdateResponse(page, true)
+  await dialog.getByRole('button', { name: 'Consultar proveedores', exact: true }).click()
+  await expect.poll(() => page.evaluate(() => (window as any).__updateWaiting)).toBe(true)
+  await page.evaluate(b => { localStorage.setItem('selectedInstancePath', b); window.dispatchEvent(new StorageEvent('storage', { key: 'selectedInstancePath', newValue: b })) }, b)
+  await expect(page.getByTestId('instance-mods')).toHaveAttribute('data-instance-path', b); await expect(dialog).toHaveCount(0)
+  await page.evaluate(() => { (window as any).__releaseUpdate() })
+  await page.getByRole('button', { name: 'Buscar actualizaciones', exact: true }).click()
+  await expect(dialog.getByRole('button', { name: 'Consultar proveedores', exact: true })).toBeEnabled()
+  await expect(dialog.locator('.mod-update-list li')).toHaveCount(0); await expect(dialog.getByRole('button', { name: 'Revisar archivos', exact: true })).toBeDisabled()
+  expect(await launcher.app.evaluate(() => (globalThis as any).__upgradeCalls)).toEqual([])
+  expect(await readFile(join(a, 'mods/alpha.jar.disabled'))).toEqual(original); expect(await readFile(join(b, 'mods/beta.jar'))).toEqual(originalB)
+})
