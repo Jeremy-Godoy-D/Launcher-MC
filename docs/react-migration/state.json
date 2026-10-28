@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa. Fuente33ef2a3/INSTALL-AUTHORITY: registro Java, raíz absoluta/directa y proceso revalidados bajo locks; manifiestos seguros y lectores internos privados. 694unitarias/77archivos,tipos raíz/lint pasan;11React+3Vue empaquetados(24,5s/18,8s), ambos renderers/hosts reconstruidos ydistVue restaurado. CI anterior40615348161(fdce3bc/cf2b77d) éxito ambos; comprobar CI nuevo tras push. Próximo bloque obligatorio antes de updates: validar workspace/backup/profile persistidos y ancestros antes de ensureDir/move/remove/lecturas, preservar shared links autorizados. No mover/borrar workspace legacy externo por prefijo JSON. Luego preservar.disabled y conectar actualización de mods/proveedores/revisión/cola, packs/shaders,mundos/ajustes/consola y6–9. No anidar lock de mods alrededor de installInstanceFiles. K08/gates5 pendientes;MS pospuesto;PR4 borrador,producción/proxy intactos;sin DevTools/CDP;no tocar ANALISIS.",
+  "nextAction": "Etapa5 activa. Fuente f25aab4/INSTALL-PATHS valida workspace/backup/profile persistidos y sus ancestros, conserva legacy externo y vuelve a preparar privadamente; reserva.backups.701unitarias/77archivos,tipos raíz/lint pasan;14React+3Vue empaquetados(35,2s/21,7s),ambos renderers/hosts reconstruidos ydistVue restaurado. CI40617567629(5158c1c/33ef2a3) falló2timeouts de5000ms; solo esos2tests ahora15000ms conservando aserciones. Verificar CI nuevo traspush. Siguiente obligatorio: validar cada ruta hija de destino/workspace/backup antes de leer/preparar/publicar, respetando shared links propios de packs/shaders/saves. Reutilizar instanceFileSource/importPathParts; considerar allowMissing para destinos ausentes sin cambiar contrato lector; callback commitReadyFiles puede recibir el archivo para validar uno por operación, evitar O(N²). Después mover buildModUpgradeManifest aAPIcompartida, conservar.disabled, conectar updates/revisión/proveedores/cola; luego packs/shaders,mundos/ajustes/consola y6–9. No anidar lock de mods alrededor del instalador. K08/gates5 pendientes;MS pospuesto,PR4borrador,producción/proxy intactos;sin DevTools/CDP ni ANALISIS.",
   "stages": [
     {
       "id": 0,
@@ -666,9 +666,17 @@
             {
               "path": "docs/react-migration/STAGE5-INSTALL-AUTHORITY.json",
               "sha256": "b0a54382f506081afce2b1803d3cd57638243ec1ff658af39fffece8ebacd367"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-INSTALL-PATHS.md",
+              "sha256": "ede81d49a90098f62be906e48dfc4c10ec9ba364be5d0a7999f16979d829e94a"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-INSTALL-PATHS.json",
+              "sha256": "a4c99f7758a04961a322ecb145a236afc04247e9ad71b755892d10fc778e5721"
             }
           ],
-          "note": "Avance parcial: WORKSPACE/AUTHORITY/GROUPS/LOCAL-FILES/MOD-INFO/DIAGNOSTICS/MOD-CHANGES/INSTALL-STATE/INSTALL-AUTHORITY. Fuente33ef2a3:694unitarias y14recorridos empaquetados;CI previo40615348161 verde, nuevo pendiente. Faltan workspace/estado/ancestros del instalador antes de updates; después packs/shaders/resto5. K08/gates5 pending."
+          "note": "Avance parcial hasta INSTALL-PATHS(f25aab4):701unitarias y17recorridos Native focales,tipos/lint pasan. CI40617567629 falló2timeouts: límites afectados ampliados sin quitar aserciones, requiere CI nuevo. Falta validar hijos de destino/staging/backup antes de updates; después packs/shaders/resto5. K08/gates5 pending."
         },
         {
           "id": "worlds-settings",
