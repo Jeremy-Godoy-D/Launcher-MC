@@ -1,0 +1,375 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-27",
+  "applicationCommit": "590217d90b19259faf7a4496cb86f1a95ec12fa1",
+  "verificationCommit": "590217d90b19259faf7a4496cb86f1a95ec12fa1",
+  "status": "stage-5-partial-mod-diagnostics",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/react-migration.yml",
+      "sha256": "62a3e07d9d467d0106f59c62b9025bae276784045a33e56e1f57852957269ced"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/36-mod-diagnostics.spec.ts",
+      "sha256": "4eaaf53e485c99cea081785fd6baedbe2cb641d3577ad2052c1c04b0907172ad"
+    },
+    {
+      "path": "launcher/packages/mod-parser/forge.features.test.ts",
+      "sha256": "d523f2a9102bdc36c31775720f61b09d86c89c9ce2be9f3b31e0cb09d26a6a56"
+    },
+    {
+      "path": "launcher/packages/mod-parser/forge.ts",
+      "sha256": "a3c480064e7c430ebb3880d7bf5c94fe7ba2c90cef38d241f11f69292a0798e6"
+    },
+    {
+      "path": "launcher/packages/mod-parser/quilt.ts",
+      "sha256": "b7417b1eaa0db0e153f8c01af77ed709a9d1a561e302115ede4addc2e5e1f8b7"
+    },
+    {
+      "path": "launcher/packages/semver/semver.test.ts",
+      "sha256": "74c4f2cf684d723307e11e7bac76a65815123ad6f826fa4aeb2d1ec00507997b"
+    },
+    {
+      "path": "launcher/packages/semver/semver.ts",
+      "sha256": "4597088602e17132997e588e5cdadb5e2d545ba671e4a665bcde564d7d41bc3a"
+    },
+    {
+      "path": "launcher/xmcl-keystone-ui/src/composables/appDropHandler.ts",
+      "sha256": "6dcd560ae8e4f19c18381fed5d50e3be6e82973d640ef69497afce3e6bf59482"
+    },
+    {
+      "path": "launcher/xmcl-keystone-ui/src/composables/modInstall.ts",
+      "sha256": "681c24707ac854362e7252a76cdf4420c8007683f0a6aaf8839736b8d8ba5180"
+    },
+    {
+      "path": "launcher/xmcl-keystone-ui/src/composables/modSearch.ts",
+      "sha256": "baa7e84b984e9b6f9780a327c8148eb7cfc67610698c63dffe3cb2c002b42c34"
+    },
+    {
+      "path": "launcher/xmcl-keystone-ui/src/util/mod.ts",
+      "sha256": "54fb374a5346729167b5fb7ff6c30f0817370d3aa019cb225b917a107efe2de1"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/instance/InstanceMods.tsx",
+      "sha256": "b8b8907d90e9c66d3aa5803844c28a070d7835a5dd0fc53b837d0d07ed62cadd"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx",
+      "sha256": "a4b7d369d0fd4e5b918b95b817ac6cb86560b7ce4cb5e9e1e69c6a24d9a95144"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/instance/ModDetails.tsx",
+      "sha256": "30ab0624b9269462b1289f26da057f6a8c9e26293e29ddbf835929888608d51f"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/instance/ModDiagnostics.tsx",
+      "sha256": "ae075ca3c6178e0dcb297301ac55cb75d9651e7bc1d398c6156778b4967647ef"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/instance/instance.css",
+      "sha256": "0505bb74698ad7985b40d9f3249457abd35293f79028a5c2cf9a113c91a70223"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/instance/modModel.ts",
+      "sha256": "0255eddc9b25d57a7a7c121f760dce1ca908044b556b53bd7a4257fa3af382bf"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/instance/usePanelFocus.ts",
+      "sha256": "571465a8044e037933215b142684cc88abff6305632d367e7eae1dee2122b158"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/en.yaml",
+      "sha256": "2e1a49cc710a7c56d7590a6dc71162d748ae732401fc2886949e4b67a88ccb43"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/es-ES.yaml",
+      "sha256": "b094e4554352d027f0e0eb3811181ddaf36142a8f806c41e6d8747f059ecb88f"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/services/InstanceModsService.ts",
+      "sha256": "b8c42a32442c0ca62d703153260fe7227efe8c25928369943850d2fba061256d"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/util/mod.test.ts",
+      "sha256": "aa84653a3687a8d09abf98ced70bf6f296e78dcb35365cc2b63a0528dafe0323"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/util/mod.ts",
+      "sha256": "cbc7e4d1da09144a06d0bf19d27a36ff7305902cee944d2b1375a196ec21faa6"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/util/modCompatible.ts",
+      "sha256": "565ced3c86a360a38016f99fb012957a6f45af0116a55af5ffa7f67507147ee5"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/util/modDependencies.ts",
+      "sha256": "383c29ffe7461d7a71024377464a4faad8e93d7f98d119b9e8dfa221eb5da3b7"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/util/modDiagnostics.test.ts",
+      "sha256": "447a75fb1f95ea845d9772e984971f555ee6dfd181c939eb5e803f00729dda46"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/util/modDiagnostics.ts",
+      "sha256": "79f268dfa4c0b51a093f0905497cda36b2244ec87fb805b752e7009f20fd092c"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/util/modRules.ts",
+      "sha256": "1187c4abff6bcf48a00fad080b44bf164cdf8bf819d694f8d8835344430307da"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instance/InstanceModsService.files.test.ts",
+      "sha256": "2d154177357a993f4d360cd84e425e405b8f88ffce0ecdf224abe86f5fa83fef"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instance/InstanceModsService.ts",
+      "sha256": "913d3111b40b237aa379e92bea1a5c28ed1ea89780bf5b93fac65e032acf4b8c"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instance/utils/localMods.test.ts",
+      "sha256": "4f36512c6820668a8df3644222a67f54e0c8c8e8ca3df019de60d90a877ab709"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instance/utils/localMods.ts",
+      "sha256": "9f3312cd21768e23f7242aa48aac4a74872210ffa6bcd4a7f5df635635adaa9f"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instance/utils/setModsEnabled.test.ts",
+      "sha256": "7aeb59e17d4f4c0aecec7bf0a19d68a5f8c40aa7334d30f7860e75c47db50710"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instance/utils/setModsEnabled.ts",
+      "sha256": "fd2cc76c0685adfa9c53682d4117030b56eefbdf86336a951c3be451a290daa7"
+    }
+  ],
+  "validation": {
+    "react": {
+      "cases": 90,
+      "time": "4.8m"
+    },
+    "strict": {
+      "cases": 1,
+      "time": "4.0s"
+    },
+    "vue": {
+      "cases": 3,
+      "time": "18.5s"
+    },
+    "distinctFunctionalCases": 94,
+    "focusedRepeat": {
+      "cases": 3,
+      "time": "13.7s",
+      "additionalDistinctCases": 0
+    },
+    "unit": {
+      "cases": 669,
+      "files": 75,
+      "seconds": 15.32,
+      "newCases": 24,
+      "existingAdditionalCasesIncluded": 18
+    },
+    "types": "full root check passed",
+    "lint": "full root lint passed, zero warnings/errors",
+    "e2eTypes": "56 existing global diagnostics; spec36 zero",
+    "harnessTests": 9,
+    "sourceDetectorFindings": 0,
+    "axe": {
+      "audits": 111,
+      "violations": 0,
+      "incomplete": 186
+    },
+    "reactPerTestPreservedPngs": 172,
+    "retainedPngsIncludingFocus3": 186,
+    "visualReview": [
+      "diagnostics-dark-1200.png",
+      "diagnostics-actions-light-800.png"
+    ],
+    "precedingCI": {
+      "run": 40508508568,
+      "head": "b585c49bf720095cb20273cda340c4d951eaca71",
+      "conclusion": "success"
+    }
+  },
+  "commands": [
+    "pnpm check",
+    "pnpm lint",
+    "pnpm exec vitest run [exact explicit list in .github/workflows/react-migration.yml at 590217d]",
+    "LAUNCHER_RENDERER=react pnpm build:renderer; pnpm --prefix=xmcl-electron-app build",
+    "XMCL_E2E_EXECUTABLE=<React package> pnpm --dir e2e exec playwright test [workflow React list,90 cases] --reporter=line --output=artifacts/stage5-mod-diagnostics-react",
+    "XMCL_REACT_CLIENT_HARNESS=1 XMCL_E2E_EXECUTABLE=<React package> pnpm --dir e2e exec playwright test specs/react-migration/04-client-contracts.spec.ts --reporter=line --output=artifacts/stage5-mod-diagnostics-strict",
+    "LAUNCHER_RENDERER=vue pnpm build:renderer; pnpm --prefix=xmcl-electron-app build",
+    "XMCL_E2E_EXECUTABLE=<Vue package> pnpm --dir e2e exec playwright test specs/react-migration/03-vue-compatibility.spec.ts specs/react-migration/08-vue-onboarding.spec.ts specs/react-migration/33-vue-content-groups.spec.ts --reporter=line --output=artifacts/stage5-mod-diagnostics-vue",
+    "pnpm --dir e2e exec tsc --noEmit (existing global diagnostics inspected)",
+    "node --test launcher/scripts/react-migration.test.mjs",
+    "impeccable detect launcher/xmcl-react-ui/src/features/instance --json (source only)",
+    "node launcher/scripts/react-migration.mjs check"
+  ],
+  "packagesAtCapture": [
+    {
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/Grimo Launcher.exe",
+      "sha256": "68872aa9ef422d6bc2c0a6b14ea0a2f6528283eef4338d51fc57415f07a335a7"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/resources/app.asar",
+      "sha256": "c0a55a75ee919bcc9b6e7ae9b50506832ca1f7f645db28fbfdedaedad7e7416d"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/Grimo Launcher.exe",
+      "sha256": "3b4f7e6965df3a25f646b0a707158f03459b1230dc46efb8710c3fa26055b337"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/resources/app.asar",
+      "sha256": "b1ab85e3f52375b4ca2a6a04d654888292292bd574786b797fff49bae60ed3a5"
+    }
+  ],
+  "packageAvailability": "Mutable output paths. Hashes identify the binaries at this capture; Vue dist/default restored, production unchanged.",
+  "artifactManifest": {
+    "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-artifact-manifest.json",
+    "sha256": "debbde6fdbe413dcda3143f5eed960bad9d883147dc2572f97eeda800a5d79b3"
+  },
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-all-units-final.log",
+      "sha256": "4dd4a29e887f82b7bec1705d1fd9de8c0b4fe2378b4a37ecf9dfc9a3a150974b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-all-units.log",
+      "sha256": "759d87d05003855fc1bc589f77e89e120e8a3d3e2db801cdc41d851527b74984"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-e2e-types-final.log",
+      "sha256": "47efe23f541affc4c8e52d6c3b30ba91a6f17655bbad76807f5212cf42f8e19f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-e2e-types.log",
+      "sha256": "47efe23f541affc4c8e52d6c3b30ba91a6f17655bbad76807f5212cf42f8e19f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-focus.log",
+      "sha256": "6602f7b094122849b0fd2b61e13ea94d842ba94269284f94eee8cd8fd925ea9c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-focus2.log",
+      "sha256": "1ddfc92cf307100a0c64492b53a68526d3c2fc2f0943937de35c07b26c5182d9"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-focus3.log",
+      "sha256": "16b2164df0409e56018e9695bc9a571f570809cc1ebb15d4f2f0f975491f04df"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-foundation.log",
+      "sha256": "314830b56fa399a9d38b6dc3ddfb6521a5b2a3be23baf6bf35ab3fcc990bf8eb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-harness.log",
+      "sha256": "45e87c2869d0efae0f22cab992f6e0a335a1f1cdd1d223400c8e070abe4a2d8d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-lint-final.log",
+      "sha256": "a4bad2bcaa8e1ef6138427eb8ce86a1c06e4f55bb4038797bf57cdb23dbae1da"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-lint-final2.log",
+      "sha256": "5cff8e6d9b58d252bd81db58a58990b723ea4293dfac90de649746bf3004ead3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-lint.log",
+      "sha256": "1dea78de83d50e3caa9e99641113d9030323946708f825622385bf20df73c5fe"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-react-build-final.log",
+      "sha256": "93ad807ca51f72855fab16f879417e4c96edbe8fac36c211def3e9cef2993cc9"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-react-build-final2.log",
+      "sha256": "5825e6b9a471a35f2e7b583079f8916db08526d47c0767b37a81c079e5b7fcd7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-react-build.log",
+      "sha256": "29f3d60b25ca47723c390043e6d07fe887bfeb1ab1fc0ad0d0960d8b49173932"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-react-renderer-final.log",
+      "sha256": "33b3c71d43df6874b35fde54e05169419d522fcbe4aa8e2f2ac3b936f0832ce5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-react-renderer-final2.log",
+      "sha256": "877ead3709471c14c66ce349cbad256e454976ced59fa407fed6b0f739edd4b6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-react-renderer.log",
+      "sha256": "2e167427417433731d0140cf2b8963c6802a2cdf1166a195915725f37fb8d31c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-react-types-final.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-react-types.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-react.log",
+      "sha256": "a69519d3d473c5d2b7f396d5d448bee8c84b40af081809bd14ede1ec499d0149"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-strict.log",
+      "sha256": "e085fc98e89fa4b7e4fdff708d1e0e03aaa167ad6a192d693f3896c7ef76ef55"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-types-committed.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-types-final.log",
+      "sha256": "a692599ecf0a6fb7cc69d28f2ae8b991be69933cea72d8ee5430dd1691c36c9a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-types-final2.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-types-verified.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-types.log",
+      "sha256": "1d7f3b5142ba4b06c34227ff43a9247a835ed707677c59968d645f753300b8a1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-units-verified.log",
+      "sha256": "0112f38f08c750d46a2b556d2d27ef519e19597ccfa9f7a5abe8608183ef6654"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-units.log",
+      "sha256": "e692f3d8e4ad5418ca149d7a357084bf702bba8f7894acaaaa1c3f14a387d07d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-vue-build.log",
+      "sha256": "bc807afe9179fe2a3c32b8f3d7f3cb7598f74a9e2beb292ce6df12072bca9481"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-vue-renderer.log",
+      "sha256": "cce1f3b57cdd6e4bbc578eb8a21e8f2f44972f2dc12605e94cfc6d54dc681292"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-vue.log",
+      "sha256": "c5e8ec6f8d3aff5fea978d943dc4051d20c57bb64ae65993c7e84b9722d4c57f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-mod-diagnostics-detector.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    }
+  ],
+  "limits": [
+    "No stage5 gate or K08 closure; dependency proposal/review and upgrades remain pending.",
+    "Diagnostics compare received archive metadata and saved configuration, not an actual game launch. Automatic/inherited Java remains unknown; no Java download or Minecraft/NSIS/delta certification.",
+    "Native fingerprint covers direct stat identities and saved runtime/java/version, not cryptographic hashes of every archive or recursive developer folders. Selected target bytes get SHA-1 verification. External-process races and power-loss batch atomicity are not claimed.",
+    "Unit rules cover Fabric/Forge/NeoForge/Quilt/LiteLoader; native diagnostic JAR scenarios use Fabric. Parser feature regression uses real TOML in a temporary directory, not all published modpacks.",
+    "Incomplete Axe audits require human review. No new calibrated CPU/GPU/memory measurement.",
+    "First focal run failed a keyboard expectation after the initial asynchronous inventory looked empty. The panel now tracks the native inventory and waits for missing/current metadata; focus3 and full regression must pass. Original failed outputs remain retained.",
+    "Legacy Quilt download hints still cannot resolve grouped alternatives; migrate with instance-aware catalog rules in stage6.",
+    "Microsoft deferred; credentials/proxy unchanged; no DevTools/CDP, no user ANALISIS edits."
+  ]
+}

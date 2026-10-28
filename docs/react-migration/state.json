@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 parcial: MOD-INFO verifica c6d7430(panel local,metadatos compartidos libres deVue con adaptadores legacy).627unitarias/71archivos,87React+1Strict+3Vue,tipos/lint raíz,9harness;107Axe0violaciones/182incomplete,152PNG por test. Dist/defaultVue restaurados,producción intacta. LOCAL-FILES yGROUPS verificados antes. Siguiente: diagnósticos/dependencias/incompatibilidades yactualización usando helpers compartidos ypipeline actual;revisar límites Quilt/Lite/Java desconocido, sin éxito/compatibilidad inventados ni aplicar manifests ajenos. Luego packs/shaders,mundos/ajustes/consola;gates5/K08 y6–9 pendientes,MS pospuesto. CI40504806956(61f86c7) éxito; verificar nuevo push.",
+  "nextAction": "Etapa 5 activa; bloque DIAGNOSTICS verificado sobre 590217d. 669 unitarias/75 archivos; tipos raíz/lint aprobados; 90 React +1 Strict +3 Vue =94 escenarios distintos;111 auditorías Axe sin violaciones/186 incomplete;172 PNG React propios. Inventario nativo +huella de configuración y hashes seleccionados, diagnóstico Fabric/Forge/NeoForge/Quilt/LiteLoader, lectura pendiente sin éxito prematuro. Vue recompilado, dist/default Vue restaurados; producción intacta. Próximo: propuesta/revisión de dependencias al activar/desactivar y actualizaciones de mods; después packs/shaders, mundos/ajustes/consola. Ninguna gate5/K08 cerrada. Java automático debe incorporar requisitos de mods en ajustes. Publicar solo tras etapas6–9 y pruebas finales; Microsoft pospuesto, sin DevTools/CDP, no tocar ANALISIS. Preparar push de informe y verificar CI de ese nuevo head.",
   "stages": [
     {
       "id": 0,
@@ -634,9 +634,17 @@
             {
               "path": "docs/react-migration/STAGE5-MOD-INFO.json",
               "sha256": "210ed5e78f25e3597b1e9cfc8df69d3b4ca6ed444fe08b149f2a6f0a95102433"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-DIAGNOSTICS.md",
+              "sha256": "0a18c5272eee441d5614fa0de85462bba7edf99affd26c7e43ebba9568947bad"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-DIAGNOSTICS.json",
+              "sha256": "63fe5b9d15f6b35c3170e92b0b47d43f552c1ff33e69985a15d636f786e0c150"
             }
           ],
-          "note": "Avance parcial; WORKSPACE/AUTHORITY/GROUPS/LOCAL-FILES/MOD-INFO. Mods:lectura,toggle,grupos,archivos locales einformación verificados;diagnóstico completo/dependencias/actualizar,packs/shaders yresto5 pendientes. Ninguna gate completada."
+          "note": "Avance parcial: WORKSPACE/AUTHORITY/GROUPS/LOCAL-FILES/MOD-INFO/DIAGNOSTICS. Lectura, toggle protegido, grupos, archivos locales, información y diagnóstico de metadatos verificados. Faltan propuesta/revisión de dependencias, actualizaciones, packs/shaders y resto5. No certifica todos los modpacks ni cierra K08."
         },
         {
           "id": "worlds-settings",

@@ -6,7 +6,7 @@ Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio
 
 ## Bloque actual
 
-Etapa5 parcial: MOD-INFO verifica c6d7430(panel local,metadatos compartidos libres deVue con adaptadores legacy).627unitarias/71archivos,87React+1Strict+3Vue,tipos/lint raíz,9harness;107Axe0violaciones/182incomplete,152PNG por test. Dist/defaultVue restaurados,producción intacta. LOCAL-FILES yGROUPS verificados antes. Siguiente: diagnósticos/dependencias/incompatibilidades yactualización usando helpers compartidos ypipeline actual;revisar límites Quilt/Lite/Java desconocido, sin éxito/compatibilidad inventados ni aplicar manifests ajenos. Luego packs/shaders,mundos/ajustes/consola;gates5/K08 y6–9 pendientes,MS pospuesto. CI40504806956(61f86c7) éxito; verificar nuevo push.
+Etapa 5 activa; bloque DIAGNOSTICS verificado sobre 590217d. 669 unitarias/75 archivos; tipos raíz/lint aprobados; 90 React +1 Strict +3 Vue =94 escenarios distintos;111 auditorías Axe sin violaciones/186 incomplete;172 PNG React propios. Inventario nativo +huella de configuración y hashes seleccionados, diagnóstico Fabric/Forge/NeoForge/Quilt/LiteLoader, lectura pendiente sin éxito prematuro. Vue recompilado, dist/default Vue restaurados; producción intacta. Próximo: propuesta/revisión de dependencias al activar/desactivar y actualizaciones de mods; después packs/shaders, mundos/ajustes/consola. Ninguna gate5/K08 cerrada. Java automático debe incorporar requisitos de mods en ajustes. Publicar solo tras etapas6–9 y pruebas finales; Microsoft pospuesto, sin DevTools/CDP, no tocar ANALISIS. Preparar push de informe y verificar CI de ese nuevo head.
 
 ## Siguiente acción
 
