@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { lstat, mkdir, mkdtemp, readFile, readdir, rename, rm, symlink, writeFile } from 'node:fs/promises'
+import { lstat, mkdir, mkdtemp, readFile, readdir, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { RuntimeVersionsSchema } from '@xmcl/instance'
@@ -27,7 +27,7 @@ it('binds shared and private authority even when both have the same archive byte
   await rm(join(path, 'resourcepacks'), { recursive: true }); await symlink(common, join(path, 'resourcepacks'), 'junction')
   const second = await readResourcePackFilesSnapshot(path, root, configuration)
   expect(second.shared).toBe(true); expect(second.authority).not.toBe(first.authority); expect(second.fingerprint).not.toBe(first.fingerprint)
-  expect(second.entries[0].path).toBe(join(path, 'resourcepacks/a.zip')); expect((await resourcePackLocation(path, root)).root).toBe(common)
+  expect(second.entries[0].path).toBe(join(path, 'resourcepacks/a.zip')); expect((await resourcePackLocation(path, root)).root).toBe(await realpath(common))
 })
 it('includes unpacked folders in inventory but refuses links inside the pack directory', async () => {
   await mkdir(join(path, 'resourcepacks/unpacked')); const first = await readResourcePackFilesSnapshot(path, root, configuration)
