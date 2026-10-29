@@ -32,3 +32,11 @@ Manifiesto ignorado launcher/e2e/artifacts/stage5-pack-shared-alias-manifest.jso
 Verificar el nuevo CI después del push. La equivalencia por alias está reproducida y corregida localmente;su relación con todos los fallos del runner anterior debe confirmarse remotamente. No declarar el CI aprobado ni publicar una candidata hasta comprobarlo.
 
 Continuar shaders,mundos,ajustes y consola de instancia;luego 6–9. K08/K09 y las gates de la etapa 5 permanecen pendientes por la aceptación completa y las conexiones con catálogo. No certifica Minecraft/Java reales,NSIS/delta aislados,AA manual ni presupuestos finales. No reintentar DevTools/CDP ni las limpiezas denegadas;conservar sharing-temp-alias sin seguirlo y ANALISIS_ARQUITECTURA.md sin editar.
+
+## Expectativa del inventario sobre rutas físicas
+
+CI40883524807 terminó:Vue869/870 unidades y React cancelado antes de smoke. La aserción nueva del inventario comparaba la raíz física devuelta por resourcePackLocation con una ruta TEMP que contenía RUNNER~1. El método devolvía correctamente la ruta resuelta;la expectativa debe compararla con realpath(common). La prueba mantiene la ruta lógica del archivo en entries,la diferencia de autoridad y la verificación de carpeta compartida.
+
+Fuente de prueba `13f6cf2271e6bffe55216fe6c4e1af263aea7b09`. Cambio exclusivo de expectativa,7/7 focales locales aprobadas. No se recompila ni se repite Electron por esta corrección. Manifiesto ignorado stage5-pack-snapshot-path-manifest.json,SHA-256 `b3045ea75af68e404dc98935c682e593d8aa0b9b2593ef0b9dad2b73b2002508`,con el blob canónico y2logs. Hace falta el CI nuevo;no se han vuelto a ejecutar los E2E del runner después de61ec027.
+
+Shaders está en desarrollo en el worktree:contratos,parser de propiedades y selección Native sin validar integralmente. No se añade al commit de esta corrección ni se declara implementada su interfaz.

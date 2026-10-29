@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa. PACK-UPDATES/aacc6bb integra consultas/revision/backup/recuperacion de ZIP sin renombrar;proveedores reales MR/CF aprobados. SHARED-PATH-ALIASES/61ec027 reproduce isLinked=false con padre alias y corrige helper/migracion legacy;870 unidades/90 archivos,tipos/lint,26 Native distintos acumulados(19 repetidos sobre ultimo host),8 Axe de packs sin violaciones/16 incomplete,56 E2E previos sin nuevos y9harness. CI anterior40878971283:Vue aprobado,React123/127 con4fallos43/46/48;ahora esos recorridos y51 pasan localmente,verificar CI propio tras push antes de afirmar verde. Siguiente:shaders,resto5 y6-9;K08/K09/gates5 pendientes por aceptacion y catalogo. No rehacer packs/mods ya probados. Dist/defaultVue,PR4borrador,produccion/proxy intactos,MSpospuesto. No DevTools/CDP,ANALISIS ni limpiezas denegadas;no limpiar/recorrer sharing-temp-alias.",
+  "nextAction": "Etapa5 activa. PACK-UPDATES/aacc6bb y SHARED-PATH-ALIASES/61ec027:870unitarias y26Native distintos acumulados;MR/CF reales aprobados. CI40883524807 fallo869/870 por expectativa de ruta fisica contra RUNNER~1;React cancelado antes de smoke.13f6cf2 corrige expectativa con realpath(common),7focales aprobadas;verificar CI nuevo. Shaders WIP local:contratos/parser/seleccion Native;completar pruebas yUI antes de confirmar. Continuar resto5 y6-9;K08/K09/gates5 pendientes. Vue default,PR4borrador,produccion/proxy intactos,MSpospuesto. No DevTools/CDP,ANALISIS ni limpiezas denegadas;no limpiar/seguir sharing-temp-alias.",
   "stages": [
     {
       "id": 0,
@@ -729,7 +729,7 @@
             },
             {
               "path": "docs/react-migration/STAGE5-SHARED-PATH-ALIASES.md",
-              "sha256": "216cab680b3fb408759a85ab06dbf0df00e49ae6a09a9a0fd110f5ddba934c7d"
+              "sha256": "550b39d28f3c032f0ad0a0d3c25122aa1e50651e6f26bce3e4e1106b539726cf"
             }
           ],
           "note": "Avance parcial hasta61ec027:PACK-UPDATES ySHARED-PATH-ALIASES.870 unidades/90archivos,tipos/lint,26Native distintos acumulados;19repetidos sobre ultimo host. MR/CF reales aprobados. CI40878971283 fallo4recorridos React;repro alias corregida y43/46/48/51 aprobados localmente. Verificar CI propio. Pendientes shaders/resto5 ycatalogo6;K08/K09 ylas gates5 siguen pending."

@@ -6,7 +6,7 @@ Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio
 
 ## Bloque actual
 
-Etapa 5 activa. PACK-UPDATES/aacc6bb integra consultas/revision/backup/recuperacion de ZIP sin renombrar;proveedores reales MR/CF aprobados. SHARED-PATH-ALIASES/61ec027 reproduce isLinked=false con padre alias y corrige helper/migracion legacy;870 unidades/90 archivos,tipos/lint,26 Native distintos acumulados(19 repetidos sobre ultimo host),8 Axe de packs sin violaciones/16 incomplete,56 E2E previos sin nuevos y9harness. CI anterior40878971283:Vue aprobado,React123/127 con4fallos43/46/48;ahora esos recorridos y51 pasan localmente,verificar CI propio tras push antes de afirmar verde. Siguiente:shaders,resto5 y6-9;K08/K09/gates5 pendientes por aceptacion y catalogo. No rehacer packs/mods ya probados. Dist/defaultVue,PR4borrador,produccion/proxy intactos,MSpospuesto. No DevTools/CDP,ANALISIS ni limpiezas denegadas;no limpiar/recorrer sharing-temp-alias.
+Etapa5 activa. PACK-UPDATES/aacc6bb y SHARED-PATH-ALIASES/61ec027:870unitarias y26Native distintos acumulados;MR/CF reales aprobados. CI40883524807 fallo869/870 por expectativa de ruta fisica contra RUNNER~1;React cancelado antes de smoke.13f6cf2 corrige expectativa con realpath(common),7focales aprobadas;verificar CI nuevo. Shaders WIP local:contratos/parser/seleccion Native;completar pruebas yUI antes de confirmar. Continuar resto5 y6-9;K08/K09/gates5 pendientes. Vue default,PR4borrador,produccion/proxy intactos,MSpospuesto. No DevTools/CDP,ANALISIS ni limpiezas denegadas;no limpiar/seguir sharing-temp-alias.
 
 ## Siguiente accion
 
@@ -73,3 +73,5 @@ CI40877340873 repitio fallo de fixture:cd4d06a reproduce con alias TEMP y normal
 ## Actualizaciones de packs y aliases de carpetas
 
 PACK-UPDATES/aacc6bb y SHARED-PATH-ALIASES/61ec027 son los últimos informes. Revisión/backup/recuperación conserva nombres,selección,prioridad ygrupos,incluso compartidos. Consulta pública ydescarga real MR/CF verificadas. isLinkTo yla migración legacy reconocen identidad física si el texto de la ruta difiere;51 demuestra el fallo anterior yla conservación tras el arreglo. No confundir con la fixture de inyección b375a9c/cd4d06a:esta ya pasa CI;los cuatro fallos posteriores son Native ynecesitan CI nuevo.
+
+CI40883524807 termino869/870 enVue,React cancelado antes de smoke.13f6cf2 cambia solo la expectativa de ubicacion fisica del inventario,7focales aprobadas. Ver ultimo seguimiento en SHARED-PATH-ALIASES. Verificar CI nuevo,completar Shaders WIP en worktree;no confundir lecturas/parser con interfaz terminada.
