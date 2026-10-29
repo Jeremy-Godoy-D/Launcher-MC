@@ -176,3 +176,5 @@ STAGE5-RESOURCE-PACK-STARTUP.md: lock compartido e instancia cubren preparativos
 ### Informacion y grupos de packs (c3f317a)
 
 STAGE5-PACK-INFORMATION-GROUPS.md: ficha local de texto seguro, limites/formato validado y foco; grupos Native resourcepacks separados, filtro/asignacion/edicion revisada sin migrar legacy mods.824unitarias/87archivos,tipos/lint y18escenarios distintos(16React+2Vue),mas1visual repetido,8Axe0violaciones/8incomplete. K08/K09/gates5 pendientes:gestion de compartidos/updates de packs,shaders,mundos,ajustes,consola y6-9. No acredita compatibilidad de partida,Java/juego/NSIS/delta reales ni publicacion.
+
+Seguimiento CI-WINDOW-FOCUS/217a623:CI40827795644 Vue aprobado,React119/120;12-launch espera estabilidad de raton. Fixture verifica foco Native y activacion Enter conservando pausas/reproduccion,1focal aprobado y56diagnosticos E2E identicos. CI nuevo completo requerido; gates sin cambios.
