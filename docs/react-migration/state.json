@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa. Fuente d63be84/RESOURCE-PACK-SELECTION: Packs lista/búsqueda/activación/prioridad reales; Native conserva líneas/CRLF/entradas Minecraft, valida snapshot de bytes/inode/enlaces y procesos propios/compartidos. Advierte ajustes compartidos y conserva su inode; foco/resize corregidos.792 unitarias/83 archivos, tipos/lint aprobados,9 escenarios empaquetados distintos (6 React+3 Vue),43 repetido tras CSS; E2E global56 previos/0 en43,9 harness. CI40773494245 verde para4d716c0/dbc4473; comprobar CI nuevo tras push. Próximo: importación/retirada local e información/grupos/compartidos/updates de packs, luego shaders,mundos,ajustes,consola y6–9. K08/K09/gates5 pendientes. Default/dist Vue restaurados; PR4 borrador,producción/proxy intactos,Microsoft pospuesto. No DevTools/CDP,ANALISIS ni reintentar limpiezas denegadas.",
+  "nextAction": "Etapa5 activa. Fuente f34855e/RESOURCE-PACK-FILES: copia local exclusiva de ZIP/carpetas+assets, selección múltiple y retirada Native revisada hacia backups; conserva fuentes/opciones/mundos/otro manifiesto y permite recuperar ZIP inválido.809 unitarias/85 archivos, tipos/lint aprobados,10 escenarios empaquetados(6React43/44+4Vue03/08/33/45),56E2Eprevios/0en43–45,9harness. CI40777460071 verde para6dd22ea/d63be84; comprobar CI nuevo tras push. Próximo prioritario: coordinar arranque de otra instancia con mutación de carpeta/ajustes compartidos (shortcut K09; LaunchService registra tras spawn). Después información/grupos/compartidos/updates de packs,shaders,mundos,ajustes,consola y6–9. K08/K09/gates5 pendientes. Dist/default Vue conservados;PR4borrador,producción/proxy intactos,MSpospuesto. No DevTools/CDP,ANALISIS ni limpiezas denegadas.",
   "stages": [
     {
       "id": 0,
@@ -698,6 +698,10 @@
             {
               "path": "docs/react-migration/STAGE5-RESOURCE-PACK-SELECTION.md",
               "sha256": "8b1c45d6b69033c7602efdfafb3969aa8f86134823d591a24630f95764585089"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-RESOURCE-PACK-FILES.md",
+              "sha256": "3aaa83baf9122faad7e31475553c5aed58245d5593f1c3f116843c203513f98a"
             }
           ],
           "note": "Avance parcial hasta UPGRADE-MANIFEST (0ae267c): 717 unitarias y 19 recorridos Native focales, tipos/lint pasan. CI 40721432762 aprueba ambos renderers sobre f27c286/9d6ad2b; source nuevo requiere CI. Pendientes consultas/revisión de updates React y guardas vigentes, packs/shaders y resto de etapa 5. K08/gates5 siguen pending."

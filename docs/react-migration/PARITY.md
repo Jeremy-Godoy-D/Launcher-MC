@@ -164,3 +164,7 @@ STAGE5-MOD-RECOVERY.md: vista previa Native de solo lectura, confirmación fresc
 ### Selección y prioridad de resource packs (d63be84)
 
 STAGE5-RESOURCE-PACK-SELECTION.md: lista/búsqueda/activación/prioridad en React, entradas Minecraft/legacy/carpetas conservadas y guardado Native con snapshot, límites y guardas de procesos. Ajustes compartidos advertidos y conservados.792unitarias/83archivos y9escenarios empaquetados distintos; K09/gates5 pendientes de importación/retirada, información/grupos/compartidos/updates y aceptación completa. Shaders/mundos/ajustes/consola y6–9 pendientes. No equivale a etapa5 terminada.
+
+### Archivos locales de packs (f34855e)
+
+STAGE5-RESOURCE-PACK-FILES.md: importar ZIP/carpetas+assets sin reemplazo, revisión/retirada hacia backups, fuentes/opciones/mundos/otro manifiesto preservados y recuperación de archivo ilegible.809unitarias/85archivos y10escenarios empaquetados distintos. K09 pendiente de coordinación con arranque compartido (shortcut explícito), información/grupos/compartidos/updates y cierre completo; etapa5/K08 también pendientes. No publicar con ese criterio abierto.
