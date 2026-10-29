@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa. Fuente c3f317a/PACK-INFORMATION-GROUPS: ficha de metadatos segura y grupos Native de packs separados por tipo/instancia; filtros, asignacion y edicion revisada conservan options,mods/shaders y legacy.824 unitarias/87 archivos, tipos/lint,18 escenarios empaquetados distintos(16React+2Vue),1visual repetido tras etiqueta,8Axe0violaciones/8incomplete,12PNG y9harness aprobados.56E2Eprevios/0en47/helper. CI40827795644 anterior:Vue aprobado yReact119/120,fallo de estabilidad del raton en12-launch. Fixture217a623 restaura/verifica foco Native y activa con Enter sin quitar aserciones:1focal10,2s aprobado,56diagnosticos E2E identicos. Verificar CI propio tras push; ver CI-WINDOW-FOCUS. Siguiente:gestion de compartidos y updates de packs;shaders,mundos,ajustes,consola y6-9. K08/K09/gates5 pendientes. Dist/default Vue conservados;PR4borrador,produccion/proxy intactos,MSpospuesto. No DevTools/CDP,ANALISIS ni limpiezas denegadas.",
+  "nextAction": "Etapa5 activa. Fuente46b6230/PACK-SHARING: revision Native de compartir/copia privada, conflictos sin reemplazo, backup local e independencia de copias; conserva seleccion/grupos/mundos. Guardas de registro/juegos/arranque y watcher coordinado; pausa/reanuda observacion para mover carpetas en Windows sin perder estado.841unitarias/88archivos,tipos/lint,22escenarios empaquetados distintos(18React+4Vue),1focal repetido tras finally,8Axe0violaciones/16incomplete y8PNG aprobados,56E2Eprevios/0en48,9harness. CI40830063540 verde para765c6be/c3f317a+217a623; verificar CI propio tras push. Siguiente:actualizaciones de packs con clientes/instalador revisado y preservacion de activacion/prioridad/compartidos; luego shaders,mundos,ajustes,consola y6-9. K08/K09/gates5 pendientes. Dist/defaultVue conservados;PR4borrador,produccion/proxy intactos,MSpospuesto. No DevTools/CDP,ANALISIS ni limpiezas denegadas.",
   "stages": [
     {
       "id": 0,
@@ -714,9 +714,13 @@
             {
               "path": "docs/react-migration/STAGE5-CI-WINDOW-FOCUS.md",
               "sha256": "b2b2de213d5512f62fd478035c3c26934f34362a19fb06b0759962578b0d37eb"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-PACK-SHARING.md",
+              "sha256": "45b21abaa198c13fffac9d37745cf9dc78db36539ce9ee2469cb3df2e81b0e7f"
             }
           ],
-          "note": "Avance parcial hasta c3f317a: MOD-RECOVERY, RESOURCE-PACK-SELECTION/FILES/STARTUP y PACK-INFORMATION-GROUPS.824unitarias,18escenarios Native distintos y tipos/lint aprobados. Pendientes gestion de compartidos/updates de packs,shaders y resto5. K08/K09 y todas las gates5 permanecen pending. CI previo119/120:fixture de foco217a623 pasa focal; CI propio pendiente."
+          "note": "Avance parcial hasta46b6230: MOD-RECOVERY, RESOURCE-PACK-SELECTION/FILES/STARTUP, PACK-INFORMATION-GROUPS y PACK-SHARING.841unitarias,22escenarios Native distintos ytipos/lint aprobados. CI40830063540 verde para765c6be; propio pendiente. Pendientes updates de packs,shaders yresto5. K08/K09 y todas las gates5 permanecen pending."
         },
         {
           "id": "worlds-settings",

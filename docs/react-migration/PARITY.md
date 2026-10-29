@@ -178,3 +178,7 @@ STAGE5-RESOURCE-PACK-STARTUP.md: lock compartido e instancia cubren preparativos
 STAGE5-PACK-INFORMATION-GROUPS.md: ficha local de texto seguro, limites/formato validado y foco; grupos Native resourcepacks separados, filtro/asignacion/edicion revisada sin migrar legacy mods.824unitarias/87archivos,tipos/lint y18escenarios distintos(16React+2Vue),mas1visual repetido,8Axe0violaciones/8incomplete. K08/K09/gates5 pendientes:gestion de compartidos/updates de packs,shaders,mundos,ajustes,consola y6-9. No acredita compatibilidad de partida,Java/juego/NSIS/delta reales ni publicacion.
 
 Seguimiento CI-WINDOW-FOCUS/217a623:CI40827795644 Vue aprobado,React119/120;12-launch espera estabilidad de raton. Fixture verifica foco Native y activacion Enter conservando pausas/reproduccion,1focal aprobado y56diagnosticos E2E identicos. CI nuevo completo requerido; gates sin cambios.
+
+### Carpetas compartidas y copias privadas de packs (46b6230)
+
+STAGE5-PACK-SHARING.md: revision Native con SHA-256/conflictos, copias independientes y respaldo previo; guards de juegos/arranque y observacion preservada al sustituir carpeta en Windows. Metodos legacy usan el mismo motor; desvincular conserva archivos.841unitarias/88archivos,tipos/lint y22escenarios distintos(18React+4Vue),mas1focal solapado,8Axe0violaciones/16incomplete. CI40830063540 aprobo el bloque anterior765c6be/c3f317a+217a623. K08/K09/gates5 siguen pending por updates de packs y aceptacion completa;shaders,mundos,ajustes,consola y6-9 despues. No certifica Java/juego/NSIS/delta reales ni publicacion.
