@@ -15,7 +15,7 @@
  *    so scripts/build-tutorial.ts can compile docs.
  */
 import { _electron, ElectronApplication, Page, test as base } from '@playwright/test'
-import { copyFile, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -143,6 +143,8 @@ export interface LauncherFixture {
 }
 
 export interface LauncherOptions {
+  /** Exercise configured paths through a temporary parent junction. */
+  gameDataParentAlias?: boolean
   /** Disable the recorder only for calibrated performance measurements. */
   recordVideo?: boolean
   /**
@@ -183,9 +185,15 @@ export const test = base.extend<{
       ? SHOWCASE_ROOT
       : await mkdtemp(join(tmpdir(), 'xmcl-e2e-'))
     const appDataPath = join(tempRoot, 'appData')
-    const gameDataPath = join(tempRoot, 'gameData')
+    const gameParent = launcherOptions.gameDataParentAlias ? join(tempRoot, 'data-parent') : tempRoot
+    let gameDataPath = join(gameParent, 'gameData')
     await mkdir(appDataPath, { recursive: true })
     await mkdir(gameDataPath, { recursive: true })
+    if (launcherOptions.gameDataParentAlias) {
+      const alias = join(tempRoot, 'data-alias')
+      await symlink(gameParent, alias, process.platform === 'win32' ? 'junction' : 'dir')
+      gameDataPath = join(alias, 'gameData')
+    }
 
     // Layout matches what xmcl-runtime/app/LauncherApp.ts expects:
     //   {appDataPath}/xmcl/root  -> contains the game data path
