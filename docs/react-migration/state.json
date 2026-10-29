@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa. Fuente b7ec02c/RESOURCE-PACK-STARTUP: lanzamiento cliente/servidor coordinado con mutaciones de packs hasta registrar proceso; la parada conserva el registro hasta salida real y no vuelca entorno/argumentos en logs.821 unitarias/86 archivos, tipos/lint,18 escenarios empaquetados distintos(14React+4Vue),56E2Eprevios/0en46 y9harness aprobados. CI40824366862 verde para f3f58cc/f34855e; verificar CI propio tras push. Siguiente: informacion/grupos/gestion de compartidos/updates de packs,shaders,mundos,ajustes,consola y6-9. K08/K09/gates5 pendientes. Dist/default Vue conservados;PR4borrador,produccion/proxy intactos,MSpospuesto. No DevTools/CDP,ANALISIS ni limpiezas denegadas.",
+  "nextAction": "Etapa5 activa. Fuente c3f317a/PACK-INFORMATION-GROUPS: ficha de metadatos segura y grupos Native de packs separados por tipo/instancia; filtros, asignacion y edicion revisada conservan options,mods/shaders y legacy.824 unitarias/87 archivos, tipos/lint,18 escenarios empaquetados distintos(16React+2Vue),1visual repetido tras etiqueta,8Axe0violaciones/8incomplete,12PNG y9harness aprobados.56E2Eprevios/0en47/helper. CI40827795644 anterior:Vue aprobado,React en curso; verificar propio tras push. Siguiente:gestion de compartidos y updates de packs;shaders,mundos,ajustes,consola y6-9. K08/K09/gates5 pendientes. Dist/default Vue conservados;PR4borrador,produccion/proxy intactos,MSpospuesto. No DevTools/CDP,ANALISIS ni limpiezas denegadas.",
   "stages": [
     {
       "id": 0,
@@ -706,9 +706,13 @@
             {
               "path": "docs/react-migration/STAGE5-RESOURCE-PACK-STARTUP.md",
               "sha256": "d1742aa22c75e10918752cc795f1a0ac7063d5b7b531707f457193411fadf3ce"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-PACK-INFORMATION-GROUPS.md",
+              "sha256": "a81b29215a8e5bed77da97e64a1fc5c13fd373d55423d9f4ea1d0bb270a6db56"
             }
           ],
-          "note": "Avance parcial hasta b7ec02c: MOD-RECOVERY, RESOURCE-PACK-SELECTION/FILES/STARTUP.821 unitarias y18 recorridos Native focales,tipos/lint aprobados. Resuelta carrera de arranque/registro y cierre; pendientes informacion/grupos/compartidos/updates de packs,shaders y resto5. K08/K09 y todas las gates5 permanecen pending."
+          "note": "Avance parcial hasta c3f317a: MOD-RECOVERY, RESOURCE-PACK-SELECTION/FILES/STARTUP y PACK-INFORMATION-GROUPS.824unitarias,18escenarios Native distintos y tipos/lint aprobados. Pendientes gestion de compartidos/updates de packs,shaders y resto5. K08/K09 y todas las gates5 permanecen pending."
         },
         {
           "id": "worlds-settings",
