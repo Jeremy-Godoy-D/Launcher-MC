@@ -453,7 +453,7 @@ react:
     cancel: "Cancelar"
     dissolve: "Disolver grupo"
     confirmDissolve: "Confirmar disolución"
-    dissolveHelp: "Se quitará este grupo. Sus mods seguirán en la instancia y no se eliminará ningún archivo."
+    dissolveHelp: "Se quitará este grupo. Su contenido seguirá en la instancia y no se eliminará ningún archivo."
     invalid: "Usa un nombre válido de hasta 256 caracteres."
     duplicate: "Ya hay un grupo con ese nombre. Elige otro."
     changed: "El grupo cambió mientras lo editabas. Vuelve a cargar y revisa los datos actuales."
@@ -597,7 +597,17 @@ react:
       backup-add: "Respaldar y añadir"
       backup-remove: "Respaldar y retirar"
 
+  packInfo:
+    title: "Información del pack"
+    close: "Cerrar información del pack"
+    format: "Formato declarado"
+    range: "Versiones orientativas"
+    help: "Información declarada por el pack. El rango de formatos es orientativo y no confirma compatibilidad con tu partida."
+    noDescription: "Este archivo no incluye una descripción de texto que se pueda mostrar."
+    truncated: "Descripción abreviada por su tamaño o estructura."
   packs:
+    groupFilter: "Filtrar por grupo de packs"
+    groupAssignment: "Grupo para los packs seleccionados"
     unreadFiles: "Archivos que no se pudieron leer"
     selectUnread: "Seleccionar archivo no leído {name}"
     sharedRunning: "Cierra las partidas que comparten estos packs o ajustes antes de continuar."

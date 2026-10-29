@@ -453,7 +453,7 @@ react:
     cancel: "Cancel"
     dissolve: "Dissolve group"
     confirmDissolve: "Confirm dissolution"
-    dissolveHelp: "This group will be removed. Its mods remain in the instance and no files are deleted."
+    dissolveHelp: "This group will be removed. Its content remains in the instance and no files are deleted."
     invalid: "Use a valid name of up to 256 characters."
     duplicate: "A group with this name already exists. Choose another."
     changed: "The group changed while you were editing. Reload and review the current data."
@@ -597,7 +597,17 @@ react:
       backup-add: "Back up and add"
       backup-remove: "Back up and remove"
 
+  packInfo:
+    title: "Pack information"
+    close: "Close pack information"
+    format: "Declared format"
+    range: "Version guide"
+    help: "Information declared by the pack. The format range is a guide and does not confirm compatibility with your game."
+    noDescription: "This file does not include a text description that can be displayed."
+    truncated: "Description shortened due to its size or structure."
   packs:
+    groupFilter: "Filter by pack group"
+    groupAssignment: "Group for selected packs"
     unreadFiles: "Files that could not be read"
     selectUnread: "Select unread file {name}"
     sharedRunning: "Close games sharing these packs or settings before continuing."
