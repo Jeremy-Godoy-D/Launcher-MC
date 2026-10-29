@@ -12,6 +12,7 @@ vi.mock('./AbstractInstanceDomainService', () => ({ AbstractInstanceDomainServic
   async isLinked() { return false }
   async watch() { return 'watched' }
 } }))
+vi.mock('./utils/resourcePackSnapshot', () => ({ readResourcePackFilesSnapshot: vi.fn(async () => ({ fingerprint: 'a'.repeat(64), shared: false, authority: 'b'.repeat(64), entries: [] })) }))
 vi.mock('./utils/localResourcePacks', () => ({ installLocalResourcePacks: vi.fn(async () => []), previewResourcePackRemoval: vi.fn(), removeReviewedResourcePacks: vi.fn() }))
 vi.mock('./utils/sharedResourcePacks', () => ({ previewResourcePackSharing: vi.fn(async () => ({ snapshot: 'b'.repeat(64), shared: true })), applyResourcePackSharing: vi.fn(async () => ({})) }))
 vi.mock('../instanceIO/utils/instanceFileSource', () => ({ instanceFileSource: vi.fn(async () => ({})) }))
@@ -23,20 +24,22 @@ const { kGameDataPath } = await import('~/app')
 const { kResourceManager } = await import('~/resource')
 const { installLocalResourcePacks, previewResourcePackRemoval, removeReviewedResourcePacks } = await import('./utils/localResourcePacks')
 const { previewResourcePackSharing, applyResourcePackSharing } = await import('./utils/sharedResourcePacks')
+const { readResourcePackFilesSnapshot } = await import('./utils/resourcePackSnapshot')
 const { instanceFileSource } = await import('../instanceIO/utils/instanceFileSource')
-let instances: { path: string; edition: string }[], processes: { options: { gameDirectory: string } }[], lock: Mutex
+let instances: { path: string; edition: string; runtime?: Record<string, string>; java?: string; version?: string }[], processes: { options: { gameDirectory: string } }[], lock: Mutex
+let metadata: ReturnType<typeof vi.fn>, watched: { files: { hash: string }[] } | undefined
 let service: InstanceType<typeof InstanceResourcePackService>, linkedOptions: ReturnType<typeof vi.fn>, of: ReturnType<typeof vi.fn>, pause: ReturnType<typeof vi.fn>, resume: ReturnType<typeof vi.fn>
 const review = { snapshot: 'a'.repeat(64), files: [{ fileName: 'a.zip', directory: false, size: 1, entries: 1 }], sharedDirectory: false, sharedOptions: false }
 beforeEach(() => {
   vi.clearAllMocks(); instances = [{ path: 'managed', edition: 'java' }]; processes = []; lock = new Mutex(); const shared = new Mutex()
   linkedOptions = vi.fn(async () => false); of = vi.fn(key => key === 'resource-pack-options' ? shared : lock)
-  pause = vi.fn(async () => {}); resume = vi.fn()
+  pause = vi.fn(async () => {}); resume = vi.fn(); watched = { files: [{ hash: 'c'.repeat(40) }] }; metadata = vi.fn(async () => [])
   const app = { mutex: { of }, registry: { get: async (key: unknown) => {
     if (key === InstanceService) return { initialize: async () => {}, state: { get instances() { return instances } } }
     if (key === LaunchService) return { getGameProcesses: async () => processes }
     if (key === InstanceOptionsService) return { isGameOptionsLinked: linkedOptions }
     if (key === kGameDataPath) return () => 'shared-root'
-    if (key === kResourceManager) return { getWatched: () => ({ pause, resume, revalidate: async () => {} }) }
+    if (key === kResourceManager) return { getWatched: () => watched && ({ pause, resume, revalidate: async () => {}, state: watched }), getMetadataByHashes: metadata }
     throw new Error('Unexpected registry access')
   } } }
   service = new InstanceResourcePackService(app as any)
@@ -109,4 +112,25 @@ it('restores observation if closing the watcher fails before any file operation'
   pause.mockRejectedValueOnce(new Error('Fixture watcher close failure'))
   await expect(service.applySharing('managed', { snapshot: 'b'.repeat(64), shared: true } as any)).rejects.toThrow('Fixture watcher close failure')
   expect(resume).toHaveBeenCalledOnce(); expect(applyResourcePackSharing).not.toHaveBeenCalled()
+})
+
+it('reads inventory configuration under the read lock and retrieves only watched public provider identities', async () => {
+  instances = [{ path: 'managed', edition: 'java', runtime: { minecraft: '1.21.1' }, java: '', version: '' }]
+  processes.push({ options: { gameDirectory: 'managed' } })
+  await service.getPackFilesSnapshot('managed')
+  expect(readResourcePackFilesSnapshot).toHaveBeenCalledWith('managed', 'shared-root', { runtime: { minecraft: '1.21.1' }, java: '', version: '' })
+  metadata.mockResolvedValue([{ sha1: 'c'.repeat(40), modrinth: { projectId: 'project', versionId: 'version' } }, { sha1: 'd'.repeat(40), curseforge: { projectId: 1, fileId: 2 } }])
+  expect(await service.getPackSources('managed')).toEqual([{ hash: 'c'.repeat(40), modrinth: { projectId: 'project', versionId: 'version' }, curseforge: undefined }])
+  expect(metadata).toHaveBeenCalledWith(['c'.repeat(40)])
+})
+it('rejects unregistered inventory/source reads, missing watchers and oversized source sets', async () => {
+  instances = []
+  await expect(service.getPackFilesSnapshot('managed')).rejects.toHaveProperty('name', 'InstanceNotFoundError')
+  await expect(service.getPackSources('managed')).rejects.toHaveProperty('name', 'InstanceNotFoundError')
+  expect(readResourcePackFilesSnapshot).not.toHaveBeenCalled(); expect(metadata).not.toHaveBeenCalled()
+  instances = [{ path: 'managed', edition: 'java' }]; watched = undefined
+  await expect(service.getPackSources('managed')).rejects.toThrow('not watched')
+  watched = { files: Array(10001).fill({ hash: 'c'.repeat(40) }) }
+  await expect(service.getPackSources('managed')).rejects.toThrow('Too many resource pack sources')
+  expect(metadata).not.toHaveBeenCalled()
 })

@@ -14,9 +14,11 @@ import { useContentGroups } from './useContentGroups'
 import { ContentGroupsEditor } from './ContentGroupsEditor'
 import { assignContentGroup, contentGroupMemberships } from './contentGroups'
 import { resourcePackFormat } from './resourcePackMetadata'
+import type { SavedInstance } from '../library/model'
+import { ModUpdates } from './ModUpdates'
 import { SharePacksDialog } from './SharePacksDialog'
 
-export function InstanceResourcePacks({ path, running }: { path: string; running: boolean }) {
+export function InstanceResourcePacks({ path, running, runtime }: { path: string; running: boolean; runtime: SavedInstance['runtime'] }) {
   const { t } = useI18n(), service = useService(InstanceResourcePacksServiceKey), options = useService(InstanceOptionsServiceKey)
   const base = useService(BaseServiceKey)
   const grouping = useContentGroups(path, 'resourcepacks'), groups = grouping.data?.groups || {}
@@ -141,6 +143,7 @@ export function InstanceResourcePacks({ path, running }: { path: string; running
       <button className="button secondary" disabled={fileBlocked || !window.windowController?.showOpenDialog} onClick={event => { priorityFocus.current = event.currentTarget; void run(() => add(true)) }}>{t('react.packs.addFolder')}</button>
       <button className="button secondary" disabled={busy} onClick={() => { void service.showDirectory(path).catch(() => { if (alive.current) setError(t('react.workspace.folderFailed')) }) }}><FolderOpen size={17} aria-hidden="true" />{t('react.packs.folder')}</button>
       <button ref={manageGroups} className="button secondary" disabled={busy || !groupReady} aria-expanded={editingGroups} onClick={() => { setDetailsPath(''); setEditingGroups(true) }}>{t('react.contentGroups.manage')}</button>
+      <ModUpdates domain="resourcepacks" path={path} runtime={runtime} getFiles={() => store.getSnapshot().data?.files || []} disabled={busy || snapshot.status !== 'ready'} running={running} refresh={read} onBusy={setBusy} />
       <button ref={shareButton} className="button secondary" disabled={blocked} onClick={event => { priorityFocus.current = event.currentTarget; void run(async () => { const review = await service.previewSharing(path, !sharedDirectory); if (alive.current) setSharing(review) }) }}>{t(sharedDirectory ? 'react.packSharing.unlink' : 'react.packSharing.link')}</button>
       <button className="button secondary" disabled={busy} onClick={() => void load()}><RefreshCw size={17} aria-hidden="true" />{t('react.content.refresh')}</button>
     </div></div>

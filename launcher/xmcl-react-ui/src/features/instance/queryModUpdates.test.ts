@@ -93,3 +93,28 @@ it('uses committed provider IDs even before their batched state event, without m
   expect(updateMods([file], runtime, sources)[0].curseforge).toEqual(sources[0].curseforge)
   expect(file.metadata).toEqual({})
 })
+
+it('queries resource packs for Vanilla using the documented minecraft identity without requiring a mod loader', async () => {
+  const f = fixture(), version = { ...next, loaders: ['minecraft'] }
+  f.api.modrinth.getLatestVersionsFromHashes.mockResolvedValue({ [hash]: version })
+  const result = await queryModUpdates([mod], { minecraft: '1.21.1' } as SavedInstance['runtime'], { ...defaults, domain: 'resourcepacks' }, f.controller.signal, f.api, f.cache)
+  expect(result.updates).toEqual([{ mod, version }])
+  expect(f.api.modrinth.getLatestVersionsFromHashes).toHaveBeenCalledWith([hash], { algorithm: 'sha1', loaders: ['minecraft'], gameVersions: ['1.21.1'], versionTypes: ['release'] }, f.controller.signal)
+})
+it('queries CurseForge resource packs without a mod-loader filter or mod-loader tag requirement', async () => {
+  const f = fixture({ domain: 'resourcepacks', policy: 'curseforgeOnly' }), file = { ...cfNext, gameVersions: ['1.21.1'] }
+  f.api.curseforge.getModFiles.mockResolvedValue({ data: [file], pagination: { index: 0, pageSize: 50, resultCount: 1, totalCount: 1 } })
+  expect((await f.run()).updates).toEqual([{ mod, file }])
+  expect(f.api.curseforge.getModFiles).toHaveBeenCalledWith({ modId: 11, gameVersion: '1.21.1', index: 0, pageSize: 50 }, f.controller.signal)
+})
+it('keeps mod and pack metadata caches separate and rejects mod-only candidates for packs', async () => {
+  const f = fixture(); expect((await f.run()).updates).toHaveLength(1)
+  const result = await queryModUpdates([mod], runtime, { ...defaults, domain: 'resourcepacks', policy: 'modrinthOnly' }, f.controller.signal, f.api, f.cache)
+  expect(result.updates).toEqual([]); expect(result.issues).toContainEqual({ provider: 'modrinth', kind: 'incomplete', file: mod.fileName })
+  expect(f.api.modrinth.getLatestVersionsFromHashes).toHaveBeenCalledTimes(2)
+})
+it('rejects pack queries without Minecraft before calling either provider', async () => {
+  const f = fixture()
+  await expect(queryModUpdates([mod], {} as SavedInstance['runtime'], { ...defaults, domain: 'resourcepacks' }, f.controller.signal, f.api, f.cache)).rejects.toThrow('Missing Minecraft')
+  expect(f.api.modrinth.getProjectVersionsByHash).not.toHaveBeenCalled(); expect(f.api.curseforge.getFiles).not.toHaveBeenCalled()
+})

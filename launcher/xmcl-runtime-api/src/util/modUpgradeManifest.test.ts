@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { HashAlgo, type File } from '@xmcl/curseforge'
 import type { ProjectVersion } from '@xmcl/modrinth'
-import { buildModUpgradeManifest } from './modUpgradeManifest'
+import { buildModUpgradeManifest, buildResourcePackUpgradeManifest } from './modUpgradeManifest'
 
 const mod = { fileName: 'old.jar.disabled', hash: 'old-sha1', size: 12, curseforge: { projectId: 34, fileId: 1 }, modrinth: { projectId: 'project', versionId: 'old' } }
 const file = { id: 2, modId: 34, fileName: 'new.jar', fileLength: 24, hashes: [{ algo: HashAlgo.Sha1, value: 'new-sha1' }] } as File
@@ -34,4 +34,13 @@ describe('shared content upgrade manifest', () => {
   it('does not append a second suffix when the provider file is already disabled', () => {
     expect(buildModUpgradeManifest([{ mod, file: { ...file, fileName: 'new.jar.disabled' } }]).files[0].path).toBe('mods/new.jar.disabled')
   })
+})
+
+it.each([{ file }, { version }])('keeps resource pack archive names and new provider hashes/IDs without mutating the source plan', provider => {
+  const plan = { mod: { ...mod, fileName: 'My Pack.zip' }, ...provider }, before = structuredClone(plan)
+  const result = buildResourcePackUpgradeManifest([plan])
+  expect(result.oldFiles[0].path).toBe('resourcepacks/My Pack.zip'); expect(result.files[0].path).toBe(result.oldFiles[0].path)
+  expect(result.oldFiles[0].hashes.sha1).toBe('old-sha1'); expect(result.files[0].hashes.sha1).toBe('new-sha1')
+  expect('file' in provider ? result.files[0].curseforge?.fileId : result.files[0].modrinth?.versionId).toBe('file' in provider ? 2 : 'new')
+  expect(plan).toEqual(before)
 })

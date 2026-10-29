@@ -34,7 +34,7 @@ export type InstanceFileUpdate = {
   operation: 'backup-add' | 'backup-remove'
 }
 
-export type ModInstallReview = Pick<InstanceModInstallReview, 'snapshot' | 'changes'>
+export type ModInstallReview = Pick<InstanceModInstallReview, 'domain' | 'snapshot' | 'changes'>
 
 
 export type InstallInstanceOptions = {
@@ -79,6 +79,7 @@ export interface ReviewedModRecovery {
   review: ModInstallReview
   changes: InstanceFileUpdate[]
   configurationChanged: boolean
+  shared?: boolean
 }
 
 export interface ReviewedModInstall {
@@ -161,7 +162,7 @@ export interface InstanceInstallService {
    */
   resumeInstanceInstall(path: string, overrides?: InstanceFile[], reviewedOperationId?: string, recoveryReview?: ModInstallReview): Promise<InstallFileError[] | void>
   /** Read only active reviewed mod plans, without exposing private workspace paths. */
-  getReviewedModInstalls(path: string): Promise<ReviewedModInstall[]>
+  getReviewedModInstalls(path: string, domain?: 'mods' | 'resourcepacks'): Promise<ReviewedModInstall[]>
   /** Preview current recovery operations without renewing the saved confirmation. */
   previewModInstallRecovery(path: string, operationId: string): Promise<ReviewedModRecovery>
   /**

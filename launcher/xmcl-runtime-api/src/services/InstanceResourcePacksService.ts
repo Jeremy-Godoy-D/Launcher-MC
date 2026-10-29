@@ -1,5 +1,11 @@
 import { InstanceResourcesService } from './InstanceResourcesService'
 import { ServiceKey } from './Service'
+import type { ModFilesSnapshot, ModSource } from './InstanceModsService'
+
+export interface ResourcePackFilesSnapshot extends ModFilesSnapshot {
+  shared: boolean
+  authority: string
+}
 
 export interface ResourcePackRemovalReview {
   snapshot: string
@@ -23,6 +29,8 @@ export interface ResourcePackSharingReview {
  * Provide the abilities to diagnose & link resource packs files to instance
  */
 export interface InstanceResourcePacksService extends InstanceResourcesService {
+  getPackFilesSnapshot(instancePath: string): Promise<ResourcePackFilesSnapshot>
+  getPackSources(instancePath: string): Promise<ModSource[]>
   previewSharing(instancePath: string, shared: boolean): Promise<ResourcePackSharingReview>
   applySharing(instancePath: string, review: ResourcePackSharingReview): Promise<{ backup?: string }>
   previewRemoval(instancePath: string, fileNames: string[]): Promise<ResourcePackRemovalReview>

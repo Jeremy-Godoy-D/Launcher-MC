@@ -13,6 +13,7 @@ import { join } from 'node:path'
 import { installLocalResourcePacks, previewResourcePackRemoval, removeReviewedResourcePacks } from './utils/localResourcePacks'
 import { applyResourcePackSharing, previewResourcePackSharing } from './utils/sharedResourcePacks'
 import { instanceFileSource } from '../instanceIO/utils/instanceFileSource'
+import { readResourcePackFilesSnapshot } from './utils/resourcePackSnapshot'
 
 /**
  * Provide the abilities to import resource pack and resource packs files to instance
@@ -26,7 +27,9 @@ export class InstanceResourcePackService extends AbstractInstanceDomainService i
   async #javaInstance(path: string) {
     const instances = await this.app.registry.get(InstanceService)
     await instances.initialize()
-    if (!instances.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceNotFoundError')
+    const instance = instances.state.instances.find(instance => instance.path === path && instance.edition === 'java')
+    if (!instance) throw new AnyError('InstanceNotFoundError')
+    return instance
   }
 
   async #change<T>(path: string, kind: 'read' | 'files' | 'files-and-options' | 'sharing', action: (root: string) => Promise<T>) {
@@ -66,6 +69,23 @@ export class InstanceResourcePackService extends AbstractInstanceDomainService i
 
   async previewSharing(path: string, shared: boolean) {
     return this.#change(path, 'read', root => previewResourcePackSharing(path, shared, root))
+  }
+
+  async getPackFilesSnapshot(path: string) {
+    return this.#change(path, 'read', async root => {
+      const instance = await this.#javaInstance(path)
+      return readResourcePackFilesSnapshot(path, root, { runtime: { ...instance.runtime }, java: instance.java, version: instance.version })
+    })
+  }
+
+  async getPackSources(path: string) {
+    await this.#javaInstance(path)
+    const manager = await this.app.registry.get(kResourceManager), state = manager.getWatched(join(path, 'resourcepacks'))?.state
+    if (!state) throw new Error('Resource packs are not watched')
+    const hashes = state.files.map(file => file.hash)
+    if (hashes.length > 10000) throw new Error('Too many resource pack sources')
+    const selected = new Set(hashes), metadata = await manager.getMetadataByHashes(hashes)
+    return metadata.flatMap(value => value && selected.has(value.sha1) ? [{ hash: value.sha1, modrinth: value.modrinth, curseforge: value.curseforge }] : [])
   }
 
   async applySharing(path: string, review: ResourcePackSharingReview) {

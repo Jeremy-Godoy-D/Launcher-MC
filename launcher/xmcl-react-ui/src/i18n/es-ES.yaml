@@ -668,3 +668,15 @@ react:
     backup: "Copias de seguridad"
     openBackup: "Abrir copias"
     removed: "Packs retirados. Sus archivos están en las copias de seguridad de esta instancia."
+
+  packUpdates:
+    title: "Actualizar packs"
+    help: "Consulta actualizaciones para los ZIP identificados. Las carpetas y los archivos locales sin origen se conservan. Revisa los cambios antes de instalar."
+    noLoader: "Configura una versión de Minecraft para buscar packs compatibles."
+    skipVersion: "Omitir packs instalados para otro Minecraft"
+    none: "No se encontraron versiones más recientes para los packs identificados y estos filtros."
+    reviewHelp: "Revisa los ZIP que se sustituirán. Cada archivo anterior se guardará como respaldo. La compatibilidad del juego requiere comprobar los requisitos del pack."
+    configurationChanged: "Cambió la configuración o la carpeta de packs. Estas versiones se eligieron antes del cambio; comprueba sus requisitos y el destino o vuelve a consultar."
+    sharedRunning: "Otra partida utiliza la carpeta compartida. Ciérrala antes de aplicar estos cambios."
+    stableNames: "Se conserva el nombre del ZIP para mantener la activación, la prioridad y los grupos. La versión nueva sustituye su contenido y conserva el anterior como respaldo."
+    shared: "Esta carpeta está compartida: los cambios afectarán a todas las instancias vinculadas."

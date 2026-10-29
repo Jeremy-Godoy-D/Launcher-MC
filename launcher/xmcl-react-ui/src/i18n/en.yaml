@@ -668,3 +668,15 @@ react:
     backup: "Backups"
     openBackup: "Open backups"
     removed: "Packs removed. Their files are in this instance’s backups."
+
+  packUpdates:
+    title: "Update resource packs"
+    help: "Check updates for identified ZIP archives. Unpacked folders and local files without a source are preserved. Review changes before installing."
+    noLoader: "Set a Minecraft version to find compatible resource packs."
+    skipVersion: "Skip packs installed for a different Minecraft version"
+    none: "No newer versions were found for identified packs with these filters."
+    reviewHelp: "Review the ZIP archives to replace. Each previous file will be backed up. Check the pack requirements for game compatibility."
+    configurationChanged: "The configuration or pack directory changed. These versions were chosen earlier; check their requirements and destination or query again."
+    sharedRunning: "Another game uses the shared pack directory. Close it before applying these changes."
+    stableNames: "The ZIP filename stays the same to preserve activation, priority and groups. The new version replaces its content and backs up the previous file."
+    shared: "This directory is shared: changes affect every linked instance."

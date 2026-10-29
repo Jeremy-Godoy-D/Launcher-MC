@@ -11,6 +11,7 @@ import { ServiceStateManager } from '~/service'
 import { downloadInstanceFiles } from './utils/downloadInstanceFiles'
 import { readPendingInstalls } from './utils/pendingInstall'
 import { readModFilesSnapshot } from '../instance/utils/localMods'
+import { readResourcePackFilesSnapshot } from '../instance/utils/resourcePackSnapshot'
 
 vi.mock('~/app', () => ({
   Inject: () => () => {},
@@ -171,13 +172,14 @@ describe('InstanceInstallService progressive installation', () => {
       {} as any,
       { getProjectVersionsByHash: vi.fn(async () => ({})) } as any,
     )
-    const review = async (oldFiles: InstanceFile[], files: InstanceFile[]) => {
-      await ensureDir(join(instancePath, 'mods'))
+    const review = async (oldFiles: InstanceFile[], files: InstanceFile[], domain: 'mods' | 'resourcepacks' = 'mods') => {
+      await ensureDir(join(instancePath, domain))
       const instance = instanceService.state.all[instancePath]
-      const snapshot = await readModFilesSnapshot(instancePath, { runtime: { ...instance.runtime }, java: instance.java, version: instance.version })
-      const options = { path: instancePath, oldFiles, files }
+      const configuration = { runtime: { ...instance.runtime }, java: instance.java, version: instance.version }
+      const snapshot = domain === 'resourcepacks' ? await readResourcePackFilesSnapshot(instancePath, root, configuration) : await readModFilesSnapshot(instancePath, configuration)
+      const options = { path: instancePath, oldFiles, files, review: { ...(domain === 'resourcepacks' ? { domain } : {}), snapshot: snapshot.fingerprint, changes: [] } }
       const updates = await createService().previewInstanceFiles(options)
-      return { ...options, review: { snapshot: snapshot.fingerprint, changes: updates.map(update => ({ path: update.file.path, operation: update.operation })) } }
+      return { ...options, review: { ...options.review, changes: updates.map(update => ({ path: update.file.path, operation: update.operation })) } }
     }
     return {
       root,
@@ -1319,6 +1321,107 @@ describe('InstanceInstallService progressive installation', () => {
     expect(await readFile(join(f.instancePath, next.path), 'utf8')).toBe('NEW')
     expect(await readFile(join(profile.state.backup, next.path), 'utf8')).toBe('USER')
     expect(await readdir(join(f.instancePath, 'mods'))).toHaveLength(1)
+  })
+
+  it.each([false, true])('updates a pack in place with backup and unchanged options/groups/worlds (shared=%s)', async shared => {
+    const f = await fixture(), old = f.file('resourcepacks/My Pack.zip', 'OLD'), next = f.file(old.path, 'NEW')
+    const global = join(f.root, 'resourcepacks')
+    if (shared) { await ensureDir(global); await symlink(global, join(f.instancePath, 'resourcepacks'), 'junction') }
+    await f.write(join(f.instancePath, old.path), 'OLD')
+    const kept = ['options.txt', 'resourcepacks-groups.json', 'saves/world/level.dat']
+    for (const path of kept) await f.write(join(f.instancePath, path), `KEEP ${path}\r\n`)
+    const options = await f.review([old], [next], 'resourcepacks')
+    expect(options.review).toMatchObject({ domain: 'resourcepacks', changes: [{ path: old.path, operation: 'backup-add' }] })
+    mockedDownload.mockImplementation(f.downloadAll)
+    await f.service.installInstanceFiles(options)
+    expect(await readFile(join(f.instancePath, old.path), 'utf8')).toBe('NEW')
+    if (shared) expect(await readFile(join(global, 'My Pack.zip'), 'utf8')).toBe('NEW')
+    const [backup] = await readdir(join(f.instancePath, '.backups'))
+    expect(await readFile(join(f.instancePath, '.backups', backup, old.path), 'utf8')).toBe('OLD')
+    for (const path of kept) expect(await readFile(join(f.instancePath, path), 'utf8')).toBe(`KEEP ${path}\r\n`)
+    expect(await readdir(join(f.instancePath, 'resourcepacks'))).toEqual(['My Pack.zip'])
+  })
+
+  it.each(['renamed.zip', 'PACK.zip'])('rejects a reviewed pack rename to %s before downloading or publishing', async name => {
+    const f = await fixture(), old = f.file('resourcepacks/pack.zip', 'OLD'), next = f.file(`resourcepacks/${name}`, 'NEW')
+    await f.write(join(f.instancePath, old.path), 'OLD')
+    await expect(f.service.installInstanceFiles(await f.review([old], [next], 'resourcepacks'))).rejects.toThrow('preserve archive names')
+    expect(mockedDownload).not.toHaveBeenCalled()
+    expect(await readFile(join(f.instancePath, old.path), 'utf8')).toBe('OLD')
+  })
+
+  it('blocks reviewed and unreviewed shared pack installs while another tracked game uses the common folder', async () => {
+    const f = await fixture(), global = join(f.root, 'resourcepacks'), other = join(f.root, 'other'), old = f.file('resourcepacks/a.zip', 'OLD'), next = f.file(old.path, 'NEW')
+    await ensureDir(global); await ensureDir(other)
+    for (const instance of [f.instancePath, other]) await symlink(global, join(instance, 'resourcepacks'), 'junction')
+    await f.write(join(f.instancePath, old.path), 'OLD')
+    const options = await f.review([old], [next], 'resourcepacks')
+    f.processes.push({ options: { gameDirectory: other } })
+    for (const input of [options, { path: f.instancePath, oldFiles: [], files: [f.file('resourcepacks/new.zip', 'OTHER')] }]) {
+      await expect(f.service.installInstanceFiles(input)).rejects.toHaveProperty('name', 'SharedOptionsRunningError')
+    }
+    expect(mockedDownload).not.toHaveBeenCalled()
+    expect(await readFile(join(global, 'a.zip'), 'utf8')).toBe('OLD')
+    expect(await pathExists(join(global, 'new.zip'))).toBe(false)
+  })
+
+  it('rechecks games started during a shared pack download before committing', async () => {
+    const f = await fixture(), global = join(f.root, 'resourcepacks'), other = join(f.root, 'other'), old = f.file('resourcepacks/a.zip', 'OLD'), next = f.file(old.path, 'NEW')
+    await ensureDir(global); await ensureDir(other)
+    for (const instance of [f.instancePath, other]) await symlink(global, join(instance, 'resourcepacks'), 'junction')
+    await f.write(join(f.instancePath, old.path), 'OLD')
+    mockedDownload.mockImplementation(async (downloads, finished) => { await Promise.all(downloads.map(download => f.materialize(download, finished))); f.processes.push({ options: { gameDirectory: other } }) })
+    await expect(f.service.installInstanceFiles(await f.review([old], [next], 'resourcepacks'))).rejects.toHaveProperty('name', 'SharedOptionsRunningError')
+    expect(await readFile(join(global, 'a.zip'), 'utf8')).toBe('OLD')
+  })
+
+  it('leaves a private pack independent of another game using shared packs', async () => {
+    const f = await fixture(), global = join(f.root, 'resourcepacks'), other = join(f.root, 'other'), old = f.file('resourcepacks/a.zip', 'OLD'), next = f.file(old.path, 'NEW')
+    await ensureDir(global); await ensureDir(other); await symlink(global, join(other, 'resourcepacks'), 'junction')
+    await f.write(join(f.instancePath, old.path), 'OLD'); await f.write(join(global, 'a.zip'), 'COMMON')
+    f.processes.push({ options: { gameDirectory: other } }); mockedDownload.mockImplementation(f.downloadAll)
+    await f.service.installInstanceFiles(await f.review([old], [next], 'resourcepacks'))
+    expect(await readFile(join(f.instancePath, old.path), 'utf8')).toBe('NEW'); expect(await readFile(join(global, 'a.zip'), 'utf8')).toBe('COMMON')
+  })
+
+  it('refuses an authority switch during download, then requires a fresh recovery review for the new directory', async () => {
+    const f = await fixture(), global = join(f.root, 'resourcepacks'), old = f.file('resourcepacks/a.zip', 'OLD'), next = f.file(old.path, 'NEW')
+    await ensureDir(global); await symlink(global, join(f.instancePath, 'resourcepacks'), 'junction'); await f.write(join(global, 'a.zip'), 'OLD')
+    mockedDownload.mockImplementationOnce(async (downloads, finished) => {
+      await Promise.all(downloads.map(download => f.materialize(download, finished)))
+      await rm(join(f.instancePath, 'resourcepacks')); await f.write(join(f.instancePath, old.path), 'OLD')
+    })
+    await expect(f.service.installInstanceFiles(await f.review([old], [next], 'resourcepacks'))).rejects.toHaveProperty('name', 'ModFilesChangedError')
+    expect(await readFile(join(global, 'a.zip'), 'utf8')).toBe('OLD'); expect(await readFile(join(f.instancePath, old.path), 'utf8')).toBe('OLD')
+    const plans = await f.service.getReviewedModInstalls(f.instancePath, 'resourcepacks')
+    expect(plans).toHaveLength(1); expect(await f.service.getReviewedModInstalls(f.instancePath)).toEqual([])
+    await expect(f.service.resumeInstanceInstall(f.instancePath, undefined, plans[0].operationId)).rejects.toHaveProperty('name', 'ModFilesChangedError')
+    const recovery = await f.service.previewModInstallRecovery(f.instancePath, plans[0].operationId)
+    expect(recovery).toMatchObject({ shared: false, configurationChanged: true, review: { domain: 'resourcepacks' } })
+    mockedDownload.mockImplementation(f.downloadAll)
+    await f.service.resumeInstanceInstall(f.instancePath, undefined, plans[0].operationId, recovery.review)
+    expect(await readFile(join(f.instancePath, old.path), 'utf8')).toBe('NEW'); expect(await readFile(join(global, 'a.zip'), 'utf8')).toBe('OLD')
+  })
+
+  it('resumes only the selected pack plan, requires review of user edits and retains their backup', async () => {
+    const f = await fixture(), old = f.file('resourcepacks/a.zip', 'OLD'), next = f.file(old.path, 'NEW')
+    await f.write(join(f.instancePath, old.path), 'OLD')
+    mockedDownload.mockRejectedValueOnce(new Error('offline'))
+    await expect(f.service.installInstanceFiles(await f.review([old], [next], 'resourcepacks'))).rejects.toThrow('offline')
+    expect(await f.service.getReviewedModInstalls(f.instancePath)).toEqual([])
+    const [plan] = await f.service.getReviewedModInstalls(f.instancePath, 'resourcepacks')
+    const [saved] = await readPendingInstalls(f.instancePath)
+    expect(saved.state.review?.directory).toBe((await readResourcePackFilesSnapshot(f.instancePath, f.root)).authority)
+    await f.write(join(f.instancePath, old.path), 'USER EDIT')
+    await expect(f.service.resumeInstanceInstall(f.instancePath, undefined, plan.operationId)).rejects.toHaveProperty('name', 'ModFilesChangedError')
+    const recovery = await f.service.previewModInstallRecovery(f.instancePath, plan.operationId)
+    expect(recovery).toMatchObject({ shared: false, configurationChanged: false, review: { domain: 'resourcepacks' } })
+    const [profile] = await readPendingInstalls(f.instancePath)
+    mockedDownload.mockImplementation(f.downloadAll)
+    await f.service.resumeInstanceInstall(f.instancePath, undefined, plan.operationId, recovery.review)
+    expect(await readFile(join(f.instancePath, old.path), 'utf8')).toBe('NEW')
+    expect(await readFile(join(profile.state.backup, old.path), 'utf8')).toBe('USER EDIT')
+    expect(await f.service.getReviewedModInstalls(f.instancePath, 'resourcepacks')).toEqual([])
   })
 
 })

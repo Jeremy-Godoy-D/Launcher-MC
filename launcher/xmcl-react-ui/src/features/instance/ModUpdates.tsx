@@ -4,10 +4,11 @@ import { Download, X } from 'lucide-react'
 import type { StateData } from '@launcher/renderer-client'
 import type { ResourceState } from '@xmcl/runtime-api/src/entities/resource'
 import { InstanceInstallServiceKey, type InstallInstanceOptions, type InstanceFileUpdate, type ReviewedModInstall, type ReviewedModRecovery } from '@xmcl/runtime-api/src/services/InstanceInstallService'
+import { InstanceResourcePacksServiceKey } from '@xmcl/runtime-api/src/services/InstanceResourcePacksService'
 import { InstanceModsServiceKey, type ModFilesSnapshot } from '@xmcl/runtime-api/src/services/InstanceModsService'
 import { TaskState } from '@xmcl/runtime-api/src/task'
 import { createOperationId } from '@xmcl/runtime-api/src/util/launch'
-import { buildModUpgradeManifest } from '@xmcl/runtime-api/src/util/modUpgradeManifest'
+import { buildModUpgradeManifest, buildResourcePackUpgradeManifest } from '@xmcl/runtime-api/src/util/modUpgradeManifest'
 import { useI18n } from '../../i18n'
 import { useService, useTasks } from '../../runtime'
 import type { SavedInstance } from '../library/model'
@@ -15,17 +16,22 @@ import { isOperationCancelled } from '../library/operations'
 import { queryModUpdates, updateLoaders, updateMods, type UpdateOptions } from './queryModUpdates'
 
 type Review = { kind: 'update'; options: Extract<InstallInstanceOptions, { oldFiles: unknown }>; changes: InstanceFileUpdate[] } | ({ kind: 'recovery'; operationId: string } & ReviewedModRecovery)
-function preferences(path: string): UpdateOptions {
+const packOverrides = new Set(['title', 'help', 'noLoader', 'skipVersion', 'none', 'reviewHelp', 'configurationChanged', 'sharedRunning'])
+function preferences(path: string, domain: 'mods' | 'resourcepacks'): UpdateOptions {
   try {
-    const read = (key: string) => JSON.parse(localStorage.getItem(`modsUpgrade${key}:${path}`) || 'null')
+    const read = (key: string) => JSON.parse(localStorage.getItem(`${domain}Upgrade${key}:${path}`) || 'null')
     const policy = read('Policy')
-    return { policy: ['modrinth', 'curseforge', 'modrinthOnly', 'curseforgeOnly'].includes(policy) ? policy : 'modrinth', releaseOnly: read('IgnoreAlphaBeta') !== false, skipVersion: read('SkipVersion') === true }
-  } catch { return { policy: 'modrinth', releaseOnly: true, skipVersion: false } }
+    return { domain, policy: ['modrinth', 'curseforge', 'modrinthOnly', 'curseforgeOnly'].includes(policy) ? policy : 'modrinth', releaseOnly: read('IgnoreAlphaBeta') !== false, skipVersion: read('SkipVersion') === true }
+  } catch { return { domain, policy: 'modrinth', releaseOnly: true, skipVersion: false } }
 }
 
-export function ModUpdates({ path, runtime, getFiles, disabled, running, refresh, onBusy }: { path: string; runtime: SavedInstance['runtime']; getFiles: () => StateData<ResourceState>['files']; disabled: boolean; running: boolean; refresh: () => Promise<void>; onBusy: (busy: boolean) => void }) {
-  const { t } = useI18n(), installs = useService(InstanceInstallServiceKey), mods = useService(InstanceModsServiceKey), tasks = useTasks()
-  const [open, setOpen] = useState(false), [options, setOptions] = useState(() => preferences(path)), [phase, setPhase] = useState<'idle' | 'query' | 'review' | 'install'>('idle')
+export function ModUpdates({ path, runtime, getFiles, disabled, running, refresh, onBusy, domain = 'mods' }: { path: string; runtime: SavedInstance['runtime']; getFiles: () => StateData<ResourceState>['files']; disabled: boolean; running: boolean; refresh: () => Promise<void>; onBusy: (busy: boolean) => void; domain?: 'mods' | 'resourcepacks' }) {
+  const { t: translate } = useI18n(), installs = useService(InstanceInstallServiceKey), mods = useService(InstanceModsServiceKey), packs = useService(InstanceResourcePacksServiceKey), tasks = useTasks()
+  const isPack = domain === 'resourcepacks', content = isPack ? packs : mods
+  const t: typeof translate = (key, ...args) => translate(isPack && key.startsWith('react.modUpdates.') && packOverrides.has(key.slice('react.modUpdates.'.length)) ? key.replace('react.modUpdates.', 'react.packUpdates.') : key, ...args)
+  const snapshotFiles = () => isPack ? packs.getPackFilesSnapshot(path) : mods.getModFilesSnapshot(path)
+  const [open, setOpen] = useState(false), [options, setOptions] = useState(() => preferences(path, domain)), [phase, setPhase] = useState<'idle' | 'query' | 'review' | 'install'>('idle')
+  const [shared, setShared] = useState(false)
   const [result, setResult] = useState<Awaited<ReturnType<typeof queryModUpdates>> | null>(null), [selected, setSelected] = useState<string[]>([])
   const [review, setReview] = useState<Review | null>(null), [pending, setPending] = useState<ReviewedModInstall[]>([]), [error, setError] = useState(''), [notice, setNotice] = useState('')
   const trigger = useRef<HTMLButtonElement>(null), alive = useRef(true), controller = useRef<AbortController | null>(null), request = useRef(''), operation = useRef(false)
@@ -37,10 +43,10 @@ export function ModUpdates({ path, runtime, getFiles, disabled, running, refresh
   useEffect(() => { onBusy(busy) }, [busy])
   useEffect(() => { if (result && !busy && !review) resultsElement.current?.scrollIntoView({ block: 'start' }) }, [result, busy, review])
   useEffect(() => { if (review && body.current) body.current.scrollTop = 0 }, [review])
-  async function readPending() { const plans = await installs.getReviewedModInstalls(path); if (alive.current) setPending(plans) }
+  async function readPending() { const plans = await installs.getReviewedModInstalls(path, domain); if (alive.current) setPending(plans) }
   function failure(error: unknown) {
     const name = error && typeof error === 'object' && 'name' in error ? error.name : ''
-    return name === 'MetadataPending' ? 'metadataPending' : name === 'ModFilesChangedError' ? 'changed' : name === 'InstanceRunningError' ? 'running' : isOperationCancelled(error) || cancelling.current ? 'cancelled' : 'failed'
+    return name === 'SharedOptionsRunningError' ? 'sharedRunning' : name === 'MetadataPending' ? 'metadataPending' : name === 'ModFilesChangedError' ? 'changed' : name === 'InstanceRunningError' ? 'running' : isOperationCancelled(error) || cancelling.current ? 'cancelled' : 'failed'
   }
   async function execute(next: typeof phase, work: () => Promise<void>) {
     if (operation.current) return
@@ -51,44 +57,45 @@ export function ModUpdates({ path, runtime, getFiles, disabled, running, refresh
   function change(next: UpdateOptions) {
     setOptions(next); setResult(null); setSelected([]); setReview(null)
     try {
-      for (const [key, value] of [['Policy', next.policy], ['IgnoreAlphaBeta', next.releaseOnly], ['SkipVersion', next.skipVersion]]) localStorage.setItem(`modsUpgrade${key}:${path}`, JSON.stringify(value))
+      for (const [key, value] of [['Policy', next.policy], ['IgnoreAlphaBeta', next.releaseOnly], ['SkipVersion', next.skipVersion]]) localStorage.setItem(`${domain}Upgrade${key}:${path}`, JSON.stringify(value))
     } catch { setError('preferencesFailed') }
   }
   async function search() {
     controller.current?.abort(); const abort = new AbortController(); controller.current = abort
     setResult(null); setReview(null); setSelected([])
     await execute('query', async () => {
-      await mods.refreshMetadata(path)
+      await content.refreshMetadata(path)
       abort.signal.throwIfAborted()
-      const captured = await mods.getModFilesSnapshot(path)
+      const captured = await snapshotFiles()
       await refresh(); abort.signal.throwIfAborted()
-      const sources = await mods.getModSources(path)
+      const sources = await (isPack ? packs.getPackSources(path) : mods.getModSources(path))
       abort.signal.throwIfAborted()
-      const current = getFiles()
-      if (captured.entries.some(entry => !entry.directory && !current.some(file => file.path === entry.path && file.mtime === entry.mtime && file.size === entry.size && /^[a-f0-9]{40}$/i.test(file.hash)))) throw { name: 'MetadataPending' }
+      const eligible = captured.entries.filter(entry => !entry.directory && (!isPack || /\.zip$/i.test(entry.fileName)))
+      const current = getFiles().filter(file => eligible.some(entry => entry.path === file.path))
+      if (eligible.some(entry => !entry.directory && !current.some(file => file.path === entry.path && file.mtime === entry.mtime && file.size === entry.size && /^[a-f0-9]{40}$/i.test(file.hash)))) throw { name: 'MetadataPending' }
       const next = await queryModUpdates(updateMods(current, captured.configuration?.runtime || runtime, sources), captured.configuration?.runtime || runtime, options, abort.signal)
       if (!alive.current || abort.signal.aborted) return
-      inventory.current = captured; setResult(next); setSelected(next.updates.map(update => update.mod.path))
+      inventory.current = captured; setShared('shared' in captured && captured.shared === true); setResult(next); setSelected(next.updates.map(update => update.mod.path))
     })
   }
   async function prepare() {
     await execute('review', async () => {
-      const captured = await mods.getModFilesSnapshot(path)
-      if (JSON.stringify(captured.configuration) !== JSON.stringify(inventory.current?.configuration)) throw { name: 'ModFilesChangedError' }
+      const captured = await snapshotFiles()
+      if (JSON.stringify(captured.configuration) !== JSON.stringify(inventory.current?.configuration) || isPack && 'authority' in captured && (!inventory.current || !('authority' in inventory.current) || captured.authority !== inventory.current.authority)) throw { name: 'ModFilesChangedError' }
       const chosen = result?.updates.filter(update => selected.includes(update.mod.path)) || []
       if (!chosen.length) return
       for (const { mod } of chosen) {
         const entry = captured.entries.find(entry => entry.path === mod.path), current = getFiles().find(file => file.path === mod.path)
         if (!entry || !current || current.hash !== mod.hash || current.mtime !== entry.mtime || current.size !== entry.size || entry.directory) throw { name: 'ModFilesChangedError' }
       }
-      const options = { path, ...buildModUpgradeManifest(chosen) }, changes = await installs.previewInstanceFiles(options)
-      if (alive.current) setReview({ kind: 'update', options: { ...options, review: { snapshot: captured.fingerprint, changes: changes.map(change => ({ path: change.file.path, operation: change.operation })) } }, changes })
+      const options = { path, ...(isPack ? buildResourcePackUpgradeManifest(chosen) : buildModUpgradeManifest(chosen)), review: { ...(isPack ? { domain } : {}), snapshot: captured.fingerprint, changes: [] } }, changes = await installs.previewInstanceFiles(options)
+      if (alive.current) setReview({ kind: 'update', options: { ...options, review: { ...options.review, changes: changes.map(change => ({ path: change.file.path, operation: change.operation })) } }, changes })
     })
   }
   async function prepareRecovery(plan: ReviewedModInstall) {
     await execute('review', async () => {
       const recovery = await installs.previewModInstallRecovery(path, plan.operationId)
-      if (alive.current) setReview({ kind: 'recovery', operationId: plan.operationId, ...recovery })
+      if (alive.current) { setShared(recovery.shared === true); setReview({ kind: 'recovery', operationId: plan.operationId, ...recovery }) }
     })
   }
   async function install(resume?: ReviewedModInstall) {
@@ -118,13 +125,15 @@ export function ModUpdates({ path, runtime, getFiles, disabled, running, refresh
     try { await tasks.cancel(active.id) } catch { cancelling.current = false; setError('cancelFailed') }
   }
   let loader = ''
-  try { loader = updateLoaders(runtime)[0] } catch { /* A visible explanation blocks queries for ambiguous or missing loaders. */ }
+  try { loader = isPack ? runtime.minecraft ? 'Minecraft' : '' : updateLoaders(runtime)[0] } catch { /* A visible explanation blocks queries for ambiguous or missing loaders. */ }
   return <>
     <button ref={trigger} className="button secondary" disabled={disabled} onClick={() => { setOpen(true); void execute('review', readPending) }}><Download size={16} aria-hidden="true" />{t('react.modUpdates.open')}</button>
     <Dialog.Root open={open} onOpenChange={open => { if (!busy) setOpen(open) }}><Dialog.Portal><Dialog.Overlay className="dialog-backdrop" /><Dialog.Content className="dialog creation-dialog mod-updates-dialog" aria-busy={busy} onCloseAutoFocus={event => { event.preventDefault(); trigger.current?.focus() }} onEscapeKeyDown={event => { if (busy) event.preventDefault() }} onPointerDownOutside={event => event.preventDefault()}>
       <Dialog.Title>{t('react.modUpdates.title')}</Dialog.Title><button className="icon-button dialog-close" aria-label={t('react.modUpdates.close')} disabled={busy} onClick={() => setOpen(false)}><X size={20} aria-hidden="true" /></button>
       <Dialog.Description>{t(review ? 'react.modUpdates.reviewHelp' : pending.length ? 'react.modUpdates.pendingHelp' : 'react.modUpdates.help')}</Dialog.Description>
       <div ref={body} className="creation-body" role="region" aria-label={t('react.modUpdates.details')} tabIndex={0}>
+        {isPack && <p>{translate('react.packUpdates.stableNames')}</p>}
+        {isPack && shared && <p role="status"><strong>{translate('react.packUpdates.shared')}</strong></p>}
         {!review && !pending.length && <p>{runtime.minecraft} · {loader || t('react.modUpdates.noLoader')}</p>}
         {!loader && <p role="alert" className="form-error">{t('react.modUpdates.noLoader')}</p>}
         {!!pending.length && !review && <><h3 className="mod-update-pending-heading">{t('react.modUpdates.pending')}</h3><ul className="mod-update-pending">{pending.map(plan => <li key={plan.operationId}><div>{(plan.files.length ? plan.files : plan.oldFiles).map(file => <span key={file.path}>{file.path}</span>)}</div><div className="content-actions"><button className="button secondary" disabled={busy || running || otherInstall} onClick={() => void prepareRecovery(plan)}>{t('react.modUpdates.recover')}</button><button className="button secondary" disabled={busy || running || otherInstall} onClick={() => void install(plan)}>{t('react.modUpdates.resume')}</button></div></li>)}</ul></>}

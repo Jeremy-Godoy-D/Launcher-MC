@@ -47,6 +47,6 @@ export function InstanceWorkspace({ instance, media, cover, headerRef, play, opt
         <div><dt>{t('react.workspace.playtime')}</dt><dd>{t('react.workspace.minutes', { value: n(Math.floor(instance.playtime / 60000)) })}</dd></div>
       </dl>
       <p className="instance-path">{t('react.workspace.folder')}: {instance.path}</p>
-    </section> : tab === 'mods' ? <InstanceMods key={instance.path} path={instance.path} runtime={instance.runtime} running={running} configuredJava={instance.java} /> : tab === 'packs' ? <InstanceResourcePacks key={instance.path} path={instance.path} running={running} /> : tab ? <div role="status" className="empty"><h2>{t(`react.workspace.${tab}`)}</h2><p>{t('react.instances.featurePending')}</p></div> : <div className="empty"><h2>{t('react.workspace.notFound')}</h2><Link to="/instance" className="button secondary">{t('react.workspace.summary')}</Link></div>}
+    </section> : tab === 'mods' ? <InstanceMods key={instance.path} path={instance.path} runtime={instance.runtime} running={running} configuredJava={instance.java} /> : tab === 'packs' ? <InstanceResourcePacks key={instance.path} path={instance.path} running={running} runtime={instance.runtime} /> : tab ? <div role="status" className="empty"><h2>{t(`react.workspace.${tab}`)}</h2><p>{t('react.instances.featurePending')}</p></div> : <div className="empty"><h2>{t('react.workspace.notFound')}</h2><Link to="/instance" className="button secondary">{t('react.workspace.summary')}</Link></div>}
   </section>
 }

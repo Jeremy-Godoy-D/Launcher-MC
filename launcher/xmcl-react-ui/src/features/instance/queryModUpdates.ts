@@ -10,7 +10,7 @@ import { modIdentity } from './modIdentity'
 type RuntimeVersions = SavedInstance['runtime']
 
 export type UpdatePolicy = 'modrinth' | 'curseforge' | 'modrinthOnly' | 'curseforgeOnly'
-export type UpdateOptions = { policy: UpdatePolicy; releaseOnly: boolean; skipVersion: boolean }
+export type UpdateOptions = { policy: UpdatePolicy; releaseOnly: boolean; skipVersion: boolean; domain?: 'mods' | 'resourcepacks' }
 export type UpdateMod = { path: string; name: string; fileName: string; hash: string; size: number; curseforge?: { projectId: number; fileId: number }; modrinth?: { projectId: string; versionId: string } }
 export type ModUpdate = { mod: UpdateMod } & ({ version: ProjectVersion } | { file: File })
 export type UpdateIssue = { provider: 'modrinth' | 'curseforge'; kind: 'failed' | 'limited' | 'incomplete'; file?: string }
@@ -52,8 +52,10 @@ function newer(candidate: string, current: string) { if (typeof candidate !== 's
 function aborted(signal: AbortSignal) { signal.throwIfAborted() }
 
 export async function queryModUpdates(mods: UpdateMod[], runtime: RuntimeVersions, options: UpdateOptions, signal: AbortSignal, api: Clients = clients, cache = modUpdateQueries) {
-  const [loader, cfLoader] = updateLoaders(runtime), results = new Map<string, ModUpdate>(), issues: UpdateIssue[] = []
-  const cached = <T,>(key: unknown[], query: () => Promise<T>) => cache.fetchQuery({ queryKey: ['mod-updates', ...key], queryFn: query })
+  const packs = options.domain === 'resourcepacks'
+  if (packs && !runtime.minecraft) throw new Error('Missing Minecraft version')
+  const [loader, cfLoader] = packs ? ['minecraft', undefined] as const : updateLoaders(runtime), results = new Map<string, ModUpdate>(), issues: UpdateIssue[] = []
+  const cached = <T,>(key: unknown[], query: () => Promise<T>) => cache.fetchQuery({ queryKey: ['mod-updates', options.domain || 'mods', ...key], queryFn: query })
   const issue = (provider: UpdateIssue['provider'], error: unknown, file?: string) => {
     aborted(signal)
     issues.push({ provider, file, kind: error && typeof error === 'object' && 'status' in error && error.status === 429 ? 'limited' : 'failed' })
@@ -96,12 +98,12 @@ export async function queryModUpdates(mods: UpdateMod[], runtime: RuntimeVersion
           // Bound pathological histories; an incomplete result is visible, never reported as up to date.
           const files: File[] = []
           for (let index = 0; index < 500; index += 50) {
-            const page = await cached(['curseforge', mod.curseforge!.projectId, runtime.minecraft, cfLoader, index], () => api.curseforge.getModFiles({ modId: mod.curseforge!.projectId, gameVersion: runtime.minecraft, modLoaderType: cfLoader, index, pageSize: 50 }, signal))
+            const page = await cached(['curseforge', mod.curseforge!.projectId, runtime.minecraft, cfLoader, index], () => api.curseforge.getModFiles({ modId: mod.curseforge!.projectId, gameVersion: runtime.minecraft, ...(packs ? {} : { modLoaderType: cfLoader }), index, pageSize: 50 }, signal))
             aborted(signal); files.push(...page.data)
             if (index + page.data.length >= page.pagination.totalCount || page.data.length === 0) break
             if (index === 450) issues.push({ provider: 'curseforge', kind: 'incomplete', file: mod.fileName })
           }
-          const file = files.filter(file => Number.isSafeInteger(file.id) && file.id > 0 && file.modId === old.modId && file.isAvailable && file.gameVersions.includes(runtime.minecraft) && file.gameVersions.some(value => value.toLowerCase() === loader) && (!options.releaseOnly || file.releaseType === 1) && sha1.test(file.hashes.find(hash => hash.algo === HashAlgo.Sha1)?.value || '')).sort((a, b) => Date.parse(b.fileDate) - Date.parse(a.fileDate))[0]
+          const file = files.filter(file => Number.isSafeInteger(file.id) && file.id > 0 && file.modId === old.modId && file.isAvailable && file.gameVersions.includes(runtime.minecraft) && (packs || file.gameVersions.some(value => value.toLowerCase() === loader)) && (!options.releaseOnly || file.releaseType === 1) && sha1.test(file.hashes.find(hash => hash.algo === HashAlgo.Sha1)?.value || '')).sort((a, b) => Date.parse(b.fileDate) - Date.parse(a.fileDate))[0]
           if (file && file.id !== old.id && newer(file.fileDate, old.fileDate) && file.hashes.find(hash => hash.algo === HashAlgo.Sha1)?.value !== mod.hash) results.set(mod.path, { mod, file })
         } catch (error) { issue('curseforge', error, mod.fileName) }
       }
