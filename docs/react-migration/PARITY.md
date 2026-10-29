@@ -182,3 +182,5 @@ Seguimiento CI-WINDOW-FOCUS/217a623:CI40827795644 Vue aprobado,React119/120;12-l
 ### Carpetas compartidas y copias privadas de packs (46b6230)
 
 STAGE5-PACK-SHARING.md: revision Native con SHA-256/conflictos, copias independientes y respaldo previo; guards de juegos/arranque y observacion preservada al sustituir carpeta en Windows. Metodos legacy usan el mismo motor; desvincular conserva archivos.841unitarias/88archivos,tipos/lint y22escenarios distintos(18React+4Vue),mas1focal solapado,8Axe0violaciones/16incomplete. CI40830063540 aprobo el bloque anterior765c6be/c3f317a+217a623. K08/K09/gates5 siguen pending por updates de packs y aceptacion completa;shaders,mundos,ajustes,consola y6-9 despues. No certifica Java/juego/NSIS/delta reales ni publicacion.
+
+Seguimiento b375a9c/CI-SHARING-FAILURES:CI40874755065 termino839/841,Vue cancelado;dos fixtures no inyectaban el fallo esperado. Ahora interceptan fs-extra.move y verifican fallo/restauracion;11focales y841unitarias locales aprobadas. Nuevo CI pendiente. K08/K09 y gates5 sin cambios;updates de packs siguen WIP.

@@ -6,7 +6,7 @@ Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio
 
 ## Bloque actual
 
-Etapa5 activa. Fuente46b6230/PACK-SHARING: revision Native de compartir/copia privada, conflictos sin reemplazo, backup local e independencia de copias; conserva seleccion/grupos/mundos. Guardas de registro/juegos/arranque y watcher coordinado; pausa/reanuda observacion para mover carpetas en Windows sin perder estado.841unitarias/88archivos,tipos/lint,22escenarios empaquetados distintos(18React+4Vue),1focal repetido tras finally,8Axe0violaciones/16incomplete y8PNG aprobados,56E2Eprevios/0en48,9harness. CI40830063540 verde para765c6be/c3f317a+217a623; verificar CI propio tras push. Siguiente:actualizaciones de packs con clientes/instalador revisado y preservacion de activacion/prioridad/compartidos; luego shaders,mundos,ajustes,consola y6-9. K08/K09/gates5 pendientes. Dist/defaultVue conservados;PR4borrador,produccion/proxy intactos,MSpospuesto. No DevTools/CDP,ANALISIS ni limpiezas denegadas.
+Etapa5 activa. Compartidos46b6230 validados localmente; CI40874755065 fallo839/841 porque dos fixtures no provocaron el fallo de publicacion esperado;Vue cancelado. b375a9c intercepta fs-extra.move con asercion de fallo/restauracion:11focales y841unitarias aprobadas,tipos/lint y9harness. Ver STAGE5-CI-SHARING-FAILURES;comprobar nuevo CI tras push. Actualizaciones de packs en curso en worktree:dominio/snapshot/guardas pendientes de completar y validar. Seguir actualizaciones,shaders,mundos,ajustes,consola y6-9;K08/K09/gates5 pendientes. Vue default,PR4borrador,produccion/proxy intactos,MSpospuesto;no DevTools/CDP,ANALISIS ni limpiezas denegadas.
 
 ## Siguiente accion
 
@@ -64,3 +64,7 @@ Etapa5 activa. Fuente46b6230/PACK-SHARING: revision Native de compartir/copia pr
 - STAGE4-VANILLA:12 archivos Git/52 artefactos ignorados,362 unitarias y32 escenarios Electron distintos, dos repetidos tras guards. Límites64 nodos/JSON1MiB cada uno y8MiB total/10000bibliotecas/512MiB buffers. No copia masiva de assets ni cambios en el core de lanzamiento. Dist Vue y paquetes independientes. Juego, descargas reales, NSIS/actualización aislada/rendimiento/publicación y revisión manual AA siguen pendientes.
 
 CI40331579209 detectó hashes de evidencia calculados sobre CRLF en cuatro JSON (COPY-RESUME,VIRTUAL-LIBRARY,SHARED-CONTENT,PROFILE-APPEARANCE), normalizados a LF por Git. Se restauraron los bytes de sus blobs Git y hashes canónicos según .gitattributes, sin cambiar contenido lógico ni resultados. Para documentos nuevos escribir bytes UTF-8/LF antes de calcular SHA-256; en Python usar write_bytes o newline="\n", no write_text con newline por defecto de Windows. Verificar evidencias contra blobs Git además del harness local. CI del último código estaba en curso; no confundir integridad fallida con éxito funcional remoto.
+
+## CI de compartidos — b375a9c
+
+STAGE5-CI-SHARING-FAILURES.md registra CI40874755065:839/841, dos fallos esperados no inyectados y Vue cancelado. Fixture corregida en el limite fs-extra.move con comprobacion explicita de fallo/restauracion,11focales y841unitarias aprobadas. Nuevo CI pendiente;no asumir verde por resultados locales. Updates de packs son WIP sin commit todavia.

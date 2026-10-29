@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa. Fuente46b6230/PACK-SHARING: revision Native de compartir/copia privada, conflictos sin reemplazo, backup local e independencia de copias; conserva seleccion/grupos/mundos. Guardas de registro/juegos/arranque y watcher coordinado; pausa/reanuda observacion para mover carpetas en Windows sin perder estado.841unitarias/88archivos,tipos/lint,22escenarios empaquetados distintos(18React+4Vue),1focal repetido tras finally,8Axe0violaciones/16incomplete y8PNG aprobados,56E2Eprevios/0en48,9harness. CI40830063540 verde para765c6be/c3f317a+217a623; verificar CI propio tras push. Siguiente:actualizaciones de packs con clientes/instalador revisado y preservacion de activacion/prioridad/compartidos; luego shaders,mundos,ajustes,consola y6-9. K08/K09/gates5 pendientes. Dist/defaultVue conservados;PR4borrador,produccion/proxy intactos,MSpospuesto. No DevTools/CDP,ANALISIS ni limpiezas denegadas.",
+  "nextAction": "Etapa5 activa. Compartidos46b6230 validados localmente; CI40874755065 fallo839/841 porque dos fixtures no provocaron el fallo de publicacion esperado;Vue cancelado. b375a9c intercepta fs-extra.move con asercion de fallo/restauracion:11focales y841unitarias aprobadas,tipos/lint y9harness. Ver STAGE5-CI-SHARING-FAILURES;comprobar nuevo CI tras push. Actualizaciones de packs en curso en worktree:dominio/snapshot/guardas pendientes de completar y validar. Seguir actualizaciones,shaders,mundos,ajustes,consola y6-9;K08/K09/gates5 pendientes. Vue default,PR4borrador,produccion/proxy intactos,MSpospuesto;no DevTools/CDP,ANALISIS ni limpiezas denegadas.",
   "stages": [
     {
       "id": 0,
