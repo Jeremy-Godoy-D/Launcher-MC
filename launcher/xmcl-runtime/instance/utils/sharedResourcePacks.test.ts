@@ -2,14 +2,23 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { copyFile, lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises'
 import { join, parse } from 'node:path'
 import { tmpdir } from 'node:os'
-import { createRequire } from 'node:module'
 import { checksum } from '@xmcl/core'
+import { move } from 'fs-extra'
+const publication = vi.hoisted(() => ({ source: '', target: '', failures: 0 }))
 vi.mock('@xmcl/core', async original => { const actual = await original<typeof import('@xmcl/core')>(); return { ...actual, checksum: vi.fn(actual.checksum) } })
 vi.mock('node:fs/promises', async original => { const actual = await original<typeof import('node:fs/promises')>(); return { ...actual, copyFile: vi.fn(actual.copyFile) } })
+vi.mock('fs-extra', async original => {
+  const actual = await original<typeof import('fs-extra')>()
+  return { ...actual, move: vi.fn(async (source: string, target: string, options?: import('fs-extra').MoveOptions) => {
+    if (source.endsWith(publication.source) && target === publication.target) { publication.failures++; throw Object.assign(new Error('Publish fixture failure'), { code: 'EIO' }) }
+    return actual.move(source, target, options)
+  }) }
+})
 import { applyResourcePackSharing, previewResourcePackSharing } from './sharedResourcePacks'
 
 let root: string, path: string, local: string, global: string
 beforeEach(async () => {
+  publication.source = ''; publication.target = ''; publication.failures = 0
   root = await mkdtemp(join(tmpdir(), 'grimo-shared-packs-')); path = join(root, 'instance'); local = join(path, 'resourcepacks'); global = join(root, 'resourcepacks')
   await mkdir(local, { recursive: true }); await mkdir(global)
   await writeFile(join(local, 'a.zip'), 'LOCAL PACK'); await writeFile(join(global, 'b.zip'), 'SHARED PACK')
@@ -75,23 +84,18 @@ it('keeps the local directory and partial copies on copy failure, and a fresh re
   await apply(await preview(true)); expect((await lstat(local)).isSymbolicLink()).toBe(true)
 })
 it('restores the original local directory if publishing the staged link fails', async () => {
-  const require = createRequire(import.meta.url), fs = createRequire(require.resolve('fs-extra'))('graceful-fs') as Pick<typeof import('node:fs'), 'rename'>, rename = fs.rename
-  vi.spyOn(fs, 'rename').mockImplementation((from, to, callback) => {
-    if (String(from).endsWith('link') && String(to) === local) callback(Object.assign(new Error('Publish fixture failure'), { code: 'EIO' }))
-    else rename(from, to, callback)
-  })
+  publication.source = 'link'; publication.target = local
   await expect(apply(await preview(true))).rejects.toHaveProperty('name', 'ResourcePackSharingIncompleteError')
+  expect(publication.failures).toBe(1)
+  expect(move).toHaveBeenCalledWith(expect.stringMatching(/[\\/]previous$/), local, { overwrite: false })
   expect((await lstat(local)).isSymbolicLink()).toBe(false); expect(await readFile(join(local, 'a.zip'), 'utf8')).toBe('LOCAL PACK')
   expect(await readFile(join(global, 'a.zip'), 'utf8')).toBe('LOCAL PACK')
 })
 it('restores the common link and retains the private copy if publishing that copy fails', async () => {
   await apply(await preview(true))
-  const require = createRequire(import.meta.url), fs = createRequire(require.resolve('fs-extra'))('graceful-fs') as Pick<typeof import('node:fs'), 'rename'>, rename = fs.rename
-  vi.spyOn(fs, 'rename').mockImplementation((from, to, callback) => {
-    if (String(from).endsWith('private') && String(to) === local) callback(Object.assign(new Error('Private publish fixture failure'), { code: 'EIO' }))
-    else rename(from, to, callback)
-  })
+  publication.source = 'private'; publication.target = local
   const error = await apply(await preview(false)).catch(error => error)
+  expect(publication.failures).toBe(1)
   expect(error.name).toBe('ResourcePackSharingIncompleteError'); expect((await lstat(local)).isSymbolicLink()).toBe(true)
   expect(await readFile(join(error.backup, 'private/a.zip'), 'utf8')).toBe('LOCAL PACK')
   expect(await readFile(join(global, 'b.zip'), 'utf8')).toBe('SHARED PACK')
