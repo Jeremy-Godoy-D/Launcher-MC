@@ -6,7 +6,7 @@ Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio
 
 ## Bloque actual
 
-Etapa5 activa. Compartidos46b6230 validados localmente; CI40874755065 fallo839/841 porque dos fixtures no provocaron el fallo de publicacion esperado;Vue cancelado. b375a9c intercepta fs-extra.move con asercion de fallo/restauracion:11focales y841unitarias aprobadas,tipos/lint y9harness. Ver STAGE5-CI-SHARING-FAILURES;comprobar nuevo CI tras push. Actualizaciones de packs en curso en worktree:dominio/snapshot/guardas pendientes de completar y validar. Seguir actualizaciones,shaders,mundos,ajustes,consola y6-9;K08/K09/gates5 pendientes. Vue default,PR4borrador,produccion/proxy intactos,MSpospuesto;no DevTools/CDP,ANALISIS ni limpiezas denegadas.
+Etapa5 activa. CI40877340873 repitio2fallos de simulacion;cd4d06a reproduce causa con TEMP por junction(9/11) y la corrige canonicalizando fixture(12/12 alias+12/12normal,regresion padrealias). Ver CI-SHARING-FAILURES;verificar nuevo CI. Actualizaciones packs WIP:API/snapshot/instalador,93focales locales aprobadas;falta UI,clientes yElectron antes de confirmar. Seguir actualizaciones,shaders,mundos,ajustes,consola y6-9;K08/K09/gates5 pendientes. No limpiar ni recorrer junction ignorada e2e/artifacts/sharing-temp-alias,limpieza rechazada;no reintentar. Vue default,PR4borrador,produccion/proxy intactos,MSpospuesto;no DevTools/CDP,ANALISIS ni limpiezas previas denegadas.
 
 ## Siguiente accion
 
@@ -68,3 +68,5 @@ CI40331579209 detectó hashes de evidencia calculados sobre CRLF en cuatro JSON 
 ## CI de compartidos — b375a9c
 
 STAGE5-CI-SHARING-FAILURES.md registra CI40874755065:839/841, dos fallos esperados no inyectados y Vue cancelado. Fixture corregida en el limite fs-extra.move con comprobacion explicita de fallo/restauracion,11focales y841unitarias aprobadas. Nuevo CI pendiente;no asumir verde por resultados locales. Updates de packs son WIP sin commit todavia.
+
+CI40877340873 repitio fallo de fixture:cd4d06a reproduce con alias TEMP y normaliza realpath;12pruebas en ambos entornos. Ver informe. No reintentar limpieza ni seguir junction launcher/e2e/artifacts/sharing-temp-alias:rechazada por revision automatica;apunta al TEMP del usuario. Updates packs WIP no confirmados,93focales;falta UI/Native.

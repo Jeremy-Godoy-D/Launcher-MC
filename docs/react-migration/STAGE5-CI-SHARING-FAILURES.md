@@ -11,3 +11,13 @@ Validación local desde launcher: `pnpm exec vitest run xmcl-runtime/instance/ut
 Manifiesto ignorado launcher/e2e/artifacts/stage5-sharing-ci-mock-manifest.json, SHA-256 `a57eacc870e998f01c3900fdc7777e7183ce0ebe9c2a9bf471cfe173bfa95149`:blob canónico de la fixture y cuatro logs. No se repite Electron ni se reconstruyen binarios por este cambio exclusivo de prueba.
 
 CI nuevo pendiente después del push. Las actualizaciones de packs siguen en desarrollo sin validar integralmente;5 y6–9 pendientes, Microsoft pospuesto, Vue predeterminado, PR4 borrador y producción/proxy intactos. No certifica descarga Java/juego/NSIS/delta reales ni publicación.
+
+## Causa reproducida mediante un alias temporal
+
+Fuente `cd4d06a5c6244b7c18625f0b679e1c4843825384`. CI40877340873 repitió los dos fallos,esta vez Vue y React cancelado. Cambiar el punto de interceptación no bastaba:la fixture comparaba una ruta temporal literal con la ruta física resuelta por el producto.
+
+Se reprodujeron ambos fallos localmente al definir TEMP/TMP para el proceso de prueba mediante una junction temporal. Antes del arreglo:9/11 aprobadas,los mismos2 fallos. Después de resolver realpath sobre mkdtemp en la fixture:12/12 con alias y12/12 sin alias. Se añade una regresión que llama al motor con un alias de carpeta padre y verifica fallo,restauración y bytes originales. Producto sin cambios. Es evidencia de la causa reproducida localmente,no inspección de las variables TEMP del runner original.
+
+Manifiesto ignorado stage5-sharing-ci-alias-manifest.json,SHA-256 `a52a822366610176264ab7633167a4e0710edeafa96fe8758ecb9f8946fbc059`;blob canónico de prueba y4logs. Nuevo CI pendiente. Los resultados anteriores de841 unidades/tipos/lint corresponden al worktree y a la revisión b375a9c, no sustituyen este CI.
+
+La revisión automática rechazó la limpieza de la junction `launcher/e2e/artifacts/sharing-temp-alias`,creada para este experimento y dirigida al TEMP del usuario. No se eliminó ni se reintentará por otra vía. No recorrerla para reunir artefactos ni seguirla en limpiezas. Se conservaron los temporales protegidos anteriores.
