@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { copyFile, lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises'
+import { copyFile, lstat, mkdir, mkdtemp, readFile, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises'
 import { join, parse } from 'node:path'
 import { tmpdir } from 'node:os'
 import { checksum } from '@xmcl/core'
@@ -19,7 +19,7 @@ import { applyResourcePackSharing, previewResourcePackSharing } from './sharedRe
 let root: string, path: string, local: string, global: string
 beforeEach(async () => {
   publication.source = ''; publication.target = ''; publication.failures = 0
-  root = await mkdtemp(join(tmpdir(), 'grimo-shared-packs-')); path = join(root, 'instance'); local = join(path, 'resourcepacks'); global = join(root, 'resourcepacks')
+  root = await realpath(await mkdtemp(join(tmpdir(), 'grimo-shared-packs-'))); path = join(root, 'instance'); local = join(path, 'resourcepacks'); global = join(root, 'resourcepacks')
   await mkdir(local, { recursive: true }); await mkdir(global)
   await writeFile(join(local, 'a.zip'), 'LOCAL PACK'); await writeFile(join(global, 'b.zip'), 'SHARED PACK')
   await mkdir(join(local, 'folder/empty'), { recursive: true }); await writeFile(join(local, 'folder/pack.mcmeta'), 'pack metadata')
@@ -113,4 +113,16 @@ it('fails closed when the checksum helper cannot read bytes', async () => {
     expect(await readdir(global)).toEqual(['b.zip'])
     expect((await lstat(local)).isSymbolicLink()).toBe(false)
   }
+})
+
+it('injects a publication failure when the caller uses a parent-directory alias', async () => {
+  const alias = join(root, 'parent-alias'); await symlink(root, alias, 'junction')
+  try {
+    const aliasedInstance = join(alias, 'instance'), review = await previewResourcePackSharing(aliasedInstance, true, alias)
+    publication.source = 'link'; publication.target = local
+    await expect(applyResourcePackSharing(aliasedInstance, review, alias)).rejects.toHaveProperty('name', 'ResourcePackSharingIncompleteError')
+    expect(publication.failures).toBe(1)
+    expect((await lstat(local)).isSymbolicLink()).toBe(false)
+    expect(await readFile(join(local, 'a.zip'), 'utf8')).toBe('LOCAL PACK')
+  } finally { await rm(alias) }
 })
