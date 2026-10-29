@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { ArrowDown, ArrowUp, FolderOpen, Plus, RefreshCw, Search, Trash2 } from 'lucide-react'
 import { ResourceState } from '@xmcl/runtime-api/src/entities/resource'
-import { InstanceResourcePacksServiceKey, type ResourcePackRemovalReview } from '@xmcl/runtime-api/src/services/InstanceResourcePacksService'
+import { InstanceResourcePacksServiceKey, type ResourcePackRemovalReview, type ResourcePackSharingReview } from '@xmcl/runtime-api/src/services/InstanceResourcePacksService'
 import { BaseServiceKey } from '@xmcl/runtime-api/src/services/BaseService'
 import { InstanceOptionsServiceKey, type ResourcePackSelection } from '@xmcl/runtime-api/src/services/InstanceOptionsService'
 import packFormatVersionRange from '@xmcl/runtime-api/src/util/packFormatVersionRange'
@@ -14,6 +14,7 @@ import { useContentGroups } from './useContentGroups'
 import { ContentGroupsEditor } from './ContentGroupsEditor'
 import { assignContentGroup, contentGroupMemberships } from './contentGroups'
 import { resourcePackFormat } from './resourcePackMetadata'
+import { SharePacksDialog } from './SharePacksDialog'
 
 export function InstanceResourcePacks({ path, running }: { path: string; running: boolean }) {
   const { t } = useI18n(), service = useService(InstanceResourcePacksServiceKey), options = useService(InstanceOptionsServiceKey)
@@ -28,6 +29,7 @@ export function InstanceResourcePacks({ path, running }: { path: string; running
   const [selection, setSelection] = useState<ResourcePackSelection | null>(null), [busy, setBusy] = useState(false)
   const [query, setQuery] = useState(''), [error, setError] = useState(''), [notice, setNotice] = useState('')
   const [selected, setSelected] = useState<string[]>([]), [removal, setRemoval] = useState<ResourcePackRemovalReview | null>(null)
+  const [sharing, setSharing] = useState<ResourcePackSharingReview | null>(null), shareButton = useRef<HTMLButtonElement>(null)
   const [sharedDirectory, setSharedDirectory] = useState(false), [backup, setBackup] = useState('')
   const removeButton = useRef<HTMLButtonElement>(null), search = useRef<HTMLInputElement>(null)
   const alive = useRef(true), pending = useRef(false)
@@ -64,6 +66,7 @@ export function InstanceResourcePacks({ path, running }: { path: string; running
   }
   function failure(error: unknown) {
     const name = error && typeof error === 'object' && 'name' in error ? error.name : ''
+    if (name === 'ResourcePackSharingIncompleteError') return t('react.packSharing.incomplete')
     return t(name === 'InstanceRunningError' ? 'react.packs.running' : name === 'SharedOptionsRunningError' ? 'react.packs.sharedRunning' : name === 'ResourcePackCollisionError' ? 'react.packs.collision' : name === 'ResourcePacksChangedError' || name === 'ResourcePackSelectionChangedError' ? 'react.packs.filesChanged' : name === 'ResourcePackRemovalIncompleteError' ? 'react.packs.incomplete' : 'react.packs.filesFailed')
   }
   async function run(action: () => Promise<void>, groupAction = false) {
@@ -73,7 +76,7 @@ export function InstanceResourcePacks({ path, running }: { path: string; running
     catch (error) {
       if (alive.current) {
         setError(groupAction ? t('react.contentGroups.failed') : failure(error))
-        if (error && typeof error === 'object' && 'name' in error && error.name === 'ResourcePackRemovalIncompleteError') setBackup(path + '/.backups')
+        if (error && typeof error === 'object' && 'name' in error && (error.name === 'ResourcePackRemovalIncompleteError' || error.name === 'ResourcePackSharingIncompleteError')) setBackup(path + '/.backups')
       }
     } finally { pending.current = false; if (alive.current) setBusy(false) }
   }
@@ -119,6 +122,10 @@ export function InstanceResourcePacks({ path, running }: { path: string; running
   const blocked = busy || running || !selection || snapshot.status !== 'ready'
   const fileBlocked = busy || running || snapshot.status !== 'ready'
   function choose(name: string, checked: boolean) { setSelected(current => checked ? [...new Set([...current, name])] : current.filter(file => file !== name)) }
+  function returnSharingFocus() {
+    if (shareButton.current?.disabled && busy) { priorityFocus.current = shareButton.current; return }
+    (shareButton.current?.isConnected && !shareButton.current.disabled ? shareButton.current : search.current)?.focus()
+  }
   function fileTitle(file: typeof files[number]) {
     return <><button className="content-file-name" aria-label={t('react.modInfo.open', { name: file.name })} aria-expanded={detailsPath === file.path} onClick={event => { detailsTrigger.current = event.currentTarget; if (detailsPath === file.path) closeDetails(); else { setEditingGroups(false); setDetailsPath(file.path) } }}>{file.name}</button>{!!fileGroups(file.fileName).length && <div className="content-group-labels">{fileGroups(file.fileName).map(name => <span className="content-group-label" key={name}><span className="content-group-dot" aria-hidden="true" style={{ backgroundColor: /^#[0-9a-f]{6}$/i.test(groups[name].color) ? groups[name].color : 'var(--accent)' }} />{name}</span>)}</div>}</>
   }
@@ -134,6 +141,7 @@ export function InstanceResourcePacks({ path, running }: { path: string; running
       <button className="button secondary" disabled={fileBlocked || !window.windowController?.showOpenDialog} onClick={event => { priorityFocus.current = event.currentTarget; void run(() => add(true)) }}>{t('react.packs.addFolder')}</button>
       <button className="button secondary" disabled={busy} onClick={() => { void service.showDirectory(path).catch(() => { if (alive.current) setError(t('react.workspace.folderFailed')) }) }}><FolderOpen size={17} aria-hidden="true" />{t('react.packs.folder')}</button>
       <button ref={manageGroups} className="button secondary" disabled={busy || !groupReady} aria-expanded={editingGroups} onClick={() => { setDetailsPath(''); setEditingGroups(true) }}>{t('react.contentGroups.manage')}</button>
+      <button ref={shareButton} className="button secondary" disabled={blocked} onClick={event => { priorityFocus.current = event.currentTarget; void run(async () => { const review = await service.previewSharing(path, !sharedDirectory); if (alive.current) setSharing(review) }) }}>{t(sharedDirectory ? 'react.packSharing.unlink' : 'react.packSharing.link')}</button>
       <button className="button secondary" disabled={busy} onClick={() => void load()}><RefreshCw size={17} aria-hidden="true" />{t('react.content.refresh')}</button>
     </div></div>
     <p className="packs-help">{t('react.packs.help')}</p>
@@ -166,6 +174,13 @@ export function InstanceResourcePacks({ path, running }: { path: string; running
       <div className="content-file">{fileTitle(file)}{file.name !== file.fileName && <span>{file.fileName}</span>}<small>{t('react.packs.format', { format: String(resourcePackFormat(file.metadata.resourcepack?.pack_format) ?? '?'), range: packFormatVersionRange[resourcePackFormat(file.metadata.resourcepack?.pack_format) ?? -1] || t('react.modInfo.unknown') })}</small><small>{file.metadata.modrinth ? 'Modrinth' : file.metadata.curseforge ? 'CurseForge' : t('react.content.local')}</small></div>
       <button className="button secondary" disabled={blocked} aria-label={t('react.content.enableName', { name: file.name })} onClick={() => void save([...packs, `file/${file.fileName}`])}>{t('react.content.enable')}</button>
     </li>)}</ul>
+    {sharing && <SharePacksDialog review={sharing} busy={busy} error={error} close={() => { setSharing(null); setError('') }} returnFocus={returnSharingFocus} apply={() => void run(async () => {
+      const result = await service.applySharing(path, sharing)
+      if (!alive.current) return
+      if (result.backup) setBackup(result.backup)
+      setSharing(null); setSelected([]); setDetailsPath('')
+      await read(); if (alive.current) setNotice(t(sharing.shared ? 'react.packSharing.linked' : 'react.packSharing.unlinked'))
+    })} />}
     {removal && <RemovePacksDialog review={removal} busy={busy} error={error} close={() => { setRemoval(null); setError('') }} returnFocus={() => (removeButton.current?.isConnected && !removeButton.current.disabled ? removeButton.current : search.current)?.focus()} remove={() => void run(async () => {
       const result = await service.removeReviewed(path, removal)
       if (!alive.current) return

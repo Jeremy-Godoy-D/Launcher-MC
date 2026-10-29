@@ -381,7 +381,7 @@ export function watchResourcesDirectory({
     onResourceKnownBroken,
   )
 
-  const watcher = createWatcher(
+  const createLiveWatcher = () => createWatcher(
     directory,
     domain,
     async (file) => {
@@ -403,6 +403,7 @@ export function watchResourcesDirectory({
     revalidate,
     context.onError,
   )
+  let watcher: FSWatcher | undefined = createLiveWatcher()
 
   workerQueue.onerror = ({ filePath }, e) => {
     if (disposed) return
@@ -450,7 +451,7 @@ export function watchResourcesDirectory({
   function dispose() {
     disposed = true
     onDispose()
-    watcher.close()
+    watcher?.close()
     workerQueue.dispose()
     context.event.off('resourceUpdate', onResourceUpdate)
   }
@@ -471,6 +472,14 @@ export function watchResourcesDirectory({
   }
 
   return {
+    async pause() {
+      const active = watcher
+      watcher = undefined
+      await active?.close()
+    },
+    resume() {
+      if (!disposed && !watcher) watcher = createLiveWatcher()
+    },
     enqueue,
     dispose,
     revalidate,

@@ -8,10 +8,23 @@ export interface ResourcePackRemovalReview {
   sharedOptions: boolean
 }
 
+export interface ResourcePackSharingReview {
+  snapshot: string
+  shared: boolean
+  linked: boolean
+  localPacks: number
+  sharedPacks: number
+  files: number
+  bytes: number
+  conflicts: string[]
+}
+
 /**
  * Provide the abilities to diagnose & link resource packs files to instance
  */
 export interface InstanceResourcePacksService extends InstanceResourcesService {
+  previewSharing(instancePath: string, shared: boolean): Promise<ResourcePackSharingReview>
+  applySharing(instancePath: string, review: ResourcePackSharingReview): Promise<{ backup?: string }>
   previewRemoval(instancePath: string, fileNames: string[]): Promise<ResourcePackRemovalReview>
   /** Move reviewed packs into private backups and remove them from this selection. */
   removeReviewed(instancePath: string, review: ResourcePackRemovalReview): Promise<{ backup: string }>
@@ -27,6 +40,7 @@ export interface InstanceResourcePacksService extends InstanceResourcesService {
   linkShared(instancePath: string): Promise<void>
   /**
    * Unlink the instance's `resourcepacks` folder from the global shared folder.
+   * Retain an independent local copy of its packs.
    */
   unlinkShared(instancePath: string): Promise<void>
 }
