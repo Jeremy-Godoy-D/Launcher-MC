@@ -168,3 +168,7 @@ STAGE5-RESOURCE-PACK-SELECTION.md: lista/búsqueda/activación/prioridad en Reac
 ### Archivos locales de packs (f34855e)
 
 STAGE5-RESOURCE-PACK-FILES.md: importar ZIP/carpetas+assets sin reemplazo, revisión/retirada hacia backups, fuentes/opciones/mundos/otro manifiesto preservados y recuperación de archivo ilegible.809unitarias/85archivos y10escenarios empaquetados distintos. K09 pendiente de coordinación con arranque compartido (shortcut explícito), información/grupos/compartidos/updates y cierre completo; etapa5/K08 también pendientes. No publicar con ese criterio abierto.
+
+### Packs durante arranque y salida (b7ec02c)
+
+STAGE5-RESOURCE-PACK-STARTUP.md: lock compartido e instancia cubren preparativos y registro cliente/servidor; el proceso permanece registrado hasta salida real. Elimina volcados de opciones con entorno/argumentos.821unitarias/86archivos y18escenarios empaquetados distintos; tipos/lint aprobados. Resuelve la carrera declarada en FILES;K08/K09/gates5 siguen pending. Proximo:informacion/grupos/compartidos/updates de packs,shaders,mundos,ajustes,consola y6-9. No acredita Java/juego/NSIS/delta reales ni publicacion.
