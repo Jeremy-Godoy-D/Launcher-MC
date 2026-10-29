@@ -32,7 +32,6 @@ export class InstanceResourcePackService extends AbstractInstanceDomainService i
     return this.mutex.of('resource-pack-options').runExclusive(() => this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
       await this.#javaInstance(path)
       if (kind !== 'read') {
-        // shortcut: checks registered processes; coordinate shared-folder startup before closing K09.
         const launch = await this.app.registry.get(LaunchService), processes = await launch.getGameProcesses()
         if (processes.some(process => process.options.gameDirectory === path)) throw new AnyError('InstanceRunningError')
         if (processes.length) {
