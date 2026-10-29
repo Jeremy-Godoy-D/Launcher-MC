@@ -11,3 +11,10 @@ export async function makeReactMod(path: string, name: string, title: string, me
   zip.end()
   await pipeline(zip.outputStream, createWriteStream(join(path, 'mods', `${name}.jar`)))
 }
+
+export async function makeReactResourcePack(path: string, name: string) {
+  await mkdir(join(path, 'resourcepacks'), { recursive: true })
+  const require = createRequire(new URL('../../xmcl-runtime/package.json', import.meta.url)), { ZipFile } = require('yazl'), zip = new ZipFile()
+  zip.addBuffer(Buffer.from(JSON.stringify({ pack: { pack_format: 34, description: `Synthetic resource pack ${name}` } })), 'pack.mcmeta'); zip.end()
+  await pipeline(zip.outputStream, createWriteStream(join(path, 'resourcepacks', `${name}.zip`)))
+}

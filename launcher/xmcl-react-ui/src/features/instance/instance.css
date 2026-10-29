@@ -92,6 +92,13 @@
   .packs-help { max-width: 75ch; line-height: 1.6; color: var(--muted); margin: 16px 0; }
   .pack-heading { margin: 24px 0 12px; }
   .pack-list { list-style: none; padding: 0; margin: 12px 0 24px; }
-  .pack-list li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .pack-list li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); }
   .pack-list .content-actions, .pack-list > li > .button { flex-shrink: 0; }
+}
+
+@layer components {
+  .pack-list input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
+  .pack-removal-files { list-style: none; padding: 0; margin: 0; }
+  .pack-removal-files li { display: grid; gap: 6px; overflow-wrap: anywhere; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .pack-removal-files span { color: var(--muted); font-size: 13px; }
 }

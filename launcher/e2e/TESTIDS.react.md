@@ -6,7 +6,7 @@ This file is the contract between the launcher UI in `xmcl-react-ui/` and the Pl
 
 Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testids` with the selected LAUNCHER_RENDERER. Computed IDs are not resolved by this static registry.
 
-**Total anchors:** 42 (in 31 Vue/TSX files)
+**Total anchors:** 42 (in 32 Vue/TSX files)
 
 | Test ID | Defined in |
 |---|---|
@@ -31,7 +31,7 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `instance-name` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L490`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L490) |
 | `instance-operation-confirm` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76)<br>[`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L159`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L159) |
 | `instance-operations` | [`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L62`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L62) |
-| `instance-resourcepacks` | [`xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L69`](../xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L69) |
+| `instance-resourcepacks` | [`xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L108`](../xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L108) |
 | `instance-workspace` | [`xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L30`](../xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L30) |
 | `launch-confirm` | [`xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157`](../xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157) |
 | `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L700`](../xmcl-react-ui/src/App.tsx#L700) |

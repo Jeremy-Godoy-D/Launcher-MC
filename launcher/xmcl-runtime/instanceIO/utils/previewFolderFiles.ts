@@ -10,7 +10,7 @@ import { instanceFileSource } from './instanceFileSource'
 const omitted = new Set(['assets', 'libraries', 'versions', 'jre', 'java_versions', 'logs', 'crash-reports', 'instance.json', 'launcher_profiles.json', 'launcher_settings.json', 'launcher_accounts.json', 'usercache.json', 'usernamecache.json', 'profile.json', 'minecraftinstance.json', 'instance.cfg', 'mmc-pack.json', 'user.json', 'accounts.json'])
 
 /** External imports reject all links; native instance operations may supply their own shared data root. */
-export async function previewFolderFiles(source: string, type?: InstanceType, options: { signal?: AbortSignal; sharedRoot?: string } = {}): Promise<InstanceFile[]> {
+export async function previewFolderFiles(source: string, type?: InstanceType, options: { signal?: AbortSignal; sharedRoot?: string; resourcePack?: boolean } = {}): Promise<InstanceFile[]> {
   options.signal?.throwIfAborted()
   if (!isAbsolute(source) || parse(source).root === source) throw new Error('Invalid import directory')
   if ((await lstat(source)).isSymbolicLink()) throw new Error('Import directory is a link')
@@ -29,7 +29,7 @@ export async function previewFolderFiles(source: string, type?: InstanceType, op
       if (++entries > 100000) throw new Error('Import directory is too large')
       const file = join(dir, entry)
       const name = prefix + entry
-      if (omitted.has(name.split('/')[0].toLowerCase()) || depth === 0 && /^instance\.json\.tmp-[a-f0-9]{16}$/i.test(name) || isInstanceInstallPath(name)) continue
+      if (!options.resourcePack && (omitted.has(name.split('/')[0].toLowerCase()) || depth === 0 && /^instance\.json\.tmp-[a-f0-9]{16}$/i.test(name) || isInstanceInstallPath(name))) continue
       let info = await lstat(file), actual = await realpath(file), branch = anchor
       if (info.isSymbolicLink()) {
         if (depth !== 0 || !options.sharedRoot) throw new Error('Import contains a link outside its source')
