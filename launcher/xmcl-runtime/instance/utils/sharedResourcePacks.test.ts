@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { copyFile, lstat, mkdir, mkdtemp, readFile, readdir, realpath, rm, symlink, writeFile } from 'node:fs/promises'
 import { join, parse } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -16,18 +16,19 @@ vi.mock('fs-extra', async original => {
 })
 import { applyResourcePackSharing, previewResourcePackSharing } from './sharedResourcePacks'
 
+describe.each(['resourcepacks', 'shaderpacks'] as const)('%s sharing', domain => {
 let root: string, path: string, local: string, global: string
 beforeEach(async () => {
   publication.source = ''; publication.target = ''; publication.failures = 0
-  root = await realpath(await mkdtemp(join(tmpdir(), 'grimo-shared-packs-'))); path = join(root, 'instance'); local = join(path, 'resourcepacks'); global = join(root, 'resourcepacks')
+  root = await realpath(await mkdtemp(join(tmpdir(), 'grimo-shared-packs-'))); path = join(root, 'instance'); local = join(path, domain); global = join(root, domain)
   await mkdir(local, { recursive: true }); await mkdir(global)
   await writeFile(join(local, 'a.zip'), 'LOCAL PACK'); await writeFile(join(global, 'b.zip'), 'SHARED PACK')
   await mkdir(join(local, 'folder/empty'), { recursive: true }); await writeFile(join(local, 'folder/pack.mcmeta'), 'pack metadata')
   await writeFile(join(path, 'options.txt'), 'resourcePacks:["vanilla","file/a.zip"]\r\nlang:es_es\r\n')
 })
 afterEach(async () => { vi.restoreAllMocks(); await rm(root, { recursive: true, force: true }) })
-const preview = (shared: boolean) => previewResourcePackSharing(path, shared, root)
-const apply = (review: Awaited<ReturnType<typeof preview>>) => applyResourcePackSharing(path, review, root)
+const preview = (shared: boolean) => previewResourcePackSharing(path, shared, root, domain)
+const apply = (review: Awaited<ReturnType<typeof preview>>) => applyResourcePackSharing(path, review, root, domain)
 
 it('previews without writes, then merges independent copies with a backup and preserves names, options and empty folders', async () => {
   const options = await readFile(join(path, 'options.txt')), review = await preview(true)
@@ -101,10 +102,11 @@ it('restores the common link and retains the private copy if publishing that cop
   expect(await readFile(join(global, 'b.zip'), 'utf8')).toBe('SHARED PACK')
 })
 it('rejects overlapping roots and invalid or forged choices', async () => {
-  await expect(previewResourcePackSharing(root, true, root)).rejects.toThrow('Overlapping')
+  await expect(previewResourcePackSharing(root, true, root, domain)).rejects.toThrow('Overlapping')
   await expect(preview('yes' as any)).rejects.toThrow('Invalid sharing choice')
+  await expect(previewResourcePackSharing(path, true, root, 'mods' as any)).rejects.toThrow('Invalid pack domain')
   await expect(apply({ ...await preview(true), shared: false })).rejects.toHaveProperty('name', 'ResourcePacksChangedError')
-  await expect(previewResourcePackSharing(path, true, parse(root).root)).rejects.toThrow('Unsafe shared root')
+  await expect(previewResourcePackSharing(path, true, parse(root).root, domain)).rejects.toThrow('Unsafe shared root')
 })
 it('fails closed when the checksum helper cannot read bytes', async () => {
   for (const value of [null, undefined]) {
@@ -118,11 +120,13 @@ it('fails closed when the checksum helper cannot read bytes', async () => {
 it('injects a publication failure when the caller uses a parent-directory alias', async () => {
   const alias = join(root, 'parent-alias'); await symlink(root, alias, 'junction')
   try {
-    const aliasedInstance = join(alias, 'instance'), review = await previewResourcePackSharing(aliasedInstance, true, alias)
+    const aliasedInstance = join(alias, 'instance'), review = await previewResourcePackSharing(aliasedInstance, true, alias, domain)
     publication.source = 'link'; publication.target = local
-    await expect(applyResourcePackSharing(aliasedInstance, review, alias)).rejects.toHaveProperty('name', 'ResourcePackSharingIncompleteError')
+    await expect(applyResourcePackSharing(aliasedInstance, review, alias, domain)).rejects.toHaveProperty('name', 'ResourcePackSharingIncompleteError')
     expect(publication.failures).toBe(1)
     expect((await lstat(local)).isSymbolicLink()).toBe(false)
     expect(await readFile(join(local, 'a.zip'), 'utf8')).toBe('LOCAL PACK')
   } finally { await rm(alias) }
+})
+
 })

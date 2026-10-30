@@ -45,10 +45,11 @@ function contains(parent: string, path: string) {
   const value = relative(parent, path)
   return value !== '..' && !value.startsWith('..' + sep) && !isAbsolute(value)
 }
-async function plan(path: string, shared: boolean, sharedRoot: string) {
+async function plan(path: string, shared: boolean, sharedRoot: string, domain: 'resourcepacks' | 'shaderpacks') {
   if (typeof shared !== 'boolean') throw new Error('Invalid sharing choice')
-  const mapped = await instanceFileSource(path, 'resourcepacks', sharedRoot, true), instance = await realpath(path), globalRoot = await realpath(sharedRoot)
-  const local = join(instance, 'resourcepacks'), global = join(globalRoot, 'resourcepacks'), linked = mapped.root !== instance
+  if (domain !== 'resourcepacks' && domain !== 'shaderpacks') throw new Error('Invalid pack domain')
+  const mapped = await instanceFileSource(path, domain, sharedRoot, true), instance = await realpath(path), globalRoot = await realpath(sharedRoot)
+  const local = join(instance, domain), global = join(globalRoot, domain), linked = mapped.root !== instance
   if (parse(globalRoot).root === globalRoot) throw new Error('Unsafe shared root')
   if (contains(local, global) || contains(global, local)) throw new Error('Overlapping pack roots')
   await assertInstallDirectory(globalRoot, global)
@@ -63,8 +64,8 @@ async function plan(path: string, shared: boolean, sharedRoot: string) {
   const review: ResourcePackSharingReview = { snapshot: digest([shared, linked, local, global, link && [link.ino, link.dev], localTree, globalTree]), shared, linked, localPacks: localNames.length, sharedPacks: globalNames.length, files: shared === linked ? 0 : copying.filter(entry => !entry.directory).length, bytes: shared === linked ? 0 : copying.reduce((size, entry) => size + entry.size, 0), conflicts }
   return { review, instance, local, global, globalRoot, localTree, globalTree, copy }
 }
-export async function previewResourcePackSharing(path: string, shared: boolean, root: string) {
-  return (await plan(path, shared, root)).review
+export async function previewResourcePackSharing(path: string, shared: boolean, root: string, domain: 'resourcepacks' | 'shaderpacks' = 'resourcepacks') {
+  return (await plan(path, shared, root, domain)).review
 }
 async function copyEntries(source: string, target: string, entries: Entry[]) {
   for (const entry of entries) {
@@ -78,13 +79,13 @@ async function copyEntries(source: string, target: string, entries: Entry[]) {
   }
 }
 const contents = (entries: Entry[]) => digest([...entries].sort((a, b) => a.path.localeCompare(b.path)))
-export async function applyResourcePackSharing(path: string, review: ResourcePackSharingReview, root: string): Promise<{ backup?: string }> {
+export async function applyResourcePackSharing(path: string, review: ResourcePackSharingReview, root: string, domain: 'resourcepacks' | 'shaderpacks' = 'resourcepacks'): Promise<{ backup?: string }> {
   if (!review || typeof review.snapshot !== 'string' || !/^[a-f0-9]{64}$/.test(review.snapshot)) throw changed()
-  const current = await plan(path, review.shared, root)
+  const current = await plan(path, review.shared, root, domain)
   if (current.review.snapshot !== review.snapshot) throw changed()
   if (current.review.conflicts.length) throw Object.assign(new Error('Conflicting shared pack names'), { name: 'ResourcePackCollisionError' })
   if (review.shared === current.review.linked) return {}
-  const backup = join(current.instance, '.backups', `resourcepacks-share-${randomUUID()}`)
+  const backup = join(current.instance, '.backups', `${domain}-share-${randomUUID()}`)
   await assertInstallDirectory(current.instance, backup); await mkdir(backup, { recursive: true }); await assertInstallDirectory(current.instance, backup)
   try {
     if (review.shared) {
@@ -100,7 +101,7 @@ export async function applyResourcePackSharing(path: string, review: ResourcePac
     } else {
       const privateCopy = join(backup, 'private'); await mkdir(privateCopy)
       await copyEntries(current.global, privateCopy, current.globalTree.entries)
-      if ((await plan(path, false, root)).review.snapshot !== current.review.snapshot) throw changed()
+      if ((await plan(path, false, root, domain)).review.snapshot !== current.review.snapshot) throw changed()
       await unlink(current.local)
       await move(privateCopy, current.local, { overwrite: false })
     }

@@ -14,6 +14,7 @@ vi.mock('../instanceIO/utils/instanceFileSource', () => ({ instanceFileSource: v
 vi.mock('./utils/localMods', () => ({ readModFilesSnapshot: vi.fn() }))
 vi.mock('./utils/localResourcePacks', () => ({ installLocalResourcePacks: vi.fn(async () => ['installed']) }))
 vi.mock('./utils/localShaders', () => ({ previewShaderRemoval: vi.fn(), removeReviewedShaders: vi.fn(async () => ({ backup: 'backup' })) }))
+vi.mock('./utils/sharedResourcePacks', () => ({ previewResourcePackSharing: vi.fn(async () => ({ snapshot: 'b'.repeat(64), shared: true })), applyResourcePackSharing: vi.fn(async () => ({})) }))
 vi.mock('./utils/shaderSelection', () => ({ readShaderSelection: vi.fn(), writeShaderSelection: vi.fn() }))
 const { InstanceShaderPacksService } = await import('./InstanceShaderPacksService')
 const { InstanceService } = await import('./InstanceService'), { LaunchService } = await import('../launch/LaunchService')
@@ -22,10 +23,13 @@ const { readModFilesSnapshot } = await import('./utils/localMods'), { instanceFi
 const { readShaderSelection, writeShaderSelection } = await import('./utils/shaderSelection')
 const { installLocalResourcePacks } = await import('./utils/localResourcePacks')
 const { previewShaderRemoval, removeReviewedShaders } = await import('./utils/localShaders')
+const { previewResourcePackSharing, applyResourcePackSharing } = await import('./utils/sharedResourcePacks')
+let pause: ReturnType<typeof vi.fn>, resume: ReturnType<typeof vi.fn>, revalidate: ReturnType<typeof vi.fn>
 const runtime = RuntimeVersionsSchema.parse({ minecraft: '1.21.1', fabricLoader: '0.16' })
 let instances: any[], processes: any[], files: any[], lock: Mutex, of: ReturnType<typeof vi.fn>, service: InstanceType<typeof InstanceShaderPacksService>
 const change = { snapshot: 'a'.repeat(64), engine: 'iris', pack: 'New.zip', enabled: true } as const
 beforeEach(() => {
+  pause = vi.fn(async () => {}); resume = vi.fn(); revalidate = vi.fn(async () => {})
   vi.clearAllMocks(); instances = [{ path: 'managed', edition: 'java', runtime, java: '', version: '' }]; processes = []; lock = new Mutex(); const global = new Mutex()
   of = vi.fn(key => key === 'resource-pack-options' ? global : lock)
   files = [{ path: 'managed/mods/iris.jar', fileName: 'iris.jar', metadata: { fabric: { schemaVersion: 1, id: 'iris', name: 'Iris', version: '1.0' } }, hash: 'c'.repeat(40), size: 10, ino: 1, mtime: 2, ctime: 3 }]
@@ -34,14 +38,14 @@ beforeEach(() => {
     if (key === InstanceService) return { initialize: async () => {}, state: { get instances() { return instances } } }
     if (key === LaunchService) return { getGameProcesses: async () => processes }
     if (key === kGameDataPath) return () => 'shared-root'
-    if (key === kResourceManager) return { getWatched: () => ({ state: { files } }) }
+    if (key === kResourceManager) return { getWatched: () => ({ state: { files }, pause, resume, revalidate }) }
     throw new Error('Unexpected registry access')
   } } }; service = new InstanceShaderPacksService(app as any)
 })
 it('rejects unregistered and non-Java reads, writes and watchers before touching files', async () => {
   for (const edition of ['missing', 'bedrock']) {
     instances = edition === 'missing' ? [] : [{ path: 'managed', edition }]
-    for (const action of [() => service.getSelection('managed'), () => service.setSelection('managed', change), () => service.watch('managed'), () => service.install({ path: 'managed', files: [] }), () => service.showDirectory('managed'), () => service.previewRemoval('managed', ['New.zip']), () => service.removeReviewed('managed', {} as any), () => service.uninstall({ path: 'managed', files: [] })]) await expect(action()).rejects.toHaveProperty('name', 'InstanceNotFoundError')
+    for (const action of [() => service.getSelection('managed'), () => service.setSelection('managed', change), () => service.watch('managed'), () => service.install({ path: 'managed', files: [] }), () => service.showDirectory('managed'), () => service.previewRemoval('managed', ['New.zip']), () => service.removeReviewed('managed', {} as any), () => service.uninstall({ path: 'managed', files: [] }), () => service.previewSharing('managed', true), () => service.applySharing('managed', {} as any), () => service.linkShared('managed'), () => service.unlinkShared('managed')]) await expect(action()).rejects.toHaveProperty('name', 'InstanceNotFoundError')
   }
   expect(readShaderSelection).not.toHaveBeenCalled(); expect(writeShaderSelection).not.toHaveBeenCalled(); expect(lstat).not.toHaveBeenCalled()
 })
@@ -107,4 +111,31 @@ it('keeps legacy uninstall names but routes them through the reviewed backup ope
 it('rejects unmanaged legacy uninstall paths and keeps an empty request a no-op', async () => {
   for (const files of [['../other.zip'], ['nested/file.zip'], ['C:\\foreign\\file.zip'], [undefined]]) await expect(service.uninstall({ path: 'managed', files } as any)).rejects.toThrow()
   await service.uninstall({ path: 'managed', files: [] }); expect(previewShaderRemoval).not.toHaveBeenCalled(); expect(removeReviewedShaders).not.toHaveBeenCalled()
+})
+
+
+it('routes legacy shader links through reviewed copies and rebinds the existing watched state', async () => {
+  await service.linkShared('managed'); await service.unlinkShared('managed')
+  expect(previewResourcePackSharing).toHaveBeenNthCalledWith(1, 'managed', true, 'shared-root', 'shaderpacks')
+  expect(previewResourcePackSharing).toHaveBeenNthCalledWith(2, 'managed', false, 'shared-root', 'shaderpacks')
+  expect(applyResourcePackSharing).toHaveBeenCalledTimes(2); expect(pause).toHaveBeenCalledTimes(2); expect(resume).toHaveBeenCalledTimes(2); expect(revalidate).toHaveBeenCalledTimes(2)
+})
+it('blocks changing shared shaders while either this game or another linked game is running', async () => {
+  processes = [{ options: { gameDirectory: 'managed' } }]
+  await expect(service.applySharing('managed', {} as any)).rejects.toHaveProperty('name', 'InstanceRunningError')
+  processes = [{ options: { gameDirectory: 'other' } }]; vi.spyOn(service, 'isLinked').mockImplementation(async path => path === 'other')
+  await expect(service.linkShared('managed')).rejects.toHaveProperty('name', 'SharedOptionsRunningError')
+  expect(pause).not.toHaveBeenCalled(); expect(applyResourcePackSharing).not.toHaveBeenCalled()
+})
+it('allows private shader changes while another unrelated private game runs', async () => {
+  processes = [{ options: { gameDirectory: 'other' } }]
+  await service.linkShared('managed'); expect(applyResourcePackSharing).toHaveBeenCalledWith('managed', expect.anything(), 'shared-root', 'shaderpacks')
+})
+it('restores shader observation after closing or copying fails', async () => {
+  pause.mockRejectedValueOnce(new Error('Close failed'))
+  await expect(service.applySharing('managed', {} as any)).rejects.toThrow('Close failed')
+  expect(resume).toHaveBeenCalledOnce(); expect(applyResourcePackSharing).not.toHaveBeenCalled()
+  vi.mocked(applyResourcePackSharing).mockRejectedValueOnce(new Error('Copy failed'))
+  await expect(service.applySharing('managed', {} as any)).rejects.toThrow('Copy failed')
+  expect(resume).toHaveBeenCalledTimes(2); expect(revalidate).toHaveBeenCalledTimes(2)
 })

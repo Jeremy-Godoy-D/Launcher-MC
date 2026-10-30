@@ -18,6 +18,8 @@ import { readShaderSelection, writeShaderSelection } from './utils/shaderSelecti
 import { installLocalResourcePacks } from './utils/localResourcePacks'
 import { previewShaderRemoval, removeReviewedShaders } from './utils/localShaders'
 import { importPathParts } from '../util/importFile'
+import type { ResourcePackSharingReview } from '@xmcl/runtime-api/src/services/InstanceResourcePacksService'
+import { applyResourcePackSharing, previewResourcePackSharing } from './utils/sharedResourcePacks'
 
 @ExposeServiceKey(InstanceShaderPacksServiceKey)
 export class InstanceShaderPacksService extends AbstractInstanceDomainService implements IInstanceShaderPacksService {
@@ -49,10 +51,29 @@ export class InstanceShaderPacksService extends AbstractInstanceDomainService im
     return { engines: getShaderEngines(instance.runtime, files), metadataPending: files.length !== active.length,
       fingerprint: createHash('sha256').update(JSON.stringify([configuration, inventory.fingerprint, files.map(file => [file.path, file.hash])])).digest('hex') }
   }
-  async #filesIdle(path: string) {
+  async #filesIdle(path: string, sharing = false) {
     const launch = await this.app.registry.get(LaunchService), processes = await launch.getGameProcesses()
     if (processes.some(process => process.options.gameDirectory === path)) throw new AnyError('InstanceRunningError')
-    if (processes.length && await this.isLinked(path) && (await Promise.all(processes.map(process => this.isLinked(process.options.gameDirectory)))).some(Boolean)) throw new AnyError('SharedOptionsRunningError')
+    if (processes.length && (sharing || await this.isLinked(path)) && (await Promise.all(processes.map(process => this.isLinked(process.options.gameDirectory)))).some(Boolean)) throw new AnyError('SharedOptionsRunningError')
+  }
+  async previewSharing(path: string, shared: boolean) {
+    return this.#read(path, root => previewResourcePackSharing(path, shared, root, 'shaderpacks'))
+  }
+  async #applySharing(path: string, review: ResourcePackSharingReview, root: string) {
+    await this.#filesIdle(path, true)
+    const manager = await this.app.registry.get(kResourceManager), watched = manager.getWatched(join(path, 'shaderpacks'))
+    // Release Windows directory handles before rebinding the same watched state.
+    try { await watched?.pause(); return await applyResourcePackSharing(path, review, root, 'shaderpacks') }
+    finally { watched?.resume(); await watched?.revalidate().catch(error => this.warn(error)) }
+  }
+  async applySharing(path: string, review: ResourcePackSharingReview) {
+    return this.#read(path, root => this.#applySharing(path, review, root))
+  }
+  async linkShared(path: string) {
+    await this.#read(path, async root => this.#applySharing(path, await previewResourcePackSharing(path, true, root, 'shaderpacks'), root))
+  }
+  async unlinkShared(path: string) {
+    await this.#read(path, async root => this.#applySharing(path, await previewResourcePackSharing(path, false, root, 'shaderpacks'), root))
   }
   async install({ path, files }: UpdateInstanceResourcesOptions) {
     const installed = await this.#read(path, async root => {

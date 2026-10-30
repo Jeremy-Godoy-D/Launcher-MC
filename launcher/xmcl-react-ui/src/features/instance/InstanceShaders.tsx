@@ -14,6 +14,8 @@ import { ShaderDetails } from './ShaderDetails'
 import { useContentGroups } from './useContentGroups'
 import { ContentGroupsEditor } from './ContentGroupsEditor'
 import { assignContentGroup, contentGroupMemberships } from './contentGroups'
+import type { ResourcePackSharingReview } from '@xmcl/runtime-api/src/services/InstanceResourcePacksService'
+import { SharePacksDialog } from './SharePacksDialog'
 
 export function InstanceShaders({ path, running, runtime }: { path: string; running: boolean; runtime: SavedInstance['runtime'] }) {
   const { t, n } = useI18n(), service = useService(InstanceShaderPacksServiceKey), base = useService(BaseServiceKey)
@@ -26,6 +28,7 @@ export function InstanceShaders({ path, running, runtime }: { path: string; runn
   const [selection, setSelection] = useState<ShaderPackSelection | null>(null), [query, setQuery] = useState(''), [working, setWorking] = useState(false), [reading, setReading] = useState(false)
   const [error, setError] = useState(''), [notice, setNotice] = useState('')
   const [selected, setSelected] = useState<string[]>([]), [removal, setRemoval] = useState<ShaderRemovalReview | null>(null), [backup, setBackup] = useState('')
+  const [sharing, setSharing] = useState<ResourcePackSharingReview | null>(null), shareButton = useRef<HTMLButtonElement>(null)
   const alive = useRef(true), request = useRef(0), operation = useRef(false), panel = useRef<HTMLElement>(null), focusAfter = useRef<HTMLButtonElement | HTMLInputElement | null>(null)
   const search = useRef<HTMLInputElement>(null), removeButton = useRef<HTMLButtonElement>(null)
   usePanelFocus(panel)
@@ -112,6 +115,39 @@ export function InstanceShaders({ path, running, runtime }: { path: string; runn
     try { if (!await base.openDirectory(backup)) throw new Error('Missing backup') }
     catch { if (alive.current) setError(t('react.workspace.folderFailed')) }
   }
+  function sharingFailure(error: unknown) {
+    const name = error && typeof error === 'object' && 'name' in error ? error.name : ''
+    return t(name === 'ResourcePacksChangedError' ? 'react.shaders.removeChanged' : name === 'ResourcePackSharingIncompleteError' ? 'react.shaderSharing.incomplete' : name === 'InstanceRunningError' ? 'react.content.running' : name === 'SharedOptionsRunningError' ? 'react.shaders.sharedRunning' : 'react.shaderSharing.failed')
+  }
+  async function reviewSharing() {
+    if (operation.current || fileBusy || running || !selection) return
+    operation.current = true; setWorking(true); setError(''); setNotice(''); setBackup('')
+    try { const review = await service.previewSharing(path, !selection.shared); if (alive.current) setSharing(review) }
+    catch (error) { if (alive.current) { setError(sharingFailure(error)); focusAfter.current = shareButton.current } }
+    finally { operation.current = false; if (alive.current) setWorking(false) }
+  }
+  async function applySharing() {
+    if (operation.current || !sharing || running) return
+    operation.current = true; setWorking(true); setError(''); setNotice('')
+    try {
+      const result = await service.applySharing(path, sharing)
+      if (!alive.current) return
+      if (result.backup) setBackup(result.backup)
+      setSharing(null); setSelected([]); setDetailsPath('')
+      await shaders.revalidate(); await read()
+      if (alive.current) setNotice(t(sharing.shared ? 'react.shaderSharing.linked' : 'react.shaderSharing.unlinked'))
+    } catch (error) {
+      if (alive.current) {
+        setError(sharingFailure(error))
+        if (error && typeof error === 'object' && 'name' in error && error.name === 'ResourcePackSharingIncompleteError') setBackup('backup' in error && typeof error.backup === 'string' ? error.backup : path + '/.backups')
+      }
+    } finally { operation.current = false; if (alive.current) setWorking(false) }
+  }
+  function returnSharingFocus() {
+    const target = shareButton.current
+    if (target && !target.disabled) { focusAfter.current = null; target.focus() }
+    else { focusAfter.current = target; search.current?.focus() }
+  }
   async function assignGroups() {
     if (operation.current || !groupReady || !selected.length || editingGroups) return
     operation.current = true; setWorking(true); setError(''); setNotice('')
@@ -143,6 +179,7 @@ export function InstanceShaders({ path, running, runtime }: { path: string; runn
       <button className="button primary" disabled={fileBusy || running || !window.windowController?.showOpenDialog} onClick={event => void add(false, event.currentTarget)}><Plus size={17} aria-hidden="true" />{t('react.content.add')}</button>
       <button className="button secondary" disabled={fileBusy || running || !window.windowController?.showOpenDialog} onClick={event => void add(true, event.currentTarget)}>{t('react.packs.addFolder')}</button>
       <button className="button secondary" disabled={blocked} onClick={() => void service.showDirectory(path).catch(() => { if (alive.current) setError(t('react.workspace.folderFailed')) })}><FolderOpen size={17} aria-hidden="true" />{t('react.shaders.folder')}</button>
+      <button ref={shareButton} className="button secondary" disabled={fileBusy || running || !selection} onClick={() => void reviewSharing()}>{t(selection?.shared ? 'react.shaderSharing.unlink' : 'react.shaderSharing.link')}</button>
       <button ref={manageGroups} className="button secondary" disabled={blocked || !groupReady} aria-expanded={editingGroups} onClick={() => { setDetailsPath(''); setEditingGroups(true) }}>{t('react.contentGroups.manage')}</button>
       <button className="button secondary" disabled={blocked} onClick={() => void refresh()}><RefreshCw size={17} aria-hidden="true" />{t('react.content.refresh')}</button>
     </div></div>
@@ -163,7 +200,7 @@ export function InstanceShaders({ path, running, runtime }: { path: string; runn
     {selection?.pack && !activePresent && <p role="status" className="packs-help">{t('react.shaders.missing', { name: selection.pack })}</p>}
     {selection?.engine && selection.enabled && <button className="button secondary" disabled={busy || running || editingGroups} onClick={event => void select(selection.pack, false, event.currentTarget)}>{t('react.shaders.disableAll')}</button>}
     {!!selected.length && <div className="content-selection" role="group" aria-label={t('react.shaders.selection')}><span>{t('react.content.selected', { count: selected.length })}</span><button className="button secondary" disabled={blocked} onClick={() => setSelected([])}>{t('react.content.clear')}</button><button ref={removeButton} className="button secondary" disabled={fileBusy || running} onClick={() => void reviewRemoval()}><Trash2 size={17} aria-hidden="true" />{t('react.packs.remove')}</button><select aria-label={t('react.shaders.groupAssignment')} value={assignTo} disabled={blocked || !groupReady} onChange={event => setAssignTo(event.target.value)}><option value="">{t('react.contentGroups.none')}</option>{Object.keys(groups).map(name => <option key={name} value={`name:${name}`}>{name}</option>)}</select><button className="button secondary" disabled={blocked || !groupReady} onClick={() => void assignGroups()}>{t('react.contentGroups.assign')}</button></div>}
-    {backup && !removal && <p className="instance-path">{t('react.packs.backup')}: {backup} <button className="button secondary" disabled={working} onClick={() => void openBackup()}>{t('react.packs.openBackup')}</button></p>}
+    {backup && !removal && !sharing && <p className="instance-path">{t('react.packs.backup')}: {backup} <button className="button secondary" disabled={working} onClick={() => void openBackup()}>{t('react.packs.openBackup')}</button></p>}
     {snapshot.status === 'ready' && !files.length && !broken.some(matches) && <p>{t(query || groupFilter !== 'all' ? 'react.shaders.noMatches' : 'react.shaders.empty')}</p>}
     <ul className="pack-list">{files.map(file => {
       const enabled = selection?.pack === file.fileName && selection.enabled
@@ -171,5 +208,6 @@ export function InstanceShaders({ path, running, runtime }: { path: string; runn
         <button className="button secondary" disabled={busy || running || !selection?.engine || editingGroups} aria-pressed={!!enabled} aria-label={t(enabled ? 'react.shaders.disableName' : 'react.shaders.enableName', { name: file.fileName })} onClick={event => void select(file.fileName, !enabled, event.currentTarget)}>{t(enabled ? 'react.shaders.disable' : 'react.shaders.enable')}</button></li>
     })}</ul>
     {removal && <RemoveShadersDialog review={removal} busy={working} error={error} backup={backup} openBackup={() => void openBackup()} close={() => { setRemoval(null); setError('') }} returnFocus={() => (removeButton.current?.isConnected && !removeButton.current.disabled ? removeButton.current : search.current)?.focus()} remove={() => void removeFiles()} />}
+    {sharing && <SharePacksDialog shaders review={sharing} busy={working} error={error} close={() => { setSharing(null); setError('') }} returnFocus={returnSharingFocus} apply={() => void applySharing()} />}
   </section>
 }
