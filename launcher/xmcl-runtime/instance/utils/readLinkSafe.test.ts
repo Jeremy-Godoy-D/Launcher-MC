@@ -27,3 +27,9 @@ it('preserves the intentional target of a dangling junction without accepting a 
   await symlink(target, link, 'junction'); await rm(target, { recursive: true })
   expect(await isLinkTo(link, target)).toBe(true); expect(await isLinkTo(link, join(root, 'other-missing'))).toBe(false)
 })
+
+it.skipIf(process.platform !== 'win32')('recognizes differently cased parent aliases without accepting a foreign target', async () => {
+  await symlink(target, link, 'junction'); await symlink(join(root, 'physical'), alias, 'junction')
+  expect(await isLinkTo(link, join(alias, 'resourcepacks').toUpperCase())).toBe(true)
+  expect(await isLinkTo(link, join(alias, 'other').toUpperCase())).toBe(false)
+})

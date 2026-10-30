@@ -18,3 +18,19 @@ export async function makeReactResourcePack(path: string, name: string, descript
   zip.addBuffer(Buffer.from(JSON.stringify({ pack: { pack_format: format, description } })), 'pack.mcmeta'); zip.end()
   await pipeline(zip.outputStream, createWriteStream(join(path, 'resourcepacks', `${name}.zip`)))
 }
+
+export async function makeReactShaderPack(path: string, name: string) {
+  await mkdir(join(path, 'shaderpacks'), { recursive: true })
+  const require = createRequire(new URL('../../xmcl-runtime/package.json', import.meta.url)), { ZipFile } = require('yazl'), zip = new ZipFile()
+  zip.addBuffer(Buffer.from('# Synthetic shader fixture\n'), 'shaders/shaders.properties')
+  zip.addBuffer(Buffer.from('#version 150\nvoid main() {}\n'), 'shaders/final.fsh'); zip.end()
+  await pipeline(zip.outputStream, createWriteStream(join(path, 'shaderpacks', `${name}.zip`)))
+}
+
+export async function makeReactForgeShaderEngine(path: string, engine: 'oculus' | 'iris') {
+  await mkdir(join(path, 'mods'), { recursive: true })
+  const require = createRequire(new URL('../../xmcl-runtime/package.json', import.meta.url)), { ZipFile } = require('yazl'), zip = new ZipFile()
+  const metadata = `modLoader="javafml"\nloaderVersion="[1,)"\nlicense="MIT"\n[[mods]]\nmodId="${engine}"\nversion="1.0.0"\ndisplayName="${engine}"\n`
+  zip.addBuffer(Buffer.from(metadata), engine === 'iris' ? 'META-INF/neoforge.mods.toml' : 'META-INF/mods.toml'); zip.end()
+  await pipeline(zip.outputStream, createWriteStream(join(path, 'mods', `${engine}.jar`)))
+}

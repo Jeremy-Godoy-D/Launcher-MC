@@ -102,3 +102,7 @@
   .pack-removal-files li { display: grid; gap: 6px; overflow-wrap: anywhere; padding: 12px 0; border-bottom: 1px solid var(--line); }
   .pack-removal-files span { color: var(--muted); font-size: 13px; }
 }
+
+@layer components {
+  .shader-list li { grid-template-columns: minmax(0, 1fr) auto; }
+}

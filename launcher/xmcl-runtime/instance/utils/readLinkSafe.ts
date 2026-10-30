@@ -1,6 +1,7 @@
 import { isSystemError } from '@xmcl/utils'
-import { readlink, realpath } from 'fs-extra'
-import { resolve } from 'path'
+import { readlink } from 'fs-extra'
+import { realpath } from 'node:fs/promises'
+import { relative, resolve } from 'path'
 import { ENOENT_ERROR } from '../../util/fs'
 
 export function readlinkSafe(path: string) {
@@ -32,6 +33,6 @@ export function normalizeLinkTarget(target: string) {
 export async function isLinkTo(linkPath: string, target: string) {
   const actual = await readlinkSafe(linkPath).catch(() => '')
   if (!actual) return false
-  if (normalizeLinkTarget(actual) === normalizeLinkTarget(target)) return true
-  try { return await realpath(linkPath) === await realpath(target) } catch { return false }
+  if (relative(normalizeLinkTarget(actual), normalizeLinkTarget(target)) === '') return true
+  try { return relative(await realpath(linkPath), await realpath(target)) === '' } catch { return false }
 }

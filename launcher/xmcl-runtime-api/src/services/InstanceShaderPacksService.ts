@@ -1,7 +1,26 @@
 import { InstanceResourcesService } from './InstanceResourcesService'
 import { ServiceKey } from './Service'
 
+export type ShaderEngine = 'optifine' | 'iris' | 'oculus'
+export interface ShaderPackSelection {
+  snapshot: string
+  engines: ShaderEngine[]
+  engine: ShaderEngine | null
+  pack: string
+  enabled: boolean
+  shared: boolean
+  metadataPending: boolean
+}
+export interface ShaderSelectionChange {
+  snapshot: string
+  engine: ShaderEngine
+  pack: string
+  enabled: boolean
+}
+
 export interface InstanceShaderPacksService extends InstanceResourcesService {
+  getSelection(instancePath: string): Promise<ShaderPackSelection>
+  setSelection(instancePath: string, change: ShaderSelectionChange): Promise<ShaderPackSelection>
   /**
    * Whether the instance's `shaderpacks` folder is linked to the global shared folder.
    */
