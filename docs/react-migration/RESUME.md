@@ -6,16 +6,15 @@ Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio
 
 ## Bloque actual
 
-Etapa5 activa. Retirada revisada de shaders f7567ad y fixtures8302808 implementadas:937unitarias/96archivos,tipos/lint;24NativeReact+5Vue aprobados,6Axe retirada0violaciones/13incomplete. Backups preservan shaders/configuraciones;legacy espera Native. CI40985586565/dd7d8ee aprobado para importación;40985785465/c7238a5 falló48 y tuvo12flaky. Fixtures corregidas y focales aprobadas;verificar CI nuevo tras push. Próximo:información/grupos,compartidos/updates de shaders;mundos/ajustes/consola y etapas6–9. K08/K09/K10 y gates5 pendientes. Vue default,PR4 borrador,producción/proxy intactos,Microsoft pospuesto. Respetar archivos/limpiezas protegidos.
+Etapa 5 activa. Información y grupos de shaders 4470ad7 completos: 939 unitarias/97 archivos, check/lint; 28 recorridos Native React y 8 Axe nuevos sin violaciones/14 incomplete. CSS de grupos largos corregido con fallo previo reproducido. CI40989902958/72eb840 aprobó React/Vue para el bloque anterior; consultar CI nuevo tras push. Próximo: compartidos/updates de shaders, mundos/ajustes/consola; etapas6–9. K08/K09/K10 y gates5 pendientes. Vue default/dist restaurados; PR4 borrador, producción/proxy intactos, Microsoft pospuesto. Respetar archivos/limpiezas protegidos.
 
 ## Siguiente acción
 
-1. Consultar CI nuevo después del push.40985586565/dd7d8ee aprobó importación;40985785465/c7238a5 falló48y12flaky.8302808 añade barreras de revisión en48 y sustituye solo un assert observer de12 por geometría/clipping sin relajar sus requisitos.24NativeReact y focal48 finales pasan;no inferir CI verde del run anterior.
-2. Continuar información/grupos de shaders con los controles/servicios existentes;después gestión segura de compartidos/updates. Retirada Native/React y contrato legacy ya están probados;no rehacerlos. El flujo de copias y sus límites están en STAGE5-SHADER-REMOVAL.md.
-3. Después mundos,ajustes,consola;catálogo6,superficies7,retirada8 y validación/publicación9. K08/K09/K10 y las tres gates5 se mantienen pending hasta aceptación integral.
-4. Último bloque:fuente f7567ad/fixtures8302808,937unidades/96archivos,check/lint;24escenarios React y5Vue en hosts actuales.6Axe retirada0violaciones/13incomplete;E2E56previos idénticos. Ambos renderers/hosts reconstruidos y dist/default Vue. No sumar conteos de bloques sin descontar solapamientos. Pruebas Electron secuenciales y sin builds simultáneos;unidades completas sin carga de compilación/Electron.
-5.54 verifica backup de bytes/configuraciones,cancelación,stale,ZIP ilegible,rename Native fallido con backup/reintento,y directorio común;55 verifica contrato Native legacy en host Vue,no un recorrido completo de la pantalla antigua. Configuraciones respaldadas antes de desactivar;shaders movidos luego bajo .backups/shaderpacks-UUID/shaderpacks. Errores/rutas están dentro del scroll del diálogo para no tapar el footer en800×400.
-6. No recorrer ni limpiar sharing-temp-alias. No tocar ANALISIS_ARQUITECTURA.md,DevTools/CDP ni limpiezas protegidas. Microsoft pospuesto;producción/proxy intactos;PR4 borrador. Java/juego/NSIS/delta y presupuestos finales pendientes.
+1. Consultar CI del nuevo push. CI40989902958/72eb840 aprobado:147React+1Strict+5Vue,937unidades por job;dos pruebas vivas omitidas. Confirma fixtures8302808;no inferir verde para la nueva fuente.
+2. Implementar compartidos/updates de shaders reutilizando los flujos revisados de packs/instalador. Información/grupos ya están implementados y probados;ver STAGE5-SHADER-INFORMATION-GROUPS.md.
+3. Después mundos,ajustes y consola;catálogo6,superficies7,retirada8 y validación/publicación9. K08/K09/K10 y gates5 siguen pending.
+4. Fuente4470ad7:939unidades/97archivos,check/lint,28NativeReact32/47/52/53/54/56.8Axe nuevos0violaciones/14incomplete;56diagnósticos E2E previos idénticos. EXEReact construido y distVue restaurado;runtime/hostVue sin cambios. No repetir pruebas Vue o unidades amplias sin nuevos cambios/riesgo.
+5. Se reprodujo fallo de desbordamiento interno antes de corregir CSS compartido. Nuevos asserts recorren ancestros y selección con grupo largo. Capturas finales claro/oscuro800/1200 revisadas;logs/manifiesto ignorados en informe. Native secuencial y sin builds simultáneos;unidades completas sin carga de build/Electron.
 
 ## Restricciones y hechos que no deben perderse
 

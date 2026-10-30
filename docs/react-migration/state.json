@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa. Retirada revisada de shaders f7567ad y fixtures8302808 implementadas:937unitarias/96archivos,tipos/lint;24NativeReact+5Vue aprobados,6Axe retirada0violaciones/13incomplete. Backups preservan shaders/configuraciones;legacy espera Native. CI40985586565/dd7d8ee aprobado para importación;40985785465/c7238a5 falló48 y tuvo12flaky. Fixtures corregidas y focales aprobadas;verificar CI nuevo tras push. Próximo:información/grupos,compartidos/updates de shaders;mundos/ajustes/consola y etapas6–9. K08/K09/K10 y gates5 pendientes. Vue default,PR4 borrador,producción/proxy intactos,Microsoft pospuesto. Respetar archivos/limpiezas protegidos.",
+  "nextAction": "Etapa 5 activa. Información y grupos de shaders 4470ad7 completos: 939 unitarias/97 archivos, check/lint; 28 recorridos Native React y 8 Axe nuevos sin violaciones/14 incomplete. CSS de grupos largos corregido con fallo previo reproducido. CI40989902958/72eb840 aprobó React/Vue para el bloque anterior; consultar CI nuevo tras push. Próximo: compartidos/updates de shaders, mundos/ajustes/consola; etapas6–9. K08/K09/K10 y gates5 pendientes. Vue default/dist restaurados; PR4 borrador, producción/proxy intactos, Microsoft pospuesto. Respetar archivos/limpiezas protegidos.",
   "stages": [
     {
       "id": 0,
@@ -746,9 +746,13 @@
             {
               "path": "docs/react-migration/STAGE5-SHADER-REMOVAL.md",
               "sha256": "73f03be1780781190c137a6123d694667b6ca088594a9b0ce063a5c27a308e84"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-SHADER-INFORMATION-GROUPS.md",
+              "sha256": "4d86ed453f25de18a6fbf8355626b7f997ac0d4a5c68c8fcc346fab47cbd88a8"
             }
           ],
-          "note": "Avance parcial:selección/importación/retirada de shaders,ver sus informes.937unidades;último host24React+5Vue,tipos/lint.6Axe retirada0violaciones/13incomplete. CI de importación dd7d8ee aprobado;docHead c7238a5 falló fixture48 y12flaky,corregidas localmente. Verificar CI nuevo. Información/grupos/compartidos/updates y resto5 pendientes;K08/K09/K10 y gates5 siguen pending."
+          "note": "Avance parcial: información/grupos shaders 4470ad7 y corrección CSS compartida. 939 unitarias, check/lint,28 NativeReact;8 Axe nuevos 0violaciones/14incomplete. CI72eb840 aprobado en ambos jobs para retirada/fixtures anteriores. Pendientes compartidos/updates, aceptación K08/K09/K10 y resto5; gates siguen pending."
         },
         {
           "id": "worlds-settings",

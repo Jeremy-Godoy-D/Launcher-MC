@@ -200,3 +200,8 @@ STAGE5-SHADER-IMPORT.md: ZIP/carpetas por selector Native, copia exclusiva verif
 ### Retirada revisada de shaders (f7567ad/8302808)
 
 STAGE5-SHADER-REMOVAL.md:selección múltiple,revisión Native,backup de configuraciones afectadas y traslado de shaders,sin borrar selección ajena;legado espera confirmación. Recupera ZIP ilegible,preserva mundo/manifiesto y muestra copias tras fallo parcial.937unidades/96archivos,tipos/lint;24NativeReact+5Vue distintos y6Axe retirada0violaciones/13incomplete. CI40985586565/dd7d8ee aprobó importación;40985785465/c7238a5 falló fixture48y12flaky,corregidas localmente. CI nuevo requerido. K10 sigue pending por información/grupos,compartidos/updates y aceptación integral;K08/K09/gates5 y6–9 pendientes. No acredita Java/juego/NSIS/delta reales ni publicación.
+
+
+### Información y grupos de shaders (4470ad7)
+
+STAGE5-SHADER-INFORMATION-GROUPS.md: ficha Native local, procedencia pública como texto, tamaño/checksum explícitos;grupos por instancia con revisión concurrente,CRUD,asignación/filtros y foco. CSS corrige grupos largos en los tres dominios;fallo previo reproducido.939unitarias/97archivos,tipos/lint,28NativeReact y8Axe nuevos0violaciones/14incomplete. CI40989902958/72eb840 aprobó ambos jobs del bloque anterior (147React+1Strict+5Vue);CI nuevo requerido para4470ad7. K10 sigue pending por compartidos/updates y aceptación integral;K08/K09,gates5 y etapas6–9 pendientes. No acredita juego/Java/NSIS/delta reales ni publicación.
