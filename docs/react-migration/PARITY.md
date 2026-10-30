@@ -196,3 +196,7 @@ STAGE5-SHADER-SELECTION.md: listado/búsqueda, detección Native de Iris/Oculus/
 ### Importación local de shaders (cd127df)
 
 STAGE5-SHADER-IMPORT.md: ZIP/carpetas por selector Native, copia exclusiva verificada, sin activar ni sobrescribir; guarda de procesos compartidos y revalidación de autoridad/identidad tras hashes. Corrección de foco al refrescar. 920 unidades/95archivos, tipos/lint;12NativeReact+4Vue aprobados en este host,12AxeShaders0violaciones/20incomplete. CI nuevo pendiente. K10 continúa pending para retirada revisada, información/grupos, compartidos/updates y aceptación completa; K08/K09/gates5 y etapas6–9 también pendientes. No acredita partida/Java/NSIS/delta reales ni publicación.
+
+### Retirada revisada de shaders (f7567ad/8302808)
+
+STAGE5-SHADER-REMOVAL.md:selección múltiple,revisión Native,backup de configuraciones afectadas y traslado de shaders,sin borrar selección ajena;legado espera confirmación. Recupera ZIP ilegible,preserva mundo/manifiesto y muestra copias tras fallo parcial.937unidades/96archivos,tipos/lint;24NativeReact+5Vue distintos y6Axe retirada0violaciones/13incomplete. CI40985586565/dd7d8ee aprobó importación;40985785465/c7238a5 falló fixture48y12flaky,corregidas localmente. CI nuevo requerido. K10 sigue pending por información/grupos,compartidos/updates y aceptación integral;K08/K09/gates5 y6–9 pendientes. No acredita Java/juego/NSIS/delta reales ni publicación.

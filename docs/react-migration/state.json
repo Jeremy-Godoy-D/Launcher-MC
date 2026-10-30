@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa. Selección e importación local de shaders implementadas (9998ede/3bc9570 y cd127df). 920 unidades, tipos/lint; último bloque 12 Native React +4 Vue aprobados, 12 Axe Shaders sin violaciones/20 incomplete. Importa ZIP/carpetas sin activar ni sobrescribir; revalida destino tras hashes y conserva foco. CI40983888898 de eee6361 aprobado:140 React+1 cliente+4 Vue; confirma fix Windows8.3. Importación cd127df:CI40985586565 de dd7d8ee activo; consultar CI del HEAD siguiente. Próximo: retirada revisada con backups, información/grupos, compartidos/updates de shaders; mundos/ajustes/consola y etapas6–9. K08/K09/K10 y gates5 pendientes. Vue default, PR4 borrador, producción/proxy intactos, Microsoft pospuesto. Respetar archivos/limpiezas protegidos.",
+  "nextAction": "Etapa5 activa. Retirada revisada de shaders f7567ad y fixtures8302808 implementadas:937unitarias/96archivos,tipos/lint;24NativeReact+5Vue aprobados,6Axe retirada0violaciones/13incomplete. Backups preservan shaders/configuraciones;legacy espera Native. CI40985586565/dd7d8ee aprobado para importación;40985785465/c7238a5 falló48 y tuvo12flaky. Fixtures corregidas y focales aprobadas;verificar CI nuevo tras push. Próximo:información/grupos,compartidos/updates de shaders;mundos/ajustes/consola y etapas6–9. K08/K09/K10 y gates5 pendientes. Vue default,PR4 borrador,producción/proxy intactos,Microsoft pospuesto. Respetar archivos/limpiezas protegidos.",
   "stages": [
     {
       "id": 0,
@@ -742,9 +742,13 @@
             {
               "path": "docs/react-migration/STAGE5-CI-SHADERS.md",
               "sha256": "d4d6fa21476dc50a231b28d5f783a6c97c4ed531384d6824b3f2468892300ff4"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-SHADER-REMOVAL.md",
+              "sha256": "73f03be1780781190c137a6123d694667b6ca088594a9b0ce063a5c27a308e84"
             }
           ],
-          "note": "Avance parcial de shaders: selección e importación local; ver SHADER-SELECTION e IMPORT. 920 unidades; último bloque16 Native distintos, tipos/lint. Retirada/grupos/compartidos/updates y resto5 pendientes; CI nuevo requerido. K08/K09/K10 y gates5 siguen pending. CI40983888898 aprobado para selección/rutas; importación local requiere su CI propio."
+          "note": "Avance parcial:selección/importación/retirada de shaders,ver sus informes.937unidades;último host24React+5Vue,tipos/lint.6Axe retirada0violaciones/13incomplete. CI de importación dd7d8ee aprobado;docHead c7238a5 falló fixture48 y12flaky,corregidas localmente. Verificar CI nuevo. Información/grupos/compartidos/updates y resto5 pendientes;K08/K09/K10 y gates5 siguen pending."
         },
         {
           "id": "worlds-settings",
