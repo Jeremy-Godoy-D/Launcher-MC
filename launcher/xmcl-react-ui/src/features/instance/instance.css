@@ -20,7 +20,8 @@
   .content-remove-files { min-height: 0; max-height: 30vh; overflow: auto; padding-left: 20px; margin: 16px 0; overflow-wrap: anywhere; }
   .content-groups-editor { padding: 16px; margin: 16px 0; border-radius: 14px; background: var(--glass-elevated); }
   .content-groups-editor p { color: var(--muted); line-height: 1.6; }
-  .content-groups-editor form { display: grid; gap: 8px; margin-top: 16px; }
+  .content-groups-editor form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin-top: 16px; }
+  .content-groups-editor input, .content-groups-editor select { min-width: 0; max-width: 100%; }
   .content-groups-editor input:not([type='color']) { padding: 10px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; }
   .content-groups-editor input[type='color'] { width: 56px; height: 40px; }
   .content-groups-editor .content-actions { margin-top: 8px; }
@@ -50,6 +51,7 @@
   .content-filters .search { flex: 1; min-width: 180px; }
   .content-filters input { width: 100%; min-width: 0; }
   .content-filters select { padding: 9px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; }
+  .content-filters select, .content-selection select { min-width: 0; max-width: 100%; }
   .content-selection { padding: 12px 0; }
   .content-list { list-style: none; padding: 0; margin: 12px 0; }
   .content-list li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }

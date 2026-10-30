@@ -85,8 +85,10 @@ test('shader selection, empty engine and conflicts remain readable with keyboard
       const win = await launcher.app.browserWindow(page)
       for (const size of [[1200, 720], [800, 400]]) {
         await win.evaluate((win, size) => win.setContentSize(size[0], size[1]), size)
-        const search = area.getByRole('textbox', { name: 'Buscar shaders instalados' }); await search.focus(); await search.press('Tab')
+        const search = area.getByRole('textbox', { name: 'Buscar shaders instalados' }), filter = area.getByRole('combobox', { name: 'Filtrar por grupo de shaders', exact: true }); await expect(filter).toBeEnabled()
+        await search.focus(); await search.press('Tab'); await expect(filter).toBeFocused(); await page.keyboard.press('Tab')
         await expect(area.getByRole('checkbox', { name: 'Seleccionar Luz = Áurea.zip', exact: true })).toBeFocused()
+        await page.keyboard.press('Tab'); await expect(area.getByRole('button', { name: 'Información de Luz = Áurea.zip', exact: true })).toBeFocused()
         if (mode === 'ready') { await page.keyboard.press('Tab'); await expect(area.getByRole('button', { name: 'Activar Luz = Áurea.zip', exact: true })).toBeFocused() }
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
         await page.addScriptTag({ content: axe.source }); const result = await page.evaluate(async () => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } }))

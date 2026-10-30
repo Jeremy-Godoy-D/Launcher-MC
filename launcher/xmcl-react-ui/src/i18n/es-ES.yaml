@@ -726,3 +726,11 @@ react:
     removed: "Shaders retirados. Sus archivos y las configuraciones afectadas se conservan en copias."
     selection: "Shaders seleccionados"
     unreadFiles: "Archivos de shaders que no se pudieron leer"
+
+    infoTitle: "Información del shader"
+    infoClose: "Cerrar información del shader"
+    infoKind: "Formato local"
+    folderSize: "No calculado. La revisión de archivos muestra el tamaño total de la carpeta."
+    infoHelp: "Estos datos describen el archivo instalado. Comprueba los requisitos del proyecto: el motor, la versión de Minecraft y la GPU también determinan su compatibilidad."
+    groupFilter: "Filtrar por grupo de shaders"
+    groupAssignment: "Grupo para los shaders seleccionados"
