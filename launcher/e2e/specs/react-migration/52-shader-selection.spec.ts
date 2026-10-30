@@ -86,7 +86,8 @@ test('shader selection, empty engine and conflicts remain readable with keyboard
       for (const size of [[1200, 720], [800, 400]]) {
         await win.evaluate((win, size) => win.setContentSize(size[0], size[1]), size)
         const search = area.getByRole('textbox', { name: 'Buscar shaders instalados' }); await search.focus(); await search.press('Tab')
-        if (mode === 'ready') await expect(area.getByRole('button', { name: 'Activar Luz = Áurea.zip', exact: true })).toBeFocused()
+        await expect(area.getByRole('checkbox', { name: 'Seleccionar Luz = Áurea.zip', exact: true })).toBeFocused()
+        if (mode === 'ready') { await page.keyboard.press('Tab'); await expect(area.getByRole('button', { name: 'Activar Luz = Áurea.zip', exact: true })).toBeFocused() }
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
         await page.addScriptTag({ content: axe.source }); const result = await page.evaluate(async () => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } }))
         expect(result.violations).toEqual([]); await writeFile(testInfo.outputPath(`${theme}-${mode}-${size[0]}-axe.json`), JSON.stringify(result, null, 2))

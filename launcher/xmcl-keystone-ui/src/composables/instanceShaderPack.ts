@@ -195,6 +195,7 @@ export function useInstanceShaderPacks(instancePath: Ref<string>, runtime: Ref<R
     shaderPacks,
     refreshing: isValidating,
     revalidate,
+    refreshSelection: mutateShaderPackOptions,
     error,
     effect,
   }

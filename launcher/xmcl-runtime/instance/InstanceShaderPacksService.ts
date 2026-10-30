@@ -1,4 +1,4 @@
-import { InstanceShaderPacksService as IInstanceShaderPacksService, InstanceShaderPacksServiceKey, LockKey, type ShaderSelectionChange, type UpdateInstanceResourcesOptions } from '@xmcl/runtime-api'
+import { InstanceShaderPacksService as IInstanceShaderPacksService, InstanceShaderPacksServiceKey, LockKey, type ShaderSelectionChange, type ShaderRemovalReview, type UpdateInstanceResourcesOptions } from '@xmcl/runtime-api'
 import { Inject, LauncherAppKey, kGameDataPath } from '~/app'
 import { ExposeServiceKey } from '~/service'
 import { LauncherApp } from '../app/LauncherApp'
@@ -7,7 +7,7 @@ import { ResourceDomain } from '@xmcl/resource'
 import { AnyError } from '@xmcl/utils'
 import { createHash } from 'node:crypto'
 import { lstat } from 'node:fs/promises'
-import { join } from 'node:path'
+import { basename, dirname, isAbsolute, join, relative } from 'node:path'
 import { getShaderEngines } from '@xmcl/runtime-api/src/util/shaderEngine'
 import { kResourceManager } from '~/resource'
 import { InstanceService } from './InstanceService'
@@ -16,6 +16,8 @@ import { instanceFileSource } from '../instanceIO/utils/instanceFileSource'
 import { readModFilesSnapshot } from './utils/localMods'
 import { readShaderSelection, writeShaderSelection } from './utils/shaderSelection'
 import { installLocalResourcePacks } from './utils/localResourcePacks'
+import { previewShaderRemoval, removeReviewedShaders } from './utils/localShaders'
+import { importPathParts } from '../util/importFile'
 
 @ExposeServiceKey(InstanceShaderPacksServiceKey)
 export class InstanceShaderPacksService extends AbstractInstanceDomainService implements IInstanceShaderPacksService {
@@ -47,16 +49,35 @@ export class InstanceShaderPacksService extends AbstractInstanceDomainService im
     return { engines: getShaderEngines(instance.runtime, files), metadataPending: files.length !== active.length,
       fingerprint: createHash('sha256').update(JSON.stringify([configuration, inventory.fingerprint, files.map(file => [file.path, file.hash])])).digest('hex') }
   }
+  async #filesIdle(path: string) {
+    const launch = await this.app.registry.get(LaunchService), processes = await launch.getGameProcesses()
+    if (processes.some(process => process.options.gameDirectory === path)) throw new AnyError('InstanceRunningError')
+    if (processes.length && await this.isLinked(path) && (await Promise.all(processes.map(process => this.isLinked(process.options.gameDirectory)))).some(Boolean)) throw new AnyError('SharedOptionsRunningError')
+  }
   async install({ path, files }: UpdateInstanceResourcesOptions) {
     const installed = await this.#read(path, async root => {
-      const launch = await this.app.registry.get(LaunchService), processes = await launch.getGameProcesses()
-      if (processes.some(process => process.options.gameDirectory === path)) throw new AnyError('InstanceRunningError')
-      if (processes.length && await this.isLinked(path) && (await Promise.all(processes.map(process => this.isLinked(process.options.gameDirectory)))).some(Boolean)) throw new AnyError('SharedOptionsRunningError')
+      await this.#filesIdle(path)
       return installLocalResourcePacks(path, files, root, 'shaderpacks')
     })
     const manager = await this.app.registry.get(kResourceManager)
     if (!manager.getWatched(join(path, 'shaderpacks'))) this.resolveMarketMetadata(installed).catch(error => this.warn(error))
     return installed
+  }
+  async previewRemoval(path: string, names: string[]) {
+    return this.#read(path, root => previewShaderRemoval(path, names, root))
+  }
+  async removeReviewed(path: string, review: ShaderRemovalReview) {
+    return this.#read(path, async root => { await this.#filesIdle(path); return removeReviewedShaders(path, review, root) })
+  }
+  async uninstall({ path, files }: UpdateInstanceResourcesOptions) {
+    await this.#javaInstance(path)
+    if (!Array.isArray(files) || files.length > 200 || files.some(file => typeof file !== 'string')) throw new Error('Invalid shader files')
+    if (!files.length) return
+    const names = files.map(file => {
+      if (isAbsolute(file) ? relative(join(path, 'shaderpacks'), dirname(file)) !== '' : importPathParts(file).length !== 1) throw new Error('Unmanaged shader file')
+      return basename(file)
+    })
+    await this.removeReviewed(path, await this.previewRemoval(path, names))
   }
   async showDirectory(path: string) {
     return this.#read(path, async root => { await instanceFileSource(path, 'shaderpacks', root, true); return super.showDirectory(path) })

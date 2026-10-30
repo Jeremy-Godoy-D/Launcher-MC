@@ -68,8 +68,8 @@ export async function installLocalResourcePacks(path: string, files: string[], s
   return selected.map(name => join(path, domain, name))
 }
 
-async function removal(path: string, fileNames: string[], sharedRoot: string) {
-  const selected = names(fileNames), dest = await directory(path, sharedRoot), selection = await readResourcePackSelection(path)
+export async function inspectLocalPackFiles(path: string, fileNames: string[], sharedRoot: string, domain: 'resourcepacks' | 'shaderpacks') {
+  const selected = names(fileNames), dest = await directory(path, sharedRoot, false, domain)
   const files: ResourcePackRemovalReview['files'] = [], hashes: unknown[] = []
   let entries = 0
   for (const fileName of selected) {
@@ -77,9 +77,19 @@ async function removal(path: string, fileNames: string[], sharedRoot: string) {
     if (!info.isFile() && !info.isDirectory()) throw new Error('Unsafe resource pack')
     const payload = info.isDirectory() ? (await previewFolderFiles(file, undefined, { resourcePack: true })).sort((a, b) => a.path.localeCompare(b.path)) : undefined
     if ((entries += payload ? payload.length : 1) > 100000) throw new Error('Too many pack entries')
-    hashes.push([fileName, info.ino, info.dev, info.size, info.mtimeMs, info.ctimeMs, payload || await checksum(file, 'sha256')])
+    const content = payload || await checksum(file, 'sha256')
+    if (!payload && (typeof content !== 'string' || !/^[a-f0-9]{64}$/.test(content))) throw new Error('Pack checksum unavailable')
+    const after = await lstat(file)
+    if (after.ino !== info.ino || after.dev !== info.dev || after.size !== info.size || after.mtimeMs !== info.mtimeMs || after.ctimeMs !== info.ctimeMs) throw changed()
+    hashes.push([fileName, info.ino, info.dev, info.size, info.mtimeMs, info.ctimeMs, content])
     files.push({ fileName, directory: info.isDirectory(), size: payload ? payload.reduce((size, file) => size + (file.size || 0), 0) : info.size, entries: payload ? payload.length : 1 })
   }
+  const current = await directory(path, sharedRoot, false, domain)
+  if (JSON.stringify(current.identity) !== JSON.stringify(dest.identity)) throw changed()
+  return { files, hashes, dest }
+}
+async function removal(path: string, fileNames: string[], sharedRoot: string) {
+  const selection = await readResourcePackSelection(path), { files, hashes, dest } = await inspectLocalPackFiles(path, fileNames, sharedRoot, 'resourcepacks')
   const review: ResourcePackRemovalReview = { snapshot: createHash('sha256').update(JSON.stringify([dest.identity, selection.snapshot, hashes])).digest('hex'), files, sharedDirectory: dest.shared, sharedOptions: selection.shared }
   return { review, dest, selection }
 }

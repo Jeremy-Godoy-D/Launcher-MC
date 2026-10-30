@@ -1,22 +1,26 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { Link } from 'react-router'
-import { FolderOpen, Plus, RefreshCw, Search } from 'lucide-react'
-import { InstanceShaderPacksServiceKey, type ShaderPackSelection } from '@xmcl/runtime-api/src/services/InstanceShaderPacksService'
+import { FolderOpen, Plus, RefreshCw, Search, Trash2 } from 'lucide-react'
+import { InstanceShaderPacksServiceKey, type ShaderPackSelection, type ShaderRemovalReview } from '@xmcl/runtime-api/src/services/InstanceShaderPacksService'
 import { InstanceModsServiceKey } from '@xmcl/runtime-api/src/services/InstanceModsService'
+import { BaseServiceKey } from '@xmcl/runtime-api/src/services/BaseService'
 import { ResourceState } from '@xmcl/runtime-api/src/entities/resource'
 import { useService, useSharedStateStore } from '../../runtime'
 import { useI18n } from '../../i18n'
 import type { SavedInstance } from '../library/model'
 import { usePanelFocus } from './usePanelFocus'
+import { RemoveShadersDialog } from './RemoveShadersDialog'
 
 export function InstanceShaders({ path, running, runtime }: { path: string; running: boolean; runtime: SavedInstance['runtime'] }) {
-  const { t, n } = useI18n(), service = useService(InstanceShaderPacksServiceKey)
+  const { t, n } = useI18n(), service = useService(InstanceShaderPacksServiceKey), base = useService(BaseServiceKey)
   const shaders = useSharedStateStore({ key: `instance-shaderpacks://${path}`, Type: ResourceState, load: client => client.service(InstanceShaderPacksServiceKey).watch(path) })
   const mods = useSharedStateStore({ key: `instance-mods://${path}`, Type: ResourceState, load: client => client.service(InstanceModsServiceKey).watch(path) })
   const snapshot = useSyncExternalStore(shaders.subscribe, shaders.getSnapshot, shaders.getSnapshot), modSnapshot = useSyncExternalStore(mods.subscribe, mods.getSnapshot, mods.getSnapshot)
   const [selection, setSelection] = useState<ShaderPackSelection | null>(null), [query, setQuery] = useState(''), [working, setWorking] = useState(false), [reading, setReading] = useState(false)
   const [error, setError] = useState(''), [notice, setNotice] = useState('')
-  const alive = useRef(true), request = useRef(0), operation = useRef(false), panel = useRef<HTMLElement>(null), focusAfter = useRef<HTMLButtonElement | null>(null)
+  const [selected, setSelected] = useState<string[]>([]), [removal, setRemoval] = useState<ShaderRemovalReview | null>(null), [backup, setBackup] = useState('')
+  const alive = useRef(true), request = useRef(0), operation = useRef(false), panel = useRef<HTMLElement>(null), focusAfter = useRef<HTMLButtonElement | HTMLInputElement | null>(null)
+  const search = useRef<HTMLInputElement>(null), removeButton = useRef<HTMLButtonElement>(null)
   usePanelFocus(panel)
   const fileBusy = working || snapshot.status !== 'ready'
   const busy = fileBusy || reading || modSnapshot.status !== 'ready'
@@ -65,7 +69,43 @@ export function InstanceShaders({ path, running, runtime }: { path: string; runn
       }
     } finally { operation.current = false; if (alive.current) setWorking(false) }
   }
+  function removalFailure(error: unknown) {
+    const name = error && typeof error === 'object' && 'name' in error ? error.name : ''
+    return t(name === 'ShaderRemovalChangedError' ? 'react.shaders.removeChanged' : name === 'ShaderRemovalIncompleteError' ? 'react.shaders.removeIncomplete' : name === 'ShaderConfigurationSharedError' ? 'react.shaders.sharedConfiguration' : name === 'InstanceRunningError' ? 'react.content.running' : name === 'SharedOptionsRunningError' ? 'react.shaders.sharedRunning' : 'react.shaders.removeFailed')
+  }
+  async function reviewRemoval() {
+    if (operation.current || fileBusy || running || !selected.length) return
+    operation.current = true; setWorking(true); setError(''); setNotice(''); setBackup('')
+    try { const value = await service.previewRemoval(path, selected); if (alive.current) setRemoval(value) }
+    catch (error) { if (alive.current) { setError(removalFailure(error)); focusAfter.current = removeButton.current } }
+    finally { operation.current = false; if (alive.current) setWorking(false) }
+  }
+  async function removeFiles() {
+    if (operation.current || !removal || running) return
+    operation.current = true; setWorking(true); setError(''); setNotice('')
+    try {
+      const result = await service.removeReviewed(path, removal)
+      if (!alive.current) return
+      setBackup(result.backup); setRemoval(null); setSelected([]); focusAfter.current = search.current
+      await shaders.revalidate(); await read()
+      if (alive.current) setNotice(t('react.shaders.removed'))
+    } catch (error) {
+      if (alive.current) {
+        setError(removalFailure(error))
+        if (error && typeof error === 'object' && 'name' in error && error.name === 'ShaderRemovalIncompleteError') setBackup('backup' in error && typeof error.backup === 'string' ? error.backup : path + '/.backups')
+      }
+    } finally { operation.current = false; if (alive.current) setWorking(false) }
+  }
+  async function openBackup() {
+    try { if (!await base.openDirectory(backup)) throw new Error('Missing backup') }
+    catch { if (alive.current) setError(t('react.workspace.folderFailed')) }
+  }
   const files = (snapshot.data?.files || []).filter(file => file.fileName.toLocaleLowerCase().includes(query.toLocaleLowerCase()))
+  const broken = (snapshot.data?.errors || []).map(error => error.path.replace(/\\/g, '/').split('/').pop()!).filter(name => name && !snapshot.data?.files.some(file => file.fileName === name))
+  useEffect(() => {
+    if (snapshot.status === 'ready') { const names = new Set([...(snapshot.data?.files.map(file => file.fileName) || []), ...broken]); setSelected(current => current.filter(name => names.has(name))) }
+  }, [snapshot.data, snapshot.status])
+  function choose(name: string, checked: boolean) { setSelected(current => checked ? [...new Set([...current, name])] : current.filter(file => file !== name)) }
   const activePresent = snapshot.data?.files.some(file => file.fileName === selection?.pack)
   return <section ref={panel} data-testid="instance-shaders" aria-labelledby="shaders-title" aria-busy={busy}>
     <div className="section-heading"><h2 id="shaders-title">{t('react.workspace.shaders')}</h2><div className="content-actions">
@@ -79,18 +119,22 @@ export function InstanceShaders({ path, running, runtime }: { path: string; runn
     {selection?.shared && <p className="packs-help" role="status">{t('react.shaders.shared')}</p>}
     {selection && (!selection.engine || selection.metadataPending) && <p className="packs-help" role="status">{t(selection.metadataPending ? 'react.shaders.metadataPending' : selection.engines.length > 1 ? 'react.shaders.ambiguous' : 'react.shaders.noEngine')} <Link to="/instance/mods">{t('react.shaders.manageMods')}</Link></p>}
     {running && <p role="status">{t('react.content.running')}</p>}
-    <div className="content-filters"><label className="search"><Search size={18} aria-hidden="true" /><input aria-label={t('react.shaders.search')} placeholder={t('react.shaders.search')} value={query} onChange={event => setQuery(event.target.value)} /></label></div>
+    <div className="content-filters"><label className="search"><Search size={18} aria-hidden="true" /><input ref={search} aria-label={t('react.shaders.search')} placeholder={t('react.shaders.search')} value={query} onChange={event => setQuery(event.target.value)} /></label></div>
     {busy && <p role="status">{t('react.shaders.loading')}</p>}
     {(error || snapshot.status === 'error' || modSnapshot.status === 'error') && <p role="alert" className="form-error">{error || t('react.shaders.loadFailed')}</p>}
     {!!snapshot.data?.errors.length && <p role="alert" className="form-error">{t('react.content.parseFailed')} {snapshot.data.errors.map(error => error.path).join(', ')}</p>}
+    {!!broken.length && <ul className="pack-list" aria-label={t('react.shaders.unreadFiles')}>{broken.filter(name => name.toLocaleLowerCase().includes(query.toLocaleLowerCase())).map(name => <li key={name}><input type="checkbox" checked={selected.includes(name)} disabled={fileBusy || running} aria-label={t('react.content.select', { name })} onChange={event => choose(name, event.target.checked)} /><div className="content-file"><strong>{name}</strong><small>{t('react.shaders.unreadFiles')}</small></div></li>)}</ul>}
     {notice && <p role="status">{notice}</p>}
     {selection?.pack && !activePresent && <p role="status" className="packs-help">{t('react.shaders.missing', { name: selection.pack })}</p>}
     {selection?.engine && selection.enabled && <button className="button secondary" disabled={busy || running} onClick={event => void select(selection.pack, false, event.currentTarget)}>{t('react.shaders.disableAll')}</button>}
-    {snapshot.status === 'ready' && !files.length && <p>{t(query ? 'react.shaders.noMatches' : 'react.shaders.empty')}</p>}
-    <ul className="content-list shader-list">{files.map(file => {
+    {!!selected.length && <div className="content-selection" role="group" aria-label={t('react.shaders.selection')}><span>{t('react.content.selected', { count: selected.length })}</span><button className="button secondary" disabled={working} onClick={() => setSelected([])}>{t('react.content.clear')}</button><button ref={removeButton} className="button secondary" disabled={fileBusy || running} onClick={() => void reviewRemoval()}><Trash2 size={17} aria-hidden="true" />{t('react.packs.remove')}</button></div>}
+    {backup && !removal && <p className="instance-path">{t('react.packs.backup')}: {backup} <button className="button secondary" disabled={working} onClick={() => void openBackup()}>{t('react.packs.openBackup')}</button></p>}
+    {snapshot.status === 'ready' && !files.length && !broken.length && <p>{t(query ? 'react.shaders.noMatches' : 'react.shaders.empty')}</p>}
+    <ul className="pack-list">{files.map(file => {
       const enabled = selection?.pack === file.fileName && selection.enabled
-      return <li key={file.path}><div className="content-file"><strong>{file.fileName}</strong><small>{file.isDirectory ? t('react.shaders.unpacked') : `${n(file.size / 1024, { maximumFractionDigits: 0 })} KiB`} · {file.metadata.modrinth ? 'Modrinth' : file.metadata.curseforge ? 'CurseForge' : t('react.shaders.local')}</small><span>{t(enabled ? 'react.shaders.active' : 'react.shaders.available')}</span></div>
+      return <li key={file.path}><input type="checkbox" checked={selected.includes(file.fileName)} disabled={fileBusy || running} aria-label={t('react.content.select', { name: file.fileName })} onChange={event => choose(file.fileName, event.target.checked)} /><div className="content-file"><strong>{file.fileName}</strong><small>{file.isDirectory ? t('react.shaders.unpacked') : `${n(file.size / 1024, { maximumFractionDigits: 1 })} KiB`} · {file.metadata.modrinth ? 'Modrinth' : file.metadata.curseforge ? 'CurseForge' : t('react.shaders.local')}</small><span>{t(enabled ? 'react.shaders.active' : 'react.shaders.available')}</span></div>
         <button className="button secondary" disabled={busy || running || !selection?.engine} aria-pressed={!!enabled} aria-label={t(enabled ? 'react.shaders.disableName' : 'react.shaders.enableName', { name: file.fileName })} onClick={event => void select(file.fileName, !enabled, event.currentTarget)}>{t(enabled ? 'react.shaders.disable' : 'react.shaders.enable')}</button></li>
     })}</ul>
+    {removal && <RemoveShadersDialog review={removal} busy={working} error={error} backup={backup} openBackup={() => void openBackup()} close={() => { setRemoval(null); setError('') }} returnFocus={() => (removeButton.current?.isConnected && !removeButton.current.disabled ? removeButton.current : search.current)?.focus()} remove={() => void removeFiles()} />}
   </section>
 }
