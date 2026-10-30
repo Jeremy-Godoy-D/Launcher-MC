@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { lstat, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
+import { lstat, mkdir, mkdtemp, readFile, rename, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createRequire } from 'node:module'
+import * as core from '@xmcl/core'
 import { installLocalResourcePacks, previewResourcePackRemoval, removeReviewedResourcePacks } from './localResourcePacks'
 
 let root: string, path: string, source: string
@@ -102,4 +103,50 @@ it('rejects traversal, unapproved directory links and unsafe private backup dire
   await expect(remove(review)).rejects.toThrow(); expect(await readFile(join(path, 'resourcepacks/a.zip'), 'utf8')).toBe('archive-a')
   const other = join(root, 'other'); await mkdir(other); await symlink(source, join(other, 'resourcepacks'), 'junction')
   await expect(installLocalResourcePacks(other, [join(source, 'a.zip')], root)).rejects.toThrow()
+})
+
+it('copies shader ZIPs and unpacked shaders with independent bytes and no resource-pack metadata requirement', async () => {
+  const folder = join(source, 'shader-folder'); await mkdir(join(folder, 'shaders'), { recursive: true }); await writeFile(join(folder, 'shaders/final.fsh'), 'SHADER SOURCE')
+  const installed = await installLocalResourcePacks(path, [join(source, 'a.zip'), folder], root, 'shaderpacks')
+  expect(installed).toEqual([join(path, 'shaderpacks/a.zip'), join(path, 'shaderpacks/shader-folder')])
+  expect(await readFile(join(path, 'shaderpacks/shader-folder/shaders/final.fsh'), 'utf8')).toBe('SHADER SOURCE')
+  expect((await lstat(installed[0])).ino).not.toBe((await lstat(join(source, 'a.zip'))).ino)
+  await writeFile(join(folder, 'shaders/final.fsh'), 'SOURCE EDIT')
+  expect(await readFile(join(path, 'shaderpacks/shader-folder/shaders/final.fsh'), 'utf8')).toBe('SHADER SOURCE')
+  await expect(lstat(join(path, 'resourcepacks'))).rejects.toHaveProperty('code', 'ENOENT')
+})
+it('keeps shader collisions and invalid-folder batches from replacing or publishing files', async () => {
+  const shaderInstall = (files: string[]) => installLocalResourcePacks(path, files, root, 'shaderpacks')
+  await shaderInstall([join(source, 'a.zip')]); await writeFile(join(source, 'a.zip'), 'REPLACEMENT'); await writeFile(join(source, 'b.zip'), 'B')
+  await expect(shaderInstall([join(source, 'b.zip'), join(source, 'a.zip')])).rejects.toHaveProperty('name', 'ResourcePackCollisionError')
+  await expect(shaderInstall([join(source, 'b.zip'), join(source, 'folder')])).rejects.toThrow()
+  expect(await readFile(join(path, 'shaderpacks/a.zip'), 'utf8')).toBe('archive-a')
+  await expect(lstat(join(path, 'shaderpacks/b.zip'))).rejects.toHaveProperty('code', 'ENOENT')
+})
+it('copies shaders only into the authorized shared directory and rejects foreign destination links', async () => {
+  await mkdir(join(root, 'shaderpacks')); await symlink(join(root, 'shaderpacks'), join(path, 'shaderpacks'), 'junction')
+  await installLocalResourcePacks(path, [join(source, 'a.zip')], root, 'shaderpacks')
+  expect(await readFile(join(root, 'shaderpacks/a.zip'), 'utf8')).toBe('archive-a')
+  const other = join(root, 'other'); await mkdir(other); await symlink(source, join(other, 'shaderpacks'), 'junction')
+  await expect(installLocalResourcePacks(other, [join(source, 'a.zip')], root, 'shaderpacks')).rejects.toThrow()
+})
+it('rejects a shader source folder with nested links before copying its batch', async () => {
+  const folder = join(source, 'shaders-folder'); await mkdir(join(folder, 'shaders'), { recursive: true }); await writeFile(join(folder, 'shaders/final.fsh'), 'SHADER')
+  await symlink(source, join(folder, 'shaders/foreign'), 'junction')
+  await expect(installLocalResourcePacks(path, [join(source, 'a.zip'), folder], root, 'shaderpacks')).rejects.toThrow()
+  await expect(lstat(join(path, 'shaderpacks/a.zip'))).rejects.toHaveProperty('code', 'ENOENT')
+})
+
+it.each(['resourcepacks', 'shaderpacks'] as const)('rejects a %s destination replaced while a source checksum is being read', async domain => {
+  const foreign = join(root, 'foreign'), directory = join(path, domain), archive = join(source, 'a.zip'), original = core.checksum
+  await mkdir(foreign); await writeFile(join(foreign, 'keep'), 'FOREIGN'); await mkdir(directory)
+  let swapped = false
+  vi.spyOn(core, 'checksum').mockImplementation(async (file, algorithm) => {
+    const hash = await original(file, algorithm)
+    if (file === archive && !swapped) { swapped = true; await rename(directory, directory + '-previous'); await symlink(foreign, directory, 'junction') }
+    return hash
+  })
+  await expect(installLocalResourcePacks(path, [archive], root, domain)).rejects.toThrow()
+  expect(swapped).toBe(true); expect(await readFile(join(foreign, 'keep'), 'utf8')).toBe('FOREIGN')
+  await expect(lstat(join(foreign, 'a.zip'))).rejects.toHaveProperty('code', 'ENOENT')
 })

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { Link } from 'react-router'
-import { FolderOpen, RefreshCw, Search } from 'lucide-react'
+import { FolderOpen, Plus, RefreshCw, Search } from 'lucide-react'
 import { InstanceShaderPacksServiceKey, type ShaderPackSelection } from '@xmcl/runtime-api/src/services/InstanceShaderPacksService'
 import { InstanceModsServiceKey } from '@xmcl/runtime-api/src/services/InstanceModsService'
 import { ResourceState } from '@xmcl/runtime-api/src/entities/resource'
@@ -18,7 +18,8 @@ export function InstanceShaders({ path, running, runtime }: { path: string; runn
   const [error, setError] = useState(''), [notice, setNotice] = useState('')
   const alive = useRef(true), request = useRef(0), operation = useRef(false), panel = useRef<HTMLElement>(null), focusAfter = useRef<HTMLButtonElement | null>(null)
   usePanelFocus(panel)
-  const busy = working || reading || snapshot.status !== 'ready' || modSnapshot.status !== 'ready'
+  const fileBusy = working || snapshot.status !== 'ready'
+  const busy = fileBusy || reading || modSnapshot.status !== 'ready'
   useEffect(() => { alive.current = true; return () => { alive.current = false; request.current++ } }, [])
   useEffect(() => { if (!busy && focusAfter.current?.isConnected && !focusAfter.current.disabled) { focusAfter.current.focus(); focusAfter.current = null } }, [busy])
   async function read() {
@@ -34,6 +35,21 @@ export function InstanceShaders({ path, running, runtime }: { path: string; runn
     try { await Promise.all([shaders.revalidate(), mods.revalidate()]); await read() }
     catch { if (alive.current) setError(t('react.shaders.loadFailed')) }
     finally { operation.current = false; if (alive.current) setWorking(false) }
+  }
+  async function add(folder: boolean, button: HTMLButtonElement) {
+    if (operation.current || fileBusy || running) return
+    operation.current = true; focusAfter.current = button; setWorking(true); setError(''); setNotice('')
+    try {
+      const result = await window.windowController!.showOpenDialog!(folder ? { properties: ['openDirectory'] } : { properties: ['openFile', 'multiSelections'], filters: [{ name: 'Minecraft shaders', extensions: ['zip'] }] })
+      if (result.canceled || !result.filePaths.length || !alive.current) return
+      await service.install({ path, files: result.filePaths })
+      if (!alive.current) return
+      await shaders.revalidate(); await read()
+      if (alive.current) setNotice(t('react.shaders.added'))
+    } catch (error) {
+      const name = error && typeof error === 'object' && 'name' in error ? error.name : ''
+      if (alive.current) setError(t(name === 'ResourcePackCollisionError' ? 'react.shaders.collision' : name === 'InstanceRunningError' ? 'react.content.running' : name === 'SharedOptionsRunningError' ? 'react.shaders.sharedRunning' : 'react.shaders.addFailed'))
+    } finally { operation.current = false; if (alive.current) setWorking(false) }
   }
   async function select(pack: string, enabled: boolean, button: HTMLButtonElement) {
     if (operation.current || !selection?.engine || busy || running) return
@@ -53,6 +69,8 @@ export function InstanceShaders({ path, running, runtime }: { path: string; runn
   const activePresent = snapshot.data?.files.some(file => file.fileName === selection?.pack)
   return <section ref={panel} data-testid="instance-shaders" aria-labelledby="shaders-title" aria-busy={busy}>
     <div className="section-heading"><h2 id="shaders-title">{t('react.workspace.shaders')}</h2><div className="content-actions">
+      <button className="button primary" disabled={fileBusy || running || !window.windowController?.showOpenDialog} onClick={event => void add(false, event.currentTarget)}><Plus size={17} aria-hidden="true" />{t('react.content.add')}</button>
+      <button className="button secondary" disabled={fileBusy || running || !window.windowController?.showOpenDialog} onClick={event => void add(true, event.currentTarget)}>{t('react.packs.addFolder')}</button>
       <button className="button secondary" disabled={working} onClick={() => void service.showDirectory(path).catch(() => { if (alive.current) setError(t('react.workspace.folderFailed')) })}><FolderOpen size={17} aria-hidden="true" />{t('react.shaders.folder')}</button>
       <button className="button secondary" disabled={working} onClick={() => void refresh()}><RefreshCw size={17} aria-hidden="true" />{t('react.content.refresh')}</button>
     </div></div>

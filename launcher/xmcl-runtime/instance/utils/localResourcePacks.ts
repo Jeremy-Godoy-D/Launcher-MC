@@ -19,18 +19,18 @@ function names(files: string[]) {
   if (new Set(unique.map(name => name.toLowerCase())).size !== unique.length) throw new Error('Conflicting resource pack names')
   return unique
 }
-async function directory(path: string, sharedRoot: string, create = false) {
-  const source = await instanceFileSource(path, 'resourcepacks', sharedRoot, true), root = join(source.root, source.path)
+async function directory(path: string, sharedRoot: string, create = false, domain: 'resourcepacks' | 'shaderpacks' = 'resourcepacks') {
+  const source = await instanceFileSource(path, domain, sharedRoot, true), root = join(source.root, source.path)
   if (create) await mkdir(root).catch(error => { if (error.code !== 'EEXIST') throw error })
   const info = await lstat(root)
   if (!info.isDirectory()) throw new Error('Unsafe resource pack directory')
   return { root, shared: source.root !== await realpath(path), identity: [root, info.ino, info.dev] }
 }
 
-export async function installLocalResourcePacks(path: string, files: string[], sharedRoot: string) {
+export async function installLocalResourcePacks(path: string, files: string[], sharedRoot: string, domain: 'resourcepacks' | 'shaderpacks' = 'resourcepacks') {
   if (!Array.isArray(files) || files.length > 200 || files.some(file => typeof file !== 'string' || !isAbsolute(file))) throw new Error('Invalid resource pack sources')
   if (!files.length) return []
-  const sources = [...new Set(files)], selected = names(sources.map(file => basename(file))), destination = await directory(path, sharedRoot, true)
+  const sources = [...new Set(files)], selected = names(sources.map(file => basename(file))), destination = await directory(path, sharedRoot, true, domain)
   if (selected.length !== sources.length) throw new Error('Conflicting resource pack names')
   const plans = []
   let entries = 0
@@ -43,11 +43,13 @@ export async function installLocalResourcePacks(path: string, files: string[], s
       throw Object.assign(new Error('Resource pack destination already exists'), { name: 'ResourcePackCollisionError' })
     }
     const payload = info.isDirectory() ? (await previewFolderFiles(source, undefined, { resourcePack: true })).sort((a, b) => a.path.localeCompare(b.path)) : undefined
-    if (payload && (!payload.some(file => file.path === 'pack.mcmeta') || (entries += payload.length) > 100000)) throw new Error('Invalid or oversized resource pack folder')
+    if (payload && (!payload.some(file => domain === 'resourcepacks' ? file.path === 'pack.mcmeta' : file.path.startsWith('shaders/')) || (entries += payload.length) > 100000)) throw new Error('Invalid or oversized resource pack folder')
     if (payload) for (const file of payload) importPathParts(file.path)
     plans.push({ source, target, payload, sha256: payload ? undefined : await checksum(source, 'sha256') })
   }
   for (const plan of plans) {
+    const current = await directory(path, sharedRoot, false, domain)
+    if (JSON.stringify(current.identity) !== JSON.stringify(destination.identity)) throw changed()
     if (!plan.payload) {
       await copyFile(plan.source, plan.target, constants.COPYFILE_EXCL)
       if (await checksum(plan.target, 'sha256') !== plan.sha256) throw changed()
@@ -63,7 +65,7 @@ export async function installLocalResourcePacks(path: string, files: string[], s
       }
     }
   }
-  return selected.map(name => join(path, 'resourcepacks', name))
+  return selected.map(name => join(path, domain, name))
 }
 
 async function removal(path: string, fileNames: string[], sharedRoot: string) {

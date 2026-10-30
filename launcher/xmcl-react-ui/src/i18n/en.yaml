@@ -708,3 +708,8 @@ react:
     disableName: "Deactivate {name}"
     enable: "Activate"
     disable: "Deactivate"
+
+    added: "Shaders copied. They were not activated automatically."
+    collision: "A shader with that name already exists. Keep the installed file or rename the new one before trying again."
+    sharedRunning: "Another game uses the shared shaders folder. Close it before copying files."
+    addFailed: "Could not add all shaders. Check the files and permissions, then refresh the folder."

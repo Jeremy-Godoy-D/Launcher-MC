@@ -1,4 +1,4 @@
-import { InstanceShaderPacksService as IInstanceShaderPacksService, InstanceShaderPacksServiceKey, LockKey, type ShaderSelectionChange } from '@xmcl/runtime-api'
+import { InstanceShaderPacksService as IInstanceShaderPacksService, InstanceShaderPacksServiceKey, LockKey, type ShaderSelectionChange, type UpdateInstanceResourcesOptions } from '@xmcl/runtime-api'
 import { Inject, LauncherAppKey, kGameDataPath } from '~/app'
 import { ExposeServiceKey } from '~/service'
 import { LauncherApp } from '../app/LauncherApp'
@@ -15,6 +15,7 @@ import { LaunchService } from '../launch/LaunchService'
 import { instanceFileSource } from '../instanceIO/utils/instanceFileSource'
 import { readModFilesSnapshot } from './utils/localMods'
 import { readShaderSelection, writeShaderSelection } from './utils/shaderSelection'
+import { installLocalResourcePacks } from './utils/localResourcePacks'
 
 @ExposeServiceKey(InstanceShaderPacksServiceKey)
 export class InstanceShaderPacksService extends AbstractInstanceDomainService implements IInstanceShaderPacksService {
@@ -45,6 +46,20 @@ export class InstanceShaderPacksService extends AbstractInstanceDomainService im
     const files = (state?.files || []).filter(file => active.some(entry => entry.path === file.path && entry.ino === file.ino && entry.ctime === file.ctime && entry.mtime === file.mtime && entry.size === file.size))
     return { engines: getShaderEngines(instance.runtime, files), metadataPending: files.length !== active.length,
       fingerprint: createHash('sha256').update(JSON.stringify([configuration, inventory.fingerprint, files.map(file => [file.path, file.hash])])).digest('hex') }
+  }
+  async install({ path, files }: UpdateInstanceResourcesOptions) {
+    const installed = await this.#read(path, async root => {
+      const launch = await this.app.registry.get(LaunchService), processes = await launch.getGameProcesses()
+      if (processes.some(process => process.options.gameDirectory === path)) throw new AnyError('InstanceRunningError')
+      if (processes.length && await this.isLinked(path) && (await Promise.all(processes.map(process => this.isLinked(process.options.gameDirectory)))).some(Boolean)) throw new AnyError('SharedOptionsRunningError')
+      return installLocalResourcePacks(path, files, root, 'shaderpacks')
+    })
+    const manager = await this.app.registry.get(kResourceManager)
+    if (!manager.getWatched(join(path, 'shaderpacks'))) this.resolveMarketMetadata(installed).catch(error => this.warn(error))
+    return installed
+  }
+  async showDirectory(path: string) {
+    return this.#read(path, async root => { await instanceFileSource(path, 'shaderpacks', root, true); return super.showDirectory(path) })
   }
   async watch(path: string) {
     return this.#read(path, async root => { await instanceFileSource(path, 'shaderpacks', root, true); return super.watch(path) })
