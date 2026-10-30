@@ -205,3 +205,8 @@ STAGE5-SHADER-REMOVAL.md:selección múltiple,revisión Native,backup de configu
 ### Información y grupos de shaders (4470ad7)
 
 STAGE5-SHADER-INFORMATION-GROUPS.md: ficha Native local, procedencia pública como texto, tamaño/checksum explícitos;grupos por instancia con revisión concurrente,CRUD,asignación/filtros y foco. CSS corrige grupos largos en los tres dominios;fallo previo reproducido.939unitarias/97archivos,tipos/lint,28NativeReact y8Axe nuevos0violaciones/14incomplete. CI40989902958/72eb840 aprobó ambos jobs del bloque anterior (147React+1Strict+5Vue);CI nuevo requerido para4470ad7. K10 sigue pending por compartidos/updates y aceptación integral;K08/K09,gates5 y etapas6–9 pendientes. No acredita juego/Java/NSIS/delta reales ni publicación.
+
+
+### Compartidos de shaders (da876d1)
+
+STAGE5-SHADER-SHARING.md: revisión de carpeta común/copia privada,hashes/copias exclusivas/backups,conflictos/snapshot/guardas y reanudación del mismo observador;legacy usa el mismo flujo. Conserva tres configuraciones,grupos/opciones/mundos y otra instancia.955unitarias/97archivos,tipos/lint;24NativeReact distintos,7UI repetidos tras ajuste final y4Vue;9Axe nuevos0violaciones/22incomplete. Timeout unitario inicial documentado;focal y suite posteriores pasan sin cambiar límites. CI40992091527/ace5299 aprobó información/grupos anterior(151React+1Strict+5Vue);CI nuevo requerido. K10 sigue pending por updates y aceptación integral;K08/K09,gates5 y etapas6–9 pendientes. No acredita juego/Java/NSIS/delta reales ni publicación.

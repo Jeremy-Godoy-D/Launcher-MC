@@ -6,15 +6,15 @@ Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio
 
 ## Bloque actual
 
-Etapa 5 activa. Información y grupos de shaders 4470ad7 completos: 939 unitarias/97 archivos, check/lint; 28 recorridos Native React y 8 Axe nuevos sin violaciones/14 incomplete. CSS de grupos largos corregido con fallo previo reproducido. CI40989902958/72eb840 aprobó React/Vue para el bloque anterior; consultar CI nuevo tras push. Próximo: compartidos/updates de shaders, mundos/ajustes/consola; etapas6–9. K08/K09/K10 y gates5 pendientes. Vue default/dist restaurados; PR4 borrador, producción/proxy intactos, Microsoft pospuesto. Respetar archivos/limpiezas protegidos.
+Etapa5 activa. Compartidos de shaders da876d1 implementados con revisión, copias independientes, backups, guardas Native y compatibilidad legacy.955unitarias/97archivos;check/lint;24NativeReact distintos más repetición7UI y4Vue aprobados.9Axe nuevos0violaciones/22incomplete;error visible800 corregido con fallo previo. CI40992091527/ace5299 aprobó información/grupos en ambos jobs (151React+1Strict+5Vue),nuevo CI requerido para compartidos. Próximo:updates shaders por instalador revisado/proveedores;mundos/ajustes/consola;etapas6–9. K08/K09/K10 y gates5 pendientes;Vue default/dist,PR4 borrador,producción/proxy intactos,Microsoft pospuesto. Respetar archivos/limpiezas protegidos.
 
 ## Siguiente acción
 
-1. Consultar CI del nuevo push. CI40989902958/72eb840 aprobado:147React+1Strict+5Vue,937unidades por job;dos pruebas vivas omitidas. Confirma fixtures8302808;no inferir verde para la nueva fuente.
-2. Implementar compartidos/updates de shaders reutilizando los flujos revisados de packs/instalador. Información/grupos ya están implementados y probados;ver STAGE5-SHADER-INFORMATION-GROUPS.md.
+1. Consultar CI del próximo push.40992091527/ace5299 aprobó ambos jobs para información/grupos:151React+1Strict+5Vue,939unitarias por job,dos proveedores vivos omitidos. No inferir verde para nuevos compartidos.
+2. Actualizaciones de shaders:reutilizar ModUpdates/queryModUpdates y el instalador revisado;extender dominio shaderpacks en Native,snapshots/manifiestos/resume/backups/filtros de proveedor y motor. Leer los consumidores antes de cambiar;no instalar directamente desde renderer ni perder autoridad de carpeta o selección. Ver STAGE5-SHADER-SHARING.md.
 3. Después mundos,ajustes y consola;catálogo6,superficies7,retirada8 y validación/publicación9. K08/K09/K10 y gates5 siguen pending.
-4. Fuente4470ad7:939unidades/97archivos,check/lint,28NativeReact32/47/52/53/54/56.8Axe nuevos0violaciones/14incomplete;56diagnósticos E2E previos idénticos. EXEReact construido y distVue restaurado;runtime/hostVue sin cambios. No repetir pruebas Vue o unidades amplias sin nuevos cambios/riesgo.
-5. Se reprodujo fallo de desbordamiento interno antes de corregir CSS compartido. Nuevos asserts recorren ancestros y selección con grupo largo. Capturas finales claro/oscuro800/1200 revisadas;logs/manifiesto ignorados en informe. Native secuencial y sin builds simultáneos;unidades completas sin carga de build/Electron.
+4. Fuente da876d1:955unidades/97archivos,check/lint;24NativeReact48/51/52/54/56/57 y4Vue03/45/55/58. Ajuste final del diálogo vuelve a pasar7de48/57;no sumar duplicados.9Axe nuevos0violaciones/22incomplete. E2E mantiene56diagnósticos previos. Ambos hosts construidos;rendererVue sin cambios reutilizado;dist/defaultVue.
+5. Timeout inicial de5s en test progressive legacy baseline;focal162ms y suite completa posterior955aprobadas,sin cambiar límite/código. Causa no demostrada. Error visual de copia800 reproducido por assert antes de corregir;ahora visiblecompleto. Ver logs/manifiesto ignorados en informe. Native secuencial sin builds;unidades completas sin carga externa de compilación/Electron.
 
 ## Restricciones y hechos que no deben perderse
 
