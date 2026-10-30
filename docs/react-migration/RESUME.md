@@ -6,16 +6,15 @@ Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio
 
 ## Bloque actual
 
-Etapa5 activa. PACK-UPDATES/aacc6bb y SHARED-PATH-ALIASES/61ec027:870unitarias y26Native distintos acumulados;MR/CF reales aprobados. CI40883524807 fallo869/870 por expectativa de ruta fisica contra RUNNER~1;React cancelado antes de smoke.13f6cf2 corrige expectativa con realpath(common),7focales aprobadas;verificar CI nuevo. Shaders WIP local:contratos/parser/seleccion Native;completar pruebas yUI antes de confirmar. Continuar resto5 y6-9;K08/K09/gates5 pendientes. Vue default,PR4borrador,produccion/proxy intactos,MSpospuesto. No DevTools/CDP,ANALISIS ni limpiezas denegadas;no limpiar/seguir sharing-temp-alias.
+Etapa 5 activa. Selección de shaders implementada en 9998ede y diagnóstico 3bc9570: 910 unidades, tipos/lint y 28 Native distintos aprobados (24 React + 4 Vue); 12 Axe de Shaders sin violaciones, incomplete manual pendiente. Causa Windows 8.3 reproducida: callback realpath difiere de fs.promises.realpath; corregido isLinkTo y probado con DOCUME~1. CI40885472006 terminó con 8 fallos React de compartidos; verificar CI nuevo. Próximo: archivos locales de shaders, información/grupos, compartidos/updates; mundos/ajustes/consola y etapas 6–9. K08/K09/K10 y gates5 pendientes. Vue default, PR4 borrador, producción/proxy intactos, Microsoft pospuesto. Respetar archivos y limpiezas protegidos.
 
-## Siguiente accion
+## Siguiente acción
 
-1. Verificar el CI propio de61ec027 y el HEAD de documentación después del push. CI40878971283 ya terminó:Vue aprobado,React123/127. No mantenerlo como job vivo ni asumir éxito por pruebas locales. Los fallos unitarios de inyección se resolvieron;los cuatro E2E43/46/48 motivaron la reproducción Native51 y el helper físico.
-2. Continuar shaders,reutilizando infraestructura/servicios existentes y revisando sus garantías de selección/compartidos antes de escribir. No duplicar un descargador ni reimplementar mods,packs,información/grupos/compartidos/updates ya probados.
-3. Después mundos,ajustes de instancia y consola;catálogo6,superficies7,retirada8,validación/publicación9. No cerrar K08/K09/gates5 sin aceptación completa y conexiones de catálogo.
-4. Evidencia actual:PACK-UPDATES/aacc6bb y SHARED-PATH-ALIASES/61ec027.870unidades/90archivos,tipos/lint;26Native distintos acumulados,19sobre el último host;8Axe packs0violaciones/16incomplete,8PNG y proveedores MR/CF reales.56diagnósticos E2E anteriores,sin nuevos. Ambos EXE reconstruidos,dist/defaultVue. Usar perfiles temporales propios.
-5. Fuente49 tiene5escenarios deterministas;50 requiere XMCL_REACT_LIVE_PROVIDERS=1 yprueba descarga real de Fast Better Grass por ambos proveedores.51 usa opcion de fixture gameDataParentAlias,con alias temporal bajo el mismo perfil;reproduce fallo en EXE aacc6bb y pasa con61ec027. No usarlo para tocar la junction protegida ni la instalación habitual.
-6. La limpieza de launcher/e2e/artifacts/sharing-temp-alias fue rechazada. No reintentar ni recorrerla para generar manifiestos;apunta al TEMP del usuario. No tocar ANALISIS_ARQUITECTURA.md,DevTools/CDP ni limpiezas protegidas anteriores. Microsoft pospuesto,proxy/producción intactos,PR4borrador. Java/juego/NSIS/delta y presupuestos finales siguen pendientes.
+1. Verificar CI nuevo después del push. CI40885472006 terminó con Vue aprobado y React125 aprobados/8 fallidos/2omitidos. La reproducción 8.3 está documentada y corregida localmente; falta confirmación remota.
+2. Continuar archivos locales de shaders reutilizando copia exclusiva/verificación/backup y controles existentes. Añadir información/grupos y gestión de compartidos/updates; no duplicar descargadores ni confiar en comprobaciones de renderer.
+3. Seguir mundos, ajustes y consola; después catálogo6, superficies7, retirada8 y validación/publicación9. No cerrar K08/K09/K10 ni gates5 por una lista/selector parcial.
+4. STAGE5-SHADER-SELECTION.md identifica fuentes, comandos, manifiesto, 910 unidades y 28 Native distintos aprobados. 12 Axe de Shaders sin violaciones, 20 incomplete. E2E tsc:56 diagnósticos previos idénticos. Ambos hosts reconstruidos, dist y default Vue. Mantener pruebas Electron secuenciales y sin builds simultáneos; unidades completas sin carga de builds/Electron.
+5. No usar ni recorrer sharing-temp-alias para pruebas/artefactos; su limpieza fue denegada. La reproducción nueva usa TEMP propio y el alias real DOCUME~1, no esa junction protegida. No tocar ANALISIS_ARQUITECTURA.md ni reintentar DevTools/CDP o limpiezas protegidas. Microsoft pospuesto; producción/proxy intactos; PR4 borrador.
 
 ## Restricciones y hechos que no deben perderse
 
