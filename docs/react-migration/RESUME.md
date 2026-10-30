@@ -6,15 +6,16 @@ Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio
 
 ## Bloque actual
 
-Etapa 5 activa. Selección de shaders implementada en 9998ede y diagnóstico 3bc9570: 910 unidades, tipos/lint y 28 Native distintos aprobados (24 React + 4 Vue); 12 Axe de Shaders sin violaciones, incomplete manual pendiente. Causa Windows 8.3 reproducida: callback realpath difiere de fs.promises.realpath; corregido isLinkTo y probado con DOCUME~1. CI40885472006 terminó con 8 fallos React de compartidos; verificar CI nuevo. Próximo: archivos locales de shaders, información/grupos, compartidos/updates; mundos/ajustes/consola y etapas 6–9. K08/K09/K10 y gates5 pendientes. Vue default, PR4 borrador, producción/proxy intactos, Microsoft pospuesto. Respetar archivos y limpiezas protegidos.
+Etapa 5 activa. Selección e importación local de shaders implementadas (9998ede/3bc9570 y cd127df). 920 unidades, tipos/lint; último bloque 12 Native React +4 Vue aprobados, 12 Axe Shaders sin violaciones/20 incomplete. Importa ZIP/carpetas sin activar ni sobrescribir; revalida destino tras hashes y conserva foco. CI40983888898 de eee6361: Vue aprobado, React aún activo al comprobar; consultar resultado y CI del push siguiente. Próximo: retirada revisada con backups, información/grupos, compartidos/updates de shaders; mundos/ajustes/consola y etapas6–9. K08/K09/K10 y gates5 pendientes. Vue default, PR4 borrador, producción/proxy intactos, Microsoft pospuesto. Respetar archivos/limpiezas protegidos.
 
 ## Siguiente acción
 
-1. Verificar CI nuevo después del push. CI40885472006 terminó con Vue aprobado y React125 aprobados/8 fallidos/2omitidos. La reproducción 8.3 está documentada y corregida localmente; falta confirmación remota.
-2. Continuar archivos locales de shaders reutilizando copia exclusiva/verificación/backup y controles existentes. Añadir información/grupos y gestión de compartidos/updates; no duplicar descargadores ni confiar en comprobaciones de renderer.
-3. Seguir mundos, ajustes y consola; después catálogo6, superficies7, retirada8 y validación/publicación9. No cerrar K08/K09/K10 ni gates5 por una lista/selector parcial.
-4. STAGE5-SHADER-SELECTION.md identifica fuentes, comandos, manifiesto, 910 unidades y 28 Native distintos aprobados. 12 Axe de Shaders sin violaciones, 20 incomplete. E2E tsc:56 diagnósticos previos idénticos. Ambos hosts reconstruidos, dist y default Vue. Mantener pruebas Electron secuenciales y sin builds simultáneos; unidades completas sin carga de builds/Electron.
-5. No usar ni recorrer sharing-temp-alias para pruebas/artefactos; su limpieza fue denegada. La reproducción nueva usa TEMP propio y el alias real DOCUME~1, no esa junction protegida. No tocar ANALISIS_ARQUITECTURA.md ni reintentar DevTools/CDP o limpiezas protegidas. Microsoft pospuesto; producción/proxy intactos; PR4 borrador.
+1. Consultar CI40983888898 de eee6361 y el del nuevo push. El anterior40885472006 falló8 compartidos; la reproducción Windows8.3 de SHADER-SELECTION demuestra la causa callback/native y pasa con DOCUME~1. No declarar el CI aprobado sin su resultado.
+2. Seguir shaders: retirada con revisión/backup y preservación de configuraciones, información/grupos, gestión de compartidos y updates. Reutilizar los controles y servicios existentes. Importación ZIP/carpeta ya está completa y probada; no rehacerla.
+3. Después mundos, ajustes y consola; catálogo6, superficies7, retirada8 y validación/publicación9. Mantener K08/K09/K10 y las tres gates5 pendientes hasta aceptación integral.
+4. Último bloque STAGE5-SHADER-IMPORT.md/cd127df:920 unidades/95archivos, tipos/lint;12 escenarios React y4 Vue sobre hosts actuales. 12 Axe Shaders0violaciones/20incomplete, E2E56previos idénticos. Checkpoint anterior documenta24React+4Vue de otros recorridos; no sumarlos sin descontar solapamientos. Ambos hosts y dist compartido Vue; no correr builds mientras haya Electron de pruebas. Unidades completas sin carga de builds/Electron.
+5. El primer intento Native de importación11/12 detectó un fallo real de foco; el lote final53 y52/44 pasa tras corregirlo. Las dos pruebas de cambio de destino fallan antes del guard y pasan después; comprueban que no se publica el ZIP en carpeta ajena.
+6. No recorrer ni limpiar sharing-temp-alias; la reproducción8.3 usa TEMP propio. No tocar ANALISIS_ARQUITECTURA.md,DevTools/CDP ni limpiezas protegidas. Microsoft pospuesto; producción/proxy intactos; PR4 borrador. Java/juego/NSIS/delta y presupuestos finales pendientes.
 
 ## Restricciones y hechos que no deben perderse
 

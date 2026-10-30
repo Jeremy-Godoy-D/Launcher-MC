@@ -192,3 +192,7 @@ PACK-UPDATES integra consultas públicas MR/CF,manifiestos con nombre ZIP establ
 ### Selección de shaders y Windows 8.3 (9998ede/3bc9570)
 
 STAGE5-SHADER-SELECTION.md: listado/búsqueda, detección Native de Iris/Oculus/OptiFine, activación/desactivación con snapshot y propiedades Java preservadas; legacy compatible. Reproducción real DOCUME~1 confirma diferencia callback/native realpath y corrige reconocimiento de enlaces. 910 unidades/95 archivos, tipos/lint y 28 Native distintos aprobados (24 React + 4 Vue). 12 Axe Shaders sin violaciones/20 incomplete, 56 diagnósticos E2E previos idénticos. CI40885472006 falló 8 escenarios React; nuevo CI requerido. K10 sigue pendiente por archivos locales, información/grupos, compartidos, updates y aceptación integral; K08/K09, todas las gates5 y etapas6–9 también pendientes. No equivale a partida/Java/NSIS/delta reales ni publicación.
+
+### Importación local de shaders (cd127df)
+
+STAGE5-SHADER-IMPORT.md: ZIP/carpetas por selector Native, copia exclusiva verificada, sin activar ni sobrescribir; guarda de procesos compartidos y revalidación de autoridad/identidad tras hashes. Corrección de foco al refrescar. 920 unidades/95archivos, tipos/lint;12NativeReact+4Vue aprobados en este host,12AxeShaders0violaciones/20incomplete. CI nuevo pendiente. K10 continúa pending para retirada revisada, información/grupos, compartidos/updates y aceptación completa; K08/K09/gates5 y etapas6–9 también pendientes. No acredita partida/Java/NSIS/delta reales ni publicación.

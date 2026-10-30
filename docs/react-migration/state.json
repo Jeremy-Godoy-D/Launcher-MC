@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa. Selección de shaders implementada en 9998ede y diagnóstico 3bc9570: 910 unidades, tipos/lint y 28 Native distintos aprobados (24 React + 4 Vue); 12 Axe de Shaders sin violaciones, incomplete manual pendiente. Causa Windows 8.3 reproducida: callback realpath difiere de fs.promises.realpath; corregido isLinkTo y probado con DOCUME~1. CI40885472006 terminó con 8 fallos React de compartidos; verificar CI nuevo. Próximo: archivos locales de shaders, información/grupos, compartidos/updates; mundos/ajustes/consola y etapas 6–9. K08/K09/K10 y gates5 pendientes. Vue default, PR4 borrador, producción/proxy intactos, Microsoft pospuesto. Respetar archivos y limpiezas protegidos.",
+  "nextAction": "Etapa 5 activa. Selección e importación local de shaders implementadas (9998ede/3bc9570 y cd127df). 920 unidades, tipos/lint; último bloque 12 Native React +4 Vue aprobados, 12 Axe Shaders sin violaciones/20 incomplete. Importa ZIP/carpetas sin activar ni sobrescribir; revalida destino tras hashes y conserva foco. CI40983888898 de eee6361: Vue aprobado, React aún activo al comprobar; consultar resultado y CI del push siguiente. Próximo: retirada revisada con backups, información/grupos, compartidos/updates de shaders; mundos/ajustes/consola y etapas6–9. K08/K09/K10 y gates5 pendientes. Vue default, PR4 borrador, producción/proxy intactos, Microsoft pospuesto. Respetar archivos/limpiezas protegidos.",
   "stages": [
     {
       "id": 0,
@@ -734,9 +734,13 @@
             {
               "path": "docs/react-migration/STAGE5-SHADER-SELECTION.md",
               "sha256": "55b4dde22b070cc649547f940cf9930d23ca12619a3159b567660184d991a7e1"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-SHADER-IMPORT.md",
+              "sha256": "bcc60d06d1466ce03cbd428659b2f4fc6f03d739cf930c40a5991c7d0b4bccf0"
             }
           ],
-          "note": "Avance parcial: selección Native/React de shaders y equivalencia física Windows 8.3. Ver STAGE5-SHADER-SELECTION.md. 910 unidades; 28 Native distintos, 12 Axe Shaders sin violaciones. CI nuevo requerido; archivos/sharing/updates de shaders y resto de instancia pendientes. K08/K09/K10 y gates5 permanecen pending."
+          "note": "Avance parcial de shaders: selección e importación local; ver SHADER-SELECTION e IMPORT. 920 unidades; último bloque16 Native distintos, tipos/lint. Retirada/grupos/compartidos/updates y resto5 pendientes; CI nuevo requerido. K08/K09/K10 y gates5 siguen pending."
         },
         {
           "id": "worlds-settings",
