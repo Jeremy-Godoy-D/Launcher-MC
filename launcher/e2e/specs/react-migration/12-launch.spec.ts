@@ -171,7 +171,18 @@ test('launch checks profile and physical directory, confirms once, restores proc
   await resumePresentation.focus()
   await expect(resumePresentation).toBeFocused()
   await expect(resumePresentation).toBeEnabled()
-  await expect(resumePresentation).toBeInViewport({ ratio: 1 })
+  // CI stalled in the observer-based viewport check; retain full bounds and ancestor clipping checks.
+  await expect(resumePresentation).toBeVisible()
+  await expect.poll(() => resumePresentation.evaluate(element => {
+    const rect = element.getBoundingClientRect()
+    let left = 0, top = 0, right = innerWidth, bottom = innerHeight
+    for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+      const style = getComputedStyle(parent), box = parent.getBoundingClientRect()
+      if (/^(auto|scroll|hidden|clip)$/.test(style.overflowX)) { left = Math.max(left, box.left + parent.clientLeft); right = Math.min(right, box.left + parent.clientLeft + parent.clientWidth) }
+      if (/^(auto|scroll|hidden|clip)$/.test(style.overflowY)) { top = Math.max(top, box.top + parent.clientTop); bottom = Math.min(bottom, box.top + parent.clientTop + parent.clientHeight) }
+    }
+    return rect.width > 0 && rect.height > 0 && rect.left >= left && rect.right <= right && rect.top >= top && rect.bottom <= bottom
+  })).toBe(true)
   await resumePresentation.press('Enter')
   await expect(page.getByRole('button', { name: 'Pausar presentación', exact: true })).toBeVisible()
   await page.emulateMedia({ reducedMotion: 'no-preference' })
