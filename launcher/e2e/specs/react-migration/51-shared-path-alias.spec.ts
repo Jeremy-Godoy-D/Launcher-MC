@@ -12,11 +12,11 @@ test('a configured parent alias retains shared packs through watch, UI refresh a
   const options = 'resourcePacks:["vanilla","file/local.zip"]\nlang:es_es\n'; await writeFile(join(path, 'options.txt'), options)
   await page.evaluate(async path => (window as any).serviceChannels.open('InstanceResourcePacksService').call('linkShared', path), path)
   const identity = await launcher.app.evaluate(async (_, { path, root }) => {
-    const fs = require('node:fs'), promises = require('node:fs/promises'), util = require('node:util'), join = require('node:path').join
+    const fs = process.getBuiltinModule('fs'), promises = fs.promises, util = process.getBuiltinModule('util'), join = process.getBuiltinModule('path').join
     const local = join(path, 'resourcepacks'), shared = join(root, 'resourcepacks')
     return { local, shared, target: await promises.readlink(local), native: await Promise.all([promises.realpath(local), promises.realpath(shared)]), callback: await Promise.all([util.promisify(fs.realpath)(local), util.promisify(fs.realpath)(shared)]) }
   }, { path, root })
-  await testInfo.attach('shared-path-identity', { body: JSON.stringify(identity, null, 2), contentType: 'application/json' })
+  await writeFile(testInfo.outputPath('shared-path-identity.json'), JSON.stringify(identity, null, 2))
   expect(await page.evaluate(async path => (window as any).serviceChannels.open('InstanceResourcePacksService').call('isLinked', path), path), JSON.stringify(identity)).toBe(true)
   await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click(); await page.getByRole('link', { name: 'Packs', exact: true }).click()
   const area = page.getByTestId('instance-resourcepacks')
