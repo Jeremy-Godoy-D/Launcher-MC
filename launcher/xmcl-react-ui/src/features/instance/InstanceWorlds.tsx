@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { FolderOpen, Map, RefreshCw, Search, X } from 'lucide-react'
+import { FolderOpen, Map, Plus, RefreshCw, Search, X } from 'lucide-react'
 import { InstanceSavesServiceKey } from '@xmcl/runtime-api/src/services/InstanceSavesService'
 import type { InstanceSavePreview } from '@xmcl/runtime-api/src/entities/save'
 import { useService } from '../../runtime'
@@ -41,6 +41,7 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
   function closeDetails() { setDetails(''); trigger.current?.focus() }
   return <section data-testid="instance-worlds" aria-labelledby="worlds-title" aria-busy={reading}>
     <div className="section-heading"><h2 id="worlds-title">{t('react.workspace.worlds')}</h2><div className="content-actions">
+      <button className="button primary" disabled={reading || running || !window.windowController?.showOpenDialog} onClick={event => { actionTrigger.current = event.currentTarget; setAction({ type: 'import', name: '' }) }}><Plus size={17} aria-hidden="true" />{t('react.worldFiles.importTitle')}</button>
       <button className="button secondary" disabled={reading || running} onClick={() => setRevision(value => value + 1)} data-testid="worlds-refresh"><RefreshCw size={17} aria-hidden="true" />{t('react.worlds.refresh')}</button>
       <button className="button secondary" disabled={opening} onClick={() => void openFolder()}><FolderOpen size={17} aria-hidden="true" />{t('react.operations.openFolder')}</button>
     </div></div>

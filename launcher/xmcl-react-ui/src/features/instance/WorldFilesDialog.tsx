@@ -9,21 +9,25 @@ import { useLibrary } from '../library/context'
 
 export function WorldFilesDialog({ path, name, type, close, returnFocus, changed }: { path: string; name: string; type: WorldFileOperation['type']; close: () => void; returnFocus: () => void; changed: () => void }) {
   const service = useService(InstanceSavesServiceKey), base = useService(BaseServiceKey), library = useLibrary(), { t, n } = useI18n()
-  const [input, setInput] = useState<WorldFileOperation>(() => type === 'copy' ? { type, instancePath: path, saveName: name, destinationInstancePath: path, destinationName: `${name} (copy)` } : type === 'export' ? { type, instancePath: path, saveName: name, destinationDirectory: '', fileName: `${name}.zip` } : { type, instancePath: path, saveName: name })
+  const [input, setInput] = useState<WorldFileOperation>(() => type === 'import' ? { type, instancePath: path, saveName: '', sourcePath: '' } : type === 'copy' ? { type, instancePath: path, saveName: name, destinationInstancePath: path, destinationName: `${name} (copy)` } : type === 'export' ? { type, instancePath: path, saveName: name, destinationDirectory: '', fileName: `${name}.zip` } : { type, instancePath: path, saveName: name })
   const [review, setReview] = useState<WorldFileReview | null>(null), [busy, setBusy] = useState(false), [error, setError] = useState(''), [finished, setFinished] = useState(false), [folder, setFolder] = useState('')
   const alive = useRef(true), pending = useRef(false), body = useRef<HTMLDivElement>(null)
   useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
   useEffect(() => { if (error) body.current?.scrollTo({ top: 0 }) }, [error])
   function failure(error: unknown) {
     const name = error && typeof error === 'object' && 'name' in error ? String(error.name) : ''
-    return ['WorldFilesChangedError', 'WorldDestinationExistsError', 'WorldOperationIncompleteError', 'InstanceRunningError', 'SharedWorldRunningError'].includes(name) ? name : 'failed'
+    return ['WorldFilesChangedError', 'WorldDestinationExistsError', 'WorldOperationIncompleteError', 'InstanceRunningError', 'SharedWorldRunningError', 'WorldArchiveInvalidError', 'WorldImportInvalidError', 'WorldImportLimitError', 'WorldArchiveChecksumError'].includes(name) ? name : type === 'import' ? 'importFailed' : 'failed'
   }
-  async function chooseFolder() {
+  async function chooseFolder(archive = false) {
     if (pending.current) return
     pending.current = true; setBusy(true); setError('')
     try {
-      const result = await window.windowController!.showOpenDialog!({ properties: ['openDirectory'] })
-      if (alive.current && !result.canceled && result.filePaths[0] && input.type === 'export') { setInput({ ...input, destinationDirectory: result.filePaths[0] }); setReview(null) }
+      const result = await window.windowController!.showOpenDialog!(archive ? { properties: ['openFile'], filters: [{ name: 'Minecraft world', extensions: ['zip'] }] } : { properties: ['openDirectory'] })
+      if (alive.current && !result.canceled && result.filePaths[0]) {
+        if (input.type === 'export') setInput({ ...input, destinationDirectory: result.filePaths[0] })
+        if (input.type === 'import') { const sourcePath = result.filePaths[0]; setInput({ ...input, sourcePath, saveName: sourcePath.replace(/\\/g, '/').split('/').pop()!.replace(/\.zip$/i, '') }) }
+        setReview(null)
+      }
     } catch { if (alive.current) setError('failed') }
     finally { pending.current = false; if (alive.current) setBusy(false) }
   }
@@ -49,7 +53,11 @@ export function WorldFilesDialog({ path, name, type, close, returnFocus, changed
     <form onSubmit={event => { event.preventDefault(); void submit() }}>
       <div className="creation-body" ref={body} role="region" aria-label={t('react.worldFiles.review')} tabIndex={0}>
         {error && <p role="alert" className="form-error">{t(`react.worldFiles.${error}`)}</p>}
-        <p className="instance-path">{name}</p>
+        <p className="instance-path">{input.type === 'import' ? input.sourcePath : name}</p>
+        {!finished && !review && input.type === 'import' && <>
+          <div className="content-actions"><button className="button secondary" type="button" disabled={busy} onClick={() => void chooseFolder(true)}>{t('react.worldFiles.chooseZip')}</button><button className="button secondary" type="button" disabled={busy} onClick={() => void chooseFolder()}>{t('react.worldFiles.chooseWorldFolder')}</button></div>
+          <label className="field">{t('react.worldFiles.importName')}<input required maxLength={255} disabled={busy} value={input.saveName} onChange={event => setInput({ ...input, saveName: event.target.value })} /></label>
+        </>}
         {!finished && !review && input.type === 'copy' && <>
           <label className="field">{t('react.worldFiles.instance')}<select disabled={busy || !!review} value={input.destinationInstancePath} onChange={event => setInput({ ...input, destinationInstancePath: event.target.value })}>{library?.instances.map(instance => <option key={instance.path} value={instance.path}>{instance.name}</option>)}</select></label>
           <label className="field">{t('react.worldFiles.name')}<input required maxLength={255} disabled={busy || !!review} value={input.destinationName} onChange={event => setInput({ ...input, destinationName: event.target.value })} /></label>
@@ -60,7 +68,7 @@ export function WorldFilesDialog({ path, name, type, close, returnFocus, changed
         </>}
         {review && !finished && <div data-testid="world-files-review">
           <p>{t(review.files === 1 ? 'react.worldFiles.summaryOne' : 'react.worldFiles.summary', { count: n(review.files), bytes: n(review.bytes) })}</p><p className="instance-path">{review.destination}</p>
-          {review.linkOnly ? <p>{t('react.worldFiles.linkOnly')}</p> : review.shared ? <p className="form-error">{t('react.worldFiles.shared')}</p> : null}
+          {review.linkOnly ? <p>{t('react.worldFiles.linkOnly')}</p> : review.shared ? <p className="form-error">{t(input.type === 'import' ? 'react.worldFiles.importShared' : 'react.worldFiles.shared')}</p> : null}
         </div>}
         {busy && <p role="status">{t('react.worldFiles.working')}</p>}
         {finished && <p role="status">{t(`react.worldFiles.${type}Done`)}</p>}
@@ -68,7 +76,7 @@ export function WorldFilesDialog({ path, name, type, close, returnFocus, changed
       </div>
       <div className="dialog-actions"><button className="button secondary" type="button" disabled={busy} onClick={close}>{t('react.worldFiles.close')}</button>
         {review && !finished && <button className="button secondary" type="button" disabled={busy} onClick={() => setReview(null)}>{t('react.worldFiles.back')}</button>}
-        {!finished && <button className="button primary" type="submit" disabled={busy || input.type === 'export' && !input.destinationDirectory}>{t(review ? 'react.worldFiles.confirm' : 'react.worldFiles.review')}</button>}
+        {!finished && <button className="button primary" type="submit" disabled={busy || input.type === 'export' && !input.destinationDirectory || input.type === 'import' && !input.sourcePath}>{t(review ? 'react.worldFiles.confirm' : 'react.worldFiles.review')}</button>}
       </div>
     </form>
   </Dialog.Content></Dialog.Portal></Dialog.Root>

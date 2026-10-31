@@ -103,6 +103,7 @@ export interface CloneSaveOptions {
 }
 
 export type WorldFileOperation = { instancePath: string; saveName: string } & (
+  { type: 'import'; sourcePath: string } |
   { type: 'copy'; destinationInstancePath: string; destinationName: string } |
   { type: 'export'; destinationDirectory: string; fileName: string } |
   { type: 'remove' }

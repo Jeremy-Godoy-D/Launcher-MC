@@ -775,7 +775,7 @@ react:
     count: "{count} worlds"
     loadFailed: "Could not read or open the worlds. Check the folder and its permissions, then refresh."
     running: "The list will refresh when the game closes. Minecraft may be saving changes."
-    empty: "This instance has no worlds yet. Create one in Minecraft or import one through the folder."
+    empty: "This instance has no worlds yet. Create one in Minecraft or use Import world."
     noMatches: "No worlds match your search."
     shared: "Shared"
     sharedHelp: "This world is in the launcher's common folder. Other linked instances can change it."
@@ -800,6 +800,19 @@ react:
     seed: "Seed"
 
   worldFiles:
+    importShared: "The destination is the common worlds folder: the new world will be available to all linked instances. The source and other worlds are preserved. Close games before confirming."
+
+    importTitle: "Import world"
+    importHelp: "Copy a world from a folder or ZIP into this instance. The source is preserved, no links are created and existing worlds are never replaced. Review the files before confirming."
+    importName: "Imported world folder name"
+    chooseZip: "Choose world ZIP"
+    chooseWorldFolder: "Choose world folder"
+    importDone: "World imported as an independent copy. The source is preserved."
+    importFailed: "Could not import the world. Check the source, permissions and a valid Windows folder name. The source is preserved."
+    WorldImportInvalidError: "Choose a folder containing level.dat or a world ZIP. Source links are not accepted."
+    WorldArchiveInvalidError: "The ZIP does not contain one compatible world, or includes ambiguous or disallowed paths. Extract it and select the folder containing level.dat."
+    WorldImportLimitError: "The ZIP exceeds import limits: 32 GiB compressed, 64 GiB expanded, 1 GiB per file, 100,000 entries or 64 folder levels. Extract the world and choose its folder to import it."
+    WorldArchiveChecksumError: "ZIP integrity does not match. Download it again or check its source. The original ZIP is preserved; inspect the partial folder before retrying with another name."
     summaryOne: "1 file · {bytes} bytes"
     copy: "Copy"
     export: "Export ZIP"

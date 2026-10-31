@@ -4,6 +4,8 @@ import { dirname, join } from 'node:path'
 import { open, readAllEntries, readEntry } from '@xmcl/unzip'
 import { applyWorldFiles, previewWorldFiles } from './worldOperations'
 import type { WorldFileOperation } from '@xmcl/runtime-api/src/services/InstanceSavesService'
+import { ZipFile } from 'yazl'
+import { writeZipFile } from '../../util/zip'
 
 let root: string, instance: string, destination: string, exports: string, world: string
 beforeEach(async () => {
@@ -64,4 +66,49 @@ it('does not publish or clean another directory when the export parent is reboun
   expect(await readFile(join(exports, 'keep'), 'utf8')).toBe('OTHER DIRECTORY'); expect(await readFile(join(world, 'level.dat'), 'utf8')).toBe('LEVEL')
   expect((await readdir(join(root, 'retained-export'))).some(name => name.startsWith('.grimo-world-export-'))).toBe(true)
   await expect(lstat(join(exports, 'Alpha.zip'))).rejects.toMatchObject({ code: 'ENOENT' })
+})
+async function archive(files: Record<string, string>, name = 'import.zip') {
+  const zip = new ZipFile()
+  for (const [path, data] of Object.entries(files)) { if (path.endsWith('/')) zip.addEmptyDirectory(path); else zip.addBuffer(Buffer.from(data), path) }
+  const path = join(exports, name); await writeZipFile(zip, path); return path
+}
+const importing = (sourcePath: string): WorldFileOperation => ({ type: 'import', sourcePath, instancePath: destination, saveName: 'Imported' })
+it('imports a folder and a wrapped ZIP as independent worlds, preserving hidden files and empty directories', async () => {
+  const folder = await previewWorldFiles(importing(world), join(root, 'data')); const copied = await apply(folder)
+  expect(await readFile(join(copied.path, '.keep'), 'utf8')).toBe('HIDDEN'); expect((await lstat(join(copied.path, 'region/empty'))).isDirectory()).toBe(true)
+  const path = await archive({ 'World/level.dat': 'ZIP LEVEL', 'World/.keep': 'ZIP HIDDEN', 'World/empty/': '', 'README.txt': 'OUTSIDE WORLD' }), bytes = await readFile(path)
+  const review = await previewWorldFiles({ ...importing(path), saveName: 'ZipWorld' }, join(root, 'data')); expect(review).toMatchObject({ files: 2, bytes: 19 })
+  const imported = await apply(review); expect(await readFile(join(imported.path, 'level.dat'), 'utf8')).toBe('ZIP LEVEL'); expect((await lstat(join(imported.path, 'empty'))).isDirectory()).toBe(true)
+  await expect(lstat(join(imported.path, 'README.txt'))).rejects.toMatchObject({ code: 'ENOENT' }); expect(await readFile(path)).toEqual(bytes)
+  await expect(previewWorldFiles(importing(world), join(root, 'data'))).rejects.toHaveProperty('name', 'WorldDestinationExistsError')
+})
+it('rejects stale import sources and unsafe source links without creating a destination', async () => {
+  const path = await archive({ 'level.dat': 'ORIGINAL' }), review = await previewWorldFiles(importing(path), join(root, 'data'))
+  await archive({ 'level.dat': 'CHANGED' }); await expect(apply(review)).rejects.toHaveProperty('name', 'WorldFilesChangedError')
+  await expect(lstat(join(destination, 'saves/Imported'))).rejects.toMatchObject({ code: 'ENOENT' })
+  await symlink(world, join(root, 'linked-world'), 'junction'); await expect(previewWorldFiles(importing(join(root, 'linked-world')), join(root, 'data'))).rejects.toThrow()
+  await expect(previewWorldFiles({ ...importing(world), instancePath: world }, join(root, 'data'))).rejects.toThrow('overlaps')
+})
+it('rejects ambiguous worlds, file-directory conflicts and case-colliding archive paths', async () => {
+  const cases: Record<string, string>[] = [{ 'One/level.dat': 'ONE', 'Two/level.dat': 'TWO' }, { 'level.dat': 'LEVEL', foo: 'FILE', 'foo/child': 'CHILD' }, { 'level.dat': 'LEVEL', Case: 'UPPER', case: 'LOWER' }]
+  for (const entries of cases) {
+    const path = await archive(entries); await expect(previewWorldFiles(importing(path), join(root, 'data'))).rejects.toThrow()
+  }
+  await expect(lstat(join(destination, 'saves'))).rejects.toMatchObject({ code: 'ENOENT' })
+})
+it('rejects archive traversal, Unix links and declared oversized output before creating a world', async () => {
+  const path = await archive({ 'level.dat': 'LEVEL' }), original = await readFile(path), central = original.indexOf(Buffer.from([0x50, 0x4b, 0x01, 0x02]))
+  expect(central).toBeGreaterThan(0)
+  const traversal = Buffer.from(original); traversal.write('../evil/x', central + 46)
+  const linked = Buffer.from(original); linked.writeUInt32LE((0o120777 << 16) >>> 0, central + 38)
+  const oversized = Buffer.from(original); oversized.writeUInt32LE(1024 ** 3 + 1, central + 24)
+  for (const bytes of [traversal, linked, oversized]) { await writeFile(path, bytes); await expect(previewWorldFiles(importing(path), join(root, 'data'))).rejects.toThrow() }
+  await expect(lstat(join(destination, 'saves'))).rejects.toMatchObject({ code: 'ENOENT' })
+})
+it('checks ZIP CRC before publishing level.dat and preserves the source on checksum failure', async () => {
+  const path = await archive({ 'level.dat': 'LEVEL' }), bytes = await readFile(path), central = bytes.indexOf(Buffer.from([0x50, 0x4b, 0x01, 0x02]))
+  bytes.writeUInt32LE((bytes.readUInt32LE(central + 16) ^ 0xffffffff) >>> 0, central + 16); await writeFile(path, bytes)
+  const review = await previewWorldFiles(importing(path), join(root, 'data')); await expect(apply(review)).rejects.toHaveProperty('name', 'WorldArchiveChecksumError')
+  expect(await readFile(path)).toEqual(bytes); await expect(lstat(join(destination, 'saves/Imported/level.dat'))).rejects.toMatchObject({ code: 'ENOENT' })
+  expect(await readdir(join(destination, 'saves/Imported'))).toEqual([])
 })

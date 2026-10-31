@@ -256,11 +256,10 @@ async function isSameFile(file1: string, file2: string) {
 /**
  * Perform hard link or copy file from `from` to `to`.
  */
-export function linkOrCopyFile(from: string, to: string) {
+export function linkOrCopyFile(from: string, to: string, exclusive = false) {
   const onLinkFileError = async (e: unknown, copied: boolean) => {
     if (isSystemError(e) && e.code === 'EEXIST') {
-      const sameFile = await isSameFile(from, to)
-      if (sameFile) {
+      if (!exclusive && await isSameFile(from, to)) {
         return to
       }
       throw e
@@ -268,7 +267,7 @@ export function linkOrCopyFile(from: string, to: string) {
     if (copied) {
       throw e
     } else {
-      await copyFile(from, to).catch(e => onLinkFileError(e, true))
+      await copyFile(from, to, exclusive ? constants.COPYFILE_EXCL : 0).catch(e => onLinkFileError(e, true))
     }
     return to
   }

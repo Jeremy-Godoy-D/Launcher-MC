@@ -164,7 +164,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async #worldFiles<T>(operation: WorldFileOperation, action: () => Promise<T>): Promise<T> {
-    if (!operation || !['copy', 'export', 'remove'].includes(operation.type)) throw new Error('Invalid world operation')
+    if (!operation || !['copy', 'export', 'remove', 'import'].includes(operation.type)) throw new Error('Invalid world operation')
     const paths = [...new Set([operation.instancePath, ...(operation.type === 'copy' ? [operation.destinationInstancePath] : [])])].sort()
     for (const path of paths) await this.#javaInstance(path)
     const lock = async (index: number): Promise<T> => {
@@ -182,7 +182,21 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     for (const path of paths) await this.#javaInstance(path)
     const launch = await this.app.registry.get(LaunchService), processes = await launch.getGameProcesses()
     if (processes.some(process => paths.includes(process.options.gameDirectory))) throw new AnyError('InstanceRunningError')
+    if (processes.length) {
+      const touched = await Promise.all(paths.map(path => realpath(path).catch(() => path)))
+      const active = await Promise.all(processes.map(process => realpath(process.options.gameDirectory).catch(() => process.options.gameDirectory)))
+      if (touched.some(path => active.some(game => relative(path, game) === ''))) throw new AnyError('InstanceRunningError')
+    }
     if (review.shared && !review.linkOnly && processes.length) throw new AnyError('SharedWorldRunningError')
+    if (operation.type === 'import' && processes.length) {
+      const source = await realpath(operation.sourcePath), shared = join(await realpath(this.getPath()), 'saves'), inShared = relative(shared, source)
+      if (!inShared || inShared !== '..' && !inShared.startsWith('..' + sep) && !isAbsolute(inShared)) throw new AnyError('SharedWorldRunningError')
+      for (const process of processes) {
+        const directory = await worldsLocation(process.options.gameDirectory, this.getPath())
+        const inside = relative(directory.root, source), reverse = relative(source, directory.root)
+        if (!inside || inside !== '..' && !inside.startsWith('..' + sep) && !isAbsolute(inside) || !reverse || reverse !== '..' && !reverse.startsWith('..' + sep) && !isAbsolute(reverse)) throw new AnyError('InstanceRunningError')
+      }
+    }
     if (operation.type === 'export') {
       const parent = await realpath(operation.destinationDirectory)
       for (const instance of this.instanceService.state.instances) {

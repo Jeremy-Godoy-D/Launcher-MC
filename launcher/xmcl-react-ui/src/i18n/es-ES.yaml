@@ -775,7 +775,7 @@ react:
     count: "{count} mundos"
     loadFailed: "No se pudieron leer o abrir los mundos. Comprueba la carpeta y sus permisos y vuelve a leer."
     running: "La lista se actualizará al cerrar la partida. Minecraft puede estar guardando cambios."
-    empty: "Todavía no hay mundos en esta instancia. Crea uno desde Minecraft o importa uno desde la carpeta."
+    empty: "Todavía no hay mundos en esta instancia. Crea uno desde Minecraft o usa Importar mundo."
     noMatches: "No hay mundos que coincidan con la búsqueda."
     shared: "Compartido"
     sharedHelp: "Este mundo está en la carpeta común del launcher. Otras instancias vinculadas pueden modificarlo."
@@ -800,6 +800,19 @@ react:
     seed: "Semilla"
 
   worldFiles:
+    importShared: "El destino es la carpeta común de mundos: el nuevo mundo estará disponible para todas las instancias vinculadas. El origen y los demás mundos se conservan. Cierra las partidas antes de confirmar."
+
+    importTitle: "Importar mundo"
+    importHelp: "Copia un mundo desde una carpeta o ZIP a esta instancia. El origen se conserva, no se crean enlaces y nunca se reemplaza un mundo existente. Revisa los archivos antes de confirmar."
+    importName: "Nombre de carpeta del mundo importado"
+    chooseZip: "Elegir ZIP del mundo"
+    chooseWorldFolder: "Elegir carpeta del mundo"
+    importDone: "Mundo importado como copia independiente. El origen se conserva."
+    importFailed: "No se pudo importar el mundo. Comprueba el origen, los permisos y un nombre de carpeta válido para Windows. El origen se conserva."
+    WorldImportInvalidError: "Elige una carpeta con level.dat o un ZIP de un mundo. No se aceptan enlaces como origen."
+    WorldArchiveInvalidError: "El ZIP no contiene un único mundo compatible o incluye rutas ambiguas o no permitidas. Extrae el archivo y elige la carpeta que contiene level.dat."
+    WorldImportLimitError: "El ZIP supera los límites de importación: 32 GiB comprimidos, 64 GiB de contenido, 1 GiB por archivo, 100.000 entradas o 64 niveles de carpetas. Extrae el mundo y elige su carpeta para importarlo."
+    WorldArchiveChecksumError: "La integridad del ZIP no coincide. Descárgalo de nuevo o comprueba su origen. Se conserva el ZIP original; revisa la carpeta parcial antes de reintentar con otro nombre."
     summaryOne: "1 archivo · {bytes} bytes"
     copy: "Copiar"
     export: "Exportar ZIP"

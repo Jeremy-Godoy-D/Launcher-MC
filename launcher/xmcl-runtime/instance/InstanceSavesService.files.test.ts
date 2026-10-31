@@ -1,6 +1,8 @@
 import { beforeEach, expect, it, vi } from 'vitest'
 import { Mutex } from 'async-mutex'
 import { LockKey } from '@xmcl/runtime-api'
+import { mkdir, mkdtemp, rm, symlink } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 vi.mock('~/app', () => ({ Inject: () => () => {}, LauncherAppKey: Symbol('app'), kGameDataPath: Symbol('data') }))
 vi.mock('~/instance', () => ({ InstanceService: class {} }))
 vi.mock('~/launch', () => ({ LaunchService: class {} }))
@@ -44,4 +46,20 @@ it('blocks source and destination games and blocks other games only for shared f
   processes = [{ options: { gameDirectory: 'other' } }]; await expect(service.applyWorldFiles(review)).resolves.toEqual({ path: 'created' })
   review.shared = true; await expect(service.applyWorldFiles(review)).rejects.toHaveProperty('name', 'SharedWorldRunningError')
   review.linkOnly = true; await expect(service.applyWorldFiles(review)).resolves.toEqual({ path: 'created' })
+})
+it('requires only the registered Java destination when importing an external source and blocks its game', async () => {
+  instances = [{ path: 'destination', edition: 'java' }]
+  review.operation = { type: 'import', instancePath: 'destination', saveName: 'Imported', sourcePath: 'C:\\external\\World.zip' }
+  await expect(service.previewWorldFiles(review.operation)).resolves.toBe(review)
+  processes = [{ options: { gameDirectory: 'destination' } }]; await expect(service.applyWorldFiles(review)).rejects.toHaveProperty('name', 'InstanceRunningError')
+  instances = []; await expect(service.applyWorldFiles(review)).rejects.toHaveProperty('name', 'InstanceNotFoundError')
+})
+it('blocks world file operations when the running game uses an alias for the same instance', async () => {
+  const root = await mkdtemp(join(process.cwd(), '.world-idle-test-')), source = join(root, 'source'), destination = join(root, 'destination'), alias = join(root, 'alias')
+  try {
+    await mkdir(source); await mkdir(destination); await symlink(source, alias, 'junction')
+    instances = [source, destination].map(path => ({ path, edition: 'java' })); processes = [{ options: { gameDirectory: alias } }]
+    review.operation = { type: 'copy', instancePath: source, destinationInstancePath: destination, saveName: 'Alpha', destinationName: 'Beta' }
+    await expect(service.applyWorldFiles(review)).rejects.toHaveProperty('name', 'InstanceRunningError')
+  } finally { expect(dirname(root)).toBe(process.cwd()); expect(root.startsWith(join(process.cwd(), '.world-idle-test-'))).toBe(true); await rm(root, { recursive: true, force: true }) }
 })
