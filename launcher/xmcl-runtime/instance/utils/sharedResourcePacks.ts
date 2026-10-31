@@ -13,7 +13,7 @@ type Entry = { path: string; directory: boolean; size: number; hash?: string }
 const changed = () => Object.assign(new Error('Resource packs changed since review'), { name: 'ResourcePacksChangedError' })
 const inspect = (path: string) => lstat(path).catch(error => { if (error.code !== 'ENOENT') throw error })
 const digest = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex')
-async function tree(root: string) {
+export async function readFolderSnapshot(root: string) {
   const info = await inspect(root), entries: Entry[] = [], seen = new Set<string>()
   if (!info) return { entries, identity: null }
   if (!info.isDirectory() || info.isSymbolicLink()) throw new Error('Unsafe pack directory')
@@ -53,7 +53,7 @@ async function plan(path: string, shared: boolean, sharedRoot: string, domain: '
   if (parse(globalRoot).root === globalRoot) throw new Error('Unsafe shared root')
   if (contains(local, global) || contains(global, local)) throw new Error('Overlapping pack roots')
   await assertInstallDirectory(globalRoot, global)
-  const globalTree = await tree(global), localTree = linked ? globalTree : await tree(local), link = await inspect(local)
+  const globalTree = await readFolderSnapshot(global), localTree = linked ? globalTree : await readFolderSnapshot(local), link = await inspect(local)
   const globalNames = topNames(globalTree.entries), localNames = topNames(localTree.entries), conflicts: string[] = [], copy: string[] = []
   if (shared && !linked) for (const name of localNames) {
     const existing = globalNames.find(value => value.toLowerCase() === name.toLowerCase())
@@ -94,7 +94,7 @@ export async function applyResourcePackSharing(path: string, review: ResourcePac
       await symlink(current.global, stagedLink, process.platform === 'win32' ? 'junction' : 'dir')
       const copied = current.copy.flatMap(name => branch(current.localTree.entries, name))
       await copyEntries(current.local, current.global, copied)
-      if (contents((await tree(current.local)).entries) !== contents(current.localTree.entries) || contents((await tree(current.global)).entries) !== contents([...current.globalTree.entries, ...copied])) throw changed()
+      if (contents((await readFolderSnapshot(current.local)).entries) !== contents(current.localTree.entries) || contents((await readFolderSnapshot(current.global)).entries) !== contents([...current.globalTree.entries, ...copied])) throw changed()
       if (current.localTree.identity) await move(current.local, join(backup, 'previous'), { overwrite: false })
       await move(stagedLink, current.local, { overwrite: false })
       if (current.localTree.identity) return { backup }

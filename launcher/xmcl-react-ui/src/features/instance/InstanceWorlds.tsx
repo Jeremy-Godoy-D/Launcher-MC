@@ -5,11 +5,14 @@ import type { InstanceSavePreview } from '@xmcl/runtime-api/src/entities/save'
 import { useService } from '../../runtime'
 import { useI18n } from '../../i18n'
 import { usePanelFocus } from './usePanelFocus'
+import { WorldFilesDialog } from './WorldFilesDialog'
+import type { WorldFileOperation } from '@xmcl/runtime-api/src/services/InstanceSavesService'
 
 export function InstanceWorlds({ path, running }: { path: string; running: boolean }) {
   const service = useService(InstanceSavesServiceKey), { t, d, n } = useI18n()
   const [worlds, setWorlds] = useState<InstanceSavePreview[]>([]), [query, setQuery] = useState(''), [reading, setReading] = useState(true)
   const [error, setError] = useState(false), [revision, setRevision] = useState(0), [opening, setOpening] = useState(false), [details, setDetails] = useState('')
+  const [action, setAction] = useState<{ name: string; type: WorldFileOperation['type'] } | null>(null), actionTrigger = useRef<HTMLButtonElement | null>(null), search = useRef<HTMLInputElement>(null)
   const alive = useRef(true), openingFolder = useRef(false), trigger = useRef<HTMLButtonElement | null>(null)
   useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
   useEffect(() => {
@@ -43,7 +46,7 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
     </div></div>
     {error && <p className="form-error" role="alert">{t('react.worlds.loadFailed')}</p>}
     {running && <p role="status">{t('react.worlds.running')}</p>}
-    <div className="content-filters"><label className="search"><Search size={17} aria-hidden="true" /><input aria-label={t('react.worlds.search')} placeholder={t('react.worlds.search')} value={query} onChange={event => setQuery(event.target.value)} /></label><span aria-live="polite">{t('react.worlds.count', { count: n(visible.length) })}</span></div>
+    <div className="content-filters"><label className="search"><Search size={17} aria-hidden="true" /><input ref={search} aria-label={t('react.worlds.search')} placeholder={t('react.worlds.search')} value={query} onChange={event => setQuery(event.target.value)} /></label><span aria-live="polite">{t(visible.length === 1 ? 'react.worlds.one' : 'react.worlds.count', { count: n(visible.length) })}</span></div>
     {selected && <WorldDetails key={selected.name} world={selected} close={closeDetails} />}
     {reading && <p role="status">{t('react.worlds.loading')}</p>}
     {!reading && !error && !visible.length && <p className="empty">{t(query ? 'react.worlds.noMatches' : 'react.worlds.empty')}</p>}
@@ -51,8 +54,10 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
       <div className="world-icon">{world.icon ? <img src={world.icon} alt="" loading="lazy" onError={event => { event.currentTarget.style.display = 'none' }} /> : <Map size={24} aria-hidden="true" />}</div>
       <div><button className="content-file-name" onClick={event => { trigger.current = event.currentTarget; setDetails(world.name) }}>{world.levelName || world.name}</button><small>{world.name} · {world.gameVersion || t('react.workspace.unknown')}{world.linkTo ? ` · ${t('react.worlds.shared')}` : ''}</small>
         {world.error ? <p className="form-error">{t(`react.worlds.${world.error}`)}</p> : <small>{t(`react.worlds.mode${world.mode}`)} · {world.lastPlayed ? d(world.lastPlayed) : t('react.workspace.never')}</small>}
+        <div className="content-actions">{(['copy', 'export', 'remove'] as const).map(type => <button key={type} className="button secondary" disabled={running || reading || world.error === 'unsafe'} aria-label={t(`react.worldFiles.${type}Name`, { name: world.name })} onClick={event => { actionTrigger.current = event.currentTarget; setAction({ name: world.name, type }) }}>{t(`react.worldFiles.${type}`)}</button>)}</div>
       </div>
     </li>)}</ul>
+    {action && <WorldFilesDialog key={`${action.name}:${action.type}`} path={path} name={action.name} type={action.type} close={() => setAction(null)} changed={() => { setDetails(''); setRevision(value => value + 1) }} returnFocus={() => { const target = actionTrigger.current; if (target?.isConnected && !target.disabled) target.focus(); else search.current?.focus() }} />}
   </section>
 }
 

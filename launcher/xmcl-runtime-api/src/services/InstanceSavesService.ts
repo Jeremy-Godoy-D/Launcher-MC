@@ -102,6 +102,21 @@ export interface CloneSaveOptions {
   newSaveName?: string
 }
 
+export type WorldFileOperation = { instancePath: string; saveName: string } & (
+  { type: 'copy'; destinationInstancePath: string; destinationName: string } |
+  { type: 'export'; destinationDirectory: string; fileName: string } |
+  { type: 'remove' }
+)
+export interface WorldFileReview {
+  operation: WorldFileOperation
+  snapshot: string
+  files: number
+  bytes: number
+  shared: boolean
+  linkOnly: boolean
+  destination: string
+}
+
 export function getInstanceSaveKey(path: string) {
   return `instance-saves://${path}`
 }
@@ -254,6 +269,8 @@ export interface PasteSaveChunksOptions {
  * Provide the ability to preview saves data of an instance
  */
 export interface InstanceSavesService {
+  previewWorldFiles(operation: WorldFileOperation): Promise<WorldFileReview>
+  applyWorldFiles(review: WorldFileReview): Promise<{ path: string; backup?: string }>
   showDirectory(instancePath: string): Promise<void>
   /**
    * Read all saves under the instance folder
