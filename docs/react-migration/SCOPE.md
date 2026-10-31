@@ -80,3 +80,11 @@ El usuario confirmó **Grimo Launcher** como nombre definitivo y proporcionó lo
 Corrección posterior del mismo día: «adapta el color del logo» y usar las distintas versiones según su finalidad. Esta instrucción autoriza derivados de color de sus logos en cobre/crema/obsidiana, conservando los originales; prevalece sobre la prohibición anterior de generar sustitutos para ese ajuste. No autoriza imágenes IA para paisajes ni cambiar los recursos propios de los modpacks. Icono de app/ICO para Windows y controles pequeños; horizontal adaptado a cada tema para superficies amplias; principal e isotipo originales conservados para sus usos de marca.
 
 Conservar los identificadores técnicos necesarios para abrir instalaciones anteriores: carpeta de datos y secretos `LauncherMC`, appId/AUMID `local.launchermc.desktop`, enlaces `launchermc` y repositorio de actualizaciones actual. El nombre visible y los nuevos paquetes pueden usar Grimo; los enlaces y binarios históricos conservan sus nombres. No interpretar el cambio de marca como autorización para borrar/mover datos, renombrar el repositorio remoto ni publicar una versión sin pasar sus gates.
+
+## Aclaración del usuario — todas las herramientas locales de Mundos (2026-10-31)
+
+Respuesta directa a la consulta de alcance: «Todas las herramientas locales, incluido editar chunks».
+
+Conservar en React todas las herramientas locales existentes de Mundos, incluidos mapa, visor de progreso, dimensiones, regiones y edición de chunks (consultar, copiar, pegar y eliminar), además de gestión de mundos, metadatos, importación/exportación, copias y datapacks. No retirar estas funciones por considerarlas extras de XMCL. P2P y administración remota SSH siguen retirados.
+
+Mantener aislamiento entre instancias, confirmación de destinos y cambios, bloqueo de escrituras mientras se usa el mundo y copias de seguridad de los datos afectados. La confirmación amplía explícitamente la aceptación de K11; no acredita que esas pantallas o garantías estén ya implementadas o validadas.

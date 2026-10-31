@@ -18,7 +18,7 @@ Referencia: beta.2, commit `7671c6f1bdc471d42816241920a262a18aca5a44`. Alcance c
 | K08 | Mods `/instance/mods`, Mod.vue y acciones | InstanceModsService/InstanceModsGroupService, instanceMods, modUpgrade | Activar/instalar/actualizar/retirar/buscar/agrupar según funciones actuales. | pending |
 | K09 | Packs `/instance/resourcepacks` | InstanceResourcePacksService, instanceResourcePack | Instalar/activar/ordenar/retirar y metadatos públicos. | pending |
 | K10 | Shaders `/instance/shaderpacks` | InstanceShaderPacksService, instanceShaderPack | Compatibilidad, instalar/activar/retirar/actualizar. | pending |
-| K11 | Mundos `/instance/save`, Save.vue | InstanceSavesService, instanceSave*, savesSearch | Operaciones locales, datapacks, importar/exportar/clonar/borrar; hashes conservados. Compartir P2P se retira. | pending |
+| K11 | Mundos `/instance/save`, Save.vue | InstanceSavesService, instanceSave*, savesSearch | Operaciones locales, datapacks, importar/exportar/clonar/borrar y todas las herramientas locales: mapa, progreso, dimensiones, regiones y editar/copiar/pegar/eliminar chunks; revisión y backups de cambios. Confirmado por el usuario 2026-10-31. Compartir P2P se retira. | pending |
 | K12 | Ajustes `/instance/base-setting` | InstanceOptionsService/InstanceService, instanceOptions, instanceEdit | Java/RAM/args/resolución/heredar/restablecer/null, guardar/salir con cambios. Sin SSH ni editor de temas. | pending |
 | K13 | Entrar a servidor normal desde Minecraft | InstanceServerInfoService, BaseSettingServer, Instance.server | Conservar destino de servidor al lanzar Java; no confundir con host/SSH/P2P. | pending |
 | K14 | Catálogo `/store` | Store.vue, curseforgeSearch/modrinthSearch y clientes | Búsqueda/filtros/proveedores públicos, paginación, offline y fallo independiente. | pending |
@@ -223,3 +223,7 @@ K11 permanece pending. `STAGE5-WORLDS-READ.md` registra lectura Native acotada, 
 ## Mundos: operaciones revisadas
 
 K11 sigue pending. `STAGE5-WORLD-OPERATIONS.md` añade copia independiente, ZIP completo y retirada a respaldo privado con revisión Native, guardas de juegos/destinos, conservación de carpetas vacías y teclado. Faltan importación/edición/datapacks y aceptación integral; los métodos legacy de escritura siguen pendientes de auditoría de IPC. CI previo pasó con tres pruebas intermitentes; revisar antes de publicar.
+
+## Confirmación posterior de herramientas locales y estabilidad
+
+El usuario confirmó el 2026-10-31 conservar todas las herramientas locales, incluida edición de chunks. K11 sigue pendiente hasta portar y validar mapa/progreso/dimensiones/regiones y sus operaciones de edición, además de importación/metadatos/datapacks. `STAGE5-CI-STABILITY.md` registra correcciones de foco/diálogos/fixtures, evidencia local y el fallo del CI anterior; falta verificar el siguiente.
