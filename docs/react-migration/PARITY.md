@@ -215,3 +215,7 @@ STAGE5-SHADER-SHARING.md: revisión de carpeta común/copia privada,hashes/copia
 ### Actualizaciones y recuperación de shaders (41f5692)
 
 STAGE5-SHADER-UPDATES.md: dominio shaderpacks revisado en Native,snapshots/autoridad/nombres/backup/guardas y recuperación;interfaz reutiliza ModUpdates. Motor Native comprobado al consultar/revisar/confirmar;resultados obsoletos se invalidan. Modrinth usaetiquetas shaders,CFMinecraft sin prometer motor/GPU;noZIP se rechaza.983unitarias/97archivos,tipos/lint,34NativeReact+4Vue finales y9Axe0violaciones/18incomplete. CI40993833018/b8c8f18 aprobó compartidos anterior(155React+1Strict+6Vue);CI nuevo requerido. Núcleo local K10 implementado;K08/K09/K10/gates5 pendientes de aceptación integral y catálogo/proveedores reales6. Continuar mundos/ajustes/consola,después6–9. Sin partida/GPU/NSIS/delta reales ni publicación.
+
+## Mundos: primera conexión React
+
+K11 permanece pending. `STAGE5-WORLDS-READ.md` registra lectura Native acotada, información, búsqueda, errores visibles, iconos seguros y enlaces al depósito propio. Faltan operaciones confirmadas y datapacks; no atribuir seguridad a escrituras legacy ni retirar mapa/edición avanzada sin resolver su alcance.

@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa. Updates/recuperación shaders 41f5692 implementados con dominio Native revisado, respaldo/nombres/configuraciones preservados y filtros documentados.983unitarias/97archivos,tipos/lint;34NativeReact+4Vue finales aprobados,9Axe nuevos0violaciones/18incomplete. Aviso sin motor800 y resultados obsoletos corregidos con fallos previos. CI40993833018/b8c8f18 aprobó compartidos anterior (155React+1Strict+6Vue);verificar CI del próximo push. Próximo:mundos/ajustes de instancia/consola;catálogo6 y proveedores reales,superficies7,retirada8,validación/publicación9. K08/K09/K10 y gates5 pendientes. Vue default/dist,PR4 borrador,producción/proxy intactos,Microsoft pospuesto. No rehacer shaders implementados;respetar archivos/limpiezas protegidos.",
+  "nextAction": "Etapa5 activa. Mundos: lectura/info/búsqueda Native implementadas en a2bf032;989unitarias/98archivos,tipos/lint y11React02/52/61 aprobados;3nuevos repetidos tras guardNBT,Vue03 final aprobado.4Axe nuevos0violaciones/4incomplete (repetidos). Límites NBT/iconos/enlaces y bytes preservados documentados en STAGE5-WORLDS-READ.md. CI41177249288/413a55d success ambos jobs;CI nuevo pendiente. Próximo:operaciones de mundos/datapacks,ajustes de instancia,consola;catálogo6,superficies7,retirada8,validación/publicación9. K11 y gates5 pendientes. Vue default/dist,PR4 borrador,producción/proxy intactos,Microsoft pospuesto;respetar rutas protegidas.",
   "stages": [
     {
       "id": 0,
@@ -765,7 +765,12 @@
         {
           "id": "worlds-settings",
           "status": "pending",
-          "evidence": []
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE5-WORLDS-READ.md",
+              "sha256": "8ff60ab5bb7e002e47aa7d98e3dba11111cbc14569119250d8dca3a0f2c1f799"
+            }
+          ]
         },
         {
           "id": "console-isolation",

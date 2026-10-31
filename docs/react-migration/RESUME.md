@@ -6,15 +6,14 @@ Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio
 
 ## Bloque actual
 
-Etapa5 activa. Updates/recuperación shaders 41f5692 implementados con dominio Native revisado, respaldo/nombres/configuraciones preservados y filtros documentados.983unitarias/97archivos,tipos/lint;34NativeReact+4Vue finales aprobados,9Axe nuevos0violaciones/18incomplete. Aviso sin motor800 y resultados obsoletos corregidos con fallos previos. CI40993833018/b8c8f18 aprobó compartidos anterior (155React+1Strict+6Vue);verificar CI del próximo push. Próximo:mundos/ajustes de instancia/consola;catálogo6 y proveedores reales,superficies7,retirada8,validación/publicación9. K08/K09/K10 y gates5 pendientes. Vue default/dist,PR4 borrador,producción/proxy intactos,Microsoft pospuesto. No rehacer shaders implementados;respetar archivos/limpiezas protegidos.
+Etapa5 activa. Mundos: lectura/info/búsqueda Native implementadas en a2bf032;989unitarias/98archivos,tipos/lint y11React02/52/61 aprobados;3nuevos repetidos tras guardNBT,Vue03 final aprobado.4Axe nuevos0violaciones/4incomplete (repetidos). Límites NBT/iconos/enlaces y bytes preservados documentados en STAGE5-WORLDS-READ.md. CI41177249288/413a55d success ambos jobs;CI nuevo pendiente. Próximo:operaciones de mundos/datapacks,ajustes de instancia,consola;catálogo6,superficies7,retirada8,validación/publicación9. K11 y gates5 pendientes. Vue default/dist,PR4 borrador,producción/proxy intactos,Microsoft pospuesto;respetar rutas protegidas.
 
 ## Siguiente acción
 
-1. Consultar CI del próximo push.40993833018/b8c8f18 aprobó ambos jobs para compartidos:155React+1Strict+6Vue,955unidades por job,dos pruebas vivas omitidas. No inferir verde para41f5692.
-2. Implementar mundos y ajustes de instancia;después consola integrada/independiente. Leer servicios y consumidores existentes y conservar datos. Shaders ya tienen selección/archivos/info/grupos/compartidos/updates/recuperación: no rehacerlos. Ver STAGE5-SHADER-UPDATES.md.
-3. Catálogo6 incluye verificación de proveedores reales y cierre integral del contenido;superficies7,retirada8,validación/publicación9. K08/K09/K10 y gates5 siguen pending. No sustituir el objetivo completo por cerrar solo shaders.
-4. Fuente41f5692:983unitarias/97archivos,tipos/lint,34NativeReact39/40/42/49/52/57/59 y4Vue03/45/58/60 finales.9Axe nuevos0violaciones/18incomplete. E2E mantiene56diagnósticos previos. Hosts construidos;rendererVue preexistente reutilizado;dist/defaultVue. No sumar repeticiones.
-5. Una regresión33/34 detectó que al reabrir persistían resultados/scroll de un motor retirado. Se invalidan por snapshot y se muestra el aviso primero,sin duplicación ni alerta durante lectura;focal6 y lote34 finales pasan. Dos negativos ZIP fallaron antes del filtro. Metadatos/descargas de proveedores son fixtures;Native real y etiquetas públicas comprobadas. No acredita juego/GPU ni API de shaders viva. Native/build secuenciales,unidades amplias sin otra carga.
+1. Verificar CI del nuevo push; el anterior 41177249288/413a55d pasó ambos jobs.
+2. Completar operaciones de mundos/datapacks con revisión de destinos, juegos activos, enlaces, colisiones, backups y errores. Reutilizar worldFiles; no rehacer la lectura/info ya implementadas. No conectar escrituras legacy inseguras.
+3. Continuar ajustes de instancia/consola y las etapas 6–9. K11 y gates5 siguen pending. Pregunta opcional sobre herramientas avanzadas de mundos sin respuesta: no retirarlas por suposición.
+4. STAGE5-WORLDS-READ.md identifica fuente, comandos y manifiesto. 989 unidades;11 React distintos+3 repetidos;Vue03 repetido;4Axe nuevos0violaciones/4incomplete, repetidos. E2E mantiene56diagnósticos previos. Dist/defaultVue;Microsoft pospuesto,producción intacta.
 
 ## Restricciones y hechos que no deben perderse
 
