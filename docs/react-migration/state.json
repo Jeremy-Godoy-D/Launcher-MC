@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa. Mundos: lectura/info/búsqueda Native implementadas en a2bf032;989unitarias/98archivos,tipos/lint y11React02/52/61 aprobados;3nuevos repetidos tras guardNBT,Vue03 final aprobado.4Axe nuevos0violaciones/4incomplete (repetidos). Límites NBT/iconos/enlaces y bytes preservados documentados en STAGE5-WORLDS-READ.md. CI41177249288/413a55d success ambos jobs;CI nuevo pendiente. Próximo:operaciones de mundos/datapacks,ajustes de instancia,consola;catálogo6,superficies7,retirada8,validación/publicación9. K11 y gates5 pendientes. Vue default/dist,PR4 borrador,producción/proxy intactos,Microsoft pospuesto;respetar rutas protegidas.",
+  "nextAction": "Etapa5 activa. Copia/ZIP/retirada revisadas de mundos 9d7efeb implementadas;999 unidades/100 archivos,tipos/lint,10React57/61/62 y3Vue03/58/63 aprobados;3React62 repetidos al simplificar revisión.12Axe nuevos0violaciones/24incomplete. STAGE5-WORLD-OPERATIONS.md conserva límites y evidencias. CI41179439218/aa5cc27 success ambos jobs,pero3flaky12/44/53:triage próximo, no afirmar estabilidad. Próximo:intermitencias,importar/editar mundos/datapacks,ajustes de instancia/consola;catálogo6,superficies7,retirada8,validación/publicación9. K11 y gates5 pendientes. Vue default/dist,PR4 borrador,producción/proxy intactos,Microsoft pospuesto;no tocar rutas protegidas.",
   "stages": [
     {
       "id": 0,
@@ -769,6 +769,10 @@
             {
               "path": "docs/react-migration/STAGE5-WORLDS-READ.md",
               "sha256": "8ff60ab5bb7e002e47aa7d98e3dba11111cbc14569119250d8dca3a0f2c1f799"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-WORLD-OPERATIONS.md",
+              "sha256": "292b25e8b41e147e118def57d9d8ebe82e96d30406daa92300ff0300fd43a25a"
             }
           ]
         },

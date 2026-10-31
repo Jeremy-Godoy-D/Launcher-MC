@@ -6,14 +6,14 @@ Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio
 
 ## Bloque actual
 
-Etapa5 activa. Mundos: lectura/info/búsqueda Native implementadas en a2bf032;989unitarias/98archivos,tipos/lint y11React02/52/61 aprobados;3nuevos repetidos tras guardNBT,Vue03 final aprobado.4Axe nuevos0violaciones/4incomplete (repetidos). Límites NBT/iconos/enlaces y bytes preservados documentados en STAGE5-WORLDS-READ.md. CI41177249288/413a55d success ambos jobs;CI nuevo pendiente. Próximo:operaciones de mundos/datapacks,ajustes de instancia,consola;catálogo6,superficies7,retirada8,validación/publicación9. K11 y gates5 pendientes. Vue default/dist,PR4 borrador,producción/proxy intactos,Microsoft pospuesto;respetar rutas protegidas.
+Etapa5 activa. Copia/ZIP/retirada revisadas de mundos 9d7efeb implementadas;999 unidades/100 archivos,tipos/lint,10React57/61/62 y3Vue03/58/63 aprobados;3React62 repetidos al simplificar revisión.12Axe nuevos0violaciones/24incomplete. STAGE5-WORLD-OPERATIONS.md conserva límites y evidencias. CI41179439218/aa5cc27 success ambos jobs,pero3flaky12/44/53:triage próximo, no afirmar estabilidad. Próximo:intermitencias,importar/editar mundos/datapacks,ajustes de instancia/consola;catálogo6,superficies7,retirada8,validación/publicación9. K11 y gates5 pendientes. Vue default/dist,PR4 borrador,producción/proxy intactos,Microsoft pospuesto;no tocar rutas protegidas.
 
 ## Siguiente acción
 
-1. Verificar CI del nuevo push; el anterior 41177249288/413a55d pasó ambos jobs.
-2. Completar operaciones de mundos/datapacks con revisión de destinos, juegos activos, enlaces, colisiones, backups y errores. Reutilizar worldFiles; no rehacer la lectura/info ya implementadas. No conectar escrituras legacy inseguras.
-3. Continuar ajustes de instancia/consola y las etapas 6–9. K11 y gates5 siguen pending. Pregunta opcional sobre herramientas avanzadas de mundos sin respuesta: no retirarlas por suposición.
-4. STAGE5-WORLDS-READ.md identifica fuente, comandos y manifiesto. 989 unidades;11 React distintos+3 repetidos;Vue03 repetido;4Axe nuevos0violaciones/4incomplete, repetidos. E2E mantiene56diagnósticos previos. Dist/defaultVue;Microsoft pospuesto,producción intacta.
+1. Consultar CI del nuevo push y resolver las tres intermitencias del anterior 41179439218/aa5cc27:12-launch:69,44-pack-files:72,53-shader-import:40. Log completo ignorado stage5-world-operations-previous-ci.log. Ambos jobs success,pero React161passed/3flaky/2skipped;7Vue y1Strict. No relajar asserts ni aumentar timeouts por suposición.
+2. Completar importar mundos ZIP/carpeta, edición de metadatos, datapacks y operaciones locales conservadas. No rehacer lectura/info/copia/ZIP/retirada ya implementadas. No conectar escrituras legacy sin revisar: siguen pendientes de auditoría/retirada en etapa8.
+3. SCOPE conserva operaciones locales existentes. La pregunta opcional sobre mapa/progreso/regiones no tiene respuesta: no retirar esas herramientas por suposición. Continuar ajustes/consola y etapas6–9;K11/gates5 pending.
+4. STAGE5-WORLD-OPERATIONS.md fija fuente9d7efeb y manifiesto:999unidades,tipos/lint;10React+3Vue distintos,3React62 repetidos tras mejora visual;12Axe nuevos0violaciones/24incomplete. PrimerAxe800 falló por scrollsin teclado y prueba de rebinding falló por ENOENT genérico;ambos corregidos. E2E mantiene56diagnósticos previos. Dist/defaultVue,paquetes independientes.
 
 ## Restricciones y hechos que no deben perderse
 

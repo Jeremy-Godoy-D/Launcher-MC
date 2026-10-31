@@ -219,3 +219,7 @@ STAGE5-SHADER-UPDATES.md: dominio shaderpacks revisado en Native,snapshots/autor
 ## Mundos: primera conexión React
 
 K11 permanece pending. `STAGE5-WORLDS-READ.md` registra lectura Native acotada, información, búsqueda, errores visibles, iconos seguros y enlaces al depósito propio. Faltan operaciones confirmadas y datapacks; no atribuir seguridad a escrituras legacy ni retirar mapa/edición avanzada sin resolver su alcance.
+
+## Mundos: operaciones revisadas
+
+K11 sigue pending. `STAGE5-WORLD-OPERATIONS.md` añade copia independiente, ZIP completo y retirada a respaldo privado con revisión Native, guardas de juegos/destinos, conservación de carpetas vacías y teclado. Faltan importación/edición/datapacks y aceptación integral; los métodos legacy de escritura siguen pendientes de auditoría de IPC. CI previo pasó con tres pruebas intermitentes; revisar antes de publicar.
