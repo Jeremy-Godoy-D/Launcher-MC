@@ -32,7 +32,7 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `instance-operation-confirm` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76)<br>[`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L159`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L159) |
 | `instance-operations` | [`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L62`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L62) |
 | `instance-resourcepacks` | [`xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L140`](../xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L140) |
-| `instance-shaders` | [`xmcl-react-ui/src/features/instance/InstanceShaders.tsx#L178`](../xmcl-react-ui/src/features/instance/InstanceShaders.tsx#L178) |
+| `instance-shaders` | [`xmcl-react-ui/src/features/instance/InstanceShaders.tsx#L179`](../xmcl-react-ui/src/features/instance/InstanceShaders.tsx#L179) |
 | `instance-workspace` | [`xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L32`](../xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L32) |
 | `instance-worlds` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L42`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L42) |
 | `launch-confirm` | [`xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157`](../xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157) |

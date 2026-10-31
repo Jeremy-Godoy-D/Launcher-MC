@@ -2,6 +2,7 @@ import { test, expect, snap } from '../../helpers/scratch'
 import { seedReactLibrary } from '../../helpers/react-library'
 import { makeReactMod, makeReactShaderPack } from '../../helpers/react-content'
 import { stubOpenDialog } from '../../helpers/tasks/importModpack'
+import { focusLauncher } from '../../helpers/focus-launcher'
 import { lstat, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
@@ -37,16 +38,22 @@ test('shader ZIP and folder imports preserve sources, configurations, worlds and
   await snap(launcher, 'shader-import-actions-800', 'Imported shader sources remain independent and import actions are reachable in the minimum window.')
 })
 
-test('a shader filename collision and canceled native picker preserve installed files and recover focus', async ({ launcher }) => {
+test('a shader filename collision and canceled native picker preserve installed files and recover focus', async ({ launcher }, testInfo) => {
   const page = launcher.main, [path] = await seedReactLibrary(page), source = join(launcher.gameDataPath, 'collision-shader-source')
   await makeReactShaderPack(path, 'Same'); await makeReactShaderPack(source, 'Same'); const installed = join(path, 'shaderpacks/Same.zip'), bytes = await readFile(installed)
   await writeFile(join(source, 'shaderpacks/Same.zip'), 'NEW SOURCE')
   await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click(); await page.getByRole('link', { name: 'Shaders', exact: true }).click()
   const area = page.getByTestId('instance-shaders'), add = area.getByRole('button', { name: 'Añadir archivos', exact: true })
+  await focusLauncher(launcher)
   await stubOpenDialog(launcher, join(source, 'shaderpacks/Same.zip')); await add.click(); await expect(area.getByRole('alert')).toContainText('Ya existe un shader')
+  const win = await launcher.app.browserWindow(page)
+  const before = { native: await win.evaluate(win => ({ focused: win.isFocused(), contentsFocused: win.webContents.isFocused() })), document: await page.evaluate(() => ({ focused: document.hasFocus(), active: document.activeElement?.outerHTML.slice(0, 400) })) }
+  // The native picker stub does not bring a Windows runner back to the foreground.
+  await win.evaluate(win => win.blur()); await focusLauncher(launcher)
   expect(await readFile(installed)).toEqual(bytes); expect(await readFile(join(source, 'shaderpacks/Same.zip'), 'utf8')).toBe('NEW SOURCE'); await expect(add).toBeFocused()
   await launcher.app.evaluate(({ dialog }) => { dialog.showOpenDialog = async () => ({ canceled: true, filePaths: [] }) })
-  await add.click(); await expect(add).toBeEnabled(); await expect(add).toBeFocused(); await expect(area.getByRole('alert')).toHaveCount(0)
+  await add.click(); await expect(add).toBeEnabled(); await focusLauncher(launcher); await expect(add).toBeFocused(); await expect(area.getByRole('alert')).toHaveCount(0)
+  await writeFile(testInfo.outputPath('picker-native-focus.json'), JSON.stringify({ before, after: await page.evaluate(() => ({ focused: document.hasFocus(), active: document.activeElement?.outerHTML.slice(0, 400) })) }, null, 2))
   expect(await readFile(installed)).toEqual(bytes)
   const error = await page.evaluate(async path => { try { await (window as any).serviceChannels.open('InstanceShaderPacksService').call('install', { path: path + '-unknown', files: [] }); return '' } catch (e: any) { return e.name } }, path)
   expect(error).toBe('InstanceNotFoundError')

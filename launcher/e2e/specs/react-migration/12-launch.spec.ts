@@ -5,6 +5,7 @@ import { test, expect, snap } from '../../helpers/scratch'
 import { mockLaunchRuntime, addLaunchProfile } from '../../helpers/react-launch'
 import { makeReactModpack, mockCreationMetadata } from '../../helpers/react-creation'
 import { stubOpenDialog } from '../../helpers/tasks/importModpack'
+import { activateLauncherControl } from '../../helpers/focus-launcher'
 
 test.use({
   launcherOptions: { seed: { name: 'Launch base QA', minecraft: '1.21.1' }, locale: 'es-ES' },
@@ -158,32 +159,10 @@ test('launch checks profile and physical directory, confirms once, restores proc
       .open('InstanceService')
       .call('createInstance', { name: 'Caves video QA', runtime: { minecraft: '1.20.4' } })
   })
-  await page.getByRole('button', { name: 'Siguiente instancia', exact: true }).click()
+  await activateLauncherControl(launcher, page.getByRole('button', { name: 'Siguiente instancia', exact: true }))
   await expect(page.locator('.featured h2')).toHaveText('Caves video QA')
-  // Restore native focus after the background swap before testing keyboard activation on Windows.
-  await win.evaluate(win => {
-    if (win.isMinimized()) win.restore()
-    win.show(); win.focus(); win.webContents.focus()
-  })
-  await expect.poll(() => win.evaluate(win => win.isFocused() && win.webContents.isFocused())).toBe(true)
-  await expect.poll(() => page.evaluate(() => document.hasFocus())).toBe(true)
   const resumePresentation = page.getByRole('button', { name: 'Reanudar presentación', exact: true })
-  await resumePresentation.focus()
-  await expect(resumePresentation).toBeFocused()
-  await expect(resumePresentation).toBeEnabled()
-  // CI stalled in the observer-based viewport check; retain full bounds and ancestor clipping checks.
-  await expect(resumePresentation).toBeVisible()
-  await expect.poll(() => resumePresentation.evaluate(element => {
-    const rect = element.getBoundingClientRect()
-    let left = 0, top = 0, right = innerWidth, bottom = innerHeight
-    for (let parent = element.parentElement; parent; parent = parent.parentElement) {
-      const style = getComputedStyle(parent), box = parent.getBoundingClientRect()
-      if (/^(auto|scroll|hidden|clip)$/.test(style.overflowX)) { left = Math.max(left, box.left + parent.clientLeft); right = Math.min(right, box.left + parent.clientLeft + parent.clientWidth) }
-      if (/^(auto|scroll|hidden|clip)$/.test(style.overflowY)) { top = Math.max(top, box.top + parent.clientTop); bottom = Math.min(bottom, box.top + parent.clientTop + parent.clientHeight) }
-    }
-    return rect.width > 0 && rect.height > 0 && rect.left >= left && rect.right <= right && rect.top >= top && rect.bottom <= bottom
-  })).toBe(true)
-  await resumePresentation.press('Enter')
+  await activateLauncherControl(launcher, resumePresentation)
   await expect(page.getByRole('button', { name: 'Pausar presentación', exact: true })).toBeVisible()
   await page.emulateMedia({ reducedMotion: 'no-preference' })
   await page.getByTestId('nav-home').focus()
@@ -195,30 +174,11 @@ test('launch checks profile and physical directory, confirms once, restores proc
     native: await win.evaluate(win => ({ focused: win.isFocused(), minimized: win.isMinimized(), contentsFocused: win.webContents.isFocused() })),
     document: await page.evaluate(() => ({ focused: document.hasFocus(), visibility: document.visibilityState })),
   }, null, 2))
-  // Restore native and renderer focus before mouse actionability checks on Windows.
-  await win.evaluate(win => {
-    if (win.isMinimized()) win.restore()
-    win.show()
-    win.focus()
-    win.webContents.focus()
-  })
-  await expect.poll(() => win.evaluate(win => win.isFocused() && win.webContents.isFocused())).toBe(true)
-  await expect.poll(() => page.evaluate(() => document.hasFocus())).toBe(true)
-  await page.locator('.sidebar-instance button').click()
+  await activateLauncherControl(launcher, page.locator('.sidebar-instance button'))
   const viewGame = page.getByRole('button', { name: 'Ver partida', exact: true })
-  await viewGame.focus()
-  await expect(viewGame).toBeFocused()
-  await viewGame.press('Enter')
+  await activateLauncherControl(launcher, viewGame)
   await expect(dialog.getByRole('button', { name: 'Detener partida', exact: true })).toBeEnabled()
-  await win.evaluate((win) => {
-    win.show()
-    win.focus()
-  })
-  await expect.poll(() => win.evaluate((win) => win.isVisible() && win.isFocused())).toBe(true)
-  await expect(dialog.getByRole('button', { name: 'Detener partida', exact: true })).toBeInViewport(
-    { ratio: 1 },
-  )
-  await dialog.getByRole('button', { name: 'Detener partida', exact: true }).press('Enter')
+  await activateLauncherControl(launcher, dialog.getByRole('button', { name: 'Detener partida', exact: true }))
   await expect(dialog.getByRole('status')).toContainText('ha terminado')
   await expect(page.getByTestId('react-prototype')).toHaveAttribute(
     'data-motion-state',
@@ -226,11 +186,7 @@ test('launch checks profile and physical directory, confirms once, restores proc
   )
   await page.keyboard.press('Escape')
   await expect(dialog).toHaveCount(0)
-  await expect.poll(() => win.evaluate(win => {
-    win.show(); win.focus(); win.webContents.focus()
-    return win.isFocused() && win.webContents.isFocused()
-  })).toBe(true)
-  await page.getByTestId('nav-home').click()
+  await activateLauncherControl(launcher, page.getByTestId('nav-home'))
   await expect(page.locator('.featured h2')).toHaveText('Caves video QA')
   await page.getByTestId('nav-home').focus()
   await page.mouse.move(70, 20)

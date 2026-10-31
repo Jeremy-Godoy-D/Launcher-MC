@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { Link } from 'react-router'
 import { FolderOpen, Plus, RefreshCw, Search, Trash2 } from 'lucide-react'
 import { InstanceShaderPacksServiceKey, type ShaderPackSelection, type ShaderRemovalReview } from '@xmcl/runtime-api/src/services/InstanceShaderPacksService'
@@ -37,11 +37,12 @@ export function InstanceShaders({ path, running, runtime }: { path: string; runn
   const fileBusy = blocked || snapshot.status !== 'ready'
   const busy = working || snapshot.status !== 'ready' || reading || modSnapshot.status !== 'ready'
   useEffect(() => { alive.current = true; return () => { alive.current = false; request.current++ } }, [])
-  useEffect(() => {
+  // A cancelled picker can be batched without a busy transition; consume pending focus on the next idle commit.
+  useLayoutEffect(() => {
     if (busy || editingGroups) return
     const target = focusAfter.current; focusAfter.current = null
     if (target?.isConnected) (target.disabled ? search.current : target)?.focus()
-  }, [busy, editingGroups])
+  })
   async function read() {
     const revision = ++request.current; setReading(true)
     try { const value = await service.getSelection(path); if (alive.current && revision === request.current) setSelection(value) }
