@@ -781,8 +781,13 @@
             {
               "path": "docs/react-migration/STAGE5-CI-STABILITY.md",
               "sha256": "be773e4dda23ba79611ae994bcf131521cc8f2ab013f92da30d52ec7e4c60e78"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-WORLD-IMPORT.md",
+              "sha256": "3434510addd5a3fd046a18c3fd38f56ef356392d09e3f967e697e65e82d7c133"
             }
-          ]
+          ],
+          "notes": "Lectura inicial acotada de mundos en React: lista, b?squeda, ficha de solo lectura, errores de lectura visibles, iconos data:image validados, enlaces compartidos hacia el dep?sito de mundos de la app y bloqueo mientras la instancia est? en ejecuci?n. Operaciones locales revisadas a?adidas en 9d7efeb: copia en la misma instancia o hacia otra instancia, exportaci?n ZIP e inutilizaci?n segura mediante traslado a .backups/world-<uuid>, con previsualizaci?n Native, bloqueo con partida activa y preservaci?n de enlaces compartidos. Correcciones de estabilidad CI e intermitencias registradas en 20a0944 (STAGE5-CI-STABILITY.md) y verificadas en CI 41211315936 (168 React + 1 Strict + 8 Vue). Importaci?n revisada de mundos desde carpeta externa o archivo ZIP a?adida en 46a3771 (STAGE5-WORLD-IMPORT.md) con validaci?n de archivo/rutas/CRC-32/SHA-256, copia independiente y bloqueo por alias f?sico de partida activa. Siguen pendientes editar metadatos, datapacks, todas las herramientas locales de mundos confirmadas por el usuario (mapa, progreso, dimensiones, regiones y consultar/copiar/pegar/eliminar/editar chunks), resumen y ajustes base de instancia."
         },
         {
           "id": "console-isolation",
@@ -923,5 +928,6 @@
       "change": "Conservar todas las herramientas locales de Mundos en React, incluidos mapa, progreso, dimensiones, regiones y edición/copia/pegado/eliminación de chunks; mantener garantías de datos. K11 continúa pendiente.",
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
-  ]
+  ],
+  "updatedAt": "2026-10-31"
 }

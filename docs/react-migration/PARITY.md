@@ -227,3 +227,7 @@ K11 sigue pending. `STAGE5-WORLD-OPERATIONS.md` añade copia independiente, ZIP 
 ## Confirmación posterior de herramientas locales y estabilidad
 
 El usuario confirmó el 2026-10-31 conservar todas las herramientas locales, incluida edición de chunks. K11 sigue pendiente hasta portar y validar mapa/progreso/dimensiones/regiones y sus operaciones de edición, además de importación/metadatos/datapacks. `STAGE5-CI-STABILITY.md` registra correcciones de foco/diálogos/fixtures, evidencia local y el fallo del CI anterior; falta verificar el siguiente.
+
+## Mundos: importaci?n revisada desde carpeta y ZIP (`46a3771`)
+
+K11 sigue `pending`. `STAGE5-WORLD-IMPORT.md` incorpora importaci?n revisada de carpetas externas y archivos `.zip` como copias independientes en `saves/`, con validaci?n de l?mites/rutas/CRC-32/SHA-256, comprobaci?n de alias de directorio en partidas activas y aviso en carpeta `saves` compartida. 1024 pruebas unitarias / 101 archivos, 10 escenarios React de mundos (61/62/64) y 2 Vue (03/63) aprobados; CI 41211315936 sobre `2190a82` verde en ambos jobs (168 React + 1 Strict + 8 Vue). Faltan edici?n de metadatos, datapacks y las herramientas locales de mundos (mapa, progreso, dimensiones, regiones y chunks), adem?s de resumen/ajustes base y consola de instancia.
