@@ -104,3 +104,9 @@
   .pack-removal-files li { display: grid; gap: 6px; overflow-wrap: anywhere; padding: 12px 0; border-bottom: 1px solid var(--line); }
   .pack-removal-files span { color: var(--muted); font-size: 13px; }
 }
+
+@layer components {
+  .world-list > li { grid-template-columns: 48px minmax(0, 1fr); }
+  .world-icon { width: 48px; height: 48px; display: grid; place-items: center; color: var(--muted); }
+  .world-icon img { width: 48px; height: 48px; object-fit: contain; border-radius: 8px; }
+}

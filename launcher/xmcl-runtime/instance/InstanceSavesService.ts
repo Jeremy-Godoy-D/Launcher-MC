@@ -35,13 +35,14 @@ import { InstanceService } from '~/instance'
 import { LaunchService } from '~/launch'
 import { kMarketProvider } from '~/market'
 import { kResourceManager } from '~/resource'
-import { getInstanceSaveHeader, readInstanceSaveMetadata, readWorldGenSettings, updateSaveMetadata, listSaveDimensions, getSaveRegions, deleteSaveChunks, readSaveChunks, writeSaveChunks, relocateSaveChunks, readSaveProgress, kSaveWorker, type SaveWorker } from '~/save'
+import { readInstanceSaveMetadata, readWorldGenSettings, updateSaveMetadata, listSaveDimensions, getSaveRegions, deleteSaveChunks, readSaveChunks, writeSaveChunks, relocateSaveChunks, readSaveProgress, kSaveWorker, type SaveWorker } from '~/save'
 import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/service'
 import { LauncherApp } from '../app/LauncherApp'
 import { copyPassively, isDirectory, linkDirectory, missing, pipeline, readdirIfPresent } from '../util/fs'
 import { isNonnull, requireObject, requireString } from '../util/object'
 import { includeAs, writeZipFile } from '../util/zip'
 import { readlinkSafe, isLinkTo } from './utils/readLinkSafe'
+import { readWorlds, worldsLocation } from './utils/worldFiles'
 
 /**
  * Provide the ability to preview saves data of an instance
@@ -141,17 +142,22 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async showDirectory(instancePath: string): Promise<void> {
-    this.app.shell.openDirectory(join(instancePath, 'saves'))
+    await this.#javaInstance(instancePath)
+    const directory = await worldsLocation(instancePath, this.getPath())
+    if (!await this.app.shell.openDirectory(directory.root)) throw new Error('Worlds folder unavailable')
   }
 
   async getInstanceSaves(path: string) {
-    const baseName = basename(path)
-    const saveRoot = join(path, 'saves')
-    const saves = await readdirIfPresent(saveRoot).then(a => a.filter(s => !s.startsWith('.')))
-    const metadatas = Promise.all(saves
-      .map(s => resolve(saveRoot, s))
-      .map((p) => getInstanceSaveHeader(p, baseName)))
-    return metadatas
+    await this.#javaInstance(path)
+    return this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      await this.#javaInstance(path)
+      return readWorlds(path, this.getPath())
+    })
+  }
+
+  async #javaInstance(path: string) {
+    await this.instanceService.initialize()
+    if (!this.instanceService.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceNotFoundError')
   }
 
   /**

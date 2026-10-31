@@ -6,7 +6,7 @@ This file is the contract between the launcher UI in `xmcl-react-ui/` and the Pl
 
 Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testids` with the selected LAUNCHER_RENDERER. Computed IDs are not resolved by this static registry.
 
-**Total anchors:** 43 (in 38 Vue/TSX files)
+**Total anchors:** 47 (in 39 Vue/TSX files)
 
 | Test ID | Defined in |
 |---|---|
@@ -33,7 +33,8 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `instance-operations` | [`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L62`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L62) |
 | `instance-resourcepacks` | [`xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L140`](../xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L140) |
 | `instance-shaders` | [`xmcl-react-ui/src/features/instance/InstanceShaders.tsx#L178`](../xmcl-react-ui/src/features/instance/InstanceShaders.tsx#L178) |
-| `instance-workspace` | [`xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L31`](../xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L31) |
+| `instance-workspace` | [`xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L32`](../xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L32) |
+| `instance-worlds` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L39`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L39) |
 | `launch-confirm` | [`xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157`](../xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157) |
 | `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L700`](../xmcl-react-ui/src/App.tsx#L700) |
 | `library-groups` | [`xmcl-react-ui/src/App.tsx#L696`](../xmcl-react-ui/src/App.tsx#L696) |
@@ -53,3 +54,6 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `setup-path` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L233`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L233) |
 | `setup-root` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L153`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L153) |
 | `store-search` | [`xmcl-react-ui/src/App.tsx#L819`](../xmcl-react-ui/src/App.tsx#L819) |
+| `world-info` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L63`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L63) |
+| `worlds-list` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L50`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L50) |
+| `worlds-refresh` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L41`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L41) |

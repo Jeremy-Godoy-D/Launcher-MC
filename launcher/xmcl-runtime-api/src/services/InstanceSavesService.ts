@@ -1,6 +1,6 @@
 import { Exception, InstanceNotFoundException } from '../entities/exception'
 import { InstallMarketOptions, InstallMarketOptionWithInstance } from '../entities/market'
-import { InstanceDatapack, InstanceSave, InstanceSaveHeader, InstanceSaveProgress, SaveDatapacks, SaveMetadata, Saves } from '../entities/save'
+import { InstanceDatapack, InstanceSave, InstanceSavePreview, InstanceSaveProgress, SaveDatapacks, SaveMetadata, Saves } from '../entities/save'
 import { SharedState } from '../util/SharedState'
 import { ServiceKey } from './Service'
 
@@ -259,7 +259,7 @@ export interface InstanceSavesService {
    * Read all saves under the instance folder
    * @param path The instance folder path
    */
-  getInstanceSaves(path: string): Promise<InstanceSaveHeader[]>
+  getInstanceSaves(path: string): Promise<InstanceSavePreview[]>
   /**
    * Watch instances saves
    * @param path

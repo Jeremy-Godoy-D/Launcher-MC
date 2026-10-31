@@ -59,6 +59,8 @@ export interface InstanceSaveHeader {
 export interface InstanceSave extends SaveMetadata, InstanceSaveHeader {
 }
 
+export type InstanceSavePreview = InstanceSaveHeader & Partial<SaveMetadata> & { error?: 'metadata' | 'unsafe' }
+
 export interface ResourceSaveMetadata extends SaveMetadata {
   /**
    * The relative path of the save root
