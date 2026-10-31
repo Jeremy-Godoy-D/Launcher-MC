@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa. Compartidos de shaders da876d1 implementados con revisión, copias independientes, backups, guardas Native y compatibilidad legacy.955unitarias/97archivos;check/lint;24NativeReact distintos más repetición7UI y4Vue aprobados.9Axe nuevos0violaciones/22incomplete;error visible800 corregido con fallo previo. CI40992091527/ace5299 aprobó información/grupos en ambos jobs (151React+1Strict+5Vue),nuevo CI requerido para compartidos. Próximo:updates shaders por instalador revisado/proveedores;mundos/ajustes/consola;etapas6–9. K08/K09/K10 y gates5 pendientes;Vue default/dist,PR4 borrador,producción/proxy intactos,Microsoft pospuesto. Respetar archivos/limpiezas protegidos.",
+  "nextAction": "Etapa5 activa. Updates/recuperación shaders 41f5692 implementados con dominio Native revisado, respaldo/nombres/configuraciones preservados y filtros documentados.983unitarias/97archivos,tipos/lint;34NativeReact+4Vue finales aprobados,9Axe nuevos0violaciones/18incomplete. Aviso sin motor800 y resultados obsoletos corregidos con fallos previos. CI40993833018/b8c8f18 aprobó compartidos anterior (155React+1Strict+6Vue);verificar CI del próximo push. Próximo:mundos/ajustes de instancia/consola;catálogo6 y proveedores reales,superficies7,retirada8,validación/publicación9. K08/K09/K10 y gates5 pendientes. Vue default/dist,PR4 borrador,producción/proxy intactos,Microsoft pospuesto. No rehacer shaders implementados;respetar archivos/limpiezas protegidos.",
   "stages": [
     {
       "id": 0,
@@ -754,9 +754,13 @@
             {
               "path": "docs/react-migration/STAGE5-SHADER-SHARING.md",
               "sha256": "bd9fd6a7195b224b275fae65aa9f9fdd5cc4e71f893a628c985251ad8483cc5e"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-SHADER-UPDATES.md",
+              "sha256": "9fa036aacdb7e703e52caa7391f322f9aa718df6e97c474880d9667795bb85e2"
             }
           ],
-          "note": "Avance parcial:compartidos shaders da876d1.955unitarias,tipos/lint;24NativeReact+7UI repetidos+4Vue;9Axe nuevos0violaciones/22incomplete. CIace5299 aprobado para información/grupos anterior. Updates shaders,aceptación K08/K09/K10 y resto5 pendientes;gates5 siguen pending."
+          "note": "Avance parcial: núcleo local shaders implementado hasta updates/recuperación41f5692;983unidades,tipos/lint,34NativeReact+4Vue finales,9Axe0violaciones/18incomplete. CIb8c8f18 aprobado para compartidos anterior. K08/K09/K10 y gates5 pendientes de aceptación integral;continuar mundos/ajustes/consola y después catálogo/proveedores reales6."
         },
         {
           "id": "worlds-settings",

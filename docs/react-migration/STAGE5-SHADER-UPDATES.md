@@ -1,0 +1,38 @@
+# Actualizaciones y recuperación de shaders
+
+Fuente `41f5692ef725d33da007ece18e0b79b140172135`. React ya consulta, selecciona, revisa, instala, cancela y recupera actualizaciones de shaders con el instalador existente. El núcleo local de K10 está implementado; la aceptación integral con catálogo/proveedores reales y las gates 5 siguen pendientes.
+
+## Comportamiento y límites
+
+Se amplía el dominio revisado a `shaderpacks`, conservando `mods` como valor legacy predeterminado. Se reutilizan inventario, autoridad de carpeta, validación de rutas, revisión, descarga/verificación, tareas, backups y recuperación. Solo actualiza ZIP directos; mantiene sus nombres y las configuraciones OptiFine/Iris/Oculus, opciones, grupos y mundos. No activa otro shader ni actualiza carpetas desempaquetadas o archivos sin origen identificado.
+
+Native limita los metadatos de origen a hashes observados y sus IDs públicos, con máximo de 10.000 entradas. Revalida instancia Java, configuración de ejecución, archivos y autoridad privada/compartida; bloquea juegos que utilizan la carpeta común, también si comienzan durante la descarga. Conserva el archivo anterior como respaldo. Las revisiones obsoletas fallan antes de publicar; un plan interrumpido conserva progreso y exige una nueva revisión para sustituir cambios del usuario. Los mismos helpers se prueban para resource packs y shaders.
+
+La interfaz usa un snapshot Native del motor/configuraciones/archivos al consultar y lo comprueba después de la consulta, al preparar y antes de solicitar la instalación. Al reabrir, descarta resultados si ese contexto cambió. Esto no certifica requisitos internos del shader, versiones mínimas del motor ni GPU, ni bloquea transaccionalmente toda edición externa de mods durante una descarga. Native protege los archivos/destinos y la configuración de ejecución; no afirma validar semánticamente compatibilidad gráfica.
+
+Modrinth recibe etiquetas de shaders: `iris` u `optifine`; Oculus usa conservadoramente `optifine`, en vez de asumir que admite cualquier función nueva exclusiva de Iris. Se verificaron las etiquetas públicas actuales de [Modrinth](https://docs.modrinth.com/api/operations/loaderlist/) y su [consulta de actualizaciones](https://docs.modrinth.com/api/operations/getlatestversionsfromhashes/); el [proyecto Oculus](https://github.com/Asek3/Oculus) documenta su compatibilidad con packs de OptiFine. La lista consultada está en el artefacto `stage5-shader-updates-loader-tags.json`; no prueba por sí sola una actualización real.
+
+CurseForge se consulta por Minecraft sin inventar valores Iris/Oculus en su enum de loaders; se mantienen el cliente/proxy actuales y el secreto fuera del renderer. Su [API de archivos](https://docs.curseforge.com/rest-api/) documenta el filtro de juego y loaders como Forge/Fabric. La UI pide comprobar los requisitos del proyecto y no presenta ese filtro como prueba de motor/GPU. Versiones, identidad, hashes y canal se validan como antes. Se rechazan candidatos no ZIP o con nombres de ruta para packs/shaders y se señala consulta incompleta; mods conservan sus formatos existentes.
+
+La prueba visual adicional encontró dos problemas al retirar el motor después de consultar: aviso fuera del área visible en 800×400 y resultados anteriores retenidos al reabrir, cuyo scroll volvía a ocultarlo. Se reprodujeron antes de corregirlos. El aviso queda primero, sin explicación duplicada ni alerta falsa durante lectura; reabrir invalida resultados/selección/revisión cuando cambia el snapshot. No se modificó la revisión Native ni se relajó el assert de viewport.
+
+## Validación
+
+- **983 unitarias / 97 archivos**, aprobadas en 21,42 s. Focales Native: 106; proveedor/servicio: 50, incluidas dentro de la suite. La prueba negativa reprodujo dos propuestas de candidatos no ZIP antes de añadir su validación.
+- Tipos y lint completos aprobados; check/lint React repetidos tras el ajuste final. E2E tsc conserva exactamente los **56 diagnósticos previos**, sin nuevos en 59/60 ni archivos afectados. No se declara ese proyecto libre de errores.
+- **34 recorridos React distintos**, lote final 39/40/42/49/52/57/59 aprobado en 2,1 min. La ejecución previa 33/34 detectó el estado obsoleto del diálogo; 59 focal final también aprobó sus seis casos antes del lote final. No se suman repeticiones.
+- 59 comprueba ambos proveedores con archivos reales instalados y respaldados en carpeta común, preservación de tres configuraciones/otra instancia/grupos/mundo, edición tras revisión, cambio de motor antes de preparar y bloqueo sin motor, cancelación de una descarga HTTP retenida y recuperación revisada de cambios del usuario.
+- **4 recorridos Vue empaquetado**, 03/45/58/60 aprobados en 11,5 s. 60 comprueba el nuevo dominio revisado mediante IPC en el host Vue, incluyendo nombres, configuraciones y bytes del backup. No afirma recorrer toda la antigua pantalla Vue. Hosts React/Vue construidos, renderer Vue preexistente reutilizado; `dist` y default quedan Vue.
+- **9 Axe nuevos: 0 violaciones / 18 incomplete**. Selección/revisión en claro/oscuro, 1200×720 y 800×400; aviso sin motor en 800×400. Capturas inspeccionadas de selección claro 800, revisión oscuro 1200 y aviso final 800: título, acciones, aviso y cuerpo desplazable alcanzables. Sin errores `pageerror` en la matriz visual; no equivale a AA manual o diagnóstico global de GPU. Logs conservan avisos de deprecación y la ejecución previa incluyó diagnósticos GPU de Chromium.
+
+Metadatos de proveedor y destinos de descarga de estos E2E son fixtures. Snapshot, selección del motor, revisión, instalación, checksum, backups, tareas, cancelación y recuperación ejecutan Native real en perfiles aislados. Se probaron los filtros de Iris/OptiFine/Oculus en unidades y un runtime OptiFine en el recorrido empaquetado. No se ejecutó Minecraft ni shaders reales ni se validaron todas las GPUs/versiones del motor.
+
+Comandos desde `launcher`: lista `pnpm exec vitest run` del workflow; `pnpm check`; `pnpm lint`; `pnpm --dir e2e exec tsc --noEmit`; builds con `LAUNCHER_RENDERER=react` (`gen:testids`, `build:renderer`, `build`) y después `LAUNCHER_RENDERER=vue pnpm build`. Playwright usa EXE propio y `XMCL_E2E_LOCALES=es-ES`: React 39/40/42/49/52/57/59; Vue 03/45/58/60. Unidades amplias sin carga externa de build/Electron; Native y builds secuenciales. El workflow incorpora 59/60.
+
+CI **[40993833018](https://github.com/Jeremy-Godoy-D/Launcher-MC/actions/runs/40993833018)** / `b8c8f18a95b6665306f363660dfaef6da12ee4a6` aprobó el bloque anterior de compartidos en ambos jobs: 955 unitarias por job, **155 React + 1 cliente estricto + 6 Vue**, dos pruebas vivas omitidas. Consultar el CI del próximo push para la fuente nueva.
+
+Manifiesto ignorado `launcher/e2e/artifacts/stage5-shader-updates-manifest.json`, SHA-256 `b49696d1a4a5e5ac98b58daf565e7aa2e635ab5a4542e4235f819fd2d1a6aba2`: 24 blobs Git canónicos y 383 artefactos, incluidos fallos previos, lote final, ambos EXE/ASAR, capturas, Axe, tipos/lint, etiquetas públicas y CI anterior. Recorrido limitado a directorios propios explícitos; no se siguieron las rutas/limpiezas protegidas.
+
+## Continuidad
+
+Siguiente: mundos, ajustes de instancia y consola, reutilizando servicios y conservando datos. Después catálogo 6 y verificaciones reales de proveedores/shaders, superficies 7, retirada de extras 8 y validación/publicación 9. No rehacer selección, archivos, información/grupos, compartidos ni updates de shaders ya implementados. K08/K09/K10 y gates 5 siguen pendientes de aceptación integral; no se salta de etapa. PR4 borrador; producción/proxy intactos; Microsoft pospuesto. NSIS/delta aislados, Java/juego reales y presupuestos finales continúan pendientes.

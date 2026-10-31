@@ -210,3 +210,8 @@ STAGE5-SHADER-INFORMATION-GROUPS.md: ficha Native local, procedencia pública co
 ### Compartidos de shaders (da876d1)
 
 STAGE5-SHADER-SHARING.md: revisión de carpeta común/copia privada,hashes/copias exclusivas/backups,conflictos/snapshot/guardas y reanudación del mismo observador;legacy usa el mismo flujo. Conserva tres configuraciones,grupos/opciones/mundos y otra instancia.955unitarias/97archivos,tipos/lint;24NativeReact distintos,7UI repetidos tras ajuste final y4Vue;9Axe nuevos0violaciones/22incomplete. Timeout unitario inicial documentado;focal y suite posteriores pasan sin cambiar límites. CI40992091527/ace5299 aprobó información/grupos anterior(151React+1Strict+5Vue);CI nuevo requerido. K10 sigue pending por updates y aceptación integral;K08/K09,gates5 y etapas6–9 pendientes. No acredita juego/Java/NSIS/delta reales ni publicación.
+
+
+### Actualizaciones y recuperación de shaders (41f5692)
+
+STAGE5-SHADER-UPDATES.md: dominio shaderpacks revisado en Native,snapshots/autoridad/nombres/backup/guardas y recuperación;interfaz reutiliza ModUpdates. Motor Native comprobado al consultar/revisar/confirmar;resultados obsoletos se invalidan. Modrinth usaetiquetas shaders,CFMinecraft sin prometer motor/GPU;noZIP se rechaza.983unitarias/97archivos,tipos/lint,34NativeReact+4Vue finales y9Axe0violaciones/18incomplete. CI40993833018/b8c8f18 aprobó compartidos anterior(155React+1Strict+6Vue);CI nuevo requerido. Núcleo local K10 implementado;K08/K09/K10/gates5 pendientes de aceptación integral y catálogo/proveedores reales6. Continuar mundos/ajustes/consola,después6–9. Sin partida/GPU/NSIS/delta reales ni publicación.
