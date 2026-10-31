@@ -1,0 +1,166 @@
+import { useLayoutEffect, useRef, useState, type RefObject } from 'react'
+import * as Dialog from '@radix-ui/react-dialog'
+import { ArrowDown, ArrowUp, Copy, Download, FolderOpen, Image, Layers, Pencil, Trash2, X } from 'lucide-react'
+import { InstanceServiceKey } from '@xmcl/runtime-api/src/services/InstanceService'
+import { LaunchServiceKey } from '@xmcl/runtime-api/src/services/LaunchService'
+import { BaseServiceKey } from '@xmcl/runtime-api/src/services/BaseService'
+import { useService } from '../../runtime'
+import { useI18n } from '../../i18n'
+import { useLibrary } from './context'
+import { instanceIcon, type SavedInstance } from './model'
+import { metadataDraft, metadataEdit } from './operations'
+import { ExportInstance } from './ExportInstance'
+import { DuplicateInstance } from './DuplicateInstance'
+import './operations.css'
+
+type Mode = 'options' | 'edit' | 'icon' | 'duplicate' | 'remove' | 'group' | 'export'
+export function InstanceOperations({ instance, onClose, onCreated, returnFocus, initialMode = 'options' }: { instance: SavedInstance; onClose: () => void; onCreated: (path: string) => void; returnFocus: RefObject<HTMLElement | null>; initialMode?: 'options' | 'duplicate' }) {
+  const library = useLibrary()
+  const service = useService(InstanceServiceKey)
+  const processes = useService(LaunchServiceKey)
+  const base = useService(BaseServiceKey)
+  const { t } = useI18n()
+  const [mode, setMode] = useState<Mode>(initialMode)
+  const [draft, setDraft] = useState(() => metadataDraft(instance))
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [deleteData, setDeleteData] = useState(false)
+  const [confirmation, setConfirmation] = useState('')
+  const [success, setSuccess] = useState('')
+  const [icon, setIcon] = useState<string>()
+  const [previewFailed, setPreviewFailed] = useState(false)
+  const chooseIcon = useRef<HTMLButtonElement>(null), alert = useRef<HTMLParagraphElement>(null)
+  useLayoutEffect(() => { if (mode === 'icon') chooseIcon.current?.focus() }, [mode])
+  useLayoutEffect(() => { if (error) alert.current?.scrollIntoView({ block: 'nearest' }) }, [error])
+  const [group, setGroup] = useState(() => {
+    const entry = library?.data?.groups.find(group => typeof group !== 'string' && group.instances.includes(instance.path))
+    return entry && typeof entry !== 'string' ? `id:${entry.id}` : ''
+  })
+  const [groupName, setGroupName] = useState('')
+  const operation = useRef(false)
+  const latest = library?.instances.find(item => item.path === instance.path)
+  const unavailable = !latest || library?.status !== 'ready'
+  const preview = instanceIcon(success ? latest?.icon || '' : icon ?? instance.icon)
+  function changeMode(value: Mode) { setMode(value); setError(''); setSuccess('') }
+  async function run(action: () => Promise<void>, checkIdle = true) {
+    if (operation.current) return
+    operation.current = true; setBusy(true); setError('')
+    try {
+      if (unavailable) throw new Error('missing')
+      if (checkIdle && (await processes.getGameProcesses()).some(process => process.options.gameDirectory === instance.path)) throw new Error('running')
+      await action()
+    } catch (failure) {
+      const name = failure && typeof failure === 'object' && 'name' in failure && typeof failure.name === 'string' ? failure.name : ''
+      const message = failure && typeof failure === 'object' && 'message' in failure && typeof failure.message === 'string' ? failure.message : ''
+      const reason = ['InstanceMetadataChanged', 'InstanceGroupsChanged'].includes(name) ? 'changed' : name === 'InstanceNameDuplicatedError' ? 'duplicateName' : message
+      setError(['missing', 'changed', 'invalid', 'invalidGroup', 'duplicateName', 'running'].includes(reason) ? reason : mode === 'icon' ? 'iconFailed' : 'failed')
+    } finally { operation.current = false; setBusy(false) }
+  }
+  return <Dialog.Root open onOpenChange={open => { if (!open && !operation.current) onClose() }}>
+    <Dialog.Portal>
+      <Dialog.Overlay className="dialog-backdrop" />
+      <Dialog.Content className="dialog creation-dialog operation-dialog" data-testid="instance-operations" onPointerDownOutside={event => event.preventDefault()} onEscapeKeyDown={event => { if (busy) event.preventDefault() }} onCloseAutoFocus={event => {
+        event.preventDefault()
+        const card = Array.from(document.querySelectorAll<HTMLElement>('[data-instance-path]')).find(card => card.dataset.instancePath === instance.path)
+        const target = returnFocus.current?.isConnected ? returnFocus.current : card?.querySelector<HTMLElement>('.instance-card-actions button:last-child') || document.querySelector<HTMLElement>('main h1')
+        if (target) { if (target.tagName === 'H1') target.tabIndex = -1; target.focus() }
+      }}>
+        <Dialog.Title>{t(`react.operations.${mode}Title`, { name: instance.name })}</Dialog.Title>
+        <Dialog.Description>{t(`react.operations.${mode}Help`)}</Dialog.Description>
+        {mode === 'export' ? <ExportInstance path={instance.path} busy={busy} onBusy={value => { operation.current = value; setBusy(value) }} onBack={() => changeMode('options')} /> : mode === 'duplicate' ? <DuplicateInstance path={instance.path} busy={busy} onBusy={value => { operation.current = value; setBusy(value) }} onBack={() => changeMode('options')} onCreated={path => { onCreated(path); onClose() }} /> : <form className="operation-form" onSubmit={event => {
+          event.preventDefault()
+          if (mode === 'edit') void run(async () => {
+            await service.editInstance(metadataEdit(instance, latest, draft, library?.instances || []))
+            setSuccess('saved')
+          })
+          if (mode === 'icon' && icon !== undefined) void run(async () => {
+            await service.editInstance({ instancePath: instance.path, icon, expectedMetadata: { ...metadataDraft(instance), icon: instance.icon || '' } })
+            setSuccess('saved')
+          })
+          if (mode === 'remove' && (!deleteData || confirmation === instance.name)) void run(async () => {
+            await service.deleteInstance(instance.path, deleteData)
+            onClose()
+          })
+          if (mode === 'group') void run(async () => {
+            if (!library) throw new Error('missing')
+            await library.assignGroup(instance.path, group, groupName)
+            setSuccess('saved')
+          }, false)
+        }}>
+          <div className="creation-body" role={mode === 'icon' ? 'region' : undefined} tabIndex={mode === 'icon' ? 0 : undefined} aria-label={mode === 'icon' ? t('react.operations.iconFields') : undefined}>
+            {mode !== 'icon' && <p className="operation-path">{instance.path}</p>}
+            {mode === 'options' && <div className="operation-actions">
+              <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('edit')}><Pencil size={18} aria-hidden="true" />{t('react.operations.edit')}</button>
+              <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('icon')}><Image size={18} aria-hidden="true" />{t('react.operations.changeIcon')}</button>
+              <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('duplicate')}><Copy size={18} aria-hidden="true" />{t(library?.data?.pendingCopies[instance.path] ? 'react.copy.resume' : 'react.operations.duplicate')}</button>
+              <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('group')}><Layers size={18} aria-hidden="true" />{t('react.operations.group')}</button>
+              <button type="button" className="button secondary" disabled={busy || unavailable || !!library?.data?.pendingCopies[instance.path]} onClick={() => changeMode('export')}><Download size={18} aria-hidden="true" />{t('react.export.action')}</button>
+              <div className="operation-order">
+                {([-1, 1] as const).map(direction => <button key={direction} type="button" className="button secondary" disabled={busy || unavailable} onClick={() => void run(async () => {
+                  await library?.move(instance.path, direction)
+                  library?.setSort('manual')
+                  setSuccess('saved')
+                }, false)}>{direction === -1 ? <ArrowUp size={18} aria-hidden="true" /> : <ArrowDown size={18} aria-hidden="true" />}{t(direction === -1 ? 'react.operations.moveUp' : 'react.operations.moveDown')}</button>)}
+              </div>
+              <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => void run(async () => { if (!await base.openDirectory(instance.path)) throw new Error('missing') }, false)}><FolderOpen size={18} aria-hidden="true" />{t('react.operations.openFolder')}</button>
+              <button type="button" className="button secondary danger-text" disabled={busy || unavailable} onClick={() => changeMode('remove')}><Trash2 size={18} aria-hidden="true" />{t('react.operations.remove')}</button>
+            </div>}
+            {mode === 'edit' && <>
+              <label htmlFor="instance-edit-name">{t('react.operations.name')}</label>
+              <input id="instance-edit-name" value={draft.name} maxLength={100} disabled={busy || !!success} onChange={event => setDraft({ ...draft, name: event.target.value })} />
+              <label htmlFor="instance-edit-description">{t('react.operations.description')}</label>
+              <textarea id="instance-edit-description" value={draft.description} maxLength={1000} disabled={busy || !!success} onChange={event => setDraft({ ...draft, description: event.target.value })} />
+              <label htmlFor="instance-edit-author">{t('react.operations.author')}</label>
+              <input id="instance-edit-author" value={draft.author} maxLength={100} disabled={busy || !!success} onChange={event => setDraft({ ...draft, author: event.target.value })} />
+            </>}
+            {mode === 'icon' && <>
+              <div className="instance-icon-editor">
+              <div className="instance-icon-preview" role="img" aria-label={t('react.operations.iconPreview')}>
+                {preview && !previewFailed ? <img key={preview} src={preview} alt={t('react.operations.iconPreview')} onError={() => setPreviewFailed(true)} /> : <Image size={40} aria-hidden="true" />}
+              </div>
+              <div className="instance-icon-actions">
+              <button ref={chooseIcon} type="button" className="button secondary" data-testid="instance-icon-choose" disabled={busy || !!success || unavailable} onClick={() => {
+                void window.windowController?.showOpenDialog?.({ properties: ['openFile'], filters: [{ name: 'PNG, JPEG, GIF, WebP', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'] }] }).then(result => {
+                  if (!result.canceled && result.filePaths[0]) { setIcon(`http://launcher/media?path=${encodeURIComponent(result.filePaths[0])}`); setPreviewFailed(false); setError('') }
+                }).catch(() => setError('failed'))
+              }}>{t('react.operations.chooseIcon')}</button>
+              <button type="button" className="button secondary" disabled={busy || !!success || unavailable} onClick={() => { setIcon(''); setPreviewFailed(false); setError('') }}>{t('react.operations.resetIcon')}</button>
+              </div>
+              </div>
+              {icon === '' && <p>{t('react.operations.iconResetHelp')}</p>}
+              {previewFailed && <p>{t('react.operations.iconPreviewFailed')}</p>}
+              {icon && <p className="operation-path" title={decodeURIComponent(icon.split('?path=')[1] || '')}>{decodeURIComponent(icon.split('?path=')[1] || '').split(/[/\\]/).pop()}</p>}
+            </>}
+            {mode === 'group' && <>
+              <label htmlFor="instance-group">{t('react.operations.group')}</label>
+              <select id="instance-group" value={group} disabled={busy || !!success} onChange={event => setGroup(event.target.value)}>
+                <option value="">{t('react.operations.ungrouped')}</option>
+                {(library?.data?.groups || []).flatMap(group => typeof group === 'string' ? [] : [<option key={group.id} value={`id:${group.id}`}>{group.name}</option>])}
+                <option value="new">{t('react.operations.newGroup')}</option>
+              </select>
+              {group === 'new' && <><label htmlFor="instance-group-name">{t('react.operations.groupName')}</label><input id="instance-group-name" maxLength={100} value={groupName} disabled={busy || !!success} onChange={event => setGroupName(event.target.value)} /></>}
+            </>}
+            {mode === 'remove' && <>
+              <p>{t('react.operations.keepDetail')}</p>
+              <label className="creation-check"><input type="checkbox" checked={deleteData} disabled={busy} onChange={event => { setDeleteData(event.target.checked); setConfirmation('') }} />{t('react.operations.deleteFiles')}</label>
+              {deleteData && <>
+                <p>{t('react.operations.deleteDetail')}</p>
+                <label htmlFor="instance-remove-confirmation">{t('react.operations.typeName', { name: instance.name })}</label>
+                <input id="instance-remove-confirmation" value={confirmation} disabled={busy} autoComplete="off" onChange={event => setConfirmation(event.target.value)} />
+              </>}
+            </>}
+            {unavailable && <p role="alert" className="form-error">{t('react.operations.missing')}</p>}
+            {!!error && <p ref={alert} role="alert" className="form-error">{t(`react.operations.${error}`)}</p>}
+            {!!success && <p role="status">{t('react.operations.saved')}</p>}
+            {busy && !success && <p role="status">{t('react.operations.busy')}</p>}
+          </div>
+          <div className="dialog-actions">
+            <button type="button" className="button secondary" disabled={busy} onClick={() => mode !== 'options' && !success ? changeMode('options') : onClose()}>{t(mode === 'options' || success ? 'react.operations.close' : 'react.operations.back')}</button>
+            {mode !== 'options' && !success && <button type="submit" className="button primary" data-testid="instance-operation-confirm" disabled={busy || unavailable || mode === 'icon' && icon === undefined || mode === 'remove' && deleteData && confirmation !== instance.name}>{t(busy ? 'react.operations.busy' : mode === 'edit' || mode === 'icon' || mode === 'group' ? 'react.operations.save' : deleteData ? 'react.operations.confirmDelete' : 'react.operations.confirmRemove')}</button>}
+          </div>
+        </form>}
+        <Dialog.Close className="dialog-close" aria-label={t('react.operations.close')} disabled={busy}><X size={20} /></Dialog.Close>
+      </Dialog.Content>
+    </Dialog.Portal>
+  </Dialog.Root>
+}

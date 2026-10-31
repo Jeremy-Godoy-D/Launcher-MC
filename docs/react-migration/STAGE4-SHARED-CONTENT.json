@@ -1,0 +1,550 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "timeZone": "America/Bogota",
+  "codeCommit": "70c70d8a488e2199b378b4ee0567cb18ad1183e8",
+  "status": "partial-stage-4",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/react-migration.yml",
+      "sha256": "69c932a28ca6b5d260ace1b7b054cc022697315b8fc1daa7107625da96ec7edb"
+    },
+    {
+      "path": "launcher/e2e/TESTIDS.react.md",
+      "sha256": "28ca0da4fdbd74bd9ec4cee0ba4b8126c778db34b725b274f659f5d9e73aa14a"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/24-shared-content.spec.ts",
+      "sha256": "e80e1013f400489b02f78d7496a0e98dfad7c46a73ec0cf377fbf519270c8c10"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/library/DuplicateInstance.tsx",
+      "sha256": "4ee0495dc0b280ab4582bff99f3116ce35b1409d8340c9ec98f85c489ea8dadc"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/library/ExportInstance.tsx",
+      "sha256": "025a5d4cf3f4e1cca82c31ac93ef0fe1bbc9e84e004eba5e0425d985b59b78c1"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/library/operations.css",
+      "sha256": "dadfd341842f5463714f5e8f9f920cba6403b75f5d801664e7a2a04925dc1f5b"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/library/operations.test.ts",
+      "sha256": "f0063dd716e32450bc2232463ba6643484298e3032d8951c90ddd753acbdd3b8"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/library/operations.ts",
+      "sha256": "474b2cb09e47b3d715f6de48a8d17ff7e3a4bb6877e888a14eef65466629737e"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/en.yaml",
+      "sha256": "31addd51d13e4153ffc72537c5bd9e1534a23b853791c0b6552067d78e4d1241"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/es-ES.yaml",
+      "sha256": "f71465ba7bcc22ec4b3f5bbd48e69f3cd8c63941f83e2aaeac5af9e82a3e2f1c"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instance/InstanceService.copy.test.ts",
+      "sha256": "4fbed8ca22ea20d4437e32eadd29b364d2e8ed090a7fa1ad6fcdc5b0f670d36a"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instance/InstanceService.ts",
+      "sha256": "2b621d901e2c329071fe295b0a3b17942abe4866d3a1c31fb5d80c6044d06c01"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instance/instanceCopy.test.ts",
+      "sha256": "a958e513f5f9c4c2d6a9da4bcc7ada35745ed5dbdeb2a2739c5c5778df25613a"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instance/instanceCopy.ts",
+      "sha256": "d58203d03a00256b1eafd9f693d92303c458064e0eda39962db9103297c2d3f2"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instanceIO/utils/instanceFileSource.ts",
+      "sha256": "80399fb2bc382610cb46cc72d69f20866e599c94c37c324523eee64ebb5f79e2"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instanceIO/utils/previewFolderFiles.test.ts",
+      "sha256": "4e7899a95dee3bfca500bed2d65265eacd64fe291d7dbc2c8be6316e61c195a6"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instanceIO/utils/previewFolderFiles.ts",
+      "sha256": "54d46152320a45cc696406836d170e1465c0afc1b08cc4373d45fd806cdcdbc4"
+    },
+    {
+      "path": "launcher/xmcl-runtime/modpack/ModpackService.ts",
+      "sha256": "83dba7a14b13103434feb3ea7d187454e33698acc5b4b1726eaa0cd94b66ff6c"
+    },
+    {
+      "path": "launcher/xmcl-runtime/modpack/reviewedExport.test.ts",
+      "sha256": "5dbee52c9950bad4136d4404ac4b4eb75be5afbbcccae4169a11f9ef395633ea"
+    },
+    {
+      "path": "launcher/xmcl-runtime/modpack/reviewedExport.ts",
+      "sha256": "13fa3acfff8e64753eb74eb6f0860d7172567c601d2ed17ae99017a3a88d521e"
+    }
+  ],
+  "validation": {
+    "unit": {
+      "passed": 514,
+      "files": 53,
+      "seconds": 12.1
+    },
+    "focusedUnit": {
+      "passed": 74,
+      "files": 5,
+      "note": "Before final3 destination guard regressions; all3 included in final514"
+    },
+    "electronReactFull": {
+      "passed": 50,
+      "reportedDuration": "3.2m",
+      "note": "Before final shared-destination guard and automatic alert visibility; final8 affected scenarios follow"
+    },
+    "electronAffectedFinal": {
+      "passed": 8,
+      "reportedDuration": "21.3s",
+      "specs": [
+        20,
+        24
+      ],
+      "overlapFullReact": true
+    },
+    "electronStrict": {
+      "passed": 1,
+      "reportedDuration": "4.5s"
+    },
+    "electronVue": {
+      "passed": 2,
+      "reportedDuration": "9.8s"
+    },
+    "distinctScenarios": 53,
+    "harness": {
+      "passed": 9
+    },
+    "types": "Root pnpm check plus final runtime and affected React checks passed",
+    "lint": "Root and affected React:0 warnings/errors; final TSX/CSS source detector:0 findings",
+    "builds": [
+      "React renderer/host Windows, after active fixtures stopped",
+      "Vue renderer/host Windows, final renderer restored to Vue"
+    ],
+    "axeFull": {
+      "reports": 75,
+      "violations": 0,
+      "incomplete": 134
+    },
+    "axeAffectedFinal": {
+      "reports": 10,
+      "violations": 0,
+      "incomplete": 20
+    },
+    "visualReview": "Six source/export/cancellation captures, dark/light1200x720/800x400. Final cancellation alerts fully in viewport; scrollable copy region reachable and actually scrolled with keyboard",
+    "nativeOperations": [
+      "Native saves/resourcepack/shaderpack share services and options/server hard links used; copied target bytes independent of originals",
+      "Selected shared world/options/server files exported; known credential fixture excluded",
+      "Shared root redirects/nested junctions rejected; public import extra trust argument ignored",
+      "Controlled in-flight review cancellation closes real stream and creates no target or partial archive; export retry publishes one complete archive",
+      "Final marker-read cancellation preserves resumable job and completed files",
+      "Source shared folders, including empty ones, cannot be export destinations"
+    ],
+    "initialFailures": [
+      "Normalized AbortError arrives as cancelled exception; new common classifier covers raw and normalized forms, copy retains task destination",
+      "Axe detected inaccessible text-only scroll region at800x400; labelled keyboard region added",
+      "Alert initially outside minimum viewport; automatic nearest scroll and8px scroll margin added, strict full-visibility assertions retained"
+    ],
+    "diagnostics": "A GPU state invalid message occurred during teardown of a negative fixture in an earlier attempt; no renderer exception in positive shared flow; no claim of warning-free native stderr",
+    "previousRemoteCI": {
+      "run": "https://github.com/Jeremy-Godoy-D/Launcher-MC/actions/runs/40287929295",
+      "head": "e4a60c0c9eed348bfa81f0e637912c0069c45bab",
+      "conclusion": "success for Vue and React; preceding block, not this code"
+    },
+    "currentRemoteCI": "pending after push"
+  },
+  "commands": [
+    "pnpm check",
+    "pnpm lint",
+    "pnpm exec vitest run <53 selectors in .github/workflows/react-migration.yml>",
+    "pnpm --prefix xmcl-runtime check",
+    "pnpm --prefix xmcl-react-ui check; pnpm --prefix xmcl-react-ui lint",
+    "node --test launcher/scripts/react-migration.test.mjs",
+    "LAUNCHER_RENDERER=react pnpm gen:testids; pnpm build:renderer; pnpm --prefix xmcl-electron-app build",
+    "XMCL_E2E_EXECUTABLE=<React EXE> pnpm --dir e2e exec playwright test <50 selected by workflow> --reporter=list --output=artifacts/shared-content-react-full",
+    "XMCL_E2E_EXECUTABLE=<React EXE> pnpm --prefix e2e exec playwright test specs/react-migration/20-local-export.spec.ts specs/react-migration/24-shared-content.spec.ts --output=artifacts/shared-content-reviewed-area",
+    "XMCL_REACT_CLIENT_HARNESS=1 pnpm --prefix e2e exec playwright test specs/react-migration/04-client-contracts.spec.ts --output=artifacts/shared-content-strict",
+    "LAUNCHER_RENDERER=vue pnpm build:renderer; pnpm --prefix xmcl-electron-app build",
+    "XMCL_E2E_EXECUTABLE=<Vue EXE> pnpm --prefix e2e exec playwright test specs/react-migration/03-vue-compatibility.spec.ts specs/react-migration/08-vue-onboarding.spec.ts --output=artifacts/shared-content-vue",
+    "Source-only impeccable detect of DuplicateInstance.tsx/ExportInstance.tsx/operations.css",
+    "node launcher/scripts/react-migration.mjs check"
+  ],
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-24-shared-content-spec-ts-cancelling-an-intentionally-stalled-na/cancel-source-review-800.png",
+      "sha256": "42dd91110f9a41d0e038f484f89f14dff2c86b1d18717d053860e3ff4f5cacc4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-24-shared-content-spec-ts-cancelling-an-intentionally-stalled-na/manifest.json",
+      "sha256": "fad846a8c457c6b2edf45aca4903eee10a681312177266bbaa85598b2809d5d9"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-24-shared-content-spec-ts-export-review-cancellation-preserves-t/cancel-export-review-800.png",
+      "sha256": "62aefcfd13c30979796f2b3ee6ce8b8d89a4e008695ebd3fea4e3db5703e6833"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-24-shared-content-spec-ts-export-review-cancellation-preserves-t/manifest.json",
+      "sha256": "ee5cef957212b643b956e6fe07de09daffbadb6516a35d67bb0d15d5c0d5d9c1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-24-shared-content-spec-ts-native-shared-folders-and-hard-linked-/manifest.json",
+      "sha256": "f8e6ba34e8303cd0e17988bcfdd2a3c2788c954cc421e2f91e5d4c58f3e8b4a3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-24-shared-content-spec-ts-native-shared-folders-and-hard-linked-/shared-export-dark-1200.png",
+      "sha256": "e2ca4491d8c201cbf3c9ac12aa8a99b3c1db1aa2188678280455c5edbd8c0df5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-24-shared-content-spec-ts-native-shared-folders-and-hard-linked-/shared-export-dark-800.png",
+      "sha256": "2c18264d858ddc208612d0c4b4f565333ea34d20c1c39774767d9d7e75db8ff8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-24-shared-content-spec-ts-native-shared-folders-and-hard-linked-/shared-export-light-1200.png",
+      "sha256": "ae9daf7e7e514338794968c4fc2f9ab5933b43047d9343b69f4ca444c02c0040"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-24-shared-content-spec-ts-native-shared-folders-and-hard-linked-/shared-export-light-800.png",
+      "sha256": "621c47464d0009452a63e236f5cb15350804ea82aaffbc7186381fb2bf8189c3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-area-confirmed.log",
+      "sha256": "76d19339d9116bb516f149fbaaf4ec13c86297de31b78cad1b84a04ba5ec53fd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-area-fixed.log",
+      "sha256": "edceda260c33e4736d757f62377c7ac4b7a6bef4226650d101f024e52f5500f0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-area.log",
+      "sha256": "5bd2e1decf8ea92c3b6e49081162776304e38ab0143f1e7b4ea6ed75e4b65b55"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-check-final.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-check.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-design-final.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-design-reviewed.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-design.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-guarded-area.log",
+      "sha256": "8876823a269442cc6513922e92760ba785bde61c3774b4302ef2c4f28ddb879f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-harness-final.log",
+      "sha256": "161849bca366cb0707d554a0b4360a755da3e871240ed2ad7718a07af5165a8b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-harness-precommit.log",
+      "sha256": "161849bca366cb0707d554a0b4360a755da3e871240ed2ad7718a07af5165a8b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-harness-tests.log",
+      "sha256": "d75e3d8fa333bbd55820e391876fffd1b40abd2911173a55d5df29eda22be9c8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-lint-confirmed.log",
+      "sha256": "6846d9354ab026e8db136e02c59706c7a5f61cfbf48b464a21e6c86b1881eab1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-lint-final.log",
+      "sha256": "e3ded783e12dcff964e9709701893ffad827ca63d3772a5bd74686923a1137ea"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-lint-guarded.log",
+      "sha256": "dc2e1f14ebc5f3971554610f0907a6e7c8799cca29d3cbf882680d7541aa02d3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-lint.log",
+      "sha256": "9dcd4d73d51f0f41c0d7e39df9a34df6aa14fbf1f5b86e13132de111d5dd1b0e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-previous-ci.json",
+      "sha256": "83d023912dfb537bf0c86d3dc3f22a1cdecef982743378c5b2ac8f56a548de5f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-check-final.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-check-visible.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/accessibility.json",
+      "sha256": "6aae5e80fb93f9a6c6e9a856d4ea01b20f0d8795e44c66824a6a39d92a1d1bc4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-es-ES/accounts-accessibility.json",
+      "sha256": "d24169234d595e3f39766aa539c6e7476e9a51abfa38a9dc0a7a39d26c0de7f0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-es-ES/onboarding-accessibility.json",
+      "sha256": "29bcbca8134fb0d053b027833b3bf5e739a2e7f906561d8d516606cc2cc4f3cd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-09-library-187cb-ever-launches-from-browsing-electron-es-ES/library-accessibility.json",
+      "sha256": "7d1aa40bd580c497f63ddb41674eb306056b0b4527bccce68e7f0c8681cebffb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-10-creatio-3c436-s-within-the-minimum-window-electron-es-ES/creation-accessibility.json",
+      "sha256": "f2bcccaa57542f7891aa67bd7cb96b225ebfc57f44ad59528659efc3c5268dd0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-12-launch--7dc1c--launch-before-confirmation-electron-es-ES/java-fallback-accessibility.json",
+      "sha256": "02f626806245fa9e7a2e22042eec5775ed18f6ec3c419eb053971a78b65569e6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES/launch-accessibility.json",
+      "sha256": "5250ccc737510abaf44f92951ee4ad5f7175419c9bb77a3ed82808d322fe5272"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-14-imports-949dd-e-links-without-duplicating-electron-es-ES/imports-accessibility.json",
+      "sha256": "0eada2748c5904883c0b7d649de0497ad0abdb57e0eb1d935194a9fd9eb4dba0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-15-prism-v-6545e-ve-version-libraries-safely-electron-es-ES/prism-accessibility.json",
+      "sha256": "61a6b7ef4691151fdeeb757e5825217312c00be67fb7e3da21782a09ed0bc27e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-16-vanilla-986e7--personal-launcher-settings-electron-es-ES/vanilla-accessibility.json",
+      "sha256": "53c617e6bebaf94faafcf4d92866c6ff8e8caca3aedc411a085d87b2d3195bf1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-19-library-98b63-folder-after-a-full-restart-electron-es-ES/operations-accessibility.json",
+      "sha256": "bf1d62fc8a26bdf455fcf22ea2da41c388ac2340cc3b789102738774c674504c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-20-local-e-45c0f-le-at-both-sizes-and-themes-electron-es-ES/export-accessibility.json",
+      "sha256": "244782124425ffa108ffda0df2b4e6057d40f54ec4ddb8be968584f957206468"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-21-group-m-b0126--or-unknown-edition-members-electron-es-ES/groups-accessibility.json",
+      "sha256": "6317bb25ace736e2ab3f768922e6e16daedbf0f3585cc8352611a0a6d113a5ea"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-22-copy-re-68334-rting-the-packaged-launcher-electron-es-ES/copy-accessibility.json",
+      "sha256": "fb7dedebf7df62625bdb2b808a8d381686cfd8c1e5426bdc73a47b193d05a61c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-es-ES/large-library-accessibility.json",
+      "sha256": "c6844317918430197dcf2ecd650fa1969b21617f9de354f3e3bb58870b7c2a88"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-24-shared--263ba-ublishing-a-partial-archive-electron-es-ES/cancel-export-accessibility.json",
+      "sha256": "593ae024ab7df3423c32226db85bf73d5313307445b78d0567db312cbdacf492"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-24-shared--c1d8a--export-only-reviewed-bytes-electron-es-ES/shared-accessibility.json",
+      "sha256": "7b004024b250b3ee2b5715456abcb63c2ebb9a750d14a16874a8bc011d0acba4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full/react-migration-24-shared--cf04b-fore-any-destination-exists-electron-es-ES/cancel-copy-accessibility.json",
+      "sha256": "c5958a524811b43b603c9f777f6f7c0bf8c1b3005f7dc6aedcd33ff988919e60"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-full.log",
+      "sha256": "d9b8cbe1f9bf7604612777f5c7854def85e8112d422a41a3095d9729bceff313"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-lint-visible.log",
+      "sha256": "97f60c05e4b0718ab037ae980918d828a6b4823a35646da313a21d1d50ad00b2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-package-confirmed.log",
+      "sha256": "ef82a25ca05f35da2adfc401ece2a2cbc316b7e7daa3348e8f12fd6b2900c89f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-package-final.log",
+      "sha256": "45325d16999ee7c3e7f97c987e76a53bc641c337881a06da8a8601ef9a3aef41"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-package-guarded.log",
+      "sha256": "48e341d58c105f6b00a40d11e594d6bdde73458b58066701e0742f64e1d21331"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-package-review.log",
+      "sha256": "9762fb5ec7fa6e938ee6faf1e22c69d40a7556676ef1150d468ab0a22fe9ae9e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-package-visible.log",
+      "sha256": "c5128895477bda7846574969bb9782dba72cb04f13882924e21f64fa19a202b7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-package.log",
+      "sha256": "6ac189aab21e3f662d47014d1264e9a824f16ebb79a66af7ee29aa897fdf3916"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-renderer-confirmed.log",
+      "sha256": "d167b4ee0f716348af0412dbe87e1e875f96d5f44799f494ce32cd5e7dd9d0f2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-renderer-final.log",
+      "sha256": "9b2df5edd809a039bc0dfe505b514192cbff7bc86f1707d269e01956885d360c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-renderer-guarded.log",
+      "sha256": "eb7d828bfa2e314d06d7ab635981a9a6b44a90b2c03f8059853f5ace65aaf266"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-renderer-review.log",
+      "sha256": "08f57effed9ba9bd9c6c6c7af6aadae0e15c51c745f0b5a6022a09bd240f7ff2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-renderer-visible.log",
+      "sha256": "86c31fd102d9a5d6919f7b1126083c1dbe7d9933c399ead5f7efcec176633c94"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-react-renderer.log",
+      "sha256": "90fb30713bb3b7a1340bd4134a79eb15997b1537ce40eb5267a4cb27a5a615e7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-reviewed-area/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-reviewed-area/react-migration-20-local-e-45c0f-le-at-both-sizes-and-themes-electron-es-ES/export-accessibility.json",
+      "sha256": "ade8d3da93d326237f114da8200b22e57b3cd8c868bdc707a7577ea7594cc3be"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-reviewed-area/react-migration-24-shared--263ba-ublishing-a-partial-archive-electron-es-ES/cancel-export-accessibility.json",
+      "sha256": "9472b448f365486abbe7ef5d83307233c51a6beab80d9cd8e155478ab6a90f8c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-reviewed-area/react-migration-24-shared--c1d8a--export-only-reviewed-bytes-electron-es-ES/shared-accessibility.json",
+      "sha256": "9690416d4a81aeea43641ef0be5ee1313e36ffb692ab09c1353709eacb846fcf"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-reviewed-area/react-migration-24-shared--cf04b-fore-any-destination-exists-electron-es-ES/cancel-copy-accessibility.json",
+      "sha256": "605ac4ced8d430a75c980ffdd4309bdb8665c8d2f9526bbd2130160824536ad3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-reviewed-area.log",
+      "sha256": "294c4c39928417f6fefa4d742404a5305f3b1346c477bb85da983a7f6d1ccf2d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-runtime-check-guarded.log",
+      "sha256": "014a891360e8bf3c856c604e13ba0dee2eeaf7aa4121c9cb1a2ef4796a223b4c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-strict/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-strict.log",
+      "sha256": "3aaf22d8b7dbb8a8b4975c881e7cd52a792401afbce4d6c17d8ca3aa7db8aa18"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-testids-confirmed.log",
+      "sha256": "0261cc42fbbb618c70c24d8bb6bfd342167fc2fac1126f43aa058b4c21cb6cdf"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-testids-visible.log",
+      "sha256": "0261cc42fbbb618c70c24d8bb6bfd342167fc2fac1126f43aa058b4c21cb6cdf"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-testids.log",
+      "sha256": "0261cc42fbbb618c70c24d8bb6bfd342167fc2fac1126f43aa058b4c21cb6cdf"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-units-final.log",
+      "sha256": "7e5431c17ba4ec152d85e094766e0305d8543775cf06b1d1ee37d100fa46296e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-units-focused-final.log",
+      "sha256": "f72d9abbeb4e6e00d2524251faa9953049cddaac38a46641862ee371e6e8a1c2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-units-focused.log",
+      "sha256": "ab3e9a3e8a30fb4fe3605a8d47113b7e33e95c5e10361358b4d647e4436d54c5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-units-focused2.log",
+      "sha256": "8e88095b23d30332ccb772f2df6a26415992abe6595ecd7568465cc9078846f1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-units-focused3.log",
+      "sha256": "3ecdc61fee4e72ce57c5fa69337445deb8d1da4e0a8ad39610c77938c946f5fc"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-units-guarded.log",
+      "sha256": "1cc3d9af7aed2fc1e78de17b6e8685a6e05072eda3e3b4d05795402bb6a6bca6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-units.log",
+      "sha256": "a8ac63c16b49f9f14e1c97e216ab154e0b59cfb13fc39251edabf71a91642794"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-visible-area.log",
+      "sha256": "feab1a74cd52390b2ad5910e0dac212d9c153496d272151de0d784909b829c8d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-vue/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-vue-final.log",
+      "sha256": "7ba28818c81d6933bdcd6d34a31933abc6fd2e6eebc7f6aca47099f0c131d97e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-vue-package-final.log",
+      "sha256": "44a2fb2ce717a3bd617165f154b24c9fafb82da5b5924faca02120a9bff22aa4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-vue-package.log",
+      "sha256": "9a350836d0ca964f7979a6ae4503f2a37a3848996f3ea44aeb579f87b093038e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-vue-renderer-final.log",
+      "sha256": "4a6719f570fa0c5a6f51c35c81b6c74a841f3dd76cf5cd0e441c45924c21d1a6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-vue-renderer.log",
+      "sha256": "4130bbeb83f1414fca7f5d6c6b3a5c8012e7002a77d514a8c2c3067d5d77f8f9"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-vue-restored.log",
+      "sha256": "0b77c10c8442ecdefe3749ce603e019021b731fc4758d5d78e3a8aa8a34d3824"
+    },
+    {
+      "path": "launcher/e2e/artifacts/shared-content-vue.log",
+      "sha256": "ee9fe8c1148e11c0dc70f5b8aede0f8a5442221fb87ce85cbe185b0c2904abfb"
+    }
+  ],
+  "limits": [
+    "Stage4 and its3 gates remain pending; K03 audit, local profile editing/appearance and media/cache/performance still required",
+    "Only native saves/resourcepacks/shaderpacks links are trusted, exact destination validated from main game root; arbitrary/external and nested links remain rejected",
+    "Options/server links are regular hard links; copy creates independent target files",
+    "Default external folder previews have no cancellation request exposed by their existing IPC contract; closing them still ignores stale results rather than cancelling native I/O",
+    "Controlled I/O stalls prove native cancellation wiring, not disk throughput or crash/power-loss recovery",
+    "World/pack/shader/server bytes are synthetic fixtures, not playable Minecraft assets",
+    "NTFS C: verified; other filesystems/platforms not physically certified",
+    "No real Minecraft/Java launch/download, NSIS/isolated update,60s idle performance or exhaustive manual AA/RTL certification in this block",
+    "Vue remains default,Microsoft deferred,no production publication"
+  ]
+}

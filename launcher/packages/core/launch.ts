@@ -295,7 +295,7 @@ export namespace LaunchPrecheck {
     version: ResolvedVersion,
     option: LaunchOption,
   ) {
-    const jarPath = resource.getVersionJar(version.minecraftVersion)
+    const jarPath = resource.getVersionJar(version.clientJar || version.minecraftVersion)
     if (version.downloads.client?.sha1) {
       if (!(await validateSha1(jarPath, version.downloads.client.sha1))) {
         throw Object.assign(
@@ -856,7 +856,7 @@ export async function generateArguments(options: LaunchOption) {
       ...version.libraries
         .filter((lib) => !lib.isNative)
         .map((lib) => mc.getLibraryByPath(lib.download.path)),
-      mc.getVersionJar(version.minecraftVersion),
+      mc.getVersionJar(version.clientJar || version.minecraftVersion),
       ...(options.extraClassPaths || []),
     ]
       .map((c) => c.replaceAll('\\', '/'))

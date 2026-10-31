@@ -1,4 +1,4 @@
-import { type Frame, parse, encodeUnicodeEscapes, decodeUnicodeEscapes } from '@xmcl/gamesetting'
+import { type Frame, parse } from '@xmcl/gamesetting'
 import {
   type EditGameSettingOptions,
   type EditShaderOptions,
@@ -6,8 +6,8 @@ import {
   getInstanceGameOptionKey,
   type InstanceOptionsService as IInstanceOptionsService,
   InstanceOptionsServiceKey,
-  parseShaderOptions,
-  stringifyShaderOptions,
+  LockKey,
+  type ResourcePackSelection,
 } from '@xmcl/runtime-api'
 import { FSWatcher } from 'chokidar'
 import { ensureDir, ensureFile, readdir, readFile, unlink, writeFile } from 'fs-extra'
@@ -26,6 +26,12 @@ import {
 
 import { requireString } from '../util/object'
 import { existsSync } from 'fs'
+import { InstanceService } from './InstanceService'
+import { LaunchService } from '../launch/LaunchService'
+import { readResourcePackSelection, writeResourcePackSelection } from './utils/resourcePackSelection'
+import { readShaderProperties, writeShaderProperties } from './utils/shaderProperties'
+import type { ShaderEngine } from '@xmcl/runtime-api/src/services/InstanceShaderPacksService'
+import { importPathParts } from '../util/importFile'
 
 /**
  * Top-level files under `<instance>/server/` that the agent / UI may read &
@@ -52,6 +58,29 @@ export class InstanceOptionsService extends AbstractService implements IInstance
     @Inject(kGameDataPath) private getPath: PathResolver,
   ) {
     super(app)
+  }
+
+  async #javaInstance(path: string) {
+    const instances = await this.app.registry.get(InstanceService)
+    await instances.initialize()
+    if (!instances.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceNotFoundError')
+  }
+
+  async getResourcePackSelection(path: string) {
+    await this.#javaInstance(path)
+    return readResourcePackSelection(path)
+  }
+
+  async editResourcePackSelection(path: string, selection: ResourcePackSelection) {
+    await this.#javaInstance(path)
+    return this.mutex.of('resource-pack-options').runExclusive(() => this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      await this.#javaInstance(path)
+      const launch = await this.app.registry.get(LaunchService)
+      const processes = await launch.getGameProcesses()
+      if (processes.some(process => process.options.gameDirectory === path)) throw new AnyError('InstanceRunningError')
+      if (processes.length && await this.isGameOptionsLinked(path) && (await Promise.all(processes.map(process => this.isGameOptionsLinked(process.options.gameDirectory)))).some(Boolean)) throw new AnyError('SharedOptionsRunningError')
+      return writeResourcePackSelection(path, selection, this.getPath('resourcepacks'), this.getPath('options.txt'))
+    }))
   }
 
   getServerProperties(instancePath: string): Promise<Record<string, string>> {
@@ -248,12 +277,9 @@ export class InstanceOptionsService extends AbstractService implements IInstance
    * Load `optionsshader.txt` file
    */
   async getShaderOptions(instancePath: string) {
-    const optionsPath = join(instancePath, 'optionsshaders.txt')
-
-    const content = await readFile(optionsPath, 'utf-8').catch((e) => '')
-    const options = parseShaderOptions(content)
-
-    return options
+    await this.#javaInstance(instancePath)
+    const { values } = await readShaderProperties(instancePath, 'optifine')
+    return { ...values, shaderPack: values.shaderPack || '' }
   }
 
   async isGameOptionsLinked(instancePath: string) {
@@ -345,49 +371,30 @@ export class InstanceOptionsService extends AbstractService implements IInstance
     return this.#getProperties(instancePath, 'oculus.properties')
   }
 
-  async #editShaderOptions(pack: string, instancePath: string, name: string) {
-    const current = await this.#getProperties(instancePath, name)
-    current.shaderPack = pack
-    current.enableShaders = pack ? 'true' : 'false'
-    const configFile = join(instancePath, 'config', name)
-    await ensureDir(join(instancePath, 'config'))
-    await writeFile(
-      configFile,
-      Object.entries(current)
-        .filter(([k, v]) => !!k && !!v)
-        .map(([k, v]) => `${k}=${encodeUnicodeEscapes(v)}`)
-        .join('\n') + '\n',
-    )
+  async #writeShaderProperties(instancePath: string, engine: ShaderEngine, patch: Record<string, string>) {
+    await this.#javaInstance(instancePath)
+    return this.mutex.of('resource-pack-options').runExclusive(() => this.mutex.of(LockKey.instance(instancePath)).runExclusive(async () => {
+      await this.#javaInstance(instancePath)
+      const launch = await this.app.registry.get(LaunchService)
+      if ((await launch.getGameProcesses()).some(process => process.options.gameDirectory === instancePath)) throw new AnyError('InstanceRunningError')
+      if (patch.shaderPack && !['OFF', '(internal)'].includes(patch.shaderPack) && importPathParts(patch.shaderPack).length !== 1) throw new Error('Invalid shader selection')
+      const before = await readShaderProperties(instancePath, engine)
+      await writeShaderProperties(instancePath, engine, patch, before.snapshot)
+    }))
   }
 
-  async #getProperties(instancePath: string, name: string) {
-    const filePath = join(instancePath, 'config', name)
+  async #editShaderOptions(pack: string, instancePath: string, name: 'iris.properties' | 'oculus.properties') {
+    await this.#writeShaderProperties(instancePath, name === 'iris.properties' ? 'iris' : 'oculus', { shaderPack: pack, enableShaders: pack ? 'true' : 'false' })
+  }
 
-    const content = await readFile(filePath, 'utf-8').catch(handleOnlyNotFound)
-    if (!content) {
-      return {}
-    }
-    const lines = content.split('\n').map((l) => l.split('=').map((s) => s.trim()))
-    const options = lines.reduce((a, b) => Object.assign(a, { [b[0]]: b[1] }), {}) as Record<
-      string,
-      string
-    >
-    // Decode Java-style unicode escape sequences
-    for (const key of Object.keys(options)) {
-      if (typeof options[key] === 'string') {
-        options[key] = decodeUnicodeEscapes(options[key])
-      }
-    }
-    return options
+  async #getProperties(instancePath: string, name: 'iris.properties' | 'oculus.properties') {
+    await this.#javaInstance(instancePath)
+    return { ...(await readShaderProperties(instancePath, name === 'iris.properties' ? 'iris' : 'oculus')).values }
   }
 
   async editShaderOptions(options: EditShaderOptions): Promise<void> {
     const { instancePath, ...patch } = options
-    const current = await this.getShaderOptions(instancePath)
-    Object.assign(current, patch)
-
-    const configFile = join(instancePath, 'optionsshaders.txt')
-    await writeFile(configFile, stringifyShaderOptions(current))
+    await this.#writeShaderProperties(instancePath, 'optifine', patch)
   }
 
   async editGameSetting(options: EditGameSettingOptions) {

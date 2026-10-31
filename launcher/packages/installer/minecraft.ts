@@ -85,8 +85,8 @@ export function resolveMinecraftJarInstallFile(
   if (!downloadInfo) return undefined
   const folder = MinecraftFolder.from(version.minecraftDirectory)
   return {
-    path: folder.getVersionJar(version.minecraftVersion, side),
-    urls: resolveDownloadUrls(downloadInfo.url, version, options[side]),
+    path: folder.getVersionJar(side === 'client' ? version.clientJar || version.minecraftVersion : version.minecraftVersion, side),
+    urls: downloadInfo.url ? resolveDownloadUrls(downloadInfo.url, version, options[side]) : [],
     size: downloadInfo.size,
     checksum: downloadInfo.sha1
       ? { algorithm: 'sha1', value: downloadInfo.sha1 }

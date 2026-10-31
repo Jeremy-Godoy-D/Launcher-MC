@@ -1,0 +1,7 @@
+# Grimo Launcher
+
+Nombre definitivo confirmado por el usuario el 2026-10-25. Los PNG y el ICO proceden de los archivos que entregó en `Nueva carpeta` y `04_Icono_Aplicacion`; se copiaron sin modificar. `assets.json` registra sus hashes, tamaños y dimensiones originales. No se generaron variantes ni se atribuye a estos archivos una licencia externa no proporcionada.
+
+El usuario pidió después adaptar el color del logo a la aplicación y recordó los distintos usos de sus versiones. Los originales anteriores se conservan; `copper/` contiene derivados editados con la herramienta de imágenes integrada en cobre/crema/obsidiana. El icono ICO y los PNG por tamaño proceden de la variante adaptada de aplicación; los dos logos horizontales tienen letras claras/oscuras para su tema correspondiente. No se invierten con filtros CSS. La interfaz mantiene la paleta y los fondos aprobados: el nuevo nombre no implica rediseñar otra vez.
+
+Identificadores conservados por compatibilidad: datos/secretos bajo `LauncherMC`, appId/AUMID `local.launchermc.desktop`, esquema `launchermc` y repositorio `Jeremy-Godoy-D/Launcher-MC`. Cambian el nombre visible, iconos y futuros paquetes EXE/ZIP `GrimoLauncher-*`; los enlaces históricos de beta.3 siguen apuntando a sus nombres publicados. La actualización y el instalador sobre una versión anterior requieren sus recorridos de publicación: cambiar la marca no los certifica ni publica una versión.

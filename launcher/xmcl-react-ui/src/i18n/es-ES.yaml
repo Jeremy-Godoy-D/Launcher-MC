@@ -1,0 +1,836 @@
+react:
+  home: Inicio
+  library: Biblioteca
+  discover: Descubrir
+  settings: Ajustes
+  appearance: Apariencia
+  system: Seguir Windows
+  dark: Oscura
+  light: Clara
+  performance: Modo rendimiento
+  ambientVideo: Vídeo ambiental
+  carousel: Presentación automática
+  instances:
+    searchPlaceholder: Nombre, versión o loader…
+    count: "{count} instancias"
+    listLabel: Instancias de la biblioteca
+    keyboard: En bibliotecas grandes usa las flechas para recorrer instancias, Inicio y Fin para ir a los extremos, y Tab para recorrer sus acciones.
+    saved: Guardada en este equipo
+    connected: Biblioteca del equipo · migración en curso
+    subtitle: Tus instancias de Minecraft Java, en un solo lugar.
+    description: Continúa tu aventura o administra esta instancia.
+    ambient: Paisaje ambiental de Minecraft Vanilla.
+    genericAmbient: Ambiente Vanilla genérico; no representa este modpack.
+    runtimeRequired: Abre Grimo Launcher para ver tus instancias guardadas.
+    loading: Cargando tus instancias…
+    loadError: No se pudo cargar la biblioteca. Reintenta para recuperar tus instancias.
+    retry: Reintentar
+    empty: Tu primera aventura empieza aquí.
+    emptyHelp: Crea una instancia de Minecraft Java o importa un modpack para empezar.
+    noneSelected: Sin instancia seleccionada
+    choose: Elegir en la biblioteca
+    missingSelection: La instancia seleccionada ya no está disponible. Elige otra para continuar.
+    storageError: La selección se aplicará en esta ventana; no se pudo guardar en este equipo.
+    launchPending: 'Se ha seleccionado «{name}». El lanzamiento todavía no está conectado en React. No se inicia Minecraft.'
+    featurePending: Esta función sigue pendiente en la migración a React. Tus instancias guardadas se conservan.
+  accounts:
+    appearance: Apariencia
+    appearanceName: 'Apariencia de {name}'
+    appearanceTitle: 'Apariencia de {name}'
+    appearanceHelp: Elige archivos locales. Se guardará una copia en este equipo, sin subirlos a ningún servicio.
+    appearanceFields: Apariencia del perfil local
+    identityHelp: El nombre y el UUID del perfil se conservan. Cambiar la apariencia no cambia la identidad de tus partidas.
+    skin: Skin
+    skinHelp: PNG de 64×64 o 64×32 píxeles, hasta 1 MiB.
+    chooseSkin: Elegir skin PNG
+    resetSkin: Restablecer skin
+    defaultSkin: Skin predeterminada
+    savedTexture: Textura guardada en el perfil
+    willReset: Se restablecerá al guardar
+    model: Modelo del personaje
+    classic: Clásico · brazos anchos
+    slim: Slim · brazos estrechos
+    cape: Capa
+    capeHelp: PNG de 64×32 píxeles, hasta 1 MiB. La visualización en el juego depende del soporte de skins locales de la instancia.
+    chooseCape: Elegir capa PNG
+    resetCape: Retirar capa
+    noCape: Sin capa
+    saveAppearance: Guardar apariencia
+    profileMissing: Este perfil ya no está disponible. Cierra el editor y selecciona otro.
+    appearanceError: No se pudo guardar. Comprueba que los archivos sean PNG con las dimensiones indicadas y sigan disponibles. Si el perfil cambió en otra ventana, vuelve a abrir el editor.
+    title: Cuentas
+    saved: Perfiles guardados en este equipo
+    description: Elige el perfil que usarás al jugar. Cada nombre local conserva su identidad.
+    playerName: Nombre del jugador
+    nameHelp: Entre 3 y 16 letras, números o guiones bajos, sin espacios.
+    duplicate: Ya existe ese perfil local. Selecciónalo con Usar o elige otro nombre.
+    create: Crear perfil local
+    saving: Guardando…
+    actionError: No se pudo completar la acción. Tus datos siguen guardados; vuelve a intentarlo.
+    runtimeRequired: Abre esta pantalla en Grimo Launcher para gestionar tus perfiles.
+    loading: Cargando perfiles guardados…
+    loadError: No se pudieron cargar tus cuentas. Reinicia el launcher para volver a intentarlo.
+    storageError: La selección se aplicará en esta ventana; no se pudo guardar en este equipo.
+    local: Perfil local
+    external: Cuenta existente · inicio de sesión pospuesto
+    active: Activo
+    use: Usar
+    useName: 'Usar {name}'
+    remove: Eliminar
+    removeName: 'Eliminar {name}'
+    empty: Aún no tienes perfiles. Crea uno local para preparar tu primera partida.
+    addTitle: Añadir un perfil local
+    microsoftDeferred: Microsoft está pospuesto. Las cuentas existentes se conservan; aquí no se solicitan credenciales.
+    removeTitle: '¿Eliminar el perfil {name}?'
+    removeDescription: Se retirará este perfil del launcher. Tus instancias, archivos y mundos se conservan. Puedes volver a añadir el mismo nombre local.
+    cancel: Cancelar
+    confirmRemove: Eliminar perfil
+    close: Cerrar
+    noneSelected: Sin perfil seleccionado
+  create:
+    title: Añadir instancia
+    description: Prepara una nueva partida o importa un modpack a una carpeta nueva.
+    source: Origen de la instancia
+    create: Nueva instancia
+    import: Importar modpack
+    name: Nombre de la instancia
+    nameHelp: Hasta 100 caracteres. Usa un nombre distinto para identificar tu partida.
+    nameError: Usa un nombre válido y distinto, sin caracteres de rutas, controles ni nombres reservados de Windows.
+    loading: Cargando versiones…
+    chooseVersion: Elige una versión
+    snapshots: Mostrar snapshots y versiones antiguas
+    metadataError: No se pudo consultar las versiones. Puedes usar las disponibles en este equipo o reintentar.
+    retry: Reintentar
+    loader: Loader
+    loaderVersion: Versión del loader
+    noLoader: No hay versiones compatibles disponibles para esta combinación.
+    noLaunch: Crear guarda la configuración. Los archivos de Minecraft se prepararán al instalar o jugar; no se inicia el juego ahora.
+    archive: Archivo del modpack
+    chooseArchive: Elegir archivo de modpack
+    chooseError: No se pudo abrir el selector de archivos. Vuelve a intentarlo.
+    parsing: Revisando el modpack…
+    parseError: No se pudo leer un modpack Java válido. Elige otro archivo .mrpack o .zip.
+    fileCount: 'Archivos: {count}'
+    importHelp: Se instalarán los archivos en una instancia nueva, sin reemplazar otras existentes. No se adoptan comandos ni ajustes personales de Java del launcher de origen. Usa solo packs de confianza.
+    retained: La instancia ya está guardada. Un reintento continúa en la misma carpeta; cerrar conserva los archivos.
+    statusError: No se pudo comprobar la instalación. Conserva la instancia y vuelve a revisar su estado.
+    unresolved: '{count} archivos requieren atención. La instalación está incompleta.'
+    working: Preparando…
+    progress: Progreso de la importación
+    progressError: No se pudo obtener el progreso. La operación puede seguir en curso.
+    actionError: No se pudo terminar. Tus campos y cualquier instancia ya creada se conservan; reintenta sin crear otra copia.
+    cancelError: No se pudo cancelar la tarea. Espera a que termine o vuelve a intentarlo.
+    cancelInstall: Cancelar instalación
+    cancel: Cancelar
+    keepClose: Conservar y cerrar
+    close: Cerrar
+    confirm: Crear instancia
+    importConfirm: Confirmar importación
+    success: Instancia guardada. Puedes abrirla para revisar su configuración.
+    checkPending: Archivos procesados. Se está comprobando si quedan pendientes.
+    open: Ver instancia
+    advanced: Opciones avanzadas
+    descriptionLabel: Descripción
+    author: Autor
+    javaAutomatic: Automático según la instancia
+    chooseJava: Elegir ejecutable Java
+    javaError: No se pudo validar Java. Elige un ejecutable válido o usa la detección automática.
+    javaHelp: Si falta un Java compatible, se ofrecerá descargarlo al jugar.
+    memory: Memoria RAM
+    memory_inherit: Heredar ajustes del launcher
+    memory_auto: Asignación automática
+    memory_manual: Asignación manual
+    minMemory: Mínimo en MB (opcional)
+    maxMemory: Máximo en MB
+    advancedError: Revisa las opciones avanzadas. La memoria debe ser un número entero positivo y el mínimo no puede superar el máximo.
+    shared: Compartir con otras instancias
+    sharedHelp: Los cambios en estos archivos serán comunes. Solo se aplica a instancias nuevas, nunca a packs importados.
+    link_saves: Mundos
+    link_resourcepacks: Resource packs
+    link_shaderpacks: Shaders
+    link_options: Opciones del juego
+    link_servers: Lista de servidores
+    linkStorageError: No se pudieron guardar estas preferencias o pertenecen a una versión posterior. Los datos anteriores se conservan.
+    linkError: La instancia se guardó, pero faltan los siguientes enlaces compartidos. Reintenta para completarlos en la misma carpeta.
+    importSource: Fuente de importación
+    source_file: Archivo
+    source_url: Enlace HTTPS
+    source_folder: Carpeta existente
+    url: Enlace al archivo del modpack
+    reviewUrl: Revisar enlace
+    urlHelp: Usa un enlace HTTPS directo a un .mrpack o .zip. Revisar descarga una copia temporal; confirmar crea la instancia.
+    urlError: Usa un enlace HTTPS válido, sin credenciales ni fragmentos.
+    folderType: Formato de la carpeta
+    chooseFolder: Elegir carpeta de origen
+    folderProfile: Perfil que se importará
+    folderScanning: Revisando archivos e integridad del origen…
+    folderError: No se pudo revisar una instancia Java válida. Comprueba formato, permisos y bibliotecas locales; no se admiten enlaces, carpetas raíz ni versiones incompletas.
+    folderHelp: Se copiarán mundos, mods y configuración a una carpeta nueva. El origen se conserva; no se copian cuentas ni ajustes personales de arranque. Prism y Vanilla incluyen las versiones locales compatibles; Modrinth y CurseForge conservan los archivos de juego.
+    prismVersion: Versión personalizada revisada. Se guardará al confirmar, junto a sus bibliotecas locales, sin reemplazar archivos existentes distintos. Usa solo packs de confianza.
+    vanillaVersion: Versión local de Minecraft revisada. Al confirmar se conservarán su herencia, el cliente y las bibliotecas disponibles, sin reemplazar archivos existentes distintos.
+    prism_sourceChanged: El origen cambió desde la revisión. Vuelve a elegir la carpeta para revisar los archivos antes de confirmar.
+    prism_conflict: Ya existe una biblioteca o versión con contenido distinto. Se conservaron los archivos existentes; esta importación no puede continuar en este directorio de datos.
+  launch:
+    title: 'Jugar: {name}'
+    description: Revisa la preparación de esta instancia antes de iniciar Minecraft.
+    profile: 'Perfil: {name}'
+    checking: Comprobando instancia, instalación y Java…
+    preparing: Preparando el juego…
+    ready: Comprobaciones terminadas. Puedes iniciar el juego.
+    needsInstall: Se requiere preparar o reparar archivos del juego, del pack o de Java. Continuar puede descargar archivos.
+    java: 'Java previsto: {version}'
+    javaAfterInstall: La versión de Java se determinará al resolver Minecraft y su loader.
+    autoJava: Si falta un Java compatible, el launcher lo descargará automáticamente al confirmar. No necesitas cambiar el Java del sistema.
+    javaInstalling: 'Descargando y comprobando Java {version} para el launcher…'
+    javaWebsite: Descargar Java desde Eclipse Adoptium
+    javaManualHelp: También puedes instalar una versión compatible desde la página oficial y volver a detectarla. Las instalaciones existentes se conservan.
+    javaRedetect: Volver a detectar Java
+    javaFallback: El Java configurado no está disponible o no es compatible. Se usará uno compatible para esta partida, conservando tu configuración.
+    reason_profile: Elige un perfil local válido antes de jugar. Microsoft sigue pospuesto.
+    reason_path: La carpeta de esta instancia no está disponible o no tiene permisos. No se creará otra carpeta en su lugar.
+    reason_changed: La configuración de la instancia cambió durante la preparación. Revísala de nuevo antes de jugar.
+    reason_files: Quedan archivos pendientes, sin resolver o con errores de integridad. Corrige su instalación antes de jugar.
+    reason_java: No se pudo preparar un Java válido y compatible. Revisa la configuración o reintenta la descarga.
+    reason_mods: Hay archivos de mods que no se pudieron leer. Revísalos antes de jugar.
+    reason_version: La versión de juego no es válida o no se pudo resolver. Revisa la configuración de la instancia.
+    reason_network: No se pudo preparar o iniciar el juego. Revisa la conexión y los archivos; puedes volver a comprobarlo.
+    reason_cancelled: Lanzamiento cancelado. Se conservan los archivos y la preparación completada.
+    reason_process: No se pudo confirmar o detener el proceso. Comprueba el estado de la partida antes de reintentar.
+    reason_memory: La memoria configurada no es válida o supera la RAM del equipo. Revisa los valores de Java y memoria.
+    reason_permission: No hay permisos suficientes para preparar o iniciar el juego. Revisa los permisos de sus carpetas y Java.
+    reason_disk: No hay espacio suficiente en disco. Libera espacio antes de reintentar.
+    reason_copy: Esta copia no está completa. Vuelve a Biblioteca y elige «Revisar copia» para continuar o conservarla sin iniciar el juego.
+    chooseProfile: Elegir perfil
+    library: Ir a la biblioteca
+    running: En ejecución
+    finished: La partida ha terminado.
+    stop: Detener partida
+    cancel: Cancelar lanzamiento
+    cancelHelp: El paso en curso puede terminar; cancelar impide iniciar el juego y conserva los archivos preparados.
+    tasks: '{count} tareas activas'
+    progressError: No se pudo consultar el progreso. La preparación puede continuar.
+    close: Cerrar
+    play: Jugar
+    view: Ver partida
+    installPlay: Instalar y jugar
+    retry: Volver a comprobar
+  setup:
+    nextAction: Al terminar
+    choice_library: Ir a la biblioteca
+    choice_create: Crear una instancia
+    choice_import: Importar un modpack
+    welcome: Tu próxima aventura empieza aquí.
+    intro: Prepara tu espacio y un perfil para Minecraft Java.
+    progress: Progreso de la configuración
+    location: Tu espacio de juego
+    profile: Tu perfil
+    ready: Todo preparado
+    loading: Buscando la ubicación recomendada…
+    loadError: No se pudo obtener la configuración inicial. Vuelve a intentarlo.
+    retry: Reintentar
+    pathDescription: Elige dónde guardar versiones, instancias y mundos del launcher.
+    folder: Carpeta de datos
+    chooseFolder: Elegir carpeta de datos
+    pathHelp: Usa una carpeta dedicada. Evita tu carpeta .minecraft habitual.
+    pathError: La ruta no es válida o no se puede escribir en ella. Elige una carpeta completa con permisos.
+    existing: Confirmo que quiero usar esta carpeta existente. Sus archivos no se eliminarán.
+    profileDescription: Crea un perfil local o continúa sin perfil para elegirlo después. Microsoft está pospuesto.
+    selected: 'Perfil seleccionado: {name}'
+    readyDescription: Revisa tu ubicación y tu perfil antes de entrar a la biblioteca.
+    noLaunch: No se iniciará Minecraft al terminar. Podrás crear o importar tu instancia desde la biblioteca.
+    actionError: No se pudo completar la configuración. Revisa la carpeta y reintenta; si el error persiste, reinicia el launcher. Tus campos se conservan.
+    back: Atrás
+    next: Continuar
+    skipProfile: Continuar sin perfil
+    finish: Entrar a la biblioteca
+    saving: Preparando…
+    minimize: Minimizar
+    maximize: Maximizar
+  operations:
+    iconFailed: No se pudo guardar el icono. Comprueba el formato, el límite de 8 MiB y que el archivo siga disponible. Puedes elegir otra imagen y volver a intentar.
+    changeIcon: Cambiar icono
+    iconTitle: 'Icono de {name}'
+    iconHelp: Elige un PNG, JPEG, GIF o WebP de hasta 8 MiB. Se guarda una copia en la instancia; el archivo original se conserva.
+    iconFields: Icono de la instancia
+    iconPreview: Vista previa del icono
+    chooseIcon: Elegir imagen
+    resetIcon: Restablecer icono
+    iconResetHelp: Al guardar se usará la presentación predeterminada. Tus archivos se conservan.
+    iconPreviewFailed: No se pudo mostrar la imagen. Comprueba el formato y que el archivo siga disponible.
+    exportTitle: Exportar instancia
+    exportHelp: Revisa qué archivos se guardarán en una copia local.
+    optionsTitle: 'Opciones de {name}'
+    optionsHelp: Administra esta instancia. Las acciones se aplican a la carpeta indicada.
+    editTitle: Editar instancia
+    editHelp: Cambia sus datos de presentación. Java, versión, archivos y ajustes se conservan.
+    duplicateTitle: Duplicar instancia
+    duplicateHelp: Copia una instancia o continúa una copia pendiente. La instancia original se conserva.
+    removeTitle: Retirar instancia
+    removeHelp: Revisa cómo se tratarán los archivos antes de confirmar.
+    edit: Editar datos
+    duplicate: Duplicar
+    openFolder: Abrir carpeta
+    remove: Retirar o eliminar
+    name: Nombre de la instancia
+    description: Descripción
+    author: Autor
+    duplicateDetail: La copia tendrá archivos y mundos independientes. Las versiones y bibliotecas globales del launcher se conservan. No se iniciará Minecraft.
+    keepDetail: Por defecto se retira de la biblioteca y su carpeta administrada se renombra con un punto inicial. Los archivos se conservan. Una carpeta externa solo se retira de la lista.
+    deleteFiles: Borrar también los archivos de una instancia administrada
+    deleteDetail: Se eliminarán los archivos de la carpeta administrada. Los mundos se trasladan antes a la carpeta compartida de mundos; si ese traslado falla, el borrado se bloquea. Las carpetas externas se conservan.
+    typeName: 'Escribe «{name}» para confirmar el borrado'
+    close: Cerrar
+    back: Volver
+    save: Guardar cambios
+    confirmDuplicate: Crear copia
+    confirmRemove: Retirar y conservar archivos
+    confirmDelete: Eliminar archivos
+    saved: Cambios guardados.
+    busy: Procesando…
+    missing: La instancia ya no está disponible. Cierra este diálogo y revisa la biblioteca.
+    changed: Los datos cambiaron en otra ventana. Cierra y vuelve a abrir para revisar la versión actual antes de editar.
+    invalid: Revisa el nombre, la descripción y el autor. Usa un nombre válido de hasta 100 caracteres.
+    duplicateName: Ya existe una instancia con ese nombre. Elige otro.
+    running: Cierra la partida de esta instancia antes de realizar esta operación.
+    failed: No se completó la operación. Revisa la carpeta y los diagnósticos antes de reintentar. Si estabas copiando, puede haber quedado una copia incompleta en la biblioteca.
+    groupTitle: Organizar instancia
+    groupHelp: El grupo y el orden se guardan en el launcher y conservan las instancias de otras ediciones.
+    group: Grupo
+    ungrouped: Sin grupo
+    newGroup: Crear grupo
+    groupName: Nombre del grupo
+    invalidGroup: Usa un nombre de grupo de hasta 100 caracteres que todavía no exista.
+    moveUp: Subir en orden manual
+    moveDown: Bajar en orden manual
+    sort: Ordenar instancias
+    sortmanual: Orden manual
+    sortname: Nombre
+    sortrecent: Última partida
+    filterGroup: Filtrar por grupo
+    allGroups: Todos los grupos
+  export:
+    cancelled: Exportación cancelada. Los archivos originales se conservan; puedes volver a intentarlo.
+    action: Exportar archivos
+    format: Formato del archivo
+    offline: Copia local con juego (.zip)
+    offlineHelp: Incluye la versión, cliente, bibliotecas y assets ya instalados. Requiere todos esos archivos disponibles. Para recuperar la copia, descomprímela e importa la carpeta Vanilla; la importación actual puede necesitar volver a descargar assets. Java se administra por separado.
+    portableHelp: Incluye los archivos seleccionados dentro del paquete. Minecraft y los loaders se descargarán al importarlo. Esta acción guarda un archivo local.
+    customVersion: Esta versión personalizada necesita la copia local para conservar su cliente y metadatos.
+    version: Versión de la copia
+    chooseFolder: Elegir carpeta de destino
+    privacy: Mundos y otros archivos personales empiezan desmarcados. Se excluyen cuentas y credenciales conocidas. Revisa también tus archivos de configuración antes de compartir la copia. No se sobrescriben archivos existentes.
+    reviewing: Revisando archivos…
+    count: '{selected} de {total} archivos seleccionados'
+    search: Buscar archivos para exportar
+    files: Archivos de la instancia
+    refine: Se muestran los primeros 200 resultados. Escribe una búsqueda más precisa para encontrar el resto.
+    empty: No hay archivos que coincidan.
+    reviewAgain: Volver a revisar archivos
+    saved: Copia guardada.
+    reveal: Mostrar archivo en su carpeta
+    save: Guardar copia
+    cancel: Cancelar exportación
+    working: Preparando y comprimiendo la copia…
+    reviewFailed: No se pudieron revisar los archivos. Comprueba el acceso a la carpeta; solo se admiten las carpetas compartidas del launcher. Pulsa «Volver a revisar archivos» para reintentar.
+    failed: No se guardó la copia. Puede haberse cancelado o faltar acceso, espacio o archivos del juego. Comprueba el destino y vuelve a revisar antes de reintentar.
+    ExportSourceChanged: Los archivos o datos cambiaron desde la revisión. Pulsa «Volver a revisar archivos» antes de guardar.
+    ExportDestinationExists: Ya existe una copia con ese nombre. Cambia la versión o la carpeta de destino.
+    ExportNeedsOffline: Esta versión necesita el formato «Copia local con juego» para conservar su cliente personalizado.
+    ExportMissingRuntime: La versión del juego no está instalada. Instálala o repara sus archivos antes de crear esta copia.
+    ExportGameRunning: Cierra la partida de esta instancia antes de exportarla.
+    ExportInvalid: Revisa la versión y el destino. Elige una carpeta fuera de la instancia y de sus carpetas compartidas.
+    ExportInstanceUnavailable: La instancia ya no está disponible. Cierra el diálogo y revisa la biblioteca.
+  groups:
+    title: Administrar grupos
+    help: Renombra o disuelve un grupo. Sus instancias y archivos se conservan.
+    dissolve: Disolver este grupo
+    keep: Las instancias quedarán sin este grupo y mantendrán su orden relativo. No se retiran ni se borran sus carpetas.
+    empty: No hay grupos. Puedes crear uno desde las opciones de una instancia, en «Grupo».
+    refresh: Revisar grupos de nuevo
+    confirmDissolve: Disolver y conservar instancias
+    changed: Los grupos cambiaron en otra ventana. Pulsa «Revisar grupos de nuevo» antes de guardar.
+    unavailable: La biblioteca no está disponible. Cierra el diálogo y vuelve a intentarlo cuando cargue.
+    failed: No se guardó el cambio. Revisa el acceso a los datos del launcher y vuelve a revisar los grupos antes de reintentar.
+  copy:
+    filesComplete: Los archivos ya están copiados. Solo falta guardar los grupos de mods; al reintentar no se vuelve a copiar la instancia.
+    groupsFailed: La instancia ya se copió, pero sus grupos de mods no se pudieron copiar. Los datos anteriores se conservan. Reintenta o vuelve a Biblioteca.
+    retryGroups: Reintentar grupos
+    details: Archivos y estado de copia
+    pending: Copia pendiente
+    action: 'Revisar copia de {name}'
+    review: Revisar copia
+    resume: Reanudar copia
+    resumeHelp: Se continúa en esta misma carpeta; no se crea otra instancia. Los archivos ya copiados se verifican antes de reutilizarlos.
+    pendingHelp: Esta instancia no puede iniciar el juego ni exportarse hasta completar la copia. Puedes conservar sus archivos y volver después.
+    verifying: Verificando la integridad de los archivos copiados…
+    reviewing: Revisando los archivos de origen…
+    progress: 'Copiando archivos: {progress} de {total}'
+    progressLabel: Progreso de copia
+    cancel: Cancelar copia
+    cancelling: Terminando la cancelación…
+    cancelled: Copia cancelada. Si ya se copiaron archivos completos, se conservan. Las copias pendientes se pueden reanudar en el mismo destino.
+    complete: Copia completada.
+    view: Ver instancia
+    cancelFailed: No se pudo cancelar la tarea. Comprueba su progreso antes de volver a intentarlo.
+    failed: No se completó la copia. Revisa el acceso, espacio disponible y archivos de origen. Solo se admiten las carpetas compartidas del launcher. Si hay una copia pendiente, reanúdala para conservar el destino.
+    InstanceCopyInvalid: No se puede leer el registro de esta copia. Conserva la carpeta y revisa los diagnósticos; no se iniciará el juego ni se creará otra copia al reintentar.
+    InstanceCopySourceChanged: Un archivo de origen falta o cambió desde la revisión. Restablece los archivos originales antes de reanudar; la copia parcial se conserva.
+    InstanceCopySourceMissing: La instancia original ya no está registrada. Restáurala en su carpeta original antes de reanudar.
+    InstanceCopyConflict: Un archivo del destino tiene otros datos y se ha conservado. Revisa la carpeta antes de reanudar; no se sobrescriben tus cambios.
+    InstanceCopyGameRunning: Cierra la partida de la instancia original o de la copia antes de continuar.
+    InstanceCopyUnsafePath: No se pueden copiar rutas enlazadas o fuera del área administrada. Revisa las carpetas antes de reintentar.
+    InstanceCopyTooLarge: El inventario supera los límites de la copia. Reduce el número de archivos o revisa los diagnósticos antes de reintentar.
+
+  media:
+    providerCover: Portada proporcionada por el proyecto.
+    project: Ver proyecto
+    source: Ver imagen original
+
+  workspace:
+    summary: "Resumen"
+    mods: "Mods"
+    packs: "Packs"
+    shaders: "Shaders"
+    worlds: "Mundos"
+    settings: "Ajustes"
+    console: "Consola"
+    navigation: "Secciones de la instancia"
+    options: "Opciones de {name}"
+    stopped: "Sin partida en curso"
+    running: "Partida en curso"
+    copyPending: "Copia pendiente de revisión"
+    folderFailed: "No se pudo abrir la carpeta. Comprueba que sigue disponible e inténtalo de nuevo."
+    unknown: "Sin definir"
+    lastPlayed: "Última partida"
+    never: "Todavía no has jugado"
+    playtime: "Tiempo jugado"
+    minutes: "{value} min"
+    folder: "Carpeta de la instancia"
+    notFound: "Sección no disponible"
+  content:
+    add: "Añadir archivos"
+    remove: "Retirar seleccionados"
+    removeTitle: "Retirar un mod | Retirar {count} mods"
+    removeHelp: "Se eliminarán estos archivos de la carpeta de mods de esta instancia. No se envían a la papelera. No se borran mundos ni archivos originales de otras carpetas. Si un mod cambió desde la selección, cancela y vuelve a leer antes de revisar otra vez."
+    cancelRemove: "Cancelar retirada"
+    confirmRemove: "Eliminar estos archivos"
+    folder: "Abrir carpeta de mods"
+    refresh: "Volver a leer"
+    search: "Buscar mods instalados"
+    filter: "Filtrar por estado"
+    all: "Todos los estados"
+    enabled: "Activado"
+    disabled: "Desactivado"
+    loading: "Leyendo mods de esta instancia…"
+    loadFailed: "No se pudieron leer los mods. Comprueba la carpeta y pulsa Volver a leer."
+    running: "Cierra la partida de esta instancia antes de modificar sus mods."
+    changed: "Los archivos o la configuración cambiaron. Pulsa «Volver a leer» y revisa los mods antes de intentarlo de nuevo."
+    failed: "No se pudo completar la operación. Comprueba el estado de los archivos con Volver a leer antes de reintentar."
+    applied: "Cambios aplicados en esta instancia."
+    parseFailed: "No se pudieron analizar estos archivos. Revisa su formato o reemplaza las copias dañadas."
+    selection: "Acciones para mods seleccionados"
+    selected: "{count} seleccionados"
+    enable: "Activar"
+    disable: "Desactivar"
+    clear: "Quitar selección"
+    empty: "Esta instancia todavía no tiene mods. Puedes añadir archivos a su carpeta."
+    noMatches: "Ningún mod coincide con la búsqueda y el filtro."
+    select: "Seleccionar {name}"
+    enableName: "Activar {name}"
+    disableName: "Desactivar {name}"
+    local: "Archivo local"
+
+  contentGroups:
+    manage: "Gestionar grupos"
+    close: "Cerrar grupos"
+    help: "Organiza el contenido de esta instancia. Los grupos no cambian los archivos del juego."
+    edit: "Grupo que quieres editar"
+    new: "Crear grupo"
+    name: "Nombre del grupo"
+    color: "Color del grupo"
+    save: "Guardar grupo"
+    saving: "Guardando…"
+    cancel: "Cancelar"
+    dissolve: "Disolver grupo"
+    confirmDissolve: "Confirmar disolución"
+    dissolveHelp: "Se quitará este grupo. Su contenido seguirá en la instancia y no se eliminará ningún archivo."
+    invalid: "Usa un nombre válido de hasta 256 caracteres."
+    duplicate: "Ya hay un grupo con ese nombre. Elige otro."
+    changed: "El grupo cambió mientras lo editabas. Vuelve a cargar y revisa los datos actuales."
+    failed: "No se guardaron los grupos. El formulario se conserva; revisa la carpeta y vuelve a intentarlo."
+    discardReload: "Descartar formulario y volver a leer"
+    migrating: "Comprobando los grupos de esta instancia…"
+    migrationFailed: "No se completó la migración de grupos. Tus datos antiguos se conservaron."
+    retryMigration: "Reintentar migración"
+    readFailed: "No se pudieron leer los grupos. El archivo se conserva. Revísalo y pulsa Volver a leer."
+    filter: "Filtrar por grupo de mods"
+    all: "Todos los grupos"
+    none: "Sin grupo"
+    assignment: "Grupo para los mods seleccionados"
+    assign: "Asignar grupo"
+    applied: "Grupos guardados en esta instancia."
+  modInfo:
+    title: "Información del mod"
+    open: "Información de {name}"
+    close: "Cerrar información del mod"
+    file: "Archivo"
+    version: "Versión"
+    loaders: "Loaders declarados"
+    unknown: "No identificado"
+    authors: "Autoría"
+    size: "Tamaño"
+    bytes: "{size} bytes"
+    origin: "Origen"
+    dependencies: "Dependencias declaradas"
+    noDependencies: "No se encontraron dependencias que se puedan mostrar para este archivo."
+    optional: "Opcional"
+    failed: "No se pudieron leer todos los metadatos de este archivo. La información básica sigue disponible."
+  modDiagnostics:
+    open: "Revisar mods"
+    title: "Diagnóstico de mods"
+    close: "Cerrar diagnóstico de mods"
+    help: "Compara los metadatos de los archivos con la configuración guardada de esta instancia."
+    count: "Errores: {errors} · Avisos o requisitos sin verificar: {uncertain}"
+    javaKnown: "Java configurado detectado: {version}"
+    javaLoading: "Leyendo los registros de Java…"
+    javaFailed: "No se pudo leer el Java detectado. Los requisitos de Java quedan sin verificar."
+    javaRetry: "Volver a leer Java"
+    pending: "Esperando los metadatos de los archivos detectados:"
+    clear: "No se detectaron incompatibilidades en los metadatos revisados."
+    metadataFailed: "No se pudieron interpretar todos los metadatos:"
+    parseFailed: "Hay archivos que no pudieron analizarse:"
+    inspect: "Ver información de {file}"
+    details: "Información"
+    any: "o"
+    all: "y"
+    unless: "salvo"
+    kind:
+      loader: "Loader no compatible o no identificado en esta instancia"
+      configuration: "Hay varios loaders configurados; revisa la versión de la instancia"
+      missing: "Dependencia no satisfecha"
+      version: "Versión de dependencia incompatible"
+      breaks: "Incompatibilidad declarada"
+      conflicts: "Conflicto declarado"
+      duplicate: "Identificador de mod duplicado"
+      unknown: "Requisito sin verificar"
+      java: "Requisito de Java no verificado o incompatible"
+      language: "Versión del cargador de lenguaje sin verificar"
+      feature: "Requisito del entorno sin verificar"
+    severity:
+      error: "Error"
+      warning: "Aviso"
+      unknown: "Sin verificar"
+    rule:
+      requires: "Requeridas"
+      recommends: "Recomendadas"
+      breaks: "Incompatibilidades"
+      conflicts: "Conflictos"
+
+  modChanges:
+    title: "Revisar cambios de mods"
+    cancel: "Cancelar cambios"
+    apply: "Aplicar estos cambios"
+    files: "Archivos y requisitos de los cambios"
+    requested: "Selección solicitada"
+    additional: "Cambios de dependencias"
+    warnings: "Requisitos por revisar"
+    enableHelp: "Se activarán estos archivos. Revisa las dependencias y los requisitos antes de continuar."
+    disableHelp: "Se desactivarán estos archivos, incluidos dependientes afectados y dependencias que ya no necesita otro mod."
+    incomplete: "Hay metadatos pendientes o archivos que no se pudieron interpretar. Solo se cambiará tu selección; no se añadieron cambios de dependencias."
+
+  modUpdates:
+    recover: "Revisar esta operación"
+    applyRecovery: "Aplicar recuperación revisada"
+    recoveryHelp: "Se conserva el progreso. Los archivos modificados se guardarán en una copia antes de sustituirlos."
+    configurationChanged: "Cambió la configuración de ejecución. Estas versiones se eligieron antes del cambio; comprueba sus requisitos o vuelve a consultar proveedores."
+    searchCancelled: "Consulta detenida. Puedes cambiar los filtros y volver a consultar."
+    open: "Buscar actualizaciones"
+    title: "Actualizar mods"
+    help: "Elige las versiones que quieras cambiar y revisa los archivos antes de instalar. No se añaden dependencias automáticamente."
+    close: "Cerrar actualizaciones"
+    details: "Versiones, selección y archivos"
+    noLoader: "Configura una versión de Minecraft y un solo loader para buscar mods compatibles."
+    policy: "Origen de las actualizaciones"
+    modrinth: "Preferir Modrinth; consultar CurseForge si hace falta"
+    curseforge: "Preferir CurseForge; consultar Modrinth si hace falta"
+    modrinthOnly: "Solo Modrinth"
+    curseforgeOnly: "Solo CurseForge"
+    releaseOnly: "Solo versiones estables"
+    skipVersion: "Omitir mods instalados para otro Minecraft"
+    search: "Consultar proveedores"
+    searching: "Consultando versiones compatibles…"
+    reviewing: "Leyendo los archivos y preparando la revisión…"
+    installing: "Aplicando los archivos revisados…"
+    progress: "Progreso de la actualización"
+    pending: "Actualizaciones pendientes"
+    pendingHelp: "Puedes reanudar la revisión original o revisar de nuevo los archivos actuales. También puedes consultar versiones nuevas."
+    resume: "Reanudar esta operación"
+    found: "Actualizaciones disponibles: {count}"
+    none: "No se encontraron versiones más recientes para los mods identificados y estos filtros."
+    partial: "La consulta está incompleta. Puedes revisar los resultados disponibles o volver a consultar."
+    unidentified: "Archivos sin origen identificado: {count}. No se buscaron actualizaciones para ellos."
+    queryFailed: "No se pudo consultar. Comprueba tu conexión o el servicio y reintenta."
+    limited: "Límite de consultas alcanzado. Espera el plazo del proveedor antes de reintentar."
+    incomplete: "Faltan metadatos o se alcanzó el límite de historial; este resultado no está completo."
+    release: "Estable"
+    beta: "Beta"
+    alpha: "Alpha"
+    staysDisabled: "Permanecerá desactivado."
+    review: "Revisar archivos"
+    reviewHelp: "Solo se aplicarán estas operaciones. Comprueba los nombres y las retiradas. Las dependencias y la compatibilidad del juego no están garantizadas por el proveedor."
+    otherInstall: "Hay otra instalación activa en esta instancia. Espera antes de aplicar cambios."
+    changed: "Los archivos o la configuración cambiaron. Conservamos los archivos y el progreso. Vuelve a consultar y revisar antes de aplicar; una operación pendiente solo se reanuda si conserva sus condiciones."
+    running: "Cierra Minecraft antes de aplicar los cambios."
+    cancelled: "Operación detenida. Los archivos ya aplicados y el plan pendiente se conservan."
+    failed: "No se completó la operación. Revisa tu conexión y los permisos de la carpeta; los archivos y planes pendientes se conservan."
+    preferencesFailed: "No se guardaron los filtros. Puedes usarlos en esta ventana."
+    cancelFailed: "No se pudo cancelar. Comprueba el progreso y vuelve a intentarlo."
+    complete: "Actualización completada."
+    back: "Volver a la selección"
+    cancel: "Detener operación"
+    install: "Instalar estos cambios"
+    metadataPending: "Aún se están leyendo los metadatos. Vuelve a leer los archivos e inténtalo otra vez."
+    operations:
+      add: "Añadir"
+      remove: "Retirar"
+      keep: "Conservar"
+      backup-add: "Respaldar y añadir"
+      backup-remove: "Respaldar y retirar"
+
+  packSharing:
+    link: "Compartir packs"
+    unlink: "Crear copia privada"
+    linkHelp: "Añade tus packs a la carpeta común sin reemplazar archivos y conserva tu carpeta actual como respaldo. Los cambios posteriores en la carpeta común afectarán a las instancias vinculadas."
+    unlinkHelp: "Crea una copia independiente de todos los packs comunes para esta instancia. Los packs compartidos seguirán disponibles para las demás."
+    review: "Revisión de carpeta de packs"
+    localCount: "Packs locales: {count}"
+    sharedCount: "Packs en la carpeta común: {count}"
+    copyCount: "Archivos que se copiarán: {count} · {bytes} bytes"
+    selection: "Se conserva la selección de Minecraft. Los grupos siguen siendo propios de cada instancia."
+    conflicts: "Hay {count} nombres en conflicto. No se reemplazará ni renombrará ningún pack. Revisa los archivos y vuelve a abrir esta revisión."
+    moreConflicts: "Se muestran los primeros 100 nombres en conflicto."
+    cancel: "Cancelar cambio de carpeta"
+    confirmLink: "Confirmar carpeta compartida"
+    confirmUnlink: "Confirmar copia privada"
+    linked: "Packs compartidos. La carpeta local anterior se conserva en las copias de seguridad."
+    unlinked: "Copia privada creada. Los cambios en esta instancia ya no modifican los packs comunes."
+    incomplete: "El cambio no terminó. Puede haber copias parciales; se conservan los archivos y respaldos. Cierra esta revisión, vuelve a leer y revisa las carpetas antes de reintentar."
+  packInfo:
+    title: "Información del pack"
+    close: "Cerrar información del pack"
+    format: "Formato declarado"
+    range: "Versiones orientativas"
+    help: "Información declarada por el pack. El rango de formatos es orientativo y no confirma compatibilidad con tu partida."
+    noDescription: "Este archivo no incluye una descripción de texto que se pueda mostrar."
+    truncated: "Descripción abreviada por su tamaño o estructura."
+  packs:
+    groupFilter: "Filtrar por grupo de packs"
+    groupAssignment: "Grupo para los packs seleccionados"
+    unreadFiles: "Archivos que no se pudieron leer"
+    selectUnread: "Seleccionar archivo no leído {name}"
+    sharedRunning: "Cierra las partidas que comparten estos packs o ajustes antes de continuar."
+    shared: "options.txt está compartido. Los cambios también afectan a otras instancias vinculadas a estos ajustes."
+    folder: "Abrir carpeta de packs"
+    help: "Los packs de arriba tienen mayor prioridad. Activar o reordenar cambia la selección de Minecraft; no mueve ni elimina archivos."
+    search: "Buscar packs instalados"
+    loadFailed: "No se pudieron leer los packs o su selección. Revisa options.txt y pulsa Volver a leer."
+    loading: "Leyendo packs y selección…"
+    applied: "Selección de packs guardada."
+    running: "Cierra la partida de esta instancia antes de cambiar sus packs."
+    changed: "options.txt cambió. Pulsa Volver a leer y revisa la selección antes de intentarlo de nuevo."
+    failed: "No se guardó la selección. Revisa los archivos y pulsa Volver a leer antes de reintentar."
+    enabled: "Activados · mayor prioridad primero"
+    noneEnabled: "No hay packs en la selección de Minecraft."
+    available: "Disponibles para activar"
+    external: "Entrada de Minecraft, un mod o un archivo no encontrado. Se conserva en su posición."
+    up: "Aumentar prioridad de {name}"
+    down: "Reducir prioridad de {name}"
+    empty: "Esta instancia todavía no tiene packs locales."
+    noMatches: "Ningún pack disponible coincide con la búsqueda."
+    noneAvailable: "Todos los packs locales están activados."
+    format: "Formato {format} · Minecraft {range}"
+    addFolder: "Añadir carpeta"
+    added: "Archivos copiados. Conserva la selección de Minecraft; puedes activar los packs disponibles."
+    selection: "Acciones para packs seleccionados"
+    remove: "Retirar seleccionados"
+    removeTitle: "Revisar retirada de packs"
+    removeHelp: "Se desactivarán en estos ajustes y se moverán a copias de seguridad de esta instancia. Los archivos originales importados y los mundos se conservan."
+    removeFiles: "Packs y archivos que se retirarán"
+    cancelRemove: "Cancelar retirada"
+    confirmRemove: "Mover a copias"
+    folderEntries: "Carpeta · {count} archivos · {size} bytes"
+    archiveSize: "Archivo · {size} bytes"
+    sharedDirectory: "La carpeta de packs está compartida. Añadir o retirar archivos afecta a todas las instancias vinculadas a esa carpeta."
+    collision: "Ya existe un pack con ese nombre. No se reemplazó. Revisa o cambia el nombre de los archivos antes de añadirlos otra vez."
+    filesChanged: "Los archivos, los vínculos o la selección de Minecraft cambiaron. Vuelve a leer y revisa de nuevo antes de confirmar."
+    incomplete: "La retirada no terminó. Puede haber packs desactivados o movidos; vuelve a leer y revisa las copias antes de reintentar."
+    filesFailed: "No se completó la operación. Puede haber copias parciales. Revisa la carpeta y vuelve a leer antes de reintentar."
+    backup: "Copias de seguridad"
+    openBackup: "Abrir copias"
+    removed: "Packs retirados. Sus archivos están en las copias de seguridad de esta instancia."
+
+  packUpdates:
+    title: "Actualizar packs"
+    help: "Consulta actualizaciones para los ZIP identificados. Las carpetas y los archivos locales sin origen se conservan. Revisa los cambios antes de instalar."
+    noLoader: "Configura una versión de Minecraft para buscar packs compatibles."
+    skipVersion: "Omitir packs instalados para otro Minecraft"
+    none: "No se encontraron versiones más recientes para los packs identificados y estos filtros."
+    reviewHelp: "Revisa los ZIP que se sustituirán. Cada archivo anterior se guardará como respaldo. La compatibilidad del juego requiere comprobar los requisitos del pack."
+    configurationChanged: "Cambió la configuración o la carpeta de packs. Estas versiones se eligieron antes del cambio; comprueba sus requisitos y el destino o vuelve a consultar."
+    sharedRunning: "Otra partida utiliza la carpeta compartida. Ciérrala antes de aplicar estos cambios."
+    stableNames: "Se conserva el nombre del ZIP para mantener la activación, la prioridad y los grupos. La versión nueva sustituye su contenido y conserva el anterior como respaldo."
+    shared: "Esta carpeta está compartida: los cambios afectarán a todas las instancias vinculadas."
+
+  shaders:
+    folder: "Carpeta de shaders"
+    help: "Selecciona un shader para el motor instalado en esta instancia. Cambiar la selección no modifica sus archivos. Comprueba los requisitos del shader; la GPU y la versión del juego también influyen."
+    engine: "Motor detectado: {name}"
+    shared: "La carpeta de shaders está compartida. Esta selección se guarda solo en la configuración de la instancia."
+    metadataPending: "Faltan metadatos actuales de algunos mods. Vuelve a leer los archivos o revisa los errores en Mods."
+    ambiguous: "Hay varios motores de shaders activos. Resuelve el conflicto en Mods antes de cambiar la selección."
+    noEngine: "No se detectó un motor de shaders compatible. Necesitas Iris, Oculus u OptiFine para activar un shader."
+    manageMods: "Administrar mods"
+    search: "Buscar shaders instalados"
+    loading: "Leyendo shaders y configuración…"
+    loadFailed: "No se pudieron leer los shaders o la configuración. Comprueba los archivos y vuelve a leerlos."
+    changed: "Los archivos, el motor o la configuración cambiaron. Se volvió a leer su estado; revisa la selección antes de reintentar."
+    saveFailed: "No se guardó la selección. Comprueba los permisos y que la configuración no sea un enlace compartido."
+    saved: "Selección de shader guardada."
+    missing: "La configuración conserva «{name}», que no aparece entre los shaders disponibles."
+    disableAll: "Desactivar selección guardada"
+    noMatches: "No hay shaders que coincidan con la búsqueda."
+    empty: "No hay shaders instalados en esta instancia."
+    unpacked: "Carpeta"
+    local: "Archivo local"
+    active: "Activo en la configuración"
+    available: "Disponible"
+    enableName: "Activar {name}"
+    disableName: "Desactivar {name}"
+    enable: "Activar"
+    disable: "Desactivar"
+
+    added: "Shaders copiados. No se activaron automáticamente."
+    collision: "Ya existe un shader con ese nombre. Conserva el archivo instalado o cambia el nombre del nuevo antes de reintentar."
+    sharedRunning: "Otra partida utiliza la carpeta compartida de shaders. Ciérrala antes de copiar archivos."
+    addFailed: "No se pudieron añadir todos los shaders. Revisa los archivos, los permisos y vuelve a leer la carpeta."
+
+    removeTitle: "Revisar retirada de shaders"
+    removeHelp: "Los archivos se moverán a copias privadas. Se guardará una copia de cada configuración afectada antes de desactivar su selección. No se cambiarán mundos ni otras opciones del juego."
+    removeFiles: "Shaders y archivos que se retirarán"
+    removeShared: "Esta carpeta está compartida. Retirar estos archivos afecta a todas las instancias vinculadas; las configuraciones de otras instancias no se modificarán."
+    removeConfigurations: "Se desactivarán estas selecciones en la instancia. Sus configuraciones completas se conservarán en la copia:"
+    removeChanged: "Los shaders o las configuraciones cambiaron. Cancela esta revisión y vuelve a revisar los archivos antes de confirmar."
+    removeIncomplete: "La retirada no terminó. Los archivos permanecen en su ubicación original o en las copias; revisa ambas carpetas antes de reintentar."
+    sharedConfiguration: "Una configuración afectada está compartida por enlace. Se conservó sin cambios; revisa ese enlace antes de retirar los shaders."
+    removeFailed: "No se pudo completar la revisión o la retirada. Comprueba los archivos, sus configuraciones y permisos, y vuelve a revisar."
+    removed: "Shaders retirados. Sus archivos y las configuraciones afectadas se conservan en copias."
+    selection: "Shaders seleccionados"
+    unreadFiles: "Archivos de shaders que no se pudieron leer"
+
+    infoTitle: "Información del shader"
+    infoClose: "Cerrar información del shader"
+    infoKind: "Formato local"
+    folderSize: "No calculado. La revisión de archivos muestra el tamaño total de la carpeta."
+    infoHelp: "Estos datos describen el archivo instalado. Comprueba los requisitos del proyecto: el motor, la versión de Minecraft y la GPU también determinan su compatibilidad."
+    groupFilter: "Filtrar por grupo de shaders"
+    groupAssignment: "Grupo para los shaders seleccionados"
+
+  shaderSharing:
+    link: "Compartir shaders"
+    unlink: "Crear copia privada"
+    linkHelp: "Añade tus shaders a la carpeta común sin reemplazar archivos y conserva tu carpeta actual como respaldo. Los cambios posteriores en esa carpeta afectarán a todas las instancias vinculadas."
+    unlinkHelp: "Crea una copia independiente de todos los shaders comunes para esta instancia. Los shaders compartidos seguirán disponibles para las demás."
+    review: "Revisión de carpeta de shaders"
+    localCount: "Shaders locales: {count}"
+    sharedCount: "Shaders en la carpeta común: {count}"
+    copyCount: "Archivos que se copiarán: {count} · {bytes} bytes"
+    selection: "Se conservan las configuraciones de OptiFine, Iris y Oculus y los grupos de esta instancia. Compartir no activa shaders automáticamente."
+    conflicts: "Hay {count} nombres en conflicto. No se reemplazará ni renombrará ningún shader. Revisa los archivos y vuelve a abrir esta revisión."
+    moreConflicts: "Se muestran los primeros 100 nombres en conflicto."
+    cancel: "Cancelar cambio de carpeta"
+    confirmLink: "Confirmar carpeta compartida"
+    confirmUnlink: "Confirmar copia privada"
+    linked: "Shaders compartidos. La carpeta local anterior se conserva en las copias de seguridad."
+    unlinked: "Copia privada creada. Los cambios en esta instancia ya no modifican los shaders comunes."
+    incomplete: "El cambio no terminó. Puede haber copias parciales; se conservan los archivos y respaldos. Cierra esta revisión, vuelve a leer y revisa las carpetas y las copias de seguridad antes de reintentar."
+    failed: "No se pudo cambiar la carpeta de shaders. Comprueba los archivos y permisos, vuelve a leer y revisa el cambio antes de reintentar."
+
+  shaderUpdates:
+    title: "Actualizar shaders"
+    help: "Consulta versiones para los ZIP identificados. Modrinth filtra por motor: Oculus usa la etiqueta OptiFine. CurseForge filtra por Minecraft; comprueba los requisitos del proyecto. No se verifica la GPU. Carpetas y archivos locales sin origen se conservan."
+    noLoader: "Configura Minecraft y un motor detectado: Iris, Oculus u OptiFine. Si faltan metadatos, vuelve a leer Mods antes de consultar versiones. Las operaciones pendientes siguen disponibles para recuperación."
+    skipVersion: "Omitir shaders instalados para otro Minecraft"
+    none: "No se encontraron versiones más recientes para los shaders identificados y estos filtros."
+    reviewHelp: "Revisa los ZIP que se sustituirán. Cada archivo anterior se guardará como respaldo. Comprueba los requisitos del proyecto para el motor, Minecraft y la GPU antes de confirmar."
+    configurationChanged: "Cambió la configuración o la carpeta de shaders. Estas versiones se eligieron antes del cambio; comprueba el motor, Minecraft y el destino o vuelve a consultar."
+    sharedRunning: "Otra partida utiliza la carpeta compartida de shaders. Ciérrala antes de aplicar estos cambios."
+    stableNames: "Se conserva el nombre del ZIP y las configuraciones de OptiFine, Iris y Oculus. El archivo anterior se guarda como respaldo; no se activa otro shader ni se cambian sus grupos."
+    shared: "Esta carpeta está compartida: actualizar sus archivos afecta a todas las instancias vinculadas. Sus configuraciones y grupos permanecen propios de cada instancia."
+
+  worlds:
+    one: "1 mundo"
+    refresh: "Volver a leer"
+    loading: "Leyendo mundos…"
+    search: "Buscar mundos"
+    count: "{count} mundos"
+    loadFailed: "No se pudieron leer o abrir los mundos. Comprueba la carpeta y sus permisos y vuelve a leer."
+    running: "La lista se actualizará al cerrar la partida. Minecraft puede estar guardando cambios."
+    empty: "Todavía no hay mundos en esta instancia. Crea uno desde Minecraft o importa uno desde la carpeta."
+    noMatches: "No hay mundos que coincidan con la búsqueda."
+    shared: "Compartido"
+    sharedHelp: "Este mundo está en la carpeta común del launcher. Otras instancias vinculadas pueden modificarlo."
+    metadata: "No se pudo leer level.dat. Conservamos la carpeta; comprueba tus copias de seguridad."
+    unsafe: "El enlace o la carpeta no es seguro para leer desde el launcher. No se accedió a su contenido."
+    close: "Cerrar información del mundo"
+    folder: "Nombre de carpeta"
+    mode: "Modo de juego"
+    mode0: "Supervivencia"
+    mode1: "Creativo"
+    mode2: "Aventura"
+    mode3: "Espectador"
+    difficulty: "Dificultad"
+    difficulty0: "Pacífico"
+    difficulty1: "Fácil"
+    difficulty2: "Normal"
+    difficulty3: "Difícil"
+    cheats: "Trucos"
+    enabled: "Activados"
+    disabled: "Desactivados"
+    time: "Días del mundo"
+    seed: "Semilla"
+
+  worldFiles:
+    summaryOne: "1 archivo · {bytes} bytes"
+    copy: "Copiar"
+    export: "Exportar ZIP"
+    remove: "Retirar"
+    copyName: "Copiar {name}"
+    exportName: "Exportar {name}"
+    removeName: "Retirar {name}"
+    copyTitle: "Copiar mundo"
+    exportTitle: "Exportar mundo"
+    removeTitle: "Retirar mundo"
+    copyHelp: "Crea una copia independiente en la instancia elegida. Conserva todos los archivos y carpetas vacías; nunca reemplaza un mundo existente."
+    exportHelp: "Guarda un ZIP completo del mundo fuera de los datos del launcher. Elige otra carpeta o nombre si el archivo ya existe."
+    removeHelp: "Retira el mundo de esta instancia y conserva sus archivos en una copia privada de seguridad. Revisa el alcance antes de confirmar."
+    close: "Cerrar operación de mundo"
+    instance: "Instancia de destino"
+    name: "Carpeta de la copia"
+    archive: "Nombre del archivo ZIP"
+    chooseFolder: "Elegir carpeta de exportación"
+    review: "Revisar archivos del mundo"
+    summary: "{count} archivos · {bytes} bytes"
+    shared: "Interviene una carpeta compartida. Copiar o exportar crea una copia independiente; retirar un mundo de la carpeta común afecta a todas las instancias vinculadas. Cierra las partidas antes de continuar."
+    linkOnly: "Solo se retirará el enlace de esta instancia. El mundo compartido y sus archivos permanecerán en la carpeta común."
+    confirm: "Confirmar operación"
+    back: "Cambiar opciones"
+    working: "Procesando archivos del mundo…"
+    copyDone: "Copia independiente creada. El mundo original se conserva."
+    exportDone: "ZIP exportado. El mundo original se conserva."
+    removeDone: "Mundo retirado. La copia de seguridad conserva los archivos o el enlace anterior."
+    failed: "No se pudo completar la operación. Comprueba nombres, permisos y destinos. El nombre debe ser válido para Windows. Los archivos anteriores se conservan. Para retirar, la copia de seguridad y el mundo deben estar en la misma unidad."
+    WorldFilesChangedError: "El mundo o su destino cambió desde la revisión. Revisa otra vez antes de confirmar."
+    WorldDestinationExistsError: "El destino ya existe. Elige otro nombre o carpeta; no se reemplazará ningún archivo."
+    WorldOperationIncompleteError: "La copia no terminó. El origen se conserva y puede haber archivos parciales en el destino. Abre la carpeta para revisarlos antes de elegir otro nombre o reintentar."
+    InstanceRunningError: "Cierra la partida de la instancia de origen y de destino antes de continuar."
+    SharedWorldRunningError: "Hay una partida abierta y esta operación usa mundos compartidos. Cierra las partidas antes de continuar."

@@ -9,6 +9,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const locales = (process.env.XMCL_E2E_LOCALES ?? 'en').split(',').map((s) => s.trim())
 
 export default defineConfig({
+  webServer: process.env.XMCL_REACT_CLIENT_HARNESS === '1' ? {
+    command: 'pnpm --dir .. --filter @launcher/react-ui dev',
+    url: 'http://localhost:3001/client-harness.html',
+    reuseExistingServer: !process.env.CI,
+    timeout: 60_000,
+  } : undefined,
   testDir: './specs',
   outputDir: './artifacts/test-results',
   // Per-test budget must cover the 180s waitForAppWindow ceiling in the

@@ -1,6 +1,6 @@
 import { Exception, InstanceNotFoundException } from '../entities/exception'
 import { InstallMarketOptions, InstallMarketOptionWithInstance } from '../entities/market'
-import { InstanceDatapack, InstanceSave, InstanceSaveHeader, InstanceSaveProgress, SaveDatapacks, SaveMetadata, Saves } from '../entities/save'
+import { InstanceDatapack, InstanceSave, InstanceSavePreview, InstanceSaveProgress, SaveDatapacks, SaveMetadata, Saves } from '../entities/save'
 import { SharedState } from '../util/SharedState'
 import { ServiceKey } from './Service'
 
@@ -100,6 +100,21 @@ export interface CloneSaveOptions {
    * @default Generated name from the `saveName`
    */
   newSaveName?: string
+}
+
+export type WorldFileOperation = { instancePath: string; saveName: string } & (
+  { type: 'copy'; destinationInstancePath: string; destinationName: string } |
+  { type: 'export'; destinationDirectory: string; fileName: string } |
+  { type: 'remove' }
+)
+export interface WorldFileReview {
+  operation: WorldFileOperation
+  snapshot: string
+  files: number
+  bytes: number
+  shared: boolean
+  linkOnly: boolean
+  destination: string
 }
 
 export function getInstanceSaveKey(path: string) {
@@ -254,12 +269,14 @@ export interface PasteSaveChunksOptions {
  * Provide the ability to preview saves data of an instance
  */
 export interface InstanceSavesService {
+  previewWorldFiles(operation: WorldFileOperation): Promise<WorldFileReview>
+  applyWorldFiles(review: WorldFileReview): Promise<{ path: string; backup?: string }>
   showDirectory(instancePath: string): Promise<void>
   /**
    * Read all saves under the instance folder
    * @param path The instance folder path
    */
-  getInstanceSaves(path: string): Promise<InstanceSaveHeader[]>
+  getInstanceSaves(path: string): Promise<InstanceSavePreview[]>
   /**
    * Watch instances saves
    * @param path

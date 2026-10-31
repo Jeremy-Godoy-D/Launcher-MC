@@ -1,0 +1,836 @@
+react:
+  home: Home
+  library: Library
+  discover: Discover
+  settings: Settings
+  appearance: Appearance
+  system: Follow Windows
+  dark: Dark
+  light: Light
+  performance: Performance mode
+  ambientVideo: Ambient video
+  carousel: Automatic presentation
+  instances:
+    searchPlaceholder: Name, version or loader…
+    count: "{count} instances"
+    listLabel: Library instances
+    keyboard: In large libraries, use arrow keys to move between instances, Home and End to reach either end, and Tab to move through their actions.
+    saved: Saved on this device
+    connected: Local library · migration in progress
+    subtitle: Your Minecraft Java instances, in one place.
+    description: Continue your adventure or manage this instance.
+    ambient: Minecraft Vanilla ambient scenery.
+    genericAmbient: Generic Vanilla ambience; does not represent this modpack.
+    runtimeRequired: Open Grimo Launcher to view your saved instances.
+    loading: Loading your instances…
+    loadError: Could not load the library. Try again to recover your instances.
+    retry: Try again
+    empty: Your first adventure starts here.
+    emptyHelp: Create a Minecraft Java instance or import a modpack to get started.
+    noneSelected: No instance selected
+    choose: Choose from the library
+    missingSelection: The selected instance is no longer available. Choose another to continue.
+    storageError: The selection applies to this window; it could not be saved on this device.
+    launchPending: 'Selected “{name}”. Launching is not connected in React yet. Minecraft will not start.'
+    featurePending: This feature is still pending in the React migration. Your saved instances are preserved.
+  accounts:
+    appearance: Appearance
+    appearanceName: 'Appearance of {name}'
+    appearanceTitle: 'Appearance of {name}'
+    appearanceHelp: Choose local files. A copy is saved on this computer without uploading it to a service.
+    appearanceFields: Local profile appearance
+    identityHelp: Your profile name and UUID stay the same. Changing appearance keeps the identity used for your saved games.
+    skin: Skin
+    skinHelp: 64×64 or 64×32 PNG, up to 1 MiB.
+    chooseSkin: Choose skin PNG
+    resetSkin: Reset skin
+    defaultSkin: Default skin
+    savedTexture: Texture saved in this profile
+    willReset: Will reset when saved
+    model: Character model
+    classic: Classic · wide arms
+    slim: Slim · narrow arms
+    cape: Cape
+    capeHelp: 64×32 PNG, up to 1 MiB. In-game display depends on local skin support in the instance.
+    chooseCape: Choose cape PNG
+    resetCape: Remove cape
+    noCape: No cape
+    saveAppearance: Save appearance
+    profileMissing: This profile is no longer available. Close the editor and select another one.
+    appearanceError: Could not save. Check that the files are PNGs with the required dimensions and are still available. If another window changed this profile, reopen the editor.
+    title: Accounts
+    saved: Profiles saved on this device
+    description: Choose the profile you will use to play. Each local name keeps its identity.
+    playerName: Player name
+    nameHelp: Use 3–16 letters, digits or underscores, without spaces.
+    duplicate: This local profile already exists. Select Use or choose another name.
+    create: Create local profile
+    saving: Saving…
+    actionError: Could not complete the action. Your data is still saved; try again.
+    runtimeRequired: Open this page in Grimo Launcher to manage your profiles.
+    loading: Loading saved profiles…
+    loadError: Could not load your accounts. Restart the launcher to try again.
+    storageError: Your selection applies in this window but could not be saved on this device.
+    local: Local profile
+    external: Existing account · sign-in deferred
+    active: Active
+    use: Use
+    useName: 'Use {name}'
+    remove: Remove
+    removeName: 'Remove {name}'
+    empty: You have no profiles yet. Create a local one to prepare your first game.
+    addTitle: Add a local profile
+    microsoftDeferred: Microsoft is deferred. Existing accounts are preserved; no credentials are requested here.
+    removeTitle: 'Remove profile {name}?'
+    removeDescription: This removes the profile from the launcher. Your instances, files and worlds are preserved. You can add the same local name again.
+    cancel: Cancel
+    confirmRemove: Remove profile
+    close: Close
+    noneSelected: No profile selected
+  create:
+    title: Add instance
+    description: Set up a new game or import a modpack into a new folder.
+    source: Instance source
+    create: New instance
+    import: Import modpack
+    name: Instance name
+    nameHelp: Up to 100 characters. Choose a distinct name for your game.
+    nameError: Use a valid distinct name, without path characters, control characters or Windows reserved names.
+    loading: Loading versions…
+    chooseVersion: Choose a version
+    snapshots: Show snapshots and older versions
+    metadataError: Could not fetch versions. Use versions available on this device or try again.
+    retry: Try again
+    loader: Loader
+    loaderVersion: Loader version
+    noLoader: No compatible versions are available for this combination.
+    noLaunch: Creating saves the configuration. Minecraft files will be prepared when installing or playing; the game does not start now.
+    archive: Modpack file
+    chooseArchive: Choose modpack file
+    chooseError: Could not open the file picker. Try again.
+    parsing: Reviewing the modpack…
+    parseError: Could not read a valid Java modpack. Choose another .mrpack or .zip file.
+    fileCount: 'Files: {count}'
+    importHelp: Files will be installed into a new instance, preserving existing instances. Commands and personal Java settings from the source launcher are not adopted. Only use packs you trust.
+    retained: The instance is saved. Retrying continues in the same folder; closing preserves the files.
+    statusError: Could not check installation. Keep the instance and review its status again.
+    unresolved: '{count} files need attention. Installation is incomplete.'
+    working: Preparing…
+    progress: Import progress
+    progressError: Could not retrieve progress. The operation may still be running.
+    actionError: Could not finish. Your fields and any created instance are preserved; try again without making another copy.
+    cancelError: Could not cancel the task. Wait until it finishes or try again.
+    cancelInstall: Cancel installation
+    cancel: Cancel
+    keepClose: Keep and close
+    close: Close
+    confirm: Create instance
+    importConfirm: Confirm import
+    success: Instance saved. Open it to review its configuration.
+    checkPending: Files processed. Checking for pending files.
+    open: View instance
+    advanced: Advanced options
+    descriptionLabel: Description
+    author: Author
+    javaAutomatic: Automatic for this instance
+    chooseJava: Choose Java executable
+    javaError: Could not validate Java. Choose a valid executable or use automatic detection.
+    javaHelp: If a compatible Java is missing, a download will be offered when playing.
+    memory: RAM allocation
+    memory_inherit: Inherit launcher settings
+    memory_auto: Automatic allocation
+    memory_manual: Manual allocation
+    minMemory: Minimum in MB (optional)
+    maxMemory: Maximum in MB
+    advancedError: Check advanced options. Memory must be a positive whole number and the minimum cannot exceed the maximum.
+    shared: Share with other instances
+    sharedHelp: Changes to these files will be shared. Applies only to new instances, never to imported packs.
+    link_saves: Worlds
+    link_resourcepacks: Resource packs
+    link_shaderpacks: Shaders
+    link_options: Game options
+    link_servers: Server list
+    linkStorageError: These preferences could not be saved or belong to a newer version. Existing data is preserved.
+    linkError: The instance was saved, but the following shared links could not be created. Retry to finish in the same folder.
+    importSource: Import source
+    source_file: File
+    source_url: HTTPS link
+    source_folder: Existing folder
+    url: Link to the modpack archive
+    reviewUrl: Review link
+    urlHelp: Use a direct HTTPS link to a .mrpack or .zip. Review downloads a temporary copy; confirm creates the instance.
+    urlError: Use a valid HTTPS link without credentials or fragments.
+    folderType: Folder format
+    chooseFolder: Choose source folder
+    folderProfile: Profile to import
+    folderScanning: Reviewing source files and integrity…
+    folderError: Could not review a valid Java instance. Check format, permissions and local libraries; links, root folders and incomplete versions are not supported.
+    folderHelp: Worlds, mods and configuration will be copied into a new folder. The source is preserved; accounts and personal launch settings are excluded. Prism and Vanilla include compatible local versions; Modrinth and CurseForge retain game files.
+    prismVersion: Custom version reviewed. Confirming will save it with its local libraries without replacing different existing files. Use only trusted packs.
+    vanillaVersion: Local Minecraft version reviewed. Confirming will preserve its inheritance, client and available libraries without replacing different existing files.
+    prism_sourceChanged: The source changed since review. Choose the folder again to review its files before confirming.
+    prism_conflict: A library or version with different content already exists. Existing files were preserved; this import cannot continue in this data directory.
+  launch:
+    title: 'Play: {name}'
+    description: Review this instance before starting Minecraft.
+    profile: 'Profile: {name}'
+    checking: Checking the instance, installation and Java…
+    preparing: Preparing the game…
+    ready: Checks complete. You can start the game.
+    needsInstall: Game, pack or Java files need preparation or repair. Continuing may download files.
+    java: 'Expected Java: {version}'
+    javaAfterInstall: The Java version will be determined when Minecraft and its loader are resolved.
+    autoJava: If a compatible Java is missing, the launcher will download it automatically after confirmation. You do not need to change the system Java.
+    javaInstalling: 'Downloading and checking Java {version} for the launcher…'
+    javaWebsite: Download Java from Eclipse Adoptium
+    javaManualHelp: You can also install a compatible version from the official website and detect it again. Existing installations are preserved.
+    javaRedetect: Detect Java again
+    javaFallback: The configured Java is unavailable or incompatible. A compatible Java will be used for this game; your configuration is preserved.
+    reason_profile: Choose a valid local profile before playing. Microsoft remains deferred.
+    reason_path: This instance folder is unavailable or not writable. A replacement folder will not be created.
+    reason_changed: The instance configuration changed during preparation. Review it again before playing.
+    reason_files: Files are pending, unresolved or failed integrity checks. Fix the installation before playing.
+    reason_java: Could not prepare a valid compatible Java. Review the configuration or retry the download.
+    reason_mods: Some mod files could not be read. Review them before playing.
+    reason_version: The game version is invalid or could not be resolved. Review the instance configuration.
+    reason_network: Could not prepare or start the game. Check the connection and files, then review it again.
+    reason_cancelled: Launch cancelled. Files and completed preparation are preserved.
+    reason_process: Could not confirm or stop the process. Check the game status before trying again.
+    reason_memory: The memory configuration is invalid or exceeds the computer RAM. Review Java and memory settings.
+    reason_permission: Insufficient permissions to prepare or start the game. Review folder and Java permissions.
+    reason_disk: Insufficient disk space. Free space before trying again.
+    reason_copy: This copy is incomplete. Return to Library and choose “Review copy” to continue or preserve it without starting the game.
+    chooseProfile: Choose profile
+    library: Go to the library
+    running: Running
+    finished: The game has ended.
+    stop: Stop game
+    cancel: Cancel launch
+    cancelHelp: The current step may finish; cancelling prevents starting the game and keeps prepared files.
+    tasks: '{count} active tasks'
+    progressError: Could not retrieve progress. Preparation may continue.
+    close: Close
+    play: Play
+    view: View game
+    installPlay: Install and play
+    retry: Check again
+  setup:
+    nextAction: After setup
+    choice_library: Go to the library
+    choice_create: Create an instance
+    choice_import: Import a modpack
+    welcome: Your next adventure starts here.
+    intro: Prepare your space and a profile for Minecraft Java.
+    progress: Setup progress
+    location: Your game space
+    profile: Your profile
+    ready: All set
+    loading: Finding the recommended location…
+    loadError: Could not load the initial setup. Try again.
+    retry: Retry
+    pathDescription: Choose where this launcher will store versions, instances and worlds.
+    folder: Data folder
+    chooseFolder: Choose data folder
+    pathHelp: Use a dedicated folder. Avoid your regular .minecraft folder.
+    pathError: This path is invalid or cannot be written to. Choose a full path to a writable folder.
+    existing: I confirm I want to use this existing folder. Its files will not be deleted.
+    profileDescription: Create a local profile or continue without one to choose it later. Microsoft is deferred.
+    selected: 'Selected profile: {name}'
+    readyDescription: Review your location and profile before entering the library.
+    noLaunch: Minecraft will not start when setup finishes. You can create or import an instance from the library.
+    actionError: Could not complete setup. Check the folder and retry; if the error persists, restart the launcher. Your fields are preserved.
+    back: Back
+    next: Continue
+    skipProfile: Continue without a profile
+    finish: Enter the library
+    saving: Preparing…
+    minimize: Minimize
+    maximize: Maximize
+  operations:
+    iconFailed: Could not save the icon. Check its format, the 8 MiB limit and that the file is still available. Choose another image and try again.
+    changeIcon: Change icon
+    iconTitle: 'Icon for {name}'
+    iconHelp: Choose a PNG, JPEG, GIF or WebP up to 8 MiB. A copy is saved inside the instance; the original file is kept.
+    iconFields: Instance icon
+    iconPreview: Icon preview
+    chooseIcon: Choose image
+    resetIcon: Reset icon
+    iconResetHelp: Saving restores the default presentation. Your files are kept.
+    iconPreviewFailed: Could not display this image. Check the format and that the file is still available.
+    exportTitle: Export instance
+    exportHelp: Review the files to save in a local copy.
+    optionsTitle: 'Options for {name}'
+    optionsHelp: Manage this instance. Actions apply to the folder shown below.
+    editTitle: Edit instance
+    editHelp: Change its display details. Java, version, files and settings are preserved.
+    duplicateTitle: Duplicate instance
+    duplicateHelp: Copy an instance or continue a pending copy. The original instance is preserved.
+    removeTitle: Remove instance
+    removeHelp: Review how files will be handled before confirming.
+    edit: Edit details
+    duplicate: Duplicate
+    openFolder: Open folder
+    remove: Remove or delete
+    name: Instance name
+    description: Description
+    author: Author
+    duplicateDetail: The copy has independent files and worlds. Global launcher versions and libraries are preserved. Minecraft will not start.
+    keepDetail: By default, the instance leaves the library and its managed folder is renamed with a leading dot. Files are preserved. An external folder is only removed from the list.
+    deleteFiles: Also delete files of a managed instance
+    deleteDetail: Files in the managed folder will be deleted. Worlds are moved to the shared worlds folder first; deletion is blocked if that move fails. External folders are preserved.
+    typeName: 'Type “{name}” to confirm deletion'
+    close: Close
+    back: Back
+    save: Save changes
+    confirmDuplicate: Create copy
+    confirmRemove: Remove and keep files
+    confirmDelete: Delete files
+    saved: Changes saved.
+    busy: Working…
+    missing: This instance is no longer available. Close this dialog and check the library.
+    changed: These details changed in another window. Close and reopen to review the current version before editing.
+    invalid: Check the name, description and author. Use a valid name of up to 100 characters.
+    duplicateName: An instance already uses this name. Choose another one.
+    running: Close this instance’s game before performing this action.
+    failed: The action did not finish. Check the folder and diagnostics before retrying. A failed duplication may have left an incomplete copy in the library.
+    groupTitle: Organize instance
+    groupHelp: Groups and ordering are saved in the launcher and preserve instances of other editions.
+    group: Group
+    ungrouped: Ungrouped
+    newGroup: Create group
+    groupName: Group name
+    invalidGroup: Use a unique group name of up to 100 characters.
+    moveUp: Move up in manual order
+    moveDown: Move down in manual order
+    sort: Sort instances
+    sortmanual: Manual order
+    sortname: Name
+    sortrecent: Last played
+    filterGroup: Filter by group
+    allGroups: All groups
+  export:
+    cancelled: Export cancelled. Source files are preserved; you can try again.
+    action: Export files
+    format: Archive format
+    offline: Local copy with game (.zip)
+    offlineHelp: Includes the installed version, client, libraries and assets. All these files must be available. To restore, extract the archive and import it as a Vanilla folder; importing may currently download assets again. Java is managed separately.
+    portableHelp: Embeds the selected files in the package. Minecraft and loaders are downloaded when importing it. This action saves a local archive.
+    customVersion: This custom version needs a local copy to preserve its client and metadata.
+    version: Copy version
+    chooseFolder: Choose destination folder
+    privacy: Worlds and other personal files start unchecked. Known accounts and credentials are excluded. Review your configuration files before sharing the copy. Existing files are never replaced.
+    reviewing: Reviewing files…
+    count: '{selected} of {total} files selected'
+    search: Search files to export
+    files: Instance files
+    refine: Showing the first 200 results. Refine the search to find the remaining files.
+    empty: No matching files.
+    reviewAgain: Review files again
+    saved: Copy saved.
+    reveal: Show archive in folder
+    save: Save copy
+    cancel: Cancel export
+    working: Preparing and compressing the copy…
+    reviewFailed: Could not review the files. Check folder access; only the launcher's own shared folders are supported. Choose “Review files again” to retry.
+    failed: The copy was not saved. It may have been cancelled, or access, disk space or game files may be missing. Check the destination and review again before retrying.
+    ExportSourceChanged: Files or details changed since review. Choose “Review files again” before saving.
+    ExportDestinationExists: A copy with this name already exists. Change its version or destination folder.
+    ExportNeedsOffline: This version needs the local copy format to preserve its custom client.
+    ExportMissingRuntime: The game version is not installed. Install or repair its files before making this copy.
+    ExportGameRunning: Close this instance’s game before exporting.
+    ExportInvalid: Check the version and destination. Choose a folder outside the instance and its shared folders.
+    ExportInstanceUnavailable: This instance is no longer available. Close the dialog and check the library.
+  groups:
+    title: Manage groups
+    help: Rename or dissolve a group. Its instances and files are preserved.
+    dissolve: Dissolve this group
+    keep: Instances will leave this group and keep their relative order. They are not removed and their folders are preserved.
+    empty: No groups yet. Create one from an instance’s options under “Group”.
+    refresh: Review groups again
+    confirmDissolve: Dissolve and keep instances
+    changed: Groups changed in another window. Choose “Review groups again” before saving.
+    unavailable: The library is unavailable. Close this dialog and retry once it has loaded.
+    failed: Could not save the change. Check access to launcher data and review the groups before retrying.
+  copy:
+    filesComplete: The files are already copied. Only the mod groups remain to be saved; retrying will not copy the instance again.
+    groupsFailed: The instance was copied, but its mod groups could not be copied. Previous data is preserved. Retry or return to Library.
+    retryGroups: Retry groups
+    details: Copy files and status
+    pending: Copy pending
+    action: 'Review copy of {name}'
+    review: Review copy
+    resume: Resume copy
+    resumeHelp: Continues in this folder without creating another instance. Previously copied files are verified before reuse.
+    pendingHelp: This instance cannot launch or export until copying finishes. You can preserve its files and return later.
+    verifying: Verifying the integrity of the copied files…
+    reviewing: Reviewing source files…
+    progress: 'Copying files: {progress} of {total}'
+    progressLabel: Copy progress
+    cancel: Cancel copy
+    cancelling: Finishing cancellation…
+    cancelled: Copy cancelled. Any complete files already copied are preserved. Pending copies can resume in the same destination.
+    complete: Copy complete.
+    view: View instance
+    cancelFailed: Could not cancel the task. Check its progress before retrying.
+    failed: Copy did not finish. Check access, free space and source files. Only the launcher's own shared folders are supported. Resume a pending copy to preserve its destination.
+    InstanceCopyInvalid: The copy record cannot be read. Preserve the folder and check diagnostics; retrying will not launch the game or create another copy.
+    InstanceCopySourceChanged: A source file is missing or changed since review. Restore the original files before resuming; the partial copy is preserved.
+    InstanceCopySourceMissing: The source instance is no longer registered. Restore it at its original folder before resuming.
+    InstanceCopyConflict: A destination file contains different data and has been preserved. Check the folder before resuming; your changes are not overwritten.
+    InstanceCopyGameRunning: Close the source instance’s or copy’s game before continuing.
+    InstanceCopyUnsafePath: Linked paths or destinations outside the managed area cannot be copied. Check the folders before retrying.
+    InstanceCopyTooLarge: The inventory exceeds copy limits. Reduce the file count or check diagnostics before retrying.
+
+  media:
+    providerCover: Cover supplied by the project.
+    project: View project
+    source: View original image
+
+  workspace:
+    summary: "Overview"
+    mods: "Mods"
+    packs: "Packs"
+    shaders: "Shaders"
+    worlds: "Worlds"
+    settings: "Settings"
+    console: "Console"
+    navigation: "Instance sections"
+    options: "Options for {name}"
+    stopped: "No game running"
+    running: "Game running"
+    copyPending: "Copy awaiting review"
+    folderFailed: "Could not open the folder. Check that it is available and try again."
+    unknown: "Not set"
+    lastPlayed: "Last played"
+    never: "Not played yet"
+    playtime: "Time played"
+    minutes: "{value} min"
+    folder: "Instance folder"
+    notFound: "Section unavailable"
+  content:
+    add: "Add files"
+    remove: "Remove selected"
+    removeTitle: "Remove one mod | Remove {count} mods"
+    removeHelp: "These files will be deleted from this instance’s mods folder. They will not go to the recycle bin. Worlds and original files in other folders are kept. If a mod changed after selection, cancel and refresh before reviewing again."
+    cancelRemove: "Cancel removal"
+    confirmRemove: "Delete these files"
+    folder: "Open mods folder"
+    refresh: "Read again"
+    search: "Search installed mods"
+    filter: "Filter by status"
+    all: "All statuses"
+    enabled: "Enabled"
+    disabled: "Disabled"
+    loading: "Reading this instance’s mods…"
+    loadFailed: "Could not read mods. Check the folder and choose Read again."
+    running: "Close this instance’s game before changing its mods."
+    changed: "Files or configuration changed. Refresh and review the mods before trying again."
+    failed: "Could not complete the operation. Check the files with Read again before retrying."
+    applied: "Changes applied to this instance."
+    parseFailed: "These files could not be parsed. Check their format or replace damaged copies."
+    selection: "Actions for selected mods"
+    selected: "{count} selected"
+    enable: "Enable"
+    disable: "Disable"
+    clear: "Clear selection"
+    empty: "This instance has no mods yet. You can add files to its folder."
+    noMatches: "No mods match your search and filter."
+    select: "Select {name}"
+    enableName: "Enable {name}"
+    disableName: "Disable {name}"
+    local: "Local file"
+
+  contentGroups:
+    manage: "Manage groups"
+    close: "Close groups"
+    help: "Organize this instance’s content. Groups do not change game files."
+    edit: "Group to edit"
+    new: "Create group"
+    name: "Group name"
+    color: "Group color"
+    save: "Save group"
+    saving: "Saving…"
+    cancel: "Cancel"
+    dissolve: "Dissolve group"
+    confirmDissolve: "Confirm dissolution"
+    dissolveHelp: "This group will be removed. Its content remains in the instance and no files are deleted."
+    invalid: "Use a valid name of up to 256 characters."
+    duplicate: "A group with this name already exists. Choose another."
+    changed: "The group changed while you were editing. Reload and review the current data."
+    failed: "Groups were not saved. The form is preserved; check the folder and try again."
+    discardReload: "Discard form and read again"
+    migrating: "Checking this instance’s groups…"
+    migrationFailed: "Group migration did not complete. Your old data was preserved."
+    retryMigration: "Retry migration"
+    readFailed: "Groups could not be read. The file is preserved. Check it and choose Read again."
+    filter: "Filter by mod group"
+    all: "All groups"
+    none: "Ungrouped"
+    assignment: "Group for selected mods"
+    assign: "Assign group"
+    applied: "Groups saved in this instance."
+  modInfo:
+    title: "Mod information"
+    open: "Information about {name}"
+    close: "Close mod information"
+    file: "File"
+    version: "Version"
+    loaders: "Declared loaders"
+    unknown: "Not identified"
+    authors: "Authors"
+    size: "Size"
+    bytes: "{size} bytes"
+    origin: "Source"
+    dependencies: "Declared dependencies"
+    noDependencies: "No displayable dependencies were found for this file."
+    optional: "Optional"
+    failed: "Some metadata could not be read. Basic file information remains available."
+  modDiagnostics:
+    open: "Check mods"
+    title: "Mod diagnostics"
+    close: "Close mod diagnostics"
+    help: "Compares file metadata with this instance’s saved configuration."
+    count: "Errors: {errors} · Warnings or unverified requirements: {uncertain}"
+    javaKnown: "Detected configured Java: {version}"
+    javaLoading: "Reading Java records…"
+    javaFailed: "Detected Java could not be read. Java requirements remain unverified."
+    javaRetry: "Read Java again"
+    pending: "Waiting for metadata of detected files:"
+    clear: "No incompatibilities were detected in the reviewed metadata."
+    metadataFailed: "Some metadata could not be interpreted:"
+    parseFailed: "Some files could not be parsed:"
+    inspect: "View information for {file}"
+    details: "Information"
+    any: "or"
+    all: "and"
+    unless: "unless"
+    kind:
+      loader: "Unsupported or unidentified loader for this instance"
+      configuration: "Multiple loaders are configured; review the instance version"
+      missing: "Unsatisfied dependency"
+      version: "Incompatible dependency version"
+      breaks: "Declared incompatibility"
+      conflicts: "Declared conflict"
+      duplicate: "Duplicate mod identifier"
+      unknown: "Unverified requirement"
+      java: "Unverified or incompatible Java requirement"
+      language: "Unverified language loader version"
+      feature: "Unverified environment requirement"
+    severity:
+      error: "Error"
+      warning: "Warning"
+      unknown: "Unverified"
+    rule:
+      requires: "Required"
+      recommends: "Recommended"
+      breaks: "Incompatibilities"
+      conflicts: "Conflicts"
+
+  modChanges:
+    title: "Review mod changes"
+    cancel: "Cancel changes"
+    apply: "Apply these changes"
+    files: "Changed files and requirements"
+    requested: "Requested selection"
+    additional: "Dependency changes"
+    warnings: "Requirements to review"
+    enableHelp: "These files will be enabled. Review dependencies and requirements before continuing."
+    disableHelp: "These files will be disabled, including affected dependents and dependencies no remaining mod needs."
+    incomplete: "Some metadata is pending or could not be interpreted. Only your selection will change; no dependency changes were added."
+
+  modUpdates:
+    recover: "Review this operation"
+    applyRecovery: "Apply reviewed recovery"
+    recoveryHelp: "Progress is retained. Modified files will be backed up before replacement."
+    configurationChanged: "The launch configuration changed. These versions were chosen before the change; check their requirements or check providers again."
+    searchCancelled: "Check stopped. Change filters and check again."
+    open: "Check updates"
+    title: "Update mods"
+    help: "Choose versions to change and review the files before installing. Dependencies are not added automatically."
+    close: "Close updates"
+    details: "Versions, selection and files"
+    noLoader: "Configure a Minecraft version and exactly one loader to find compatible mods."
+    policy: "Update source"
+    modrinth: "Prefer Modrinth; fall back to CurseForge"
+    curseforge: "Prefer CurseForge; fall back to Modrinth"
+    modrinthOnly: "Modrinth only"
+    curseforgeOnly: "CurseForge only"
+    releaseOnly: "Stable releases only"
+    skipVersion: "Skip installed mods for another Minecraft version"
+    search: "Check providers"
+    searching: "Checking compatible versions…"
+    reviewing: "Reading files and preparing the review…"
+    installing: "Applying reviewed files…"
+    progress: "Update progress"
+    pending: "Pending updates"
+    pendingHelp: "Resume the original review or review the current files again. You can also check for newer versions."
+    resume: "Resume this operation"
+    found: "Available updates: {count}"
+    none: "No newer versions were found for identified mods with these filters."
+    partial: "The check is incomplete. Review available results or check again."
+    unidentified: "Files without an identified source: {count}. They were not checked for updates."
+    queryFailed: "The request failed. Check your connection or the service and retry."
+    limited: "Request limit reached. Wait for the provider’s retry period before trying again."
+    incomplete: "Metadata is missing or the history limit was reached; this result is incomplete."
+    release: "Release"
+    beta: "Beta"
+    alpha: "Alpha"
+    staysDisabled: "Will remain disabled."
+    review: "Review files"
+    reviewHelp: "Only these operations will be applied. Check filenames and removals. Provider metadata does not guarantee dependencies or in-game compatibility."
+    otherInstall: "Another installation is active in this instance. Wait before applying changes."
+    changed: "Files or configuration changed. Files and progress were preserved. Check and review again before applying; a pending operation resumes only while its original conditions remain valid."
+    running: "Close Minecraft before applying changes."
+    cancelled: "Operation stopped. Published files and the pending plan are preserved."
+    failed: "The operation did not complete. Check your connection and folder permissions; files and pending plans are preserved."
+    preferencesFailed: "Filters were not saved. You can use them in this window."
+    cancelFailed: "Cancellation failed. Check progress and try again."
+    complete: "Update completed."
+    back: "Back to selection"
+    cancel: "Stop operation"
+    install: "Install these changes"
+    metadataPending: "File metadata is still loading. Read the files again and retry."
+    operations:
+      add: "Add"
+      remove: "Remove"
+      keep: "Keep"
+      backup-add: "Back up and add"
+      backup-remove: "Back up and remove"
+
+  packSharing:
+    link: "Share packs"
+    unlink: "Create private copy"
+    linkHelp: "Add your packs to the shared folder without replacing files and retain your current folder as a backup. Later changes to the shared folder affect linked instances."
+    unlinkHelp: "Create an independent copy of all shared packs for this instance. Shared packs remain available to other instances."
+    review: "Pack folder review"
+    localCount: "Local packs: {count}"
+    sharedCount: "Packs in the shared folder: {count}"
+    copyCount: "Files to copy: {count} · {bytes} bytes"
+    selection: "Your Minecraft selection is preserved. Groups remain specific to each instance."
+    conflicts: "There are {count} conflicting names. No pack will be replaced or renamed. Review the files and reopen this review."
+    moreConflicts: "Only the first 100 conflicting names are shown."
+    cancel: "Cancel folder change"
+    confirmLink: "Confirm shared folder"
+    confirmUnlink: "Confirm private copy"
+    linked: "Packs shared. The previous local folder is retained in backups."
+    unlinked: "Private copy created. Changes in this instance no longer modify shared packs."
+    incomplete: "The change did not finish. Partial copies may remain; files and backups are retained. Close this review, reload and inspect the folders before retrying."
+  packInfo:
+    title: "Pack information"
+    close: "Close pack information"
+    format: "Declared format"
+    range: "Version guide"
+    help: "Information declared by the pack. The format range is a guide and does not confirm compatibility with your game."
+    noDescription: "This file does not include a text description that can be displayed."
+    truncated: "Description shortened due to its size or structure."
+  packs:
+    groupFilter: "Filter by pack group"
+    groupAssignment: "Group for selected packs"
+    unreadFiles: "Files that could not be read"
+    selectUnread: "Select unread file {name}"
+    sharedRunning: "Close games sharing these packs or settings before continuing."
+    shared: "options.txt is shared. Changes also affect other instances linked to these settings."
+    folder: "Open resource packs folder"
+    help: "Packs at the top have higher priority. Enabling or reordering changes the Minecraft selection; files are not moved or deleted."
+    search: "Search installed resource packs"
+    loadFailed: "Could not read resource packs or their selection. Check options.txt and Read again."
+    loading: "Reading packs and selection…"
+    applied: "Resource pack selection saved."
+    running: "Close this instance’s game before changing its resource packs."
+    changed: "options.txt changed. Read again and review the selection before retrying."
+    failed: "The selection was not saved. Check the files and Read again before retrying."
+    enabled: "Enabled · highest priority first"
+    noneEnabled: "Minecraft has no resource packs selected."
+    available: "Available to enable"
+    external: "Minecraft, mod or missing-file entry. Its position is preserved."
+    up: "Increase priority of {name}"
+    down: "Decrease priority of {name}"
+    empty: "This instance has no local resource packs yet."
+    noMatches: "No available resource pack matches this search."
+    noneAvailable: "All local resource packs are enabled."
+    format: "Format {format} · Minecraft {range}"
+    addFolder: "Add folder"
+    added: "Files copied. The Minecraft selection is preserved; you can enable the available packs."
+    selection: "Actions for selected resource packs"
+    remove: "Remove selected"
+    removeTitle: "Review resource pack removal"
+    removeHelp: "These packs will be disabled in these settings and moved to this instance’s backups. Imported originals and worlds are preserved."
+    removeFiles: "Packs and files to remove"
+    cancelRemove: "Cancel removal"
+    confirmRemove: "Move to backups"
+    folderEntries: "Folder · {count} files · {size} bytes"
+    archiveSize: "File · {size} bytes"
+    sharedDirectory: "The packs folder is shared. Adding or removing files affects every instance linked to that folder."
+    collision: "A pack with this name already exists. It was not replaced. Check or rename the files before adding them again."
+    filesChanged: "Files, links or the Minecraft selection changed. Read again and review them before confirming."
+    incomplete: "Removal did not finish. Some packs may have been disabled or moved; read again and check the backups before retrying."
+    filesFailed: "The operation did not finish. Partial copies may exist. Check the folder and read again before retrying."
+    backup: "Backups"
+    openBackup: "Open backups"
+    removed: "Packs removed. Their files are in this instance’s backups."
+
+  packUpdates:
+    title: "Update resource packs"
+    help: "Check updates for identified ZIP archives. Unpacked folders and local files without a source are preserved. Review changes before installing."
+    noLoader: "Set a Minecraft version to find compatible resource packs."
+    skipVersion: "Skip packs installed for a different Minecraft version"
+    none: "No newer versions were found for identified packs with these filters."
+    reviewHelp: "Review the ZIP archives to replace. Each previous file will be backed up. Check the pack requirements for game compatibility."
+    configurationChanged: "The configuration or pack directory changed. These versions were chosen earlier; check their requirements and destination or query again."
+    sharedRunning: "Another game uses the shared pack directory. Close it before applying these changes."
+    stableNames: "The ZIP filename stays the same to preserve activation, priority and groups. The new version replaces its content and backs up the previous file."
+    shared: "This directory is shared: changes affect every linked instance."
+
+  shaders:
+    folder: "Shader directory"
+    help: "Choose a shader for this instance’s installed engine. Changing the selection does not modify shader files. Check its requirements; your GPU and game version also affect compatibility."
+    engine: "Detected engine: {name}"
+    shared: "The shader directory is shared. This selection is saved only in this instance’s configuration."
+    metadataPending: "Some mods do not have current metadata. Refresh the files or check errors in Mods."
+    ambiguous: "Multiple shader engines are active. Resolve the conflict in Mods before changing the selection."
+    noEngine: "No compatible shader engine was detected. You need Iris, Oculus or OptiFine to activate a shader."
+    manageMods: "Manage mods"
+    search: "Search installed shaders"
+    loading: "Reading shaders and configuration…"
+    loadFailed: "Could not read shaders or configuration. Check the files and refresh."
+    changed: "The files, engine or configuration changed. Their state was refreshed; review the selection before trying again."
+    saveFailed: "The selection was not saved. Check permissions and whether the configuration is a shared link."
+    saved: "Shader selection saved."
+    missing: "The configuration keeps “{name}”, which is not among the available shaders."
+    disableAll: "Disable saved selection"
+    noMatches: "No shaders match your search."
+    empty: "No shaders are installed in this instance."
+    unpacked: "Directory"
+    local: "Local file"
+    active: "Active in configuration"
+    available: "Available"
+    enableName: "Activate {name}"
+    disableName: "Deactivate {name}"
+    enable: "Activate"
+    disable: "Deactivate"
+
+    added: "Shaders copied. They were not activated automatically."
+    collision: "A shader with that name already exists. Keep the installed file or rename the new one before trying again."
+    sharedRunning: "Another game uses the shared shaders folder. Close it before copying files."
+    addFailed: "Could not add all shaders. Check the files and permissions, then refresh the folder."
+
+    removeTitle: "Review shader removal"
+    removeHelp: "Files will be moved to private backups. Each affected configuration will be backed up before disabling its selection. Worlds and other game options will not change."
+    removeFiles: "Shaders and files to remove"
+    removeShared: "This folder is shared. Removing these files affects every linked instance; configurations in other instances will not change."
+    removeConfigurations: "These selections will be disabled in this instance. Their full configurations will remain in the backup:"
+    removeChanged: "Shaders or configurations changed. Cancel this review and review the files again before confirming."
+    removeIncomplete: "Removal did not finish. Files remain in their original location or in backups; inspect both folders before retrying."
+    sharedConfiguration: "An affected configuration is linked and shared. It was preserved; check that link before removing these shaders."
+    removeFailed: "Could not complete the review or removal. Check the files, configurations and permissions, then review again."
+    removed: "Shaders removed. Their files and affected configurations remain in backups."
+    selection: "Selected shaders"
+    unreadFiles: "Unreadable shader files"
+
+    infoTitle: "Shader information"
+    infoClose: "Close shader information"
+    infoKind: "Local format"
+    folderSize: "Not calculated. The file review shows the total folder size."
+    infoHelp: "These details describe the installed file. Check the project requirements: its engine, Minecraft version and GPU also determine compatibility."
+    groupFilter: "Filter by shader group"
+    groupAssignment: "Group for selected shaders"
+
+  shaderSharing:
+    link: "Share shaders"
+    unlink: "Create private copy"
+    linkHelp: "Add your shaders to the shared folder without replacing files and retain your current folder as a backup. Later changes in that folder affect every linked instance."
+    unlinkHelp: "Create an independent copy of all shared shaders for this instance. Shared shaders remain available to the others."
+    review: "Shader folder review"
+    localCount: "Local shaders: {count}"
+    sharedCount: "Shaders in the shared folder: {count}"
+    copyCount: "Files to copy: {count} · {bytes} bytes"
+    selection: "OptiFine, Iris and Oculus configurations and this instance's groups are preserved. Sharing does not automatically activate shaders."
+    conflicts: "There are {count} conflicting names. No shader will be replaced or renamed. Check the files and reopen this review."
+    moreConflicts: "The first 100 conflicting names are shown."
+    cancel: "Cancel folder change"
+    confirmLink: "Confirm shared folder"
+    confirmUnlink: "Confirm private copy"
+    linked: "Shaders shared. The previous local folder is retained in backups."
+    unlinked: "Private copy created. Changes in this instance no longer modify shared shaders."
+    incomplete: "The change did not finish. Partial copies may exist; files and backups are retained. Close this review, reload and inspect the folders and backups before retrying."
+    failed: "Could not change the shader folder. Check files and permissions, reload and review the change before retrying."
+
+  shaderUpdates:
+    title: "Update shaders"
+    help: "Check versions for identified ZIPs. Modrinth filters by engine: Oculus uses the OptiFine tag. CurseForge filters by Minecraft; check the project's requirements. GPU compatibility is not verified. Folders and local files without a source are preserved."
+    noLoader: "Configure Minecraft and a detected engine: Iris, Oculus or OptiFine. If metadata is missing, reload Mods before checking versions. Pending operations remain available for recovery."
+    skipVersion: "Skip shaders installed for another Minecraft version"
+    none: "No newer versions were found for the identified shaders and these filters."
+    reviewHelp: "Review the ZIPs to replace. Each previous file is retained as a backup. Check the project's engine, Minecraft and GPU requirements before confirming."
+    configurationChanged: "The configuration or shader folder changed. These versions were selected earlier; check the engine, Minecraft and destination or search again."
+    sharedRunning: "Another game uses the shared shader folder. Close it before applying these changes."
+    stableNames: "The ZIP name and OptiFine, Iris and Oculus configurations are preserved. The previous file is backed up; no other shader is activated and its groups are unchanged."
+    shared: "This folder is shared: updating its files affects every linked instance. Their configurations and groups remain local to each instance."
+
+  worlds:
+    one: "1 world"
+    refresh: "Refresh"
+    loading: "Reading worlds…"
+    search: "Search worlds"
+    count: "{count} worlds"
+    loadFailed: "Could not read or open the worlds. Check the folder and its permissions, then refresh."
+    running: "The list will refresh when the game closes. Minecraft may be saving changes."
+    empty: "This instance has no worlds yet. Create one in Minecraft or import one through the folder."
+    noMatches: "No worlds match your search."
+    shared: "Shared"
+    sharedHelp: "This world is in the launcher's common folder. Other linked instances can change it."
+    metadata: "Could not read level.dat. The folder is preserved; check your backups."
+    unsafe: "The link or folder is unsafe to read from the launcher. Its contents were not accessed."
+    close: "Close world information"
+    folder: "Folder name"
+    mode: "Game mode"
+    mode0: "Survival"
+    mode1: "Creative"
+    mode2: "Adventure"
+    mode3: "Spectator"
+    difficulty: "Difficulty"
+    difficulty0: "Peaceful"
+    difficulty1: "Easy"
+    difficulty2: "Normal"
+    difficulty3: "Hard"
+    cheats: "Cheats"
+    enabled: "Enabled"
+    disabled: "Disabled"
+    time: "World days"
+    seed: "Seed"
+
+  worldFiles:
+    summaryOne: "1 file · {bytes} bytes"
+    copy: "Copy"
+    export: "Export ZIP"
+    remove: "Remove"
+    copyName: "Copy {name}"
+    exportName: "Export {name}"
+    removeName: "Remove {name}"
+    copyTitle: "Copy world"
+    exportTitle: "Export world"
+    removeTitle: "Remove world"
+    copyHelp: "Create an independent copy in the selected instance, keeping all files and empty folders. Existing worlds are never replaced."
+    exportHelp: "Save a complete world ZIP outside launcher data. Choose another folder or name if the file already exists."
+    removeHelp: "Remove the world from this instance and keep its files in a private backup. Review the scope before confirming."
+    close: "Close world operation"
+    instance: "Destination instance"
+    name: "Copy folder name"
+    archive: "ZIP file name"
+    chooseFolder: "Choose export folder"
+    review: "Review world files"
+    summary: "{count} files · {bytes} bytes"
+    shared: "A shared folder is involved. Copying or exporting creates an independent copy; removing a world from the common folder affects all linked instances. Close games before continuing."
+    linkOnly: "Only this instance's link will be removed. The shared world and its files will remain in the common folder."
+    confirm: "Confirm operation"
+    back: "Change options"
+    working: "Processing world files…"
+    copyDone: "Independent copy created. The original world is preserved."
+    exportDone: "ZIP exported. The original world is preserved."
+    removeDone: "World removed. The backup retains the files or the previous link."
+    failed: "Could not complete the operation. Check names, permissions and destinations. Use a valid Windows name. Previous files are preserved. Removal requires the world and backup to be on the same drive."
+    WorldFilesChangedError: "The world or destination changed since review. Review again before confirming."
+    WorldDestinationExistsError: "The destination already exists. Choose another name or folder; no files will be replaced."
+    WorldOperationIncompleteError: "The copy did not finish. The source is preserved and partial files may remain in the destination. Open the folder and inspect it before choosing another name or retrying."
+    InstanceRunningError: "Close games in both the source and destination instances before continuing."
+    SharedWorldRunningError: "A game is running and this operation uses shared worlds. Close games before continuing."

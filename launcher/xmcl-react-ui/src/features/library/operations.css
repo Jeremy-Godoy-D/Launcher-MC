@@ -1,0 +1,18 @@
+@layer components {
+  .operation-form { display: flex; flex-direction: column; min-height: 0; gap: 16px; }
+  .operation-actions { display: grid; gap: 8px; }
+  .operation-actions .button { justify-content: flex-start; }
+  .operation-order { display: flex; flex-wrap: wrap; gap: 8px; }
+  .operation-path { overflow-wrap: anywhere; color: var(--muted); font-size: 13px; margin: 0 0 8px; }
+  .operation-form .form-error { scroll-margin-block: 8px; }
+  .operation-dialog h2 { overflow-wrap: anywhere; }
+  .instance-icon-editor { display: grid; grid-template-columns: 104px minmax(0, 1fr); align-items: center; gap: 16px; }
+  .instance-icon-actions { display: grid; gap: 10px; }
+  .instance-icon-preview { display: grid; place-items: center; min-height: 104px; color: var(--muted); }
+  .instance-icon-preview img { width: 96px; height: 96px; object-fit: contain; }
+  .operation-dialog .dialog-actions { flex-shrink: 0; flex-wrap: wrap; }
+  .danger-text { color: var(--ink); }
+  .export-files { min-width: 0; margin: 0; padding: 12px; border: 1px solid var(--line); }
+  .export-files .creation-check { align-items: flex-start; overflow-wrap: anywhere; padding-block: 4px; }
+  .export-files small { color: var(--muted); }
+}

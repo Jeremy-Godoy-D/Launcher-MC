@@ -10,7 +10,7 @@ import { kResourceManager, kResourceWorker } from '~/resource'
 import { AbstractService, ServiceStateManager } from '~/service'
 import { isSystemError } from '@xmcl/utils'
 import { linkDirectory, linkOrCopyDirectory, linkWithTimeoutOrCopy, missing } from '../util/fs'
-import { readlinkSafe, isLinkTo, normalizeLinkTarget } from './utils/readLinkSafe'
+import { readlinkSafe, isLinkTo } from './utils/readLinkSafe'
 import { ModrinthV2Client } from '@xmcl/modrinth'
 import { CurseforgeApiError, CurseforgeV1Client } from '@xmcl/curseforge'
 import { pathToFileURL } from 'url'
@@ -45,7 +45,7 @@ export abstract class AbstractInstanceDomainService extends AbstractService {
     if (linkedPath) {
       const shared = await this.getSharedDirectory()
       // Preserve an intentional link to the global shared folder.
-      if (normalizeLinkTarget(linkedPath) === normalizeLinkTarget(shared)) {
+      if (await isLinkTo(destPath, shared)) {
         return
       }
       await unlink(destPath)

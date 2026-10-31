@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { linkInstanceFiles } from './linkInstanceFiles'
 import type { InstanceFile } from '@xmcl/instance'
-import { mkdtemp, rm, writeFile, mkdir } from 'fs-extra'
+import { mkdtemp, rm, writeFile, mkdir, readFile, stat } from 'fs-extra'
+import { pathToFileURL } from 'node:url'
 import { tmpdir, platform } from 'os'
 import { join } from 'path'
 
@@ -13,6 +14,19 @@ const file = (path: string): InstanceFile => ({
 const PLATFORM = { os: platform() === 'win32' ? 'windows' : 'linux' } as any
 
 describe('linkInstanceFiles', () => {
+  it('copies local imported worlds so destination writes cannot modify the source', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'grimo-copy-import-'))
+    try {
+      const src = join(dir, 'original.dat'), destination = join(dir, 'imported', 'level.dat')
+      await writeFile(src, 'original world')
+      const finished = new Set<string>()
+      await linkInstanceFiles([{ file: { ...file('saves/world/level.dat'), downloads: [pathToFileURL(src).href] }, src, destination }], PLATFORM, finished, [], new AbortController().signal)
+      expect(finished.size).toBe(1)
+      expect((await stat(src)).ino).not.toBe((await stat(destination)).ino)
+      await writeFile(destination, 'changed world')
+      expect(await readFile(src, 'utf8')).toBe('original world')
+    } finally { await rm(dir, { recursive: true, force: true }) }
+  })
   it('links a file from src to destination', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'xmcl-link-'))
     try {

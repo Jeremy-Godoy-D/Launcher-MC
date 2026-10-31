@@ -45,9 +45,9 @@ export async function getRequiredModIdsFromArtifact(content: Uint8Array, loader:
   }
   if (loader === 'quilt') {
     const metadata = await readQuiltMod(content)
+    // shortcut: legacy download hints cannot resolve Quilt alternatives; use instance-aware rules in the React catalog.
     return (metadata.quilt_loader.depends ?? [])
-      .filter(dependency => !dependency.optional)
-      .map(dependency => dependency.id)
+      .flatMap(dependency => typeof dependency === 'string' ? [dependency] : !Array.isArray(dependency) && !dependency.optional ? [dependency.id] : [])
   }
 
   const fileName = loader === 'neoforge' ? 'neoforge.mods.toml' : 'mods.toml'

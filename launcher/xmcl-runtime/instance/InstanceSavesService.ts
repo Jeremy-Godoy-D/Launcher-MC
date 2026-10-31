@@ -19,6 +19,7 @@ import {
   type LaunchOptions,
   type LinkSaveAsServerWorldOptions,
   type ShareSaveOptions,
+  type WorldFileOperation, type WorldFileReview,
   type UpdateSaveOptions,
 } from '@xmcl/runtime-api'
 import { open, openEntryReadStream, readAllEntries } from '@xmcl/unzip'
@@ -27,6 +28,7 @@ import { AnyError, isSystemError } from '@xmcl/utils'
 import { FSWatcher } from 'chokidar'
 import filenamify from 'filenamify'
 import { createWriteStream, existsSync } from 'fs'
+import { realpath } from 'node:fs/promises'
 import { ensureDir, ensureFile, readFile, readdir, rename, rm, rmdir, stat, unlink, writeFile } from 'fs-extra'
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'path'
 import { ZipFile } from 'yazl'
@@ -35,13 +37,15 @@ import { InstanceService } from '~/instance'
 import { LaunchService } from '~/launch'
 import { kMarketProvider } from '~/market'
 import { kResourceManager } from '~/resource'
-import { getInstanceSaveHeader, readInstanceSaveMetadata, readWorldGenSettings, updateSaveMetadata, listSaveDimensions, getSaveRegions, deleteSaveChunks, readSaveChunks, writeSaveChunks, relocateSaveChunks, readSaveProgress, kSaveWorker, type SaveWorker } from '~/save'
+import { readInstanceSaveMetadata, readWorldGenSettings, updateSaveMetadata, listSaveDimensions, getSaveRegions, deleteSaveChunks, readSaveChunks, writeSaveChunks, relocateSaveChunks, readSaveProgress, kSaveWorker, type SaveWorker } from '~/save'
 import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/service'
 import { LauncherApp } from '../app/LauncherApp'
 import { copyPassively, isDirectory, linkDirectory, missing, pipeline, readdirIfPresent } from '../util/fs'
 import { isNonnull, requireObject, requireString } from '../util/object'
 import { includeAs, writeZipFile } from '../util/zip'
 import { readlinkSafe, isLinkTo } from './utils/readLinkSafe'
+import { readWorlds, worldsLocation } from './utils/worldFiles'
+import { applyWorldFiles, previewWorldFiles } from './utils/worldOperations'
 
 /**
  * Provide the ability to preview saves data of an instance
@@ -141,17 +145,64 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async showDirectory(instancePath: string): Promise<void> {
-    this.app.shell.openDirectory(join(instancePath, 'saves'))
+    await this.#javaInstance(instancePath)
+    const directory = await worldsLocation(instancePath, this.getPath())
+    if (!await this.app.shell.openDirectory(directory.root)) throw new Error('Worlds folder unavailable')
   }
 
   async getInstanceSaves(path: string) {
-    const baseName = basename(path)
-    const saveRoot = join(path, 'saves')
-    const saves = await readdirIfPresent(saveRoot).then(a => a.filter(s => !s.startsWith('.')))
-    const metadatas = Promise.all(saves
-      .map(s => resolve(saveRoot, s))
-      .map((p) => getInstanceSaveHeader(p, baseName)))
-    return metadatas
+    await this.#javaInstance(path)
+    return this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      await this.#javaInstance(path)
+      return readWorlds(path, this.getPath())
+    })
+  }
+
+  async #javaInstance(path: string) {
+    await this.instanceService.initialize()
+    if (!this.instanceService.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceNotFoundError')
+  }
+
+  async #worldFiles<T>(operation: WorldFileOperation, action: () => Promise<T>): Promise<T> {
+    if (!operation || !['copy', 'export', 'remove'].includes(operation.type)) throw new Error('Invalid world operation')
+    const paths = [...new Set([operation.instancePath, ...(operation.type === 'copy' ? [operation.destinationInstancePath] : [])])].sort()
+    for (const path of paths) await this.#javaInstance(path)
+    const lock = async (index: number): Promise<T> => {
+      if (index < paths.length) return this.mutex.of(LockKey.instance(paths[index])).runExclusive(() => lock(index + 1))
+      for (const path of paths) await this.#javaInstance(path)
+      return action()
+    }
+    return this.mutex.of('resource-pack-options').runExclusive(async () => {
+      return lock(0)
+    })
+  }
+
+  async #worldFilesIdle(review: WorldFileReview) {
+    const operation = review.operation, paths = [operation.instancePath, ...(operation.type === 'copy' ? [operation.destinationInstancePath] : [])]
+    for (const path of paths) await this.#javaInstance(path)
+    const launch = await this.app.registry.get(LaunchService), processes = await launch.getGameProcesses()
+    if (processes.some(process => paths.includes(process.options.gameDirectory))) throw new AnyError('InstanceRunningError')
+    if (review.shared && !review.linkOnly && processes.length) throw new AnyError('SharedWorldRunningError')
+    if (operation.type === 'export') {
+      const parent = await realpath(operation.destinationDirectory)
+      for (const instance of this.instanceService.state.instances) {
+        const root = await realpath(instance.path).catch(() => instance.path), inside = relative(root, parent)
+        if (!inside || inside !== '..' && !inside.startsWith('..' + sep) && !isAbsolute(inside)) throw new Error('Export must be outside instances')
+      }
+    }
+  }
+
+  async previewWorldFiles(operation: WorldFileOperation) {
+    return this.#worldFiles(operation, async () => {
+      await this.#javaInstance(operation.instancePath)
+      const review = await previewWorldFiles(operation, this.getPath())
+      await this.#worldFilesIdle(review)
+      return review
+    })
+  }
+
+  async applyWorldFiles(review: WorldFileReview) {
+    return this.#worldFiles(review?.operation, async () => applyWorldFiles(review, this.getPath(), value => this.#worldFilesIdle(value)))
   }
 
   /**

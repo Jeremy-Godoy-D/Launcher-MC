@@ -3,6 +3,12 @@ import { UserProfile } from '../entities/user.schema'
 import { LaunchException, LaunchOptions } from '../services/LaunchService'
 import { AUTHORITY_DEV } from './authority'
 
+export function createOperationId() {
+  const crypto = globalThis.crypto as Crypto | undefined
+  if (crypto?.randomUUID) return crypto.randomUUID()
+  return `op-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 function tryParseUrl(url: string) {
   try {
     return new URL(url)

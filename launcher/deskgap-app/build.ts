@@ -5,10 +5,12 @@ import { dirname, extname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import electronConfig from '../xmcl-electron-app/esbuild.config'
 import { unicodeRegexPlugin } from './unicodeRegex'
+import * as rendererModule from '../scripts/renderer'
 
 const root = dirname(fileURLToPath(import.meta.url))
 const dist = join(root, 'dist')
-const rendererSource = resolve(root, '../xmcl-keystone-ui/dist')
+const renderer = (rendererModule as typeof rendererModule & { default?: typeof rendererModule }).default ?? rendererModule
+const rendererSource = resolve(root, '..', renderer.rendererTarget().package, 'dist')
 const rendererDestination = join(dist, 'renderer')
 const sharedConfig = (electronConfig as typeof electronConfig & { default?: typeof electronConfig }).default ?? electronConfig
 
@@ -46,7 +48,7 @@ async function assertAsciiBundle(path: string) {
 
 async function main() {
   if (!await pathExists(join(rendererSource, 'index.html'))) {
-    throw new Error('The Keystone renderer is not built. Run pnpm build:renderer first.')
+    throw new Error('The selected renderer is not built. Run pnpm build:renderer first.')
   }
   await emptyDir(dist)
   await build({

@@ -12,13 +12,15 @@ export interface ServiceStateContext {
 export class ServiceStateManager {
   private logger: Logger
 
-  private containers: Record<string, ServiceStateContainer> = {}
+  private containers: Record<string, ServiceStateContainer> = Object.create(null)
 
   constructor(private app: LauncherApp) {
     this.logger = this.app.getLogger('ServiceStateManager')
-    app.controller.handle('commit', async (event, id, type, payload) => {
+    app.controller.handle('commit', async (event, id, type, payload, epoch) => {
       const stateProxy = this.containers[id]
       if (!stateProxy) return 'NOT_STATE_SERVICE'
+      if (!stateProxy.isTracked(event.sender)) throw new AnyError('StateError', 'State not acquired by this window')
+      if (epoch !== undefined && stateProxy.epoch !== epoch) throw new AnyError('StateError', 'State expired')
       try {
         await stateProxy.commit(type, payload)
       } catch (e) {
@@ -26,13 +28,17 @@ export class ServiceStateManager {
         throw e
       }
     })
-    app.controller.handle('unref', ({ sender }, id) => {
+    app.controller.handle('unref', ({ sender }, id, epoch) => {
       const stateProxy = this.containers[id]
       if (!stateProxy) return 'NOT_STATE_SERVICE'
+      if (epoch !== undefined && stateProxy.epoch !== epoch) return 'STATE_EXPIRED'
       stateProxy.untrack(sender)
     })
-    app.controller.handle('revalidate', async (_, id, ...args) => {
-      await this.revalidate(id, ...args)
+    app.controller.handle('revalidate', async ({ sender }, id, epoch) => {
+      const state = this.containers[id]
+      if (!state || !state.isTracked(sender)) throw new AnyError('StateError', 'State not acquired by this window')
+      if (epoch !== undefined && state.epoch !== epoch) throw new AnyError('StateError', 'State expired')
+      await state.revalidate()
     })
     app.registryDisposer(async () => {
       for (const container of Object.values(this.containers)) {
@@ -71,7 +77,7 @@ export class ServiceStateManager {
     const container = ServiceStateContainer.unwrap(state)
     if (!container) throw new TypeError('Unregistered state!')
     container.track(client)
-    return JSON.parse(JSON.stringify(state))
+    return container.snapshot()
   }
 
   get<T extends SharedState<any> = SharedState<State<any>>>(id: string): T | undefined {

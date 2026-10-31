@@ -1,0 +1,11 @@
+{
+  "name": "@launcher/renderer-client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./index.ts",
+  "sideEffects": false,
+  "scripts": { "check": "tsc --noEmit --project tsconfig.json" },
+  "dependencies": { "@xmcl/runtime-api": "workspace:*" },
+  "devDependencies": { "typescript": "5.9.3" }
+}

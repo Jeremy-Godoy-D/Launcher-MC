@@ -5,7 +5,7 @@ import { darkIco, darkIcon, darkTray, lightIco, lightIcon, lightTray } from './u
 import { HAS_DEV_SERVER, HOST } from './constant'
 
 const manifest: InstalledAppManifest = {
-  name: 'Launcher MC',
+  name: 'Grimo Launcher',
   description: 'Minecraft Java: instancias, mods y modpacks',
   url: HAS_DEV_SERVER ? defaultUrl : `http://${HOST}/index.html`,
   backgroundColor: '0x424242',

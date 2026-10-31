@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-27",
+  "applicationCommit": "cf2b77d91edccbd9019636ec07fdd3f1d94096b0",
+  "rendererSourceCommit": "f6e78e5d7e04cfde2a150a44d4db2f844c70c83d",
+  "status": "stage-5-partial-safe-install-state-publication",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/react-migration.yml",
+      "sha256": "adfeac390c65710a129df53f67a7749545864ae60a8282c47ecfeb69a2af0068"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instanceIO/utils/pendingInstall.test.ts",
+      "sha256": "bf4552a3f442f5555416a43f8d932a903037f14d01de8cad3b8e163a6ae08fb7"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instanceIO/utils/pendingInstall.ts",
+      "sha256": "7f921651a95ab70b365d4841cfab44b316761fd55fdac0d8104c5a5fd26f7467"
+    }
+  ],
+  "validation": {
+    "unit": {
+      "cases": 683,
+      "files": 77,
+      "newCases": 5,
+      "seconds": 18.81
+    },
+    "focusedUnit": {
+      "cases": 31,
+      "files": 3,
+      "seconds": 11.07
+    },
+    "runtimeTypes": "passed",
+    "rootLint": "passed,zero warnings/errors",
+    "nativeReact": {
+      "cases": 8,
+      "time": "23.4s"
+    },
+    "nativeVue": {
+      "cases": 3,
+      "time": "19.4s"
+    },
+    "currentNativeScenarios": 11,
+    "harnessTests": 9,
+    "axe": {
+      "audits": 10,
+      "violations": 0,
+      "incomplete": 24
+    },
+    "retainedPngs": 19,
+    "lastCompleteRendererRegression": {
+      "source": "f6e78e5",
+      "cases": 97,
+      "ciRun": 40612683266,
+      "ciHead": "0d3ae7e77e3475e5b2c9d127cf4f3c4bbb0a6f74",
+      "conclusion": "success",
+      "renderers": [
+        "react",
+        "vue"
+      ]
+    }
+  },
+  "commands": [
+    "pnpm --prefix=xmcl-runtime check",
+    "pnpm lint",
+    "pnpm exec vitest run [explicit workflow list at cf2b77d,683 cases]",
+    "pnpm exec vitest run xmcl-runtime/instanceIO/utils/pendingInstall.test.ts xmcl-runtime/instanceIO/InstanceInstallService.progressive.test.ts xmcl-runtime/instanceIO/InstanceInstallService.concurrent.test.ts",
+    "LAUNCHER_RENDERER=react pnpm --prefix=xmcl-electron-app build (existing unchanged React renderer from f6e78e5)",
+    "XMCL_E2E_EXECUTABLE=<React package> pnpm --dir e2e exec playwright test specs/react-migration/14-imports-advanced.spec.ts specs/react-migration/24-shared-content.spec.ts --reporter=line --output=artifacts/stage5-install-state-react",
+    "LAUNCHER_RENDERER=vue pnpm --prefix=xmcl-electron-app build (existing unchanged Vue renderer)",
+    "XMCL_E2E_EXECUTABLE=<Vue package> pnpm --dir e2e exec playwright test specs/react-migration/03-vue-compatibility.spec.ts specs/react-migration/08-vue-onboarding.spec.ts specs/react-migration/33-vue-content-groups.spec.ts --reporter=line --output=artifacts/stage5-install-state-vue",
+    "node --test launcher/scripts/react-migration.test.mjs",
+    "node launcher/scripts/react-migration.mjs check"
+  ],
+  "artifactManifest": {
+    "path": "launcher/e2e/artifacts/stage5-install-state-artifact-manifest.json",
+    "sha256": "932217054ef5a78cc173a4e66f9d7e3ec3028b774a54b0063d170d19edeb0601"
+  },
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-state-all-units.log",
+      "sha256": "bbfd5c5927e1c566e81dc04fba421536fb4d26376de9041bf8eba01d3e7ac10a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-state-harness.log",
+      "sha256": "e9f4ed1dc90fd81807e83d7d8e25f1de2007d3308c621cf43f9e0f7ee7767b64"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-state-lint.log",
+      "sha256": "afae49740aaf5b24d63e6a9a2e4def97cd3eadb2fd5a35c2359a223dbbd10e64"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-state-react-build.log",
+      "sha256": "341cc36609ff8d16acac62605329e3b6fe6674915bc365325da505e0cb7f128e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-state-react.log",
+      "sha256": "5d2f3854afd3ba373d9869b10a582c9e1eb755815fdf3a0dbdc20e5bbf9a78fa"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-state-types.log",
+      "sha256": "014a891360e8bf3c856c604e13ba0dee2eeaf7aa4121c9cb1a2ef4796a223b4c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-state-units-debug.log",
+      "sha256": "a40ceeb77d6d5b185ea37737bdb04d78dbdbd0514e0645f4330f6c5f143cf296"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-state-units-final.log",
+      "sha256": "d20a322a92443c45b62c2df620d661852aa72dca64295d174b793a53dc38950d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-state-units.log",
+      "sha256": "8dd4a5633175f7d2f764e5ba1ccd5db95fb020e4d6183581154b9df5933c2ac6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-state-units2.log",
+      "sha256": "34c1b80703617b474a77bdd70d2c999c63dce5eb0ff1f9956a8adb2724a6a5ea"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-state-units3.log",
+      "sha256": "e76b124c5b3fd3f7089fd76ddffd2e3b9c2a34a6111f81a2b1a4788bfeb361c1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-state-units4.log",
+      "sha256": "1cae19cefa71ba0ad5f6e31b12064bab768df501b51f8fc82d2ca6ad5fb0d85a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-state-vue-build.log",
+      "sha256": "645e389092557c2b45c3366bfb112b520cd4a53ac36525c9868c248bc1992633"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-state-vue.log",
+      "sha256": "ca61522b8cc42ec4557127b7fb289cbfc92ae7b5f2d23513c2004c238ddc0886"
+    }
+  ],
+  "packagesAtCapture": [
+    {
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/Grimo Launcher.exe",
+      "sha256": "ea08891aa156173243d6c126486621846804180cdc482ffd6e1dd357c0ce6ca7"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/resources/app.asar",
+      "sha256": "c587bddf5886400a03c72e25df5ea624e43a3b9e5f63b77ed8ceed8ab6890944"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/Grimo Launcher.exe",
+      "sha256": "6d5ea5ef1f8425a06a83a8e442de9b80bbe96f20bbb067da105c17336f6fc80b"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/resources/app.asar",
+      "sha256": "328d592591f0d1c07534276d2e5439d82d75e6fc15e4b0da9b6ff2286c71b0e7"
+    }
+  ],
+  "packageAvailability": "Mutable output paths; hashes identify capture. Vue host/default restored. Renderers unchanged from f6e78e5.",
+  "limits": [
+    "This helper protects complete JSON publication and planted direct file/directory links; it does not authorize an arbitrary instance path or verify every ancestor. Harden InstanceInstallService registration/process/workspace boundaries before wiring React content upgrades.",
+    "No whole-installer transaction or power-loss durability guarantee. Existing service locks serialize writers; no new global writer queue.",
+    "Initial unsupported overlapping-writer stress encountered Windows EPERM and one test-side delayed rejection; final tests observe complete old/new JSON at publication with handled errors. Real concurrent/progressive installation remains covered by26 existing service tests. Failed diagnostic logs are retained.",
+    "The97-case renderer regression and successful CI belong to prior f6e78e5/0d3ae7e. Current backend change has11 focused packaged scenarios and683 units; its own CI is required after push.",
+    "No UI redesign, new StrictMode/performance calibration, actual Java/game or NSIS/delta proof here. Stage5/K08 remain pending; Microsoft deferred, production/proxy/secrets and user ANALISIS unchanged."
+  ]
+}

@@ -1,11 +1,9 @@
 import {
   CreateInstanceOptions,
-  duplicateInstance,
   InstanceDataWithTime,
   InstanceSchema,
   computeInstanceEditChanges,
   createInstance,
-  type EditInstanceOptions,
   DuplicateInstanceTrackerEvents,
 } from '@xmcl/instance'
 import {
@@ -13,28 +11,36 @@ import {
   InstanceServiceKey,
   InstanceState,
   InstancesSchema,
+  InstanceGroupDataOrStringArray,
   LockKey,
   DuplicateInstanceTask,
   type InstanceService as IInstanceService,
   type SharedState,
+  type InstanceCopyState,
 } from '@xmcl/runtime-api'
 import { AnyError, isSystemError } from '@xmcl/utils'
 import filenamify from 'filenamify'
-import { fileTypeFromBuffer, fileTypeFromFile } from 'file-type'
+import { fileTypeFromBuffer } from 'file-type'
+import { createHash } from 'node:crypto'
 import { existsSync } from 'fs'
-import { ensureDir, readdir, readlink, readJson, rename, rm, writeFile, writeJson } from 'fs-extra'
-import { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'path'
+import { ensureDir, lstat, mkdir, realpath, readdir, readlink, readJson, rename, rm, writeJson } from 'fs-extra'
+import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'path'
 import { Inject, LauncherAppKey, kGameDataPath, type PathResolver } from '~/app'
 import { ImageStorage, kTasks, Tasks } from '~/infra'
 import { VersionMetadataService } from '~/install/VersionMetadataService'
 import { ExposeServiceKey, ServiceStateManager, Singleton, StatefulService } from '~/service'
 import { validateDirectory } from '~/util/validate'
 import { LauncherApp } from '../app/LauncherApp'
-import { ENOENT_ERROR, exists, isDirectory, isPathDiskRootPath, linkOrCopyFile, readdirEnsured } from '../util/fs'
+import { ENOENT_ERROR, exists, isDirectory, isPathDiskRootPath, readdirEnsured } from '../util/fs'
+import { readBoundedLocalFile } from '../util/readBoundedLocalFile'
 import { getMediaIconPath, resolveInstanceIcon, serializeInstanceIcon, toMediaIconUrl } from './instanceIcon'
 import { requireObject, requireString } from '../util/object'
 import { getTracker } from '~/util/taskHelper'
 import { setTimeout } from 'timers/promises'
+import { writeFile as writeAtomically } from 'atomically'
+import { assertInstanceCopyComplete, prepareInstanceCopy, readInstanceCopy, runInstanceCopy } from './instanceCopy'
+import { saveInstanceCopy, type InstanceCopyJob } from './instanceCopy'
+import type { TaskInstance } from '../infra/task'
 
 const INSTANCES_FOLDER = 'instances'
 
@@ -50,6 +56,8 @@ export class InstanceService extends StatefulService<InstanceState> implements I
   // the install/delete cancellation handshake.
   #removeHandlers: Record<string, Array<() => Promise<void> | void>> = {}
   #onRenamedInstancePath?: (oldPath: string, newPath: string) => void
+  #groupsWrite: Promise<void> = Promise.resolve()
+  #instanceWrites = new Map<string, Promise<void>>()
 
   constructor(
     @Inject(LauncherAppKey) app: LauncherApp,
@@ -166,8 +174,8 @@ export class InstanceService extends StatefulService<InstanceState> implements I
           })
         }
 
-        this.state.subscribe('instanceGroupsSet', async () => {
-          await writeJson(instancesPath, {
+        this.state.subscribe('instanceGroupsSet', () => {
+          const data = JSON.stringify({
             selectedInstance,
             instances: this.state.instances.map((s) => s.path).map(normalizeInstancePath),
             groups: this.state.groups.map((g) =>
@@ -176,13 +184,17 @@ export class InstanceService extends StatefulService<InstanceState> implements I
                 : { ...g, instances: g.instances.map(normalizeInstancePath) },
             ),
           })
+          this.#groupsWrite = this.#groupsWrite.catch(() => {}).then(() => writeAtomically(instancesPath, data))
+          void this.#groupsWrite.catch(error => this.error(error))
         })
 
-        this.state.subscribe('instanceEdit', async ({ path }) => {
+        this.state.subscribe('instanceEdit', ({ path }) => {
           const inst = this.state.all[path]
           const persisted = { ...inst, icon: serializeInstanceIcon(inst.icon, path) }
-          await writeFile(join(path, 'instance.json'), JSON.stringify(persisted, null, 2))
-          this.log(`Saved instance ${path}`)
+          const data = JSON.stringify(persisted, null, 2)
+          const write = (this.#instanceWrites.get(path) || Promise.resolve()).catch(() => {}).then(() => writeAtomically(join(path, 'instance.json'), data))
+          this.#instanceWrites.set(path, write)
+          void write.catch(error => this.error(error))
         })
       },
     )
@@ -210,6 +222,16 @@ export class InstanceService extends StatefulService<InstanceState> implements I
   async getSharedInstancesState(): Promise<SharedState<InstanceState>> {
     await this.initialize()
     return this.state
+  }
+
+  async updateInstanceGroups(previous: InstanceState['groups'], next: InstanceState['groups']) {
+    await this.initialize()
+    if (!Array.isArray(previous) || !Array.isArray(next) || previous.length > 10000 || next.length > 10000) throw new TypeError('Invalid instance groups')
+    const expected = InstanceGroupDataOrStringArray.parse(previous)
+    const groups = InstanceGroupDataOrStringArray.parse(next)
+    if (JSON.stringify(this.state.groups) !== JSON.stringify(expected)) throw Object.assign(new Error('Instance groups changed'), { name: 'InstanceGroupsChanged' })
+    this.state.instanceGroupsSet(groups)
+    await this.#groupsWrite
   }
 
   protected getPathUnder(...ps: string[]) {
@@ -257,6 +279,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     }
 
     let option: InstanceDataWithTime
+    let hasStoredPath = false
 
     if (!(await isDirectory(path))) {
       return false
@@ -265,6 +288,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     this.log(`Start load instance under ${path}`)
     try {
       option = await readJson(join(path, 'instance.json')).then(InstanceSchema.parse)
+      hasStoredPath = !!option.path
       delete option.path
     } catch (e) {
       this.warn(`Cannot load instance json ${path}`)
@@ -285,7 +309,8 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     const expectPath = this.getPathUnder(filenamify(name, { replacement: '_' }))
 
     try {
-      if (this.isUnderManaged(path) && expectPath !== path && !existsSync(expectPath)) {
+      // Persisted paths are stable identities; editing the display name must not move them on restart.
+      if (!hasStoredPath && this.isUnderManaged(path) && expectPath !== path && !existsSync(expectPath)) {
         this.log(`Migrate instance ${path} -> ${expectPath}`)
         await rename(path, expectPath)
         // const failed = await Promise.race([
@@ -307,6 +332,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     instance.icon = resolveInstanceIcon(instance.icon, instance.path)
 
     this.state.instanceAdd(instance)
+    await this.#updateCopyState(instance.path)
 
     this.log(`Loaded instance ${instance.path}`)
 
@@ -354,31 +380,21 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     })
     this.state.instanceAdd(instance)
 
-    this.log('Created instance with option')
-    this.log(JSON.stringify(instance, null, 4))
+    await this.#groupsWrite
+    this.log(`Created instance ${instance.path}`)
 
     return instance.path
   }
 
   /**
-   * Ensure an incoming icon value is stored inside the instance folder when it
-    * is a local or remote image, returning the in-memory (absolute) media URL
-    * to display it. Every non-empty icon is owned by the instance afterwards.
+   * Import absolute image sources as independent instance files, while retaining
+   * portable relative references used by pending modpack installations.
    */
   async #resolveIncomingInstanceIcon(instancePath: string, icon: string | undefined): Promise<string> {
     if (!icon) return ''
     const mediaPath = getMediaIconPath(icon)
     if (mediaPath) {
-      // Already inside the instance folder: keep the absolute media URL.
-      const rel = relative(instancePath, mediaPath)
-      if (rel && !rel.startsWith('..') && !isAbsolute(rel)) {
-        return icon
-      }
-      // A local file outside the folder: copy it in.
-      if (existsSync(mediaPath)) {
-        return this.#storeInstanceIcon(instancePath, mediaPath)
-      }
-      return icon
+      return this.#storeInstanceIcon(instancePath, mediaPath)
     }
     if (icon.startsWith('http://launcher/image/')) {
       const imageName = basename(new URL(icon).pathname)
@@ -400,14 +416,25 @@ export class InstanceService extends StatefulService<InstanceState> implements I
       if (contentLength > 8 * 1024 * 1024) {
         throw new Error('Instance icon exceeds maximum size of 8 MB')
       }
-      const data = Buffer.from(await response.arrayBuffer())
-      if (data.byteLength > 8 * 1024 * 1024) {
-        throw new Error('Instance icon exceeds maximum size of 8 MB')
-      }
+      if (!response.body) throw new Error('Empty instance icon response')
+      const reader = response.body.getReader(), chunks: Uint8Array[] = []
+      let size = 0
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          size += value.byteLength
+          if (size > 8 * 1024 * 1024) throw new Error('Instance icon exceeds maximum size of 8 MB')
+          chunks.push(value)
+        }
+      } finally { await reader.cancel().catch(() => {}) }
+      const data = Buffer.concat(chunks)
       return this.#storeInstanceIconData(instancePath, data, response.headers.get('content-type') || '')
     }
     // No scheme: a relative reference resolved against the instance folder.
     if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(icon)) {
+      const inside = relative(instancePath, resolve(instancePath, icon))
+      if (inside === '..' || inside.startsWith(`..${sep}`) || isAbsolute(inside)) throw new Error('Instance icon escapes its folder')
       return resolveInstanceIcon(icon, instancePath)
     }
     throw new Error('Unsupported instance icon URL')
@@ -415,78 +442,127 @@ export class InstanceService extends StatefulService<InstanceState> implements I
 
   async #storeInstanceIconData(instancePath: string, data: Buffer, contentType: string): Promise<string> {
     const fileType = await fileTypeFromBuffer(data).catch(() => undefined)
-    const isSvg = contentType.startsWith('image/svg+xml') || data.subarray(0, 512).toString().includes('<svg')
+    const isSvg = contentType.startsWith('image/svg+xml')
     if (!fileType?.mime.startsWith('image/') && !isSvg) {
       throw new Error('Instance icon is not an image')
     }
     const ext = isSvg ? 'svg' : (fileType?.ext || 'png')
-    const iconPath = join(instancePath, `icon.${ext}`)
+    const iconPath = join(instancePath, `icon-${createHash('sha256').update(data).digest('hex')}.${ext}`)
     await ensureDir(instancePath)
-    await writeFile(iconPath, data)
+    await writeAtomically(iconPath, data)
     return toMediaIconUrl(iconPath)
   }
 
   /**
-   * Copy the image at `source` into the instance folder as `icon.<ext>` and
-   * return the in-memory media URL used to display it.
+   * Own the validated bytes under a content hash, so edits cannot overwrite
+   * a legacy link or change the image belonging to an older review.
    */
   async #storeInstanceIcon(instancePath: string, source: string): Promise<string> {
-    let ext = extname(source).replace(/^\./, '').toLowerCase()
-    if (ext !== 'svg') {
-      const fileType = await fileTypeFromFile(source).catch(() => undefined)
-      if (fileType?.ext) {
-        ext = fileType.ext
-      }
-    }
-    if (!ext) ext = 'png'
-    const iconPath = join(instancePath, `icon.${ext}`)
-    if (resolve(source) !== resolve(iconPath)) {
-      await ensureDir(instancePath)
-      await rm(iconPath, { force: true }).catch(() => undefined)
-      await linkOrCopyFile(source, iconPath)
-    }
-    return toMediaIconUrl(iconPath)
+    const data = await readBoundedLocalFile(source, 8 * 1024 * 1024)
+    const svg = extname(source).toLowerCase() === '.svg' && data.subarray(0, 512).toString().includes('<svg')
+    return this.#storeInstanceIconData(instancePath, data, svg ? 'image/svg+xml' : '')
   }
 
-  async duplicateInstance(path: string) {
-    requireString(path)
+  #copyOperations = new Map<string, Promise<string>>()
 
-    if (!this.state.all[path]) {
-      return ''
-    }
-
-    const instance = this.state.all[path]
-    const newPath = this.getCandidatePath(instance.name || basename(path))
-    const newName = basename(newPath)
-
-    await this.createInstance({
-      ...JSON.parse(JSON.stringify(instance)),
-      path: newPath,
-      name: newName,
-    })
-
-    const task = this.tasks.create<DuplicateInstanceTask>({
-      type: 'duplicateInstance',
-      key: `duplicate-instance-${path}`,
-      from: path,
-      to: newPath,
-    })
-
+  async #updateCopyState(path: string): Promise<InstanceCopyState | undefined> {
+    let copy: InstanceCopyState | undefined
     try {
-      await duplicateInstance({
-        instancePath: path,
-        newPath,
-        logger: this,
-        signal: task.controller.signal,
-        tracker: getTracker<DuplicateInstanceTrackerEvents>(task),
-      })
+      const job = await readInstanceCopy(path)
+      if (job) copy = { sourcePath: job.source, totalFiles: job.files.length }
+    } catch { copy = { sourcePath: '', totalFiles: 0, invalid: true } }
+    if (JSON.stringify(this.state.pendingCopies[path]) !== JSON.stringify(copy)) this.state.instanceCopyState({ path, copy })
+    return copy
+  }
+
+  async getInstanceCopyState(path: string) {
+    await this.initialize()
+    requireString(path)
+    if (!this.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceNotFoundError')
+    return this.#updateCopyState(path)
+  }
+
+  async #copyIdle(...paths: string[]) {
+    const { LaunchService } = await import('../launch/LaunchService')
+    const processes = await (await this.app.registry.get(LaunchService)).getGameProcesses()
+    if (processes.some(process => paths.includes(process.options.gameDirectory))) throw new AnyError('InstanceCopyGameRunning')
+  }
+
+  #copyRequest(requestId?: string) {
+    if (requestId !== undefined && (typeof requestId !== 'string' || !/^[a-zA-Z0-9_-]{1,80}$/.test(requestId))) throw new TypeError('Invalid copy request')
+  }
+
+  async #managedCopyPath(path: string) {
+    if (!this.isUnderManaged(path) || (await lstat(path)).isSymbolicLink()) throw new AnyError('InstanceCopyUnsafePath')
+    const root = await realpath(this.getPath(INSTANCES_FOLDER)), actual = await realpath(path), inside = relative(root, actual)
+    if (!inside || inside === '..' || inside.startsWith(`..${sep}`) || isAbsolute(inside)) throw new AnyError('InstanceCopyUnsafePath')
+  }
+
+  async #runCopy(path: string, job: InstanceCopyJob, task: TaskInstance<DuplicateInstanceTask>) {
+    const operation = this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      if (!this.state.instances.some(instance => instance.path === path)) throw new AnyError('InstanceNotFoundError')
+      await this.#copyIdle(job.source, path)
+      await runInstanceCopy(job, path, task.controller.signal, getTracker<DuplicateInstanceTrackerEvents>(task), this.getPath())
+      this.state.instanceCopyState({ path })
+      return path
+    })
+    this.#copyOperations.set(path, operation)
+    try {
+      const result = await operation
       task.complete()
+      return result
     } catch (error) {
       task.fail(error)
-      throw error
+      throw Object.assign(error instanceof Error ? error : new Error('Instance copy failed', { cause: error }), { destinationPath: path, sourcePath: job.source })
+    } finally {
+      this.#copyOperations.delete(path)
+      if (this.state.instances.some(instance => instance.path === path)) await this.#updateCopyState(path)
     }
+  }
 
-    return newPath
+  async duplicateInstance(path: string, requestId?: string) {
+    await this.initialize()
+    requireString(path); this.#copyRequest(requestId)
+    const instance = this.state.instances.find(instance => instance.path === path && instance.edition === 'java')
+    if (!instance) return ''
+    return this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      await this.#copyIdle(path)
+      await assertInstanceCopyComplete(path)
+      const snapshot = JSON.parse(JSON.stringify(instance))
+      const newPath = this.getCandidatePath(instance.name || basename(path))
+      const task = this.tasks.create<DuplicateInstanceTask>({ type: 'duplicateInstance', key: `duplicate-instance-${newPath}`, from: path, to: newPath, requestId })
+      try {
+        const job = await prepareInstanceCopy(path, task.controller.signal, this.getPath())
+        await ensureDir(this.getPath(INSTANCES_FOLDER))
+        await mkdir(newPath)
+        await this.#managedCopyPath(newPath)
+        await saveInstanceCopy(newPath, job)
+        await this.createInstance({ ...snapshot, icon: serializeInstanceIcon(snapshot.icon, path), path: newPath, name: basename(newPath) })
+        await this.#updateCopyState(newPath)
+        return await this.#runCopy(newPath, job, task)
+      } catch (error) {
+        task.fail(error)
+        throw Object.assign(error instanceof Error ? error : new Error('Instance copy failed', { cause: error }), { destinationPath: newPath, sourcePath: path })
+      }
+    })
+  }
+
+  async resumeInstanceCopy(path: string, requestId?: string) {
+    await this.initialize()
+    requireString(path); this.#copyRequest(requestId)
+    const existing = this.#copyOperations.get(path)
+    if (existing) return existing
+    if (!this.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceCopyUnsafePath')
+    await this.#managedCopyPath(path)
+    const job = await readInstanceCopy(path)
+    if (!job) { this.state.instanceCopyState({ path }); return path }
+    if (!this.state.instances.some(instance => instance.path === job.source && instance.edition === 'java')) throw new AnyError('InstanceCopySourceMissing')
+    return this.mutex.of(LockKey.instance(job.source)).runExclusive(async () => {
+      if (!await readInstanceCopy(path)) { this.state.instanceCopyState({ path }); return path }
+      await assertInstanceCopyComplete(job.source)
+      const task = this.tasks.create<DuplicateInstanceTask>({ type: 'duplicateInstance', key: `duplicate-instance-${path}`, from: job.source, to: path, requestId })
+      return this.#runCopy(path, job, task)
+    })
   }
 
   /**
@@ -509,7 +585,6 @@ export class InstanceService extends StatefulService<InstanceState> implements I
       await ensureDir(sharedSaves)
       const saves = await readdir(instanceSaves)
       for (const saveName of saves) {
-        if (saveName.startsWith('.')) continue
         const savePath = join(instanceSaves, saveName)
         // Skip individually linked saves
         if (await readlink(savePath).catch(() => '')) continue
@@ -517,10 +592,10 @@ export class InstanceService extends StatefulService<InstanceState> implements I
         if (existsSync(dest)) {
           dest = join(sharedSaves, `${saveName}-${Date.now()}`)
         }
-        await rename(savePath, dest).catch((e) => this.warn(`Fail to move save ${savePath} to shared: ${e}`))
+        await rename(savePath, dest)
       }
     } catch (e) {
-      this.warn(`Fail to move instance saves to shared for ${path}: ${e}`)
+      throw new Error('Cannot preserve instance worlds before deletion', { cause: e })
     }
   }
 
@@ -531,14 +606,17 @@ export class InstanceService extends StatefulService<InstanceState> implements I
   async deleteInstance(path: string, deleteData = true) {
     await this.initialize()
     requireString(path)
+    if (typeof deleteData !== 'boolean') throw new TypeError('deleteData must be a boolean')
 
     const instance = this.state.instances.find(i => i.path === path)
+    if (!instance) throw new AnyError('InstanceNotFoundError')
     const isBedrock = instance?.edition === 'bedrock'
 
     const isManaged = this.isUnderManaged(path)
     const lock = this.mutex.of(LockKey.instanceRemove(path))
     const instanceLock = this.mutex.of(LockKey.instance(path))
     if (isManaged && (await exists(path))) {
+      if ((await lstat(path)).isSymbolicLink() || !this.isUnderManaged(await realpath(path))) throw new Error('Unsafe managed instance directory')
       await lock.runExclusive(async () => {
         // Reject any install requests currently waiting for the instance
         // lock so they don't start work that we are about to wipe out.
@@ -568,6 +646,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
           // abort) to complete. allSettled so a buggy handler can't
           // block deletion.
           await Promise.allSettled(handlerPromises)
+          await this.#instanceWrites.get(path)
 
           if (isBedrock && process.platform === 'win32') {
             try {
@@ -589,7 +668,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
             try {
               await rm(path, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 })
             } catch (e) {
-              if (isSystemError(e) && (e.code === ENOENT_ERROR || e.code === 'EPERM')) {
+              if (isSystemError(e) && e.code === ENOENT_ERROR) {
                 this.warn(`Fail to remove instance ${path}: ${e}`)
               } else {
                 if (e instanceof Error && e.name === 'Error') {
@@ -602,7 +681,8 @@ export class InstanceService extends StatefulService<InstanceState> implements I
             // Rename to hidden
             const name = basename(path)
             const newPath = join(dirname(path), '.' + name)
-            await rename(path, newPath).catch(() => undefined)
+              if (await exists(newPath)) throw new Error('Retired instance destination already exists')
+              await rename(path, newPath)
           }
 
           this.#removeHandlers[path] = []
@@ -611,17 +691,26 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     }
 
     this.state.instanceRemove(path)
+    this.#instanceWrites.delete(path)
+    this.state.instanceGroupsSet(this.state.groups.filter(group => group !== path).map(group => typeof group === 'string' ? group : { ...group, instances: group.instances.filter(member => member !== path) }))
+    await this.#groupsWrite
   }
 
   /**
    * Edit the instance. If the `path` is not present, it will edit the current selected instance.
    * Otherwise, it will edit the instance on the provided path
    */
-  async editInstance(options: EditInstanceOptions & { instancePath: string }) {
+  async editInstance(options: Parameters<IInstanceService['editInstance']>[0]) {
     await this.initialize()
-
     requireObject(options)
+    if (options.expectedMetadata) {
+      requireString(options.instancePath)
+      return this.mutex.of(LockKey.instance(options.instancePath)).runExclusive(() => this.#editInstanceFields(options))
+    }
+    return this.#editInstanceFields(options)
+  }
 
+  async #editInstanceFields(options: Parameters<IInstanceService['editInstance']>[0]) {
     const instancePath = options.instancePath
 
     if (!instancePath) {
@@ -629,6 +718,8 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     }
     let state =
       this.state.all[instancePath] || this.state.instances.find((i) => i.path === instancePath)
+
+    if (options.expectedMetadata && (!state || state.edition === 'bedrock')) throw new AnyError('InstanceNotFoundError')
 
     if (!state) {
       // Try to force load the instance
@@ -652,6 +743,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
         const newPath = join(dirname(instancePath), options.name)
         if (newPath !== instancePath) {
           if (this.state.instances.some((i) => i.path === newPath)) {
+            if (options.expectedMetadata) throw Object.assign(new Error('Instance name already exists'), { name: 'InstanceNameDuplicatedError' })
             options.name = undefined
             this.error(new AnyError('InstanceNameDuplicatedError'))
           }
@@ -659,20 +751,19 @@ export class InstanceService extends StatefulService<InstanceState> implements I
       }
     }
 
-    const result = await computeInstanceEditChanges(state, options, async (path: string) =>
-      this.#storeInstanceIcon(instancePath, path).catch((e) => {
-        this.error(e)
-        return ''
-      }),
-    )
+    const checkMetadata = () => {
+      const expected = options.expectedMetadata
+      if (expected && !['name', 'description', 'author', ...(Object.hasOwn(expected, 'icon') ? ['icon'] : [])].every(key => typeof Reflect.get(expected, key) === 'string' && Reflect.get(expected, key) === (Reflect.get(state, key) || ''))) throw Object.assign(new Error('Instance metadata changed'), { name: 'InstanceMetadataChanged' })
+    }
+    checkMetadata()
+    const result = await computeInstanceEditChanges(state, options, async (path: string) => toMediaIconUrl(path))
     if (result.icon) {
       result.icon = await this.#resolveIncomingInstanceIcon(instancePath, result.icon)
     }
 
     if (Object.keys(result).length > 0) {
-      this.log(
-        `Modify instance ${instancePath} (${options.name}) ${JSON.stringify(result, null, 4)}.`,
-      )
+      checkMetadata()
+    this.log(`Modified instance ${instancePath}`)
       // A reset-to-global field is represented as `undefined` in `result`.
       // The mutation payload is broadcast to renderer processes over Electron
       // IPC, whose structured clone serialization silently drops `undefined`
@@ -685,11 +776,13 @@ export class InstanceService extends StatefulService<InstanceState> implements I
         payload[key] = value === undefined ? null : value
       }
       this.state.instanceEdit(payload as any)
+      await this.#instanceWrites.get(instancePath)
     }
   }
 
   isUnderManaged(path: string) {
-    return resolve(path).startsWith(resolve(this.getPathUnder()))
+    const child = relative(resolve(this.getPathUnder()), resolve(path))
+    return !!child && child !== '..' && !child.startsWith(`..${sep}`) && !isAbsolute(child)
   }
 
   async acquireInstanceById(id: string): Promise<string> {
@@ -709,6 +802,8 @@ export class InstanceService extends StatefulService<InstanceState> implements I
   }
 
   async validateInstancePath(path: string) {
+    requireString(path)
+    if (!isAbsolute(path) || !(await isDirectory(path))) return 'bad'
     const err = await validateDirectory(this.app.platform, path, true)
     if (err && err !== 'exists') {
       return err

@@ -1,0 +1,71 @@
+[
+  {
+    "id": "overworld",
+    "width": 1280,
+    "height": 720,
+    "fps": 24,
+    "durationSeconds": 12,
+    "audioStreams": 0,
+    "video": {
+      "file": "vanilla-caves.mp4",
+      "bytes": 1273812,
+      "sha256": "bfc6f5aaa7152584257112b9c24e87fae0c9542f34e1b5490ccabb2a7d7147da"
+    },
+    "poster": {
+      "file": "vanilla-caves.webp",
+      "bytes": 16990,
+      "sha256": "421d755af38b31b9c3ceaa4790dc5f4d6a523f7ad7135123a87d06eb88728d8b"
+    },
+    "thumbnail": {
+      "file": "vanilla-caves-thumb.webp",
+      "bytes": 2932,
+      "sha256": "09a16cd96ed579a111d0c0a983ad9c59b8f97c3d0fd6a0c4b57a81a543779816"
+    }
+  },
+  {
+    "id": "nether",
+    "width": 1280,
+    "height": 720,
+    "fps": 24,
+    "durationSeconds": 12,
+    "audioStreams": 0,
+    "video": {
+      "file": "vanilla-nether.mp4",
+      "bytes": 1291662,
+      "sha256": "1e4864ff7f4c6b133348aadd3ab0c09902ae82310d291bf548e937e626af5eb5"
+    },
+    "poster": {
+      "file": "vanilla-nether.webp",
+      "bytes": 17056,
+      "sha256": "3fd9ad625f8c373b78d99ede696b307c7990b9f0bb6ce17b8382ecfbe43e42b2"
+    },
+    "thumbnail": {
+      "file": "vanilla-nether-thumb.webp",
+      "bytes": 3030,
+      "sha256": "0deb6285d505b23f1444ae37038b3643d7fbc9ff60913e243bca15babe344d7f"
+    }
+  },
+  {
+    "id": "end",
+    "width": 1280,
+    "height": 720,
+    "fps": 24,
+    "durationSeconds": 12,
+    "audioStreams": 0,
+    "video": {
+      "file": "vanilla-end.mp4",
+      "bytes": 1200941,
+      "sha256": "1dafb52337feae0e49673011edbd0f4906b0ca0fbc2758f3c10f285dc48b2b94"
+    },
+    "poster": {
+      "file": "vanilla-end.webp",
+      "bytes": 27816,
+      "sha256": "72cd2210037af2dae1fd88a0c77483e8d6aa7afd372a80a0925dd0e09bf9ee8c"
+    },
+    "thumbnail": {
+      "file": "vanilla-end-thumb.webp",
+      "bytes": 4854,
+      "sha256": "80701e39cf6436496959feb5866e0279d6966dd9cad80ccb057c97edc84ce8ec"
+    }
+  }
+]

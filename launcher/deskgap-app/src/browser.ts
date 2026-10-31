@@ -2,13 +2,13 @@ import type {
   Bootstrap,
   ServiceChannels,
   ServiceKey,
-  SharedState,
   TaskMonitor,
   Tasks,
   WindowController,
 } from '@xmcl/runtime-api'
 import { LaunchServiceKey } from '@xmcl/runtime-api'
 import type { Monitor } from '@xmcl/runtime-api/monitor'
+import { SharedStateRegistry } from '../../packages/renderer-client/transport'
 import { TransportFrameDecoder } from './framing'
 import { createRendererTelemetry, createServiceCalls } from './serviceBridge'
 
@@ -114,6 +114,10 @@ class Emitter {
     return this
   }
 
+  listenerCount(event: string) { return this.listeners.get(event)?.size ?? 0 }
+
+  eventNames() { return [...this.listeners.keys()] }
+
   emit(event: string, ...args: any[]) {
     for (const listener of this.listeners.get(event) ?? []) listener(...args)
   }
@@ -213,79 +217,13 @@ function installBridge(deskgap: DeskGapBrowserClient) {
   const windowEvents = new Emitter()
   const taskEvents = new Emitter()
   const servicesEmitters = new Map<ServiceKey<any>, WeakRef<Emitter>>()
-  const states: Record<string, WeakRef<SharedState<object>>> = {}
-  const pendingCommits: Record<string, { type: string; payload: any }[]> = {}
-  const stateEmitter = Symbol('stateEmitter')
   let droppedEntries: NativeFileDropEntry[] = []
   let dropGeneration = 0
 
   const transport = new LauncherTransport(deskgap, dispatch)
   const invoke = <Result>(channel: string, ...args: any[]) => transport.invoke<Result>(channel, args)
 
-  function createSharedState<T extends object>(value: T, id: string): SharedState<T> {
-    const emitter = new Emitter()
-    Object.defineProperty(value, stateEmitter, { value: emitter })
-    return Object.assign(value, {
-      subscribe(key: string, listener: (payload: any) => void) {
-        emitter.on(key, listener)
-        return this
-      },
-      unsubscribe(key: string, listener: (payload: any) => void) {
-        emitter.removeListener(key, listener)
-        return this
-      },
-      subscribeAll(listener: (type: string, payload: any) => void) {
-        emitter.on('*', listener)
-        return this
-      },
-      unsubscribeAll(listener: (type: string, payload: any) => void) {
-        emitter.removeListener('*', listener)
-        return this
-      },
-      commit(method: string, ...args: any[]) {
-        return invoke('commit', id, method, ...args)
-      },
-      revalidate() {
-        void invoke('revalidate', id)
-      },
-      unref() {
-        void invoke('unref', id)
-      },
-    }) as unknown as SharedState<T>
-  }
-
-  const gc = new FinalizationRegistry<string>((id) => {
-    delete states[id]
-    void invoke('unref', id)
-  })
-
-  async function receive(message: any): Promise<any> {
-    if (typeof message !== 'object' || message === null) return message
-    const { result, error } = message
-    if (error) return Promise.reject(error)
-    if (!result || typeof result !== 'object' || !('__state__' in result)) return result
-
-    const id = String(result.id)
-    const existing = states[id]?.deref()
-    if (existing) {
-      Object.assign(existing, result)
-      return existing
-    }
-
-    delete result.__state__
-    const state = createSharedState(result, id)
-    gc.register(state, id)
-    states[id] = new WeakRef(state)
-    queueMicrotask(() => {
-      for (const mutation of pendingCommits[id] ?? []) {
-        const emitter = (state as any)[stateEmitter] as Emitter
-        emitter.emit(mutation.type, mutation.payload)
-        emitter.emit('*', mutation.type, mutation.payload)
-      }
-      delete pendingCommits[id]
-    })
-    return state
-  }
+  const registry = new SharedStateRegistry(invoke, () => new Emitter())
 
   const serviceChannels: ServiceChannels = {
     open(serviceKey) {
@@ -299,7 +237,7 @@ function installBridge(deskgap: DeskGapBrowserClient) {
         on: emitter.on.bind(emitter),
         once: emitter.once.bind(emitter),
         removeListener: emitter.removeListener.bind(emitter),
-        ...createServiceCalls(serviceKey, invoke, receive),
+        ...createServiceCalls(serviceKey, (channel, ...args) => registry.request(channel, ...args), async result => result),
       } as any
     },
   }
@@ -383,18 +321,10 @@ function installBridge(deskgap: DeskGapBrowserClient) {
       servicesEmitters.get(event.service)?.deref()?.emit(event.event, ...event.args)
     } else if (channel === 'state-validating') {
       const event = payload[0]
-      const state = states[event.id]?.deref()
-      if (state) (state as any)[stateEmitter].emit('state-validating', event.semaphore)
+      registry.validating(event.id, event.semaphore, event.epoch)
     } else if (channel === 'commit') {
-      const [id, type, mutationPayload] = payload
-      const state = states[id]?.deref()
-      if (state) {
-        const emitter = (state as any)[stateEmitter] as Emitter
-        emitter.emit(type, mutationPayload)
-        emitter.emit('*', type, mutationPayload)
-      } else {
-        ;(pendingCommits[id] ??= []).push({ type, payload: mutationPayload })
-      }
+      const [id, type, mutationPayload, revision, epoch] = payload
+      registry.mutation(id, type, mutationPayload, revision, epoch)
     }
   }
 

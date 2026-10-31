@@ -1,0 +1,1161 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "codeCommit": "6e3b83d3c8522183810c4ff5c002b91b1ab823ed",
+  "status": "stage-4-integration-complete",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": "launcher/e2e/helpers/gpu-counters.ps1",
+      "sha256": "c4f064573bd32031f67cfe41b8d7009c9607539d4fcd38214710145195f0990b"
+    },
+    {
+      "path": "launcher/e2e/specs/react-performance/01-home.spec.ts",
+      "sha256": "ac82c844d0c4572cd5ec28d9798cb1d6429d225b7d959559381fec9f32a2f409"
+    },
+    {
+      "path": "launcher/e2e/specs/react-performance/02-gpu.spec.ts",
+      "sha256": "c078329ac14a02424df8ba6527f54850926f281ca6674a5382eeee221adf7885"
+    },
+    {
+      "path": "launcher/e2e/specs/react-performance/03-reference.spec.ts",
+      "sha256": "08ef32b676a29f64b79ab54b08071738a659936ad6bc4c47c223269e51156a4b"
+    },
+    {
+      "path": "launcher/e2e/specs/react-performance/04-library.spec.ts",
+      "sha256": "729fbcb18c3af09874fec79057b4ee9e7c6fbe77156ed336f496ff22baa467e5"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/App.tsx",
+      "sha256": "71f32d3266cbef1169f4645356649ca9d16c143689d895aa2d750864a9e81924"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/library/model.ts",
+      "sha256": "c496c766aa34e020c6f1cd16b8b9a37e89fdef1c831036b0d1bab812026dc3f4"
+    }
+  ],
+  "scopeDecision": "PLAN5.4 stage4 says onboarding/local/Home/carousel/Library/create/import/launch via services. Accepted here: React/service/IPC/domain file integration. Real public runtime/Java/game and installer/update acceptance remain gates9 and K03/K05/K06,not certified by synthetic metadata/process tests. Earlier notes had conflated that final validation with this integration gate; PLAN/SCOPE unchanged.",
+  "validation": {
+    "unit": {
+      "passed": 591,
+      "files": 61,
+      "seconds": 17.136
+    },
+    "functionalReact": 66,
+    "strict": 1,
+    "vue": 2,
+    "distinctFunctionalScenarios": 69,
+    "candidatePerformanceCases": 4,
+    "referenceCase": 1,
+    "durations": {
+      "functionalReact": "3.7m",
+      "strict": "4.3s",
+      "vue": "10.0s",
+      "candidateBenchmarks": "7.7m",
+      "largeLibrary": "1.3m",
+      "publishedReference": "1.3m"
+    },
+    "harness": 9,
+    "axe": {
+      "reports": 91,
+      "violations": 0,
+      "incomplete": 162
+    },
+    "types": "Root check passed; E2E global56 diagnostics in unchanged files,0 in performance files.",
+    "lint": "Root and4 performance files0 warnings/errors; UI source detector[]",
+    "visual": "Final dark1200x720/light800x400 Home and both equivalent-profile static screenshots reviewed; source slice changes only >3 records. Native benchmark asserts3 Home previews and bounded virtual Library. Not exhaustive manual AA/RTL.",
+    "builds": "React renderer/host rebuilt after two-line performance fix; final Vue host rebuilt,shared dist Vue; outputs separate."
+  },
+  "fixes": [
+    "Empty icon returns bundled fallback before URL construction; security allowlist unchanged and all7 model tests pass.",
+    "Home had mounted1000 recent cards after navigating from virtual Library. Regression first failed expected3/actual1000. Now3 recent previews with View Library; carousel and full Library retain all instances.",
+    "Peak observed after navigation batches fell1494.17MiB to291.88MiB; idle final178.14MiB. This is an observed allocation improvement,not a universal process maximum or proof that every event target is leak-free."
+  ],
+  "homeWorkloads": [
+    {
+      "workload": "poster",
+      "elapsedSeconds": 60.0219618,
+      "rendererCPUPercentOfOneCore": 0.13522883552266693,
+      "processCPUPercentOfOneCore": {
+        "Browser": 0.45048344287873626,
+        "GPU": 0.06208394208134658,
+        "Utility": 0.011547439957219137,
+        "Tab": 0.13522883552266696
+      },
+      "rendererWorkingSetKiB": [
+        139808,
+        138368,
+        138372,
+        138376,
+        138376,
+        138376,
+        138376,
+        138376,
+        138376,
+        138376,
+        138380,
+        138380,
+        138380,
+        138380,
+        124024,
+        124088,
+        124088,
+        124088,
+        124088,
+        124088,
+        124152,
+        124152,
+        124152,
+        124152,
+        124152,
+        124216,
+        124216,
+        124220,
+        124220,
+        124236,
+        124300
+      ]
+    },
+    {
+      "workload": "video",
+      "elapsedSeconds": 60.0153811,
+      "rendererCPUPercentOfOneCore": 2.041874895300798,
+      "processCPUPercentOfOneCore": {
+        "Browser": 0.42144029641094777,
+        "GPU": 5.394317157806068,
+        "Utility": 0.008192899736497677,
+        "Tab": 2.0418748953007984
+      },
+      "rendererWorkingSetKiB": [
+        126036,
+        126340,
+        126532,
+        126832,
+        127052,
+        123212,
+        123428,
+        123660,
+        123828,
+        124176,
+        125288,
+        123932,
+        124068,
+        124096,
+        124108,
+        124200,
+        124208,
+        124188,
+        124204,
+        124224,
+        124224,
+        124372,
+        124372,
+        124308,
+        124348,
+        124364,
+        124368,
+        124432,
+        124448,
+        124400,
+        124416
+      ],
+      "mediaFramesPerSecond": 23.993849136784036
+    },
+    {
+      "workload": "rotation",
+      "elapsedSeconds": 60.01850069999999,
+      "rendererCPUPercentOfOneCore": 2.6615509907264316,
+      "processCPUPercentOfOneCore": {
+        "Browser": 0.9306896931532315,
+        "GPU": 7.7450218612342,
+        "Utility": 0.0029124352984712257,
+        "Tab": 2.6615509907264316
+      },
+      "rendererWorkingSetKiB": [
+        130036,
+        127800,
+        127972,
+        128240,
+        129516,
+        129760,
+        129952,
+        128244,
+        128424,
+        128656,
+        128712,
+        128664,
+        128704,
+        128720,
+        130484,
+        130684,
+        130912,
+        131076,
+        131340,
+        131556,
+        129596,
+        129808,
+        130024,
+        130188,
+        133116,
+        136800,
+        137624,
+        137512,
+        136724,
+        137548,
+        137260
+      ]
+    },
+    {
+      "workload": "minimized",
+      "elapsedSeconds": 60.009100399999994,
+      "rendererCPUPercentOfOneCore": 0.023899708384897033,
+      "processCPUPercentOfOneCore": {
+        "Browser": 0.11277456177296724,
+        "GPU": 0.09659201623359134,
+        "Utility": 0.002009695182832657,
+        "Tab": 0.023899708384897033
+      },
+      "rendererWorkingSetKiB": [
+        140136,
+        140136,
+        140136,
+        140136,
+        140136,
+        140136,
+        140136,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140140,
+        140144,
+        140144,
+        140144
+      ]
+    },
+    {
+      "workload": "performance",
+      "elapsedSeconds": 60.004217899999986,
+      "rendererCPUPercentOfOneCore": 0.18469034990955305,
+      "processCPUPercentOfOneCore": {
+        "Browser": 0.5026629969624188,
+        "GPU": 0.08915539919069614,
+        "Utility": 0.0030064553178685803,
+        "Tab": 0.18469034990955305
+      },
+      "rendererWorkingSetKiB": [
+        141624,
+        141624,
+        140256,
+        140256,
+        140256,
+        138208,
+        138272,
+        138008,
+        138008,
+        138008,
+        138008,
+        137048,
+        137048,
+        137584,
+        137076,
+        137076,
+        137084,
+        137084,
+        135500,
+        135500,
+        135500,
+        135500,
+        135500,
+        135500,
+        135500,
+        135636,
+        135636,
+        135636,
+        135636,
+        135640,
+        135640
+      ]
+    }
+  ],
+  "environment": {
+    "platform": "win32",
+    "os": "10.0.26100",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+    "logicalCpus": 12,
+    "totalMemoryBytes": 17010274304,
+    "recorder": false,
+    "runtime": {
+      "version": "0.2.0-beta.2",
+      "electron": "43.5.0",
+      "chrome": "150.0.7871.250",
+      "gpu": {
+        "2d_canvas": "enabled",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "enabled",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "enabled_on",
+        "rasterization": "enabled",
+        "raw_draw": "disabled_off_ok",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "enabled",
+        "video_encode": "enabled",
+        "webgl": "enabled",
+        "webgpu": "enabled",
+        "webnn": "disabled_off"
+      }
+    }
+  },
+  "automaticRotation": "Final benchmark observes automatic featured changes,unchanged saved selection across samples,and exact3 instance.json SHA-256 values unchanged after all5 workloads.",
+  "reference": {
+    "release": "https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/tag/v0.2.0-beta.2",
+    "publishedTargetCommit": "9314c125056dcb1ca506bc998808649841259f7c",
+    "zip": "launcher/e2e/artifacts/update-download-release-final/LauncherMC-0.2.0-beta.2-win-x64.zip",
+    "zipBytes": 141527244,
+    "zipSha256": "929813fac59a809e3012435ec60822e36b3a8f65c27ae40a5875f9add91702da",
+    "inventoryBaseline": "7671c6f1bdc471d42816241920a262a18aca5a44 remains historical; actual benchmark uses exact published ZIP.",
+    "candidate": {
+      "memoryWindowSeconds": 60.006,
+      "rendererWorkingSetMeanMiB": 120.80418346774194,
+      "warmStartupMedianSeconds": 0.8530677000000142,
+      "startupSamples": [
+        {
+          "wallReadySeconds": 0.8530677000000142,
+          "mainReadyUptimeSeconds": 0.8109997
+        },
+        {
+          "wallReadySeconds": 0.887091400000034,
+          "mainReadyUptimeSeconds": 0.8064903
+        },
+        {
+          "wallReadySeconds": 0.81764929999999,
+          "mainReadyUptimeSeconds": 0.7779331
+        },
+        {
+          "wallReadySeconds": 0.7960553000000072,
+          "mainReadyUptimeSeconds": 0.7509768
+        },
+        {
+          "wallReadySeconds": 0.8724079000000493,
+          "mainReadyUptimeSeconds": 0.8308626
+        }
+      ],
+      "profile": {
+        "instances": 1,
+        "name": "Performance Vanilla",
+        "minecraft": "1.21.1",
+        "size": "1200x720",
+        "reducedMotion": true,
+        "dark": true,
+        "recorder": false,
+        "gameNotLaunched": true
+      },
+      "runtime": {
+        "version": "0.2.0-beta.2",
+        "electron": "43.5.0",
+        "chrome": "150.0.7871.250"
+      }
+    },
+    "published": {
+      "memoryWindowSeconds": 60.007,
+      "rendererWorkingSetMeanMiB": 170.29485887096774,
+      "warmStartupMedianSeconds": 1.0012221999999893,
+      "startupSamples": [
+        {
+          "wallReadySeconds": 0.9784545999999973,
+          "mainReadyUptimeSeconds": 0.9397561
+        },
+        {
+          "wallReadySeconds": 1.0012221999999893,
+          "mainReadyUptimeSeconds": 0.956923
+        },
+        {
+          "wallReadySeconds": 0.960635500000004,
+          "mainReadyUptimeSeconds": 0.9192568
+        },
+        {
+          "wallReadySeconds": 1.0035598999999928,
+          "mainReadyUptimeSeconds": 0.9577574
+        },
+        {
+          "wallReadySeconds": 1.002934699999998,
+          "mainReadyUptimeSeconds": 0.9562296
+        }
+      ],
+      "profile": {
+        "instances": 1,
+        "name": "Performance Vanilla",
+        "minecraft": "1.21.1",
+        "size": "1200x720",
+        "reducedMotion": true,
+        "dark": true,
+        "recorder": false,
+        "gameNotLaunched": true
+      },
+      "runtime": {
+        "version": "0.2.0-beta.2",
+        "electron": "43.5.0",
+        "chrome": "150.0.7871.250"
+      }
+    },
+    "ratios": {
+      "memory": 0.7093824456513697,
+      "warmStartup": 0.8520263533909089
+    },
+    "definition": "Five warm same-profile restarts after unmeasured preparation; parent wall clock until correct saved instance heading visible. Static visual composition differs between redesigned UI and reference."
+  },
+  "gpu": {
+    "seconds": 60.01000000000001,
+    "adapter": [
+      {
+        "Name": "NVIDIA GeForce RTX 4060",
+        "DriverVersion": "32.0.16.1656"
+      }
+    ],
+    "busiestAppEngineMeanPercent": 1.3783198822641365,
+    "counters": [
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0_eng_0_engtype_3d",
+        "counter": "utilization percentage",
+        "mean": 0.22864487245370407,
+        "peak": 0.24276011643966292,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0_eng_10_engtype_copy",
+        "counter": "utilization percentage",
+        "mean": 0.0,
+        "peak": 0.0,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0_eng_11_engtype_copy",
+        "counter": "utilization percentage",
+        "mean": 0.0,
+        "peak": 0.0,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0_eng_12_engtype_copy",
+        "counter": "utilization percentage",
+        "mean": 0.0,
+        "peak": 0.0,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0_eng_13_engtype_security_1",
+        "counter": "utilization percentage",
+        "mean": 0.0,
+        "peak": 0.0,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0_eng_1_engtype_legacyoverlay",
+        "counter": "utilization percentage",
+        "mean": 0.0,
+        "peak": 0.0,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0_eng_2_engtype_videodecode",
+        "counter": "utilization percentage",
+        "mean": 1.3783198822641365,
+        "peak": 1.5974513388430078,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0_eng_3_engtype_copy",
+        "counter": "utilization percentage",
+        "mean": 0.0,
+        "peak": 0.0,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0_eng_4_engtype_copy",
+        "counter": "utilization percentage",
+        "mean": 0.0029919599086573523,
+        "peak": 0.006928873325930274,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0_eng_5_engtype_security",
+        "counter": "utilization percentage",
+        "mean": 0.0,
+        "peak": 0.0,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0_eng_6_engtype_videoencode",
+        "counter": "utilization percentage",
+        "mean": 0.0,
+        "peak": 0.0,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0_eng_7_engtype_ofa_0",
+        "counter": "utilization percentage",
+        "mean": 0.0,
+        "peak": 0.0,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0_eng_8_engtype_vr",
+        "counter": "utilization percentage",
+        "mean": 0.0,
+        "peak": 0.0,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0_eng_9_engtype_copy",
+        "counter": "utilization percentage",
+        "mean": 0.0,
+        "peak": 0.0,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0",
+        "counter": "dedicated usage",
+        "mean": 56928902.92364607,
+        "peak": 57044992,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "pid_14584_luid_0x00000000_0x0000d49f_phys_0",
+        "counter": "shared usage",
+        "mean": 20471561.18886852,
+        "peak": 31580160,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "luid_0x00000000_0x0000d49f_phys_0",
+        "counter": "dedicated usage",
+        "mean": 884272656.4665885,
+        "peak": 1045442560,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "luid_0x00000000_0x0000f94a_phys_0",
+        "counter": "dedicated usage",
+        "mean": 0.0,
+        "peak": 0.0,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "luid_0x00000000_0x0000d49f_phys_0",
+        "counter": "shared usage",
+        "mean": 74214214.85752371,
+        "peak": 87937024,
+        "coveredSeconds": 60.01000000000001
+      },
+      {
+        "instance": "luid_0x00000000_0x0000f94a_phys_0",
+        "counter": "shared usage",
+        "mean": 8192.0,
+        "peak": 8192,
+        "coveredSeconds": 60.01000000000001
+      }
+    ],
+    "scope": "App PID engine utilisation; adapter memory machine-wide. Process memory diagnostic only,KB4490156; not exclusive VRAM or leak certification."
+  },
+  "largeLibrary": {
+    "before": {
+      "roundTrips": 40,
+      "batchRendererMiB": [
+        846.2109375,
+        1056.453125,
+        1105.03515625,
+        1494.171875
+      ],
+      "idleMeanRendererMiB": 444.3915070564516,
+      "idleFinalRendererMiB": 248.50390625,
+      "nativeListenerCounts": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "domElements": [
+        474,
+        474,
+        474,
+        474
+      ]
+    },
+    "emptyIconGuardOnly": {
+      "roundTrips": 40,
+      "batchRendererMiB": [
+        760.5703125,
+        1049.55859375,
+        1156.51953125,
+        1183.25390625
+      ],
+      "idleMeanRendererMiB": 380.4774445564516,
+      "idleFinalRendererMiB": 228.73828125,
+      "nativeListenerCounts": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "domElements": [
+        474,
+        474,
+        474,
+        474
+      ]
+    },
+    "after": {
+      "roundTrips": 40,
+      "batchRendererMiB": [
+        246.92578125,
+        268.72265625,
+        276.578125,
+        291.8828125
+      ],
+      "idleMeanRendererMiB": 211.7578125,
+      "idleFinalRendererMiB": 178.14453125,
+      "nativeListenerCounts": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "domElements": [
+        474,
+        474,
+        474,
+        474
+      ]
+    },
+    "bounds": "1000 registered native instances;40round trips,3 Home recent cards,<40 mounted Library cards,474 stable Library DOM elements,2 stable native event listener channels,31 idle samples. StrictMode separately verifies shared subscription cleanup. No forced GC."
+  },
+  "gateEvidence": {
+    "onboarding-accounts": [
+      "STAGE4-ONBOARDING",
+      "STAGE4-ACCOUNTS",
+      "STAGE4-PROFILE-APPEARANCE"
+    ],
+    "home-carousel": [
+      "STAGE4-LIBRARY",
+      "STAGE4-RECENT-ORDER",
+      "STAGE4-PROVIDER-MEDIA",
+      "STAGE4-AMBIENT-MEDIA",
+      "this performance closure"
+    ],
+    "library-instance-launch": [
+      "STAGE4-CREATION",
+      "STAGE4-IMPORTS",
+      "STAGE4-PRISM",
+      "STAGE4-VANILLA",
+      "STAGE4-CLIENTS",
+      "STAGE4-PRISM-BASE",
+      "STAGE4-LAUNCH",
+      "STAGE4-LIBRARY-PARITY",
+      "STAGE4-RECENT-ORDER",
+      "operations/export/copy/shared-content reports already registered on gate"
+    ]
+  },
+  "remaining": [
+    "Stage5 real instance summary/tabs/mods/packs/shaders/worlds/settings/console and isolation; instance-header video not integrated yet.",
+    "Stage6 real catalog replaces project fixtures; stage7 tasks including Home,global settings/updater/help/logger/migration; stage8 switch/remove graph; stage9 final live Java/game/loaders,Windows disposable NSIS/delta,security/AA/RTL/release.",
+    "K03/K05/K06 end-to-end status remains pending; service integration gate is not physical game acceptance. Global E2E56 historical diagnostics remain. Microsoft deferred.",
+    "Thumbnail files exist in source manifest but UI currently consumes full posters. Initial declaration/clip format evidence in STAGE4-AMBIENT-MEDIA."
+  ],
+  "previousRemoteCI": {
+    "run": "https://github.com/Jeremy-Godoy-D/Launcher-MC/actions/runs/40400306593",
+    "head": "7bcbe79ccce9b75fcaf433e5f2f422bbcb6cdbc2",
+    "conclusion": "success React and Vue"
+  },
+  "currentRemoteCI": "pending after push",
+  "commands": {
+    "check": "pnpm check",
+    "lint": "pnpm lint",
+    "unit": "Exact workflow Vitest command plus --reporter=json --outputFile=e2e/artifacts/calibration-final-units.json",
+    "candidateBenchmarks": "LAUNCHER_RENDERER=react; packaged EXE; pnpm --dir e2e exec playwright test specs/react-performance/01-home.spec.ts specs/react-performance/02-gpu.spec.ts specs/react-performance/03-reference.spec.ts --reporter=line --output=artifacts/calibration-final-benchmarks",
+    "library": "Same EXE; playwright test specs/react-performance/04-library.spec.ts --reporter=line --output=artifacts/home-bounded-library",
+    "reference": "LAUNCHER_RENDERER=vue; exact published extracted EXE; playwright test specs/react-performance/03-reference.spec.ts --reporter=line --output=artifacts/reference-beta2-confirmed",
+    "functional": "Exact workflow React smoke; then StrictMode harness; then Vue compatibility/onboarding; separate outputs.",
+    "gpuAggregation": "Time-overlap weighted Windows counter intervals clipped to media UTC window; engine percentages never added across independent engines. Adapter counters global; process memory diagnostic."
+  },
+  "packages": [
+    {
+      "renderer": "react",
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/Grimo Launcher.exe",
+      "bytes": 238238720,
+      "sha256": "66027967cd1c0ca7163381fe834f296926945ba5d18abe202502a2f02933c172"
+    },
+    {
+      "renderer": "react",
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/resources/app.asar",
+      "bytes": 26335143,
+      "sha256": "b1c24b953419638b4c8cc125180fed9e6492903cbd1c3806f3033179b33b48d7"
+    },
+    {
+      "renderer": "vue",
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/Grimo Launcher.exe",
+      "bytes": 238238720,
+      "sha256": "13b8b46859deac9edec754c764ac8dfe3c68e41126a301481cae94b353c8ed0c"
+    },
+    {
+      "renderer": "vue",
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/resources/app.asar",
+      "bytes": 23864810,
+      "sha256": "16601ce9d4c0103a0827cadde5c4d8591fc199c24823f0dd18af633d369458fd"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-benchmarks/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-benchmarks/react-performance-01-home--f4940-g-GPU-and-all-app-processes-electron-es-ES/home-performance.json",
+      "bytes": 431310,
+      "sha256": "42ee9691551c28ad0e280f5097212bf2ee15fb93e5f56afedeea7c96441e0b12"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-benchmarks/react-performance-02-gpu-W-85f5e-al-60-second-video-workload-electron-es-ES/gpu-counters.json",
+      "bytes": 286565,
+      "sha256": "b3928458fdb640a0e2c719bf526111e5495dc006893d9f6fc9016635cb3e5a7f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-benchmarks/react-performance-02-gpu-W-85f5e-al-60-second-video-workload-electron-es-ES/gpu-window.json",
+      "bytes": 6225,
+      "sha256": "4110745d8232f1c65bed867c558cf621a1a627a32b84cc89b3297d2c514a8901"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-benchmarks/react-performance-03-refer-1307b-d-five-warm-packaged-starts-electron-es-ES/reference-comparison.json",
+      "bytes": 6114,
+      "sha256": "2c20e991e2b8d6e5270ee9109746d282851edd39e7d659e071dc42d185432a9e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-benchmarks/react-performance-03-refer-1307b-d-five-warm-packaged-starts-electron-es-ES/reference-static.png",
+      "bytes": 519964,
+      "sha256": "5d805e7ae22bfbc453105af7fd26e2b076167d9ba625616454600812258c1c82"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-benchmarks.log",
+      "bytes": 4675,
+      "sha256": "0641d097994dc789a271ecff9f3ea953d9f5a80c3c8bdff47196864efcacb29a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-detector.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-e2e-lint.log",
+      "bytes": 93,
+      "sha256": "726e44bb66b45490a95e7533d27ef751f783c26e65c545ad0887b2e8f68684f6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-e2e-types.log",
+      "bytes": 7794,
+      "sha256": "b031bee6bc0a43bad8812f9ab1aa062a0ce53f3b3bf4c6a0f56e6620263bb7de"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-harness-before-docs.log",
+      "bytes": 142,
+      "sha256": "161849bca366cb0707d554a0b4360a755da3e871240ed2ad7718a07af5165a8b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-harness-tests.log",
+      "bytes": 824,
+      "sha256": "a52e3a2899ddff49b610eb561862ad3eaf94db5a6ccbcd850ee2969614bbb0e2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-lint-root.log",
+      "bytes": 1144,
+      "sha256": "3680c372a42af5c6a8961490227939860b06b6d2e8d57fd37d8ce4affbbc710f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/accessibility.json",
+      "bytes": 277024,
+      "sha256": "c4cb9d4785b1d56bf837effede3ffd37e76faa97c8de72076aaf57bcd0e8a706"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-1200-catalog.png",
+      "bytes": 487297,
+      "sha256": "1622780c7af71e10b0a6e9c43d1110a26e15a4b56539abbac0ff325a648e2209"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-1200-home.png",
+      "bytes": 562224,
+      "sha256": "2949e3e23543959197324a6f3c21af0cfca50ca711d72a496bc0e6573cee5858"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-1200-library.png",
+      "bytes": 373280,
+      "sha256": "1d8d5f4d32282d0355c673622c2e6b20a8fbeac0c541598513e6c695b17fc5b1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-800-catalog.png",
+      "bytes": 199350,
+      "sha256": "9fffac40ec8ebb9c8cdfdc5515af08073fa1a4ade7da61aa997e74e97635a3c7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-800-home.png",
+      "bytes": 268365,
+      "sha256": "dc34750e16fa227a64f30f343bd4d77960aa5b9b1f36770042a2dfac1e0f1b7b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-800-library.png",
+      "bytes": 174920,
+      "sha256": "cd0ea816a37c1950f5af8cfae471e1be4bf70f9c4f34ae316f15d61dfca22f7b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-1200-catalog.png",
+      "bytes": 450423,
+      "sha256": "97c3f03ce06f739021824d8d8ef10c89fd495d9d2dedddd5d520aa16516afe92"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-1200-home.png",
+      "bytes": 536560,
+      "sha256": "ed3471482b2ccd7830ea57b50dca4fd79216c050137807a44518dd0954bc025b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-1200-library.png",
+      "bytes": 324586,
+      "sha256": "32def8e06dcaca4266914eb7f6e6926cab449e7e9e5302014f4628b4a46bf426"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-800-catalog.png",
+      "bytes": 175208,
+      "sha256": "4b4e6e1c454e0c7af9f12c94b6e5d30604a45909a45fd6a06eb1ebc22b6f7eac"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-800-home.png",
+      "bytes": 250408,
+      "sha256": "c77f8df14063817e24b9c6edff1085472183ed42e7e20a0e5527a89b4bcf1b30"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-800-library.png",
+      "bytes": 147547,
+      "sha256": "f6eadd32e9674737d2ec41efc19cfc7021f19b5923064ac88faac7181f0bf47a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-02-package-ecf1f-d-decodes-its-shipped-video-electron-es-ES/package-smoke.json",
+      "bytes": 277,
+      "sha256": "7f9f489555761c6192eaf2f00dec5d7fbf09c708319f0328e316c672a0cf93d6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-05-prefere-fb385-windows-and-runtime-locales-electron-es-ES/preferences-i18n.json",
+      "bytes": 320,
+      "sha256": "b47fb38f873fc32fb1e15510fa777b4a484ff521335547ba87b8a32318f373a3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-es-ES/accounts-accessibility.json",
+      "bytes": 879176,
+      "sha256": "c8419483c4a464a44de00a275589d9380b807a62749b6d17349b4f745eafc96c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-es-ES/accounts.json",
+      "bytes": 214,
+      "sha256": "52734c150ac2fc6295bb147075c7cbd36571bbbcf77233aea80a515c200de297"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-es-ES/onboarding-accessibility.json",
+      "bytes": 492318,
+      "sha256": "c0efd6fd1fb9d38148383d78e8ca8d61b27024d7658595e4f4d986404a2ee590"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-es-ES/onboarding.json",
+      "bytes": 226,
+      "sha256": "9dfafd8d6db47338f002649ba668d7f5c6758aceb74862282633b25087ef5d3b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-09-library-187cb-ever-launches-from-browsing-electron-es-ES/library-accessibility.json",
+      "bytes": 1349596,
+      "sha256": "c93558755b9c9f8558d5f70c5f518aac9efd0121b89ae37350791c25db000c40"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-10-creatio-3c436-s-within-the-minimum-window-electron-es-ES/creation-accessibility.json",
+      "bytes": 737412,
+      "sha256": "cc9bd5b1278055275445ee9aabe36828e4cb9b3f60fc4c5b0b93167e491a68df"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-12-launch--7dc1c--launch-before-confirmation-electron-es-ES/java-fallback-accessibility.json",
+      "bytes": 108038,
+      "sha256": "8311b008a9c152be85df57e5b865ba3b9200d8b55a36c285c430d0eb263f5df6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES/launch-accessibility.json",
+      "bytes": 455462,
+      "sha256": "2202f76002c2e02e4e3966a5d8f27decee2f540760bf19174a5fd40e5a273425"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES/launch-focus-before-interaction.json",
+      "bytes": 164,
+      "sha256": "0f4a606700229749245ba9881cf1e379eb3d666ee749631595f314f3641d2d3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-13-brandin-3fe98-eeps-existing-launcher-data-electron-es-ES/branding.json",
+      "bytes": 316,
+      "sha256": "22ce5a188fab99ba9bc46d9d40ca8aaa09d4d7c832df6bf001602e99e0659e1c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-14-imports-949dd-e-links-without-duplicating-electron-es-ES/imports-accessibility.json",
+      "bytes": 966976,
+      "sha256": "503df73327e7ea2feec7d0ae7ab11d81a988a238f0b0725caea56924b206ab9f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-15-prism-v-6545e-ve-version-libraries-safely-electron-es-ES/prism-accessibility.json",
+      "bytes": 854668,
+      "sha256": "4052915c0a9b08d84598c3133f1e4eda19251bed36084af5e951a252b29a0edd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-16-vanilla-986e7--personal-launcher-settings-electron-es-ES/vanilla-accessibility.json",
+      "bytes": 856303,
+      "sha256": "0a72e47c99e897c7887931ea329f70d1a1882826c50b65b5c8339dec4cc01fb4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-19-library-98b63-folder-after-a-full-restart-electron-es-ES/operations-accessibility.json",
+      "bytes": 597910,
+      "sha256": "766ba6052d10893c44c1fa7d50a412f4e8f1452539b06bcd01ee1b04a6e9a554"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-20-local-e-45c0f-le-at-both-sizes-and-themes-electron-es-ES/export-accessibility.json",
+      "bytes": 706601,
+      "sha256": "42109f7a1d217b4bdbb99e2ba89ee241237ff46495f35e4512b9d8b256353fe3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-21-group-m-b0126--or-unknown-edition-members-electron-es-ES/groups-accessibility.json",
+      "bytes": 604150,
+      "sha256": "53656378b3ed8ffbf40c84e73870071aa2cb37a6d4072a9e195a46b2cd37c0a1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-22-copy-re-68334-rting-the-packaged-launcher-electron-es-ES/copy-accessibility.json",
+      "bytes": 615240,
+      "sha256": "1152472021a4c037065cea388da8e94c4053cf00423d3e3dc1349bd1d96e54ec"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-es-ES/large-library-accessibility.json",
+      "bytes": 4347600,
+      "sha256": "5df89433f51a71180a4e35c0db68857897537f484a38e72253f8b5ada87f28cd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-24-shared--263ba-ublishing-a-partial-archive-electron-es-ES/cancel-export-accessibility.json",
+      "bytes": 151204,
+      "sha256": "1ff0ac0233a2a296be75f42d29a42499391ea014b1a9bb71743d02592dc76afd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-24-shared--c1d8a--export-only-reviewed-bytes-electron-es-ES/shared-accessibility.json",
+      "bytes": 789589,
+      "sha256": "8485e46945cac7e55b256b8c272c112fc794801197353c5332f0e8e5fa86ff43"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-24-shared--cf04b-fore-any-destination-exists-electron-es-ES/cancel-copy-accessibility.json",
+      "bytes": 126038,
+      "sha256": "1a9f0c75d88a4fa2272a5cae0107d3f29d04e1bd8418403722e15ddd47032cf5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-25-profile-b4fcc--including-packaged-restart-electron-es-ES/profile-appearance-accessibility.json",
+      "bytes": 593030,
+      "sha256": "ab64b291e2d60608aeea159008b89ddac385a8e4b47f6e24fa3c765d97cfe599"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-26-instanc-ea455-iginals-identity-and-worlds-electron-es-ES/instance-icon-accessibility.json",
+      "bytes": 617422,
+      "sha256": "d69830cc61fa5cc6dbef1dfaa7f70c639813e7c054e3f2d880601292b5e6f8f6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-27-provide-2a1a8-le-at-both-sizes-and-themes-electron-es-ES/provider-cover-accessibility.json",
+      "bytes": 652949,
+      "sha256": "bb7d1047f434ef1e6fba9300db382f18818cf243a89e0f2ece9697e86205ca8d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-28-library-0aea5-replacing-destination-edits-electron-es-ES/legacy-groups-accessibility.json",
+      "bytes": 372495,
+      "sha256": "66e85692b321a5ad1085c79ec01cd72ce8987cccfea7373c323716b601126865"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react/react-migration-30-ambient-10b87-nd-old-sources-are-released-electron-es-ES/ambient-decode.json",
+      "bytes": 744,
+      "sha256": "5e57aa93cb44dfe8b9f7cf16fbac5fd9e385fa0ad3d58ef8a92cae0a745f01b3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-react.log",
+      "bytes": 15627,
+      "sha256": "29bc2582b2a66f1df83dd28c43016cebffa14acf427058aaa93d94f3cdf43a2f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-strict/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-strict/react-migration-04-client--bbc79--and-releases-all-consumers-electron-es-ES/client-contracts.json",
+      "bytes": 282,
+      "sha256": "95f93e0be1f7594c7e08435db0cb6ee691c5709e6b7fdc9939918582981294d5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-strict.log",
+      "bytes": 1438,
+      "sha256": "a2e7cb7a14f79b090677037fbe666462f0731ab7b85ed4327cb9a6103a39f336"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-types-root.log",
+      "bytes": 562,
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-units.json",
+      "bytes": 205079,
+      "sha256": "3b2e879612403e60a0a3a1b4fdc29236da5f202fd6d3e6227d72c5c5faaa6501"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-units.log",
+      "bytes": 121,
+      "sha256": "d7a6b752f25870b80b442c0e61ddca0199c086af28b947341a97192aee1a5ee8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-vue/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-vue-package.log",
+      "bytes": 2545,
+      "sha256": "59949d8b5865ecc27015b455fb521ac16af132cef5cc653edc081a1c144ef37c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-vue.log",
+      "bytes": 1451,
+      "sha256": "e4455552aee3d9d0a50bee691581250c906c179dcaf4861541116d88d50cd140"
+    },
+    {
+      "path": "launcher/e2e/artifacts/empty-icon-package.log",
+      "bytes": 2581,
+      "sha256": "5e0ff38c364d1d5cc6fc67f37a1d15d923ce7e2909056bef709161c6459331ec"
+    },
+    {
+      "path": "launcher/e2e/artifacts/empty-icon-renderer.log",
+      "bytes": 3994,
+      "sha256": "d33157ab0407099487851c398bd0c4d3aae968eaf7900c9fb3382bca84a22940"
+    },
+    {
+      "path": "launcher/e2e/artifacts/empty-icon-units.log",
+      "bytes": 245,
+      "sha256": "b35d1bfd61cf91d7c6fc431d00dfbdb33b1f995131afa2c8d63b22291d30c493"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-bounded-library/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-bounded-library/react-performance-04-libra-13a43-and-a-60-second-idle-window-electron-es-ES/large-library-performance.json",
+      "bytes": 7126,
+      "sha256": "a1526032d3db7f24995fd1dbe0a46eb9d0b6212d05d8084fceffae49c3a5421d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-bounded-library.log",
+      "bytes": 928,
+      "sha256": "ead1888be0f2161391cdd88997fc4cd68abe57bbc195c369a85b48452dbbc743"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-bounded-package.log",
+      "bytes": 2581,
+      "sha256": "d1c77e0cd0aaa91872378c93e83c3c3b52087fff9ee748d3c94c7cce05a61d2d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-bounded-renderer.log",
+      "bytes": 3994,
+      "sha256": "41dda4cfdb82a234eba5d74dfe103e7b185640d252a12f758ebe1477b229b81e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-bounded-testids.log",
+      "bytes": 86,
+      "sha256": "15e12f252d3efd087fab95bb9e8a3a56979afb942f7be780d5b091a5c4d37f91"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-unbounded-before.log",
+      "bytes": 2668,
+      "sha256": "c174da4efa4317394a0cae323e87bdd5ba7f0109349ff9ac1ef54e79540445ea"
+    },
+    {
+      "path": "launcher/e2e/artifacts/large-library-no-empty-exceptions/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/large-library-no-empty-exceptions/react-performance-04-libra-13a43-and-a-60-second-idle-window-electron-es-ES/large-library-performance.json",
+      "bytes": 7107,
+      "sha256": "cfa9c83ec4e561b78b4a15cb455e68a1ad4f75ff01a3e495e0b8a333c9d9196d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/large-library-performance/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/large-library-performance/react-performance-04-libra-13a43-and-a-60-second-idle-window-electron-es-ES/large-library-performance.json",
+      "bytes": 7142,
+      "sha256": "87680ef09a83b6035d30fda1ec5db908a4d33b6d2bbfa0a48fc7d469a1fd5cc7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/performance-calibration-lint.log",
+      "bytes": 1085,
+      "sha256": "d2d39273b2146b009cc395ff8c4aaa2c35f0ab996e3b7f3343839afc1e3697a3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/performance-calibration-types.log",
+      "bytes": 7794,
+      "sha256": "b031bee6bc0a43bad8812f9ab1aa062a0ce53f3b3bf4c6a0f56e6620263bb7de"
+    },
+    {
+      "path": "launcher/e2e/artifacts/reference-beta2-confirmed/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/reference-beta2-confirmed/react-performance-03-refer-1307b-d-five-warm-packaged-starts-electron-es-ES/reference-comparison.json",
+      "bytes": 6094,
+      "sha256": "8cefd8aa3c8744444d23c47c4c99fbda798607822ccf5ddb69f7ba381536c3df"
+    },
+    {
+      "path": "launcher/e2e/artifacts/reference-beta2-confirmed/react-performance-03-refer-1307b-d-five-warm-packaged-starts-electron-es-ES/reference-static.png",
+      "bytes": 155988,
+      "sha256": "b012bf70b5466541504b2d4141b4a7ae9b16402025268909ab13c2041cd42549"
+    },
+    {
+      "path": "launcher/e2e/artifacts/reference-beta2-confirmed.log",
+      "bytes": 910,
+      "sha256": "2c1d572b34edf421bf85ad94465f571857ebbca15be3fac96720c7bf2f9add9e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/reference-beta2-performance.log",
+      "bytes": 2814,
+      "sha256": "6dd375e01aab3fa61e5662ff6073f64aec85660acba02f573af43bab6b86a25c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/calibration-final-harness-closure.log",
+      "bytes": 142,
+      "sha256": "161849bca366cb0707d554a0b4360a755da3e871240ed2ad7718a07af5165a8b"
+    }
+  ]
+}

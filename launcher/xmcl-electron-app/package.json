@@ -4,7 +4,7 @@
     "main": "./index.js",
     "version": "0.2.0-beta.2",
     "author": "Jeremy Godoy (@Jeremy-Godoy-D)",
-    "description": "Launcher MC - Minecraft Java para Windows",
+    "description": "Grimo Launcher - Minecraft Java para Windows",
     "license": "MIT",
     "engines": {
         "node": ">=22.16.0"

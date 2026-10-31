@@ -26,7 +26,7 @@ export async function resolveProgressVersion(instancePath: string, gameDataPath?
   if (!await pathExists(join(gameDataPath, 'versions', id, `${id}.json`))) return undefined
   const version = await Version.parse(gameDataPath, id)
   return {
-    clientJarPath: join(gameDataPath, 'versions', version.minecraftVersion, `${version.minecraftVersion}.jar`),
+    clientJarPath: join(gameDataPath, 'versions', version.clientJar || version.minecraftVersion, `${version.clientJar || version.minecraftVersion}.jar`),
     assetIndex: version.assetIndex?.id || version.assets,
   }
 }

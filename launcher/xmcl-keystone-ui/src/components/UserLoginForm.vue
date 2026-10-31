@@ -181,7 +181,7 @@
         data-testid="microsoft-error-help"
       >
         <div class="text-xs opacity-90 font-medium">
-          Comprueba que esta compilación de Launcher MC tenga configurado MICROSOFT_CLIENT_ID o utiliza un perfil local (Modo Desconectado) para jugar sin conexión.
+          Comprueba que esta compilación de Grimo Launcher tenga configurado MICROSOFT_CLIENT_ID o utiliza un perfil local (Modo Desconectado) para jugar sin conexión.
         </div>
       </div>
       <a

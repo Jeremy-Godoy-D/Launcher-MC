@@ -1,5 +1,5 @@
 import { MinecraftFolder, type LaunchOption as ResolvedLaunchOptions, type ResolvedVersion, type ServerOptions, type ResolvedServerVersion, createMinecraftProcessWatcher, generateArguments, generateArgumentsServer, launch, launchServer } from '@xmcl/core'
-import { AUTHORITY_DEV, type CreateLaunchShortcutOptions, type GameProcess, type LaunchService as ILaunchService, LaunchException, type LaunchOptions, LaunchServiceKey } from '@xmcl/runtime-api'
+import { AUTHORITY_DEV, type CreateLaunchShortcutOptions, type GameProcess, type LaunchService as ILaunchService, LaunchException, type LaunchOptions, LaunchServiceKey, LockKey } from '@xmcl/runtime-api'
 import { offline } from '@xmcl/user'
 import { ChildProcess, spawn } from 'child_process'
 import createDesktopShortcut, { type ShortcutOptions } from 'create-desktop-shortcuts'
@@ -27,11 +27,13 @@ import type { LaunchMiddleware } from './LaunchMiddleware'
 import { ensureDir } from '@xmcl/installer/utils'
 import { LaunchHistoryStore } from './LaunchHistoryStore'
 import { runWithInternalSpan } from '../infra/telemetry_context'
+import { assertInstanceCopyComplete } from '../instance/instanceCopy'
 
 type TrackedGameProcess = GameProcess & {
   process: ChildProcess
   launchId: string
   gameLogAmbiguous: boolean
+  stopping?: boolean
 }
 
 const MAX_LAUNCH_OUTPUT_LENGTH = 1024 * 1024
@@ -287,6 +289,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
   }
 
   async generateArguments(options: LaunchOptions) {
+    await assertInstanceCopyComplete(options.gameDirectory)
     try {
       if (options.side === 'client') {
         const user = options.user
@@ -363,6 +366,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
    * @returns Does this launch request success?
    */
   async launch(options: LaunchOptions) {
+    await assertInstanceCopyComplete(options.gameDirectory)
     // E2E hook: when XMCL_E2E_NO_LAUNCH is set, never spawn a real Java
     // process. Emit synthetic minecraft-start / window-ready events so the
     // renderer reflects a "launched" state, then return a fake pid. The
@@ -397,6 +401,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
       })
       return fakePid
     }
+    let releaseResources: (() => void) | undefined, releaseInstance: (() => void) | undefined
     try {
       const user = options.user
       const javaPath = options.java
@@ -440,6 +445,11 @@ export class LaunchService extends AbstractService implements ILaunchService {
         )
       }
 
+      // Same order as pack mutations; user commands run before these non-reentrant locks.
+      releaseResources = await this.mutex.of('resource-pack-options').acquire()
+      releaseInstance = await this.mutex.of(LockKey.instance(options.gameDirectory)).acquire()
+      await assertInstanceCopyComplete(options.gameDirectory)
+
       let process: ChildProcess
       const context: Record<string, any> = {}
       let launchOptions: (ResolvedLaunchOptions | ServerOptions)
@@ -470,8 +480,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
           this.log('Launching a server')
         }
 
-        this.log('Launching client with these option...')
-        this.log(JSON.stringify(op, (k, v) => (k === 'accessToken' ? '***' : v), 2))
+        this.log('Launching client')
         try {
           process = await this.#track(() => launch(op), 'spawn_process')
         } catch (e) {
@@ -496,8 +505,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
           }
         }
 
-        this.log('Launching server with these option...')
-        this.log(JSON.stringify(launchOptions, (k, v) => (k === 'accessToken' ? '***' : v), 2))
+        this.log('Launching server')
         process = await this.#track(() => launchServer(launchOptions), 'spawn_process')
       }
 
@@ -535,6 +543,8 @@ export class LaunchService extends AbstractService implements ILaunchService {
         gameLogAmbiguous: false,
       }
       this.processes[process.pid] = processData
+      releaseInstance(); releaseInstance = undefined
+      releaseResources(); releaseResources = undefined
 
       for (const tracked of Object.values(this.processes)) {
         if (tracked.pid !== process.pid && tracked.options.gameDirectory === options.gameDirectory) {
@@ -698,27 +708,36 @@ export class LaunchService extends AbstractService implements ILaunchService {
         }
       }
       throw e
+    } finally {
+      releaseInstance?.()
+      releaseResources?.()
     }
   }
 
   async kill(pid: number, force?: boolean) {
     const process = this.processes[pid]
-    delete this.processes[pid]
     if (process) {
-      if (process.side === 'client') {
-        if (force) {
-          this.#forceKill(process.process)
+      if (process.stopping && !force) return
+      process.stopping = true
+      try {
+        if (process.side === 'client') {
+          if (force) {
+            this.#forceKill(process.process)
+          } else {
+            process.process.kill()
+          }
         } else {
-          process.process.kill()
+          if (process.ready && !force) {
+            process.process.stdin?.write('/stop\n')
+          } else if (force) {
+            this.#forceKill(process.process)
+          } else {
+            process.process.kill()
+          }
         }
-      } else {
-        if (process.ready && !force) {
-          process.process.stdin?.write('/stop\n')
-        } else if (force) {
-          this.#forceKill(process.process)
-        } else {
-          process.process.kill()
-        }
+      } catch (error) {
+        process.stopping = false
+        throw error
       }
     }
   }

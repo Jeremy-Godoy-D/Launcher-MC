@@ -1,4 +1,4 @@
-import { HAS_DEV_SERVER, HOST, IS_DEV, WindowsBuild } from '@/constant'
+import { HAS_DEV_SERVER, HOST, IS_DEV, IS_REACT_RENDERER, WindowsBuild } from '@/constant'
 import browsePreload from '@preload/browse'
 import indexPreload from '@preload/index'
 import indexTogetherPreload from '@preload/indexTogether'
@@ -21,6 +21,7 @@ import { createI18n } from './utils/i18n'
 import { darkIcon } from './utils/icons'
 import { getLoginSuccessHTML } from './utils/login'
 import { createWindowTracker } from './utils/windowSizeTracker'
+import { isBootstrapSender } from './utils/bootstrapSender'
 import { MultiplayerNetworkDiagnosticsController } from './MultiplayerNetworkDiagnosticsController'
 import { BrowserRtcController } from './BrowserRtcController'
 
@@ -166,10 +167,15 @@ export class ElectronController implements LauncherAppController {
   }
 
   handle(channel: string, handler: (event: { sender: Client }, ...args: any[]) => any, once = false) {
+    const guarded: typeof handler = channel === 'bootstrap' ? (event, ...args) => {
+      const native = event as Electron.IpcMainInvokeEvent
+      if (!isBootstrapSender(native, this.mainWin?.webContents, defaultApp.url)) throw new Error('Bootstrap requires the main launcher frame')
+      return handler(event, ...args)
+    } : handler
     if (!once) {
-      return ipcMain.handle(channel, handler)
+      return ipcMain.handle(channel, guarded)
     }
-    return ipcMain.handleOnce(channel, handler)
+    return ipcMain.handleOnce(channel, guarded)
   }
 
   broadcast(channel: string, ...payload: any[]): void {
@@ -351,7 +357,7 @@ export class ElectronController implements LauncherAppController {
         session: restoredSession,
         contextIsolation: true,
         sandbox: true,
-        webviewTag: true,
+        webviewTag: !IS_REACT_RENDERER,
       },
       show: false,
     })

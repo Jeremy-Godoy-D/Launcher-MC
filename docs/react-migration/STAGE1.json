@@ -1,0 +1,455 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-24",
+  "stage": 1,
+  "status": "awaiting_review",
+  "codeCommit": "21d9fdda21981e76bb1acd1ae4db41ec1b4112cd",
+  "branch": "codex/react-migration",
+  "sourceFilesHashEncoding": "SHA-256 of committed Git blobs; newline-normalized by repository attributes",
+  "sourceFiles": [
+    {
+      "path": "launcher/e2e/specs/react-migration/01-prototype.spec.ts",
+      "sha256": "2ffc0e724dc89c8e740c0881810783fb57620982566aa20a280576f0ff5298d9"
+    },
+    {
+      "path": "launcher/pnpm-lock.yaml",
+      "sha256": "40a4e5ec6da4574cf771c3a5333cc94476ee88938ab9899e4cbee90d766b0673"
+    },
+    {
+      "path": "launcher/pnpm-workspace.yaml",
+      "sha256": "b1be89737f4d511388981ae885a0e161bb380de23e838c5206b9b5d1273ec494"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/.gitignore",
+      "sha256": "48163b405463fda0eaba6e8a035a05c566af99784f2083decc7e49788701a685"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/.impeccable/design.json",
+      "sha256": "206a12efa223e3872f0f5061641e6b0200e29750299dc593fae90d1713a47d19"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/DESIGN.md",
+      "sha256": "c0190f09d2686de64f3acd64fa4602f7c22c85125aa3de0096aa88971d5c2bc6"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/MEDIA.md",
+      "sha256": "c29f04fd3d8fde023fae8620b3177dd2c5f9be10f47a1c5806cba9648ead9bc1"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/PRODUCT.md",
+      "sha256": "034086015ad089b76654796de8e6c2e5e745fe64c46e533afe84dd26146c8611"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/package.json",
+      "sha256": "9180ba54cbac9607ed38dd87550061e1e2011f5ef1fe97503bc723eb8dade1f5"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/App.tsx",
+      "sha256": "44ba425677957e07e360bdda75f8be1e19218e39662b82cd1a36e5ae1b600353"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/assets/ambient/credits.json",
+      "sha256": "610841c05808b2f4a10d5da78f43e64c57d3430d8d04b5874385c9019c6669e6"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/assets/ambient/vanilla-caves.mp4",
+      "sha256": "bfc6f5aaa7152584257112b9c24e87fae0c9542f34e1b5490ccabb2a7d7147da"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/assets/ambient/vanilla-caves.webp",
+      "sha256": "421d755af38b31b9c3ceaa4790dc5f4d6a523f7ad7135123a87d06eb88728d8b"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/assets/ambient/vanilla-ocean.webp",
+      "sha256": "da41d4de543bde2319eb88134245a92a6a5e70940e4da76e58037c0f06b7f6cf"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/assets/ambient/vanilla-shaders.webp",
+      "sha256": "f93a5093278dfe5feb9410a16810b38a366afa1e43bebd75389b24c64fd5e2fb"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/index.html",
+      "sha256": "e127638b644fabbe1503d210e54019217aeb771a88f0b181147565cdd898bb22"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/main.tsx",
+      "sha256": "2e18e1de0ee8209b9c4381fe7509a8da6579dc41bfa8a214c59519a8cf17e150"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/presentation.test.ts",
+      "sha256": "80d4aacd7a75ab904b9d865c4d79086b0e2ad739005c0231d28c63a04f81177c"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/presentation.ts",
+      "sha256": "3fff66c1de955a8e1de3a1fd979b0e5ede99dbced6d4c43d14fa4e2214238c88"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/project-fixtures.json",
+      "sha256": "498647fd07270f883592e21ae22bdf2e0cce47bcda7fd47558b887065b310884"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/styles.css",
+      "sha256": "44553424f67be3eeb2e95f577dfd7383329ba4fe651ff3061faf9bc6c95565ce"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/tsconfig.json",
+      "sha256": "c0995ed3e1f916904b030f148deb27cfc7fcf04d9d7354a668b61d2c4fe7a88c"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/vite.config.ts",
+      "sha256": "f22137eee3bd372de74ef044f6bb059e6e7a7496c3375cdf2273886b5998a109"
+    }
+  ],
+  "plan": {
+    "path": "docs/react-migration/PLAN.md",
+    "bytes": 34594,
+    "sha256": "ea55fb9552eb69f39763bf00ae28e7c4c3c7b575b7d6f727580f75c2705f60e4"
+  },
+  "scope": {
+    "path": "docs/react-migration/SCOPE.md",
+    "bytes": 6927,
+    "sha256": "9bb6b44e3498e55b3c81f018689fe602e3b4e419d2864d8129cc66f89cabadfc"
+  },
+  "validation": {
+    "reactTypes": "passed",
+    "reactLint": "passed, zero warnings/errors",
+    "reactBuild": "passed",
+    "rootTypes": "passed: runtime-api/runtime/Electron/Vue",
+    "rootLint": "passed, zero warnings/errors",
+    "unit": {
+      "passed": 2,
+      "command": "pnpm --dir launcher exec vitest run xmcl-react-ui/src/presentation.test.ts"
+    },
+    "harness": {
+      "passed": 8,
+      "command": "node --test launcher/scripts/react-migration.test.mjs"
+    },
+    "electron": {
+      "passed": 2,
+      "seconds": 11.3,
+      "command": "XMCL_E2E_EXECUTABLE=<verified beta.2 extracted executable>; XMCL_E2E_LOCALES=es-ES; pnpm --dir e2e exec playwright test specs/react-migration/01-prototype.spec.ts --output=artifacts/react-migration-prototype-glass-final --reporter=line",
+      "executableVersion": "0.2.0-beta.2",
+      "profile": "official temporary fixtures; updater and real game disabled",
+      "preload": "packaged index-preload.js, asserts windowController.on",
+      "isolation": {
+        "contextIsolation": true,
+        "sandbox": true,
+        "nodeIntegration": false
+      },
+      "scope": "additional prototype window; not complete React package",
+      "checks": [
+        "navigation",
+        "twelve visual variants",
+        "loaded visible images",
+        "no horizontal overflow",
+        "independent featured/selection",
+        "captured Play target",
+        "search/loader/empty/reset/list",
+        "list back to Home",
+        "catalog empty recovery",
+        "dialog Escape and restored focus",
+        "credits action fully visible at 800x400",
+        "actual video time advances/reduced motion/native minimize/restore",
+        "global background follows featured",
+        "performance removes sidebar and portal dialogue blur, restores afterwards"
+      ]
+    },
+    "accessibility": [
+      {
+        "appearance": "dark",
+        "width": 1200,
+        "section": "home",
+        "violations": 0,
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "appearance": "dark",
+        "width": 1200,
+        "section": "library",
+        "violations": 0,
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "appearance": "dark",
+        "width": 1200,
+        "section": "catalog",
+        "violations": 0,
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "appearance": "dark",
+        "width": 800,
+        "section": "home",
+        "violations": 0,
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "appearance": "dark",
+        "width": 800,
+        "section": "library",
+        "violations": 0,
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "appearance": "dark",
+        "width": 800,
+        "section": "catalog",
+        "violations": 0,
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "appearance": "light",
+        "width": 1200,
+        "section": "home",
+        "violations": 0,
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "appearance": "light",
+        "width": 1200,
+        "section": "library",
+        "violations": 0,
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "appearance": "light",
+        "width": 1200,
+        "section": "catalog",
+        "violations": 0,
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "appearance": "light",
+        "width": 800,
+        "section": "home",
+        "violations": 0,
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "appearance": "light",
+        "width": 800,
+        "section": "library",
+        "violations": 0,
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "appearance": "light",
+        "width": 800,
+        "section": "catalog",
+        "violations": 0,
+        "incomplete": [
+          "color-contrast"
+        ]
+      }
+    ],
+    "pageErrors": 0,
+    "independentReview": {
+      "disposition": "ship",
+      "scope": "prototype updated with global background and glass; final visual capture review, not human approval or full AA certificate"
+    },
+    "designTokens": {
+      "colors": 29,
+      "componentSnippets": 9,
+      "validated": true
+    },
+    "mediaDecode": "FFprobe structure asserted; full FFmpeg decode exit 0"
+  },
+  "media": [
+    {
+      "file": "vanilla-shaders.webp",
+      "title": "minecraft shaders graphiques",
+      "author": "downloadsource.fr",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+      "source": "https://www.flickr.com/photos/128776630@N02/16180013416",
+      "originalUrl": "https://live.staticflickr.com/7552/16180013416_72d0cd0c11_b.jpg",
+      "sourceSha256": "a83b98ccd0baf632bbb0fcef9871719dd971462fabfcefd1a19f7b305c789403",
+      "sha256": "f93a5093278dfe5feb9410a16810b38a366afa1e43bebd75389b24c64fd5e2fb",
+      "changes": "Conversión WebP; sin generar ni sustituir el contenido de la captura.",
+      "output": {
+        "path": "launcher/xmcl-react-ui/src/assets/ambient/vanilla-shaders.webp",
+        "bytes": 52050,
+        "sha256": "f93a5093278dfe5feb9410a16810b38a366afa1e43bebd75389b24c64fd5e2fb"
+      }
+    },
+    {
+      "file": "vanilla-ocean.webp",
+      "title": "Minecraft - Frozen ocean",
+      "author": "Xbox México",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "source": "https://commons.wikimedia.org/wiki/File:Minecraft_-_Frozen_ocean.jpg",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Minecraft_-_Frozen_ocean.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "sourceSha256": "f4bdf6d6113ec9e02d64b6252e4fb880de127e2cc9cc4bf4cc614c97950a91ab",
+      "sha256": "da41d4de543bde2319eb88134245a92a6a5e70940e4da76e58037c0f06b7f6cf",
+      "changes": "Conversión WebP.",
+      "output": {
+        "path": "launcher/xmcl-react-ui/src/assets/ambient/vanilla-ocean.webp",
+        "bytes": 67196,
+        "sha256": "da41d4de543bde2319eb88134245a92a6a5e70940e4da76e58037c0f06b7f6cf"
+      }
+    },
+    {
+      "file": "vanilla-caves.mp4",
+      "title": "Minecraft Caves & Cliffs: Part II",
+      "author": "Xbox MENA",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "source": "https://commons.wikimedia.org/wiki/File:إعلان_تحديث_–_Minecraft_Caves_%26_Cliffs_–_Part_II.webm",
+      "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a4/%D8%A5%D8%B9%D9%84%D8%A7%D9%86_%D8%AA%D8%AD%D8%AF%D9%8A%D8%AB_%E2%80%93_Minecraft_Caves_%26_Cliffs_%E2%80%93_Part_II.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "sourceSha256": "c53add0574ee065f8219691f6381896bf4169d8083d320a240ade94d8558ee10",
+      "sha256": "bfc6f5aaa7152584257112b9c24e87fae0c9542f34e1b5490ccabb2a7d7147da",
+      "changes": "Fragmento 30–36s a media velocidad, 1280×720 H.264 24fps, sin audio, difuminado suave sigma 0.35; poster WebP del primer frame. Es vídeo promocional, no gameplay de una instancia.",
+      "output": {
+        "path": "launcher/xmcl-react-ui/src/assets/ambient/vanilla-caves.mp4",
+        "bytes": 1273812,
+        "sha256": "bfc6f5aaa7152584257112b9c24e87fae0c9542f34e1b5490ccabb2a7d7147da"
+      }
+    }
+  ],
+  "poster": {
+    "path": "launcher/xmcl-react-ui/src/assets/ambient/vanilla-caves.webp",
+    "bytes": 16990,
+    "sha256": "421d755af38b31b9c3ceaa4790dc5f4d6a523f7ad7135123a87d06eb88728d8b"
+  },
+  "video": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1280,
+        "height": 720,
+        "r_frame_rate": "24/1"
+      }
+    ],
+    "format": {
+      "duration": "12.000000",
+      "size": "1273812"
+    }
+  },
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-glass-final.log",
+      "bytes": 1438,
+      "sha256": "69726582415495b09f4e3b86458f4e394e6a51eb818c03d6671ff21ca5beacea"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-glass-final/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/accessibility.json",
+      "bytes": 265304,
+      "sha256": "42fcb7e7a08515d6c2a10e1d90e2b86e5f31a5308b73479dce1804dfedb77ed6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-glass-final/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-1200-catalog.png",
+      "bytes": 483160,
+      "sha256": "471532daf7ee0f0df905219e235446931b431a305acc3c9ef05c44fa3f642f3c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-glass-final/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-1200-home.png",
+      "bytes": 565924,
+      "sha256": "27eb35b004ee0a4ca9b73917ad4fd371c2a0d2348069b28e756c239fb03c8523"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-glass-final/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-1200-library.png",
+      "bytes": 365840,
+      "sha256": "5f3adcb7f2bef5a9350a2420ff9254d713798e2a21c36ee59bbc867e2262195e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-glass-final/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-800-catalog.png",
+      "bytes": 197710,
+      "sha256": "96ffdfef8a392503f8e3a5f05dd72126d02f1021a1ef2ec370730fa4841d70b5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-glass-final/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-800-home.png",
+      "bytes": 260951,
+      "sha256": "9910b425e06155b2b12e663afa568ea06ce0facebbb8f645d66a4f394d374240"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-glass-final/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-dark-800-library.png",
+      "bytes": 240142,
+      "sha256": "221a5c0894cd476c60c7587633c2d4ac7fd27a85d6b46e479cd65e72ee473d9b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-glass-final/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-1200-catalog.png",
+      "bytes": 446786,
+      "sha256": "aaff7dabe0dd0a3ec70a3ca33eb59b002aaabd42af103d8c95a76b4402abbf9f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-glass-final/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-1200-home.png",
+      "bytes": 539715,
+      "sha256": "33d1cf2ba5815dd39ff4a54aee02093e498cb2cefce004de7def639a22f16fa1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-glass-final/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-1200-library.png",
+      "bytes": 319681,
+      "sha256": "63bff8d81f0499d2ca888b355a9fb60882ea866131e14a9bd1eeceb64d644a38"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-glass-final/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-800-catalog.png",
+      "bytes": 172522,
+      "sha256": "b5ddf754a665ea09ff9a0a9a18fd9c2c10f5d20840cfdfb79adaf0602d8ae36d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-glass-final/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-800-home.png",
+      "bytes": 242642,
+      "sha256": "fbca98d84fc0e2a2a693f9854f95a8fd1685dbb65e3df7126140679f7f4cc092"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-glass-final/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/prototype-light-800-library.png",
+      "bytes": 217446,
+      "sha256": "fd51b34d0d9950acea71fcabbe3000659bbe2c74548d0e7f45d7251b324ce237"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-01-prototype-spec-ts-react-prototype-independent-selection-filte/prototype-800-credits.png",
+      "bytes": 58200,
+      "sha256": "f4c0f13c64f2ce1c3e59304da4a70c0523261bc86d55a466893f3a869119a66d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-types.log",
+      "bytes": 389,
+      "sha256": "8ed8cb01e7458e75933c015bb03b4374b004e2159dbd70fe5acdfe68cc89d944"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-prototype-lint.log",
+      "bytes": 944,
+      "sha256": "ea4e4e5091dfb6915e8f2997f0c291f3ace528448a321a3548f8ea902cc8cba2"
+    }
+  ],
+  "userReview": {
+    "status": "pending",
+    "feedback": "me gusta pero creo que te olvidaste de el fondo y quiero que agregues glassmorphismo",
+    "feedbackApplied": true,
+    "reference": "user reply request_user_input_async call_da1a144a18914f88ad4a8f5d492563b6; changes implemented and retested; final acceptance not inferred"
+  },
+  "limits": [
+    "Fixture prototype: no real services, installs, account changes or game launch",
+    "Old beta.2 host still contains XMCL extras; removal stage 8",
+    "CPU/GPU/memory 60s for React not measured",
+    "Full AA pending: contrast on images incomplete in Axe",
+    "No production CSP/package integration, installer or Microsoft tests",
+    "Draft review server only, no production release"
+  ]
+}

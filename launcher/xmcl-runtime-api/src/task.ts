@@ -149,5 +149,5 @@ export interface TaskMonitor extends GenericEventEmitter<TaskChannelEventMap> {
   /**
    * Remove all finished tasks
    */
-  clear(): void
+  clear(): void | Promise<void>
 }

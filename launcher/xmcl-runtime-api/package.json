@@ -44,7 +44,8 @@
         "@xmcl/system": "workspace:*",
         "@xmcl/text-component": "workspace:*",
         "@xmcl/unzip": "workspace:*",
-        "@xmcl/user": "workspace:*"
+        "@xmcl/user": "workspace:*",
+        "@xmcl/semver": "workspace:*"
     },
     "devDependencies": {
         "@types/node": "^24.13.3",

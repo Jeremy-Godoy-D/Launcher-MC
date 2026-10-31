@@ -8,17 +8,9 @@ import { LaunchServiceKey } from '../../services/LaunchService'
 import { UserServiceKey } from '../../services/UserService'
 import { VersionServiceKey } from '../../services/VersionService'
 import { findMatchedVersion } from '../../entities/version'
-import { generateLaunchOptionsWithGlobal } from '../../util/launch'
+import { createOperationId, generateLaunchOptionsWithGlobal } from '../../util/launch'
 import { getAutoOrManuallJava, getAutoSelectedJava } from '../../util/java'
 import { defineCommand } from '../registry'
-
-function createOperationId() {
-  const crypto = globalThis.crypto as Crypto | undefined
-  if (crypto?.randomUUID) {
-    return crypto.randomUUID()
-  }
-  return `op-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
-}
 
 /**
  * Input schema for `instance.launch`. Mirrors the surface that both the

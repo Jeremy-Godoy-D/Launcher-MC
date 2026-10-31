@@ -13,7 +13,7 @@ const linuxPackageScripts = {
 }
 
 export const config = {
-  productName: 'Launcher MC',
+  productName: 'Grimo Launcher',
   appId: 'local.launchermc.desktop',
   directories: {
     output: 'build/output',
@@ -21,7 +21,7 @@ export const config = {
     app: '.',
   },
   protocols: {
-    name: 'Launcher MC',
+    name: 'Grimo Launcher',
     schemes: ['launchermc'],
   },
   publish: null,
@@ -29,7 +29,7 @@ export const config = {
   files: [{
     from: 'dist',
     to: '.',
-    filter: ['**/*.js', '**/*.ico', '**/*.png', '**/*.webp', '**/*.svg', '*.node', '*.dll', '**/*.html', '**/*.css', '**/*.woff2', '**/*.wasm'],
+    filter: ['**/*.js', '**/*.ico', '**/*.png', '**/*.webp', '**/*.svg', '**/*.mp4', '*.node', '*.dll', '**/*.html', '**/*.css', '**/*.woff2', '**/*.wasm'],
   }, {
     from: '.',
     to: '.',
@@ -42,7 +42,7 @@ export const config = {
     { from: '../THIRD_PARTY_NOTICES.txt', to: 'THIRD_PARTY_NOTICES.txt' },
     { from: '../UPSTREAM.md', to: 'UPSTREAM.md' },
   ],
-  artifactName: 'LauncherMC-${version}-${os}-${arch}.${ext}',
+  artifactName: 'GrimoLauncher-${version}-${os}-${arch}.${ext}',
   dmg: {
     artifactName: 'xmcl-${version}-${arch}.${ext}',
     contents: [
@@ -77,8 +77,8 @@ export const config = {
     },
   },
   win: {
-    artifactName: 'LauncherMC-${version}-win-${arch}.${ext}',
-    icon: 'icons/launchermc.ico',
+    artifactName: 'GrimoLauncher-${version}-win-${arch}.${ext}',
+    icon: '../branding/copper/grimo.ico',
     electronLanguages: ['es', 'en-US'],
     target: [
       { target: 'nsis', arch: ['x64'] },
@@ -91,7 +91,7 @@ export const config = {
     allowToChangeInstallationDirectory: true,
     createDesktopShortcut: true,
     createStartMenuShortcut: true,
-    shortcutName: 'Launcher MC',
+    shortcutName: 'Grimo Launcher',
     license: '../LICENSE',
   },
   linux: {

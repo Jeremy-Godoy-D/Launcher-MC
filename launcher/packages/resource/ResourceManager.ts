@@ -3,7 +3,6 @@ import { File } from './File'
 import { Resource } from './Resource'
 import { ResourceContext } from './ResourceContext'
 import { ResourceMetadata } from './ResourceMetadata'
-import { ResourceWorkerQueuePayload } from './ResourceWorkerQueuePayload'
 import { UpdateResourcePayload } from './ResourcesState'
 import { generateResourceV3, pickMetadata } from './core/generateResource'
 import { getFile } from './core/getFile'
@@ -17,7 +16,7 @@ import { ResourceSnapshotTable, ResourceUriTable } from './schema'
 import { AnyError } from '@xmcl/utils'
 
 export class ResourceManager {
-  #watched: Record<string, { enqueue: (job: ResourceWorkerQueuePayload) => void }> = {}
+  #watched: Partial<Record<string, ReturnType<typeof watchResourcesDirectory>>> = {}
 
   constructor(readonly context: ResourceContext) {}
 

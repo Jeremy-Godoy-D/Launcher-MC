@@ -45,7 +45,7 @@ import { definedServices } from './definedServices'
 export const definedPlugins: LauncherAppPlugin[] = [
   (app) => {
     const rejectP2P = async (): Promise<never> => {
-      throw new Error('P2P no está disponible en Launcher MC.')
+      throw new Error('P2P no está disponible en Grimo Launcher.')
     }
     app.registry.register(kMultiplayerHostFactory, async () => ({
       closed: new Promise<void>(() => {}),

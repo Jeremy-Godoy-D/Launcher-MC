@@ -1,4 +1,5 @@
 import type { Resource } from '@xmcl/resource'
+import type { Instance } from '@xmcl/instance'
 import { InstanceResourcesService, UpdateInstanceResourcesOptions } from './InstanceResourcesService'
 import { ServiceKey } from './Service'
 
@@ -6,18 +7,40 @@ export function getInstanceModStateKey(path: string) {
   return `instance-mods://${path}`
 }
 
+export type ModSource = Pick<Resource, 'hash'> & Pick<Resource['metadata'], 'modrinth' | 'curseforge'>
+
+export interface ModFilesSnapshot {
+  fingerprint: string
+  configuration?: ModReviewConfiguration
+  entries: Array<{ path: string; fileName: string; size: number; mtime: number; ctime: number; ino: number; dev: number; directory: boolean }>
+}
+export type ModReviewConfiguration = Pick<Instance, 'runtime' | 'java' | 'version'>
+
+export type ReviewedModChanges = UpdateInstanceResourcesOptions & {
+  expectedHashes?: Record<string, string>
+  expectedSnapshot?: string
+}
+
 /**
  * Provide the abilities to import/export mods files to instance
  */
 export interface InstanceModsService extends InstanceResourcesService {
+  /** Import regular mod archives without replacing an existing destination. */
+  install(options: UpdateInstanceResourcesOptions): Promise<string[]>
+  /** Remove direct mod files; reviewed hashes reject files changed after confirmation. */
+  uninstall(options: ReviewedModChanges): Promise<void>
+  /** Capture directory identities for a reviewed operation, without reading every archive. */
+  getModFilesSnapshot(path: string): Promise<ModFilesSnapshot>
+  /** Read committed public provider identifiers without waiting for batched UI events. */
+  getModSources(path: string): Promise<ModSource[]>
   /**
    * Mark mods enabled
    */
-  enable(options: UpdateInstanceResourcesOptions): Promise<void>
+  enable(options: ReviewedModChanges): Promise<void>
   /**
    * Mark mods disabled
    */
-  disable(options: UpdateInstanceResourcesOptions): Promise<void>
+  disable(options: ReviewedModChanges): Promise<void>
   /**
    * Install mods to the server instance.
    */

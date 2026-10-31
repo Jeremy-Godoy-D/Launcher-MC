@@ -12,6 +12,7 @@ vi.mock('~/app', () => ({
   Inject: () => () => {},
   LauncherApp: class LauncherApp {},
   LauncherAppKey: Symbol('LauncherAppKey'),
+  kGameDataPath: Symbol('kGameDataPath'),
 }))
 
 vi.mock('~/infra', () => ({
@@ -27,6 +28,8 @@ vi.mock('~/instance/InstanceModsGroupService', () => ({
   InstanceModsGroupService: class InstanceModsGroupService {},
 }))
 
+vi.mock('../launch/LaunchService', () => ({ LaunchService: class LaunchService {} }))
+
 vi.mock('~/peer', () => ({
   kPeerFacade: Symbol('kPeerFacade'),
 }))
@@ -41,6 +44,8 @@ vi.mock('./utils/resolveInstanceFiles', () => ({
 
 const { InstanceInstallService } = await import('./InstanceInstallService')
 const { InstanceService } = await import('~/instance/InstanceService')
+const { LaunchService } = await import('../launch/LaunchService')
+const { kGameDataPath } = await import('~/app')
 
 describe('InstanceInstallService concurrent diff installs', () => {
   const roots: string[] = []
@@ -71,7 +76,7 @@ describe('InstanceInstallService concurrent diff installs', () => {
     })
 
     const logger = { log: vi.fn(), warn: vi.fn(), error: vi.fn() }
-    const instanceService = { registerRemoveHandler: vi.fn(() => vi.fn()) }
+    const instanceService = { initialize: async () => {}, state: { instances: [{ path: instancePath, edition: 'java' }] }, registerRemoveHandler: vi.fn(() => vi.fn()) }
     const app = {
       appDataPath: root,
       minecraftDataPath: root,
@@ -80,7 +85,7 @@ describe('InstanceInstallService concurrent diff installs', () => {
       platform: { os: 'windows' },
       registry: {
         getOrCreate: vi.fn(async () => ({})),
-        get: vi.fn(async (key) => key === kDownloadOptions ? {} : key === InstanceService ? instanceService : undefined),
+        get: vi.fn(async (key) => key === kDownloadOptions ? {} : key === InstanceService ? instanceService : key === LaunchService ? { getGameProcesses: async () => [] } : key === kGameDataPath ? (...parts: string[]) => join(root, ...parts) : undefined),
         getIfPresent: vi.fn(async () => undefined),
       },
     } as any
@@ -135,18 +140,26 @@ describe('InstanceInstallService concurrent diff installs', () => {
       hashes: { sha1: 'second' },
       downloads: ['https://example.com/second.jar'],
     })
+    const initial = Promise.allSettled([first, second])
 
     try {
-      await vi.waitFor(() => expect(mockedDownload).toHaveBeenCalledTimes(2))
+      await vi.waitFor(() => expect(mockedDownload).toHaveBeenCalledTimes(2), { timeout: 5000 })
     } finally {
       releaseDownloads()
+      expect(await initial).toMatchObject([{ status: 'fulfilled' }, { status: 'fulfilled' }])
     }
-    await Promise.all([first, second])
 
     expect(await pathExists(join(instancePath, 'mods', 'first.jar'))).toBe(true)
     expect(await pathExists(join(instancePath, 'mods', 'second.jar'))).toBe(true)
 
-    const overlapping = await Promise.allSettled([
+    const getService = app.registry.get.getMockImplementation()!
+    const validation = Promise.withResolvers<void>()
+    let validationCalls = 0
+    app.registry.get.mockImplementation(async (key: unknown) => {
+      if (key === kGameDataPath && ++validationCalls === 1) await validation.promise
+      return getService(key)
+    })
+    const installingOverlapping = Promise.allSettled([
       install({
         path: 'mods/shared.jar',
         hashes: { sha1: 'first-version' },
@@ -159,8 +172,12 @@ describe('InstanceInstallService concurrent diff installs', () => {
       }),
     ])
 
-    expect(overlapping[1].status).toBe('fulfilled')
+    try { await vi.waitFor(() => expect(validationCalls).toBe(1)) }
+    finally { validation.resolve() }
+    const overlapping = await installingOverlapping
+
+    expect(overlapping[1]).toMatchObject({ status: 'fulfilled' })
     if (overlapping[0].status === 'rejected') expect(overlapping[0].reason.name).toBe('AbortError')
     expect(await readFile(join(instancePath, 'mods', 'shared.jar'), 'utf8')).toBe('second-version')
-  })
+  }, 15000)
 })

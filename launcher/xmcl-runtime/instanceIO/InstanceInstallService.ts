@@ -3,10 +3,12 @@ import {
   InstanceFileOperationHandler as InstanceFileOperationHandlerV2,
   InstanceInstallManifest,
   InstanceInstallLock,
+  InstanceModInstallReview,
   InstanceLockSchema,
   computeFileUpdates,
+  assertInstanceInstallPaths,
   mergeInstanceInstallManifest,
-  type InstanceFile,
+  InstanceFile,
   type InstanceUpstream,
 } from '@xmcl/instance'
 import { ModrinthV2Client } from '@xmcl/modrinth'
@@ -32,6 +34,7 @@ import {
   type InstallInstanceOptions,
   type InstanceFileUpdate,
   type SharedState,
+  type ModInstallReview,
 } from '@xmcl/runtime-api'
 import { Tracker } from '@xmcl/installer'
 import { AnyError, isSystemError } from '@xmcl/utils'
@@ -39,12 +42,13 @@ import { FSWatcher } from 'chokidar'
 import { randomUUID } from 'crypto'
 import filenamify from 'filenamify'
 import { unwatchFile, watchFile, type Stats } from 'fs'
-import { ensureDir, pathExists, readJSON, readJson, remove, rename, rmdir, stat, unlink, writeFile, writeJson } from 'fs-extra'
-import { basename, dirname, join, relative, resolve } from 'path'
-import { Inject, LauncherApp, LauncherAppKey } from '~/app'
+import { ensureDir, lstat, pathExists, readJSON, readJson, realpath, remove, rmdir, unlink } from 'fs-extra'
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'path'
+import { Inject, LauncherApp, LauncherAppKey, kGameDataPath } from '~/app'
 import { ZipManager, kTasks, type Tasks } from '~/infra'
 import { InstanceService } from '~/instance/InstanceService'
 import { InstanceModsGroupService } from '~/instance/InstanceModsGroupService'
+import { readContentGroups } from '../instance/utils/contentGroupsFile'
 import { kDownloadOptions } from '~/network'
 import { kPeerFacade } from '~/peer'
 import { kResourceManager, kResourceWorker, type ResourceWorker } from '~/resource'
@@ -55,8 +59,14 @@ import { unzipInstanceFiles } from './utils/unzipInstanceFiles'
 import { deduplicateInstanceFiles } from '~/util/deduplicateInstanceFiles'
 import { resolveInstanceFiles } from './utils/resolveInstanceFiles'
 import { getTracker } from '~/util/taskHelper'
-import { readPendingInstalls, writeInstallState } from './utils/pendingInstall'
+import { assertInstallDirectory, assertInstallStatePaths, isLegacyInstallWorkspace, readPendingInstalls, writeInstallState } from './utils/pendingInstall'
+import { instanceFileSource } from './utils/instanceFileSource'
+import { captureModInstallRecovery, prepareModInstallReview } from './utils/reviewedModInstall'
 import { activeInstallFiles, hasInstallWork, installPathKey, supersedeInstallPlans } from './utils/installPlan'
+
+function reviewedUpdates(updates: InstanceFileUpdate[], domain?: ModInstallReview['domain']): InstanceFileUpdate[] {
+  return domain && domain !== 'mods' ? updates.map(update => update.operation === 'add' ? { ...update, operation: 'backup-add' } : update) : updates
+}
 
 /**
  * Provide the abilities to import/export instance from/to modpack
@@ -66,6 +76,69 @@ export class InstanceInstallService extends AbstractService implements IInstance
   private readonly pendingInstallRefreshers = new Map<string, () => Promise<void>>()
   private readonly activeInstallTasks = new Map<string, AbortController>()
   private readonly installRegistrations = new Map<string, Promise<void>>()
+
+  async #javaDirectory(path: string) {
+    const instances = await this.app.registry.get(InstanceService)
+    await instances.initialize()
+    if (typeof path !== 'string' || !isAbsolute(path) || !instances.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceNotFoundError')
+    const directory = await lstat(path)
+    if (!directory.isDirectory()) throw new AnyError('UnsafeInstanceDirectory')
+    return directory
+  }
+
+  async #idleJavaDirectory(path: string) {
+    const directory = await this.#javaDirectory(path)
+    const { LaunchService } = await import('../launch/LaunchService')
+    const launch = await this.app.registry.get(LaunchService)
+    if ((await launch.getGameProcesses()).some(process => process.options.gameDirectory === path)) throw new AnyError('InstanceRunningError')
+    return directory
+  }
+
+  async #idleSharedPacks(path: string, files: InstanceFile[]) {
+    for (const domain of ['resourcepacks', 'shaderpacks'] as const) {
+      if (!files.some(file => file.path.replace(/\\/g, '/').split('/')[0].toLowerCase() === domain)) continue
+      const getPath = await this.app.registry.get(kGameDataPath), root = getPath()
+      const source = await instanceFileSource(path, domain, root, true)
+      if (source.root === await realpath(path)) continue
+      const { LaunchService } = await import('../launch/LaunchService'), launch = await this.app.registry.get(LaunchService)
+      for (const process of await launch.getGameProcesses()) {
+        const game = process.options.gameDirectory
+        if ((await instanceFileSource(game, domain, root, true)).root !== await realpath(game)) throw new AnyError('SharedOptionsRunningError')
+      }
+    }
+  }
+
+  #validateFiles(path: string, files: InstanceFile[]) {
+    InstanceFile.array().max(100000).parse(files)
+    assertInstanceInstallPaths(path, files.map(file => file.path))
+  }
+
+  async #validateTargets(path: string, files: InstanceFile[], allowDirectoryConflicts = false) {
+    this.#validateFiles(path, files)
+    const getPath = await this.app.registry.get(kGameDataPath)
+    for (const file of files) {
+      const target = await instanceFileSource(path, file.path.replace(/\\/g, '/'), getPath(), true)
+      const info = await lstat(join(target.root, target.path)).catch(error => { if (error.code !== 'ENOENT') throw error })
+      if (info && !info.isFile() && !(allowDirectoryConflicts && info.isDirectory())) throw new Error('Unsafe instance file')
+    }
+  }
+
+  #localInstallPlan(options: Extract<InstallInstanceOptions, { oldFiles: InstanceFile[] }>, manifestUpdatedAt?: number): InstanceInstallLock {
+    const operationId = randomUUID()
+    return {
+      version: 1,
+      files: deduplicateInstanceFiles(options.files),
+      upstream: { type: 'peer', id: '' },
+      mtime: Date.now(),
+      backup: join(options.path, '.backups', operationId),
+      workspace: join(options.path, '.install', operationId, 'files'),
+      finishedPath: [],
+      oldFiles: options.oldFiles,
+      manifestUpdatedAt,
+      operationId,
+      review: options.review === undefined ? undefined : InstanceModInstallReview.pick({ domain: true, snapshot: true, changes: true }).parse(options.review),
+    }
+  }
 
   constructor(
     @Inject(LauncherAppKey) app: LauncherApp,
@@ -79,6 +152,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
   }
 
   async getLegacyLock(instancePath: string) {
+    await this.#javaDirectory(instancePath)
     const instanceService = await this.app.registry.get(InstanceService)
     const inst = instanceService.state.all[instancePath]
     const upstream = inst.upstream
@@ -130,7 +204,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
     return undefined
   }
 
-  private getSha1 = async (instancePath: string, file: File) => {
+  #getSha1 = async (instancePath: string, file: File) => {
     const snapshot = await this.resourceManager.getSnapshotByDomainedPath(
       getDomainedPath(file.path, instancePath),
     )
@@ -140,16 +214,16 @@ export class InstanceInstallService extends AbstractService implements IInstance
     return this.worker.checksum(file.path, 'sha1')
   }
 
-  private getInstallFile = async (path: string) => {
+  #getInstallFile = async (path: string) => {
     const file = await getFile(path)
     return file?.isDirectory ? undefined : file
   }
 
-  private getCrc32 = async (instancePath: string, file: File) => {
+  #getCrc32 = async (instancePath: string, file: File) => {
     return await this.worker.checksum(file.path, 'crc32')
   }
 
-  private getChecksum = async (_instancePath: string, file: File, algorithm: string) =>
+  #getChecksum = async (_instancePath: string, file: File, algorithm: string) =>
     this.worker.checksum(file.path, algorithm)
 
   async #getDelta(
@@ -158,8 +232,10 @@ export class InstanceInstallService extends AbstractService implements IInstance
     newUpstream: InstanceUpstream,
     newFiles: InstanceFile[],
   ) {
+    await this.#validateTargets(instancePath, newFiles)
+    if (lockState) await this.#validateTargets(instancePath, lockState.files)
     let fileDelta: InstanceFileUpdate[] = []
-    const fs = { getFile: this.getInstallFile, getSha1: this.getSha1, getCrc32: this.getCrc32, getChecksum: this.getChecksum, join }
+    const fs = { getFile: this.#getInstallFile, getSha1: this.#getSha1, getCrc32: this.#getCrc32, getChecksum: this.#getChecksum, join }
 
     if (lockState) {
       // check if upstream are the same
@@ -178,6 +254,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
       const legacy = await this.getLegacyLock(instancePath)
       if (legacy) {
         const { upstream, files } = legacy
+        await this.#validateTargets(instancePath, files)
         if (isUpstreamIsSameOrigin(newUpstream, upstream)) {
           fileDelta = await computeFileUpdates(instancePath, files, newFiles, undefined, fs)
         } else {
@@ -199,16 +276,11 @@ export class InstanceInstallService extends AbstractService implements IInstance
     profilePath = join(instancePath, '.install-profile'),
     resuming = false,
     legacyBaseline?: { upstream: InstanceUpstream; files: InstanceFile[] } | null,
+    releaseRegistration: () => void = () => {},
+    recoveryReview?: ModInstallReview,
   ) {
-    const previousRegistration = this.installRegistrations.get(instancePath)
-    const registered = Promise.withResolvers<void>()
-    if (!resuming) this.installRegistrations.set(instancePath, registered.promise)
-    const releaseRegistration = () => {
-      registered.resolve()
-      if (this.installRegistrations.get(instancePath) === registered.promise) this.installRegistrations.delete(instancePath)
-    }
     return this.mutex.of(`instance-install-operation:${profilePath}`).runExclusive(async () => {
-      if (!resuming) await previousRegistration
+      await this.#idleJavaDirectory(instancePath)
       if (resuming) {
         const saved = await readJson(profilePath).then(InstanceInstallLock.parse).catch((error) => {
           if (isSystemError(error) && error.code === 'ENOENT') return undefined
@@ -217,19 +289,18 @@ export class InstanceInstallService extends AbstractService implements IInstance
         if (!saved) return false
         targetState = { ...saved, files: targetState.files, oldFiles: targetState.oldFiles }
         await this.mutex.of(LockKey.instance(instancePath)).runExclusive(async () => {
-          await stat(instancePath)
-          if (dirname(targetState.workspace) === dirname(instancePath) &&
-              basename(targetState.workspace).startsWith(`.${basename(instancePath)}-install-`)) {
-            const workspace = join(instancePath, '.install', randomUUID(), 'files')
-            await ensureDir(dirname(workspace))
-            if (await pathExists(targetState.workspace)) await rename(targetState.workspace, workspace)
-            targetState.workspace = workspace
+          await this.#idleJavaDirectory(instancePath)
+          await assertInstallStatePaths(instancePath, profilePath, targetState, true)
+          if (isLegacyInstallWorkspace(instancePath, profilePath, targetState)) {
+            // Persisted JSON cannot authorize moving or deleting an external directory.
+            targetState.workspace = join(instancePath, '.install', randomUUID(), 'files')
+            targetState.finishedPath = []
             await writeInstallState(profilePath, targetState)
           }
         })
       }
       return this.#runInstall(
-        instancePath, lockState, targetState, id, noLock, profilePath, resuming, releaseRegistration, legacyBaseline,
+        instancePath, lockState, targetState, id, noLock, profilePath, resuming, releaseRegistration, legacyBaseline, recoveryReview,
       )
     }).finally(releaseRegistration)
   }
@@ -244,10 +315,26 @@ export class InstanceInstallService extends AbstractService implements IInstance
     resuming: boolean,
     releaseRegistration: () => void,
     legacyBaseline?: { upstream: InstanceUpstream; files: InstanceFile[] } | null,
+    recoveryReview?: ModInstallReview,
   ) {
     const lockFilePath = join(instancePath, 'instance-lock.json')
     const currentStatePath = profilePath
-    const originalDirectory = await stat(instancePath)
+    const originalDirectory = await this.#idleJavaDirectory(instancePath)
+    await assertInstallStatePaths(instancePath, profilePath, targetState)
+    const workspacePath = targetState.workspace, backupPath = targetState.backup
+    const checkStatePaths = async () => {
+      if (targetState.workspace !== workspacePath || targetState.backup !== backupPath) throw new Error('Install state paths changed')
+      await assertInstallStatePaths(instancePath, profilePath, targetState)
+    }
+    const checkFile = async (file: InstanceFile) => {
+      await this.#validateTargets(instancePath, [file])
+      for (const area of [workspacePath, backupPath]) {
+        const path = join(area, file.path)
+        await assertInstallDirectory(instancePath, dirname(path))
+        const info = await lstat(path).catch(error => { if (error.code !== 'ENOENT') throw error })
+        if (info && !info.isFile()) throw new Error('Unsafe staged instance file')
+      }
+    }
 
     const curseforgeClient = this.curseforgeClient
     const modrinthClient = this.modrinthClient
@@ -261,11 +348,18 @@ export class InstanceInstallService extends AbstractService implements IInstance
     const downloadOptions = await this.app.registry.get(kDownloadOptions)
 
     const lock = this.mutex.of(LockKey.instance(instancePath))
+    const mutate = <T>(action: () => Promise<T>) => this.mutex.of('resource-pack-options').runExclusive(() => lock.runExclusive(action))
+    const getPath = await this.app.registry.get(kGameDataPath), sharedRoot = getPath()
   // eslint-disable-next-line @typescript-eslint/no-this-alias
     const logger = this
 
     const instanceService = await this.app.registry.get(InstanceService)
     const inst = instanceService.state?.all?.[instancePath]
+    const reviewConfiguration = () => {
+      const instance = instanceService.state.all[instancePath]
+      return { runtime: { ...instance.runtime }, java: instance.java, version: instance.version }
+    }
+    let reviewGuard: Awaited<ReturnType<typeof prepareModInstallReview>>
     const singleFile = targetState.files && targetState.files.length === 1 ? targetState.files[0] : undefined
     const singleFileIcon = singleFile ? (singleFile as any)?.icon : undefined
     const singleFileName = singleFile ? basename(singleFile.path) : undefined
@@ -312,15 +406,17 @@ export class InstanceInstallService extends AbstractService implements IInstance
       abortOnRemove,
     )
     const checkInstance = async () => {
-      const directory = await stat(instancePath).catch((error) => {
-        if (isSystemError(error) && error.code === 'ENOENT') return undefined
+      const directory = await this.#idleJavaDirectory(instancePath).catch((error) => {
+        if (removing || isSystemError(error) && error.code === 'ENOENT' || error?.name === 'UnsafeInstanceDirectory') return undefined
         throw error
       })
-      if (removing || !directory || directory.ino !== originalDirectory.ino) {
+      if (removing || !directory?.isDirectory() || directory.ino !== originalDirectory.ino || directory.dev !== originalDirectory.dev) {
         removing = true
         task.controller.abort()
         throw task.controller.signal.reason
       }
+      await checkStatePaths()
+      await this.#idleSharedPacks(instancePath, [...activeInstallFiles(targetState), ...activeInstallFiles(targetState, true)])
     }
     const onDirectoryChange = (current: Stats) => {
       if (current.nlink === 0 || current.ino !== originalDirectory.ino) void abortOnRemove()
@@ -489,6 +585,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
         throw new DOMException('Installation superseded by a newer plan', 'AbortError')
       }
       targetState = current.state
+      await checkStatePaths()
       // Also covers a crash between publishing a newer plan and recording its
       // ownership transfers in the older profiles.
       for (const newer of profiles.filter(profile =>
@@ -502,16 +599,19 @@ export class InstanceInstallService extends AbstractService implements IInstance
         throw new DOMException('Installation superseded by a newer plan', 'AbortError')
       }
     }
-    const delta = (ready?: Set<string>) => {
-      const files = deduplicateInstanceFiles(activeInstallFiles(targetState))
-      const baseline = deduplicateInstanceFiles(activeInstallFiles(targetState, true))
-      return computeFileUpdates(
+    const delta = async (ready?: Set<string>) => {
+      const files = deduplicateInstanceFiles(activeInstallFiles(targetState)).filter(file => !ready || ready.has(file.path))
+      const baseline = deduplicateInstanceFiles(activeInstallFiles(targetState, true)).filter(file => !ready || ready.has(file.path))
+      // A new directory collision fails only that file at commit, preserving other ready files.
+      await this.#validateTargets(instancePath, files, true)
+      await this.#validateTargets(instancePath, baseline, true)
+      return reviewedUpdates(await computeFileUpdates(
         instancePath,
-        ready ? baseline.filter(file => ready.has(file.path)) : baseline,
-        ready ? files.filter(file => ready.has(file.path)) : files,
+        baseline,
+        files,
         noLock ? undefined : targetState.baseline?.mtime,
-        { getFile: this.getInstallFile, getSha1: this.getSha1, getCrc32: this.getCrc32, getChecksum: this.getChecksum },
-      )
+        { getFile: this.#getInstallFile, getSha1: this.#getSha1, getCrc32: this.#getCrc32, getChecksum: this.#getChecksum },
+      ), targetState.review?.domain)
     }
     const initialize = async () => {
       task.controller.signal.throwIfAborted()
@@ -520,6 +620,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
       const profiles = await readPendingInstalls(instancePath)
       const saved = profiles.find(profile => profile.path === profilePath)?.state
       if (saved) targetState = { ...targetState, ...saved, files: targetState.files }
+      await checkStatePaths()
       if (!noLock && lockState && !isUpstreamIsSameOrigin(lockState.upstream, targetState.upstream)) {
         throw new AnyError('InstanceUpstreamError', 'The instance is locked by another upstream')
       }
@@ -541,6 +642,8 @@ export class InstanceInstallService extends AbstractService implements IInstance
         (profile.state.revision ?? 0) < targetState.revision!)
       const transfer = supersedeInstallPlans(targetState, previous)
       targetState = transfer.plan
+      const updates = await delta()
+      reviewGuard = await prepareModInstallReview(instancePath, () => targetState, updates, reviewConfiguration, (path, algorithm) => this.worker.checksum(path, algorithm), recoveryReview, sharedRoot)
       await ensureDir(dirname(currentStatePath))
       await ensureDir(targetState.workspace)
       await writeInstallState(currentStatePath, targetState)
@@ -551,7 +654,10 @@ export class InstanceInstallService extends AbstractService implements IInstance
           if (active) {
             active.abort(new DOMException('Installation superseded by a newer plan', 'AbortError'))
           } else {
-            await remove(older.state.workspace)
+            if (!isLegacyInstallWorkspace(instancePath, older.path, older.state)) {
+              await assertInstallStatePaths(instancePath, older.path, older.state)
+              await remove(older.state.workspace)
+            }
             if (dirname(dirname(older.state.workspace)) === join(instancePath, '.install')) {
               await rmdir(dirname(older.state.workspace)).catch((error) => {
                 if (!isSystemError(error) || !['ENOENT', 'ENOTEMPTY'].includes(error.code)) throw error
@@ -563,12 +669,12 @@ export class InstanceInstallService extends AbstractService implements IInstance
       }
       await loadCurrentPlan()
       await refreshStatus()
-      return delta()
+      return updates
     }
     const prepare = async (updates: InstanceFileUpdate[]) => {
       try {
         await resolveAddedFiles(updates)
-        await lock.runExclusive(async () => {
+        await mutate(async () => {
           await checkInstance()
           await loadCurrentPlan()
           const refreshed = new Map(updates.map(update => [update.file.path, update.file]))
@@ -578,6 +684,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
         task.controller.signal.throwIfAborted()
         preparing = true
         acceptingReady = true
+        for (const update of updates) { await checkFile(update.file); await reviewGuard?.(update.file, update.operation) }
         await handler.prepareInstallFiles(updates, task.controller.signal, true)
         task.controller.signal.throwIfAborted()
       } catch (error) {
@@ -590,8 +697,13 @@ export class InstanceInstallService extends AbstractService implements IInstance
     }
     const commit = async (updates: InstanceFileUpdate[], final: boolean) => {
       await checkInstance()
+      for (const update of updates) await reviewGuard?.(update.file, update.operation)
       try {
-        await handler.commitReadyFiles(updates, final && errors.length === 0 && !task.controller.signal.aborted, checkInstance)
+        await handler.commitReadyFiles(updates, final && errors.length === 0 && !task.controller.signal.aborted, async (file, operation) => {
+          await checkInstance()
+          await checkFile(file)
+          await reviewGuard?.(file, operation)
+        })
       } catch (error) {
         errors.push(error)
       }
@@ -613,7 +725,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
           const latestLock = await readLock()
           const existingFiles = latestLock?.files ?? (await Promise.all(
             (targetState.baseline?.files ?? []).map(async file =>
-              await this.getInstallFile(join(instancePath, file.path)) ? file : undefined),
+              await this.#getInstallFile(join(instancePath, file.path)) ? file : undefined),
           )).filter(file => file !== undefined)
           const actual = new Map(existingFiles.map(file => [file.path, file]))
           for (const file of activeInstallFiles(targetState)) {
@@ -646,6 +758,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
       await cleanup()
     }
     const cleanup = async () => {
+      await checkStatePaths()
       await remove(targetState.workspace)
       await unlink(currentStatePath).catch((error) => {
         if (!isSystemError(error) || error.code !== 'ENOENT') throw error
@@ -663,7 +776,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
     }
 
     const flushReady = async () => {
-      await lock.runExclusive(async () => {
+      await mutate(async () => {
         await checkInstance()
         await loadCurrentPlan()
         const active = new Set(activeInstallFiles(targetState).map(file => file.path))
@@ -699,13 +812,13 @@ export class InstanceInstallService extends AbstractService implements IInstance
     }
 
     try {
-      const updates = await lock.runExclusive(initialize)
+      const updates = await mutate(initialize)
       releaseRegistration()
       await prepare(updates)
       acceptingReady = false
       if (flushTimer) clearTimeout(flushTimer)
       await flushing
-      await lock.runExclusive(async () => {
+      await mutate(async () => {
         await checkInstance()
         try {
           await loadCurrentPlan()
@@ -720,7 +833,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
     } catch (e) {
       writersSettled.resolve()
       if (superseded) {
-        await lock.runExclusive(async () => {
+        await mutate(async () => {
           await checkInstance()
           await cleanup()
         })
@@ -773,6 +886,9 @@ export class InstanceInstallService extends AbstractService implements IInstance
 
   async previewInstanceFiles(options: InstallInstanceOptions): Promise<InstanceFileUpdate[]> {
     const { path: instancePath } = options
+    await this.#javaDirectory(instancePath)
+    await this.#validateTargets(instancePath, options.files)
+    if ('oldFiles' in options) await this.#validateTargets(instancePath, options.oldFiles)
     const lockFilePath = join(instancePath, 'instance-lock.json')
     const lockState = await readJson(lockFilePath)
       .then(InstanceLockSchema.parse)
@@ -783,32 +899,42 @@ export class InstanceInstallService extends AbstractService implements IInstance
       return delta
     }
 
-    const fs = { getFile: this.getInstallFile, getSha1: this.getSha1, getCrc32: this.getCrc32, getChecksum: this.getChecksum, join }
-    return await computeFileUpdates(instancePath, options.oldFiles, options.files, Date.now(), fs)
+    const plan = supersedeInstallPlans(this.#localInstallPlan(options), await readPendingInstalls(instancePath)).plan
+    const baseline = activeInstallFiles(plan, true)
+    await this.#validateTargets(instancePath, baseline)
+    const fs = { getFile: this.#getInstallFile, getSha1: this.#getSha1, getCrc32: this.#getCrc32, getChecksum: this.#getChecksum, join }
+    return reviewedUpdates(await computeFileUpdates(instancePath, baseline, plan.files, undefined, fs), plan.review?.domain)
   }
 
   async getInstanceInstallManifest(path: string): Promise<InstanceInstallManifest | undefined> {
+    await this.#javaDirectory(path)
     return readJson(join(path, '.install-manifest'))
       .then(InstanceInstallManifest.parse)
       .catch(() => undefined)
   }
 
   async stageInstanceFiles(options: Extract<InstallInstanceOptions, { oldFiles: InstanceFile[] }>): Promise<InstanceInstallManifest> {
+    await this.#javaDirectory(options.path)
+    this.#validateFiles(options.path, options.files); this.#validateFiles(options.path, options.oldFiles)
     const lock = this.mutex.of(LockKey.instanceManifest(options.path))
-    return lock.runExclusive(async () => {
+    return lock.runExclusive(() => this.mutex.of(LockKey.instance(options.path)).runExclusive(async () => {
+      await this.#javaDirectory(options.path)
       const current = await this.getInstanceInstallManifest(options.path)
       const manifest = mergeInstanceInstallManifest(current, options)
-      await writeJson(join(options.path, '.install-manifest'), manifest)
+      await writeInstallState(join(options.path, '.install-manifest'), manifest)
       return manifest
-    })
+    }))
   }
 
   async setInstanceInstallManifest(options: Extract<InstallInstanceOptions, { oldFiles: InstanceFile[] }>): Promise<InstanceInstallManifest | undefined> {
+    await this.#javaDirectory(options.path)
+    this.#validateFiles(options.path, options.files); this.#validateFiles(options.path, options.oldFiles)
     const lock = this.mutex.of(LockKey.instanceManifest(options.path))
-    return lock.runExclusive(async () => {
+    return lock.runExclusive(() => this.mutex.of(LockKey.instance(options.path)).runExclusive(async () => {
+      await this.#javaDirectory(options.path)
       const manifestPath = join(options.path, '.install-manifest')
       if (!options.oldFiles.length && !options.files.length) {
-        await unlink(manifestPath).catch(() => undefined)
+        await unlink(manifestPath).catch(error => { if (!isSystemError(error) || error.code !== 'ENOENT') throw error })
         return undefined
       }
       const current = await this.getInstanceInstallManifest(options.path)
@@ -820,12 +946,13 @@ export class InstanceInstallService extends AbstractService implements IInstance
         oldFiles: options.oldFiles,
         files: options.files,
       }
-      await writeJson(manifestPath, manifest)
+      await writeInstallState(manifestPath, manifest)
       return manifest
-    })
+    }))
   }
 
-  async applyInstanceInstallManifest(path: string, id?: string): Promise<void> {
+  async applyInstanceInstallManifest(path: string, id?: string, review?: ModInstallReview): Promise<void> {
+    await this.#idleJavaDirectory(path)
     const lock = this.mutex.of(LockKey.instanceManifest(path))
     await lock.runExclusive(async () => {
       const manifest = await this.getInstanceInstallManifest(path)
@@ -835,40 +962,93 @@ export class InstanceInstallService extends AbstractService implements IInstance
         oldFiles: manifest.oldFiles,
         files: manifest.files,
         id,
+        review,
       }, manifest.updatedAt)
-      await unlink(join(path, '.install-manifest')).catch(() => undefined)
+      await this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+        await this.#idleJavaDirectory(path)
+        const current = await this.getInstanceInstallManifest(path)
+        if (current?.updatedAt === manifest.updatedAt) await unlink(join(path, '.install-manifest')).catch(error => { if (!isSystemError(error) || error.code !== 'ENOENT') throw error })
+      })
     })
   }
 
   async discardInstanceInstallManifest(path: string): Promise<void> {
+    await this.#javaDirectory(path)
     const lock = this.mutex.of(LockKey.instanceManifest(path))
-    await lock.runExclusive(() => unlink(join(path, '.install-manifest')).catch(() => undefined))
+    await lock.runExclusive(() => this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      await this.#javaDirectory(path)
+      await unlink(join(path, '.install-manifest')).catch(error => { if (!isSystemError(error) || error.code !== 'ENOENT') throw error })
+    }))
+  }
+
+  async getReviewedModInstalls(path: string, domain: 'mods' | 'resourcepacks' | 'shaderpacks' = 'mods') {
+    if (domain !== 'mods' && domain !== 'resourcepacks' && domain !== 'shaderpacks') throw new Error('Invalid reviewed content domain')
+    await this.#javaDirectory(path)
+    return this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      await this.#javaDirectory(path)
+      return (await readPendingInstalls(path)).flatMap(({ state }) => state.review && (state.review.domain || 'mods') === domain && state.operationId && state.oldFiles && hasInstallWork(state)
+        ? [{ operationId: state.operationId, files: activeInstallFiles(state), oldFiles: activeInstallFiles(state, true) }] : [])
+    })
+  }
+
+  async previewModInstallRecovery(path: string, operationId: string) {
+    if (typeof operationId !== 'string' || !/^[a-f0-9-]{36}$/.test(operationId)) throw new Error('Invalid reviewed install')
+    await this.#javaDirectory(path)
+    return this.mutex.of('resource-pack-options').runExclusive(() => this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      await this.#javaDirectory(path)
+      const saved = (await readPendingInstalls(path)).find(profile => profile.state.review && profile.state.operationId === operationId && hasInstallWork(profile.state))
+      if (!saved) throw new Error('Reviewed install no longer pending')
+      const state = saved.state, files = deduplicateInstanceFiles(activeInstallFiles(state)), baseline = deduplicateInstanceFiles(activeInstallFiles(state, true))
+      await this.#validateTargets(path, files); await this.#validateTargets(path, baseline)
+      const changes = reviewedUpdates(await computeFileUpdates(path, baseline, files, undefined, { getFile: this.#getInstallFile, getSha1: this.#getSha1, getCrc32: this.#getCrc32, getChecksum: this.#getChecksum }), state.review?.domain)
+      const instances = await this.app.registry.get(InstanceService), instance = instances.state.all[path]
+      const configuration = { runtime: { ...instance.runtime }, java: instance.java, version: instance.version }
+      const getPath = await this.app.registry.get(kGameDataPath)
+      const capture = await captureModInstallRecovery(path, state, changes, configuration, (path, algorithm) => this.worker.checksum(path, algorithm), getPath())
+      return { review: { ...(state.review?.domain ? { domain: state.review.domain } : {}), snapshot: capture.snapshot, changes: changes.map(change => ({ path: change.file.path, operation: change.operation })) }, changes, configurationChanged: JSON.stringify(configuration) !== JSON.stringify(state.review?.configuration) || capture.directory !== state.review?.directory, ...(state.review?.domain && state.review.domain !== 'mods' ? { shared: capture.shared } : {}) }
+    }))
   }
 
   async resumeInstanceInstall(
     instancePath: string,
     overrides?: InstanceFile[],
+    reviewedOperationId?: string,
+    recoveryReview?: ModInstallReview,
   ): Promise<void | InstallFileError[]> {
+    if (reviewedOperationId !== undefined && (typeof reviewedOperationId !== 'string' || !/^[a-f0-9-]{36}$/.test(reviewedOperationId) || overrides !== undefined)) throw new Error('Invalid reviewed install')
+    if (recoveryReview !== undefined) {
+      if (!reviewedOperationId || overrides !== undefined) throw new Error('Recovery requires a reviewed operation')
+      recoveryReview = InstanceModInstallReview.pick({ domain: true, snapshot: true, changes: true }).parse(recoveryReview)
+    }
+    await this.#idleJavaDirectory(instancePath)
+    if (overrides) this.#validateFiles(instancePath, overrides)
     return this.mutex.of(`${LockKey.instance(instancePath)}:resume`).runExclusive(async () => {
+      await this.#idleJavaDirectory(instancePath)
       const profiles = await readPendingInstalls(instancePath)
-      for (const profile of profiles) {
-        const result = await this.resumeInstallProfile(instancePath, profile.path, profile.state, overrides)
+      const selected = reviewedOperationId === undefined ? profiles : profiles.filter(profile => profile.state.review && profile.state.operationId === reviewedOperationId && hasInstallWork(profile.state))
+      if (reviewedOperationId !== undefined && !selected.length) throw new Error('Reviewed install no longer pending')
+      if (overrides && selected.some(profile => profile.state.review)) throw new Error('Reviewed install requires a new review')
+      for (const profile of selected) {
+        const result = await this.#resumeInstallProfile(instancePath, profile.path, profile.state, overrides, reviewedOperationId, recoveryReview)
         if (result) return result
       }
     })
   }
 
-  private async resumeInstallProfile(
+  async #resumeInstallProfile(
     instancePath: string,
     currentStatePath: string,
     currentState: InstanceInstallLock,
     overrides?: InstanceFile[],
+    taskId?: string,
+    recoveryReview?: ModInstallReview,
   ): Promise<void | InstallFileError[]> {
     const lockFilePath = join(instancePath, 'instance-lock.json')
     const lockState = await readJson(lockFilePath)
       .then(InstanceLockSchema.parse)
       .catch(() => undefined)
 
+    if (overrides && currentState.review) throw new Error('Reviewed install requires a new review')
     if (overrides) {
       currentState.files = currentState.files.map(
         (f) => overrides.find((o) => o.path === f.path) ?? f,
@@ -881,7 +1061,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
         currentState.oldFiles = []
       }
       const installed = await this.#install(
-        instancePath, lockState, currentState, undefined, currentState.oldFiles !== undefined, currentStatePath, true,
+        instancePath, lockState, currentState, taskId, currentState.oldFiles !== undefined, currentStatePath, true, undefined, undefined, recoveryReview,
       )
       if (!installed) return
       if (currentState.oldFiles) {
@@ -950,16 +1130,20 @@ export class InstanceInstallService extends AbstractService implements IInstance
   }
 
   async watchInstanceInstall(path: string): Promise<SharedState<InstanceInstallStatus>> {
+    await this.#javaDirectory(path)
     const stateManager = await this.app.registry.get(ServiceStateManager)
     return stateManager.registerOrGet(`instance-install://${path}`, async () => {
       const status = new InstanceInstallStatus()
       status.instance = path
       let disposed = false
-      let revision = 0
-      const refreshPending = async () => {
-        const currentRevision = ++revision
+      const refreshPending = () => this.mutex.of(`instance-install-status:${path}`).runExclusive(async () => {
         try {
           const profiles = await readPendingInstalls(path)
+          const unresolved = await readJSON(join(path, 'unresolved-files.json')).catch(error => {
+            if (isSystemError(error) && error.code === 'ENOENT') return []
+            throw error
+          })
+          const unresolvedFiles = InstanceFile.array().parse(unresolved)
           const count = profiles.reduce((total, { state }) => {
             if (!hasInstallWork(state) && state.supersededPaths?.length) return total
             const committed = new Set(state.committedPath ?? [])
@@ -967,12 +1151,15 @@ export class InstanceInstallService extends AbstractService implements IInstance
             // every target file has already been published.
             return total + Math.max(1, activeInstallFiles(state).filter(file => !committed.has(file.path)).length)
           }, 0)
-          if (!disposed && currentRevision === revision) status.pendingFileCountSet(count)
+          if (!disposed) {
+            status.pendingFileCountSet(count)
+            status.unresolvedFilesSet(unresolvedFiles)
+          }
         } catch (error) {
           this.warn('Failed to read pending instance installs', error)
-          if (!disposed && currentRevision === revision) status.pendingFileCountSet(Math.max(1, status.pendingFileCount))
+          if (!disposed) status.pendingFileCountSet(Math.max(1, status.pendingFileCount))
         }
-      }
+      })
       // Native watchers can coalesce atomic replacements or lose a removed
       // staging directory. Our own writes explicitly refresh the shared state.
       this.pendingInstallRefreshers.set(path, refreshPending)
@@ -1011,17 +1198,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
             await refreshPending()
             return
           }
-          if (ev === 'add' || ev === 'change') {
-            if (filePath === 'unresolved-files.json') {
-              const unresolvedFilesPath = join(path, 'unresolved-files.json')
-              const unresolvedFiles = await readJSON(unresolvedFilesPath).catch(() => [])
-              status.unresolvedFilesSet(unresolvedFiles)
-            }
-          } else if (ev === 'unlink') {
-            if (filePath === 'unresolved-files.json') {
-              status.unresolvedFilesSet([])
-            }
-          }
+          if (filePath === 'unresolved-files.json' && (ev === 'add' || ev === 'change' || ev === 'unlink')) await refreshPending()
         })
         .add('.')
 
@@ -1045,74 +1222,61 @@ export class InstanceInstallService extends AbstractService implements IInstance
     legacyBaseline?: { upstream: InstanceUpstream; files: InstanceFile[] } | null,
   ): Promise<void> {
     const { path: instancePath, id } = options
-    const files = deduplicateInstanceFiles(options.files)
-
-    const timestamp = Date.now()
-    this.log('Install instance files', instancePath, id)
-
-    if ('upstream' in options) {
-      const operationId = randomUUID()
-      const upstream = options.upstream
-      const currentState: InstanceInstallLock = {
-        version: 0,
-        files,
-        upstream,
-        mtime: timestamp,
-        backup: join(
-          instancePath,
-          '.backups',
-          `${filenamify(new Date().toLocaleString(), { replacement: '-' })}-${operationId}`,
-        ),
-        workspace: join(instancePath, '.install', operationId, 'files'),
-        finishedPath: [],
-        operationId,
-      }
-
-      this.log('Install instance files with upstream')
-      await this.#install(
-        instancePath, undefined, currentState, id, false, join(instancePath, '.install', `${operationId}.json`),
-        false, legacyBaseline,
-      )
-    } else {
-      const oldFiles = options.oldFiles
-      const operationId = randomUUID()
-
-      const lockState: InstanceLockSchema = {
-        version: 1,
-        files: oldFiles,
-        upstream: {
-          type: 'peer',
-          id: '',
-        },
-        mtime: timestamp,
-      }
-
-      const currentState: InstanceInstallLock = {
-        version: 1,
-        files,
-        upstream: {
-          type: 'peer',
-          id: '',
-        },
-        mtime: timestamp,
-        backup: join(
-          instancePath,
-          '.backups',
-          operationId,
-        ),
-        workspace: join(instancePath, '.install', operationId, 'files'),
-        finishedPath: [],
-        oldFiles,
-        manifestUpdatedAt,
-        operationId,
-      }
-
-      this.log('Install instance files with diff')
-      await this.#install(
-        instancePath, lockState, currentState, id, true, join(instancePath, '.install', `${operationId}.json`),
-      )
-      await this.#migrateModGroupFilenames(instancePath, oldFiles, files)
+    // Reserve order before asynchronous validation; downloads are released after initialization.
+    const previousRegistration = this.installRegistrations.get(instancePath)
+    const registered = Promise.withResolvers<void>()
+    this.installRegistrations.set(instancePath, registered.promise)
+    const releaseRegistration = () => {
+      registered.resolve()
+      if (this.installRegistrations.get(instancePath) === registered.promise) this.installRegistrations.delete(instancePath)
     }
+    try {
+      await previousRegistration
+      await this.#idleJavaDirectory(instancePath)
+      await this.#validateTargets(instancePath, options.files)
+      if ('oldFiles' in options) await this.#validateTargets(instancePath, options.oldFiles)
+      const files = deduplicateInstanceFiles(options.files)
+
+      const timestamp = Date.now()
+      this.log('Install instance files', instancePath, id)
+
+      if ('upstream' in options) {
+        const operationId = randomUUID()
+        const upstream = options.upstream
+        const currentState: InstanceInstallLock = {
+          version: 0,
+          files,
+          upstream,
+          mtime: timestamp,
+          backup: join(
+            instancePath,
+            '.backups',
+            `${filenamify(new Date().toLocaleString(), { replacement: '-' })}-${operationId}`,
+          ),
+          workspace: join(instancePath, '.install', operationId, 'files'),
+          finishedPath: [],
+          operationId,
+        }
+
+        this.log('Install instance files with upstream')
+        await this.#install(
+          instancePath, undefined, currentState, id, false, join(instancePath, '.install', `${operationId}.json`),
+          false, legacyBaseline, releaseRegistration,
+        )
+      } else {
+        const oldFiles = options.oldFiles
+        const currentState = this.#localInstallPlan({ ...options, files }, manifestUpdatedAt)
+        const operationId = currentState.operationId!
+        const lockState: InstanceLockSchema = { version: 1, files: oldFiles, upstream: currentState.upstream, mtime: timestamp }
+
+        this.log('Install instance files with diff')
+        await this.#install(
+          instancePath, lockState, currentState, id, true, join(instancePath, '.install', `${operationId}.json`),
+          false, undefined, releaseRegistration,
+        )
+        await this.#migrateModGroupFilenames(instancePath, oldFiles, files)
+      }
+    } finally { releaseRegistration() }
   }
 
   async #migrateModGroupFilenames(instancePath: string, oldFiles: readonly InstanceFile[], files: readonly InstanceFile[]) {
@@ -1121,30 +1285,34 @@ export class InstanceInstallService extends AbstractService implements IInstance
     if (Object.keys(mappings).length === 0) return
 
     try {
-      const service = await this.app.registry.get(InstanceModsGroupService)
-      const state = await service.getGroupState(instancePath)
-      const migrated = migrateModGroupFilenames(state.groups, mappings)
-      if (migrated !== state.groups) await service.updateModsGroups(instancePath, migrated)
+      const previous = await readContentGroups(instancePath, 'mods')
+      if (!previous) return
+      const migrated = migrateModGroupFilenames(previous, mappings)
+      if (migrated !== previous) {
+        const service = await this.app.registry.get(InstanceModsGroupService)
+        await service.updateModsGroups(instancePath, migrated, 'mods', previous)
+      }
     } catch (error) {
       this.warn(`Failed to migrate mod group filenames for ${instancePath}`, error)
     }
   }
 
   async dismissUnresolvedFiles(path: string, files?: string[]): Promise<void> {
-    const unresolvedFilesPath = join(path, 'unresolved-files.json')
-    if (files && files.length > 0) {
-      // Dismiss only the requested files, keeping the rest so the user can
-      // still resolve them later. Drop the file entirely once it is empty.
-      const current: InstanceFile[] = await readJSON(unresolvedFilesPath).catch(() => [])
-      const toDismiss = new Set(files)
-      const remaining = current.filter((f) => !toDismiss.has(f.path))
-      if (remaining.length > 0) {
-        await writeFile(unresolvedFilesPath, JSON.stringify(remaining))
+    await this.#javaDirectory(path)
+    if (files !== undefined && (!Array.isArray(files) || files.length > 100000 || files.some(file => typeof file !== 'string'))) throw new TypeError('Invalid unresolved file selection')
+    await this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      await this.#javaDirectory(path)
+      const unresolvedFilesPath = join(path, 'unresolved-files.json')
+      if (files && files.length > 0) {
+        // Keep every unresolved file that was not explicitly dismissed.
+        const current = await readJSON(unresolvedFilesPath).then(InstanceFile.array().parse).catch(error => { if (isSystemError(error) && error.code === 'ENOENT') return []; throw error })
+        const toDismiss = new Set(files)
+        const remaining = current.filter(file => !toDismiss.has(file.path))
+        if (remaining.length > 0) await writeInstallState(unresolvedFilesPath, remaining)
+        else await unlink(unresolvedFilesPath).catch(error => { if (!isSystemError(error) || error.code !== 'ENOENT') throw error })
       } else {
-        await unlink(unresolvedFilesPath).catch(() => undefined)
+        await unlink(unresolvedFilesPath).catch(error => { if (!isSystemError(error) || error.code !== 'ENOENT') throw error })
       }
-    } else {
-      await unlink(unresolvedFilesPath).catch(() => undefined)
-    }
+    })
   }
 }

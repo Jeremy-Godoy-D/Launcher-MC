@@ -5,6 +5,7 @@ packages:
   - 'xmcl-runtime-api'
   - 'xmcl-runtime'
   - 'xmcl-keystone-ui'
+  - 'xmcl-react-ui'
   - 'xmcl-client-vue'
   # NOTE: 'e2e' is intentionally NOT in this list. It's an opt-in sub-project
   # so the default `pnpm install` doesn't pull Playwright (~14 MB) for the

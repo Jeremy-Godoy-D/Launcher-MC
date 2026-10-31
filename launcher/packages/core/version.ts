@@ -69,6 +69,8 @@ export interface ResolvedVersion {
    * The minecraft version of this version
    */
   minecraftVersion: string
+  /** Optional client JAR version ID; Minecraft identity remains unchanged. */
+  clientJar?: string
   /**
    * The minecraft directory of this version
    */
@@ -515,6 +517,7 @@ export namespace Version {
     let location: string
     let javaVersion: JavaVersion = { majorVersion: 8, component: 'jre-legacy' }
     let compatibleJavaMajors: number[] | undefined
+    let clientJar: string | undefined
 
     const chains: string[] = hierarchy.map((j) => folder.getVersionRoot(j.id))
     const inheritances = hierarchy.map((j) => j.id)
@@ -542,6 +545,13 @@ export namespace Version {
       assetIndex = json.assetIndex || assetIndex
       javaVersion = json.javaVersion || javaVersion
       compatibleJavaMajors = json.compatibleJavaMajors ?? compatibleJavaMajors
+      if (json.jar !== undefined) {
+        const value = json.jar
+        // Reject control characters in untrusted import identifiers and arguments.
+        // eslint-disable-next-line no-control-regex
+        if (typeof value !== 'string' || !value || value.length > 200 || /[\\/<>:"|?*\x00-\x1f\x7f]/.test(value) || /[. ]$/.test(value) || /^(CON|PRN|AUX|NUL|COM[0-9]|LPT[0-9])(\.|$)/i.test(value)) throw new TypeError('Invalid client JAR identifier')
+        clientJar = value
+      }
       if (json.libraries) {
         json.libraries.forEach((lib) => {
           let libOrgName = `${lib.groupId}:${lib.artifactId}`
@@ -577,6 +587,7 @@ export namespace Version {
       assetIndex,
       assets,
       minecraftVersion,
+      ...(clientJar ? { clientJar } : {}),
       inheritances,
       arguments: args,
       downloads: downloadsMap,

@@ -1,0 +1,913 @@
+{
+  "schemaVersion": 1,
+  "plan": {
+    "path": "docs/react-migration/PLAN.md",
+    "sha256": "ea55fb9552eb69f39763bf00ae28e7c4c3c7b575b7d6f727580f75c2705f60e4"
+  },
+  "scope": {
+    "path": "docs/react-migration/SCOPE.md",
+    "sha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
+  },
+  "baseline": {
+    "version": "0.2.0-beta.2",
+    "commit": "7671c6f1bdc471d42816241920a262a18aca5a44",
+    "preservedFiles": [
+      {
+        "path": "ANALISIS_ARQUITECTURA.md",
+        "sha256": "e0a2246b6c27efdd1c4bf66be2c0649fbff418cd4b326c9429a50b115da7c6d8"
+      }
+    ],
+    "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
+  },
+  "currentStage": 5,
+  "nextAction": "Etapa5 activa. Copia/ZIP/retirada revisadas de mundos 9d7efeb implementadas;999 unidades/100 archivos,tipos/lint,10React57/61/62 y3Vue03/58/63 aprobados;3React62 repetidos al simplificar revisión.12Axe nuevos0violaciones/24incomplete. STAGE5-WORLD-OPERATIONS.md conserva límites y evidencias. CI41179439218/aa5cc27 success ambos jobs,pero3flaky12/44/53:triage próximo, no afirmar estabilidad. Próximo:intermitencias,importar/editar mundos/datapacks,ajustes de instancia/consola;catálogo6,superficies7,retirada8,validación/publicación9. K11 y gates5 pendientes. Vue default/dist,PR4 borrador,producción/proxy intactos,Microsoft pospuesto;no tocar rutas protegidas.",
+  "stages": [
+    {
+      "id": 0,
+      "title": "Inventario y referencia beta.2",
+      "status": "complete",
+      "gates": [
+        {
+          "id": "plan-scope",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/PLAN.md",
+              "sha256": "ea55fb9552eb69f39763bf00ae28e7c4c3c7b575b7d6f727580f75c2705f60e4"
+            },
+            {
+              "path": "docs/react-migration/SCOPE.md",
+              "sha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
+            }
+          ],
+          "note": "Usuario aprobó React y luego confirmó solo núcleo, sin extras, el 2026-10-23. Aclaración directa del usuario el 2026-10-25: Java automático y alternativa manual, añadida a SCOPE; PLAN aprobado se conserva."
+        },
+        {
+          "id": "inventory-parity",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE0.md",
+              "sha256": "55cbd493035888defa05906848ded4479266c271a9f83bb6c71e945b75715277"
+            },
+            {
+              "path": "docs/react-migration/STAGE0.json",
+              "sha256": "dd68154ba63538ab8961a64db7d75fe6d25fc7b4461d88984d643e024ffc3e3e"
+            },
+            {
+              "path": "docs/react-migration/inventory.json",
+              "sha256": "0033a4ae24c39d538e6f059d5eb1162bc6e721eef5b7034023cad1e64a7b05cd"
+            }
+          ]
+        },
+        {
+          "id": "baseline-package",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE0.md",
+              "sha256": "55cbd493035888defa05906848ded4479266c271a9f83bb6c71e945b75715277"
+            },
+            {
+              "path": "docs/react-migration/STAGE0.json",
+              "sha256": "dd68154ba63538ab8961a64db7d75fe6d25fc7b4461d88984d643e024ffc3e3e"
+            }
+          ]
+        },
+        {
+          "id": "baseline-visual",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE0.md",
+              "sha256": "55cbd493035888defa05906848ded4479266c271a9f83bb6c71e945b75715277"
+            },
+            {
+              "path": "docs/react-migration/STAGE0.json",
+              "sha256": "dd68154ba63538ab8961a64db7d75fe6d25fc7b4461d88984d643e024ffc3e3e"
+            }
+          ]
+        },
+        {
+          "id": "baseline-performance",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE0.md",
+              "sha256": "55cbd493035888defa05906848ded4479266c271a9f83bb6c71e945b75715277"
+            },
+            {
+              "path": "docs/react-migration/STAGE0.json",
+              "sha256": "dd68154ba63538ab8961a64db7d75fe6d25fc7b4461d88984d643e024ffc3e3e"
+            }
+          ]
+        },
+        {
+          "id": "harness-checks",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE0.md",
+              "sha256": "55cbd493035888defa05906848ded4479266c271a9f83bb6c71e945b75715277"
+            },
+            {
+              "path": "docs/react-migration/STAGE0.json",
+              "sha256": "dd68154ba63538ab8961a64db7d75fe6d25fc7b4461d88984d643e024ffc3e3e"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "title": "Prototipo y revisión visual",
+      "status": "complete",
+      "gates": [
+        {
+          "id": "prototype",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE1.md",
+              "sha256": "51cb3144aea0edac2f3ccad8170a83cb25228cc6e20ec8211071ec1fe023b0e5"
+            },
+            {
+              "path": "docs/react-migration/STAGE1.json",
+              "sha256": "06256ee1d2f6c1c7da48956a45a048d6421b901ec5e59c3764849eeb4816265d"
+            }
+          ]
+        },
+        {
+          "id": "media",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE1.md",
+              "sha256": "51cb3144aea0edac2f3ccad8170a83cb25228cc6e20ec8211071ec1fe023b0e5"
+            },
+            {
+              "path": "docs/react-migration/STAGE1.json",
+              "sha256": "06256ee1d2f6c1c7da48956a45a048d6421b901ec5e59c3764849eeb4816265d"
+            }
+          ]
+        },
+        {
+          "id": "visual-tests",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE1.md",
+              "sha256": "51cb3144aea0edac2f3ccad8170a83cb25228cc6e20ec8211071ec1fe023b0e5"
+            },
+            {
+              "path": "docs/react-migration/STAGE1.json",
+              "sha256": "06256ee1d2f6c1c7da48956a45a048d6421b901ec5e59c3764849eeb4816265d"
+            }
+          ]
+        },
+        {
+          "id": "user-design-review",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/DESIGN_APPROVAL.json",
+              "sha256": "b905301d3462acf3162df86daf05be5270570d10e84723db0cdb804daa2a3df1"
+            }
+          ],
+          "approval": {
+            "date": "2026-10-24",
+            "source": "user",
+            "reference": "Respuesta del usuario en este chat, posterior a la captura y entrega ebf87a1: «si lo apruebo». Acepta prototipo con fondo global y glassmorphism, código 21d9fdda21981e76bb1acd1ae4db41ec1b4112cd."
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Infraestructura React",
+      "status": "complete",
+      "gates": [
+        {
+          "id": "build-selector",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE2.md",
+              "sha256": "8a9f7f1d1c62e0e2a1317f4ceec76402f0b4544ead99ec0dd8debeff42ee16bb"
+            },
+            {
+              "path": "docs/react-migration/STAGE2.json",
+              "sha256": "21398f88383ce7386ea438662a7b92cd2d09230ca8849157a2dc7bfcf0ebef5f"
+            }
+          ]
+        },
+        {
+          "id": "windows-build",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE2.md",
+              "sha256": "8a9f7f1d1c62e0e2a1317f4ceec76402f0b4544ead99ec0dd8debeff42ee16bb"
+            },
+            {
+              "path": "docs/react-migration/STAGE2.json",
+              "sha256": "21398f88383ce7386ea438662a7b92cd2d09230ca8849157a2dc7bfcf0ebef5f"
+            }
+          ]
+        },
+        {
+          "id": "packaged-boot",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE2.md",
+              "sha256": "8a9f7f1d1c62e0e2a1317f4ceec76402f0b4544ead99ec0dd8debeff42ee16bb"
+            },
+            {
+              "path": "docs/react-migration/STAGE2.json",
+              "sha256": "21398f88383ce7386ea438662a7b92cd2d09230ca8849157a2dc7bfcf0ebef5f"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Cliente y estados",
+      "status": "complete",
+      "gates": [
+        {
+          "id": "service-state-contracts",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE3.md",
+              "sha256": "46e8d1f80c5fed5a349126272009c79bca673180792f1b233fc23d82f20c0c42"
+            },
+            {
+              "path": "docs/react-migration/STAGE3.json",
+              "sha256": "8b401892be0d5f3607484c4dce2b2b599163b8330c91e319d8fba35794c34ead"
+            }
+          ]
+        },
+        {
+          "id": "tasks-events",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE3.md",
+              "sha256": "46e8d1f80c5fed5a349126272009c79bca673180792f1b233fc23d82f20c0c42"
+            },
+            {
+              "path": "docs/react-migration/STAGE3.json",
+              "sha256": "8b401892be0d5f3607484c4dce2b2b599163b8330c91e319d8fba35794c34ead"
+            }
+          ]
+        },
+        {
+          "id": "i18n-preferences",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE3.md",
+              "sha256": "46e8d1f80c5fed5a349126272009c79bca673180792f1b233fc23d82f20c0c42"
+            },
+            {
+              "path": "docs/react-migration/STAGE3.json",
+              "sha256": "8b401892be0d5f3607484c4dce2b2b599163b8330c91e319d8fba35794c34ead"
+            }
+          ]
+        },
+        {
+          "id": "strict-mode-cleanup",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE3.md",
+              "sha256": "46e8d1f80c5fed5a349126272009c79bca673180792f1b233fc23d82f20c0c42"
+            },
+            {
+              "path": "docs/react-migration/STAGE3.json",
+              "sha256": "8b401892be0d5f3607484c4dce2b2b599163b8330c91e319d8fba35794c34ead"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Recorrido principal",
+      "status": "complete",
+      "gates": [
+        {
+          "id": "onboarding-accounts",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE4-ACCOUNTS.md",
+              "sha256": "212789f426c4b7082bf1c0d3cc9393382be43317b383577f80cf24ae5b19cdcb"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-ACCOUNTS.json",
+              "sha256": "3f20d9ff278fdfde2298657ea8e848bd4d6485a1cd3c5a2eb4fab66532c13361"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-ONBOARDING.md",
+              "sha256": "38d74e958c96113b24bbeb49a19475ed25f223b0410139b638b05186cb6ef7fc"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-ONBOARDING.json",
+              "sha256": "085bec469e7de5034b2477f438b3cfa2cbf53214974d1c4320d440b4c8c08944"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CREATION.md",
+              "sha256": "acf54cdd7d4078c8132f1c134153fc00c86e01ff829721b1130e345eeeafe5b1"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CREATION.json",
+              "sha256": "d8691be6a876817c20e464bf6fc65496115537bd22baed8c3e61ac996151ec6d"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-BRANDING.md",
+              "sha256": "1fc375ac843db313ba2fe45c0171e446b67818d93821fa0f8a1e2a6b0a1c0975"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-BRANDING.json",
+              "sha256": "9c5593a4b74e695b378e5f915bfe90edae65c3f6ccf8c3cf8c086e6c5c2c0899"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PROFILE-APPEARANCE.md",
+              "sha256": "4c00f66fd2dffd6065e800e2c25542a2e81bf56123cd2b08dea79872c12152d6"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PROFILE-APPEARANCE.json",
+              "sha256": "24ce9e09365740dc99e40a9c01e0b71d47901ae91168ccb24e5779b4aa05279d"
+            }
+          ],
+          "note": "Onboarding por servicios, alta/selección/eliminación y edición de apariencia local verificados, incluidos errores, foco, persistencia y reinicio del EXE. La equivalencia exacta de OFFLINE conserva la selección local; nuevos perfiles posteriores al reinicio conservan los anteriores. Nombre/UUID de juego estables, cuentas externas intactas, Microsoft deferred. El aspecto dentro de Minecraft se valida con el juego en etapa9; aquí se acredita la gestión local y los bytes guardados."
+        },
+        {
+          "id": "home-carousel",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE4-LIBRARY.md",
+              "sha256": "8e7efee91ee040b1d4f7c0ce05840b4ac62450a6e3ff4bf13786064396a8c5da"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LIBRARY.json",
+              "sha256": "7c7693f6f922b3bc65744c7c1aa49fa619b4570cef95b60fb9b8a7faf171807c"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LAUNCH.md",
+              "sha256": "79cc0339304424f376db619d9f3c6a8fe1667ce6eb8155f22bbc6b46afeaa9ab"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LAUNCH.json",
+              "sha256": "8188594f39504979cb784e9bef40fd4110dd0b5c6beaad162acb2ce1ca6ca114"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-BRANDING.md",
+              "sha256": "1fc375ac843db313ba2fe45c0171e446b67818d93821fa0f8a1e2a6b0a1c0975"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-BRANDING.json",
+              "sha256": "9c5593a4b74e695b378e5f915bfe90edae65c3f6ccf8c3cf8c086e6c5c2c0899"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PROVIDER-MEDIA.md",
+              "sha256": "b184261540f93e82bc259ddb18a7181e9681312fa295029160e1ba2ae2730a7d"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PROVIDER-MEDIA.json",
+              "sha256": "6131046346dddd9c34b90299c4b590f3912cc715f998a483152c1605a13f4cc0"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-RECENT-ORDER.md",
+              "sha256": "0da36f0b407f9c5c5201fa4601dccd11920fa6aa10c6b57b4328a51af0b1d24b"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-RECENT-ORDER.json",
+              "sha256": "2cf048843cc244df2671e8b39bac59ea354a7e5ab7c4b04f90359d78d0a39155"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-AMBIENT-MEDIA.md",
+              "sha256": "b17333174911638eb0fd5ac68d45377bf46e70e9f82c099680a0140a3aa7748c"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-AMBIENT-MEDIA.json",
+              "sha256": "629b2376ede2127def12d3e3864f85ed0c2c4974ea78cc5ccbe31372e7258743"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PERFORMANCE-PRELIMINARY.md",
+              "sha256": "0f063d7d1d48464af9e6cfe339ac2962131c47bcf01f0af4be9762b74e2650f4"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PERFORMANCE-PRELIMINARY.json",
+              "sha256": "0fa5bcbbafdd8247b82974b940dfcd2768db4fd7b4cc27799fbe121a30ed1564"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CLOSURE.md",
+              "sha256": "590a3a9f137d410bed5744d3b0e1ed9fcd3e2a7207a525b7f8eb6d3d4e73021c"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CLOSURE.json",
+              "sha256": "411fc2911171c8ebad9c49cd290d8c6d2a83489ccd0df42fb38681e5486b2052"
+            }
+          ],
+          "note": "Integración de Inicio/carrusel y presupuesto de referencia aceptados:orden/selección independiente,medios/caché/pausas/ticks reales,CPU<8%,24fps,memoria/arranque comparados yGPU física. Recientes limitados3 yBiblioteca1000virtualizada. Fuente6e3b83d/STAGE4-CLOSURE. Tareas7 ycabecera5 no se declaran implementadas."
+        },
+        {
+          "id": "library-instance-launch",
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE4-LIBRARY.md",
+              "sha256": "8e7efee91ee040b1d4f7c0ce05840b4ac62450a6e3ff4bf13786064396a8c5da"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LIBRARY.json",
+              "sha256": "7c7693f6f922b3bc65744c7c1aa49fa619b4570cef95b60fb9b8a7faf171807c"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CREATION.md",
+              "sha256": "acf54cdd7d4078c8132f1c134153fc00c86e01ff829721b1130e345eeeafe5b1"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CREATION.json",
+              "sha256": "d8691be6a876817c20e464bf6fc65496115537bd22baed8c3e61ac996151ec6d"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LAUNCH.md",
+              "sha256": "79cc0339304424f376db619d9f3c6a8fe1667ce6eb8155f22bbc6b46afeaa9ab"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LAUNCH.json",
+              "sha256": "8188594f39504979cb784e9bef40fd4110dd0b5c6beaad162acb2ce1ca6ca114"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-BRANDING.md",
+              "sha256": "1fc375ac843db313ba2fe45c0171e446b67818d93821fa0f8a1e2a6b0a1c0975"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-BRANDING.json",
+              "sha256": "9c5593a4b74e695b378e5f915bfe90edae65c3f6ccf8c3cf8c086e6c5c2c0899"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-IMPORTS.md",
+              "sha256": "cefb9b7072f0233e5a97d1ad2ca9e654cb187f54f1649279e41ab1655c2ea3e7"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-IMPORTS.json",
+              "sha256": "92128b6fcdda77baff1bd3622adbedf3771f83162f35b46a2f328bdbd754c3d7"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PRISM.md",
+              "sha256": "e6cfefe9950a0ea3bb1b37429e517e38a3fad3bbb35f1e7683c6b9c0aaa80f43"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PRISM.json",
+              "sha256": "8ea9fbb19bf3aec657684c06dd526032b7abe29485bd3b8f7bd3cb6819a5d919"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-VANILLA.md",
+              "sha256": "44f5e994b65c5a534b1b18b0204483e99e205335dcd7648e2d479f939d8f7b52"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-VANILLA.json",
+              "sha256": "aa0d36489462893936a52c825e0223d841ede6a49dcadde86162bda59401276e"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CLIENTS.md",
+              "sha256": "f2f0d98ebb8d0205f0b33597d7d79ccbecdfc607d996960b93e37525b8e8dd66"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CLIENTS.json",
+              "sha256": "43168ee1419718b46826ea10ee30ed53804302bb08a99959b26dffcec15fe621"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PRISM-BASE.md",
+              "sha256": "bb3316ecd54f69b7a5a2ec4c34fa837b4698ce4a154bf9d7d64b563bcaa65369"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-PRISM-BASE.json",
+              "sha256": "fc914f909b7a51720dba1aaad77d46b69c02dc160db47ecd6213604988938f88"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-OPERATIONS.md",
+              "sha256": "a6799934a8e013b30df8972750641add6a7d53aabf5b40300ba75fc144ae89f6"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-OPERATIONS.json",
+              "sha256": "ee2323ce2303780938e74357d55936d88acb199f3d2ced6093dfd9e97ca98ee7"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-EXPORT.md",
+              "sha256": "e431b7167b1be186571bca454bf2ea605205e3f43963ef1ab2c743912b7bf2a9"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-EXPORT.json",
+              "sha256": "6721f40e3e277d9fb49e6e996e3223db1aadd91031b4a11e7076436ffc12a2d1"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-GROUPS.md",
+              "sha256": "73fb1ff4990db02a4f552cc6c36d6d7091205a37bfadf4e464680d99b7c1fdaf"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-GROUPS.json",
+              "sha256": "00d13fb020b6fd6aa16ab0a3cfea6c8a1a0af98f4d28550496707e6dfc6fc529"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-COPY-CANCEL.md",
+              "sha256": "cfca77f20ebee7697bda64c75e3bf1e8220aabf4ab28e8131db0f679694fe207"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-COPY-CANCEL.json",
+              "sha256": "215bcad8d2caeada5c004389c32b027136a893451bbb2ca8d0411ca4087bc731"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-COPY-RESUME.md",
+              "sha256": "1afbf9dbf393e13b04a387cb290e9ad7c3f64ac641a5b8d55455630e7405f4a1"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-COPY-RESUME.json",
+              "sha256": "3bd5681656fa8144f48a2da56dd83b902440689754bf42c19e5870bf13539b5b"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-VIRTUAL-LIBRARY.md",
+              "sha256": "12df1601539a416a0df3b862898ecf46b816990c772e7d3e7846b918ad4e2c8b"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-VIRTUAL-LIBRARY.json",
+              "sha256": "18b01e007af3da06dca0a37dc5d6d127b80dbb4f73b4d64a3bfa2044d75f6cdc"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-SHARED-CONTENT.md",
+              "sha256": "f016f1543b5a17229ac63799d876adef520b574d4d567ad59febc8571efd5635"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-SHARED-CONTENT.json",
+              "sha256": "4d4bdd707744b4f1ed858335261071c50cbfca5f4ca7a44d973d07e55feaac59"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-INSTANCE-ICONS.md",
+              "sha256": "66354079c857cb71a0e0689ed60a24dfe814f9d3028f0dc0b087b8e16a12a6e2"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-INSTANCE-ICONS.json",
+              "sha256": "df983cdd33d78919cca93798c2032ea00d833278eeb5a636e6ca2da142de5d0f"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LIBRARY-PARITY.md",
+              "sha256": "dc6f7c59dee6e6975df52622e1e65f6671a90f7477dbadab2ebaf438c027b8cd"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-LIBRARY-PARITY.json",
+              "sha256": "e852a93a7b7bb67f258c939d1831a18b0b306c6c67945c79d6e478448b7a86de"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-RECENT-ORDER.md",
+              "sha256": "0da36f0b407f9c5c5201fa4601dccd11920fa6aa10c6b57b4328a51af0b1d24b"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-RECENT-ORDER.json",
+              "sha256": "2cf048843cc244df2671e8b39bac59ea354a7e5ab7c4b04f90359d78d0a39155"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CLOSURE.md",
+              "sha256": "590a3a9f137d410bed5744d3b0e1ed9fcd3e2a7207a525b7f8eb6d3d4e73021c"
+            },
+            {
+              "path": "docs/react-migration/STAGE4-CLOSURE.json",
+              "sha256": "411fc2911171c8ebad9c49cd290d8c6d2a83489ccd0df42fb38681e5486b2052"
+            }
+          ],
+          "note": "PLAN5.4 exige crear/importar/lanzar vía servicios en4;contratos React/IPC,archivos,diagnósticos/captura/reintento/procesos probados por informes registrados. Se acepta esa integración;Java/loaders/partida reales continúan pendientes enK03/K05/K06 y aceptación9. Las notas previas confundían validación física final con esta gate;PLAN/SCOPE no cambian. Fuente6e3b83d/STAGE4-CLOSURE,no publicación."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Espacio de instancia",
+      "status": "active",
+      "gates": [
+        {
+          "id": "instance-content",
+          "status": "pending",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE5-WORKSPACE.md",
+              "sha256": "23db1fc1a4a8ef3bc7350bd92e5dfff04b998db62b8b1ba9570934787641e982"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-WORKSPACE.json",
+              "sha256": "2d377b776a6d9d86edc58a7f8e62e617679ad63c70311fce0b05e0d000769521"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-AUTHORITY.md",
+              "sha256": "75cb69bd6fd1da76f1c44cb4c2e6c09080f9d60243b67b88e567e359ea2cebf2"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-AUTHORITY.json",
+              "sha256": "a0b0b99940ec80de9911655e5f93580668ac3c48e31459fc0efb94ab0dc42afe"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-GROUPS.md",
+              "sha256": "0b37ec01e096b5766754b49b815a220168135c0d3aae697ffaadf231842fae5b"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-GROUPS.json",
+              "sha256": "1717fc3be1d141a3ecf7c4fce0cd90b7de6a6a2cc30c9c07fbdd6e62526353de"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-LOCAL-FILES.md",
+              "sha256": "e560d8ef3eaa6122745fa6ad84726660620b2d2a98179096f5be078b21519b4f"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-LOCAL-FILES.json",
+              "sha256": "d399fae5ab04da270700735053e81e05a3c42c5080355885d4a19bd8e2fb2fd9"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-MOD-INFO.md",
+              "sha256": "58853e98041ab9fd2736a98b20c9db714144e4b1f64942703d513fdb41d31632"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-MOD-INFO.json",
+              "sha256": "210ed5e78f25e3597b1e9cfc8df69d3b4ca6ed444fe08b149f2a6f0a95102433"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-DIAGNOSTICS.md",
+              "sha256": "0a18c5272eee441d5614fa0de85462bba7edf99affd26c7e43ebba9568947bad"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-DIAGNOSTICS.json",
+              "sha256": "63fe5b9d15f6b35c3170e92b0b47d43f552c1ff33e69985a15d636f786e0c150"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-MOD-CHANGES.md",
+              "sha256": "586fa04f8844fbe4286bde0b0222fe628092459b0ba0da494ea2bc6982e16947"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-MOD-CHANGES.json",
+              "sha256": "bb1b2d6f4a247132c0f734c12e35a593ff355fd2aeb3b124387443ba31954146"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-INSTALL-STATE.md",
+              "sha256": "8ae5640fc0577d71ef97125824dbdda46b672df16f7d35f5e09d13b8415130b6"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-INSTALL-STATE.json",
+              "sha256": "74edad2288d35995312fb44c63a0784a61a0f517d717a3c359c3ca44daa44a8c"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-INSTALL-AUTHORITY.md",
+              "sha256": "45038e209cd77fb092b8a06635abf8c5337d4440bd25b345fba2a17c118e49aa"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-INSTALL-AUTHORITY.json",
+              "sha256": "b0a54382f506081afce2b1803d3cd57638243ec1ff658af39fffece8ebacd367"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-INSTALL-PATHS.md",
+              "sha256": "ede81d49a90098f62be906e48dfc4c10ec9ba364be5d0a7999f16979d829e94a"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-INSTALL-PATHS.json",
+              "sha256": "a4c99f7758a04961a322ecb145a236afc04247e9ad71b755892d10fc778e5721"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-INSTALL-TARGETS.md",
+              "sha256": "bbc64003cf00f5f00066aecc59bd19bc781a32816d10058f3ce34499ef59241a"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-UPGRADE-MANIFEST.md",
+              "sha256": "52ad4317158be582f1e385667d0fc789e15df268d0ea51b64914f0fecd4275c7"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-REVIEWED-UPGRADES.md",
+              "sha256": "ddae6228489dcf3fe543b7cddb2f7bb3c937e85999404ab0f6dd416f44040c06"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-MOD-UPDATES.md",
+              "sha256": "6ab6c87a93833b68e539c6bcd9e4d9103a06fc59133da8771258f5bad8185a5b"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-MOD-RECOVERY.md",
+              "sha256": "8f34b3a056f9c986483220eb7ec8e1325f5ad7a73688e2c8dcbbb2b5e19b28fb"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-RESOURCE-PACK-SELECTION.md",
+              "sha256": "8b1c45d6b69033c7602efdfafb3969aa8f86134823d591a24630f95764585089"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-RESOURCE-PACK-FILES.md",
+              "sha256": "3aaa83baf9122faad7e31475553c5aed58245d5593f1c3f116843c203513f98a"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-RESOURCE-PACK-STARTUP.md",
+              "sha256": "d1742aa22c75e10918752cc795f1a0ac7063d5b7b531707f457193411fadf3ce"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-PACK-INFORMATION-GROUPS.md",
+              "sha256": "a81b29215a8e5bed77da97e64a1fc5c13fd373d55423d9f4ea1d0bb270a6db56"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-CI-WINDOW-FOCUS.md",
+              "sha256": "b2b2de213d5512f62fd478035c3c26934f34362a19fb06b0759962578b0d37eb"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-PACK-SHARING.md",
+              "sha256": "45b21abaa198c13fffac9d37745cf9dc78db36539ce9ee2469cb3df2e81b0e7f"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-CI-SHARING-FAILURES.md",
+              "sha256": "2fef2dee2934b5051697ae8fa8064d65ce26920c21140052c51da3f4cbc93e93"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-PACK-UPDATES.md",
+              "sha256": "fd28d93497c6cf5b581c0a34c2382593b105685605bb6a2af07fce02383df7db"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-SHARED-PATH-ALIASES.md",
+              "sha256": "550b39d28f3c032f0ad0a0d3c25122aa1e50651e6f26bce3e4e1106b539726cf"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-SHADER-SELECTION.md",
+              "sha256": "55b4dde22b070cc649547f940cf9930d23ca12619a3159b567660184d991a7e1"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-SHADER-IMPORT.md",
+              "sha256": "bcc60d06d1466ce03cbd428659b2f4fc6f03d739cf930c40a5991c7d0b4bccf0"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-CI-SHADERS.md",
+              "sha256": "d4d6fa21476dc50a231b28d5f783a6c97c4ed531384d6824b3f2468892300ff4"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-SHADER-REMOVAL.md",
+              "sha256": "73f03be1780781190c137a6123d694667b6ca088594a9b0ce063a5c27a308e84"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-SHADER-INFORMATION-GROUPS.md",
+              "sha256": "4d86ed453f25de18a6fbf8355626b7f997ac0d4a5c68c8fcc346fab47cbd88a8"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-SHADER-SHARING.md",
+              "sha256": "bd9fd6a7195b224b275fae65aa9f9fdd5cc4e71f893a628c985251ad8483cc5e"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-SHADER-UPDATES.md",
+              "sha256": "9fa036aacdb7e703e52caa7391f322f9aa718df6e97c474880d9667795bb85e2"
+            }
+          ],
+          "note": "Avance parcial: núcleo local shaders implementado hasta updates/recuperación41f5692;983unidades,tipos/lint,34NativeReact+4Vue finales,9Axe0violaciones/18incomplete. CIb8c8f18 aprobado para compartidos anterior. K08/K09/K10 y gates5 pendientes de aceptación integral;continuar mundos/ajustes/consola y después catálogo/proveedores reales6."
+        },
+        {
+          "id": "worlds-settings",
+          "status": "pending",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE5-WORLDS-READ.md",
+              "sha256": "8ff60ab5bb7e002e47aa7d98e3dba11111cbc14569119250d8dca3a0f2c1f799"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-WORLD-OPERATIONS.md",
+              "sha256": "292b25e8b41e147e118def57d9d8ebe82e96d30406daa92300ff0300fd43a25a"
+            }
+          ]
+        },
+        {
+          "id": "console-isolation",
+          "status": "pending",
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Catálogo público",
+      "status": "pending",
+      "gates": [
+        {
+          "id": "catalog-search",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "catalog-install",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "catalog-network-failures",
+          "status": "pending",
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Superficies restantes",
+      "status": "pending",
+      "gates": [
+        {
+          "id": "global-settings-updater",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "remaining-windows",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "accessibility",
+          "status": "pending",
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Sustitución y retirada de extras",
+      "status": "pending",
+      "gates": [
+        {
+          "id": "react-default",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "removed-features",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "consumer-builds",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "data-compatibility",
+          "status": "pending",
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Validación y publicación",
+      "status": "pending",
+      "gates": [
+        {
+          "id": "full-validation",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "isolated-installer",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "performance-security",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "release-assets",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "publication",
+          "status": "pending",
+          "evidence": []
+        }
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "date": "2026-10-23",
+      "source": "user",
+      "change": "Medios reales: Vanilla/fallback se busca en internet; packs usan sus propios recursos vía metadatos. No usar la imagen IA generada ni reemplazar fondos de todos los packs por Vanilla.",
+      "previousPlanSha256": "8595d10f58038fcc06935c8cf7be6a34f6ac38942c12413b4c0db7a64a60f30a",
+      "previousScopeSha256": "16b7e8204a84c923dce1c695e4155da409d1df24c19e240fab54fde9f67063d2"
+    },
+    {
+      "date": "2026-10-23",
+      "source": "user",
+      "change": "Priorizar imágenes reales Vanilla con shaders ya renderizados; packs conservan sus propios recursos. No instalar ni ejecutar shaders para el fondo.",
+      "previousPlanSha256": "55c35896706c4546f3d95b97d87fee9f2a309636f88c41f53d52e33530abff01",
+      "previousScopeSha256": "0f69c85567cbeeed08198949abf02a281d60229822039dea617fe0c64f25bd52"
+    },
+    {
+      "date": "2026-10-24",
+      "source": "user",
+      "change": "Revisión visual: extender paisaje a fondo de toda la ventana y añadir glassmorphism. No es aceptación final; conservar contraste/rendimiento y no reintroducir extras.",
+      "previousPlanSha256": "14759855940f8a67672231b46f8c94f374e3828d583006b4c2af001c40a37b95",
+      "previousScopeSha256": "8c0b6136b39ab2a8bcfa982780ceb0971a013c68328bfcb5d196990432a71340"
+    }
+  ]
+}

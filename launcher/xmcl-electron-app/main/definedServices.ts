@@ -1,3 +1,4 @@
+import { PresentationService } from '@xmcl/runtime/presentation/PresentationService'
 import { BaseService } from '@xmcl/runtime/app'
 import { AgentService } from '@xmcl/runtime/agent'
 import { AuthlibInjectorService } from '@xmcl/runtime/authlibInjector'
@@ -42,6 +43,7 @@ import { LocalSkinService, OfficialUserService, UserService, MinecraftFriendsSer
 import { ServerService } from './ServerService'
 
 export const definedServices = [
+  PresentationService,
   // Main-process-only: it deliberately has no service key, so token access
   // cannot be invoked through renderer service IPC.
   ExternalCredentialService,

@@ -38,7 +38,7 @@ test('beta.3 offers a manual upgrade and Aurora preserves its account, instance 
     await app!.evaluate(({ net }, version) => {
       const original = net.fetch.bind(net)
       net.fetch = (input: any, init?: any) => String(input).includes('/repos/Jeremy-Godoy-D/Launcher-MC/releases?')
-        ? Promise.resolve(new Response(JSON.stringify([{ tag_name: `v${version}`, prerelease: true, draft: false, assets: [{ name: `LauncherMC-${version}-win-x64.exe`, browser_download_url: `https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/download/v${version}/LauncherMC-${version}-win-x64.exe` }] }]))) as any
+        ? Promise.resolve(new Response(JSON.stringify([{ tag_name: `v${version}`, prerelease: true, draft: false, assets: [{ name: `GrimoLauncher-${version}-win-x64.exe`, browser_download_url: `https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/download/v${version}/GrimoLauncher-${version}-win-x64.exe` }] }]))) as any
         : original(input, init)
     }, version)
     await expect.poll(() => old.evaluate(async () => {
@@ -50,7 +50,7 @@ test('beta.3 offers a manual upgrade and Aurora preserves its account, instance 
     await app!.close()
     app = undefined
     // Full-package replacement: boot the genuine new binary with the same isolated data.
-    const upgraded = await launch(resolve('../xmcl-electron-app/build/output/win-unpacked/Launcher MC.exe'))
+    const upgraded = await launch(resolve('../xmcl-electron-app/build/output/win-unpacked/Grimo Launcher.exe'))
     expect(await app!.evaluate(({ app }) => app.getVersion())).toBe(version)
     const shell = new AppShell(upgraded)
     await shell.dismissTutorial()

@@ -8,7 +8,7 @@
     </div>
     <AppSystemBar v-if="!isBigPicture" back>
       <span class="inline-flex items-center gap-2 px-2 text-xs font-semibold tracking-tight text-[var(--mc-ink-secondary)]">
-        <span>Launcher MC</span><span class="opacity-40">/</span><span>{{ sectionLabel }}</span>
+        <span>Grimo Launcher</span><span class="opacity-40">/</span><span>{{ sectionLabel }}</span>
       </span>
     </AppSystemBar>
     <div
@@ -42,7 +42,7 @@
   </v-app>
   <v-app v-else class="aurora-shell h-full max-h-screen overflow-hidden" :class="{ 'dark': isDark }">
     <AppBackground />
-    <AppSystemBar no-user no-task no-debug><span class="px-4">Launcher MC</span></AppSystemBar>
+    <AppSystemBar no-user no-task no-debug><span class="px-4">Grimo Launcher</span></AppSystemBar>
     <div class="app-layout relative flex min-h-0 flex-1 overflow-hidden">
       <Setup @ready="onReady" />
     </div>

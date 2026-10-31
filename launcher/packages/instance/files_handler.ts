@@ -1,4 +1,4 @@
-import { constants, copyFile, ensureDir, remove, rename, rmdir, stat, unlink } from 'fs-extra'
+import { constants, copyFile, ensureDir, lstat, remove, rename, rmdir, stat, unlink } from 'fs-extra'
 import { dirname, isAbsolute, join, relative } from 'path'
 import { fileURLToPath } from 'url'
 import { InstanceFile, InstanceFileUpdate, isInstanceInstallPath } from './files'
@@ -71,6 +71,13 @@ export function assertNoCaseInsensitivePathCollisions(
       throw error
     }
     seen.set(key, path)
+  }
+}
+
+export function assertInstanceInstallPaths(instancePath: string, paths: Iterable<string>) {
+  for (const path of paths) {
+    const normalized = relative(instancePath, join(instancePath, path))
+    if (!normalized || isAbsolute(path) || normalized === '..' || normalized.startsWith(`..\\`) || normalized.startsWith('../') || isInstanceInstallPath(normalized)) throw new Error(`Invalid instance install path: ${path}`)
   }
 }
 
@@ -197,14 +204,7 @@ export class InstanceFileOperationHandler {
 
   #validateUpdates(updates: InstanceFileUpdate[]) {
     assertNoCaseInsensitiveUpdatePathCollisions(updates)
-    for (const { file: { path } } of updates) {
-      const normalized = relative(this.instancePath, join(this.instancePath, path))
-      if (!normalized || isAbsolute(path) || normalized === '..' ||
-          normalized.startsWith(`..\\`) || normalized.startsWith('../') ||
-          isInstanceInstallPath(normalized)) {
-        throw new Error(`Invalid instance install path: ${path}`)
-      }
-    }
+    assertInstanceInstallPaths(this.instancePath, updates.map(update => update.file.path))
   }
 
   /**
@@ -212,7 +212,7 @@ export class InstanceFileOperationHandler {
    * file intact; removals are deferred until all target files are available.
    * The caller persists `committed`/`removed` even if this method rejects.
    */
-  async commitReadyFiles(updates: InstanceFileUpdate[], complete: boolean, checkInstance: () => Promise<void>) {
+  async commitReadyFiles(updates: InstanceFileUpdate[], complete: boolean, checkInstance: (file: InstanceFile, operation: InstanceFileUpdate['operation']) => Promise<void>) {
     this.committed.clear()
     this.removed.clear()
     this.#validateUpdates(updates)
@@ -225,7 +225,7 @@ export class InstanceFileOperationHandler {
       if (operation !== 'add' && operation !== 'backup-add') continue
       if (!this.finished.has(file.path)) continue
       try {
-        await checkInstance()
+        await checkInstance(file, operation)
         const src = join(this.workspacePath, file.path)
         const dest = join(this.instancePath, file.path)
         await ensureDir(dirname(dest))
@@ -262,7 +262,7 @@ export class InstanceFileOperationHandler {
           continue
         }
         try {
-          await checkInstance()
+          await checkInstance(file, operation)
           const dest = join(this.instancePath, file.path)
           if (operation === 'backup-remove') {
             const backup = join(this.backupPath, file.path)
@@ -575,7 +575,8 @@ export class InstanceFileOperationHandler {
     const destination = join(this.workspacePath, file.path)
 
     // Check if file already exists with correct checksum
-    const fStat = await stat(destination).catch(() => undefined)
+    const fStat = await lstat(destination).catch(error => { if (error.code !== 'ENOENT') throw error })
+    if (fStat && !fStat.isFile()) throw new Error('Unsafe staged instance file')
     if (fStat && fStat.isFile()) {
       const checksum = getInstanceFileChecksum(file)
       if (checksum && await this.#matchesChecksum(destination, checksum)) {
@@ -584,6 +585,9 @@ export class InstanceFileOperationHandler {
         return
       }
     }
+
+    // A stale workspace file may be a hard link to a cached resource.
+    if (fStat) await unlink(destination)
 
     // The workspace copy is missing or its content does not match the
     // expected hash. Drop any stale "finished" marker that may have

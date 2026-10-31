@@ -15,7 +15,7 @@
  *    so scripts/build-tutorial.ts can compile docs.
  */
 import { _electron, ElectronApplication, Page, test as base } from '@playwright/test'
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -65,7 +65,7 @@ const ELECTRON_BIN = PACKAGED_BINARY || (process.platform === 'win32'
  * elapses, throwing a descriptive error that enumerates every observed
  * window URL so CI logs pinpoint which window the launcher stalled on.
  */
-async function waitForAppWindow(
+export async function waitForAppWindow(
   app: ElectronApplication,
   pattern: RegExp,
   timeoutMs: number,
@@ -143,6 +143,10 @@ export interface LauncherFixture {
 }
 
 export interface LauncherOptions {
+  /** Exercise configured paths through a temporary parent junction. */
+  gameDataParentAlias?: boolean
+  /** Disable the recorder only for calibrated performance measurements. */
+  recordVideo?: boolean
   /**
    * If true, skip writing the `root` file so the launcher shows the bootstrap
    * (first-launch) wizard. Default: false.
@@ -181,9 +185,15 @@ export const test = base.extend<{
       ? SHOWCASE_ROOT
       : await mkdtemp(join(tmpdir(), 'xmcl-e2e-'))
     const appDataPath = join(tempRoot, 'appData')
-    const gameDataPath = join(tempRoot, 'gameData')
+    const gameParent = launcherOptions.gameDataParentAlias ? join(tempRoot, 'data-parent') : tempRoot
+    let gameDataPath = join(gameParent, 'gameData')
     await mkdir(appDataPath, { recursive: true })
     await mkdir(gameDataPath, { recursive: true })
+    if (launcherOptions.gameDataParentAlias) {
+      const alias = join(tempRoot, 'data-alias')
+      await symlink(gameParent, alias, process.platform === 'win32' ? 'junction' : 'dir')
+      gameDataPath = join(alias, 'gameData')
+    }
 
     // Layout matches what xmcl-runtime/app/LauncherApp.ts expects:
     //   {appDataPath}/xmcl/root  -> contains the game data path
@@ -219,7 +229,7 @@ export const test = base.extend<{
         FORCE_COLOR: '0',
       },
       timeout: 60_000,
-      recordVideo: { dir: testInfo.outputDir },
+      recordVideo: launcherOptions.recordVideo === false ? undefined : { dir: testInfo.outputDir },
     })
 
     // Mirror the electron child process stdio into the test output so CI
@@ -280,10 +290,24 @@ export const test = base.extend<{
       file: testInfo.file,
     })
 
+    let artifactError: unknown
     try {
       await use({ app, main, gameDataPath, appDataPath, locale, manifest })
     } finally {
-      await flushJourneyManifest(manifest)
+      try {
+        await flushJourneyManifest(manifest)
+        if (manifest.shots.length) {
+          const directory = testInfo.outputPath('screenshots')
+          await mkdir(directory, { recursive: true })
+          const shots = [] as JourneyManifest['shots']
+          for (const shot of manifest.shots) {
+            const pngPath = join(directory, shot.relPath)
+            await copyFile(shot.pngPath, pngPath)
+            shots.push({ ...shot, pngPath })
+          }
+          await writeFile(join(directory, 'manifest.json'), JSON.stringify({ ...manifest, shots }, null, 2), 'utf8')
+        }
+      } catch (error) { artifactError = error }
       // On failure, copy launcher logs out of the per-test temp before rm,
       // so CI's upload-artifacts step picks them up.
       if (testInfo.status !== testInfo.expectedStatus) {
@@ -310,6 +334,7 @@ export const test = base.extend<{
         await rm(tempRoot, { recursive: true, force: true }).catch(() => {})
       }
     }
+    if (artifactError !== undefined) throw artifactError
   },
 })
 

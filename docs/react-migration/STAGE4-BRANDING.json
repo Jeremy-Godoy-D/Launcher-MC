@@ -1,0 +1,464 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-25",
+  "codeCommit": "ab031939d0caf7d63d4fe6a5c555a5af48ddaea5",
+  "status": "partial-stage-4",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/react-migration.yml",
+      "sha256": "4062b2d6ebc3a21e2fe382303b7f677ab29a619b6732956f48f78ba4c6e60f01"
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "sha256": "5c4922e8d560fb402b68ea938f10001ffb2beb4043a452d3b70aeff58fcb8cd2"
+    },
+    {
+      "path": "launcher/branding/README.md",
+      "sha256": "d71e7ec94e891a3f24c7b81e234f7819912feef24070ecc67c7a230ec4d06a24"
+    },
+    {
+      "path": "launcher/branding/app-1024.png",
+      "sha256": "57652f39e46cb4bcfd9cea4565f448d8251d5805dc33d39d24c1607852458838"
+    },
+    {
+      "path": "launcher/branding/app-128.png",
+      "sha256": "2ec533c943320e78604733bf0278e0dcc1375af9fe7b982dea531bfa9c4ca351"
+    },
+    {
+      "path": "launcher/branding/app-16.png",
+      "sha256": "49adc7e00a413758cd7ee101234e140074a25a9f5c823a33358706efd7c71a28"
+    },
+    {
+      "path": "launcher/branding/app-256.png",
+      "sha256": "4dc37d972c5f93c0aa0e3e3c6811bf38bdd3275833983b4fb5d00a43e091001d"
+    },
+    {
+      "path": "launcher/branding/app-32.png",
+      "sha256": "a813efcc62b62890eea1aaf20830d4608b5bbb4ad281faee722dff044d344717"
+    },
+    {
+      "path": "launcher/branding/app-48.png",
+      "sha256": "2af13ff90f03cbbf8acdb238d52ba4c51d52dfd8b36f6851d58b764c6f956599"
+    },
+    {
+      "path": "launcher/branding/app-512.png",
+      "sha256": "79db392d1955db404e55462310aa40cc87d32c3a46a3ff7cf50788fac54f1973"
+    },
+    {
+      "path": "launcher/branding/app-64.png",
+      "sha256": "f660f481aa45a446dbeda739483d302271d33d9fefbfed9d9afc4ff2cdeb89dd"
+    },
+    {
+      "path": "launcher/branding/assets.json",
+      "sha256": "faaf58deaaec75bd09100f10a3ea1877f172c55c5cb623a581f4808fef52900a"
+    },
+    {
+      "path": "launcher/branding/copper/README.md",
+      "sha256": "961ecae3daef64e2e2f1967c161f57b7000973e7cded135d8c084e975b101e3c"
+    },
+    {
+      "path": "launcher/branding/copper/app-1024.png",
+      "sha256": "62d76a6b165d8b7a0c0020f23e665d607fd7a4dbd3f0db0540ffcee22b820246"
+    },
+    {
+      "path": "launcher/branding/copper/app-128.png",
+      "sha256": "af34c5cefa191cf935d38b76798ac5c10272e06f5917b0c51be76511c4db6dae"
+    },
+    {
+      "path": "launcher/branding/copper/app-16.png",
+      "sha256": "5b56a8d7c32147b370fd1b6b4d62100e9a8c20a8c907ecfa58adc4115b89cbb5"
+    },
+    {
+      "path": "launcher/branding/copper/app-24.png",
+      "sha256": "06ed5c44e6557762756382e5ffaff6596f1923f922965edc706a2e885d8dbb39"
+    },
+    {
+      "path": "launcher/branding/copper/app-256.png",
+      "sha256": "2dcf9f5a698a313d103fdaa4b4d51f8ee834e85608d7dc7ed66400ffb715f7a4"
+    },
+    {
+      "path": "launcher/branding/copper/app-32.png",
+      "sha256": "00741df1c1b3bc8571f99d1471715844abe2cb2a262d8189359eb722e0a1bae2"
+    },
+    {
+      "path": "launcher/branding/copper/app-48.png",
+      "sha256": "bb8f52ceb0a7341317ab27664f5f13877150920f174e4b477446bf26f0df4c61"
+    },
+    {
+      "path": "launcher/branding/copper/app-512.png",
+      "sha256": "fe7384d1b45c25a426001d402c03e0d0fb09e9bd51d01e5f91c18b4cca6fb419"
+    },
+    {
+      "path": "launcher/branding/copper/app-64.png",
+      "sha256": "49ab2ad33cff0ce36818b18cad5a36cc745c99587abc33030c0de60dd7431d08"
+    },
+    {
+      "path": "launcher/branding/copper/assets.json",
+      "sha256": "bc82dcd1adba3ebb07285f95c6ad5012a345f158c060bf2b950fdea4acfd7bed"
+    },
+    {
+      "path": "launcher/branding/copper/grimo.ico",
+      "sha256": "e71def31723a286560c5abd800822969895ffea50434a4152bb676702e29af56"
+    },
+    {
+      "path": "launcher/branding/copper/source-app.png",
+      "sha256": "18bbe47ff3fb95c40a6194ac08f617d805a4a94115de791898b9df0fe90ff4ed"
+    },
+    {
+      "path": "launcher/branding/copper/wordmark-dark.png",
+      "sha256": "3121b8dd1291e44b40a6822f867025ea6e5e733b0fb8154227c7bc8ddbc8254d"
+    },
+    {
+      "path": "launcher/branding/copper/wordmark-light.png",
+      "sha256": "8c375b6acc47720fa36b0349ebbc53f9c99c61ffa62dfa8ba82c5a1a38c05303"
+    },
+    {
+      "path": "launcher/branding/grimo.ico",
+      "sha256": "ec8459f2dec80dbdafb97c1cd3376a00da1637fec3ae51ab44b1e11646d7a46d"
+    },
+    {
+      "path": "launcher/branding/isotipo.png",
+      "sha256": "08e2ec9538bd9428125cf5a3636ac4b4389e4d68d7bf6549d998f645005caa3a"
+    },
+    {
+      "path": "launcher/branding/logo-horizontal.png",
+      "sha256": "28ce9e499052b31e1d2cc9832cd0d0c92dcbcd317b420403643bf83ffbecc91b"
+    },
+    {
+      "path": "launcher/branding/logo-principal.png",
+      "sha256": "2dcde8f72f4f75cd18028f966452075ad693e37750988f1c8c95616028540b09"
+    },
+    {
+      "path": "launcher/deskgap-app/src/launcherApp.ts",
+      "sha256": "a32f40ffadc554dd258c230e4e11005e67ed6aea0cdf2c582250184b0919e527"
+    },
+    {
+      "path": "launcher/e2e/TESTIDS.react.md",
+      "sha256": "c51bbc53f16e491f09239c4462a6f63e97e900b662f63d8b033158e3ddf37961"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/13-branding.spec.ts",
+      "sha256": "0d62841692790588ecf9f60f82c35ebf56b5574985c94bc1aff56e6da2eacd9c"
+    },
+    {
+      "path": "launcher/e2e/specs/release/01-beta3-migration.spec.ts",
+      "sha256": "c8cbbf0dace89b159f9017a97e18546d63cbeba8df1f3e8f31307cad182a0f35"
+    },
+    {
+      "path": "launcher/scripts/branding.test.ts",
+      "sha256": "fa7faafc349c433ad23750e9b36dae2a1304d9303dbc3377076f472b76fff0a8"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/appxmanifest.xml",
+      "sha256": "872697ba14a47992da87339e35ac15f340c14efb71797e803746d36ffa67dd86"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/electron-builder.config.ts",
+      "sha256": "32f87b29b870acbda4854f927345d5c67ba45737890aaa4168e9dac52c325967"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/main/ElectronLauncherApp.ts",
+      "sha256": "0cf06c6ceade5dd7866eaaa19ee4fa6b5c759ac1e43f1f9f4cd61e87b9c9ae60"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/main/ManualUpdater.ts",
+      "sha256": "a2e703118765ee85e4e22bd834dcf77ff085519142e7b04029e93fe6e2e83a35"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/main/defaultApp.ts",
+      "sha256": "0ab8c00466e1e85160219862d2feb98e670d6f141acabef46ecb8fa1af472534"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/main/definedPlugins.ts",
+      "sha256": "6113d55c93883d36c31cf732ff08cb99072c9dec8389be4593a9ea07a7e63226"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/main/pluginIconProtocol.ts",
+      "sha256": "d92e653ffae450121312663793697034f8356566e15202826cbcdc0e8869e20b"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/main/utils/icons.ts",
+      "sha256": "0681400d7ea8222e482f755084020c179aaf7af14b8fc0bd7eedba108f5eed44"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/package.json",
+      "sha256": "4bda117b844466abe14031bd0066b2a7ebc192e1c7d4fa1dc87e1f6c9e40894a"
+    },
+    {
+      "path": "launcher/xmcl-keystone-ui/src/components/UserLoginForm.vue",
+      "sha256": "32b8883a5ce6cb0df7c0f56b36821906e21d51ee20ea4a7d6b16e20d8e2492a0"
+    },
+    {
+      "path": "launcher/xmcl-keystone-ui/src/index.html",
+      "sha256": "bdad325d3088184d035fcad812670e6241789476679da669f5519cdf449b6442"
+    },
+    {
+      "path": "launcher/xmcl-keystone-ui/src/views/HomeLayout.vue",
+      "sha256": "b79cf8f1691e32b8976193145a98595903757e0abf34536a1d9e862959da5a8f"
+    },
+    {
+      "path": "launcher/xmcl-keystone-ui/src/views/LauncherNavigation.vue",
+      "sha256": "c35ebea80d67af2047fa1a800d2fa3114fe0114141e0fd24044c85945514b740"
+    },
+    {
+      "path": "launcher/xmcl-keystone-ui/src/views/SettingAbout.vue",
+      "sha256": "1dbe07b33790ee8d902a7fb5d2219fd2c48de820effd9f876090fcd060da59b2"
+    },
+    {
+      "path": "launcher/xmcl-keystone-ui/src/windows/main/App.vue",
+      "sha256": "6e414be5928aaff918afda7d34c17a742865263b3c73dfcfcb96c9f01cbfe747"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/DESIGN.md",
+      "sha256": "f575b3e0c24c485b94375c9c81e9865577f1b8cc398c4b2dcd498c0f66275e11"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/PRODUCT.md",
+      "sha256": "aa888dd252da86efaf7ac3945e7ea0c1d205938aab6a252c6c8061b3f4bb63a1"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/App.tsx",
+      "sha256": "58ea76fea02f5bea846557b99697f773e3a7e3af71812906fd33b66c44964204"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/auxiliary.tsx",
+      "sha256": "09392b394ea3967d86350160facb07c738a3b93b5863fec2b1663d3253050359"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/onboarding/Onboarding.tsx",
+      "sha256": "2de3f2275c7900c6952007fa18ab3f23db50eee031740fd565c1b0f8f8cf977b"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/onboarding/onboarding.css",
+      "sha256": "c6b742d0b490663028ea6652347c4097eb617b09846dfcf382c4c098e4940449"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/en.yaml",
+      "sha256": "be9ae76a90e89935c32136390314ece03fcde94c9ec4ac5b57b80842b04c6e59"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/es-ES.yaml",
+      "sha256": "7527b7e82ed527dce5c6f68cd39663845a10fc9acec6dd25e74ae3862ad111aa"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/index.html",
+      "sha256": "a089cc3adf91d973e882740d8c6d38f9836d815a564ba466c5da379dc4895ec0"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/logger.html",
+      "sha256": "ed842b2d2d314605e790bb4150b0896506613fa46497618c5ca2244ed98ffe82"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/migration.html",
+      "sha256": "1b2421275ce572c7d8bb0bd8a88193435ead3f90e246f69b6f06d137ff22fc88"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/styles.css",
+      "sha256": "16e8c1c8c858d45b4b0d002230d2453ca44d8cda9e58ec4754f676632804dd42"
+    }
+  ],
+  "validation": {
+    "unit": {
+      "passed": 269,
+      "files": 29,
+      "seconds": 15.91
+    },
+    "electronReact": {
+      "passed": 22,
+      "reportedDuration": "1.4m"
+    },
+    "strictMode": {
+      "passed": 1,
+      "seconds": 4.6
+    },
+    "electronVue": {
+      "passed": 2,
+      "seconds": 11
+    },
+    "harness": {
+      "passed": 9
+    },
+    "types": "passed: root",
+    "lint": "passed: 0 warnings/errors",
+    "axe": {
+      "reports": 33,
+      "violations": 0,
+      "incomplete": 46
+    },
+    "detector": {
+      "findings": 0,
+      "targets": [
+        "Onboarding.tsx",
+        "onboarding.css"
+      ]
+    },
+    "packagedIcon": {
+      "matchedFrames": 7,
+      "windowsExtraction": true
+    },
+    "workflows": "YAML parsed; not run on GitHub"
+  },
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/grimo-unit-confirmed.log",
+      "sha256": "1e370df76b986f59e72476882c7a2ec483c2e18281cba85554afc24bf41b2788"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-harness-tests.log",
+      "sha256": "59c3a187b5ea8246dc3dc4c0aa8d8482a9851f0f53267020dbe57b7ed2f41861"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-copper-types.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-copper-lint.log",
+      "sha256": "a58f60220db28ba2c1a678d4cfee238d48b569545ac29bf964e067bd6511c9a8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-detector.json",
+      "sha256": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-copper-renderer.log",
+      "sha256": "71e662fa37c79ccc319b77df268395aff5accd02067f7fd576b1918ff765dadf"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-copper-build.log",
+      "sha256": "ccdf0288b2198492569bf638c0a59cc7162a62f7ff8dd76bc18dc9e861867ae6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-regression.log",
+      "sha256": "f7d010277dedcf3eb5dbf3053fa5f914cfea507736bd1a28ba04fac08693207a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-strict.log",
+      "sha256": "9942fb1dc67f2d2e01687fab6d2b6231426f4605986822bbb42ef42f2c8870eb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-vue-renderer.log",
+      "sha256": "800d50cfb0073f89788b4594053ef1777e0098b7d1f6e648462497d0831fe323"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-vue-build.log",
+      "sha256": "5120ef2ee711712bc3ac10bbcc06d55cf8dc60a77cb15e98aa85cf6e4f04bccd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-vue.log",
+      "sha256": "46e2dc0f258ef796e6aed078481344939956641b0d2d05d6b01146ec8b2a9ba1"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-packaged-icons.json",
+      "sha256": "2d8fcc76aeca2f152dae6cc058246316cb0332ae8ec941db1314cf710f4db8f0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-extracted-icon.png",
+      "sha256": "00741df1c1b3bc8571f99d1471715844abe2cb2a262d8189359eb722e0a1bae2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/accessibility.json",
+      "sha256": "6efae9d44cd2769a8162400fcf4a66cc5cee81aff9d49b5ecbe8eef5c1fa0938"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/react-migration-02-package-ecf1f-d-decodes-its-shipped-video-electron-es-ES/package-smoke.json",
+      "sha256": "7f9f489555761c6192eaf2f00dec5d7fbf09c708319f0328e316c672a0cf93d6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/react-migration-05-prefere-fb385-windows-and-runtime-locales-electron-es-ES/preferences-i18n.json",
+      "sha256": "b47fb38f873fc32fb1e15510fa777b4a484ff521335547ba87b8a32318f373a3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-es-ES/accounts-accessibility.json",
+      "sha256": "59b266fdf90b5715580c503f3d098685ef12c4383a88e04c2a4b58ffc5c55372"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-es-ES/accounts.json",
+      "sha256": "52734c150ac2fc6295bb147075c7cbd36571bbbcf77233aea80a515c200de297"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-es-ES/onboarding-accessibility.json",
+      "sha256": "86b26c375571c450da70b375cdca53def64a433b8f7d730b2260e111b62edc0c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-es-ES/onboarding.json",
+      "sha256": "9dfafd8d6db47338f002649ba668d7f5c6758aceb74862282633b25087ef5d3b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/react-migration-09-library-187cb-ever-launches-from-browsing-electron-es-ES/library-accessibility.json",
+      "sha256": "1a9be10b84b7413c024c66b228500dc578dc39944b5430fb401d953004bb3411"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/react-migration-10-creatio-3c436-s-within-the-minimum-window-electron-es-ES/creation-accessibility.json",
+      "sha256": "6e40f399754a0da14bc9ebe9cad64e4c2da9629e31ee52f15d33883323696b9f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/react-migration-12-launch--7dc1c--launch-before-confirmation-electron-es-ES/java-fallback-accessibility.json",
+      "sha256": "2ad736edc0091fddd23ba0adbb554a36a47c1d0e6f7ad4118acd577789a35d21"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES/launch-accessibility.json",
+      "sha256": "ca8079af529bc6e7a57ab22bb48b825c8ff0bf8d93b4a83c0d5defd43b4c70ee"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/react-migration-13-brandin-3fe98-eeps-existing-launcher-data-electron-es-ES/branding.json",
+      "sha256": "1fffcdc676f118ec864b0a3c9c4e570fb1ac347fb30fd1f4a430a1baf30668a8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-strict/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-strict/react-migration-04-client--bbc79--and-releases-all-consumers-electron-es-ES/client-contracts.json",
+      "sha256": "95f93e0be1f7594c7e08435db0cb6ee691c5709e6b7fdc9939918582981294d5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-vue/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/visual/react-migration-13-branding-spec-ts-grimo-displays-adapted-supplied-logos-in-bot/grimo-dark-1200.png",
+      "sha256": "bb57168d48f0f6573b4824c5a509743e6ce3e002f305cb9005058dd14fe46f4f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/visual/react-migration-13-branding-spec-ts-grimo-displays-adapted-supplied-logos-in-bot/grimo-dark-800.png",
+      "sha256": "bda8a8c8dcb39f44a0206d2a6af7d9ce9a49b93a7ebb8f6d4f885eb008d6ebb4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/visual/react-migration-13-branding-spec-ts-grimo-displays-adapted-supplied-logos-in-bot/grimo-light-1200.png",
+      "sha256": "4b380a69aad8994bf1b379cbd5a77381ce5e8502213c03d95e371b7923fb6430"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/visual/react-migration-13-branding-spec-ts-grimo-displays-adapted-supplied-logos-in-bot/grimo-light-800.png",
+      "sha256": "179e3f7ea8a4ff43e73e10101de47860cc1fb1a1bb9f91aff96f60616fb2704b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/visual/react-migration-13-branding-spec-ts-onboarding-wordmarks-uses-the-horizontal-ver/grimo-setup-dark-1200.png",
+      "sha256": "e37e83328b02ecb6e63197247afa91ad0f624cc92a21e74229a215f0b6c15152"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/visual/react-migration-13-branding-spec-ts-onboarding-wordmarks-uses-the-horizontal-ver/grimo-setup-dark-800.png",
+      "sha256": "8ebaeebcb60549c7b1434d10acf72f47d37eec5fa078828f94b4e090e498c46a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/visual/react-migration-13-branding-spec-ts-onboarding-wordmarks-uses-the-horizontal-ver/grimo-setup-light-1200.png",
+      "sha256": "80bf4785cd458e8b04255443241ed44ed3827959bb66bcef7e1a68b53dad68c3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/grimo-confirmed/visual/react-migration-13-branding-spec-ts-onboarding-wordmarks-uses-the-horizontal-ver/grimo-setup-light-800.png",
+      "sha256": "5561e0ec974191e7b7115384f9599e9edd420c623af0a2463b43b3ba1607b804"
+    }
+  ],
+  "limits": [
+    "All stage 4 gates remain pending",
+    "No NSIS execution, isolated beta.3 upgrade/delta, Authenticode signing or production publication",
+    "No native DeskGap/Appx/non-Windows validation",
+    "Game processes and Java installation remain synthetic in launch fixtures",
+    "No 60-second performance budget or exhaustive manual accessibility certification",
+    "Original user logos preserved; requested color adaptation uses built-in image editing and technical PNG/ICO conversion"
+  ]
+}

@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "tsx build.ts",
-    "build:renderer": "pnpm --prefix=../xmcl-keystone-ui build",
+    "build:renderer": "tsx ../scripts/renderer.ts build",
     "package": "tsx package.ts",
     "test:packaging": "vitest run packaging.test.ts",
     "check": "tsc --noEmit --project tsconfig.json",

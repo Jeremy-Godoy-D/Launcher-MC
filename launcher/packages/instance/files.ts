@@ -38,9 +38,10 @@ export type InstanceFile = z.infer<typeof InstanceFile>
 
 export function isInstanceInstallPath(path: string) {
   const root = path.replace(/\\/g, '/').split('/')[0].toLowerCase()
-  return root === '.install' || root === '.install-profile' || root === '.install-profile.tmp' ||
+  return root === '.install' || root === '.backups' || root === '.install-profile' || root === '.install-profile.tmp' ||
+    root === 'instance.json' || /^instance\.json\.tmp-[a-f0-9]{16}$/.test(root) || root.startsWith('.install-state-') ||
     root === '.install-manifest' || root === 'instance-lock.json' || root === 'instance-lock.json.tmp' ||
-    root === 'unresolved-files.json'
+    root === 'unresolved-files.json' || root === '.copy-job.json' || root.startsWith('.copy-temp-')
 }
 
 /**
@@ -74,6 +75,16 @@ export const InstanceLockSchema = z.object({
 
 export type InstanceLockSchema = z.infer<typeof InstanceLockSchema>
 
+export const InstanceModInstallReview = z.object({
+  domain: z.enum(['mods', 'resourcepacks', 'shaderpacks']).optional(),
+  snapshot: z.string().regex(/^[a-f0-9]{64}$/),
+  changes: z.array(z.object({ path: z.string(), operation: InstanceFileUpdate.shape.operation })).max(2000),
+  configuration: InstanceDataSchema.pick({ runtime: true, java: true, version: true }).optional(),
+  targets: z.record(z.string(), z.string().regex(/^[a-f0-9]{40}$/).nullable()).optional(),
+  directory: z.string().regex(/^[a-f0-9]{64}$/).optional(),
+})
+export type InstanceModInstallReview = z.infer<typeof InstanceModInstallReview>
+
 /**
  * Represent a intermediate state of the instance files.
  */
@@ -90,6 +101,8 @@ export const InstanceInstallLock = InstanceLockSchema.extend({
   committedPath: z.array(z.string()).optional(),
   /** Revision of a staged manifest applied by this operation. */
   manifestUpdatedAt: z.number().optional(),
+  /** Native conditions captured when a user confirms a mod upgrade. */
+  review: InstanceModInstallReview.optional(),
   operationId: z.string().optional(),
   revision: z.number().optional(),
   /** Original files remain available even after publishing a partial lock. */

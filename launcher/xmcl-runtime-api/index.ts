@@ -31,6 +31,7 @@ export * from './src/entities/yggdrasil.schema'
 
 export * from './src/service'
 export * from './src/util/marketInstanceFile'
+export * from './src/util/modUpgradeManifest'
 export * from './src/services/AuthlibInjectorService'
 export * from './src/services/AgentService'
 export * from './src/services/XmclApiEndpoints'
@@ -103,3 +104,4 @@ export * from './src/util/LockKey'
 export * from './src/util/versionRange'
 
 export * from './src/commands'
+export * from './src/services/PresentationService'

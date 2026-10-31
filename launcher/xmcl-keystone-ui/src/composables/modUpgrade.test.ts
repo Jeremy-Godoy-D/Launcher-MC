@@ -30,7 +30,7 @@ describe('mod upgrade manifest', () => {
         { path: 'mods/jei-old.jar', hashes: { sha1: 'jei-old-sha1' }, size: 24, curseforge: { projectId: 238222, fileId: 1 } },
       ],
       files: [
-        expect.objectContaining({ path: 'mods/sodium-new.jar', modrinth: { projectId: 'sodium', versionId: 'sodium-version' } }),
+        expect.objectContaining({ path: 'mods/sodium-new.jar.disabled', modrinth: { projectId: 'sodium', versionId: 'sodium-version' } }),
         expect.objectContaining({ path: 'mods/jei-new.jar', curseforge: { projectId: 238222, fileId: 2 } }),
       ],
     })
