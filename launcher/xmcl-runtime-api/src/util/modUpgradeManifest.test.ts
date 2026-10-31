@@ -36,11 +36,14 @@ describe('shared content upgrade manifest', () => {
   })
 })
 
+describe.each(['resourcepacks', 'shaderpacks'] as const)('%s stable archive names', domain => {
 it.each([{ file }, { version }])('keeps resource pack archive names and new provider hashes/IDs without mutating the source plan', provider => {
   const plan = { mod: { ...mod, fileName: 'My Pack.zip' }, ...provider }, before = structuredClone(plan)
-  const result = buildResourcePackUpgradeManifest([plan])
-  expect(result.oldFiles[0].path).toBe('resourcepacks/My Pack.zip'); expect(result.files[0].path).toBe(result.oldFiles[0].path)
+  const result = buildResourcePackUpgradeManifest([plan], domain)
+  expect(result.oldFiles[0].path).toBe(`${domain}/My Pack.zip`); expect(result.files[0].path).toBe(result.oldFiles[0].path)
   expect(result.oldFiles[0].hashes.sha1).toBe('old-sha1'); expect(result.files[0].hashes.sha1).toBe('new-sha1')
   expect('file' in provider ? result.files[0].curseforge?.fileId : result.files[0].modrinth?.versionId).toBe('file' in provider ? 2 : 'new')
   expect(plan).toEqual(before)
+})
+
 })

@@ -162,7 +162,7 @@ export interface InstanceInstallService {
    */
   resumeInstanceInstall(path: string, overrides?: InstanceFile[], reviewedOperationId?: string, recoveryReview?: ModInstallReview): Promise<InstallFileError[] | void>
   /** Read only active reviewed mod plans, without exposing private workspace paths. */
-  getReviewedModInstalls(path: string, domain?: 'mods' | 'resourcepacks'): Promise<ReviewedModInstall[]>
+  getReviewedModInstalls(path: string, domain?: 'mods' | 'resourcepacks' | 'shaderpacks'): Promise<ReviewedModInstall[]>
   /** Preview current recovery operations without renewing the saved confirmation. */
   previewModInstallRecovery(path: string, operationId: string): Promise<ReviewedModRecovery>
   /**

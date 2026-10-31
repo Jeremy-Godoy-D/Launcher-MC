@@ -9,10 +9,10 @@ import { readResourcePackFilesSnapshot, resourcePackLocation } from '../../insta
 import { activeInstallFiles, installPathKey } from './installPlan'
 
 function changed() { return Object.assign(new Error('Mods or configuration changed since review'), { name: 'ModFilesChangedError' }) }
-type Domain = 'mods' | 'resourcepacks'
+type Domain = 'mods' | 'resourcepacks' | 'shaderpacks'
 function modPath(path: string, domain: Domain = 'mods') {
   const parts = importPathParts(path)
-  if (parts.length !== 2 || (process.platform === 'win32' ? parts[0].toLowerCase() : parts[0]) !== domain || domain === 'resourcepacks' && !/\.zip$/i.test(parts[1])) throw new Error('Only direct content archives can use an upgrade review')
+  if (parts.length !== 2 || (process.platform === 'win32' ? parts[0].toLowerCase() : parts[0]) !== domain || domain !== 'mods' && !/\.zip$/i.test(parts[1])) throw new Error('Only direct content archives can use an upgrade review')
   return installPathKey(path)
 }
 function changesKey(changes: Array<{ path: string; operation: string }>, domain: Domain = 'mods') {
@@ -21,18 +21,18 @@ function changesKey(changes: Array<{ path: string; operation: string }>, domain:
 
 async function readModHash(path: string, relative: string, checksum: (path: string, algorithm: string) => Promise<string>, domain: Domain = 'mods', sharedRoot?: string) {
   modPath(relative, domain)
-  if (domain === 'resourcepacks') await resourcePackLocation(path, sharedRoot!)
+  if (domain !== 'mods') await resourcePackLocation(path, sharedRoot!, domain)
   else if (!(await lstat(join(path, 'mods'))).isDirectory()) throw changed()
   const file = join(path, relative), info = await lstat(file).catch(error => { if (error.code !== 'ENOENT') throw error })
   if (!info) return null
   if (!info.isFile()) throw changed()
   const hash = await checksum(file, 'sha1')
-  if (domain === 'resourcepacks' && (typeof hash !== 'string' || !/^[a-f0-9]{40}$/i.test(hash))) throw changed()
+  if (domain !== 'mods' && (typeof hash !== 'string' || !/^[a-f0-9]{40}$/i.test(hash))) throw changed()
   return hash.toLowerCase()
 }
 
 async function inventory(path: string, configuration: ModReviewConfiguration, domain: Domain, sharedRoot?: string) {
-  if (domain === 'resourcepacks') return readResourcePackFilesSnapshot(path, sharedRoot!, configuration)
+  if (domain !== 'mods') return readResourcePackFilesSnapshot(path, sharedRoot!, configuration, domain)
   return { ...await readModFilesSnapshot(path, configuration), authority: undefined, shared: undefined }
 }
 
@@ -63,7 +63,7 @@ export async function prepareModInstallReview(
   if (!review && recoveryReview) throw new Error('Reviewed install no longer pending')
   if (!review) return undefined
   if (recoveryReview?.domain !== undefined && recoveryReview.domain !== domain) throw changed()
-  if (domain === 'resourcepacks') {
+  if (domain !== 'mods') {
     const before = activeInstallFiles(state, true).map(file => file.path.replace(/\\/g, '/')).sort(), after = activeInstallFiles(state).map(file => file.path.replace(/\\/g, '/')).sort()
     if (JSON.stringify(before) !== JSON.stringify(after)) throw new Error('Pack updates preserve archive names')
   }
@@ -76,12 +76,12 @@ export async function prepareModInstallReview(
   if (recoveryReview) {
     const capture = await captureModInstallRecovery(path, state, updates, getConfiguration(), checksum, sharedRoot)
     if (recoveryReview.snapshot !== capture.snapshot || changesKey(recoveryReview.changes, domain) !== changesKey(updates.map(update => ({ path: update.file.path, operation: update.operation })), domain)) throw changed()
-    review = state.review = { snapshot: recoveryReview.snapshot, changes: recoveryReview.changes, configuration: capture.configuration, targets: capture.targets, ...(domain === 'resourcepacks' ? { domain, directory: capture.directory } : {}) }
+    review = state.review = { snapshot: recoveryReview.snapshot, changes: recoveryReview.changes, configuration: capture.configuration, targets: capture.targets, ...(domain !== 'mods' ? { domain, directory: capture.directory } : {}) }
   }
   if (!!review.configuration !== !!review.targets) throw new Error('Invalid persisted mod review')
   if (!review.configuration) {
     if (changesKey(review.changes, domain) !== changesKey(updates.map(update => ({ path: update.file.path, operation: update.operation })), domain)) throw changed()
-    const reviewedInventory = domain === 'resourcepacks' ? await readResourcePackFilesSnapshot(path, sharedRoot!, getConfiguration()) : undefined
+    const reviewedInventory = domain !== 'mods' ? await readResourcePackFilesSnapshot(path, sharedRoot!, getConfiguration(), domain) : undefined
     const oldFiles = state.oldFiles ?? []
     const hashes = Object.fromEntries(oldFiles.map(file => [join(path, file.path), file.hashes.sha1?.toLowerCase()]))
     for (const file of oldFiles) modPath(file.path, domain)
@@ -99,7 +99,7 @@ export async function prepareModInstallReview(
   }
   const checkConfiguration = async () => {
     if (JSON.stringify(getConfiguration()) !== JSON.stringify(review.configuration)) throw changed()
-    if (domain === 'resourcepacks' && (await resourcePackLocation(path, sharedRoot!)).authority !== review.directory) throw changed()
+    if (domain !== 'mods' && (await resourcePackLocation(path, sharedRoot!, domain)).authority !== review.directory) throw changed()
   }
   const targets = review.targets!
   for (const name of Object.keys(targets)) modPath(name, domain)

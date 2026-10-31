@@ -3,7 +3,7 @@ import { QueryClient } from '@tanstack/react-query'
 import type { File } from '@xmcl/curseforge'
 import type { ProjectVersion } from '@xmcl/modrinth'
 import type { SavedInstance } from '../library/model'
-import { queryModUpdates, updateLoaders, updateMods, type UpdateMod, type UpdateOptions } from './queryModUpdates'
+import { queryModUpdates, shaderUpdateLoader, updateLoaders, updateMods, type UpdateMod, type UpdateOptions } from './queryModUpdates'
 
 const caches: QueryClient[] = []
 afterEach(() => { for (const cache of caches.splice(0)) cache.clear() })
@@ -95,14 +95,14 @@ it('uses committed provider IDs even before their batched state event, without m
 })
 
 it('queries resource packs for Vanilla using the documented minecraft identity without requiring a mod loader', async () => {
-  const f = fixture(), version = { ...next, loaders: ['minecraft'] }
+  const f = fixture(), version = { ...next, loaders: ['minecraft'], files: [{ ...next.files[0], filename: 'pack.zip' }] }
   f.api.modrinth.getLatestVersionsFromHashes.mockResolvedValue({ [hash]: version })
   const result = await queryModUpdates([mod], { minecraft: '1.21.1' } as SavedInstance['runtime'], { ...defaults, domain: 'resourcepacks' }, f.controller.signal, f.api, f.cache)
   expect(result.updates).toEqual([{ mod, version }])
   expect(f.api.modrinth.getLatestVersionsFromHashes).toHaveBeenCalledWith([hash], { algorithm: 'sha1', loaders: ['minecraft'], gameVersions: ['1.21.1'], versionTypes: ['release'] }, f.controller.signal)
 })
 it('queries CurseForge resource packs without a mod-loader filter or mod-loader tag requirement', async () => {
-  const f = fixture({ domain: 'resourcepacks', policy: 'curseforgeOnly' }), file = { ...cfNext, gameVersions: ['1.21.1'] }
+  const f = fixture({ domain: 'resourcepacks', policy: 'curseforgeOnly' }), file = { ...cfNext, fileName: 'pack.zip', gameVersions: ['1.21.1'] }
   f.api.curseforge.getModFiles.mockResolvedValue({ data: [file], pagination: { index: 0, pageSize: 50, resultCount: 1, totalCount: 1 } })
   expect((await f.run()).updates).toEqual([{ mod, file }])
   expect(f.api.curseforge.getModFiles).toHaveBeenCalledWith({ modId: 11, gameVersion: '1.21.1', index: 0, pageSize: 50 }, f.controller.signal)
@@ -117,4 +117,34 @@ it('rejects pack queries without Minecraft before calling either provider', asyn
   const f = fixture()
   await expect(queryModUpdates([mod], {} as SavedInstance['runtime'], { ...defaults, domain: 'resourcepacks' }, f.controller.signal, f.api, f.cache)).rejects.toThrow('Missing Minecraft')
   expect(f.api.modrinth.getProjectVersionsByHash).not.toHaveBeenCalled(); expect(f.api.curseforge.getFiles).not.toHaveBeenCalled()
+})
+
+it.each(['iris', 'optifine', 'oculus'] as const)('uses the supported shader tag for %s instead of the Java mod loader', async shaderEngine => {
+  const f = fixture(), loader = shaderEngine === 'iris' ? 'iris' : 'optifine', version = { ...next, loaders: [loader], files: [{ ...next.files[0], filename: 'shader.zip' }] }
+  f.api.modrinth.getLatestVersionsFromHashes.mockResolvedValue({ [hash]: version })
+  const result = await queryModUpdates([mod], runtime, { ...defaults, domain: 'shaderpacks', shaderEngine }, f.controller.signal, f.api, f.cache)
+  expect(result.updates).toEqual([{ mod, version }])
+  expect(f.api.modrinth.getLatestVersionsFromHashes).toHaveBeenCalledWith([hash], expect.objectContaining({ loaders: [loader] }), f.controller.signal)
+})
+it('blocks unknown shader engines before querying providers', async () => {
+  const f = fixture({ domain: 'shaderpacks' })
+  await expect(f.run()).rejects.toThrow('Missing shader engine'); expect(f.api.modrinth.getProjectVersionsByHash).not.toHaveBeenCalled()
+  expect(() => shaderUpdateLoader('canvas' as any)).toThrow('Missing shader engine')
+})
+it('queries CurseForge shaders by Minecraft without inventing an engine enum or requiring Fabric tags', async () => {
+  const f = fixture({ domain: 'shaderpacks', shaderEngine: 'iris', policy: 'curseforgeOnly' }), file = { ...cfNext, fileName: 'shader.zip', gameVersions: ['1.21.1'] }
+  f.api.curseforge.getModFiles.mockResolvedValue({ data: [file], pagination: { index: 0, pageSize: 50, resultCount: 1, totalCount: 1 } })
+  expect((await f.run()).updates).toEqual([{ mod, file }]); expect(f.api.curseforge.getModFiles).toHaveBeenCalledWith({ modId: 11, gameVersion: '1.21.1', index: 0, pageSize: 50 }, f.controller.signal)
+})
+it.each(['modrinthOnly', 'curseforgeOnly'] as const)('rejects non-ZIP shader candidates from %s', async policy => {
+  const f = fixture({ domain: 'shaderpacks', shaderEngine: 'iris', policy })
+  f.api.modrinth.getLatestVersionsFromHashes.mockResolvedValue({ [hash]: { ...next, loaders: ['iris'] } })
+  f.api.curseforge.getModFiles.mockResolvedValue({ data: [{ ...cfNext, fileName: 'not-a-shader.jar' }], pagination: { index: 0, pageSize: 50, resultCount: 1, totalCount: 1 } })
+  const result = await f.run(); expect(result.updates).toEqual([]); expect(result.issues).toContainEqual({ provider: policy === 'modrinthOnly' ? 'modrinth' : 'curseforge', kind: 'incomplete', file: mod.fileName })
+})
+it('rejects Iris-only candidates for OptiFine and keeps shader caches separate from mods and resource packs', async () => {
+  const f = fixture(); await f.run()
+  f.api.modrinth.getLatestVersionsFromHashes.mockResolvedValue({ [hash]: { ...next, loaders: ['iris'], files: [{ ...next.files[0], filename: 'shader.zip' }] } })
+  const result = await queryModUpdates([mod], runtime, { ...defaults, policy: 'modrinthOnly', domain: 'shaderpacks', shaderEngine: 'optifine' }, f.controller.signal, f.api, f.cache)
+  expect(result.updates).toEqual([]); expect(result.issues).toContainEqual({ provider: 'modrinth', kind: 'incomplete', file: mod.fileName }); expect(f.api.modrinth.getLatestVersionsFromHashes).toHaveBeenCalledTimes(2)
 })

@@ -754,3 +754,15 @@ react:
     unlinked: "Private copy created. Changes in this instance no longer modify shared shaders."
     incomplete: "The change did not finish. Partial copies may exist; files and backups are retained. Close this review, reload and inspect the folders and backups before retrying."
     failed: "Could not change the shader folder. Check files and permissions, reload and review the change before retrying."
+
+  shaderUpdates:
+    title: "Update shaders"
+    help: "Check versions for identified ZIPs. Modrinth filters by engine: Oculus uses the OptiFine tag. CurseForge filters by Minecraft; check the project's requirements. GPU compatibility is not verified. Folders and local files without a source are preserved."
+    noLoader: "Configure Minecraft and a detected engine: Iris, Oculus or OptiFine. If metadata is missing, reload Mods before checking versions. Pending operations remain available for recovery."
+    skipVersion: "Skip shaders installed for another Minecraft version"
+    none: "No newer versions were found for the identified shaders and these filters."
+    reviewHelp: "Review the ZIPs to replace. Each previous file is retained as a backup. Check the project's engine, Minecraft and GPU requirements before confirming."
+    configurationChanged: "The configuration or shader folder changed. These versions were selected earlier; check the engine, Minecraft and destination or search again."
+    sharedRunning: "Another game uses the shared shader folder. Close it before applying these changes."
+    stableNames: "The ZIP name and OptiFine, Iris and Oculus configurations are preserved. The previous file is backed up; no other shader is activated and its groups are unchanged."
+    shared: "This folder is shared: updating its files affects every linked instance. Their configurations and groups remain local to each instance."

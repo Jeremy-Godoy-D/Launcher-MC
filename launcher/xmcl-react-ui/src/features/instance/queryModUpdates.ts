@@ -6,11 +6,12 @@ import type { StateData } from '@launcher/renderer-client'
 import type { ModSource } from '@xmcl/runtime-api/src/services/InstanceModsService'
 import type { ResourceState } from '@xmcl/runtime-api/src/entities/resource'
 import { modIdentity } from './modIdentity'
+import type { ShaderEngine } from '@xmcl/runtime-api/src/services/InstanceShaderPacksService'
 
 type RuntimeVersions = SavedInstance['runtime']
 
 export type UpdatePolicy = 'modrinth' | 'curseforge' | 'modrinthOnly' | 'curseforgeOnly'
-export type UpdateOptions = { policy: UpdatePolicy; releaseOnly: boolean; skipVersion: boolean; domain?: 'mods' | 'resourcepacks' }
+export type UpdateOptions = { policy: UpdatePolicy; releaseOnly: boolean; skipVersion: boolean; domain?: 'mods' | 'resourcepacks' | 'shaderpacks'; shaderEngine?: ShaderEngine }
 export type UpdateMod = { path: string; name: string; fileName: string; hash: string; size: number; curseforge?: { projectId: number; fileId: number }; modrinth?: { projectId: string; versionId: string } }
 export type ModUpdate = { mod: UpdateMod } & ({ version: ProjectVersion } | { file: File })
 export type UpdateIssue = { provider: 'modrinth' | 'curseforge'; kind: 'failed' | 'limited' | 'incomplete'; file?: string }
@@ -46,15 +47,22 @@ export function updateLoaders(runtime: RuntimeVersions) {
   return loaders[0]
 }
 const sha1 = /^[a-f0-9]{40}$/i
+const zipName = (name: unknown) => typeof name === 'string' && name.length <= 255 && /^[^/\\\u0000-\u001f]+\.zip$/i.test(name)
+export function shaderUpdateLoader(engine?: ShaderEngine | null) {
+  if (engine === 'iris') return 'iris'
+  // Oculus documents compatibility with OptiFine packs, not every newer Iris-only feature.
+  if (engine === 'optifine' || engine === 'oculus') return 'optifine'
+  throw new Error('Missing shader engine')
+}
 const hasModrinth = (mod: UpdateMod) => !!mod.modrinth && /^[0-9a-z]{8}$/i.test(mod.modrinth.projectId) && /^[0-9a-z]{8}$/i.test(mod.modrinth.versionId)
 const hasCurseforge = (mod: UpdateMod) => Number.isSafeInteger(mod.curseforge?.projectId) && mod.curseforge!.projectId > 0 && Number.isSafeInteger(mod.curseforge?.fileId) && mod.curseforge!.fileId > 0
 function newer(candidate: string, current: string) { if (typeof candidate !== 'string' || typeof current !== 'string') return false; const a = Date.parse(candidate), b = Date.parse(current); return Number.isFinite(a) && Number.isFinite(b) && a > b }
 function aborted(signal: AbortSignal) { signal.throwIfAborted() }
 
 export async function queryModUpdates(mods: UpdateMod[], runtime: RuntimeVersions, options: UpdateOptions, signal: AbortSignal, api: Clients = clients, cache = modUpdateQueries) {
-  const packs = options.domain === 'resourcepacks'
+  const packs = options.domain === 'resourcepacks' || options.domain === 'shaderpacks'
   if (packs && !runtime.minecraft) throw new Error('Missing Minecraft version')
-  const [loader, cfLoader] = packs ? ['minecraft', undefined] as const : updateLoaders(runtime), results = new Map<string, ModUpdate>(), issues: UpdateIssue[] = []
+  const [loader, cfLoader] = packs ? [options.domain === 'shaderpacks' ? shaderUpdateLoader(options.shaderEngine) : 'minecraft', undefined] as const : updateLoaders(runtime), results = new Map<string, ModUpdate>(), issues: UpdateIssue[] = []
   const cached = <T,>(key: unknown[], query: () => Promise<T>) => cache.fetchQuery({ queryKey: ['mod-updates', options.domain || 'mods', ...key], queryFn: query })
   const issue = (provider: UpdateIssue['provider'], error: unknown, file?: string) => {
     aborted(signal)
@@ -76,7 +84,7 @@ export async function queryModUpdates(mods: UpdateMod[], runtime: RuntimeVersion
           if (options.skipVersion && !old.game_versions.includes(runtime.minecraft)) continue
           if (!version) continue
           const primary = version.files?.find(file => file.primary) || version.files?.[0]
-          if (!/^[0-9a-z]{8}$/i.test(version.id) || version.project_id !== old.project_id || !version.loaders?.includes(loader) || !version.game_versions?.includes(runtime.minecraft) || options.releaseOnly && version.version_type !== 'release' || !primary || !sha1.test(primary.hashes?.sha1 || '')) { issues.push({ provider: 'modrinth', kind: 'incomplete', file: mod.fileName }); continue }
+          if (!/^[0-9a-z]{8}$/i.test(version.id) || version.project_id !== old.project_id || !version.loaders?.includes(loader) || !version.game_versions?.includes(runtime.minecraft) || options.releaseOnly && version.version_type !== 'release' || !primary || packs && !zipName(primary.filename) || !sha1.test(primary.hashes?.sha1 || '')) { issues.push({ provider: 'modrinth', kind: 'incomplete', file: mod.fileName }); continue }
           if (version.id !== old.id && primary.hashes.sha1 !== mod.hash && newer(version.date_published, old.date_published)) results.set(mod.path, { mod, version })
         }
       } catch (error) { issue('modrinth', error) }
@@ -103,7 +111,8 @@ export async function queryModUpdates(mods: UpdateMod[], runtime: RuntimeVersion
             if (index + page.data.length >= page.pagination.totalCount || page.data.length === 0) break
             if (index === 450) issues.push({ provider: 'curseforge', kind: 'incomplete', file: mod.fileName })
           }
-          const file = files.filter(file => Number.isSafeInteger(file.id) && file.id > 0 && file.modId === old.modId && file.isAvailable && file.gameVersions.includes(runtime.minecraft) && (packs || file.gameVersions.some(value => value.toLowerCase() === loader)) && (!options.releaseOnly || file.releaseType === 1) && sha1.test(file.hashes.find(hash => hash.algo === HashAlgo.Sha1)?.value || '')).sort((a, b) => Date.parse(b.fileDate) - Date.parse(a.fileDate))[0]
+          if (packs && files.some(file => file.modId === old.modId && file.isAvailable && file.gameVersions.includes(runtime.minecraft) && !zipName(file.fileName))) issues.push({ provider: 'curseforge', kind: 'incomplete', file: mod.fileName })
+          const file = files.filter(file => Number.isSafeInteger(file.id) && file.id > 0 && file.modId === old.modId && file.isAvailable && file.gameVersions.includes(runtime.minecraft) && (packs ? zipName(file.fileName) : file.gameVersions.some(value => value.toLowerCase() === loader)) && (!options.releaseOnly || file.releaseType === 1) && sha1.test(file.hashes.find(hash => hash.algo === HashAlgo.Sha1)?.value || '')).sort((a, b) => Date.parse(b.fileDate) - Date.parse(a.fileDate))[0]
           if (file && file.id !== old.id && newer(file.fileDate, old.fileDate) && file.hashes.find(hash => hash.algo === HashAlgo.Sha1)?.value !== mod.hash) results.set(mod.path, { mod, file })
         } catch (error) { issue('curseforge', error, mod.fileName) }
       }

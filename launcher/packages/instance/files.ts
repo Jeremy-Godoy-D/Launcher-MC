@@ -76,7 +76,7 @@ export const InstanceLockSchema = z.object({
 export type InstanceLockSchema = z.infer<typeof InstanceLockSchema>
 
 export const InstanceModInstallReview = z.object({
-  domain: z.enum(['mods', 'resourcepacks']).optional(),
+  domain: z.enum(['mods', 'resourcepacks', 'shaderpacks']).optional(),
   snapshot: z.string().regex(/^[a-f0-9]{64}$/),
   changes: z.array(z.object({ path: z.string(), operation: InstanceFileUpdate.shape.operation })).max(2000),
   configuration: InstanceDataSchema.pick({ runtime: true, java: true, version: true }).optional(),

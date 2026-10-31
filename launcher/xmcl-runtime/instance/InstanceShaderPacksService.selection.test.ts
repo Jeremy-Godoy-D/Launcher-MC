@@ -11,6 +11,7 @@ vi.mock('../launch/LaunchService', () => ({ LaunchService: class {} }))
 vi.mock('./AbstractInstanceDomainService', () => ({ AbstractInstanceDomainService: class { constructor(public app: any) {} get mutex() { return this.app.mutex } async watch() { return 'watched' } async isLinked() { return false } async showDirectory() {} } }))
 vi.mock('node:fs/promises', async original => { const actual = await original<typeof import('node:fs/promises')>(); return { ...actual, lstat: vi.fn(async () => ({ isDirectory: () => true })) } })
 vi.mock('../instanceIO/utils/instanceFileSource', () => ({ instanceFileSource: vi.fn(async () => ({})) }))
+vi.mock('./utils/resourcePackSnapshot', () => ({ readResourcePackFilesSnapshot: vi.fn(async () => ({ fingerprint: 'a'.repeat(64), shared: false, authority: 'b'.repeat(64), entries: [] })) }))
 vi.mock('./utils/localMods', () => ({ readModFilesSnapshot: vi.fn() }))
 vi.mock('./utils/localResourcePacks', () => ({ installLocalResourcePacks: vi.fn(async () => ['installed']) }))
 vi.mock('./utils/localShaders', () => ({ previewShaderRemoval: vi.fn(), removeReviewedShaders: vi.fn(async () => ({ backup: 'backup' })) }))
@@ -24,11 +25,14 @@ const { readShaderSelection, writeShaderSelection } = await import('./utils/shad
 const { installLocalResourcePacks } = await import('./utils/localResourcePacks')
 const { previewShaderRemoval, removeReviewedShaders } = await import('./utils/localShaders')
 const { previewResourcePackSharing, applyResourcePackSharing } = await import('./utils/sharedResourcePacks')
+const { readResourcePackFilesSnapshot } = await import('./utils/resourcePackSnapshot')
+let metadata: ReturnType<typeof vi.fn>
 let pause: ReturnType<typeof vi.fn>, resume: ReturnType<typeof vi.fn>, revalidate: ReturnType<typeof vi.fn>
 const runtime = RuntimeVersionsSchema.parse({ minecraft: '1.21.1', fabricLoader: '0.16' })
 let instances: any[], processes: any[], files: any[], lock: Mutex, of: ReturnType<typeof vi.fn>, service: InstanceType<typeof InstanceShaderPacksService>
 const change = { snapshot: 'a'.repeat(64), engine: 'iris', pack: 'New.zip', enabled: true } as const
 beforeEach(() => {
+  metadata = vi.fn(async () => [])
   pause = vi.fn(async () => {}); resume = vi.fn(); revalidate = vi.fn(async () => {})
   vi.clearAllMocks(); instances = [{ path: 'managed', edition: 'java', runtime, java: '', version: '' }]; processes = []; lock = new Mutex(); const global = new Mutex()
   of = vi.fn(key => key === 'resource-pack-options' ? global : lock)
@@ -38,14 +42,14 @@ beforeEach(() => {
     if (key === InstanceService) return { initialize: async () => {}, state: { get instances() { return instances } } }
     if (key === LaunchService) return { getGameProcesses: async () => processes }
     if (key === kGameDataPath) return () => 'shared-root'
-    if (key === kResourceManager) return { getWatched: () => ({ state: { files }, pause, resume, revalidate }) }
+    if (key === kResourceManager) return { getWatched: () => ({ state: { files }, pause, resume, revalidate }), getMetadataByHashes: metadata }
     throw new Error('Unexpected registry access')
   } } }; service = new InstanceShaderPacksService(app as any)
 })
 it('rejects unregistered and non-Java reads, writes and watchers before touching files', async () => {
   for (const edition of ['missing', 'bedrock']) {
     instances = edition === 'missing' ? [] : [{ path: 'managed', edition }]
-    for (const action of [() => service.getSelection('managed'), () => service.setSelection('managed', change), () => service.watch('managed'), () => service.install({ path: 'managed', files: [] }), () => service.showDirectory('managed'), () => service.previewRemoval('managed', ['New.zip']), () => service.removeReviewed('managed', {} as any), () => service.uninstall({ path: 'managed', files: [] }), () => service.previewSharing('managed', true), () => service.applySharing('managed', {} as any), () => service.linkShared('managed'), () => service.unlinkShared('managed')]) await expect(action()).rejects.toHaveProperty('name', 'InstanceNotFoundError')
+    for (const action of [() => service.getSelection('managed'), () => service.setSelection('managed', change), () => service.watch('managed'), () => service.install({ path: 'managed', files: [] }), () => service.showDirectory('managed'), () => service.previewRemoval('managed', ['New.zip']), () => service.removeReviewed('managed', {} as any), () => service.uninstall({ path: 'managed', files: [] }), () => service.previewSharing('managed', true), () => service.applySharing('managed', {} as any), () => service.linkShared('managed'), () => service.unlinkShared('managed'), () => service.getShaderFilesSnapshot('managed'), () => service.getShaderSources('managed')]) await expect(action()).rejects.toHaveProperty('name', 'InstanceNotFoundError')
   }
   expect(readShaderSelection).not.toHaveBeenCalled(); expect(writeShaderSelection).not.toHaveBeenCalled(); expect(lstat).not.toHaveBeenCalled()
 })
@@ -138,4 +142,18 @@ it('restores shader observation after closing or copying fails', async () => {
   vi.mocked(applyResourcePackSharing).mockRejectedValueOnce(new Error('Copy failed'))
   await expect(service.applySharing('managed', {} as any)).rejects.toThrow('Copy failed')
   expect(resume).toHaveBeenCalledTimes(2); expect(revalidate).toHaveBeenCalledTimes(2)
+})
+
+
+it('captures shader inventory with its Native configuration and shader-only directory authority', async () => {
+  await service.getShaderFilesSnapshot('managed')
+  expect(readResourcePackFilesSnapshot).toHaveBeenCalledWith('managed', 'shared-root', { runtime, java: '', version: '' }, 'shaderpacks')
+})
+it('returns only watched shader public provider identities without unrelated metadata', async () => {
+  const source = { projectId: 'abcdefgh', versionId: 'version1' }
+  metadata.mockResolvedValue([{ sha1: files[0].hash, modrinth: source, unrelated: 'PRIVATE' }, { sha1: 'f'.repeat(40), curseforge: { projectId: 1, fileId: 2 } }])
+  expect(await service.getShaderSources('managed')).toEqual([{ hash: files[0].hash, modrinth: source, curseforge: undefined }])
+  expect(metadata).toHaveBeenCalledWith([files[0].hash])
+  files = Array(10001).fill(files[0]); metadata.mockClear()
+  await expect(service.getShaderSources('managed')).rejects.toThrow('Shader sources unavailable'); expect(metadata).not.toHaveBeenCalled()
 })

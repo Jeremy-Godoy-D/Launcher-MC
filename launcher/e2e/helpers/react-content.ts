@@ -19,10 +19,10 @@ export async function makeReactResourcePack(path: string, name: string, descript
   await pipeline(zip.outputStream, createWriteStream(join(path, 'resourcepacks', `${name}.zip`)))
 }
 
-export async function makeReactShaderPack(path: string, name: string) {
+export async function makeReactShaderPack(path: string, name: string, label = '') {
   await mkdir(join(path, 'shaderpacks'), { recursive: true })
   const require = createRequire(new URL('../../xmcl-runtime/package.json', import.meta.url)), { ZipFile } = require('yazl'), zip = new ZipFile()
-  zip.addBuffer(Buffer.from('# Synthetic shader fixture\n'), 'shaders/shaders.properties')
+  zip.addBuffer(Buffer.from('# Synthetic shader fixture\n' + (label ? `# ${label}\n` : '')), 'shaders/shaders.properties')
   zip.addBuffer(Buffer.from('#version 150\nvoid main() {}\n'), 'shaders/final.fsh'); zip.end()
   await pipeline(zip.outputStream, createWriteStream(join(path, 'shaderpacks', `${name}.zip`)))
 }

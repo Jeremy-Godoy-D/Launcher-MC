@@ -65,7 +65,7 @@ import { captureModInstallRecovery, prepareModInstallReview } from './utils/revi
 import { activeInstallFiles, hasInstallWork, installPathKey, supersedeInstallPlans } from './utils/installPlan'
 
 function reviewedUpdates(updates: InstanceFileUpdate[], domain?: ModInstallReview['domain']): InstanceFileUpdate[] {
-  return domain === 'resourcepacks' ? updates.map(update => update.operation === 'add' ? { ...update, operation: 'backup-add' } : update) : updates
+  return domain && domain !== 'mods' ? updates.map(update => update.operation === 'add' ? { ...update, operation: 'backup-add' } : update) : updates
 }
 
 /**
@@ -95,14 +95,16 @@ export class InstanceInstallService extends AbstractService implements IInstance
   }
 
   async #idleSharedPacks(path: string, files: InstanceFile[]) {
-    if (!files.some(file => file.path.replace(/\\/g, '/').split('/')[0].toLowerCase() === 'resourcepacks')) return
-    const getPath = await this.app.registry.get(kGameDataPath), root = getPath()
-    const source = await instanceFileSource(path, 'resourcepacks', root, true)
-    if (source.root === await realpath(path)) return
-    const { LaunchService } = await import('../launch/LaunchService'), launch = await this.app.registry.get(LaunchService)
-    for (const process of await launch.getGameProcesses()) {
-      const game = process.options.gameDirectory
-      if ((await instanceFileSource(game, 'resourcepacks', root, true)).root !== await realpath(game)) throw new AnyError('SharedOptionsRunningError')
+    for (const domain of ['resourcepacks', 'shaderpacks'] as const) {
+      if (!files.some(file => file.path.replace(/\\/g, '/').split('/')[0].toLowerCase() === domain)) continue
+      const getPath = await this.app.registry.get(kGameDataPath), root = getPath()
+      const source = await instanceFileSource(path, domain, root, true)
+      if (source.root === await realpath(path)) continue
+      const { LaunchService } = await import('../launch/LaunchService'), launch = await this.app.registry.get(LaunchService)
+      for (const process of await launch.getGameProcesses()) {
+        const game = process.options.gameDirectory
+        if ((await instanceFileSource(game, domain, root, true)).root !== await realpath(game)) throw new AnyError('SharedOptionsRunningError')
+      }
     }
   }
 
@@ -979,8 +981,8 @@ export class InstanceInstallService extends AbstractService implements IInstance
     }))
   }
 
-  async getReviewedModInstalls(path: string, domain: 'mods' | 'resourcepacks' = 'mods') {
-    if (domain !== 'mods' && domain !== 'resourcepacks') throw new Error('Invalid reviewed content domain')
+  async getReviewedModInstalls(path: string, domain: 'mods' | 'resourcepacks' | 'shaderpacks' = 'mods') {
+    if (domain !== 'mods' && domain !== 'resourcepacks' && domain !== 'shaderpacks') throw new Error('Invalid reviewed content domain')
     await this.#javaDirectory(path)
     return this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
       await this.#javaDirectory(path)
@@ -1003,7 +1005,7 @@ export class InstanceInstallService extends AbstractService implements IInstance
       const configuration = { runtime: { ...instance.runtime }, java: instance.java, version: instance.version }
       const getPath = await this.app.registry.get(kGameDataPath)
       const capture = await captureModInstallRecovery(path, state, changes, configuration, (path, algorithm) => this.worker.checksum(path, algorithm), getPath())
-      return { review: { ...(state.review?.domain ? { domain: state.review.domain } : {}), snapshot: capture.snapshot, changes: changes.map(change => ({ path: change.file.path, operation: change.operation })) }, changes, configurationChanged: JSON.stringify(configuration) !== JSON.stringify(state.review?.configuration) || capture.directory !== state.review?.directory, ...(state.review?.domain === 'resourcepacks' ? { shared: capture.shared } : {}) }
+      return { review: { ...(state.review?.domain ? { domain: state.review.domain } : {}), snapshot: capture.snapshot, changes: changes.map(change => ({ path: change.file.path, operation: change.operation })) }, changes, configurationChanged: JSON.stringify(configuration) !== JSON.stringify(state.review?.configuration) || capture.directory !== state.review?.directory, ...(state.review?.domain && state.review.domain !== 'mods' ? { shared: capture.shared } : {}) }
     }))
   }
 

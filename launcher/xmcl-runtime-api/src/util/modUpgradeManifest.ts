@@ -38,8 +38,8 @@ export function buildModUpgradeManifest(
 
   return { oldFiles, files }
 }
-export function buildResourcePackUpgradeManifest(plans: readonly UpgradeManifestPlan[]) {
-  const manifest = buildModUpgradeManifest(plans, 'resourcepacks')
+export function buildResourcePackUpgradeManifest(plans: readonly UpgradeManifestPlan[], domain: 'resourcepacks' | 'shaderpacks' = 'resourcepacks') {
+  const manifest = buildModUpgradeManifest(plans, domain)
   manifest.files = manifest.files.map((file, index) => ({ ...file, path: manifest.oldFiles[index].path }))
   return manifest
 }

@@ -16,6 +16,7 @@ import { ContentGroupsEditor } from './ContentGroupsEditor'
 import { assignContentGroup, contentGroupMemberships } from './contentGroups'
 import type { ResourcePackSharingReview } from '@xmcl/runtime-api/src/services/InstanceResourcePacksService'
 import { SharePacksDialog } from './SharePacksDialog'
+import { ModUpdates } from './ModUpdates'
 
 export function InstanceShaders({ path, running, runtime }: { path: string; running: boolean; runtime: SavedInstance['runtime'] }) {
   const { t, n } = useI18n(), service = useService(InstanceShaderPacksServiceKey), base = useService(BaseServiceKey)
@@ -177,6 +178,7 @@ export function InstanceShaders({ path, running, runtime }: { path: string; runn
   return <section ref={panel} data-testid="instance-shaders" aria-labelledby="shaders-title" aria-busy={busy}>
     <div className="section-heading"><h2 id="shaders-title">{t('react.workspace.shaders')}</h2><div className="content-actions">
       <button className="button primary" disabled={fileBusy || running || !window.windowController?.showOpenDialog} onClick={event => void add(false, event.currentTarget)}><Plus size={17} aria-hidden="true" />{t('react.content.add')}</button>
+      <ModUpdates domain="shaderpacks" path={path} runtime={runtime} getFiles={() => shaders.getSnapshot().data?.files || []} disabled={fileBusy || reading || modSnapshot.status !== 'ready'} running={running} refresh={async () => { await shaders.revalidate(); await read() }} onBusy={setWorking} />
       <button className="button secondary" disabled={fileBusy || running || !window.windowController?.showOpenDialog} onClick={event => void add(true, event.currentTarget)}>{t('react.packs.addFolder')}</button>
       <button className="button secondary" disabled={blocked} onClick={() => void service.showDirectory(path).catch(() => { if (alive.current) setError(t('react.workspace.folderFailed')) })}><FolderOpen size={17} aria-hidden="true" />{t('react.shaders.folder')}</button>
       <button ref={shareButton} className="button secondary" disabled={fileBusy || running || !selection} onClick={() => void reviewSharing()}>{t(selection?.shared ? 'react.shaderSharing.unlink' : 'react.shaderSharing.link')}</button>

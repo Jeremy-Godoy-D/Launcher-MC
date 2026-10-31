@@ -754,3 +754,15 @@ react:
     unlinked: "Copia privada creada. Los cambios en esta instancia ya no modifican los shaders comunes."
     incomplete: "El cambio no terminó. Puede haber copias parciales; se conservan los archivos y respaldos. Cierra esta revisión, vuelve a leer y revisa las carpetas y las copias de seguridad antes de reintentar."
     failed: "No se pudo cambiar la carpeta de shaders. Comprueba los archivos y permisos, vuelve a leer y revisa el cambio antes de reintentar."
+
+  shaderUpdates:
+    title: "Actualizar shaders"
+    help: "Consulta versiones para los ZIP identificados. Modrinth filtra por motor: Oculus usa la etiqueta OptiFine. CurseForge filtra por Minecraft; comprueba los requisitos del proyecto. No se verifica la GPU. Carpetas y archivos locales sin origen se conservan."
+    noLoader: "Configura Minecraft y un motor detectado: Iris, Oculus u OptiFine. Si faltan metadatos, vuelve a leer Mods antes de consultar versiones. Las operaciones pendientes siguen disponibles para recuperación."
+    skipVersion: "Omitir shaders instalados para otro Minecraft"
+    none: "No se encontraron versiones más recientes para los shaders identificados y estos filtros."
+    reviewHelp: "Revisa los ZIP que se sustituirán. Cada archivo anterior se guardará como respaldo. Comprueba los requisitos del proyecto para el motor, Minecraft y la GPU antes de confirmar."
+    configurationChanged: "Cambió la configuración o la carpeta de shaders. Estas versiones se eligieron antes del cambio; comprueba el motor, Minecraft y el destino o vuelve a consultar."
+    sharedRunning: "Otra partida utiliza la carpeta compartida de shaders. Ciérrala antes de aplicar estos cambios."
+    stableNames: "Se conserva el nombre del ZIP y las configuraciones de OptiFine, Iris y Oculus. El archivo anterior se guarda como respaldo; no se activa otro shader ni se cambian sus grupos."
+    shared: "Esta carpeta está compartida: actualizar sus archivos afecta a todas las instancias vinculadas. Sus configuraciones y grupos permanecen propios de cada instancia."

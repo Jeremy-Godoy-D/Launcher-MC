@@ -1,6 +1,7 @@
 import { InstanceResourcesService } from './InstanceResourcesService'
 import { ServiceKey } from './Service'
-import type { ResourcePackSharingReview } from './InstanceResourcePacksService'
+import type { ResourcePackSharingReview, ResourcePackFilesSnapshot } from './InstanceResourcePacksService'
+import type { ModSource } from './InstanceModsService'
 
 export type ShaderEngine = 'optifine' | 'iris' | 'oculus'
 export interface ShaderPackSelection {
@@ -26,6 +27,8 @@ export interface ShaderRemovalReview {
 }
 
 export interface InstanceShaderPacksService extends InstanceResourcesService {
+  getShaderFilesSnapshot(instancePath: string): Promise<ResourcePackFilesSnapshot>
+  getShaderSources(instancePath: string): Promise<ModSource[]>
   getSelection(instancePath: string): Promise<ShaderPackSelection>
   setSelection(instancePath: string, change: ShaderSelectionChange): Promise<ShaderPackSelection>
   previewRemoval(instancePath: string, fileNames: string[]): Promise<ShaderRemovalReview>

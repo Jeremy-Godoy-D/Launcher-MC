@@ -20,6 +20,7 @@ import { previewShaderRemoval, removeReviewedShaders } from './utils/localShader
 import { importPathParts } from '../util/importFile'
 import type { ResourcePackSharingReview } from '@xmcl/runtime-api/src/services/InstanceResourcePacksService'
 import { applyResourcePackSharing, previewResourcePackSharing } from './utils/sharedResourcePacks'
+import { readResourcePackFilesSnapshot } from './utils/resourcePackSnapshot'
 
 @ExposeServiceKey(InstanceShaderPacksServiceKey)
 export class InstanceShaderPacksService extends AbstractInstanceDomainService implements IInstanceShaderPacksService {
@@ -108,6 +109,20 @@ export class InstanceShaderPacksService extends AbstractInstanceDomainService im
   }
   async getSelection(path: string) {
     return this.#read(path, async root => readShaderSelection(path, root, await this.#context(path)))
+  }
+  async getShaderFilesSnapshot(path: string) {
+    return this.#read(path, async root => {
+      const instance = await this.#javaInstance(path)
+      return readResourcePackFilesSnapshot(path, root, { runtime: { ...instance.runtime }, java: instance.java, version: instance.version }, 'shaderpacks')
+    })
+  }
+  async getShaderSources(path: string) {
+    return this.#read(path, async () => {
+      const manager = await this.app.registry.get(kResourceManager), state = manager.getWatched(join(path, 'shaderpacks'))?.state
+      if (!state || state.files.length > 10000) throw new Error('Shader sources unavailable')
+      const hashes = state.files.map(file => file.hash), selected = new Set(hashes), metadata = await manager.getMetadataByHashes(hashes)
+      return metadata.flatMap(value => value && selected.has(value.sha1) ? [{ hash: value.sha1, modrinth: value.modrinth, curseforge: value.curseforge }] : [])
+    })
   }
   async setSelection(path: string, change: ShaderSelectionChange) {
     return this.#read(path, async root => {
