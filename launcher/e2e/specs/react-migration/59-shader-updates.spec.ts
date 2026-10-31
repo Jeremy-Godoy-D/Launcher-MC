@@ -1,4 +1,4 @@
-import { test, expect, snap, type Page } from '../../helpers/scratch'
+import { test, expect, snap } from '../../helpers/scratch'
 import type { LauncherFixture } from '../../fixtures/launcher'
 import { seedReactLibrary } from '../../helpers/react-library'
 import { makeReactShaderPack } from '../../helpers/react-content'
@@ -8,6 +8,7 @@ import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { createServer, type ServerResponse } from 'node:http'
 import axe from 'axe-core'
+import { activateLauncherControl, focusLauncher } from '../../helpers/focus-launcher'
 
 test.use({ launcherOptions: { locale: 'es-ES', gameDataParentAlias: true } })
 const hash = (bytes: Buffer) => createHash('sha1').update(bytes).digest('hex')
@@ -51,14 +52,35 @@ async function fixture(launcher: LauncherFixture, provider = 'modrinthOnly', sha
   await page.evaluate(({ path, provider }) => localStorage.setItem(`shaderpacksUpgradePolicy:${path}`, JSON.stringify(provider)), { path, provider }); await page.reload()
   return { path, other, root, original, next }
 }
-async function open(page: Page) {
+async function open(launcher: LauncherFixture) {
+  const page = launcher.main
   await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click(); await page.getByRole('link', { name: 'Shaders', exact: true }).click()
   const area = page.getByTestId('instance-shaders'), trigger = area.getByRole('button', { name: 'Buscar actualizaciones', exact: true })
-  await expect(trigger).toBeEnabled(); await trigger.click()
+  await activateLauncherControl(launcher, trigger)
   const dialog = page.getByRole('dialog', { name: 'Actualizar shaders', exact: true })
   await expect(dialog.getByRole('button', { name: 'Consultar proveedores', exact: true })).toBeEnabled()
   return { area, trigger, dialog }
 }
+test('shader updates open while background selection reads are still pending', async ({ launcher }) => {
+  const page = launcher.main; await fixture(launcher)
+  await launcher.app.evaluate(({ ipcMain }) => {
+    const original = (ipcMain as any)._invokeHandlers.get('service-call'), state = globalThis as any
+    const gate = new Promise<void>(resolve => { state.__releaseShaderSelection = resolve }); state.__shaderSelectionReads = 0
+    ipcMain.removeHandler('service-call')
+    ipcMain.handle('service-call', async (event: unknown, service: string, method: string, ...args: unknown[]) => {
+      if (service === 'InstanceShaderPacksService' && method === 'getSelection') { state.__shaderSelectionReads++; await gate }
+      return original(event, service, method, ...args)
+    })
+  })
+  try {
+    await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click(); await page.getByRole('link', { name: 'Shaders', exact: true }).click()
+    await expect.poll(() => launcher.app.evaluate(() => (globalThis as any).__shaderSelectionReads)).toBeGreaterThan(0)
+    const area = page.getByTestId('instance-shaders'), trigger = area.getByRole('button', { name: 'Buscar actualizaciones', exact: true })
+    await expect(area).toHaveAttribute('aria-busy', 'true'); await expect(trigger).toBeEnabled(); await focusLauncher(launcher); await trigger.click()
+    await expect(page.getByRole('dialog', { name: 'Actualizar shaders', exact: true })).toBeVisible()
+  } finally { await launcher.app.evaluate(() => (globalThis as any).__releaseShaderSelection()) }
+  await expect(page.getByRole('dialog').getByRole('button', { name: 'Consultar proveedores', exact: true })).toBeEnabled()
+})
 for (const provider of ['modrinthOnly', 'curseforgeOnly']) test(`shader ${provider}: Native updates preserve shared shader names, engine configurations, groups, worlds and backups`, async ({ launcher }, testInfo) => {
   const page = launcher.main, f = await fixture(launcher, provider, true)
   const options = 'resourcePacks:["vanilla","file/alpha.zip"]\r\nlang:es_es\r\n', groups = '{"Visual":{"color":"#abcdef","files":["alpha.zip"]}}'
@@ -68,7 +90,7 @@ for (const provider of ['modrinthOnly', 'curseforgeOnly']) test(`shader ${provid
     for (const file of configurations) await writeFile(join(path, file), '# KEEP\nshaderPack=alpha.zip\nunknown=retained\n')
   }
   await mkdir(join(f.path, 'saves/keep'), { recursive: true }); await writeFile(join(f.path, 'saves/keep/level.dat'), 'KEEP WORLD')
-  const { dialog, trigger } = await open(page)
+  const { dialog, trigger } = await open(launcher)
   await dialog.getByRole('button', { name: 'Consultar proveedores', exact: true }).click(); await expect(dialog).toContainText('2.0.0')
   await expect(dialog).toContainText('todas las instancias vinculadas')
   await dialog.getByRole('button', { name: 'Revisar archivos', exact: true }).click()
@@ -93,7 +115,7 @@ for (const provider of ['modrinthOnly', 'curseforgeOnly']) test(`shader ${provid
   await writeFile(testInfo.outputPath(`${provider}-request.json`), JSON.stringify({ requests, calls }, null, 2))
 })
 test('shader confirmation rejects edits after review without replacing bytes or creating a recovery operation', async ({ launcher }) => {
-  const page = launcher.main, f = await fixture(launcher), { dialog } = await open(page)
+  const page = launcher.main, f = await fixture(launcher), { dialog } = await open(launcher)
   await dialog.getByRole('button', { name: 'Consultar proveedores', exact: true }).click(); await expect(dialog).toContainText('2.0.0')
   await dialog.getByRole('button', { name: 'Revisar archivos', exact: true }).click(); await expect(dialog.locator('.mod-update-changes')).toContainText('shaderpacks/alpha.zip')
   await makeReactShaderPack(f.path, 'alpha', 'USER EDIT'); const edited = await readFile(join(f.path, 'shaderpacks/alpha.zip'))
@@ -105,7 +127,7 @@ test('shader confirmation rejects edits after review without replacing bytes or 
 })
 
 test('an engine change after searching blocks review without calling the Native installer', async ({ launcher }, testInfo) => {
-  const page = launcher.main, f = await fixture(launcher), { dialog } = await open(page)
+  const page = launcher.main, f = await fixture(launcher), { dialog } = await open(launcher)
   await dialog.getByRole('button', { name: 'Consultar proveedores', exact: true }).click(); await expect(dialog).toContainText('2.0.0')
   await page.evaluate(async path => (window as any).serviceChannels.open('InstanceService').call('editInstance', { instancePath: path, runtime: { minecraft: '1.21.1', optifine: '' } }), f.path)
   await dialog.getByRole('button', { name: 'Revisar archivos', exact: true }).click(); await expect(dialog.getByRole('alert')).toContainText('cambiaron')
@@ -142,7 +164,7 @@ test('shader recovery UI cancels a real held download, reviews user edits and pr
       try { await install.call('installInstanceFiles', options); return false } catch { return true }
     }, { path, originalHash: hash(original), newHash: hash(next), url: `http://127.0.0.1:${address.port}/next.zip` })
     expect(initial).toBe(true); mode = 'hold'
-    const { dialog } = await open(page)
+    const { dialog } = await open(launcher)
     await dialog.getByRole('button', { name: 'Reanudar esta operación', exact: true }).click(); await expect.poll(() => held.size).toBeGreaterThan(0)
     await dialog.getByRole('button', { name: 'Detener operación', exact: true }).click(); await expect(dialog.getByRole('alert')).toContainText('Operación detenida', { timeout: 30000 })
     await makeReactShaderPack(path, 'alpha', 'USER EDIT'); const edited = await readFile(join(path, 'shaderpacks/alpha.zip'))
@@ -157,7 +179,7 @@ test('shader updates and review remain accessible in both themes and supported w
   await fixture(launcher, 'modrinthOnly', true); await page.emulateMedia({ reducedMotion: 'reduce' })
   for (const theme of ['dark', 'light']) {
     await page.evaluate(theme => { const key = 'launcher.react.preferences', prefs = JSON.parse(localStorage.getItem(key)!); localStorage.setItem(key, JSON.stringify({ ...prefs, appearance: theme })) }, theme); await page.reload()
-    const { dialog } = await open(page), win = await launcher.app.browserWindow(page)
+    const { dialog } = await open(launcher), win = await launcher.app.browserWindow(page)
     for (const size of [[1200, 720], [800, 400]]) {
       await win.evaluate((win, size) => win.setContentSize(size[0], size[1]), size)
       await dialog.getByRole('button', { name: 'Consultar proveedores', exact: true }).click(); await expect(dialog).toContainText('2.0.0')

@@ -6,6 +6,7 @@ import { lstat, mkdir, readFile, readdir, symlink, writeFile } from 'node:fs/pro
 import { createRequire } from 'node:module'
 import { join } from 'node:path'
 import axe from 'axe-core'
+import { activateLauncherControl } from '../../helpers/focus-launcher'
 
 test.use({ launcherOptions: { locale: 'es-ES', gameDataParentAlias: true } })
 async function open(page: Page) {
@@ -20,6 +21,7 @@ test('world copy reviews Native bytes and destination, preserves all files and r
   await trigger.click(); await dialog.getByLabel('Instancia de destino').selectOption(b); await dialog.getByLabel('Carpeta de la copia').fill('Beta'); await dialog.getByRole('button', { name: 'Revisar archivos del mundo', exact: true }).click()
   await expect(dialog.getByTestId('world-files-review')).toContainText('2 archivos'); await page.keyboard.press('Escape'); await expect(trigger).toBeFocused(); await expect(lstat(join(b, 'saves/Beta'))).rejects.toMatchObject({ code: 'ENOENT' })
   await trigger.click(); await dialog.getByLabel('Instancia de destino').selectOption(b); await dialog.getByLabel('Carpeta de la copia').fill('Beta'); await dialog.getByRole('button', { name: 'Revisar archivos del mundo', exact: true }).click()
+  await expect(dialog.getByTestId('world-files-review')).toContainText('2 archivos'); await expect(dialog.getByRole('button', { name: 'Confirmar operación', exact: true })).toBeEnabled()
   await writeFile(join(source, '.hidden'), 'EXTERNAL'); await dialog.getByRole('button', { name: 'Confirmar operación', exact: true }).click(); await expect(dialog.getByRole('alert')).toContainText('cambió desde la revisión')
   await dialog.getByRole('button', { name: 'Revisar archivos del mundo', exact: true }).click(); await dialog.getByRole('button', { name: 'Confirmar operación', exact: true }).click(); await expect(dialog.getByRole('status')).toContainText('Copia independiente creada')
   expect(await readFile(join(b, 'saves/Beta/level.dat'))).toEqual(bytes); expect(await readFile(join(b, 'saves/Beta/.hidden'), 'utf8')).toBe('EXTERNAL'); expect((await lstat(join(b, 'saves/Beta/region/empty'))).isDirectory()).toBe(true)
@@ -51,7 +53,7 @@ test('world operation forms and reviews keep confirmation and keyboard focus rea
       for (const type of ['Copiar', 'Exportar', 'Retirar']) {
         const trigger = area.getByRole('button', { name: `${type} ${name}`, exact: true }); await trigger.click()
         if (type === 'Exportar') { await stubOpenDialog(launcher, exports); await dialog.getByRole('button', { name: 'Elegir carpeta de exportación' }).click() }
-        const review = dialog.getByRole('button', { name: 'Revisar archivos del mundo', exact: true }); await review.focus(); await expect(review).toBeInViewport({ ratio: 1 }); await page.keyboard.press('Enter')
+        const review = dialog.getByRole('button', { name: 'Revisar archivos del mundo', exact: true }); await activateLauncherControl(launcher, review)
         const confirm = dialog.getByRole('button', { name: 'Confirmar operación', exact: true }); await confirm.focus(); await expect(confirm).toBeInViewport({ ratio: 1 })
         expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true)
         await page.addScriptTag({ content: axe.source }); const report = await page.evaluate(async () => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } }))
