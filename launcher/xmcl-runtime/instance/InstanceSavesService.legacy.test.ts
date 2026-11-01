@@ -668,3 +668,26 @@ it('pauses a datapack observer before backing up its world and clears the detach
     expect(await readFile(join(source, '.backups', backup, 'Alpha/level.dat'))).toEqual(bytes)
   } finally { dispose(); await watcher.close() }
 })
+
+
+it('does not attach a world observer while a global world mutation is active', async () => {
+  const app = (service as any).app, add = vi.spyOn(FSWatcher.prototype, 'add'), unlock = await app.mutex.of('resource-pack-options').acquire()
+  const pending = service.watch(source)
+  await vi.waitFor(() => expect(registerOrGet).toHaveBeenCalled())
+  expect(add).not.toHaveBeenCalled(); unlock()
+  const [, dispose] = await pending as any
+  dispose(); for (const call of add.mock.results) if (call.value instanceof FSWatcher) await call.value.close()
+})
+
+it('serializes shared datapack observer registration after its initial read with global mutations', async () => {
+  await makeReactWorld(source, 'Alpha'); await service.linkSharedSave(source)
+  const savePath = join(source, 'saves/Alpha'); await mkdir(join(savePath, 'datapacks')); await downloadedPack(join(savePath, 'datapacks'))
+  const app = (service as any).app, add = vi.spyOn(FSWatcher.prototype, 'add')
+  let unlock: (() => void) | undefined
+  getSnapshot.mockImplementationOnce(async () => { void app.mutex.of('resource-pack-options').acquire().then((release: () => void) => { unlock = release }); return undefined })
+  const pending = service.watchSaveDatapacks(savePath)
+  await vi.waitFor(() => expect(unlock).toBeTypeOf('function'))
+  expect(add).not.toHaveBeenCalled(); unlock!()
+  const [, dispose] = await pending as any
+  dispose(); for (const call of add.mock.results) if (call.value instanceof FSWatcher) await call.value.close()
+})

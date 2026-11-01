@@ -400,7 +400,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
         void control.pause().catch(error => this.warn(error))
       }
       try {
-        await lock.runExclusive(async () => {
+        await this.#worldPaths([path], async () => {
           await this.#javaInstance(path)
           await worldsLocation(path, this.getPath())
           const observers = this.#saveWatchers.get(path) || new Set()
@@ -873,7 +873,6 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     const stateManager = await this.app.registry.get(ServiceStateManager)
     return stateManager.registerOrGet(getInstanceSaveDatapacksKey(savePath), async ({ defineAsyncOperation }) => {
       const state = new SaveDatapacks()
-      const key = source.depot && owner === source.instancePath ? 'resource-pack-options' : LockKey.instance(owner)
       let watcher: FSWatcher | undefined, disposed = false, refresh: Promise<void> | undefined, dirty = false
       const revalidate = defineAsyncOperation(async () => {
         if (disposed) return
@@ -911,14 +910,14 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       }
       try {
         await revalidate()
-        await this.mutex.of(key).runExclusive(async () => {
+        await this.#worldPaths([owner], async () => {
           await this.#legacySaveContext(savePath)
           const observers = this.#saveWatchers.get(owner) || new Set()
           observers.add(control); this.#saveWatchers.set(owner, observers)
           await control.resume()
-        })
+        }, owner === this.getPath())
       } catch (error) { dispose(); throw error }
-      return [state, dispose, async () => { await revalidate(); await this.mutex.of(key).runExclusive(() => control.resume()) }]
+      return [state, dispose, async () => { await revalidate(); await this.#worldPaths([owner], () => control.resume(), owner === this.getPath()) }]
     })
   }
 
