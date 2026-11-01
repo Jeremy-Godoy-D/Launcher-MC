@@ -11,7 +11,7 @@ import { importPathParts } from '../../util/importFile'
 
 type Entry = { path: string; directory: boolean; size: number; hash?: string }
 const changed = () => Object.assign(new Error('Resource packs changed since review'), { name: 'ResourcePacksChangedError' })
-const inspect = (path: string) => lstat(path).catch(error => { if (error.code !== 'ENOENT') throw error })
+const inspect = (path: string) => lstat(path, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
 const digest = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex')
 export async function readFolderSnapshot(root: string, ignoredFile?: string) {
   const info = await inspect(root), entries: Entry[] = [], seen = new Set<string>()
@@ -24,21 +24,22 @@ export async function readFolderSnapshot(root: string, ignoredFile?: string) {
       const relative = prefix + name; importPathParts(relative)
       if (entries.length >= 100000 || seen.has(relative.toLowerCase())) throw new Error('Oversized or ambiguous pack directory')
       seen.add(relative.toLowerCase())
-      const file = join(path, name), before = await lstat(file)
+      const file = join(path, name), before = await lstat(file, { bigint: true })
       if (before.isSymbolicLink() || !before.isDirectory() && !before.isFile()) throw new Error('Unsafe pack entry')
-      const entry: Entry = { path: relative, directory: before.isDirectory(), size: before.isDirectory() ? 0 : before.size }
+      if (before.size > BigInt(Number.MAX_SAFE_INTEGER)) throw new Error('Pack entry size exceeds exact numeric range')
+      const entry: Entry = { path: relative, directory: before.isDirectory(), size: before.isDirectory() ? 0 : Number(before.size) }
       entries.push(entry)
       if (entry.directory) await scan(file, relative + '/', depth + 1)
       else {
         entry.hash = await checksum(file, 'sha256')
         if (typeof entry.hash !== 'string' || !/^[a-f0-9]{64}$/.test(entry.hash)) throw new Error('Pack checksum unavailable')
-        const after = await lstat(file)
-        if (before.ino !== after.ino || before.dev !== after.dev || before.size !== after.size || before.mtimeMs !== after.mtimeMs || before.ctimeMs !== after.ctimeMs) throw changed()
+        const after = await lstat(file, { bigint: true })
+        if (before.ino !== after.ino || before.dev !== after.dev || before.size !== after.size || before.mtimeNs !== after.mtimeNs || before.ctimeNs !== after.ctimeNs) throw changed()
       }
     }
   }
   await scan(root)
-  return { entries, identity: [info.ino, info.dev] }
+  return { entries, identity: [info.ino, info.dev].map(String) }
 }
 const topNames = (entries: Entry[]) => entries.filter(entry => !entry.path.includes('/')).map(entry => entry.path)
 const branch = (entries: Entry[], name: string) => entries.filter(entry => entry.path === name || entry.path.startsWith(name + '/'))
@@ -62,7 +63,7 @@ async function plan(path: string, shared: boolean, sharedRoot: string, domain: '
     else if (existing !== name || digest(branch(localTree.entries, name)) !== digest(branch(globalTree.entries, name))) conflicts.push(name)
   }
   const copying = shared ? copy.flatMap(name => branch(localTree.entries, name)) : globalTree.entries
-  const review: ResourcePackSharingReview = { snapshot: digest([shared, linked, local, global, link && [link.ino, link.dev], localTree, globalTree]), shared, linked, localPacks: localNames.length, sharedPacks: globalNames.length, files: shared === linked ? 0 : copying.filter(entry => !entry.directory).length, bytes: shared === linked ? 0 : copying.reduce((size, entry) => size + entry.size, 0), conflicts }
+  const review: ResourcePackSharingReview = { snapshot: digest([shared, linked, local, global, link && [link.ino, link.dev].map(String), localTree, globalTree]), shared, linked, localPacks: localNames.length, sharedPacks: globalNames.length, files: shared === linked ? 0 : copying.filter(entry => !entry.directory).length, bytes: shared === linked ? 0 : copying.reduce((size, entry) => size + entry.size, 0), conflicts }
   return { review, instance, local, global, globalRoot, localTree, globalTree, copy }
 }
 export async function previewResourcePackSharing(path: string, shared: boolean, root: string, domain: 'resourcepacks' | 'shaderpacks' = 'resourcepacks') {

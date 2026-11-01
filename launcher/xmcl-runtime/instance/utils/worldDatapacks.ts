@@ -10,7 +10,7 @@ import { importPathParts } from '../../util/importFile'
 import { readFolderSnapshot } from './sharedResourcePacks'
 import { readBoundedFile, staticPngDataUrl, worldLocation } from './worldFiles'
 
-const inspect = (path: string) => lstat(path).catch(error => { if (error.code !== 'ENOENT') throw error })
+const inspect = (path: string) => lstat(path, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
 const digest = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex')
 const invalid = () => Object.assign(new Error('Invalid world datapack'), { name: 'WorldDatapackInvalidError' })
 const changed = () => Object.assign(new Error('World files changed since review'), { name: 'WorldFilesChangedError' })
@@ -59,11 +59,11 @@ async function readZipEntryBuffer(zip: Awaited<ReturnType<typeof openZip>>, entr
 }
 
 async function inspectDatapackZip(filePath: string) {
-  const info = await lstat(filePath)
+  const info = await lstat(filePath, { bigint: true })
   if (!info.isFile() || info.isSymbolicLink() || info.size > MAX_DATAPACK_ZIP) throw invalid()
-  const root = await realpath(filePath), actual = await lstat(root)
+  const root = await realpath(filePath), actual = await lstat(root, { bigint: true })
   if (actual.ino !== info.ino || actual.dev !== info.dev || actual.isSymbolicLink()) throw changed()
-  const identity = [root, info.ino, info.dev, info.size, info.mtimeMs, info.ctimeMs], hash = await checksum(root, 'sha256')
+  const identity = [root, info.ino.toString(), info.dev.toString(), info.size.toString(), info.mtimeNs.toString(), info.ctimeNs.toString()], hash = await checksum(root, 'sha256')
   if (typeof hash !== 'string' || !/^[a-f0-9]{64}$/.test(hash)) throw changed()
   const zip = await openZip(root).catch(() => { throw invalid() })
   try {
@@ -87,16 +87,16 @@ async function inspectDatapackZip(filePath: string) {
     if (!mcmetaEntry) throw invalid()
     const meta = parsePackMcmeta(await readZipEntryBuffer(zip, mcmetaEntry, MAX_MCMETA))
     const icon = iconEntry && iconEntry.uncompressedSize <= MAX_ICON ? await readZipEntryBuffer(zip, iconEntry, MAX_ICON).then(staticPngDataUrl).catch(() => '') : ''
-    const after = await lstat(filePath)
-    if (after.isSymbolicLink() || after.ino !== info.ino || after.dev !== info.dev || after.size !== info.size || after.mtimeMs !== info.mtimeMs || after.ctimeMs !== info.ctimeMs || await checksum(root, 'sha256') !== hash) throw changed()
-    return { kind: 'zip' as const, root, identity, hash, size: info.size, files: 1, mtime: info.mtimeMs, ...meta, icon }
+    const after = await lstat(filePath, { bigint: true })
+    if (after.isSymbolicLink() || after.ino !== info.ino || after.dev !== info.dev || after.size !== info.size || after.mtimeNs !== info.mtimeNs || after.ctimeNs !== info.ctimeNs || await checksum(root, 'sha256') !== hash) throw changed()
+    return { kind: 'zip' as const, root, identity, hash, size: Number(info.size), files: 1, mtime: Number(info.mtimeMs), ...meta, icon }
   } finally { zip.close() }
 }
 
 async function inspectDatapackFolder(dirPath: string) {
-  const info = await lstat(dirPath)
+  const info = await lstat(dirPath, { bigint: true })
   if (!info.isDirectory() || info.isSymbolicLink()) throw invalid()
-  const root = await realpath(dirPath), actual = await lstat(root)
+  const root = await realpath(dirPath), actual = await lstat(root, { bigint: true })
   if (actual.ino !== info.ino || actual.dev !== info.dev || actual.isSymbolicLink() || parse(root).root === root) throw invalid()
   const snapshot = await readFolderSnapshot(root)
   if (!snapshot.identity) throw changed()
@@ -106,11 +106,11 @@ async function inspectDatapackFolder(dirPath: string) {
   if (digest(await readFolderSnapshot(root)) !== digest(snapshot)) throw changed()
   const files = snapshot.entries.filter(entry => !entry.directory).length, size = snapshot.entries.reduce((sum, entry) => sum + entry.size, 0)
   if (!Number.isSafeInteger(size) || size > MAX_DATAPACK_EXPANDED) throw invalid()
-  return { kind: 'folder' as const, root, identity: [root, info.ino, info.dev, snapshot.identity], hash: digest(snapshot), snapshot, size, files, mtime: info.mtimeMs, ...meta, icon }
+  return { kind: 'folder' as const, root, identity: [root, info.ino.toString(), info.dev.toString(), snapshot.identity], hash: digest(snapshot), snapshot, size, files, mtime: Number(info.mtimeMs), ...meta, icon }
 }
 
 export async function inspectDatapackSource(sourcePath: string, requestedName?: string) {
-  const info = await lstat(sourcePath).catch(() => { throw invalid() })
+  const info = await lstat(sourcePath, { bigint: true }).catch(() => { throw invalid() })
   if (info.isSymbolicLink() || !info.isFile() && !info.isDirectory()) throw invalid()
   const fileName = datapackFileName(requestedName || basename(sourcePath), info.isFile())
   if (info.isDirectory() && /\.zip$/i.test(fileName)) throw invalid()
@@ -136,10 +136,10 @@ async function readSidecar<T>(filePath: string, valid: (value: any) => value is 
 }
 
 export async function inspectInstalledDatapack(datapacksRoot: string, rawName: string) {
-  const fileName = datapackFileName(rawName), target = join(datapacksRoot, fileName), info = await lstat(target)
+  const fileName = datapackFileName(rawName), target = join(datapacksRoot, fileName), info = await lstat(target, { bigint: true })
   const name = fileName.replace(/\.zip$/i, '')
   if (info.isSymbolicLink()) {
-    return { fileName, linkOnly: true, files: 1, bytes: 0, identity: ['link', info.ino, info.dev, info.mtimeMs, info.ctimeMs], sidecars: [] as string[], datapack: { name, fileName, directory: false, description: '' } satisfies WorldDatapackReview }
+    return { fileName, linkOnly: true, files: 1, bytes: 0, identity: ['link', info.ino.toString(), info.dev.toString(), info.mtimeNs.toString(), info.ctimeNs.toString()], sidecars: [] as string[], datapack: { name, fileName, directory: false, description: '' } satisfies WorldDatapackReview }
   }
   const sidecars: string[] = [], sidecarHashes: Array<[string, string]> = []
   for (const suffix of ['modrinth', 'curseforge'] as const) {
@@ -152,10 +152,10 @@ export async function inspectInstalledDatapack(datapacksRoot: string, rawName: s
   }
   if (info.isFile()) {
     const hash = await checksum(target, 'sha256'), meta = /\.zip$/i.test(fileName) ? await inspectDatapackZip(target).catch(error => { if (error?.name === 'WorldFilesChangedError') throw error; return undefined }) : undefined
-    const after = await lstat(target)
-    if (after.isSymbolicLink() || after.ino !== info.ino || after.dev !== info.dev || after.size !== info.size || after.mtimeMs !== info.mtimeMs || after.ctimeMs !== info.ctimeMs || typeof hash !== 'string' || !/^[a-f0-9]{64}$/.test(hash)) throw changed()
+    const after = await lstat(target, { bigint: true })
+    if (after.isSymbolicLink() || after.ino !== info.ino || after.dev !== info.dev || after.size !== info.size || after.mtimeNs !== info.mtimeNs || after.ctimeNs !== info.ctimeNs || typeof hash !== 'string' || !/^[a-f0-9]{64}$/.test(hash)) throw changed()
     const datapack: WorldDatapackReview = { name, fileName, directory: false, ...(meta ? { packFormat: meta.packFormat, description: meta.description } : { description: '' }) }
-    return { fileName, linkOnly: false, files: 1, bytes: info.size, identity: ['file', info.ino, info.dev, info.size, info.mtimeMs, info.ctimeMs, hash, sidecarHashes], sidecars, datapack }
+    return { fileName, linkOnly: false, files: 1, bytes: Number(info.size), identity: ['file', info.ino.toString(), info.dev.toString(), info.size.toString(), info.mtimeNs.toString(), info.ctimeNs.toString(), hash, sidecarHashes], sidecars, datapack }
   }
   if (info.isDirectory()) {
     const snapshot = await readFolderSnapshot(target)
@@ -164,7 +164,7 @@ export async function inspectInstalledDatapack(datapacksRoot: string, rawName: s
     if (digest(await readFolderSnapshot(target)) !== digest(snapshot)) throw changed()
     const files = snapshot.entries.filter(entry => !entry.directory).length || 1, bytes = snapshot.entries.reduce((sum, entry) => sum + entry.size, 0)
     const datapack: WorldDatapackReview = { name, fileName, directory: true, ...(meta ? { packFormat: meta.packFormat, description: meta.description } : { description: '' }) }
-    return { fileName, linkOnly: false, files, bytes, identity: ['folder', info.ino, info.dev, snapshot, sidecarHashes], sidecars, datapack }
+    return { fileName, linkOnly: false, files, bytes, identity: ['folder', info.ino.toString(), info.dev.toString(), snapshot, sidecarHashes], sidecars, datapack }
   }
   throw new Error('Unsafe datapack entry')
 }
@@ -188,7 +188,7 @@ export async function readWorldDatapacks(instance: string, saveName: string, sha
     const info = await inspect(fullPath)
     if (!info) continue
     if (info.isSymbolicLink() || importPathParts(fileName).length !== 1 || fileName.length > 255) {
-      result.push({ path, savePath, fileName, name, icon: '', description: '', packFormat: -1, mtime: info.mtimeMs, directory: false, size: 0, entries: 1, error: 'unsafe' })
+      result.push({ path, savePath, fileName, name, icon: '', description: '', packFormat: -1, mtime: Number(info.mtimeMs), directory: false, size: 0, entries: 1, error: 'unsafe' })
       continue
     }
     const mr = await readSidecar(join(datapacksRoot, `.${fileName}.modrinth`), (v): v is { projectId: string; versionId: string } => Boolean(v && typeof v.projectId === 'string' && typeof v.versionId === 'string'))
@@ -199,17 +199,17 @@ export async function readWorldDatapacks(instance: string, saveName: string, sha
         result.push({ path, savePath, fileName, name, icon: inspected.icon, description: inspected.description, packFormat: inspected.packFormat, mtime: inspected.mtime, directory: true, size: inspected.size, entries: inspected.files, modrinth: mr.value, curseforge: cf.value })
       } catch (error) {
         const unsafe = error instanceof Error && error.message === 'Unsafe shared resource pack entry'
-        result.push({ path, savePath, fileName, name, icon: '', description: '', packFormat: -1, mtime: info.mtimeMs, directory: true, size: 0, entries: 1, error: unsafe ? 'unsafe' : 'invalid' })
+        result.push({ path, savePath, fileName, name, icon: '', description: '', packFormat: -1, mtime: Number(info.mtimeMs), directory: true, size: 0, entries: 1, error: unsafe ? 'unsafe' : 'invalid' })
       }
     } else if (info.isFile() && /\.zip$/i.test(fileName)) {
       try {
         const inspected = await inspectDatapackZip(fullPath)
         result.push({ path, savePath, fileName, name, icon: inspected.icon, description: inspected.description, packFormat: inspected.packFormat, mtime: inspected.mtime, directory: false, size: inspected.size, entries: 1, modrinth: mr.value, curseforge: cf.value })
       } catch {
-        result.push({ path, savePath, fileName, name, icon: '', description: '', packFormat: -1, mtime: info.mtimeMs, directory: false, size: info.size, entries: 1, error: 'invalid' })
+        result.push({ path, savePath, fileName, name, icon: '', description: '', packFormat: -1, mtime: Number(info.mtimeMs), directory: false, size: Number(info.size), entries: 1, error: 'invalid' })
       }
     } else {
-      result.push({ path, savePath, fileName, name, icon: '', description: '', packFormat: -1, mtime: info.mtimeMs, directory: false, size: info.isFile() ? info.size : 0, entries: 1, error: 'invalid' })
+      result.push({ path, savePath, fileName, name, icon: '', description: '', packFormat: -1, mtime: Number(info.mtimeMs), directory: false, size: info.isFile() ? Number(info.size) : 0, entries: 1, error: 'invalid' })
     }
   }
   const afterDir = await inspect(datapacksRoot)

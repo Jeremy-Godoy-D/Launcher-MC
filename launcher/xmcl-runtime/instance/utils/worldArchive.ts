@@ -17,10 +17,10 @@ const fail = (name = 'WorldArchiveInvalidError') => Object.assign(new Error(name
 const changed = () => fail('WorldFilesChangedError')
 const MAX_ARCHIVE = 32 * 1024 ** 3, MAX_EXPANDED = 64 * 1024 ** 3, MAX_FILE = 1024 ** 3
 async function archiveIdentity(path: string) {
-  const info = await lstat(path)
+  const info = await lstat(path, { bigint: true })
   if (!info.isFile() || info.isSymbolicLink()) throw fail()
   if (info.size > MAX_ARCHIVE) throw fail('WorldImportLimitError')
-  return [await realpath(path), info.ino, info.dev, info.size, info.mtimeMs, info.ctimeMs]
+  return [await realpath(path), info.ino, info.dev, info.size, info.mtimeNs, info.ctimeNs].map(String)
 }
 export async function inspectWorldArchive(path: string) {
   const identity = await archiveIdentity(path), hash = await checksum(path, 'sha256'), zip = await open(path), files: ArchiveFile[] = []

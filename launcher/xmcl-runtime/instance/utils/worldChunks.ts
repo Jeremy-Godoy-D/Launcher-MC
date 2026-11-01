@@ -10,7 +10,7 @@ import { worldName } from './worldFiles'
 
 const hash = (value: Buffer | Uint8Array | string) => createHash('sha256').update(value).digest('hex')
 const digest = (value: unknown) => hash(JSON.stringify(value))
-const inspect = (path: string) => lstat(path).catch(error => { if (error.code !== 'ENOENT') throw error })
+const inspect = (path: string) => lstat(path, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
 const changed = () => Object.assign(new Error('Chunk regions changed since review'), { name: 'WorldChunksChangedError' })
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const hex = /^[0-9a-f]{64}$/
@@ -43,7 +43,7 @@ async function directoryIdentity(root: string, directory: string) {
   for (const part of ['', ...path.split(sep).filter(Boolean)]) {
     current = join(current, part)
     const info = await inspect(current)
-    entries.push([current, info && [info.ino, info.dev]])
+    entries.push([current, info && [info.ino, info.dev].map(String)])
     if (!info) break
   }
   return digest(entries)
@@ -54,9 +54,9 @@ async function fileState(directory: string, name: string) {
   if (!info) return { name, bytes: undefined, hash: null, identity: null }
   const bytes = await readBoundedFile(path, MAX_REGION_BYTES)
   validateRegionFile(bytes)
-  const after = await lstat(path)
-  if (info.isSymbolicLink() || info.ino !== after.ino || info.dev !== after.dev || info.size !== after.size || info.mtimeMs !== after.mtimeMs || info.ctimeMs !== after.ctimeMs) throw changed()
-  return { name, bytes, hash: hash(bytes), identity: [after.ino, after.dev, after.size, after.mtimeMs, after.ctimeMs] }
+  const after = await lstat(path, { bigint: true })
+  if (info.isSymbolicLink() || info.ino !== after.ino || info.dev !== after.dev || info.size !== after.size || info.mtimeNs !== after.mtimeNs || info.ctimeNs !== after.ctimeNs) throw changed()
+  return { name, bytes, hash: hash(bytes), identity: [after.ino, after.dev, after.size, after.mtimeNs, after.ctimeNs].map(String) }
 }
 
 function validateManifest(value: Manifest): Manifest {

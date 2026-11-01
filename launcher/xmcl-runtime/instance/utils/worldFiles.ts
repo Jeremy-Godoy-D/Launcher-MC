@@ -12,7 +12,7 @@ import { deflate, gunzip, gzip, inflate } from 'node:zlib'
 import { instanceFileSource } from '../../instanceIO/utils/instanceFileSource'
 import { importPathParts } from '../../util/importFile'
 
-const inspect = (path: string) => lstat(path).catch(error => { if (error.code !== 'ENOENT') throw error })
+const inspect = (path: string) => lstat(path, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
 const changed = () => Object.assign(new Error('World changed during read'), { name: 'WorldChangedError' })
 const digest = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex')
 export function worldName(name: string) {
@@ -23,26 +23,26 @@ export function worldName(name: string) {
 export async function worldsLocation(instance: string, sharedRoot: string) {
   const source = await instanceFileSource(instance, 'saves', sharedRoot, true), root = join(source.root, source.path), info = await inspect(root)
   if (info && (!info.isDirectory() || info.isSymbolicLink())) throw new Error('Unsafe worlds directory')
-  return { root, shared: source.root !== await realpath(instance), identity: digest([root, info && [info.ino, info.dev]]) }
+  return { root, shared: source.root !== await realpath(instance), identity: digest([root, info && [info.ino, info.dev].map(String)]) }
 }
 
 /** Only the launcher's own depot may be the target of a legacy per-world link. */
 export async function worldLocation(instance: string, name: string, sharedRoot: string) {
   worldName(name)
-  const directory = await worldsLocation(instance, sharedRoot), logical = join(instance, 'saves', name), entry = join(directory.root, name), link = await lstat(entry)
+  const directory = await worldsLocation(instance, sharedRoot), logical = join(instance, 'saves', name), entry = join(directory.root, name), link = await lstat(entry, { bigint: true })
   let root = entry
   if (link.isSymbolicLink()) {
     if (directory.shared) throw new Error('Nested world link')
-    const depot = join(await realpath(sharedRoot), 'saves'), info = await lstat(depot)
+    const depot = join(await realpath(sharedRoot), 'saves'), info = await lstat(depot, { bigint: true })
     if (!info.isDirectory() || info.isSymbolicLink()) throw new Error('Unsafe worlds depot')
     root = await realpath(entry)
     const parts = relative(depot, root).split(/[\\/]/)
     if (isAbsolute(relative(depot, root)) || parts.length !== 1 || worldName(parts[0]) !== parts[0]) throw new Error('Untrusted world link')
   }
-  const info = await lstat(root)
+  const info = await lstat(root, { bigint: true })
   if (!info.isDirectory() || info.isSymbolicLink()) throw new Error('Unsafe world directory')
   return { root, logical, shared: directory.shared || link.isSymbolicLink(), linked: link.isSymbolicLink(),
-    identity: digest([directory.identity, entry, link.ino, link.dev, root, info.ino, info.dev]) }
+    identity: digest([directory.identity, entry, link.ino.toString(), link.dev.toString(), root, info.ino.toString(), info.dev.toString()]) }
 }
 
 

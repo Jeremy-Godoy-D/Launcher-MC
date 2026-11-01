@@ -40,7 +40,7 @@ export function parseProgressJson(content: string) {
 export async function progressInfo(root: string, path: string, budget: ProgressBudget) {
   chargeProgress(budget)
   await assertInstallDirectory(root, dirname(path))
-  const info = await lstat(path).catch(error => { if (error.code !== 'ENOENT') throw error })
+  const info = await lstat(path, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
   if (info?.isSymbolicLink()) throw new Error('Unsafe progress link')
   return info
 }
@@ -97,7 +97,7 @@ export async function openProgressArchive(root: string, path: string, budget: Pr
   const zip = await openZip(path)
   try {
     const after = await progressInfo(root, path, budget)
-    if (!after || before.ino !== after.ino || before.dev !== after.dev || before.size !== after.size || before.mtimeMs !== after.mtimeMs || before.ctimeMs !== after.ctimeMs) throw new Error('Progress archive changed')
+    if (!after || before.ino !== after.ino || before.dev !== after.dev || before.size !== after.size || before.mtimeNs !== after.mtimeNs || before.ctimeNs !== after.ctimeNs) throw new Error('Progress archive changed')
     const entries = new Map<string, Entry>(), directories = new Map<string, Set<string>>([['', new Set()]])
     for await (const entry of walkEntriesGenerator(zip)) {
       // Extra fields can expand into many small JS records while the ZIP is indexed.

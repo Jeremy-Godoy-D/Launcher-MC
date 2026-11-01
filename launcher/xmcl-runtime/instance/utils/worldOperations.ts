@@ -17,7 +17,7 @@ import { linkOrCopyFile } from '../../util/fs'
 
 const digest = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex')
 const changed = () => Object.assign(new Error('World files changed since review'), { name: 'WorldFilesChangedError' })
-const inspect = (path: string) => lstat(path).catch(error => { if (error.code !== 'ENOENT') throw error })
+const inspect = (path: string) => lstat(path, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
 function contains(parent: string, child: string) { const path = relative(parent, child); return path !== '..' && !path.startsWith('..' + sep) && !isAbsolute(path) }
 function operationInput(input: WorldFileOperation): WorldFileOperation {
   if (!input || typeof input.instancePath !== 'string' || !isAbsolute(input.instancePath)) throw new Error('Invalid world operation')
@@ -33,11 +33,11 @@ function operationInput(input: WorldFileOperation): WorldFileOperation {
 }
 async function sourceLocation(operation: WorldFileOperation, sharedRoot: string) {
   if (operation.type !== 'import') return { ...await worldLocation(operation.instancePath, operation.saveName, sharedRoot), file: false }
-  const info = await lstat(operation.sourcePath), root = await realpath(operation.sourcePath)
+  const info = await lstat(operation.sourcePath, { bigint: true }), root = await realpath(operation.sourcePath)
   if (info.isSymbolicLink() || !info.isDirectory() && !info.isFile() || info.isFile() && !/\.zip$/i.test(operation.sourcePath) || parse(root).root === root) throw Object.assign(new Error('Invalid world import source'), { name: 'WorldImportInvalidError' })
-  const actual = await lstat(root)
+  const actual = await lstat(root, { bigint: true })
   if (actual.ino !== info.ino || actual.dev !== info.dev || actual.isSymbolicLink()) throw changed()
-  return { root, logical: operation.sourcePath, shared: false, linked: false, file: info.isFile(), identity: digest([root, info.ino, info.dev]) }
+  return { root, logical: operation.sourcePath, shared: false, linked: false, file: info.isFile(), identity: digest([root, info.ino.toString(), info.dev.toString()]) }
 }
 async function plan(input: WorldFileOperation, sharedRoot: string) {
   const operation = operationInput(input), source = await sourceLocation(operation, sharedRoot)
@@ -62,7 +62,7 @@ async function plan(input: WorldFileOperation, sharedRoot: string) {
     if ((await sourceLocation(operation, sharedRoot)).identity !== source.identity) throw changed()
     const datapack = { name: pack.name, fileName: pack.fileName, directory: pack.kind === 'folder', packFormat: pack.packFormat, description: pack.description }
     const normalized: WorldFileOperation = { ...operation, fileName: pack.fileName }
-    const authority = digest([source.identity, dpDir && [dpDir.ino, dpDir.dev]])
+    const authority = digest([source.identity, dpDir && [dpDir.ino.toString(), dpDir.dev.toString()]])
     const review: WorldFileReview = { operation: normalized, snapshot: digest([normalized, source, authority, pack.identity, pack.hash, datapack]), files: pack.files, bytes: pack.size, shared: source.shared, linkOnly: false, destination: join(operation.instancePath, 'saves', operation.saveName, 'datapacks', pack.fileName), datapack }
     return { review, source, sourceTree: pack.kind === 'folder' ? pack.snapshot : { identity: [pack.hash], entries: [] }, parent, target, authority, archive: undefined, level: undefined, datapackSource: pack, installedDatapack: undefined }
   }
@@ -71,7 +71,7 @@ async function plan(input: WorldFileOperation, sharedRoot: string) {
     if (!dpDir?.isDirectory() || dpDir.isSymbolicLink()) throw new Error('Unsafe datapacks directory')
     const installed = await inspectInstalledDatapack(parent, operation.fileName), target = join(parent, operation.fileName)
     if ((await sourceLocation(operation, sharedRoot)).identity !== source.identity) throw changed()
-    const authority = digest([source.identity, [dpDir.ino, dpDir.dev]])
+    const authority = digest([source.identity, [dpDir.ino.toString(), dpDir.dev.toString()]])
     const review: WorldFileReview = { operation, snapshot: digest([operation, source, authority, installed.identity, installed.datapack]), files: installed.files, bytes: installed.bytes, shared: source.shared, linkOnly: installed.linkOnly, destination: join(operation.instancePath, 'saves', operation.saveName, 'datapacks', operation.fileName), datapack: installed.datapack }
     return { review, source, sourceTree: { identity: [installed.identity], entries: [] }, parent, target, authority, archive: undefined, level: undefined, datapackSource: undefined, installedDatapack: installed }
   }
@@ -86,11 +86,11 @@ async function plan(input: WorldFileOperation, sharedRoot: string) {
     parent = destination.root; target = join(parent, operation.type === 'copy' ? operation.destinationName : operation.saveName); authority = destination.identity; shared ||= destination.shared
     if (contains(source.root, target)) throw new Error('World copy overlaps its source')
   } else if (operation.type === 'export') {
-    const info = await lstat(operation.destinationDirectory)
+    const info = await lstat(operation.destinationDirectory, { bigint: true })
     if (!info.isDirectory() || info.isSymbolicLink()) throw new Error('Invalid export directory')
     parent = await realpath(operation.destinationDirectory); target = join(parent, operation.fileName)
     if (contains(await realpath(sharedRoot), parent) || contains(await realpath(operation.instancePath), parent)) throw new Error('Export must be outside launcher data')
-    authority = digest([parent, info.ino, info.dev])
+    authority = digest([parent, info.ino.toString(), info.dev.toString()])
   }
   if (target && await inspect(target)) throw Object.assign(new Error('World destination already exists'), { name: 'WorldDestinationExistsError' })
   const review: WorldFileReview = { operation, snapshot: digest([operation, source, sourceTree, parent, target, authority]), files: sourceTree.entries.filter(file => !file.directory).length,
@@ -139,7 +139,7 @@ export async function applyWorldFiles(review: WorldFileReview, sharedRoot: strin
     }
     await mkdir(current.target)
     try {
-      const targetInfo = await lstat(current.target)
+      const targetInfo = await lstat(current.target, { bigint: true })
       const ordered = [...current.datapackSource!.snapshot.entries].sort((a, b) => Number(a.path === 'pack.mcmeta') - Number(b.path === 'pack.mcmeta'))
       for (const entry of ordered) {
         const info = await inspect(current.target)
@@ -148,7 +148,7 @@ export async function applyWorldFiles(review: WorldFileReview, sharedRoot: strin
         await assertInstallDirectory(current.datapackSource!.root, dirname(srcFile)); await assertInstallDirectory(current.target, dirname(destFile))
         if (entry.directory) await mkdir(destFile)
         else {
-          const fstat = await lstat(srcFile)
+          const fstat = await lstat(srcFile, { bigint: true })
           if (!fstat.isFile() || fstat.isSymbolicLink()) throw changed()
           await copyFile(srcFile, destFile, constants.COPYFILE_EXCL)
           if (await checksum(destFile, 'sha256') !== entry.hash) throw changed()
@@ -192,7 +192,7 @@ export async function applyWorldFiles(review: WorldFileReview, sharedRoot: strin
     return { path: current.source.logical, backup }
   }
   async function copyInto(target: string, verifyDestination: () => Promise<void> = async () => {}) {
-    const identity = await lstat(target)
+    const identity = await lstat(target, { bigint: true })
     async function stableTarget() {
       const current = await inspect(target)
       if (!current?.isDirectory() || current.isSymbolicLink() || current.ino !== identity.ino || current.dev !== identity.dev) throw changed()
@@ -206,7 +206,7 @@ export async function applyWorldFiles(review: WorldFileReview, sharedRoot: strin
       await assertInstallDirectory(current.source.root, dirname(source)); await assertInstallDirectory(target, dirname(destination))
       if (entry.directory) await mkdir(destination)
       else {
-        const info = await lstat(source)
+        const info = await lstat(source, { bigint: true })
         if (!info.isFile() || info.isSymbolicLink()) throw changed()
         await copyFile(source, destination, constants.COPYFILE_EXCL)
         if (await checksum(destination, 'sha256') !== entry.hash) throw changed()
@@ -222,7 +222,7 @@ export async function applyWorldFiles(review: WorldFileReview, sharedRoot: strin
     const destination = await worldsLocation(instance, sharedRoot)
     await mkdir(current.target)
     try {
-      const targetInfo = await lstat(current.target)
+      const targetInfo = await lstat(current.target, { bigint: true })
       const verifyDestination = async () => {
         const info = await inspect(current.target)
         if (!info?.isDirectory() || info.isSymbolicLink() || info.ino !== targetInfo.ino || info.dev !== targetInfo.dev || (await worldsLocation(instance, sharedRoot)).identity !== destination.identity) throw changed()
@@ -234,11 +234,11 @@ export async function applyWorldFiles(review: WorldFileReview, sharedRoot: strin
   }
   const destinationDirectory = operation.destinationDirectory
   async function exportParent() {
-    const info = await lstat(current.parent)
-    if (!info.isDirectory() || info.isSymbolicLink() || digest([current.parent, info.ino, info.dev]) !== current.authority || await realpath(destinationDirectory) !== current.parent) throw changed()
+    const info = await lstat(current.parent, { bigint: true })
+    if (!info.isDirectory() || info.isSymbolicLink() || digest([current.parent, info.ino.toString(), info.dev.toString()]) !== current.authority || await realpath(destinationDirectory) !== current.parent) throw changed()
   }
   await exportParent()
-  const temporary = await mkdtemp(join(current.parent, '.grimo-world-export-')), temporaryInfo = await lstat(temporary)
+  const temporary = await mkdtemp(join(current.parent, '.grimo-world-export-')), temporaryInfo = await lstat(temporary, { bigint: true })
   if (dirname(temporary) !== current.parent || !temporary.startsWith(join(current.parent, '.grimo-world-export-')) || parse(temporary).root === temporary) throw changed()
   try {
     const staged = join(temporary, 'world'); await mkdir(staged); await copyInto(staged)

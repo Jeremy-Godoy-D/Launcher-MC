@@ -63,13 +63,13 @@ async function findLatestFile(dir: string, preferredUuid: string | undefined, ro
   }
 
   let latestFile = jsonFiles[0]
-  let latestMtime = 0
+  let latestMtime = 0n
   for (const f of jsonFiles) {
     try {
       const s = await progressInfo(root, join(dir, f), budget)
       if (!s?.isFile()) throw new Error('Invalid progress file')
-      if (s.mtimeMs > latestMtime) {
-        latestMtime = s.mtimeMs
+      if (s.mtimeNs > latestMtime) {
+        latestMtime = s.mtimeNs
         latestFile = f
       }
     } catch (cause) {
@@ -277,12 +277,12 @@ export async function locateFtbPlayerFile(savePath: string, playerUuid?: string,
     const snbtCandidates = files.filter(f => f.endsWith('.snbt') && !['data.snbt', 'chapter_groups.snbt', 'snbt'].includes(f.toLowerCase()))
     if (snbtCandidates.length > 0) {
       let newestFile: string | undefined
-      let newestMtime = -1
+      let newestMtime = -1n
       for (const f of snbtCandidates) {
         const filePath = join(dir, f)
         const s = await progressInfo(savePath, filePath, budget)
-        if (s?.isFile() && s.mtimeMs > newestMtime) {
-          newestMtime = s.mtimeMs
+        if (s?.isFile() && s.mtimeNs > newestMtime) {
+          newestMtime = s.mtimeNs
           newestFile = filePath
         }
       }
@@ -544,7 +544,8 @@ async function extractLocalTextures(itemIds: string[], instancePath: string, cli
   const opened: FileSystem[] = [], jars = new Map<string, FileSystem | null>()
   try {
     const clientStat = clientJarPath && gameDataPath ? await progressInfo(gameDataPath, clientJarPath, budget).catch(() => undefined) : undefined
-    const key = (id: string) => JSON.stringify([instancePath, clientJarPath, clientStat?.ino, clientStat?.mtimeMs, clientStat?.size, id])
+    const identity = clientStat && [clientStat.dev, clientStat.ino, clientStat.mtimeNs, clientStat.ctimeNs, clientStat.size].map(String)
+    const key = (id: string) => JSON.stringify([instancePath, clientJarPath, identity, id])
     const targets: string[] = []
     for (const id of [...new Set(itemIds)].slice(0, 150)) {
       if (typeof id !== 'string' || id.length > 2048) continue
@@ -648,7 +649,7 @@ export async function readSaveProgress(
   let levelDatMtime = 0
   try {
     const s = await progressInfo(savePath, levelDatPath, budget)
-    if (s) levelDatMtime = s.mtimeMs
+    if (s) levelDatMtime = Number(s.mtimeMs)
   } catch {}
 
   const advInfo = await findLatestFile(join(savePath, 'advancements'), preferredPlayerUuid, savePath, budget)
