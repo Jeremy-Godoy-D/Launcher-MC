@@ -295,3 +295,7 @@ STAGE5-CONSOLE-REQUEST-ISOLATION corrige mezclas de listados/lecturas/eliminacio
 ## Consola: archivos directos protegidos, historial y streams pendientes
 
 STAGE5-CONSOLE-FILE-BOUNDARY (`0bf7a01`/`c4a8b77`) documenta autoridad Java, rutas/enlaces/identidad y presupuestos Native, fallos recuperables y corrección de etiquetas en la barra. 1.152 unitarias/115 archivos;8 React+4 Vue y dos matrices React repetidas. CI41299557622/e9a9436 limpio:213main+1Strict+9Vue,2opt-inomitidos,0flaky, valida el bloque anterior. K21 no se cierra: LaunchHistoryStore/captura no reciben aún estas garantías; faltan límites de filas/texto y streams/virtualización/scroll/copiar/exportar/logger. K12 pass,K11 pending; todas las herramientas locales de Mundos conservadas.
+
+## Consola: vista acotada y progreso pendiente de CI
+
+STAGE5-CONSOLE-BOUNDED-VIEW (`4849893`/`ca6e281`/`381e52c`/`78642d0`) documenta el presupuesto de archivos, virtualización, homónimos, blancos/Unicode y contraste medido. Pasan 1.157 unitarias/116 archivos y 14 escenarios Native distintos, con cinco matrices repetidas. CI 41301976771 falló por teclado en 72; la corrección pasa tres casos locales y necesita CI nuevo. K21 mantiene historial/captura, streams/memoria, copiar/exportar Native y logger pendientes; la vista de archivos está acotada, liveEntries aún no. K12 pass, K11 pending; Mundos completo en alcance y etapa 5 activa.
