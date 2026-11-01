@@ -1,4 +1,4 @@
-import { ResourceManager } from '@xmcl/resource'
+import { ResourceManager, isValidCurseforgeRef, isValidModrinthRef } from '@xmcl/resource'
 import { checksum } from '@xmcl/core'
 import {
   InstanceSavesServiceKey,
@@ -23,14 +23,13 @@ import {
   type WorldFileOperation, type WorldFileReview, type SaveChunkChange,
   type UpdateSaveOptions,
 } from '@xmcl/runtime-api'
-import { readPackMetaAndIcon } from '@xmcl/resourcepack'
 import { AnyError, isSystemError } from '@xmcl/utils'
 import { FSWatcher } from 'chokidar'
 import filenamify from 'filenamify'
 import { existsSync } from 'fs'
 import { lstat, mkdir, mkdtemp, realpath, symlink } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
-import { ensureDir, readFile, readdir, rename, rm, rmdir, stat, unlink, writeFile } from 'fs-extra'
+import { ensureDir, readdir, rename, rm, rmdir, stat, unlink } from 'fs-extra'
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'path'
 import { Inject, LauncherAppKey, kGameDataPath, type PathResolver } from '~/app'
 import { InstanceService } from '~/instance'
@@ -54,7 +53,7 @@ import { applySaveChunkPlan, listSaveChunkBackups, planSaveChunkChanges } from '
  */
 @ExposeServiceKey(InstanceSavesServiceKey)
 export class InstanceSavesService extends AbstractService implements IInstanceSavesService {
-  #saveWatchers = new Map<string, { pause(): Promise<void>; resume(): void }>()
+  #saveWatchers = new Map<string, Set<{ pause(): Promise<void>; resume(): Promise<void> }>>()
   constructor(@Inject(LauncherAppKey) app: LauncherApp,
     @Inject(InstanceService) private instanceService: InstanceService,
     @Inject(kResourceManager) resourceManager: ResourceManager,
@@ -374,8 +373,8 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       }
 
       const control = {
-        pause: async () => { const old = watcher; watcher = undefined; await old?.close() },
-        resume: () => {
+        pause: async () => { const old = watcher; await old?.close(); if (watcher === old) watcher = undefined },
+        resume: async () => {
           if (disposed || watcher) return
           watcher = startWatcher()
           void revalidate().catch(error => this.warn(error))
@@ -384,15 +383,18 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       const dispose = () => {
         disposed = true
         launchService.off('minecraft-exit', onExit)
-        if (this.#saveWatchers.get(path) === control) this.#saveWatchers.delete(path)
-        void control.pause()
+        const observers = this.#saveWatchers.get(path)
+        observers?.delete(control)
+        if (!observers?.size) this.#saveWatchers.delete(path)
+        void control.pause().catch(error => this.warn(error))
       }
       try {
         await lock.runExclusive(async () => {
           await this.#javaInstance(path)
           await worldsLocation(path, this.getPath())
-          this.#saveWatchers.set(path, control)
-          control.resume()
+          const observers = this.#saveWatchers.get(path) || new Set()
+          observers.add(control); this.#saveWatchers.set(path, observers)
+          await control.resume()
         })
       } catch (error) { dispose(); throw error }
 
@@ -575,10 +577,10 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     const global = (await worldsLocation(this.getPath(), this.getPath())).root
     const original = await lstat(local, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
     if (!linked && !original?.isSymbolicLink()) return
-    const observer = this.#saveWatchers.get(instancePath)
-    await observer?.pause()
+    const observers = [...(this.#saveWatchers.get(instancePath) || [])]
     let guards: (WorldLock & { releaseLocal(directory: string): void }) | undefined
     try {
+      for (const observer of observers) await observer.pause()
       guards = await this.#worldFolderLocks(instancePath, true)
       await guards.verify()
       for (const original of originals) if ((await previewWorldFiles(original.operation, this.getPath())).snapshot !== original.snapshot) throw new AnyError('WorldFilesChangedError')
@@ -607,7 +609,10 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
         }
         throw Object.assign(new Error('World sharing incomplete; original folder retained', { cause }), { name: 'WorldSharingIncompleteError', backup })
       }
-    } finally { guards?.release(); observer?.resume() }
+    } finally {
+      guards?.release()
+      for (const observer of observers) await observer.resume().catch(error => this.warn(error))
+    }
   }
 
   async isSaveLinked(instancePath: string) {
@@ -825,122 +830,83 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     return source
   }
 
-  private async readDatapack(savePath: string, fileName: string): Promise<InstanceDatapack | undefined> {
-    const fullPath = join(savePath, 'datapacks', fileName)
-    if (fileName.startsWith('.')) return undefined
-    let fstat
-    try {
-      fstat = await stat(fullPath)
-    } catch {
-      return undefined
-    }
-    // Only zip files and directories are valid datapacks
-    if (!fstat.isDirectory() && extname(fileName).toLowerCase() !== '.zip') {
-      return undefined
-    }
-    try {
-      const { metadata, icon } = await readPackMetaAndIcon(fullPath)
-      const description = flattenPackDescription(metadata.description)
-
-      let curseforge: { projectId: number; fileId: number } | undefined
-      let modrinth: { projectId: string; versionId: string } | undefined
-
-      const cfSidecar = join(savePath, 'datapacks', `.${fileName}.curseforge`)
-      if (existsSync(cfSidecar)) {
-        curseforge = await readFile(cfSidecar, 'utf-8').then(JSON.parse).catch(() => undefined)
-      }
-      const mrSidecar = join(savePath, 'datapacks', `.${fileName}.modrinth`)
-      if (existsSync(mrSidecar)) {
-        modrinth = await readFile(mrSidecar, 'utf-8').then(JSON.parse).catch(() => undefined)
-      }
-
-      if (!curseforge && !modrinth) {
-        const resourceManager = await this.app.registry.get(kResourceManager).catch(() => undefined)
-        if (resourceManager) {
-          const snapshot = await resourceManager.getSnapshot(fullPath).catch(() => undefined)
-          if (snapshot?.sha1) {
-            const meta = await resourceManager.getMetadataByHash(snapshot.sha1).catch(() => undefined)
-            if (meta) {
-              curseforge = meta.curseforge
-              modrinth = meta.modrinth
-            }
-          }
+  async #legacyDatapacks(savePath: string) {
+    return this.#readSave(savePath, async root => {
+      const source = await this.#legacySaveContext(savePath)
+      if (source.root !== root) throw new AnyError('WorldChangedError')
+      const rows = await readWorldDatapacks(source.instancePath, source.saveName, this.getPath())
+      const resources = await this.app.registry.get(kResourceManager)
+      const result: InstanceDatapack[] = []
+      for (const row of rows) {
+        if (row.error) continue
+        let curseforge = row.curseforge && isValidCurseforgeRef(row.curseforge) ? { projectId: row.curseforge.projectId, fileId: row.curseforge.fileId } : undefined
+        let modrinth = row.modrinth && isValidModrinthRef(row.modrinth) ? { projectId: row.modrinth.projectId, versionId: row.modrinth.versionId } : undefined
+        if (!curseforge && !modrinth) {
+          const snapshot = await resources.getSnapshot(join(root, 'datapacks', row.fileName)).catch(() => undefined)
+          const metadata = snapshot?.sha1 ? await resources.getMetadataByHash(snapshot.sha1).catch(() => undefined) : undefined
+          if (isValidCurseforgeRef(metadata?.curseforge)) curseforge = { projectId: metadata.curseforge.projectId, fileId: metadata.curseforge.fileId }
+          if (isValidModrinthRef(metadata?.modrinth)) modrinth = { projectId: metadata.modrinth.projectId, versionId: metadata.modrinth.versionId }
         }
+        result.push({ ...row, path: join(savePath, 'datapacks', row.fileName), savePath, curseforge, modrinth })
       }
-
-      return {
-        path: fullPath,
-        savePath,
-        fileName,
-        name: fileName.replace(/\.zip$/i, ''),
-        icon: icon ? `data:image/png;base64,${Buffer.from(icon).toString('base64')}` : '',
-        description,
-        packFormat: metadata.pack_format ?? -1,
-        mtime: fstat.mtimeMs,
-        curseforge,
-        modrinth,
-      }
-    } catch (e) {
-      this.warn(`Fail to parse datapack ${fullPath}. Skip it.`)
-      this.warn(e as any)
-      return undefined
-    }
+      return result
+    })
   }
 
   async watchSaveDatapacks(savePath: string) {
-    requireString(savePath)
+    const source = await this.#legacySaveContext(savePath)
+    const owner = this.instanceService.state.instances.find(instance => {
+      const name = relative(join(resolve(instance.path), 'saves'), resolve(savePath))
+      return instance.edition === 'java' && !!name && name !== '..' && !isAbsolute(name) && !name.includes(sep)
+    })?.path || source.instancePath
     const stateManager = await this.app.registry.get(ServiceStateManager)
     return stateManager.registerOrGet(getInstanceSaveDatapacksKey(savePath), async ({ defineAsyncOperation }) => {
-      const datapacksDir = join(savePath, 'datapacks')
       const state = new SaveDatapacks()
-
-      await ensureDir(datapacksDir).catch(() => undefined)
-
-      const initial = await readdirIfPresent(datapacksDir)
-      const parsed = await Promise.all(initial.filter(f => !f.startsWith('.')).map(f => this.readDatapack(savePath, f)))
-      state.saveDatapacks(parsed.filter(isNonnull))
-
-      const updateDatapack = defineAsyncOperation(async (fileName: string) => {
-        const datapack = await this.readDatapack(savePath, fileName)
-        if (datapack) {
-          state.saveDatapackUpdate(datapack)
-        }
-      })
-
-      const watcher = new FSWatcher({
-        awaitWriteFinish: true,
-        ignorePermissionErrors: true,
-        followSymlinks: true,
-        cwd: datapacksDir,
-        depth: 0,
-      })
-
-      watcher
-        .on('error', (e) => {
-          if ((e as any).code === 'EBUSY' || (e as any).code === 'EPERM') return
-          this.error(e as any)
-        })
-        .on('all', (event, file) => {
-          if (!file || file.startsWith('.')) return
-          const fullPath = join(datapacksDir, file)
-          if (event === 'add' || event === 'change' || event === 'addDir') {
-            updateDatapack(file)
-          } else if (event === 'unlink' || event === 'unlinkDir') {
-            state.saveDatapackRemove(fullPath)
+      let watcher: FSWatcher | undefined, disposed = false, refresh: Promise<void> | undefined, dirty = false
+      const revalidate = defineAsyncOperation(async () => {
+        if (disposed) return
+        dirty = true
+        if (refresh) return refresh
+        refresh = (async () => {
+          while (dirty && !disposed) {
+            dirty = false
+            try { const rows = await this.#legacyDatapacks(savePath); if (!disposed) state.saveDatapacks(rows) }
+            catch (error) { if (!disposed) state.saveDatapacks([]); throw error }
           }
-        })
-        .add(datapacksDir)
-
+        })()
+        try { await refresh } finally { refresh = undefined }
+      })
+      const control = {
+        pause: async () => { const old = watcher; await old?.close(); if (watcher === old) watcher = undefined },
+        resume: async () => {
+          if (disposed || watcher) return
+          const current = await this.#saveLocation(savePath).catch(error => { state.saveDatapacks([]); throw error }), directory = join(current.root, 'datapacks')
+          await assertInstallDirectory(current.root, directory).catch(error => { state.saveDatapacks([]); throw error })
+          if (disposed || watcher) return
+          watcher = new FSWatcher({ awaitWriteFinish: true, ignorePermissionErrors: true, followSymlinks: false, depth: 1 })
+            .on('error', error => { if (!['EBUSY', 'EPERM'].includes((error as any).code)) this.error(error instanceof Error ? error : new Error('Datapack observer failed', { cause: error })) })
+            .on('all', () => { void revalidate().catch(error => this.warn(error)) })
+            .add(directory)
+          void revalidate().catch(error => this.warn(error))
+        },
+      }
       const dispose = () => {
-        watcher?.close()
+        disposed = true
+        const observers = this.#saveWatchers.get(owner)
+        observers?.delete(control)
+        if (!observers?.size) this.#saveWatchers.delete(owner)
+        void control.pause().catch(error => this.warn(error))
       }
-
-      const revalidate = async () => {
-        const files = await readdirIfPresent(datapacksDir)
-        const parsed = await Promise.all(files.filter(f => !f.startsWith('.')).map(f => this.readDatapack(savePath, f)))
-        state.saveDatapacks(parsed.filter(isNonnull))
-      }
-
+      try {
+        await revalidate()
+        const key = source.depot && owner === source.instancePath ? 'resource-pack-options' : LockKey.instance(owner)
+        await this.mutex.of(key).runExclusive(async () => {
+          await this.#legacySaveContext(savePath)
+          const observers = this.#saveWatchers.get(owner) || new Set()
+          observers.add(control); this.#saveWatchers.set(owner, observers)
+          await control.resume()
+        })
+      } catch (error) { dispose(); throw error }
       return [state, dispose, revalidate]
     })
   }
@@ -960,21 +926,15 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async getInstanceSaveDatapacks(instancePath: string) {
-    requireString(instancePath)
-    const savesDir = join(instancePath, 'saves')
-    const saveNames = await readdirIfPresent(savesDir).then(a => a.filter(s => !s.startsWith('.')))
-    const result: InstanceDatapack[] = []
-    await Promise.all(saveNames.map(async (name) => {
-      const savePath = join(savesDir, name)
-      const fstat = await stat(savePath).catch(() => undefined)
-      if (!fstat?.isDirectory()) return
-      const datapacksDir = join(savePath, 'datapacks')
-      const files = await readdirIfPresent(datapacksDir).then(a => a.filter(f => !f.startsWith('.')))
-      const parsed = await Promise.all(files.map(f => this.readDatapack(savePath, f)))
-      for (const dp of parsed) {
-        if (dp) result.push(dp)
-      }
-    }))
+    await this.#javaInstance(instancePath)
+    const worlds = await this.getInstanceSaves(instancePath), result: InstanceDatapack[] = []
+    for (const world of worlds) {
+      if (world.error) continue
+      const rows = await this.#legacyDatapacks(world.path)
+      if (result.length + rows.length > 10000) throw new Error('Too many instance datapacks')
+      result.push(...rows)
+    }
+    await this.#javaInstance(instancePath)
     return result
   }
 

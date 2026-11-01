@@ -25,12 +25,18 @@ vi.mock('~/instance', () => ({ InstanceService: class {} }))
 vi.mock('~/launch', () => ({ LaunchService: class {} }))
 vi.mock('~/resource', () => ({ kResourceManager: Symbol('resources') }))
 vi.mock('~/market', () => ({ kMarketProvider: Symbol('market') }))
-vi.mock('~/save', () => ({ kSaveWorker: Symbol('save') }))
+vi.mock('~/save', () => ({ kSaveWorker: Symbol('save'), readInstanceSaveMetadata: vi.fn(async (path: string, instanceName: string) => ({ path, instanceName })) }))
+vi.mock('./utils/worldDatapacks', async original => {
+  const actual = await original<typeof import('./utils/worldDatapacks')>()
+  return { ...actual, readWorldDatapacks: vi.fn(actual.readWorldDatapacks) }
+})
 vi.mock('~/service', () => ({ AbstractService: class { constructor(public app: any) {} get mutex() { return this.app.mutex } }, ExposeServiceKey: () => () => {}, ServiceStateManager: class {} }))
 const { InstanceSavesService } = await import('./InstanceSavesService')
+const { readWorldDatapacks } = await import('./utils/worldDatapacks')
 let root: string, exports: string, source: string, destination: string, third: string, service: InstanceType<typeof InstanceSavesService>
 let instances: { path: string; edition: string }[], processes: any[], sessions: { verify: ReturnType<typeof vi.fn>; release: ReturnType<typeof vi.fn> }[]
 let installFile: ReturnType<typeof vi.fn>
+let getSnapshot: ReturnType<typeof vi.fn>, getMetadataByHash: ReturnType<typeof vi.fn>, registerOrGet: ReturnType<typeof vi.fn>
 async function downloadedPack(directory: string, fileName = 'Market.zip', metadata: any = { curseforge: { projectId: 1, fileId: 2 } }) {
   const path = join(directory, fileName), zip = new ZipFile()
   zip.addBuffer(Buffer.from(JSON.stringify({ pack: { pack_format: 48, description: 'Market pack' } })), 'pack.mcmeta')
@@ -47,17 +53,20 @@ beforeEach(async () => {
   exports = await mkdtemp(join(process.cwd(), '.world-legacy-export-'))
   instances = [source, destination, third].map(path => ({ path, edition: 'java' })); processes = []; sessions = []
   installFile = vi.fn()
+  getSnapshot = vi.fn(async () => undefined); getMetadataByHash = vi.fn(async () => undefined)
+  registerOrGet = vi.fn(async (_key, factory) => factory({ defineAsyncOperation: (fn: any) => fn }))
   for (const path of [source, destination, third, root]) await mkdir(join(path, 'saves'), { recursive: true })
   await world(source)
   const locks = new Map<string, Mutex>(), of = (key: string) => { if (!locks.has(key)) locks.set(key, new Mutex()); return locks.get(key)! }
   const app = {
-    mutex: { of }, registry: { get: async () => ({ getGameProcesses: async () => processes, get: () => undefined, installFile }) },
+    mutex: { of }, registry: { get: async () => ({ getGameProcesses: async () => processes, get: () => undefined, installFile, getSnapshot, getMetadataByHash, registerOrGet, on: vi.fn(), off: vi.fn(), isParked: () => false }) },
     acquireWorldLock: async () => {
       const session = { verify: vi.fn(async () => { expect(of('resource-pack-options').isLocked()).toBe(true) }), release: vi.fn() }
       sessions.push(session); return session
     },
   }
   service = new InstanceSavesService(app as any, { initialize: async () => {}, state: { get instances() { return instances } } } as any, {} as any, (...parts) => join(root, ...parts), {} as any)
+  ;(service as any).warn = vi.fn(); (service as any).error = vi.fn()
 })
 afterEach(async () => {
   vi.restoreAllMocks()
@@ -532,4 +541,115 @@ it('uses the same owned staging for a CurseForge world and preserves occupied us
 it('validates a world market destination before downloading', async () => {
   await expect(service.installFromMarket({ market: MarketType.CurseForge, file: { fileId: 2 }, instancePath: exports })).rejects.toHaveProperty('name', 'InstanceNotFoundError')
   expect(installFile).not.toHaveBeenCalled()
+})
+
+
+it('rejects foreign datapack watches and unregistered/non-Java aggregate reads without creating directories', async () => {
+  const foreign = await world(exports, 'Foreign')
+  for (const savePath of [foreign, exports, 'relative/world']) await expect(service.watchSaveDatapacks(savePath)).rejects.toThrow()
+  for (const path of [exports, root]) await expect(service.getInstanceSaveDatapacks(path)).rejects.toHaveProperty('name', 'InstanceNotFoundError')
+  instances = instances.map(row => ({ ...row, edition: 'bedrock' }))
+  await expect(service.getInstanceSaveDatapacks(source)).rejects.toHaveProperty('name', 'InstanceNotFoundError')
+  expect(registerOrGet).not.toHaveBeenCalled()
+  await expect(lstat(join(foreign, 'datapacks'))).rejects.toHaveProperty('code', 'ENOENT')
+  expect((service as any).readDatapack).toBeUndefined()
+})
+
+it('preserves logical paths and valid sidecar/cache provenance across bounded aggregate datapack reads', async () => {
+  const savePath = await makeReactWorld(source, 'Alpha'), second = await makeReactWorld(source, 'Beta')
+  const worldBytes = await readFile(join(savePath, 'level.dat'))
+  await mkdir(join(savePath, 'datapacks')); await mkdir(join(second, 'datapacks'))
+  await downloadedPack(join(savePath, 'datapacks'), 'Sidecar.zip')
+  await writeFile(join(savePath, 'datapacks/.Sidecar.zip.curseforge'), JSON.stringify({ projectId: 1, fileId: 2, ignored: 'OTHER' }))
+  await downloadedPack(join(second, 'datapacks'), 'Cached.zip')
+  getSnapshot.mockResolvedValue({ sha1: 'a'.repeat(40) }); getMetadataByHash.mockResolvedValue({ modrinth: { projectId: 'project1', versionId: 'version1', ignored: 'OTHER' } })
+  const result = await service.getInstanceSaveDatapacks(source)
+  expect(result).toHaveLength(2)
+  expect(result[0]).toMatchObject({ savePath, path: join(savePath, 'datapacks/Sidecar.zip'), curseforge: { projectId: 1, fileId: 2 } })
+  expect(result[1]).toMatchObject({ savePath: second, path: join(second, 'datapacks/Cached.zip'), modrinth: { projectId: 'project1', versionId: 'version1' } })
+  expect(result[0].curseforge).not.toHaveProperty('ignored'); expect(result[1].modrinth).not.toHaveProperty('ignored')
+  expect(getSnapshot).toHaveBeenCalledExactlyOnceWith(join(second, 'datapacks/Cached.zip'))
+  expect(await readFile(join(savePath, 'level.dat'))).toEqual(worldBytes)
+})
+
+it('observes a missing datapacks directory without creating it, ignores event-supplied paths and stops after disposal', async () => {
+  const savePath = join(source, 'saves/Alpha'), add = vi.spyOn(FSWatcher.prototype, 'add')
+  const [state, dispose, refresh] = await service.watchSaveDatapacks(savePath) as any
+  const watcher = add.mock.results[0].value as FSWatcher
+  try {
+    expect(state.datapacks).toEqual([])
+    await expect(lstat(join(savePath, 'datapacks'))).rejects.toHaveProperty('code', 'ENOENT')
+    await mkdir(join(savePath, 'datapacks')); await downloadedPack(join(savePath, 'datapacks'))
+    watcher.emit('all', 'add', join(exports, 'Foreign.zip'))
+    await vi.waitFor(() => expect(state.datapacks).toHaveLength(1))
+    expect(state.datapacks[0].path).toBe(join(savePath, 'datapacks/Market.zip'))
+    dispose(); await watcher.close(); await rm(join(savePath, 'datapacks/Market.zip'))
+    await refresh(); expect(state.datapacks).toHaveLength(1)
+    expect(await readdir(exports)).toEqual([])
+  } finally { dispose(); await watcher.close() }
+})
+
+it('clears a datapack watch after its authority is removed and rejects a foreign datapack junction', async () => {
+  const savePath = join(source, 'saves/Alpha'); await mkdir(join(savePath, 'datapacks')); await downloadedPack(join(savePath, 'datapacks'))
+  const add = vi.spyOn(FSWatcher.prototype, 'add'), [state, dispose, refresh] = await service.watchSaveDatapacks(savePath) as any
+  const watcher = add.mock.results[0].value as FSWatcher
+  try {
+    expect(state.datapacks).toHaveLength(1)
+    // Windows holds the watched directory open; release it before simulating an external replacement.
+    await watcher.close()
+    await rename(join(savePath, 'datapacks'), join(savePath, 'retained')); await symlink(exports, join(savePath, 'datapacks'), 'junction')
+    await expect(refresh()).rejects.toThrow(); expect(state.datapacks).toEqual([])
+    expect(await readdir(exports)).toEqual([])
+    await rm(join(savePath, 'datapacks')); await rename(join(savePath, 'retained'), join(savePath, 'datapacks'))
+    instances = []; await expect(refresh()).rejects.toThrow(); expect(state.datapacks).toEqual([])
+  } finally { dispose(); await watcher.close() }
+})
+
+it('bounds the combined datapack result before returning an oversized list', async () => {
+  await makeReactWorld(source, 'Alpha')
+  vi.mocked(readWorldDatapacks).mockResolvedValueOnce(Array.from({ length: 10001 }, (_, i) => ({ path: '', savePath: '', fileName: `Pack${i}.zip`, name: 'Fixture', description: '', icon: '', mtime: 0, packFormat: 48 })))
+  await expect(service.getInstanceSaveDatapacks(source)).rejects.toThrow('Too many instance datapacks')
+})
+
+
+it('pauses both world and datapack observers while replacing saves and clears a disconnected datapack state', async () => {
+  const savePath = await makeReactWorld(source, 'Alpha'); await mkdir(join(savePath, 'datapacks')); await downloadedPack(join(savePath, 'datapacks'))
+  const add = vi.spyOn(FSWatcher.prototype, 'add')
+  const [, stopWorlds] = await service.watch(source) as any
+  const [state, stopDatapacks] = await service.watchSaveDatapacks(savePath) as any
+  const first = add.mock.results.map(call => call.value as FSWatcher)
+  try {
+    expect(first).toHaveLength(2)
+    await service.linkSharedSave(source)
+    for (const watcher of first) expect(watcher.getWatched()).toEqual({})
+    expect(add.mock.results.length).toBeGreaterThanOrEqual(4)
+    await vi.waitFor(() => expect(state.datapacks).toHaveLength(1))
+    expect(state.datapacks[0].path).toBe(join(savePath, 'datapacks/Market.zip'))
+    await service.unlinkSharedSave(source)
+    expect(state.datapacks).toEqual([])
+    expect(await readFile(join(root, 'saves/Alpha/datapacks/Market.zip'))).toBeDefined()
+  } finally {
+    stopDatapacks(); stopWorlds()
+    for (const call of add.mock.results) if (call.value instanceof FSWatcher) await call.value.close()
+  }
+})
+
+it('restores earlier observers when closing another observer fails before a folder mutation', async () => {
+  const savePath = await makeReactWorld(source, 'Alpha'), add = vi.spyOn(FSWatcher.prototype, 'add')
+  const original = await lstat(join(source, 'saves'), { bigint: true }), bytes = await readFile(join(savePath, 'level.dat'))
+  const [, stopWorlds] = await service.watch(source) as any
+  const [, stopDatapacks] = await service.watchSaveDatapacks(savePath) as any
+  const second = add.mock.results[1].value as FSWatcher, close = vi.spyOn(second, 'close').mockRejectedValueOnce(new Error('Fixture close failure'))
+  try {
+    await expect(service.linkSharedSave(source)).rejects.toThrow('Fixture close failure')
+    expect(new Set(add.mock.results.map(call => call.value)).size).toBe(3)
+    expect(close).toHaveBeenCalledOnce()
+    expect((await lstat(join(source, 'saves'), { bigint: true })).ino).toBe(original.ino)
+    expect(await readFile(join(savePath, 'level.dat'))).toEqual(bytes)
+    expect(await readFile(join(root, 'saves/Alpha/level.dat'))).toEqual(bytes)
+    expect((await lstat(join(root, 'saves/Alpha/level.dat'), { bigint: true })).ino).not.toBe((await lstat(join(savePath, 'level.dat'), { bigint: true })).ino)
+  } finally {
+    stopDatapacks(); stopWorlds()
+    for (const call of add.mock.results) if (call.value instanceof FSWatcher) await call.value.close()
+  }
 })
