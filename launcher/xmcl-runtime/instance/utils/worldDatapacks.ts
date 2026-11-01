@@ -27,7 +27,8 @@ function flattenDescription(value: unknown) {
   function visit(node: unknown, depth = 0) {
     if (depth > 32 || ++visited > 2048 || text.length >= 4096) return
     if (typeof node === 'string' || typeof node === 'number' || typeof node === 'boolean') {
-      const cleaned = [...String(node).replace(/§[0-9a-fk-or]/gi, '')].filter(char => char.charCodeAt(0) >= 32 && char.charCodeAt(0) !== 127 || char === '\n' || char === '\t').join('')
+      // Keep the pattern in a string for DeskGap's ASCII-only host bundle.
+      const cleaned = [...String(node).replace(new RegExp('\\u00a7[0-9a-fk-or]', 'gi'), '')].filter(char => char.charCodeAt(0) >= 32 && char.charCodeAt(0) !== 127 || char === '\n' || char === '\t').join('')
       text += cleaned.slice(0, 4096 - text.length)
     } else if (Array.isArray(node)) {
       for (const child of node) { visit(child, depth + 1); if (text.length >= 4096) break }
