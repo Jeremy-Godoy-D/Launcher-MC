@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa. 31f2c84 protege LaunchHistoryStore/captura/fallback: rutas, manifiestos, límites y posesión de launchId/instancia/lado, retención sin rm recursivo y salida persistida ante evidencia unavailable. Ver STAGE5-LAUNCH-HISTORY: 1188/118 archivos, 14 React+7 Vue locales, tipos/lint y nueve harness; dist Vue. CI41307887151/c683bd0 success confirma chunks y foco72 anteriores (1157 unitarias,219 React+1Strict+10Vue,2omitidos,0flaky). Verificar nuevo CI exacto tras push sin reiniciar vivo. Continuar K21: identidad/orden/multibyte y memoria de stdout/stderr/errPromises/liveEntries, carreras de arranque, copiar/exportar Native y logger por instancia. No rehacer lectores/vista de archivos ni este historial. K12 pass; K11 integral/IPC legacy/no NIO pendiente. Mundos completo con chunks en alcance; 6–9 pendientes. NSIS/delta aislados en runner Windows de Actions antes de pedir VM local. PR4 borrador; producción/proxy intactos, Microsoft pospuesto. Excluir DOMPurify WIP y ANALISIS_ARQUITECTURA.md.",
+  "nextAction": "Etapa 5 activa. acd7fe9 corrige precisión BigInt de logs y assert de copia;030024a implementa pipes del juego incrementales/ordenados con backpressure, capturas acotadas e identidad;0c94354 prueba Java real normal en ambos EXE. Ver STAGE5-GAME-OUTPUT:1219/120 archivos,94 focales,19 React+8 Vue locales,4 lanzamientos de clase Java de prueba;tipos/lint y9harness;dist Vue. CI41311764936/ddc8e2a falló1187/1188 por inodes Number redondeados,Vue cancelado y Native no ejecutado;verificar nuevoCI exacto tras push sin reiniciar vivo. Próximo K21: estado vivo React por launchId/directorio/lado/canal,ensamblado de fragmentos,memoria/lotes,carreras de snapshot y demás mapas de procesos;copiar/exportar Native y logger por instancia. No rehacer archivos/historial/pipes aceptados salvo regresión. Revisar preExecuteCommand en seguridad. K12pass;K11 integral/IPC legacy/noNIO e identidades Number de Mundos pending;conservar todas herramientas y chunks. No repetir fixture rechazada de interceptar ChildProcess.prototype.spawn;usar flujo normal autorizado y fixtures existentes. 6–9 pendientes,NSIS/delta runnerWindows,MSpospuesto,PR4borrador,producción/proxy intactos;excluir DOMPurify WIP y ANALISIS_ARQUITECTURA.md.",
   "stages": [
     {
       "id": 0,
@@ -861,9 +861,13 @@
             {
               "path": "docs/react-migration/STAGE5-LAUNCH-HISTORY.md",
               "sha256": "439485b48f2c25bd45d3eb1cf3069fa815f47d5bb08c2b88a10d12c53b1a38b9"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-GAME-OUTPUT.md",
+              "sha256": "a7b47ed104bc003035ccc7876a6497951d9b71a28ee10523ced08ce92889fc15"
             }
           ],
-          "note": "K12 pass. CI41307887151/c683bd0 success confirma foco72 y calibración de commits chunks; K11 integral/IPC legacy/no NIO pendiente. Conservar mapa, progreso, dimensiones, regiones y editar/copiar/pegar/eliminar chunks; gate/5 permanecen pending/activa. Ver STAGE5-LAUNCH-HISTORY; validar CI del bloque actual tras push."
+          "note": "K12pass. K11 integral/IPClegacy/noNIO y precisión de identidades en Mundos pending;Mundos/chunks completos en alcance. CI41311764936 falló en assert de ino Number de importación,acd7fe9 cambia a BigInt y mantiene conservación de bytes;no fue un fallo demostrado de la copia. Ver STAGE5-GAME-OUTPUT;validar nuevo CI exacto sin cierre de gate."
         },
         {
           "id": "console-isolation",
@@ -896,9 +900,13 @@
             {
               "path": "docs/react-migration/STAGE5-LAUNCH-HISTORY.md",
               "sha256": "439485b48f2c25bd45d3eb1cf3069fa815f47d5bb08c2b88a10d12c53b1a38b9"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-GAME-OUTPUT.md",
+              "sha256": "a7b47ed104bc003035ccc7876a6497951d9b71a28ee10523ced08ce92889fc15"
             }
           ],
-          "note": "31f2c84: historial/captura Native con rutas, identidad, presupuestos, fallback por proceso real y retención conservadora. 1188 unitarias/118 archivos,14 React+7 Vue; K21 aún pendiente por streams/estado vivo/arranque/copiar/exportar/logger. Ver STAGE5-LAUNCH-HISTORY; validar CI del bloque actual tras push."
+          "note": "030024a/0c94354: pipes de juego y captura Native con identidad,decoder incremental y límites;Java real de prueba en ambos EXE,1219 unitarias y27 recorridos Electron. K21 aún pending por React vivo/lotes/memoria/carreras,copiar/exportar/logger y revisión preExecuteCommand. Ver STAGE5-GAME-OUTPUT;validar nuevo CI exacto sin cierre de gate."
         }
       ]
     },
@@ -1035,5 +1043,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-01T13:31:29.312111+00:00"
+  "updatedAt": "2026-11-01T15:07:49.961690+00:00"
 }
