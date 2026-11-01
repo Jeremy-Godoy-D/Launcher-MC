@@ -51,7 +51,8 @@ export function InstanceBaseSettings({ instance, running }: { instance: SavedIns
     library.selectionGuard.current = guard
     return () => { if (library.selectionGuard.current === guard) library.selectionGuard.current = null }
   }, [library?.selectionGuard, instance.path])
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (!dirty && !busy) return
     const close = (event: BeforeUnloadEvent) => {
       if (allowExit.current || (!dirtyInstanceSettings(latest.current.draft).length && !pending.current)) return
       event.preventDefault(); event.returnValue = 'false'
@@ -59,7 +60,7 @@ export function InstanceBaseSettings({ instance, running }: { instance: SavedIns
     }
     window.addEventListener('beforeunload', close)
     return () => window.removeEventListener('beforeunload', close)
-  }, [])
+  }, [dirty, busy])
   function change<K extends keyof InstanceSettingsForm>(key: K, value: InstanceSettingsForm[K]) {
     allowExit.current = false
     setDraft(previous => ({ ...previous, values: { ...previous.values, [key]: value } })); setFailure(null); setMessage('')

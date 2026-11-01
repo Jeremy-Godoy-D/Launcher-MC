@@ -206,3 +206,22 @@ test('settings text keeps AA contrast over the worst uniform ambient luminance',
     expect(result.length).toBeGreaterThan(15); expect(result.filter(value => value.ratio < 4.5)).toEqual([])
   }
 })
+
+test('clean reloads after save remove the unload guard before exposing success', async ({ launcher }) => {
+  const page = launcher.main
+  await page.addInitScript(() => {
+    const listeners = new Set<unknown>(), add = window.addEventListener.bind(window), remove = window.removeEventListener.bind(window)
+    window.addEventListener = ((type: string, listener: any, options?: any) => { if (type === 'beforeunload') listeners.add(listener); add(type, listener, options) }) as typeof window.addEventListener
+    window.removeEventListener = ((type: string, listener: any, options?: any) => { if (type === 'beforeunload') listeners.delete(listener); remove(type, listener, options) }) as typeof window.removeEventListener
+    Object.defineProperty(window, '__settingsUnloadListeners', { get: () => listeners.size })
+  })
+  await seedReactLibrary(page); await open(page)
+  const area = settings(page)
+  expect(await page.evaluate(() => (window as any).__settingsUnloadListeners)).toBe(0)
+  for (let index = 0; index < 3; index++) {
+    const host = `saved-${index}.test`; await area.getByTestId('setting-server-host').fill(host)
+    await activateLauncherControl(launcher, area.getByTestId('setting-save-btn')); await expect(area.getByRole('status')).toContainText('guardados correctamente')
+    expect(await page.evaluate(() => (window as any).__settingsUnloadListeners)).toBe(0)
+    await page.reload(); await expect(area.getByTestId('setting-server-host')).toHaveValue(host)
+  }
+})
