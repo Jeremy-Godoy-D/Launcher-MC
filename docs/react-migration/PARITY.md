@@ -275,3 +275,7 @@ STAGE5-SESSION-LOCK incorpora LockFile nativo compatible con Java FileChannel du
 ## Activación de teclado en CI (`fe45be7`)
 
 STAGE5-CI-KEYBOARD-ACTIVATION registra CI41285066451/dcb31c5 (194pass,1failed,1flaky,2skipped;Vue success/React failure), contextos descargados y corrección de fixtures36/72 mediante el helper Native y espera de disponibilidad. Mantiene aserciones de foco/Tab/retorno,6React sin reintentos,12Axe0violaciones/12incomplete,E2E56base sin nuevos. Verificar nuevo CI; esta corrección de pruebas no cierra K11/K12/K21 ni etapa5. Producción/proxy sin cambios,Microsoft pospuesto.
+
+## Argumentos exactos de instancia (`f2220b5`)
+
+STAGE5-INSTANCE-ARGUMENTS corrige join/split destructivo al guardar yfiltrado de vacíos al lanzar cliente. Editor por campos conserva espacios/comillas/multilínea/vacíos,ordenyfoco,[] propio yherencia por IPC/disco/recarga.1101unitarias/111archivos,35focales,145finalesReact/lanzamiento,5React+2Vue,8Axe0violaciones/8incomplete y9harness. CI41287115212/cfa9bfc pasó Vue+React (200main,1Strict,8Vue,2opt-in de proveedores omitidos,0flaky);verificar nuevo SHA. K12 sigue pending por flags/RAM/herencia,borradores/navegación/selección/conflictos/validación Native;K11/K21 y etapa5 conservan pendientes,6–9sin iniciar. Producción/proxy intactos,Microsoft pospuesto.
