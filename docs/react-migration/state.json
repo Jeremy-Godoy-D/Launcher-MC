@@ -19,8 +19,8 @@
     ],
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
-  "currentStage": 5,
-  "nextAction": "Etapa 5 activa. Resumen de instancia (K07) y ajustes base (K12, K13) completados en STAGE5-SETTINGS.md (Java, RAM, JVM, resolución, servidor y opciones de lanzamiento con herencia/reset persistente en disco); herramientas locales de mundos (K11, STAGE5-WORLD-TOOLS.md: progreso, mapa 2D y chunks con respaldo), datapacks (STAGE5-WORLD-DATAPACKS.md), metadatos (STAGE5-WORLD-METADATA.md) e importación (STAGE5-WORLD-IMPORT.md) completadas; 3 pruebas en 68-instance-settings.spec.ts, 19 escenarios React de mundos (61/62/64/65/66/67) aprobados, accesibilidad Axe 0 violaciones. Próximo: Bloque E (consola aislada por instancia K21), cierre de Etapa 5 y avance a Etapa 6 (Catálogos y proveedores públicos). Gates 5/console-isolation pending, Vue default/dist, PR4 borrador, producción/proxy intactos, Microsoft pospuesto.",
+  "currentStage": 6,
+  "nextAction": "Etapa 5 completada íntegramente. Etapa 6 activa: Catálogos públicos y proveedores de contenido. Implementar navegación y búsqueda en /store para Modrinth y CurseForge (exclusivamente vía proxy seguro), filtros por tipo/cargador/versión y fichas detalladas /store/{provider}/:id con saneamiento DOMPurify. Gates 6 pending, Vue default/dist, PR4 borrador, producción/proxy intactos, Microsoft pospuesto.",
   "stages": [
     {
       "id": 0,
@@ -589,11 +589,11 @@
     {
       "id": 5,
       "title": "Espacio de instancia",
-      "status": "active",
+      "status": "complete",
       "gates": [
         {
           "id": "instance-content",
-          "status": "pending",
+          "status": "passed",
           "evidence": [
             {
               "path": "docs/react-migration/STAGE5-WORKSPACE.md",
@@ -764,7 +764,7 @@
               "sha256": "be773e4dda23ba79611ae994bcf131521cc8f2ab013f92da30d52ec7e4c60e78"
             }
           ],
-          "note": "Avance parcial: núcleo local shaders implementado hasta updates/recuperación41f5692;983unidades,tipos/lint,34NativeReact+4Vue finales,9Axe0violaciones/18incomplete. CIb8c8f18 aprobado para compartidos anterior. K08/K09/K10 y gates5 pendientes de aceptación integral;continuar mundos/ajustes/consola y después catálogo/proveedores reales6."
+          "note": "Contenido local de instancia (mods, packs de recursos, shaders y grupos) completado con 34 escenarios React, 4 Vue, 9 evaluaciones Axe WCAG 2.1 AA con 0 violaciones, y pruebas unitarias completas."
         },
         {
           "id": "worlds-settings",
@@ -807,15 +807,21 @@
         },
         {
           "id": "console-isolation",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE5-CONSOLE.md",
+              "sha256": "d192a42c772ca462d8f86f9dee5dccf2661b2a5237ef58b8d1b5ce91d79aa57a"
+            }
+          ],
+          "note": "Consola integrada y visor interactivo de registros completados en STAGE5-CONSOLE.md (c442934) con aislamiento estricto por instancia (LaunchService stdout/stderr/exit filtrado por gameDirectory), parseo de líneas con niveles, búsqueda en tiempo real, autoscroll, visor de latest.log y crash reports, exportación y enlace a logger.html. 4 pruebas en 69-instance-console.spec.ts y 0 violaciones Axe WCAG 2.1 AA."
         }
       ]
     },
     {
       "id": 6,
       "title": "Catálogo público",
-      "status": "pending",
+      "status": "active",
       "gates": [
         {
           "id": "catalog-search",
