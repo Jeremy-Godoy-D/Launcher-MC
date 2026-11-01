@@ -1,3 +1,11 @@
+
+## Último bloque — logger independiente (4504f02, 2026-11-01)
+
+K21 pass; etapa5 activa por K11. Leer STAGE5-LOGGER-WINDOWS.md: contexto Native por instancia/fuente en Electron/DeskGap, reusable InstanceConsole/LaunchStore, navegación exacta y precomandos sin capturar comandos/salida. 1264 unitarias/125 archivos; 28 escenarios React distintos y ocho Vue. Los dos fallos de recorte principal se debían al orden CSS compartido; declaración de capas antes de los chunks en los tres HTML. La aserción adicional de logger encontró un píxel: scroll-padding lo corrigió; no bajar ratios ni aumentar timeouts. Cuatro Axe finales cero violaciones/tres incomplete; nueve harness. Tipos/lint/build DeskGap; E2E mantiene exactamente56 diagnósticos base. Dist Vue, paquetes separados, PR4 borrador, producción beta.2/proxy sin cambios; DOMPurify WIP/ANALISIS excluidos.
+
+CI41332318544/3657285 success (230 React +1 Strict +14 Vue, dos omitidos), consultar nuevo push por su SHA. Siguiente K11: BigInt de ino/dev/timestamps en helpers y lectores compartidos, serializar identidad a strings sin redondearla; readBoundedFile aún usa Stats Number y debe revisarse también. IPC legacy y escritores noNIO/aceptación integral pendientes. Mantener todos los mapas/progreso/dimensiones/regiones/chunks. No ampliar extras ni tocar la raíz de datos habitual.
+
+Artefactos propios stage5-logger-*, manifest ignorado; snapshots de controles y visor aparte para auxiliares 900×600/600×400. showLog en spec84 usa el hook sin spawn; spec80 sí ejecuta Java propio, nunca Minecraft. No afirmar AA global/DeskGap funcional/instalador aislado. No reintentar DevTools, spawn prototype ni limpiezas rechazadas.
 # Punto de reanudación
 
 ## Objetivo

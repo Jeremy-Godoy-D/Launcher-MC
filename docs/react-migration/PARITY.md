@@ -28,7 +28,7 @@ Referencia: beta.2, commit `7671c6f1bdc471d42816241920a262a18aca5a44`. Alcance c
 | K18 | Ajustes globales `/setting` | BaseService/JavaService, SettingGeneral/Global/Network/Advanced | Persistir idioma/directorios/Java/RAM/red/descargas y opciones núcleo; quitar categorías de extras. | pending |
 | K19 | Actualizaciones y notas | BaseService, SettingUpdate/SettingUpdateInfoDialog, ReleaseFile | url pública, apiUrl solo interno, operación manual, integridad, 800×400 y errores. | pending |
 | K20 | Tareas/notificaciones | taskMonitor, taskManager, dialog/notifier, AppTaskDialog | Un poll activo sin solapamiento, cancelar/limpiar, errores en área afectada. | pending |
-| K21 | Consola integrada / logger.html | InstanceLogService, gameMonitor, windows/logger | Logs/filtros/copiar/exportar/scroll/abrir ventana; sin IA diagnóstica remota. | pending |
+| K21 | Consola integrada / logger.html | InstanceLogService, gameMonitor, windows/logger | Logs/filtros/copiar/exportar/scroll/abrir ventana; sin IA diagnóstica remota. | pass |
 | K22 | Onboarding/bootstrap y migration.html | bootstrap/migration preload, Setup, windows/migration | Perfil/ruta seguros, tres etapas, progreso/error, no tocar raíz habitual. | pending |
 | K23 | Barra de ventana/teclado/diálogos/arrastre | windowController, dropHandler, dialog, quick commands | Arrastre de archivos núcleo, minimizar/maximizar/cerrar, navegación/foco/accesibilidad. Sin invocar extras. | pending |
 | K24 | Apariencia nueva y medios | Nuevo resolvedor; identidad/upstream y galerías públicas existentes | Claro/oscuro/sistema, vídeo/poster/rotación/pausa/rendimiento y fallbacks del plan. | pending |
@@ -319,3 +319,7 @@ STAGE5-LIVE-CONSOLE (2b5c564/1aae267/84dd8e1) registra ensamblado de fragmentos/
 ## Acciones Native de consola
 
 STAGE5-CONSOLE-ACTIONS (2d9a28f/280d99a/17fd9b8) registra confirmación de copiar, exportación Native atómica/acotada, cancelación/fallos y contexto capturado, guard de emisor y orígenes opacos. Pasan 1.249 unitarias/122 archivos, tipos en siete paquetes, 18 escenarios React distintos y ocho Vue, 20 Axe sin violaciones/20 incomplete y nueve harness; E2E conserva 56 diagnósticos base. La compilación ASCII DeskGap se conserva con patrones equivalentes y 17 focales, sin cambiar configuración. CI41326986337/c4c6d20 pasó el bloque anterior; nuevo CI pendiente. K21 aún requiere logger por instancia y seguridad de ventanas/IPC/preExecuteCommand; K11 integral/legacy/noNIO/precisión pendiente, K12 pass. Mundos/chunks completos en alcance, etapa 5 activa, 6–9 pendientes, Microsoft pospuesto y producción/proxy intactos.
+
+## Consola independiente aceptada (4504f02)
+
+K21 pasa. STAGE5-LOGGER-WINDOWS.md registra contexto Native fijo por instancia/fuente, archivos y salida vivos, acciones y reintentos, navegación restringida y precomandos sin salida/credenciales en logs. 1264 unitarias/125 archivos, 28 escenarios React distintos y ocho Vue; cuatro Axe finales de logger con cero violaciones/tres incomplete. Los fallos de capas y margen de scroll se corrigieron conservando las aserciones. CI41332318544/3657285 confirma el bloque anterior; comprobar el nuevo. K11 sigue pending, todas sus herramientas/chunks conservadas. Auditoría global IPC/extras, juego real, rendimiento e instalador/delta antes de producción.

@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa. Copiar/exportar Native implementados en 2d9a28f, fixtures 280d99a y compatibilidad ASCII 17fd9b8; ver STAGE5-CONSOLE-ACTIONS. Pasaron 1249 unitarias/122 archivos, tipos en siete paquetes y build DeskGap, 18 escenarios React distintos y ocho Vue; 20 Axe sin violaciones/20 incomplete, nueve harness, E2E 56 diagnósticos base. CI41326986337/c4c6d20 success (226 React +1 Strict +14 Vue, dos omitidos) confirma historial vivo; verificar CI exacto del push nuevo. Próximo K21: logger funcional por instancia/contexto capturado, reutilizar InstanceConsole/LaunchStore; revisar ElectronController.createMonitorWindow/getLoggerWindow/gameLaunch y auxiliary.tsx. Endurecer orígenes/navegación amplios en ambos hosts y auditar IPC antes de producción, además de preExecuteCommand. No rehacer lectores/historial/pipes/streaming/acciones aceptadas salvo regresión. K11 integral/IPC legacy/noNIO/BigInt en helpers de Mundos pending; todas las herramientas/chunks conservadas, K12 pass, 6–9 pendientes. Paquetes separados, dist Vue, Microsoft pospuesto, PR4 borrador, producción/proxy intactos. Mantener restricciones de RESUME y excluir DOMPurify WIP/ANALISIS_ARQUITECTURA.md.",
+  "nextAction": "Etapa 5 activa: K21 consola/logger y K12 ajustes pass. Bloque 4504f02 validado: 1264 unitarias/125 archivos, 28 escenarios React distintos (incluidas correcciones y repeticiones documentadas), ocho Vue, tipos/lint/build DeskGap, nueve harness. Ver STAGE5-LOGGER-WINDOWS. CI41332318544/3657285 success: 230 React +1 Strict +14 Vue, dos opt-in omitidos; verificar CI del nuevo push. Siguiente K11: terminar identidades exactas BigInt y serialización normalizada en worldFiles/worldOperations/worldChunks/progressFiles, readBoundedFile y lectores compartidos/datasets; auditar IPC legacy/escritores noNIO y aceptación integral de todas las herramientas/chunks. No rehacer consola salvo regresión. Etapas6–9 pendientes. Dist Vue/paquetes separados, PR4 borrador, producción beta.2/proxy intactos, Microsoft pospuesto. Mantener restricciones de RESUME; excluir DOMPurify WIP y ANALISIS_ARQUITECTURA.md.",
   "stages": [
     {
       "id": 0,
@@ -871,7 +871,7 @@
         },
         {
           "id": "console-isolation",
-          "status": "pending",
+          "status": "passed",
           "evidence": [
             {
               "path": "docs/react-migration/STAGE5-CONSOLE.md",
@@ -912,9 +912,13 @@
             {
               "path": "docs/react-migration/STAGE5-CONSOLE-ACTIONS.md",
               "sha256": "568da59daca83dcb0d8ab2f5ceb984dc47d291e5ba5e614587e7ddbfee93b593"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-LOGGER-WINDOWS.md",
+              "sha256": "e95ad00b90dc900d6157eafaa43fc88fc36d7440efe73f5cb4e3ab054a2b9d72"
             }
           ],
-          "note": "2d9a28f/280d99a: copiar confirma Native; exportar usa selector Native, escritura atómica acotada y guard de emisor; cancelación/fallos/contextos tardíos probados. 1249 unitarias/122 archivos, siete paquetes con tipos, 18 escenarios React distintos y ocho Vue; 20 Axe sin violaciones/20 incomplete. 17fd9b8 conserva ASCII en dos patrones de texto de Mundos: 17 focales y build DeskGap aprobados, sin cambiar configuración. CI41326986337/c4c6d20 pasó el bloque previo; nuevo CI pendiente. K21 mantiene logger por instancia y aceptación de seguridad, incluido preExecuteCommand; ver STAGE5-CONSOLE-ACTIONS."
+          "note": "K21 pass: logger por contexto Native fijo en 4016ae9, capas CSS 3eef3ab, precomandos privados 26c16f0, scroll completo 4504f02. 1264 unitarias/125 archivos, tipos/lint/build DeskGap, 28 escenarios React distintos y ocho Vue; fallos geométricos corregidos sin relajar aserciones. Matriz logger final cuatro Axe: cero violaciones/tres incomplete. CI41332318544/3657285 success confirma bloque anterior; verificar nuevo CI. Ver STAGE5-LOGGER-WINDOWS; auditoría global IPC/extras en etapa8, K11 integral todavía pending."
         }
       ]
     },
@@ -1051,5 +1055,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-01T17:35:38Z"
+  "updatedAt": "2026-11-01T18:19:20.183957Z"
 }
