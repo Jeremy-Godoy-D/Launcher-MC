@@ -997,7 +997,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     try {
       const provider = await this.app.registry.get(kMarketProvider)
       const results = await provider.installFile({ ...request, directory: staging })
-      if (!Array.isArray(results) || results.length > 1000) throw new Error('Invalid datapack download batch')
+      if (!Array.isArray(results) || results.length === 0 || results.length > 1000) throw new Error('Invalid datapack download batch')
       const workspace = await lstat(staging, { bigint: true })
       if (!workspace.isDirectory() || workspace.isSymbolicLink() || workspace.ino !== identity.ino || workspace.dev !== identity.dev || await realpath(staging) !== staging) throw new AnyError('WorldFilesChangedError')
       for (const result of results) {
@@ -1018,11 +1018,11 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     let request: InstallMarketOptions
     if (options.market === MarketType.CurseForge) {
       const refs = Array.isArray(options.file) ? options.file : [options.file]
-      if (refs.length > 1000 || refs.some(ref => !ref || !Number.isSafeInteger(ref.fileId) || ref.fileId <= 0)) throw new Error('Invalid CurseForge datapack references')
+      if (refs.length === 0 || refs.length > 1000 || refs.some(ref => !ref || !Number.isSafeInteger(ref.fileId) || ref.fileId <= 0)) throw new Error('Invalid CurseForge datapack references')
       request = { market: MarketType.CurseForge, file: refs.map(ref => ({ fileId: ref.fileId, icon: icon(ref.icon) })) }
     } else {
       const refs = Array.isArray(options.version) ? options.version : [options.version]
-      if (refs.length > 1000 || refs.some(ref => !ref || typeof ref.versionId !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(ref.versionId))) throw new Error('Invalid Modrinth datapack references')
+      if (refs.length === 0 || refs.length > 1000 || refs.some(ref => !ref || typeof ref.versionId !== 'string' || !/^[0-9A-Za-z]{8}$/.test(ref.versionId))) throw new Error('Invalid Modrinth datapack references')
       request = { market: MarketType.Modrinth, version: refs.map(ref => ({ versionId: ref.versionId, ...(ref.filename === undefined ? {} : { filename: datapackFileName(ref.filename, true) }), icon: icon(ref.icon) })) }
     }
     return request

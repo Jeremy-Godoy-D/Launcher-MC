@@ -494,14 +494,25 @@ it('rejects invalid market references and unsafe datapack folders before contact
   const savePath = join(source, 'saves/Alpha')
   for (const input of [
     { market: MarketType.CurseForge, file: { fileId: 0 } },
+    { market: MarketType.CurseForge, file: [] },
     { market: MarketType.CurseForge, file: Array.from({ length: 1001 }, () => ({ fileId: 1 })) },
     { market: MarketType.Modrinth, version: { versionId: '../escape' } },
-    { market: MarketType.Modrinth, version: { versionId: 'v1', filename: '../escape.zip' } },
+    { market: MarketType.Modrinth, version: { versionId: 'v1' } },
+    { market: MarketType.Modrinth, version: [] },
+    { market: MarketType.Modrinth, version: { versionId: 'version2', filename: '../escape.zip' } },
     { market: MarketType.CurseForge, file: { fileId: 1, icon: 'bad\nicon' } },
   ]) await expect(service.installDatapackFromMarket({ ...input, savePath } as any)).rejects.toThrow()
   await symlink(exports, join(savePath, 'datapacks'), 'junction')
   await expect(service.installDatapackFromMarket({ market: MarketType.CurseForge, file: { fileId: 1 }, savePath })).rejects.toThrow()
   expect(installFile).not.toHaveBeenCalled(); expect(await readdir(exports)).toEqual([])
+})
+
+it.each([MarketType.CurseForge, MarketType.Modrinth])('rejects a missing provider result without reporting installation success: %s', async market => {
+  const savePath = join(source, 'saves/Alpha')
+  installFile.mockResolvedValue([])
+  await expect(service.installDatapackFromMarket({ market, savePath, ...(market === MarketType.CurseForge ? { file: { fileId: 1 } } : { version: { versionId: 'version2' } }) } as any)).rejects.toThrow('Invalid datapack download batch')
+  await expect(lstat(join(savePath, 'datapacks'))).rejects.toHaveProperty('code', 'ENOENT')
+  expect((await readdir(root)).filter(name => name.startsWith('.datapack-download-'))).toEqual([])
 })
 
 

@@ -42,7 +42,7 @@ for (const provider of ['modrinth', 'curseforge'] as const) test(`Native ${provi
   try {
     // Metadata uses Electron net.fetch; file bytes still use the native download pipeline.
     await launcher.app.evaluate(({ session }, base) => {
-      session.defaultSession.webRequest.onBeforeRequest({ urls: ['https://api.modrinth.com/v2/versions*', 'https://*/v1/mods/files'] }, (details, callback) => {
+      session.defaultSession.webRequest.onBeforeRequest({ urls: ['https://api.modrinth.com/v2/versions*', 'https://*/v1/mods/files'] }, (details: { url: string }, callback: (response: { redirectURL: string }) => void) => {
         const target = new URL(details.url)
         callback({ redirectURL: base + target.pathname + target.search })
       })
