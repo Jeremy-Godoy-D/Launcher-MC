@@ -65,6 +65,8 @@ declare global {
       showOpenDialog?: import('@xmcl/runtime-api/src/controller').WindowController['showOpenDialog']
       writeClipboard?: import('@xmcl/runtime-api/src/controller').WindowController['writeClipboard']
       exportLogView?: import('@xmcl/runtime-api/src/controller').WindowController['exportLogView']
+      openLogger?: import('@xmcl/runtime-api/src/controller').WindowController['openLogger']
+      getLoggerContext?: import('@xmcl/runtime-api/src/controller').WindowController['getLoggerContext']
       on(channel: 'window-active', listener: (active: boolean) => void): unknown
       removeListener(channel: 'window-active', listener: (active: boolean) => void): unknown
     }

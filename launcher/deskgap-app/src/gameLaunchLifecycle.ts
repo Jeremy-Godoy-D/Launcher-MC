@@ -6,6 +6,7 @@ interface WindowReadyEvent {
 
 interface GameStartEvent {
   showLog?: boolean
+  gameDirectory?: string
 }
 
 interface GameExitEvent {
@@ -22,7 +23,7 @@ export interface GameLaunchLifecycleService {
 
 export interface GameLaunchLifecycleController {
   closeMonitorWindow(): void
-  createMonitorWindow(): Promise<void>
+  createMonitorWindow(instancePath?: string): Promise<void>
   handleMinecraftExit(status: GameExitEvent): void
   handleMinecraftWindowReady(hideLauncher: boolean): void
   setGameRunning(running: boolean): void
@@ -43,9 +44,9 @@ export function bindGameLaunchLifecycle(
       void host.moveGameWindow(pid, resolution.monitor).catch(error => host.warn(error))
     }
     controller.handleMinecraftWindowReady(!!hideLauncher)
-  }).on('minecraft-start', ({ showLog }) => {
+  }).on('minecraft-start', ({ showLog, gameDirectory }) => {
     controller.setGameRunning(service.getProcesses().length > 0)
-    if (showLog) void controller.createMonitorWindow()
+    if (showLog) void controller.createMonitorWindow(gameDirectory).catch(error => host.warn(error))
   }).on('minecraft-exit', (status) => {
     const running = service.getProcesses().length > 0
     controller.setGameRunning(running)

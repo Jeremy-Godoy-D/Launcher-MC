@@ -1074,6 +1074,7 @@ react:
     exportError: "No se pudo guardar el registro. Elige otro destino .log o .txt y comprueba los permisos y el espacio libre."
     clear: "Limpiar vista"
     export: "Exportar a archivo"
+    openError: "No se pudo abrir la consola. Inténtalo de nuevo."
     openWindow: "Abrir en ventana independiente"
     showInFolder: "Mostrar archivo"
     empty: "No hay registros disponibles para mostrar."
@@ -1118,3 +1119,14 @@ react:
     prepared: Preparado
     complete: Completado
     incompleteState: Interrumpido
+
+  logger:
+    loading: "Cargando consola…"
+    loadError: "No se pudo cargar esta consola. Comprueba la instancia e inténtalo de nuevo."
+    retry: "Reintentar"
+    missing: "Esta instancia ya no está disponible. Cierra esta ventana y elige una instancia existente."
+    noContext: "Abre la consola desde una instancia para ver sus registros."
+    liveSinceOpen: "La salida en vivo se captura mientras esta ventana está abierta. Los registros anteriores están en los archivos guardados."
+    minimize: "Minimizar"
+    maximize: "Maximizar o restaurar"
+    close: "Cerrar consola"

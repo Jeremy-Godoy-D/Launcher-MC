@@ -92,6 +92,14 @@ export const windowController: ControllerPlugin = function (this: ElectronContro
       })
     } finally { exporting.delete(event.sender) }
   })
+  ipcMain.handle('open-logger', async (event, instancePath, source) => {
+    exportOwner(event)
+    await this.openLogger(instancePath, source)
+  })
+  ipcMain.handle('get-logger-context', event => {
+    exportOwner(event)
+    return this.getLoggerContext(event.sender)
+  })
   ipcMain.handle('find-in-page', (event, text: string, options: FindInPageOptions) => {
     event.sender.findInPage(text, options)
   })
@@ -203,7 +211,7 @@ export const windowController: ControllerPlugin = function (this: ElectronContro
           }
           return false
         case Operation.Close:
-          if (this.parking) {
+          if (this.parking && window === this.mainWin) {
             window.hide()
           } else {
             window.close()

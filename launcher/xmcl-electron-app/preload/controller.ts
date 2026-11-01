@@ -64,6 +64,8 @@ function createController(): WindowController {
     writeClipboardImage,
     writeClipboard,
     exportLogView: (text, name) => ipcRenderer.invoke('export-log-view', text, name),
+    openLogger: (instancePath, source) => ipcRenderer.invoke('open-logger', instancePath, source),
+    getLoggerContext: () => ipcRenderer.invoke('get-logger-context'),
     getPathForFile,
     queryAudioPermission: () => ipcRenderer.invoke('query-audio-permission'),
     getMonitors: () => ipcRenderer.invoke('get-monitors'),

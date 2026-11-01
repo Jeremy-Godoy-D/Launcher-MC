@@ -8,7 +8,9 @@ import browserWinUrl from '@renderer/browser.html'
 import loggerWinUrl from '@renderer/logger.html'
 import migrateWinUrl from '@renderer/migration.html'
 import { parseOAuthRedirect } from '@xmcl/runtime/user/accountSystems/oauthRedirect'
-import { InstalledAppManifest, Settings } from '@xmcl/runtime-api'
+import { InstalledAppManifest, Settings, type LoggerContext } from '@xmcl/runtime-api'
+import { InstanceService } from '@xmcl/runtime/instance/InstanceService'
+import { loggerContext } from '@xmcl/runtime/util/loggerContext'
 import { Client, LauncherAppController, MicrosoftAuthTelemetryEvent } from '@xmcl/runtime/app'
 import { Logger } from '@xmcl/runtime/infra'
 import { kSettings } from '@xmcl/runtime/settings'
@@ -22,6 +24,7 @@ import { darkIcon } from './utils/icons'
 import { getLoginSuccessHTML } from './utils/login'
 import { createWindowTracker } from './utils/windowSizeTracker'
 import { isBootstrapSender } from './utils/bootstrapSender'
+import { rendererNavigation, externalNavigation } from '@xmcl/runtime/util/rendererNavigation'
 import { MultiplayerNetworkDiagnosticsController } from './MultiplayerNetworkDiagnosticsController'
 import { BrowserRtcController } from './BrowserRtcController'
 
@@ -31,6 +34,7 @@ export class ElectronController implements LauncherAppController {
   protected mainWin: BrowserWindow | undefined = undefined
 
   protected loggerWin: BrowserWindow | undefined = undefined
+  private loggerWindows = new Map<string, { context: LoggerContext; window?: BrowserWindow; opening?: Promise<void> }>()
 
   protected browserRef: BrowserWindow | undefined = undefined
 
@@ -62,7 +66,6 @@ export class ElectronController implements LauncherAppController {
   maximized: boolean | undefined
 
   private windowOpenHandler: Parameters<WebContents['setWindowOpenHandler']>[0] = (detail: HandlerDetails) => {
-    const url = new URL(detail.url)
     const features = detail.features.split(',')
     const width = parseInt(features.find(f => f.startsWith('width'))?.split('=')[1] ?? '1024', 10)
     const height = parseInt(features.find(f => f.startsWith('height'))?.split('=')[1] ?? '768', 10)
@@ -71,7 +74,7 @@ export class ElectronController implements LauncherAppController {
     const man = this.activatedManifest!
     // Determine if translucency should be enabled (from user settings or app manifest)
     const enableTranslucency = this.settings?.windowTranslucent || man.vibrancy
-    if (url.host === 'app' || detail.frameName === 'app' || (url.host.startsWith('localhost') && HAS_DEV_SERVER)) {
+    if (rendererNavigation(detail.url, man.url)) {
       return {
         action: 'allow',
         overrideBrowserWindowOptions: {
@@ -89,12 +92,17 @@ export class ElectronController implements LauncherAppController {
           webPreferences: {
             preload: indexPreload,
             devTools: IS_DEV,
+            contextIsolation: true,
+            sandbox: true,
+            nodeIntegration: false,
+            webviewTag: false,
           },
         },
       }
     }
 
-    shell.openExternal(detail.url)
+    const external = externalNavigation(detail.url)
+    if (external) void shell.openExternal(external).catch(error => this.logger.warn(error))
     return { action: 'deny' }
   }
 
@@ -108,9 +116,10 @@ export class ElectronController implements LauncherAppController {
   }
 
   private onWebContentWillNavigate = (event: Event, url: string) => {
-    if (!url.startsWith(HAS_DEV_SERVER ? 'http://localhost' : ('http://' + HOST))) {
+    if (!rendererNavigation(url, this.activatedManifest?.url ?? defaultApp.url) && !rendererNavigation(url, loggerWinUrl)) {
       event.preventDefault()
-      shell.openExternal(url)
+      const external = externalNavigation(url)
+      if (external) void shell.openExternal(external).catch(error => this.logger.warn(error))
     }
   }
 
@@ -425,43 +434,76 @@ export class ElectronController implements LauncherAppController {
     if (this.loggerWin?.isDestroyed()) {
       this.loggerWin = undefined
     }
-    return this.loggerWin
+    return this.loggerWin ?? [...this.loggerWindows.values()].find(entry => entry.window && !entry.window.isDestroyed())?.window
   }
 
-  async createMonitorWindow() {
+  getLoggerContext(contents: WebContents) {
+    const context = [...this.loggerWindows.values()].find(entry => entry.window?.webContents === contents)?.context
+    return context ? { ...context } : undefined
+  }
+
+  async openLogger(instancePath: string, source?: string) {
+    const context = loggerContext(instancePath, source)
+    const instances = await this.app.registry.get(InstanceService)
+    await instances.initialize()
+    if (!instances.state.instances.some(instance => instance.path === context.instancePath && instance.edition === 'java')) throw new Error('Logger instance not found')
+    const key = JSON.stringify(context), previous = this.loggerWindows.get(key)
+    if (previous) {
+      await previous.opening
+      if (previous.window && !previous.window.isDestroyed()) { previous.window.show(); previous.window.focus(); return }
+    }
+    const entry: { context: LoggerContext; window?: BrowserWindow; opening?: Promise<void> } = { context }
+    this.loggerWindows.set(key, entry)
+    entry.opening = this.createMonitorWindow(context).catch(error => {
+      if (this.loggerWindows.get(key) === entry) this.loggerWindows.delete(key)
+      if (entry.window && !entry.window.isDestroyed()) entry.window.close()
+      throw error
+    })
+    await entry.opening
+  }
+
+  async createMonitorWindow(context?: LoggerContext) {
     const tracker = createWindowTracker(this.app, 'monitor', this.activatedManifest!)
     // Determine if translucency should be enabled
     const enableTranslucency = this.settings?.windowTranslucent ?? false
 
     const config = await tracker.getConfig()
     const browser = new BrowserWindow({
-      title: 'KeyStone Monitor',
-      width: config.getWidth(600, 600),
-      height: config.getHeight(400, 400),
+      title: IS_REACT_RENDERER ? 'Grimo Launcher' : 'KeyStone Monitor',
+      width: config.getWidth(IS_REACT_RENDERER ? 900 : 600, 600),
+      height: config.getHeight(IS_REACT_RENDERER ? 600 : 400, 400),
       x: config.x,
       y: config.y,
       minWidth: 600,
       minHeight: 400,
       frame: false,
-      transparent: true,
-      hasShadow: false,
-      maximizable: false,
+      transparent: !IS_REACT_RENDERER,
+      hasShadow: IS_REACT_RENDERER,
+      maximizable: IS_REACT_RENDERER,
       icon: darkIcon,
       backgroundMaterial: this.getBackgroundMaterial(enableTranslucency), // Windows mica/acrylic
       webPreferences: {
         preload: monitorPreload,
         session: this.app.session.getSession(this.activatedManifest!.url),
+        contextIsolation: true,
+        sandbox: true,
+        nodeIntegration: false,
+        webviewTag: false,
       },
     })
 
     this.setupBrowserLogger(browser, 'logger')
+    browser.webContents.setWindowOpenHandler(this.windowOpenHandler)
+    browser.webContents.on('will-navigate', this.onWebContentWillNavigate)
 
-    browser.loadURL(loggerWinUrl)
-    browser.show()
-
-    tracker.track(browser)
-
-    this.loggerWin = browser
+    if (context) {
+      const key = JSON.stringify(context), entry = this.loggerWindows.get(key)!
+      entry.window = browser
+      browser.once('closed', () => { if (this.loggerWindows.get(key) === entry) this.loggerWindows.delete(key) })
+    } else this.loggerWin = browser
+    const url = IS_REACT_RENDERER ? new URL('logger.html', defaultApp.url).href : loggerWinUrl
+    await browser.loadURL(url)
+    browser.show(); tracker.track(browser)
   }
 
   requireFocus(): void {
@@ -471,8 +513,8 @@ export class ElectronController implements LauncherAppController {
       } else {
         this.mainWin.focus()
       }
-    } else if (this.loggerWin) {
-      this.loggerWin.focus()
+    } else {
+      this.getLoggerWindow()?.focus()
     }
   }
 
@@ -504,7 +546,7 @@ export class ElectronController implements LauncherAppController {
   }
 
   get activeWindow() {
-    return this.mainWin ?? this.loggerWin
+    return this.mainWin ?? this.getLoggerWindow()
   }
 
   getNativeWindowHandle() {

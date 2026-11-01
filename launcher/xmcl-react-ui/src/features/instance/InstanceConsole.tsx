@@ -19,13 +19,13 @@ import { useService, useServiceEvent } from '../../runtime'
 import { useI18n } from '../../i18n'
 import { useGameLogs, useLaunch } from '../launch/context'
 
-export function InstanceConsole({ instance }: { instance: SavedInstance }) {
+export function InstanceConsole({ instance, initialSource = '__live__', detached = false }: { instance: SavedInstance; initialSource?: string; detached?: boolean }) {
   const { t } = useI18n()
   const logService = useService(InstanceLogServiceKey)
   const launch = useLaunch()
   const logs = useGameLogs()
 
-  const [selectedSource, setSelectedSource] = useState<'__live__' | string>('__live__')
+  const [selectedSource, setSelectedSource] = useState(initialSource)
   const [logFiles, setLogFiles] = useState<string[]>([])
   const [crashReports, setCrashReports] = useState<string[]>([])
   const liveEntries = useMemo(() => logs.entries.filter(entry => entry.gameDirectory === instance.path).map(entry => {
@@ -45,6 +45,9 @@ export function InstanceConsole({ instance }: { instance: SavedInstance }) {
   const [success, setSuccess] = useState<'copy' | 'export'>()
   const [actionError, setActionError] = useState<'copyError' | 'exportError'>()
   const actionBusy = useRef(false)
+  const opening = useRef(false)
+  const [openingWindow, setOpeningWindow] = useState(false)
+  const [windowError, setWindowError] = useState(false)
   const actionEpoch = useRef(0)
   const mounted = useRef(false)
   const successTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -216,8 +219,14 @@ export function InstanceConsole({ instance }: { instance: SavedInstance }) {
   }
 
   // Open external window
-  function openWindow() {
-    window.open('logger.html', 'grimo-logger', 'width=900,height=600')
+  async function openWindow() {
+    if (opening.current) return
+    opening.current = true; setOpeningWindow(true); setWindowError(false)
+    try {
+      if (!window.windowController?.openLogger) throw new Error('Native logger unavailable')
+      await window.windowController.openLogger(instance.path, selectedSource)
+    } catch { if (mounted.current) setWindowError(true) }
+    finally { opening.current = false; if (mounted.current) setOpeningWindow(false) }
   }
 
   // Show in explorer
@@ -385,16 +394,18 @@ export function InstanceConsole({ instance }: { instance: SavedInstance }) {
             </button>
           )}
 
-          <button
+          {!detached && <button
             type="button"
             className="button secondary"
             data-testid="console-open-window"
-            onClick={openWindow}
+            onClick={() => { void openWindow() }}
+            disabled={openingWindow}
+            aria-busy={openingWindow}
             title={t('react.instanceConsole.openWindow')}
           >
             <ExternalLink size={16} aria-hidden="true" />
             {t('react.instanceConsole.openWindow')}
-          </button>
+          </button>}
 
           <button
             type="button"
@@ -410,6 +421,7 @@ export function InstanceConsole({ instance }: { instance: SavedInstance }) {
       </div>
 
       <div>
+        {windowError && <p className="form-error" role="alert">{t('react.instanceConsole.openError')}</p>}
         {actionError && <p className="form-error" role="alert">{t(`react.instanceConsole.${actionError}`)}</p>}
         {Object.entries(fileErrors).filter(([, value]) => value).map(([operation, key]) => <p key={operation} className="form-error" role="alert">{t(`react.instanceConsole.${key}`)}</p>)}
         {fileView?.source === selectedSource && fileView.limited && <p className="form-description" role="status">{t('react.instanceConsole.limited')}</p>}

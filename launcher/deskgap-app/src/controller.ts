@@ -1,5 +1,9 @@
 import { parseOAuthRedirect } from '@xmcl/runtime/user/accountSystems/oauthRedirect'
 import { exportLogView } from '@xmcl/runtime/util/exportLogView'
+import { deskGapNavigation, externalNavigation } from '@xmcl/runtime/util/rendererNavigation'
+import { loggerContext } from '@xmcl/runtime/util/loggerContext'
+import { InstanceService } from '@xmcl/runtime/instance/InstanceService'
+import type { LoggerContext } from '@xmcl/runtime-api/src/controller'
 import type { InstalledAppManifest } from '@xmcl/runtime-api'
 import type { Client, LauncherAppController } from '@xmcl/runtime/app'
 import type { Logger } from '@xmcl/runtime/infra'
@@ -148,6 +152,7 @@ export class DeskGapController implements LauncherAppController {
   private mainClient?: DeskGapClient
   private monitorWindow?: BrowserWindow
   private monitorClient?: DeskGapClient
+  private loggerWindows = new Map<string, { context: LoggerContext; window?: BrowserWindow; opening?: Promise<void> }>()
   private migrationWindow?: BrowserWindow
   private migrationClient?: DeskGapClient
   private migrationCompletion?: { resolve(): void; timeout: ReturnType<typeof setTimeout> }
@@ -203,15 +208,7 @@ export class DeskGapController implements LauncherAppController {
       if (process.platform !== 'win32' || process.env.NODE_ENV === 'production') {
         window.webView.setDevToolsEnabled(process.env.NODE_ENV !== 'production')
       }
-      window.webView.setWindowOpenHandler(({ url }) => {
-        void shell.openExternal(url)
-        return { action: 'deny' }
-      })
-      window.webView.on('will-navigate', (event: { preventDefault(): void }, url: string) => {
-        if (url.includes('.deskgap.test/')) return
-        event.preventDefault()
-        void shell.openExternal(url)
-      })
+      this.guardRenderer(window, isBootstrap ? 'index-bootstrap.html' : 'index.html')
       window.webView.on('console-message', (event: { level: string; message: string }) => {
         if (event.level === 'error' || event.level === 'warning') this.logger.warn(event.message)
         else this.logger.log(event.message)
@@ -247,7 +244,7 @@ export class DeskGapController implements LauncherAppController {
   }
 
   requireFocus() {
-    const window = this.mainWindow
+    const window = this.mainWindow ?? this.getMonitorWindow()
     if (!window || window.isDestroyed()) return
     window.webView.resume()
     if (window.isMinimized()) window.restore()
@@ -283,11 +280,35 @@ export class DeskGapController implements LauncherAppController {
       this.monitorWindow = undefined
       this.monitorClient = undefined
     }
-    return this.monitorWindow
+    return this.monitorWindow ?? [...this.loggerWindows.values()].find(entry => entry.window && !entry.window.isDestroyed())?.window
   }
 
-  async createMonitorWindow() {
-    const existing = this.getMonitorWindow()
+  async openLogger(instancePath: string, source?: string) {
+    const context = loggerContext(instancePath, source)
+    const instances = await this.launcher.registry.get(InstanceService)
+    await instances.initialize()
+    if (!instances.state.instances.some(instance => instance.path === context.instancePath && instance.edition === 'java')) throw new Error('Logger instance not found')
+    const key = JSON.stringify(context), previous = this.loggerWindows.get(key)
+    if (previous) {
+      await previous.opening
+      if (previous.window && !previous.window.isDestroyed()) { previous.window.show(); previous.window.focus(); return }
+    }
+    const entry: { context: LoggerContext; window?: BrowserWindow; opening?: Promise<void> } = { context }
+    this.loggerWindows.set(key, entry)
+    entry.opening = this.createMonitorWindow(undefined, context).catch(error => {
+      if (this.loggerWindows.get(key) === entry) this.loggerWindows.delete(key)
+      if (entry.window && !entry.window.isDestroyed()) entry.window.close()
+      throw error
+    })
+    await entry.opening
+  }
+
+  async createMonitorWindow(instancePath?: string, context?: LoggerContext) {
+    if (process.env.LAUNCHER_RENDERER === 'react' && !context) {
+      if (!instancePath) throw new Error('Logger instance is required')
+      return this.openLogger(instancePath)
+    }
+    const existing = !context && this.getMonitorWindow()
     if (existing) {
       existing.show()
       existing.focus()
@@ -295,10 +316,10 @@ export class DeskGapController implements LauncherAppController {
     }
     await app.whenReady()
     const window = new BrowserWindow({
-      title: 'KeyStone Monitor',
+      title: context ? 'Grimo Launcher' : 'KeyStone Monitor',
       icon: this.launcher.getWindowIcon(this.launcher.builtinAppManifest),
-      width: 600,
-      height: 400,
+      width: context ? 900 : 600,
+      height: context ? 600 : 400,
       minWidth: 600,
       minHeight: 400,
       frame: true,
@@ -308,15 +329,12 @@ export class DeskGapController implements LauncherAppController {
       webPreferences: { session: this.launcher.browserSession },
     })
     const client = this.attach(window)
-    this.monitorWindow = window
-    this.monitorClient = client
+    if (context) this.loggerWindows.get(JSON.stringify(context))!.window = window
+    else { this.monitorWindow = window; this.monitorClient = client }
     if (process.platform !== 'win32' || process.env.NODE_ENV === 'production') {
       window.webView.setDevToolsEnabled(process.env.NODE_ENV !== 'production')
     }
-    window.webView.setWindowOpenHandler(({ url }) => {
-      void shell.openExternal(url)
-      return { action: 'deny' }
-    })
+    this.guardRenderer(window, 'logger.html')
     window.webView.on('console-message', (event: { level: string; message: string }) => {
       if (event.level === 'error' || event.level === 'warning') this.logger.warn(`[monitor] ${event.message}`)
     })
@@ -325,11 +343,16 @@ export class DeskGapController implements LauncherAppController {
       this.detach(client)
       if (this.monitorWindow === window) this.monitorWindow = undefined
       if (this.monitorClient === client) this.monitorClient = undefined
+      if (context) {
+        const key = JSON.stringify(context)
+        if (this.loggerWindows.get(key)?.window === window) this.loggerWindows.delete(key)
+      }
     })
     window.loadFile(join(__dirname, 'renderer', 'logger.html'))
   }
 
   closeMonitorWindow() {
+    if (process.env.LAUNCHER_RENDERER === 'react') return
     const window = this.getMonitorWindow()
     if (window) window.close()
   }
@@ -425,6 +448,7 @@ export class DeskGapController implements LauncherAppController {
     const client = this.attach(window)
     this.migrationWindow = window
     this.migrationClient = client
+    this.guardRenderer(window, 'migration.html')
     window.webView.on('console-message', (event: { level: string; message: string }) => {
       if (event.level === 'error' || event.level === 'warning') this.logger.warn(`[migration] ${event.message}`)
     })
@@ -467,6 +491,20 @@ export class DeskGapController implements LauncherAppController {
     }
     const window = this.migrationWindow
     if (window && !window.isDestroyed()) window.close()
+  }
+
+  private guardRenderer(window: BrowserWindow, entry: string) {
+    const accept = deskGapNavigation(entry)
+    const openExternal = (url: string) => {
+      const external = externalNavigation(url)
+      if (external) void shell.openExternal(external).catch(error => this.logger.warn(error))
+    }
+    window.webView.setWindowOpenHandler(({ url }) => { openExternal(url); return { action: 'deny' } })
+    window.webView.on('did-start-navigation', (_event: unknown, url: string) => { accept(url) })
+    window.webView.on('will-navigate', (event: { preventDefault(): void }, url: string) => {
+      if (accept(url)) return
+      event.preventDefault(); openExternal(url)
+    })
   }
 
   private attach(window: BrowserWindow) {
@@ -534,6 +572,11 @@ export class DeskGapController implements LauncherAppController {
     this.handle('window.write-clipboard', (_, text: string) => clipboard.writeText(text))
     this.handle('window.show-open-dialog', ({ sender }, options) => dialog.showOpenDialog(this.getWindow(sender), options))
     this.handle('window.show-save-dialog', ({ sender }, options) => dialog.showSaveDialog(this.getWindow(sender), options))
+    this.handle('window.open-logger', async (_event, instancePath, source) => this.openLogger(instancePath, source))
+    this.handle('window.get-logger-context', ({ sender }) => {
+      const context = [...this.loggerWindows.values()].find(entry => entry.window === this.getWindow(sender))?.context
+      return context ? { ...context } : undefined
+    })
     this.handle('window.export-log-view', async ({ sender }, text, name) => {
       const window = this.getWindow(sender)
       if (exporting.has(sender)) throw new Error('Log export is already open')
@@ -595,7 +638,7 @@ export class DeskGapController implements LauncherAppController {
         window.webView.resume()
         window.show()
       } else if (operation === 'close') {
-        if (this.parking) {
+        if (this.parking && window === this.mainWindow) {
           window.hide()
           void window.webView.trySuspend()
         } else {

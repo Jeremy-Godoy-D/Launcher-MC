@@ -1074,6 +1074,7 @@ react:
     exportError: "Could not save the log. Choose another .log or .txt destination and check permissions and free space."
     clear: "Clear view"
     export: "Export to file"
+    openError: "Could not open the console. Try again."
     openWindow: "Open in separate window"
     showInFolder: "Show file"
     empty: "No log entries to display."
@@ -1118,3 +1119,14 @@ react:
     prepared: Prepared
     complete: Completed
     incompleteState: Interrupted
+
+  logger:
+    loading: "Loading console…"
+    loadError: "Could not load this console. Check the instance and try again."
+    retry: "Try again"
+    missing: "This instance is no longer available. Close this window and choose an existing instance."
+    noContext: "Open the console from an instance to view its records."
+    liveSinceOpen: "Live output is captured while this window is open. Earlier output is available in the saved log files."
+    minimize: "Minimize"
+    maximize: "Maximize or restore"
+    close: "Close console"
