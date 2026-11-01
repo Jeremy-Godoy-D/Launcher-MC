@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa. Importación revisada de mundos (46a3771, STAGE5-WORLD-IMPORT.md) y edición revisada de metadatos con respaldo (90d04ec, STAGE5-WORLD-METADATA.md) completadas; 1027 unidades / 101 archivos, tipos/lint (0 avisos en xmcl-runtime), 13 escenarios React de mundos (61/62/64/65) y 2 Vue (03/63) aprobados; 4 estados Axe de metadatos con 0 violaciones / 8 incompletos. CI 41254221156 sobre 14209e4 terminó en success en ambos jobs (172 React + 1 Strict + 8 Vue, 0 flaky). Próximo: datapacks y herramientas locales de mundos confirmadas por el usuario (mapa, progreso, dimensiones, regiones y edición/copia/pegado/eliminación de chunks), seguidos de resumen/ajustes base (K07, K12, K13), consola (K21) y etapas 6–9. Gates 5/K11 pending, Vue default/dist, PR4 borrador, producción/proxy intactos, Microsoft pospuesto.",
+  "nextAction": "Etapa 5 activa. Gestión revisada de datapacks por mundo (15810a6, STAGE5-WORLD-DATAPACKS.md), edición de metadatos (90d04ec, STAGE5-WORLD-METADATA.md) e importación (46a3771) completadas; 4 unidades en worldDatapacks.test.ts, 20 en operaciones/archivos, tipos/lint (0 avisos en xmcl-runtime), 16 escenarios React de mundos (61/62/64/65/66) y 2 Vue (03/63) aprobados; 4 estados Axe de datapacks con 0 violaciones / 2 incompletos. CI 41254221156 sobre 14209e4 terminó en success en ambos jobs (172 React + 1 Strict + 8 Vue, 0 flaky). Próximo: herramientas locales de mundos confirmadas por el usuario (mapa, progreso, dimensiones, regiones y edición/copia/pegado/eliminación de chunks), seguidos de resumen/ajustes base (K07, K12, K13), consola (K21) y etapas 6–9. Gates 5/K11 pending, Vue default/dist, PR4 borrador, producción/proxy intactos, Microsoft pospuesto.",
   "stages": [
     {
       "id": 0,
@@ -789,9 +789,13 @@
             {
               "path": "docs/react-migration/STAGE5-WORLD-METADATA.md",
               "sha256": "246f16308cc6ce7d56d952251d47229e49bb9fc42cdf4ae2ef0a561f0f86d538"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-WORLD-DATAPACKS.md",
+              "sha256": "9a16df94f2d1ee2ee7fc472611a96a903dc60e1c0eae889bf0d924d5d305dff4"
             }
           ],
-          "note": "Lectura inicial acotada de mundos en React (STAGE5-WORLDS-READ.md), operaciones locales revisadas de copia/ZIP/retirada con respaldo (9d7efeb, STAGE5-WORLD-OPERATIONS.md), estabilidad CI (20a0944, STAGE5-CI-STABILITY.md), importación revisada desde carpeta/ZIP (46a3771, STAGE5-WORLD-IMPORT.md) y edición revisada de metadatos con respaldo de level.dat (90d04ec, STAGE5-WORLD-METADATA.md) completadas; CI 41254221156 verde en ambos jobs (172 React + 1 Strict + 8 Vue). Siguen pendientes datapacks, todas las herramientas locales de mundos confirmadas por el usuario (mapa, progreso, dimensiones, regiones y consultar/copiar/pegar/eliminar/editar chunks), resumen y ajustes base de instancia."
+          "note": "Lectura inicial acotada de mundos en React (STAGE5-WORLDS-READ.md), operaciones locales revisadas de copia/ZIP/retirada con respaldo (9d7efeb, STAGE5-WORLD-OPERATIONS.md), estabilidad CI (20a0944, STAGE5-CI-STABILITY.md), importación revisada desde carpeta/ZIP (46a3771, STAGE5-WORLD-IMPORT.md), edición revisada de metadatos con respaldo de level.dat (90d04ec, STAGE5-WORLD-METADATA.md) y gestión revisada de datapacks (15810a6, STAGE5-WORLD-DATAPACKS.md) completadas; CI 41254221156 verde en ambos jobs (172 React + 1 Strict + 8 Vue). Siguen pendientes todas las herramientas locales de mundos confirmadas por el usuario (mapa, progreso, dimensiones, regiones y consultar/copiar/pegar/eliminar/editar chunks), resumen y ajustes base de instancia."
         },
         {
           "id": "console-isolation",
