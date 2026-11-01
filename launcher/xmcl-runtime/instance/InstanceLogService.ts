@@ -3,7 +3,7 @@ import { readFile, unlink } from 'fs-extra'
 import { isAbsolute, join } from 'path'
 import { Inject, LauncherAppKey } from '~/app'
 import { kEncodingWorker, type EncodingWorker } from '~/encoding'
-import { AbstractService, ExposeServiceKey, Singleton } from '~/service'
+import { AbstractService, ALL_PARAMS, ExposeServiceKey, Singleton } from '~/service'
 import { LauncherApp } from '../app/LauncherApp'
 import { UTF8 } from '../util/encoding'
 import { AnyError, isSystemError } from '@xmcl/utils'
@@ -45,7 +45,7 @@ export class InstanceLogService extends AbstractService implements IInstanceLogS
   /**
    * List the log in current instances.
    */
-  @Singleton()
+  @Singleton(ALL_PARAMS)
   async listLogs(instancePath: string) {
     const files = await readdirIfPresent(join(instancePath, 'logs'))
     return files.filter(f => f.endsWith('.gz') || f.endsWith('.txt') || f.endsWith('.log'))
@@ -54,7 +54,7 @@ export class InstanceLogService extends AbstractService implements IInstanceLogS
   /**
    * List the dedicated-server logs in `<instance>/server/logs/`.
    */
-  @Singleton()
+  @Singleton(ALL_PARAMS)
   async listServerLogs(instancePath: string) {
     const files = await readdirIfPresent(join(instancePath, 'server', 'logs'))
     return files.filter(f => f.endsWith('.gz') || f.endsWith('.txt') || f.endsWith('.log'))
@@ -64,7 +64,7 @@ export class InstanceLogService extends AbstractService implements IInstanceLogS
    * Remove a dedicated-server log from disk
    * @param name The log file name
    */
-  @Singleton(name => name)
+  @Singleton(ALL_PARAMS)
   async removeServerLog(instancePath: string, name: string) {
     const filePath = join(instancePath, 'server', 'logs', name)
     this.log(`Remove server log ${filePath}`)
@@ -75,7 +75,7 @@ export class InstanceLogService extends AbstractService implements IInstanceLogS
    * Get the dedicated-server log content.
    * @param name The log file name
    */
-  @Singleton(name => name)
+  @Singleton(ALL_PARAMS)
   async getServerLogContent(instancePath: string, name: string) {
     try {
       const filePath = join(instancePath, 'server', 'logs', name)
@@ -104,7 +104,7 @@ export class InstanceLogService extends AbstractService implements IInstanceLogS
    * Remove a log from disk
    * @param name The log file name
    */
-  @Singleton(name => name)
+  @Singleton(ALL_PARAMS)
   async removeLog(instancePath: string, name: string) {
     const filePath = join(instancePath, 'logs', name)
     this.log(`Remove log ${filePath}`)
@@ -115,7 +115,7 @@ export class InstanceLogService extends AbstractService implements IInstanceLogS
    * Get the log content.
    * @param name The log file name
    */
-  @Singleton(name => name)
+  @Singleton(ALL_PARAMS)
   async getLogContent(instancePath: string, name: string) {
     try {
       const filePath = join(instancePath, 'logs', name)
@@ -134,7 +134,7 @@ export class InstanceLogService extends AbstractService implements IInstanceLogS
   /**
    * List crash reports in current instance
    */
-  @Singleton()
+  @Singleton(ALL_PARAMS)
   async listCrashReports(instancePath: string) {
     const files = await readdirIfPresent(join(instancePath, 'crash-reports'))
     return files.filter(f => f.endsWith('.gz') || f.endsWith('.txt'))
@@ -144,7 +144,7 @@ export class InstanceLogService extends AbstractService implements IInstanceLogS
    * Remove a crash report from disk
    * @param name The crash report file name
    */
-  @Singleton((name) => name)
+  @Singleton(ALL_PARAMS)
   async removeCrashReport(instancePath: string, name: string) {
     const filePath = join(instancePath, 'crash-reports', name)
     this.log(`Remove crash report ${filePath}`)
@@ -162,7 +162,7 @@ export class InstanceLogService extends AbstractService implements IInstanceLogS
    * Get the crash report content
    * @param name The name of crash report
    */
-  @Singleton((name) => name)
+  @Singleton(ALL_PARAMS)
   async getCrashReportContent(instancePath: string, name: string) {
     let filePath: string
     if (isAbsolute(name)) {
