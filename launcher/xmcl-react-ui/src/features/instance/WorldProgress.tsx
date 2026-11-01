@@ -103,7 +103,7 @@ export function WorldProgress({
   }, [currentChapter, query])
 
   return (
-    <section className="world-progress" data-testid="world-progress" aria-label={t('react.worldProgress.tab')}>
+    <section className="world-progress" data-testid="world-progress" aria-label={t('react.worldProgress.tab')} aria-busy={loading}>
       <div className="section-heading">
         <div className="content-selection">
           <button
@@ -153,7 +153,7 @@ export function WorldProgress({
             disabled={loading || running}
             data-testid="progress-refresh"
             aria-label={t('react.worlds.refresh')}
-            onClick={() => setRevision((v) => v + 1)}
+            onClick={() => { setLoading(true); setError(false); setProgress(null); setRevision((v) => v + 1) }}
           >
             <RefreshCw size={16} aria-hidden="true" />
             {error && t('react.worlds.refresh')}

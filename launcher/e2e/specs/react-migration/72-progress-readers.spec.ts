@@ -86,8 +86,9 @@ test('progress success and read errors retain keyboard recovery in both themes a
         await activateLauncherControl(launcher, refresh)
         if (state === 'ready') {
           await expect(progress.getByTestId('progress-list')).toContainText('Avance comprobado')
-          await expect(refresh).toBeEnabled(); await focusLauncher(launcher)
-          await refresh.press('Tab'); await expect(progress.getByTestId('progress-filter')).toBeFocused(); await expect(progress.getByTestId('progress-filter')).toBeInViewport({ ratio: 1 })
+          await expect(progress).toHaveAttribute('aria-busy', 'false'); await expect(refresh).toBeEnabled(); await focusLauncher(launcher)
+          await refresh.focus(); await expect(refresh).toBeFocused(); await page.keyboard.press('Tab')
+          await expect(progress.getByTestId('progress-filter')).toBeFocused(); await expect(progress.getByTestId('progress-filter')).toBeInViewport({ ratio: 1 })
         } else { await expect(progress.getByRole('alert')).toBeVisible(); await refresh.focus(); await expect(refresh).toBeInViewport({ ratio: 1 }) }
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
         await page.addScriptTag({ content: axe.source }); const report = await page.evaluate(async () => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }))
