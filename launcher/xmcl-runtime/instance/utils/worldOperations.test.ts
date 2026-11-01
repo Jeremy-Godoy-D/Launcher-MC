@@ -1,11 +1,27 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import { deserialize, serialize, TagType } from '@xmcl/nbt'
 import { lstat, mkdir, mkdtemp, readFile, readdir, rename, rm, symlink, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { open, readAllEntries, readEntry } from '@xmcl/unzip'
 import { applyWorldFiles, previewWorldFiles } from './worldOperations'
+import { readWorlds } from './worldFiles'
 import type { WorldFileOperation } from '@xmcl/runtime-api/src/services/InstanceSavesService'
 import { ZipFile } from 'yazl'
 import { writeZipFile } from '../../util/zip'
+
+class Version { @TagType(TagType.String) Name = '1.21.1' }
+class Gen { @TagType(TagType.Long) seed = 42n; @TagType(TagType.String) bonus = 'keep-gen' }
+class Level {
+  @TagType(TagType.String) LevelName = 'Alpha World'
+  @TagType(TagType.Int) GameType = 1
+  @TagType(TagType.Byte) Difficulty = 2
+  @TagType(TagType.Byte) allowCommands = 0
+  @TagType(TagType.Long) RandomSeed = 42n
+  @TagType(TagType.String) CustomTag = 'preserve-me'
+  @TagType(Version) Version = new Version()
+  @TagType(Gen) WorldGenSettings = new Gen()
+}
+class World { @TagType(Level) Data = new Level() }
 
 let root: string, instance: string, destination: string, exports: string, world: string
 beforeEach(async () => {
@@ -111,4 +127,28 @@ it('checks ZIP CRC before publishing level.dat and preserves the source on check
   const review = await previewWorldFiles(importing(path), join(root, 'data')); await expect(apply(review)).rejects.toHaveProperty('name', 'WorldArchiveChecksumError')
   expect(await readFile(path)).toEqual(bytes); await expect(lstat(join(destination, 'saves/Imported/level.dat'))).rejects.toMatchObject({ code: 'ENOENT' })
   expect(await readdir(join(destination, 'saves/Imported'))).toEqual([])
+})
+it('updates reviewed world metadata, preserves extra NBT fields and stores a private level.dat backup', async () => {
+  const original = Buffer.from(await serialize(new World(), { compressed: 'gzip' })); await writeFile(join(world, 'level.dat'), original)
+  const op: WorldFileOperation = { type: 'metadata', instancePath: instance, saveName: 'Alpha', metadata: { levelName: '  Alpha Edited  ', seed: '-9223372036854775808', difficulty: 3, cheat: true } }
+  const review = await previewWorldFiles(op, join(root, 'data'))
+  expect(review.metadata).toEqual({ before: { levelName: 'Alpha World', seed: '42', difficulty: 2, cheat: false }, after: { levelName: 'Alpha Edited', seed: '-9223372036854775808', difficulty: 3, cheat: true } })
+  const result = await apply(review)
+  expect(await readFile(join(result.backup!, 'Alpha/level.dat'))).toEqual(original)
+  const [updated] = await readWorlds(instance, join(root, 'data'))
+  expect(updated).toMatchObject({ name: 'Alpha', levelName: 'Alpha Edited', seed: '-9223372036854775808', difficulty: 3, cheat: true, mode: 1, gameVersion: '1.21.1' })
+  const parsed = await deserialize<{ Data: Record<string, any> }>(await readFile(join(world, 'level.dat')), { compressed: 'gzip' })
+  expect(parsed.Data.CustomTag).toBe('preserve-me'); expect(parsed.Data.WorldGenSettings.bonus).toBe('keep-gen'); expect(parsed.Data.WorldGenSettings.seed).toBe(-9223372036854775808n)
+})
+it('rejects invalid world metadata inputs and stale level.dat changes without modifying the world', async () => {
+  const original = Buffer.from(await serialize(new World(), { compressed: 'gzip' })); await writeFile(join(world, 'level.dat'), original)
+  const valid = { levelName: 'Valid', seed: '99', difficulty: 1 as const, cheat: false }
+  for (const metadata of [{ ...valid, levelName: '   ' }, { ...valid, levelName: 'bad\u0000name' }, { ...valid, seed: '' }, { ...valid, seed: '9223372036854775808' }, { ...valid, difficulty: 4 as any }]) {
+    await expect(previewWorldFiles({ type: 'metadata', instancePath: instance, saveName: 'Alpha', metadata }, join(root, 'data'))).rejects.toHaveProperty('name', 'WorldMetadataInvalidError')
+  }
+  const review = await previewWorldFiles({ type: 'metadata', instancePath: instance, saveName: 'Alpha', metadata: valid }, join(root, 'data'))
+  const other = new World(); other.Data.LevelName = 'Concurrent'; await writeFile(join(world, 'level.dat'), await serialize(other, { compressed: 'gzip' }))
+  const concurrentBytes = await readFile(join(world, 'level.dat'))
+  await expect(apply(review)).rejects.toHaveProperty('name', 'WorldFilesChangedError')
+  expect(await readFile(join(world, 'level.dat'))).toEqual(concurrentBytes)
 })

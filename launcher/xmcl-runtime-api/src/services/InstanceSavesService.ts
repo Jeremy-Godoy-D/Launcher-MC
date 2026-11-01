@@ -102,10 +102,17 @@ export interface CloneSaveOptions {
   newSaveName?: string
 }
 
+export interface WorldMetadataInput {
+  levelName: string
+  seed: string
+  difficulty: 0 | 1 | 2 | 3
+  cheat: boolean
+}
 export type WorldFileOperation = { instancePath: string; saveName: string } & (
   { type: 'import'; sourcePath: string } |
   { type: 'copy'; destinationInstancePath: string; destinationName: string } |
   { type: 'export'; destinationDirectory: string; fileName: string } |
+  { type: 'metadata'; metadata: WorldMetadataInput } |
   { type: 'remove' }
 )
 export interface WorldFileReview {
@@ -116,6 +123,7 @@ export interface WorldFileReview {
   shared: boolean
   linkOnly: boolean
   destination: string
+  metadata?: { before: WorldMetadataInput; after: WorldMetadataInput }
 }
 
 export function getInstanceSaveKey(path: string) {

@@ -54,8 +54,8 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `setup-path` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L233`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L233) |
 | `setup-root` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L153`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L153) |
 | `store-search` | [`xmcl-react-ui/src/App.tsx#L819`](../xmcl-react-ui/src/App.tsx#L819) |
-| `world-files-dialog` | [`xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L50`](../xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L50) |
-| `world-files-review` | [`xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L69`](../xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L69) |
+| `world-files-dialog` | [`xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L51`](../xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L51) |
+| `world-files-review` | [`xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L76`](../xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L76) |
 | `world-info` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L69`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L69) |
 | `worlds-list` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L54`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L54) |
 | `worlds-refresh` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L45`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L45) |

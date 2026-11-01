@@ -63,3 +63,10 @@ it('blocks world file operations when the running game uses an alias for the sam
     await expect(service.applyWorldFiles(review)).rejects.toHaveProperty('name', 'InstanceRunningError')
   } finally { expect(dirname(root)).toBe(process.cwd()); expect(root.startsWith(join(process.cwd(), '.world-idle-test-'))).toBe(true); await rm(root, { recursive: true, force: true }) }
 })
+it('requires a registered Java instance and idle world locks for metadata edits', async () => {
+  instances = [{ path: 'source', edition: 'java' }]
+  review.operation = { type: 'metadata', instancePath: 'source', saveName: 'Alpha', metadata: { levelName: 'Alpha', seed: '1', difficulty: 2, cheat: false } }
+  await expect(service.previewWorldFiles(review.operation)).resolves.toBe(review)
+  processes = [{ options: { gameDirectory: 'source' } }]; await expect(service.applyWorldFiles(review)).rejects.toHaveProperty('name', 'InstanceRunningError')
+  processes = [{ options: { gameDirectory: 'other' } }]; review.shared = true; await expect(service.applyWorldFiles(review)).rejects.toHaveProperty('name', 'SharedWorldRunningError')
+})

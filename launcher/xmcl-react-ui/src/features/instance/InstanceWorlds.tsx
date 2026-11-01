@@ -55,10 +55,10 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
       <div className="world-icon">{world.icon ? <img src={world.icon} alt="" loading="lazy" onError={event => { event.currentTarget.style.display = 'none' }} /> : <Map size={24} aria-hidden="true" />}</div>
       <div><button className="content-file-name" onClick={event => { trigger.current = event.currentTarget; setDetails(world.name) }}>{world.levelName || world.name}</button><small>{world.name} · {world.gameVersion || t('react.workspace.unknown')}{world.linkTo ? ` · ${t('react.worlds.shared')}` : ''}</small>
         {world.error ? <p className="form-error">{t(`react.worlds.${world.error}`)}</p> : <small>{t(`react.worlds.mode${world.mode}`)} · {world.lastPlayed ? d(world.lastPlayed) : t('react.workspace.never')}</small>}
-        <div className="content-actions">{(['copy', 'export', 'remove'] as const).map(type => <button key={type} className="button secondary" disabled={running || reading || world.error === 'unsafe'} aria-label={t(`react.worldFiles.${type}Name`, { name: world.name })} onClick={event => { actionTrigger.current = event.currentTarget; setAction({ name: world.name, type }) }}>{t(`react.worldFiles.${type}`)}</button>)}</div>
+        <div className="content-actions">{(['metadata', 'copy', 'export', 'remove'] as const).map(type => <button key={type} className="button secondary" disabled={running || reading || world.error === 'unsafe' || type === 'metadata' && !!world.error} aria-label={t(`react.worldFiles.${type}Name`, { name: world.name })} onClick={event => { actionTrigger.current = event.currentTarget; setAction({ name: world.name, type }) }}>{t(`react.worldFiles.${type}`)}</button>)}</div>
       </div>
     </li>)}</ul>
-    {action && <WorldFilesDialog key={`${action.name}:${action.type}`} path={path} name={action.name} type={action.type} close={() => setAction(null)} changed={() => { setDetails(''); setRevision(value => value + 1) }} returnFocus={() => { const target = actionTrigger.current; if (target?.isConnected && !target.disabled) target.focus(); else search.current?.focus() }} />}
+    {action && <WorldFilesDialog key={`${action.name}:${action.type}`} path={path} name={action.name} type={action.type} world={worlds.find(world => world.name === action.name)} close={() => setAction(null)} changed={() => { setDetails(''); setRevision(value => value + 1) }} returnFocus={() => { const target = actionTrigger.current; if (target?.isConnected && !target.disabled) target.focus(); else search.current?.focus() }} />}
   </section>
 }
 

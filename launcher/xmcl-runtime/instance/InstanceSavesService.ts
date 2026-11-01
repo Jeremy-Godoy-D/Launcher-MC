@@ -164,7 +164,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async #worldFiles<T>(operation: WorldFileOperation, action: () => Promise<T>): Promise<T> {
-    if (!operation || !['copy', 'export', 'remove', 'import'].includes(operation.type)) throw new Error('Invalid world operation')
+    if (!operation || !['copy', 'export', 'remove', 'import', 'metadata'].includes(operation.type)) throw new Error('Invalid world operation')
     const paths = [...new Set([operation.instancePath, ...(operation.type === 'copy' ? [operation.destinationInstancePath] : [])])].sort()
     for (const path of paths) await this.#javaInstance(path)
     const lock = async (index: number): Promise<T> => {
