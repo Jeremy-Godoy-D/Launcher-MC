@@ -98,6 +98,8 @@ test('live console bounds high-volume output, preserves manual reading and retur
       await expect(console.getByTestId('console-autoscroll')).toBeChecked()
       await expect.poll(() => viewport.evaluate(element => element.scrollHeight - element.clientHeight - element.scrollTop)).toBeLessThan(4)
       expect(await viewport.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true)
+      await viewport.scrollIntoViewIfNeeded()
+      await expect(viewport).toBeInViewport({ ratio: 1 })
       await page.addScriptTag({ content: axe.source })
       const report = await page.evaluate(() => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }))
       await writeFile(testInfo.outputPath(`console-live-${theme}-${width}-axe.json`), JSON.stringify(report, null, 2))
