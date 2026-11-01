@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import {
   Terminal,
   Copy,
@@ -81,11 +81,18 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
   const [searchQuery, setSearchQuery] = useState('')
   const [autoscroll, setAutoscroll] = useState(true)
   const [copied, setCopied] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [listing, setListing] = useState(false)
+  const [reading, setReading] = useState(false)
+  const [fileRevision, setFileRevision] = useState(0)
+  const [fileErrors, setFileErrors] = useState<Partial<Record<'list' | 'read' | 'show', string>>>({})
+  const loading = listing || reading
   const [hasActiveProcess, setHasActiveProcess] = useState(running)
 
   const activePids = useRef<Set<number>>(new Set())
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const listRequest = useRef(0)
+  const showRequest = useRef(0)
+  const fileErrorKey = (error: unknown) => error && typeof error === 'object' && 'name' in error && error.name === 'InstanceLogTooLarge' ? 'tooLarge' : 'fileError'
 
   // Load existing processes for this instance path
   useEffect(() => {
@@ -98,22 +105,24 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
   }, [launchService, instance.path, running])
 
   // Load available log and crash report files
-  const refreshFiles = () => {
-    setLoading(true)
-    Promise.all([
-      logService.listLogs(instance.path).catch(() => [] as string[]),
-      logService.listCrashReports(instance.path).catch(() => [] as string[]),
-    ]).then(([logs, crashes]) => {
-      setLogFiles(logs)
-      setCrashReports(crashes)
-    }).finally(() => {
-      setLoading(false)
+  const refreshFiles = useCallback(() => {
+    const request = ++listRequest.current
+    setListing(true)
+    setFileErrors(previous => ({ ...previous, list: undefined, show: undefined }))
+    void Promise.allSettled([logService.listLogs(instance.path), logService.listCrashReports(instance.path)]).then(([logs, crashes]) => {
+      if (listRequest.current !== request) return
+      if (logs.status === 'fulfilled') setLogFiles(logs.value)
+      if (crashes.status === 'fulfilled') setCrashReports(crashes.value)
+      const failure = [logs, crashes].find(result => result.status === 'rejected')
+      if (failure?.status === 'rejected') setFileErrors(previous => ({ ...previous, list: fileErrorKey(failure.reason) }))
+      setListing(false)
     })
-  }
+  }, [logService, instance.path])
 
   useEffect(() => {
     refreshFiles()
-  }, [instance.path])
+    return () => { listRequest.current++; showRequest.current++ }
+  }, [refreshFiles])
 
   // Real-time events with instance process isolation
   useServiceEvent(LaunchServiceKey, 'minecraft-start', (event) => {
@@ -167,12 +176,16 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
 
   // Load file content when a stored log or crash report is selected
   useEffect(() => {
+    let cancelled = false
+    showRequest.current++
+    setFileErrors(previous => ({ ...previous, read: undefined, show: undefined }))
+    setFileEntries([])
     if (selectedSource === '__live__') {
-      setFileEntries([])
+      setReading(false)
       return
     }
 
-    setLoading(true)
+    setReading(true)
     const isCrash = crashReports.includes(selectedSource)
     const loadPromise = isCrash
       ? logService.getCrashReportContent(instance.path, selectedSource)
@@ -180,16 +193,18 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
 
     loadPromise
       .then((content) => {
+        if (cancelled) return
         const lines = content.split(/\r?\n/).filter((l) => l.length > 0)
         setFileEntries(lines.map((l, i) => parseLogLine(l, i, isCrash ? 'error' : 'info')))
       })
-      .catch(() => {
-        setFileEntries([])
+      .catch((error) => {
+        if (!cancelled) setFileErrors(previous => ({ ...previous, read: fileErrorKey(error) }))
       })
       .finally(() => {
-        setLoading(false)
+        if (!cancelled) setReading(false)
       })
-  }, [selectedSource, instance.path, crashReports, logService])
+    return () => { cancelled = true }
+  }, [selectedSource, instance.path, crashReports, logService, fileRevision])
 
   // Filter entries based on level and search query
   const currentEntries = selectedSource === '__live__' ? liveEntries : fileEntries
@@ -269,13 +284,14 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
   }
 
   // Show in explorer
-  function showInFolder() {
+  async function showInFolder() {
+    const request = ++showRequest.current
+    setFileErrors(previous => ({ ...previous, show: undefined }))
     if (selectedSource && selectedSource !== '__live__') {
-      if (crashReports.includes(selectedSource)) {
-        logService.showCrash(instance.path, selectedSource)
-      } else {
-        logService.showLog(instance.path, selectedSource)
-      }
+      try {
+        if (crashReports.includes(selectedSource)) await logService.showCrash(instance.path, selectedSource)
+        else await logService.showLog(instance.path, selectedSource)
+      } catch (error) { if (showRequest.current === request) setFileErrors(previous => ({ ...previous, show: fileErrorKey(error) })) }
     }
   }
 
@@ -428,13 +444,17 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
             type="button"
             className="button secondary"
             data-testid="console-refresh"
-            onClick={refreshFiles}
+            onClick={() => { refreshFiles(); setFileRevision(value => value + 1) }}
             disabled={loading}
             title={t('react.instanceConsole.refresh')}
           >
             <RefreshCw size={16} className={loading ? 'spinning' : ''} aria-hidden="true" />
           </button>
         </div>
+      </div>
+
+      <div>
+        {Object.entries(fileErrors).filter(([, value]) => value).map(([operation, key]) => <p key={operation} className="form-error" role="alert">{t(`react.instanceConsole.${key}`)}</p>)}
       </div>
 
       <div

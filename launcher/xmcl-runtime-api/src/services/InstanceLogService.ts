@@ -64,7 +64,7 @@ export interface InstanceLogService {
    * Show the dedicated-server log file on disk. This will open a file explorer.
    * @param name The log file name
    */
-  showServerLog(instancePath: string, name: string): void
+  showServerLog(instancePath: string, name: string): Promise<void>
   /**
    * List crash reports in current instance
    */
@@ -83,12 +83,12 @@ export interface InstanceLogService {
    * Show the log file on disk. This will open a file explorer.
    * @param name The log file name
    */
-  showLog(instancePath: string, name: string): void
+  showLog(instancePath: string, name: string): Promise<void>
   /**
    * Show a crash report on disk. This will open a file explorer.
    * @param name The crash report file name
    */
-  showCrash(instancePath: string, name: string): void
+  showCrash(instancePath: string, name: string): Promise<void>
 }
 
 export const InstanceLogServiceKey: ServiceKey<InstanceLogService> = 'InstanceLogService'

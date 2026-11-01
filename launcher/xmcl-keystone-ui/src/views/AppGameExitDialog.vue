@@ -121,13 +121,13 @@ watch(error, (e) => {
 })
 async function displayLog() {
   const log = data.isServer
-    ? await getServerLogContent(path.value, 'latest.log')
-    : await getLogContent(path.value, 'latest.log')
+    ? await getServerLogContent(path.value, 'latest.log').catch(() => t('logsCrashes.readError'))
+    : await getLogContent(path.value, 'latest.log').catch(() => t('logsCrashes.readError'))
   data.log = log
   data.isShown = true
 }
 async function displayCrash(crashReport: string | undefined) {
-  const log = await getCrashReportContent(path.value, data.crashReportLocation) || crashReport || ''
+  const log = await getCrashReportContent(path.value, data.crashReportLocation).catch(() => '') || crashReport || t('logsCrashes.readError')
   data.log = log
   data.isShown = true
 }
@@ -159,9 +159,9 @@ function openFolder() {
   if (data.isCrash) {
     showItemInDirectory(data.crashReportLocation)
   } else if (data.isServer) {
-    showServerLog(path.value, 'latest.log')
+    void showServerLog(path.value, 'latest.log').catch(() => { data.log = t('logsCrashes.readError') })
   } else {
-    showLog(path.value, 'latest.log')
+    void showLog(path.value, 'latest.log').catch(() => { data.log = t('logsCrashes.readError') })
   }
 }
 
