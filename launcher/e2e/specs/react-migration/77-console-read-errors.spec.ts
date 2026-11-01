@@ -5,6 +5,7 @@ import axe from 'axe-core'
 import { test, expect, snap, type Page } from '../../helpers/scratch'
 import { seedReactLibrary } from '../../helpers/react-library'
 import { focusLauncher } from '../../helpers/focus-launcher'
+import { readTextContrast } from '../../helpers/contrast'
 
 test.use({ launcherOptions: { locale: 'es-ES', gameDataParentAlias: true } })
 async function openConsole(page: Page) {
@@ -55,6 +56,9 @@ test('console file errors remain accessible in both themes and supported window 
       await expect(console.getByTestId('console-refresh')).toBeInViewport({ ratio: 1 })
       await console.getByRole('alert').scrollIntoViewIfNeeded()
       await expect(console.getByRole('alert')).toBeInViewport({ ratio: 1 })
+      const contrast = await page.evaluate(readTextContrast, '[data-testid="console-empty"] p')
+      await writeFile(testInfo.outputPath(`console-empty-contrast-${theme}-${width}.json`), JSON.stringify(contrast, null, 2))
+      expect(Math.min(...contrast.map(value => value.ratio))).toBeGreaterThanOrEqual(4.5)
       await page.addScriptTag({ content: axe.source })
       const report = await page.evaluate(() => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }))
       await writeFile(testInfo.outputPath(`console-errors-${theme}-${width}-axe.json`), JSON.stringify(report, null, 2))

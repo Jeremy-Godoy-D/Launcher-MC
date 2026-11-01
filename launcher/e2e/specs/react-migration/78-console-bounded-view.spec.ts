@@ -3,6 +3,8 @@ import { join } from 'node:path'
 import axe from 'axe-core'
 import { test, expect, snap, type Page } from '../../helpers/scratch'
 import { seedReactLibrary } from '../../helpers/react-library'
+import { focusLauncher } from '../../helpers/focus-launcher'
+import { readTextContrast } from '../../helpers/contrast'
 
 test.use({ launcherOptions: { locale: 'es-ES', gameDataParentAlias: true } })
 async function openConsole(page: Page) {
@@ -77,10 +79,18 @@ test('virtual console measures wrapped rows at both themes and supported native 
       await win.evaluate((win, size) => win.setContentSize(size.width, size.height), { width, height })
       await expect.poll(() => page.evaluate(() => [innerWidth, innerHeight])).toEqual([width, height])
       const viewport = console.getByTestId('console-entries'), entries = console.getByTestId('console-entry')
+      await focusLauncher(launcher)
       await viewport.focus(); await page.keyboard.press('Home')
       await expect(entries.filter({ hasText: 'wrapped-0 ' })).toBeVisible()
       await page.keyboard.press('End'); await expect(entries.filter({ hasText: 'wrapped-239 ' })).toBeVisible()
-      await entries.filter({ hasText: 'wrapped-238 ' }).hover()
+      await page.mouse.move(1, 1)
+      const normal = await page.evaluate(readTextContrast, '[data-testid="console-entries"] .console-level')
+      const errorRow = entries.filter({ hasText: 'wrapped-238 ' })
+      await errorRow.hover(); expect(await errorRow.evaluate(element => element.matches(':hover'))).toBe(true)
+      const hover = await page.evaluate(readTextContrast, '[data-testid="console-entries"] .console-level')
+      await writeFile(testInfo.outputPath(`console-contrast-${theme}-${width}.json`), JSON.stringify({ normal, hover }, null, 2))
+      expect(Math.min(...normal.map(value => value.ratio))).toBeGreaterThanOrEqual(4.5)
+      expect(Math.min(...hover.map(value => value.ratio))).toBeGreaterThanOrEqual(4.5)
       expect(await entries.count()).toBeLessThan(100)
       expect(await viewport.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true)
       await page.addScriptTag({ content: axe.source })
