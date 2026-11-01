@@ -46,8 +46,6 @@ export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
   const curseforge = createCurseforgeProxyClient((...args) => app.fetch(...args))
   app.registry.register(CurseforgeV1Client, curseforge)
 
-  const installService = await app.registry.get(InstanceInstallService)
-
   const resourceManager = await app.registry.get(kResourceManager)
   const tasks = await app.registry.get(kTasks)
   const hashWorker = await app.registry.get(kResourceWorker)
@@ -363,6 +361,7 @@ export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
       catch (error) { await Promise.allSettled(downloads); throw error }
     },
     installInstanceFile: async (options: InstallMarketInstanceOptions) => {
+      const installService = await app.registry.getOrCreate(InstanceInstallService)
       const files = await getFiles(options)
 
       await installService.installInstanceFiles({
