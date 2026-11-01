@@ -116,7 +116,11 @@ export class ServiceStateManager {
       this.app.emit('service-state-init', id)
     }, () => { })
 
-    return await container.promise
+    try { return await container.promise }
+    catch (error) {
+      if (this.containers[id] === container) delete this.containers[id]
+      throw error
+    }
   }
 
   #unregister = (id: string) => {

@@ -100,3 +100,20 @@ test('state IPC checks acquiring window and generation; stale unref cannot relea
   await handlers.get('unref')!({ sender: client }, 'same', current.__stateEpoch__)
   expect(secondDispose).toHaveBeenCalledTimes(1)
 })
+
+
+it('shares an initial failure and allows a repaired state to initialize under the same key', async () => {
+  const manager = new ServiceStateManager({ controller: { handle: vi.fn() }, disposed: false, getLogger: () => ({ error: vi.fn() }), registryDisposer: vi.fn(), emit: vi.fn() } as any)
+  let reject!: (error: Error) => void
+  const factory = vi.fn(() => new Promise<never>((_resolve, fail) => { reject = fail }))
+  const first = manager.registerOrGet('repaired-datapacks', factory), second = manager.registerOrGet('repaired-datapacks', factory)
+  const failures = Promise.allSettled([first, second])
+  reject(new Error('Invalid datapacks directory'))
+  expect((await failures).map(item => item.status)).toEqual(['rejected', 'rejected'])
+  expect(factory).toHaveBeenCalledOnce(); expect(manager.get('repaired-datapacks')).toBeUndefined()
+  const dispose = vi.fn(), state = await manager.registerOrGet('repaired-datapacks', async () => [new TestState(), dispose])
+  expect(state.value).toBe(0); expect(manager.get('repaired-datapacks')).toBe(state)
+  const client = new TestClient(); manager.serializeAndTrack(client, state)
+  state.valueSet(7); expect(client.send).toHaveBeenCalledOnce()
+  client.destroy(); expect(dispose).toHaveBeenCalledOnce()
+})

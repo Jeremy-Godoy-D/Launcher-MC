@@ -1,4 +1,4 @@
-import { copyFile, lstat, mkdir, readFile, readdir, symlink, writeFile } from 'node:fs/promises'
+import { copyFile, lstat, mkdir, readFile, readdir, symlink, unlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { test, expect, type Page } from '../../helpers/scratch'
 import { makeReactWorld } from '../../helpers/react-world'
@@ -42,6 +42,11 @@ test('Native datapack readers reject foreign destinations and raw private reader
   }
   await expect(lstat(join(foreign, 'datapacks'))).rejects.toHaveProperty('code', 'ENOENT')
   expect(await readFile(join(foreign, 'level.dat'))).toEqual(bytes)
+  await writeFile(join(world, 'datapacks'), 'INVALID DIRECTORY')
+  expect(await launcher.main.evaluate(async world => { try { await (window as any).serviceChannels.open('InstanceSavesService').call('watchSaveDatapacks', world); return false } catch { return true } }, world)).toBe(true)
+  await unlink(join(world, 'datapacks')); await mkdir(join(world, 'datapacks'))
+  expect(await openWatch(launcher.main, world)).toEqual([])
+  await closeWatch(launcher.main)
 })
 
 test('Native datapack watch discovers a missing folder, publishes live bounded metadata and releases filesystem handles', async ({ launcher }, testInfo) => {
