@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5activa;4fff469 corrigeSingletondeInstanceLogService conALL_PARAMS:3regresiones unitarias yNative76 fallaban antes.1142unitarias/115archivos,5React+3Vue,4Axe0violaciones/4incomplete,9harness;tipos/lintaprobados,E2E56base,distVue restaurado. CI41297391323/0bc6c6f success limpio ambos:212main+1Strict+8Vue,2opt-in omitidos,0flaky;K12 pass,no rehacer borradores/argv/herencia/contraste/cierre. Verificar nuevoCI de logs sinreiniciar vivo. Continuar K21:autoridad/rutas/limites gzip e historial/errores;stdout stderr solo PID ydecode async pueden perderorden/multibyte,errPromises sinlimite;UI arrays/splitporchunk/sinvirtualizar ycatchsilenciosos. Reutilizar writeClipboard existente;resolver exportacion con resultadoNative. Probar dosprocesos,fragmentos,arranque/lotes/scroll/errores. K11 aceptacionintegral/IPClegacy/escritoresnoNIO pending;Mundos completoenalcance,5activa,6–9pending,PR4borrador,produccion/proxy intactos,Microsoftpospuesto,DOMPurifyWIP fuera de commits. VerSTAGE5-CONSOLE-REQUEST-ISOLATION.",
+  "nextAction": "Etapa 5 activa. K12 aceptado: CI 41297391323/0bc6c6f limpio (212 main, 1 Strict, 8 Vue, 2 opt-in omitidos, 0 flaky); no repetir ajustes. 4fff469 corrige solicitudes cruzadas de logs con ALL_PARAMS: 3 regresiones unitarias y Native 76 fallaban antes; 1142 unitarias/115 archivos, 5 React y 3 Vue, tipos/lint, 9 harness. CI 41299557622/e9a9436 en curso, no reiniciarlo. Continuar K21: autoridad, rutas y lecturas/gzip/historial acotados con errores visibles; después identidad, orden/multibyte y memoria de streams, virtualización/scroll y copiar/exportar con confirmación Native. K11 pendiente de aceptación integral, IPC legacy y escritores no NIO. Conservar todas las herramientas locales de Mundos. Etapas 6–9 pendientes, PR 4 borrador; producción/proxy intactos, Microsoft pospuesto y DOMPurify WIP excluido. Ver STAGE5-CONSOLE-REQUEST-ISOLATION y RESUME.",
   "stages": [
     {
       "id": 0,
@@ -40,7 +40,7 @@
               "sha256": "3cd5ff51492ab003261495faeede5dcbaea2bac86f74aa89f7ddf2e705b801b3"
             }
           ],
-          "note": "Usuario aprobÃ³ React y luego confirmÃ³ solo nÃºcleo, sin extras, el 2026-10-23. AclaraciÃ³n directa del usuario el 2026-10-25: Java automÃ¡tico y alternativa manual, aÃ±adida a SCOPE; PLAN aprobado se conserva."
+          "note": "Usuario aprobó React y luego confirmó solo núcleo, sin extras, el 2026-10-23. Aclaración directa del usuario el 2026-10-25: Java automático y alternativa manual, añadida a SCOPE; PLAN aprobado se conserva."
         },
         {
           "id": "inventory-parity",
@@ -120,7 +120,7 @@
     },
     {
       "id": 1,
-      "title": "Prototipo y revisiÃ³n visual",
+      "title": "Prototipo y revisión visual",
       "status": "complete",
       "gates": [
         {
@@ -177,7 +177,7 @@
           "approval": {
             "date": "2026-10-24",
             "source": "user",
-            "reference": "Respuesta del usuario en este chat, posterior a la captura y entrega ebf87a1: Â«si lo aprueboÂ». Acepta prototipo con fondo global y glassmorphism, cÃ³digo 21d9fdda21981e76bb1acd1ae4db41ec1b4112cd."
+            "reference": "Respuesta del usuario en este chat, posterior a la captura y entrega ebf87a1: «si lo apruebo». Acepta prototipo con fondo global y glassmorphism, código 21d9fdda21981e76bb1acd1ae4db41ec1b4112cd."
           }
         }
       ]
@@ -344,7 +344,7 @@
               "sha256": "24ce9e09365740dc99e40a9c01e0b71d47901ae91168ccb24e5779b4aa05279d"
             }
           ],
-          "note": "Onboarding por servicios, alta/selecciÃ³n/eliminaciÃ³n y ediciÃ³n de apariencia local verificados, incluidos errores, foco, persistencia y reinicio del EXE. La equivalencia exacta de OFFLINE conserva la selecciÃ³n local; nuevos perfiles posteriores al reinicio conservan los anteriores. Nombre/UUID de juego estables, cuentas externas intactas, Microsoft deferred. El aspecto dentro de Minecraft se valida con el juego en etapa9; aquÃ­ se acredita la gestiÃ³n local y los bytes guardados."
+          "note": "Onboarding por servicios, alta/selección/eliminación y edición de apariencia local verificados, incluidos errores, foco, persistencia y reinicio del EXE. La equivalencia exacta de OFFLINE conserva la selección local; nuevos perfiles posteriores al reinicio conservan los anteriores. Nombre/UUID de juego estables, cuentas externas intactas, Microsoft deferred. El aspecto dentro de Minecraft se valida con el juego en etapa9; aquí se acredita la gestión local y los bytes guardados."
         },
         {
           "id": "home-carousel",
@@ -415,7 +415,7 @@
               "sha256": "411fc2911171c8ebad9c49cd290d8c6d2a83489ccd0df42fb38681e5486b2052"
             }
           ],
-          "note": "IntegraciÃ³n de Inicio/carrusel y presupuesto de referencia aceptados:orden/selecciÃ³n independiente,medios/cachÃ©/pausas/ticks reales,CPU<8%,24fps,memoria/arranque comparados yGPU fÃ­sica. Recientes limitados3 yBiblioteca1000virtualizada. Fuente6e3b83d/STAGE4-CLOSURE. Tareas7 ycabecera5 no se declaran implementadas."
+          "note": "Integración de Inicio/carrusel y presupuesto de referencia aceptados:orden/selección independiente,medios/caché/pausas/ticks reales,CPU<8%,24fps,memoria/arranque comparados yGPU física. Recientes limitados3 yBiblioteca1000virtualizada. Fuente6e3b83d/STAGE4-CLOSURE. Tareas7 ycabecera5 no se declaran implementadas."
         },
         {
           "id": "library-instance-launch",
@@ -582,7 +582,7 @@
               "sha256": "411fc2911171c8ebad9c49cd290d8c6d2a83489ccd0df42fb38681e5486b2052"
             }
           ],
-          "note": "PLAN5.4 exige crear/importar/lanzar vÃ­a servicios en4;contratos React/IPC,archivos,diagnÃ³sticos/captura/reintento/procesos probados por informes registrados. Se acepta esa integraciÃ³n;Java/loaders/partida reales continÃºan pendientes enK03/K05/K06 y aceptaciÃ³n9. Las notas previas confundÃ­an validaciÃ³n fÃ­sica final con esta gate;PLAN/SCOPE no cambian. Fuente6e3b83d/STAGE4-CLOSURE,no publicaciÃ³n."
+          "note": "PLAN5.4 exige crear/importar/lanzar vía servicios en4;contratos React/IPC,archivos,diagnósticos/captura/reintento/procesos probados por informes registrados. Se acepta esa integración;Java/loaders/partida reales continúan pendientes enK03/K05/K06 y aceptación9. Las notas previas confundían validación física final con esta gate;PLAN/SCOPE no cambian. Fuente6e3b83d/STAGE4-CLOSURE,no publicación."
         }
       ]
     },
@@ -876,7 +876,7 @@
     },
     {
       "id": 6,
-      "title": "CatÃ¡logo pÃºblico",
+      "title": "Catálogo público",
       "status": "pending",
       "gates": [
         {
@@ -920,7 +920,7 @@
     },
     {
       "id": 8,
-      "title": "SustituciÃ³n y retirada de extras",
+      "title": "Sustitución y retirada de extras",
       "status": "pending",
       "gates": [
         {
@@ -947,7 +947,7 @@
     },
     {
       "id": 9,
-      "title": "ValidaciÃ³n y publicaciÃ³n",
+      "title": "Validación y publicación",
       "status": "pending",
       "gates": [
         {
@@ -982,30 +982,30 @@
     {
       "date": "2026-10-23",
       "source": "user",
-      "change": "Medios reales: Vanilla/fallback se busca en internet; packs usan sus propios recursos vÃ­a metadatos. No usar la imagen IA generada ni reemplazar fondos de todos los packs por Vanilla.",
+      "change": "Medios reales: Vanilla/fallback se busca en internet; packs usan sus propios recursos vía metadatos. No usar la imagen IA generada ni reemplazar fondos de todos los packs por Vanilla.",
       "previousPlanSha256": "8595d10f58038fcc06935c8cf7be6a34f6ac38942c12413b4c0db7a64a60f30a",
       "previousScopeSha256": "16b7e8204a84c923dce1c695e4155da409d1df24c19e240fab54fde9f67063d2"
     },
     {
       "date": "2026-10-23",
       "source": "user",
-      "change": "Priorizar imÃ¡genes reales Vanilla con shaders ya renderizados; packs conservan sus propios recursos. No instalar ni ejecutar shaders para el fondo.",
+      "change": "Priorizar imágenes reales Vanilla con shaders ya renderizados; packs conservan sus propios recursos. No instalar ni ejecutar shaders para el fondo.",
       "previousPlanSha256": "55c35896706c4546f3d95b97d87fee9f2a309636f88c41f53d52e33530abff01",
       "previousScopeSha256": "0f69c85567cbeeed08198949abf02a281d60229822039dea617fe0c64f25bd52"
     },
     {
       "date": "2026-10-24",
       "source": "user",
-      "change": "RevisiÃ³n visual: extender paisaje a fondo de toda la ventana y aÃ±adir glassmorphism. No es aceptaciÃ³n final; conservar contraste/rendimiento y no reintroducir extras.",
+      "change": "Revisión visual: extender paisaje a fondo de toda la ventana y añadir glassmorphism. No es aceptación final; conservar contraste/rendimiento y no reintroducir extras.",
       "previousPlanSha256": "14759855940f8a67672231b46f8c94f374e3828d583006b4c2af001c40a37b95",
       "previousScopeSha256": "8c0b6136b39ab2a8bcfa982780ceb0971a013c68328bfcb5d196990432a71340"
     },
     {
       "date": "2026-10-31",
       "source": "user",
-      "change": "Conservar todas las herramientas locales de Mundos en React, incluidos mapa, progreso, dimensiones, regiones y ediciÃ³n/copia/pegado/eliminaciÃ³n de chunks; mantener garantÃ­as de datos. K11 continÃºa pendiente.",
+      "change": "Conservar todas las herramientas locales de Mundos en React, incluidos mapa, progreso, dimensiones, regiones y edición/copia/pegado/eliminación de chunks; mantener garantías de datos. K11 continúa pendiente.",
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-01T10:54:26.549288+00:00"
+  "updatedAt": "2026-11-01T10:58:27.999098+00:00"
 }
