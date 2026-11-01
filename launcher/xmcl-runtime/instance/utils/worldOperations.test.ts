@@ -53,6 +53,31 @@ it('exports a complete ZIP including empty directories and never overwrites an e
   const bytes = await readFile(result.path); await expect(preview('export')).rejects.toHaveProperty('name', 'WorldDestinationExistsError'); expect(await readFile(result.path)).toEqual(bytes)
   expect((await readdir(exports)).some(name => name.startsWith('.grimo-world-export-'))).toBe(false)
 })
+
+it('binds provider metadata to the import review and rejects invalid IDs before creating a world', async () => {
+  const input = { type: 'import' as const, instancePath: destination, saveName: 'Imported', sourcePath: world, curseforge: { projectId: 1, fileId: 2 } }, data = join(root, 'data')
+  const review = await previewWorldFiles(input, data)
+  if (review.operation.type !== 'import') throw new Error('Wrong review')
+  review.operation.curseforge!.fileId = 3
+  await expect(applyWorldFiles(review, data)).rejects.toHaveProperty('name', 'WorldFilesChangedError')
+  await expect(lstat(join(destination, 'saves/Imported'))).rejects.toHaveProperty('code', 'ENOENT')
+  for (const curseforge of [{ projectId: 0, fileId: 1 }, { projectId: 1, fileId: NaN }, { projectId: 1, fileId: Number.MAX_SAFE_INTEGER + 1 }]) await expect(previewWorldFiles({ ...input, curseforge }, data)).rejects.toThrow()
+})
+
+it('retains a partial independent folder export and the changed source when a writer ignores the review', async () => {
+  const review = await previewWorldFiles({ ...operation('export'), type: 'export', destinationDirectory: exports, fileName: 'Exported', format: 'folder' }, join(root, 'data'))
+  await expect(apply(review, async () => { await writeFile(join(world, 'level.dat'), 'A DIFFERENT WORLD') })).rejects.toHaveProperty('name', 'WorldOperationIncompleteError')
+  expect(await readFile(join(world, 'level.dat'), 'utf8')).toBe('A DIFFERENT WORLD')
+  expect((await lstat(join(exports, 'Exported'))).isDirectory()).toBe(true)
+  await expect(previewWorldFiles({ ...operation('export'), type: 'export', destinationDirectory: exports, fileName: 'Empty', format: 'unsafe' } as any, join(root, 'data'))).rejects.toThrow()
+})
+
+it('refuses internal shared-link publication for an ordinary source world', async () => {
+  const review = await preview('copy')
+  await expect(applyWorldFiles(review, join(root, 'data'), undefined, true)).rejects.toThrow('Invalid shared world link')
+  await expect(lstat(join(destination, 'saves/Beta'))).rejects.toHaveProperty('code', 'ENOENT')
+  expect(await readFile(join(world, 'level.dat'), 'utf8')).toBe('LEVEL')
+})
 it('moves a world into a private backup while removing an owned per-world link preserves its target', async () => {
   const result = await apply(await preview('remove')); expect(await readFile(join(result.backup!, 'Alpha/level.dat'), 'utf8')).toBe('LEVEL'); await expect(lstat(world)).rejects.toMatchObject({ code: 'ENOENT' })
   const common = join(root, 'data/saves/Shared'); await mkdir(common, { recursive: true }); await writeFile(join(common, 'level.dat'), 'SHARED'); await symlink(common, world, 'junction')

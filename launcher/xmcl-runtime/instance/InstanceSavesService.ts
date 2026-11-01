@@ -1,6 +1,5 @@
 import { ResourceManager } from '@xmcl/resource'
 import {
-  ImportSaveException,
   InstanceSavesServiceKey,
   LockKey,
   MarketType,
@@ -22,16 +21,14 @@ import {
   type WorldFileOperation, type WorldFileReview, type SaveChunkChange,
   type UpdateSaveOptions,
 } from '@xmcl/runtime-api'
-import { open, openEntryReadStream, readAllEntries } from '@xmcl/unzip'
 import { readPackMetaAndIcon } from '@xmcl/resourcepack'
 import { AnyError, isSystemError } from '@xmcl/utils'
 import { FSWatcher } from 'chokidar'
 import filenamify from 'filenamify'
-import { createWriteStream, existsSync } from 'fs'
+import { existsSync } from 'fs'
 import { lstat, realpath } from 'node:fs/promises'
-import { ensureDir, ensureFile, readFile, readdir, rename, rm, rmdir, stat, unlink, writeFile } from 'fs-extra'
+import { ensureDir, readFile, readdir, rename, rm, rmdir, stat, unlink, writeFile } from 'fs-extra'
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'path'
-import { ZipFile } from 'yazl'
 import { Inject, LauncherAppKey, kGameDataPath, type PathResolver } from '~/app'
 import { InstanceService } from '~/instance'
 import { LaunchService } from '~/launch'
@@ -40,9 +37,8 @@ import { kResourceManager } from '~/resource'
 import { readInstanceSaveMetadata, readWorldGenSettings, listSaveDimensions, getSaveRegions, readSaveChunks, readSaveProgress, getRegionDir, kSaveWorker, type SaveWorker } from '~/save'
 import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/service'
 import { LauncherApp, type WorldLock } from '../app/LauncherApp'
-import { copyPassively, isDirectory, linkDirectory, missing, pipeline, readdirIfPresent } from '../util/fs'
+import { linkDirectory, missing, readdirIfPresent } from '../util/fs'
 import { isNonnull, requireObject, requireString } from '../util/object'
-import { includeAs, writeZipFile } from '../util/zip'
 import { readlinkSafe, isLinkTo } from './utils/readLinkSafe'
 import { datapackFileName, readWorldDatapacks } from './utils/worldDatapacks'
 import { readBoundedFile, readWorlds, readWorldMetadata, worldLocation, worldName, worldsLocation } from './utils/worldFiles'
@@ -236,7 +232,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     return this.#applyWorldFiles(review)
   }
 
-  async #applyWorldFiles(review: WorldFileReview, allowDepot = false) {
+  async #applyWorldFiles(review: WorldFileReview, allowDepot = false, linkSharedWorld = false) {
     return this.#worldFiles(review?.operation, async () => {
       let lock: WorldLock | undefined
       try {
@@ -246,7 +242,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
           await lock?.verify()
           // Windows directory rename rejects live child-file handles, including a game opened after release.
           if (beforeWorldRename) { lock?.release(); lock = undefined }
-        })
+        }, linkSharedWorld)
       } finally { lock?.release() }
     }, allowDepot)
   }
@@ -451,89 +447,33 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async importSave(options: ImportSaveOptions) {
-    let { instancePath, saveName, path, curseforge } = options
-
-    if (!path) {
-      throw new ImportSaveException({ type: 'instanceImportMissingPath' })
+    requireObject(options)
+    const { instancePath, path, curseforge } = options
+    requireString(path, 'Invalid world import source')
+    if (!isAbsolute(path)) throw new Error('Invalid world import source')
+    await this.#javaInstance(instancePath)
+    const info = await lstat(path), canonical = await realpath(path), directory = await worldsLocation(instancePath, this.getPath())
+    const base = worldName(options.saveName ?? filenamify(info.isDirectory() ? basename(path) : basename(path, extname(path))))
+    let saveName = base, index = 1
+    while (await lstat(join(directory.root, saveName)).then(() => true, error => { if (error.code !== 'ENOENT') throw error; return false })) {
+      if (index > 1000) throw new Error('Too many conflicting world names')
+      saveName = worldName(`${base} (${index++})`)
     }
-
-    if (!this.instanceService.state.all[instancePath]) {
-      throw new Error(`Cannot find managed instance ${instancePath}`)
-    }
-
-    // normalize the save name
-    saveName = filenamify(saveName ?? basename(path))
-    let dest = join(instancePath, 'saves', basename(saveName, extname(saveName)))
-    let i = 1
-    while (existsSync(dest)) {
-      dest = join(instancePath, 'saves', `${saveName} (${i++})`)
-    }
-
-    const isDir = await isDirectory(path)
-
-    if (isDir) {
-      if (!existsSync(join(path, 'level.dat'))) {
-        throw new ImportSaveException({ type: 'instanceImportIllegalSave', path })
-      }
-
-      const sharedSavesDir = this.getPath('saves')
-      // if path is direct child of saves, we need to link it else we copy it
-      if (path.startsWith(sharedSavesDir)) {
-        await linkDirectory(path, dest, this)
-      } else {
-        await copyPassively(path, dest)
-      }
+    const depot = info.isDirectory() && !info.isSymbolicLink() && relative(dirname(canonical), join(await realpath(this.getPath()), 'saves')) === ''
+    let dest: string
+    if (depot) {
+      if (curseforge !== undefined) throw new Error('Provider metadata cannot change a shared world')
+      const review = await this.#previewWorldFiles({ type: 'copy', instancePath: this.getPath(), saveName: worldName(basename(canonical)), destinationInstancePath: instancePath, destinationName: saveName }, true)
+      dest = (await this.#applyWorldFiles(review, true, true)).path
     } else {
-      // validate the source
-      const zipFile = await open(path).catch((e) => {
-        throw new ImportSaveException({ type: 'instanceImportIllegalSave', path }, e.message, { cause: e })
-      })
-      const entries = await readAllEntries(zipFile)
-
-      let saveRoot = undefined as string | undefined
-      for (const e of entries) {
-        if (e.fileName.endsWith('/level.dat')) {
-          saveRoot = e.fileName.substring(0, e.fileName.length - '/level.dat'.length)
-          break
-        }
-        if (e.fileName === 'level.dat') {
-          saveRoot = ''
-          break
-        }
-      }
-
-      if (saveRoot === undefined) {
-        throw new ImportSaveException({ type: 'instanceImportIllegalSave', path })
-      }
-
-      const root = saveRoot
-
-      const entriesToExtract = entries.filter(e => !e.fileName.endsWith('/') && e.fileName.startsWith(root))
-      for (const entry of entriesToExtract) {
-        const relativePath = entry.fileName.substring(root.length)
-        const destPath = join(dest, relativePath)
-        await ensureDir(dirname(destPath))
-        const stream = await openEntryReadStream(zipFile, entry)
-        await pipeline(stream, createWriteStream(destPath))
-      }
+      const review = await this.previewWorldFiles({ type: 'import', instancePath, saveName, sourcePath: path, ...(curseforge === undefined ? {} : { curseforge }) })
+      dest = (await this.applyWorldFiles(review)).path
     }
-
-    if (curseforge) {
-      await writeFile(join(dest, '.curseforge'), JSON.stringify({
-        projectId: curseforge.projectId,
-        fileId: curseforge.fileId,
-      }))
-    }
-
-    const stateManager = await this.app.registry.get(ServiceStateManager)
-    const state = stateManager.get<Saves>(getInstanceSaveKey(instancePath))
+    const state = (await this.app.registry.get(ServiceStateManager)).get<Saves>(getInstanceSaveKey(instancePath))
     if (state) {
-      const meta = await readInstanceSaveMetadata(dest, basename(instancePath)).catch(() => undefined)
-      if (meta) {
-        state.instanceSaveUpdate(meta)
-      }
+      const location = await worldLocation(instancePath, saveName, this.getPath()), metadata = await readWorldMetadata(location.root).catch(() => undefined)
+      if (metadata && (await worldLocation(instancePath, saveName, this.getPath())).identity === location.identity) state.instanceSaveUpdate({ ...metadata, advancements: 0, name: saveName, path: dest, instanceName: basename(instancePath), icon: '', ...(location.shared ? { linkTo: location.root } : {}), ...(curseforge ? { curseforge } : {}) })
     }
-
     return dest
   }
 
@@ -546,35 +486,11 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
    */
   async exportSave(options: ExportSaveOptions) {
     requireObject(options)
-
-    const { instancePath, saveName, zip = true, destination } = options
-
-    requireString(saveName)
-    requireString(destination)
-
-    const source = join(instancePath, saveName)
-
-    if (!this.instanceService.state.all[instancePath]) {
-      throw new Error(`Cannot find managed instance ${instancePath}`)
-    }
-
-    if (await missing(instancePath)) {
-      throw new Error(`Cannot find managed instance ${instancePath}`)
-    }
-
-    this.log(`Export save from ${instancePath}:${saveName} to ${destination}.`)
-
-    if (!zip) {
-      // copy to folder
-      await ensureDir(destination)
-      await copyPassively(source, destination)
-    } else {
-      // compress to zip
-      await ensureFile(destination)
-      const zipFile = new ZipFile()
-      await includeAs(zipFile, source, '')
-      await writeZipFile(zipFile, destination)
-    }
+    const { instancePath, destination, zip = true } = options
+    requireString(destination, 'Invalid world export destination')
+    if (!isAbsolute(destination) || typeof zip !== 'boolean') throw new Error('Invalid world export destination')
+    const review = await this.previewWorldFiles({ type: 'export', instancePath, saveName: worldName(options.saveName), destinationDirectory: dirname(destination), fileName: basename(destination), ...(zip ? {} : { format: 'folder' }) })
+    await this.applyWorldFiles(review)
   }
 
   async isSaveLinked(instancePath: string) {

@@ -1,7 +1,10 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { Mutex } from 'async-mutex'
-import { lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises'
+import { lstat, mkdir, mkdtemp, readFile, readdir, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
+import { open, readAllEntries, readEntry } from '@xmcl/unzip'
+import { ZipFile } from 'yazl'
+import { writeZipFile } from '../util/zip'
 import { makeReactWorld } from '../../e2e/helpers/react-world'
 import { prepareWorldMetadata, readWorldMetadata } from './utils/worldFiles'
 vi.mock('~/app', () => ({ Inject: () => () => {}, LauncherAppKey: Symbol('app'), kGameDataPath: Symbol('data') }))
@@ -12,7 +15,7 @@ vi.mock('~/market', () => ({ kMarketProvider: Symbol('market') }))
 vi.mock('~/save', () => ({ kSaveWorker: Symbol('save') }))
 vi.mock('~/service', () => ({ AbstractService: class { constructor(public app: any) {} get mutex() { return this.app.mutex } }, ExposeServiceKey: () => () => {}, ServiceStateManager: class {} }))
 const { InstanceSavesService } = await import('./InstanceSavesService')
-let root: string, source: string, destination: string, third: string, service: InstanceType<typeof InstanceSavesService>
+let root: string, exports: string, source: string, destination: string, third: string, service: InstanceType<typeof InstanceSavesService>
 let instances: { path: string; edition: string }[], processes: any[], sessions: { verify: ReturnType<typeof vi.fn>; release: ReturnType<typeof vi.fn> }[]
 async function world(instance: string, name = 'Alpha') {
   const path = join(instance, 'saves', name); await mkdir(path, { recursive: true }); await writeFile(join(path, 'level.dat'), 'original-world')
@@ -20,6 +23,7 @@ async function world(instance: string, name = 'Alpha') {
 }
 beforeEach(async () => {
   root = await mkdtemp(join(process.cwd(), '.world-legacy-test-')); source = join(root, 'source'); destination = join(root, 'destination'); third = join(root, 'third')
+  exports = await mkdtemp(join(process.cwd(), '.world-legacy-export-'))
   instances = [source, destination, third].map(path => ({ path, edition: 'java' })); processes = []; sessions = []
   for (const path of [source, destination, third, root]) await mkdir(join(path, 'saves'), { recursive: true })
   await world(source)
@@ -35,7 +39,9 @@ beforeEach(async () => {
 })
 afterEach(async () => {
   vi.restoreAllMocks()
-  if (root) { expect(dirname(root)).toBe(process.cwd()); expect(root).toContain('.world-legacy-test-'); await rm(root, { recursive: true, force: true }) }
+  for (const [path, prefix] of [[root, '.world-legacy-test-'], [exports, '.world-legacy-export-']]) {
+    if (path) { expect(dirname(path)).toBe(process.cwd()); expect(path).toContain(prefix); await rm(path, { recursive: true, force: true }) }
+  }
 })
 it('clones through reviewed independent copies and refuses an occupied batch before publishing any destination', async () => {
   const existing = await world(third, 'Beta')
@@ -153,4 +159,81 @@ it('rejects foreign datapack destinations and blocks shared-depot modifications 
   await expect(service.deleteDatapack({ savePath: shared, fileName: 'Incoming' })).rejects.toMatchObject({ name: 'SharedWorldRunningError' })
   expect(await readFile(join(shared, 'datapacks/Incoming/pack.mcmeta'))).toEqual(await readFile(join(incoming, 'pack.mcmeta')))
   expect(await readFile(join(foreign, 'level.dat'), 'utf8')).toBe('PRIVATE')
+})
+
+it('imports external folders independently, preserves dotted names and chooses a new name on collision', async () => {
+  const incoming = join(exports, 'Incoming.world'); await mkdir(incoming); await writeFile(join(incoming, 'level.dat'), 'IMPORTED')
+  const first = await service.importSave({ instancePath: destination, path: incoming })
+  const second = await service.importSave({ instancePath: destination, path: incoming })
+  expect(first).toBe(join(destination, 'saves/Incoming.world')); expect(second).toBe(join(destination, 'saves/Incoming.world (1)'))
+  expect((await lstat(join(first, 'level.dat'), { bigint: true })).ino).not.toBe((await lstat(join(incoming, 'level.dat'), { bigint: true })).ino)
+  await writeFile(join(first, 'level.dat'), 'ONLY INSTALLED')
+  expect(await readFile(join(incoming, 'level.dat'), 'utf8')).toBe('IMPORTED')
+})
+
+it('imports wrapped ZIPs through the bounded importer with reviewed provider metadata', async () => {
+  const zip = new ZipFile(), path = join(exports, 'World.zip')
+  zip.addBuffer(Buffer.from('IMPORTED'), 'wrapped/level.dat'); zip.addBuffer(Buffer.from('SOURCE PROVIDER'), 'wrapped/.curseforge'); zip.addEmptyDirectory('wrapped/empty')
+  await writeZipFile(zip, path); const bytes = await readFile(path), curseforge = { projectId: 1, fileId: 2 }
+  const installed = await service.importSave({ instancePath: destination, path, curseforge })
+  expect(await readFile(join(installed, 'level.dat'), 'utf8')).toBe('IMPORTED')
+  expect(JSON.parse(await readFile(join(installed, '.curseforge'), 'utf8'))).toEqual(curseforge)
+  expect((await lstat(join(installed, 'empty'))).isDirectory()).toBe(true)
+  expect(await readFile(path)).toEqual(bytes)
+  const invalid = new ZipFile(), bad = join(exports, 'Bad.zip')
+  invalid.addBuffer(Buffer.from('ONE'), 'one/level.dat'); invalid.addBuffer(Buffer.from('TWO'), 'two/level.dat'); await writeZipFile(invalid, bad)
+  await expect(service.importSave({ instancePath: destination, path: bad })).rejects.toMatchObject({ name: 'WorldArchiveInvalidError' })
+  await expect(lstat(join(destination, 'saves/Bad'))).rejects.toHaveProperty('code', 'ENOENT')
+})
+
+it('enables only direct owned depot worlds as links while sibling-prefix folders remain independent', async () => {
+  const shared = await world(root, 'Shared'), enabled = await service.importSave({ instancePath: destination, path: shared })
+  expect((await lstat(enabled)).isSymbolicLink()).toBe(true); expect(await realpath(enabled)).toBe(await realpath(shared))
+  const incoming = join(root, 'saves-foreign/External'); await mkdir(incoming, { recursive: true }); await writeFile(join(incoming, 'level.dat'), 'FOREIGN PREFIX')
+  const copied = await service.importSave({ instancePath: third, path: incoming })
+  expect((await lstat(copied)).isSymbolicLink()).toBe(false)
+  expect((await lstat(join(copied, 'level.dat'), { bigint: true })).ino).not.toBe((await lstat(join(incoming, 'level.dat'), { bigint: true })).ino)
+  await expect(service.importSave({ instancePath: third, path: shared, curseforge: { projectId: 1, fileId: 2 } })).rejects.toThrow()
+  await rename(join(third, 'saves'), join(third, 'retained-saves')); await symlink(join(root, 'saves'), join(third, 'saves'), 'junction')
+  await expect(service.importSave({ instancePath: third, path: shared })).rejects.toThrow()
+  expect(await readdir(join(root, 'saves'))).toEqual(['Shared'])
+})
+
+it('does not expose shared-link publication or depot authorization through extra public arguments', async () => {
+  const operation = { type: 'copy' as const, instancePath: source, saveName: 'Alpha', destinationInstancePath: destination, destinationName: 'Independent' }
+  const review = await service.previewWorldFiles(operation)
+  await (service.applyWorldFiles as any)(review, true, true)
+  expect((await lstat(join(destination, 'saves/Independent'))).isSymbolicLink()).toBe(false)
+  expect((await lstat(join(destination, 'saves/Independent/level.dat'), { bigint: true })).ino).not.toBe((await lstat(join(source, 'saves/Alpha/level.dat'), { bigint: true })).ino)
+  await expect(service.importSave({ instancePath: root, path: join(source, 'saves/Alpha') })).rejects.toMatchObject({ name: 'InstanceNotFoundError' })
+})
+
+it('rejects invalid legacy transfers before creating a world or touching an existing export', async () => {
+  const incoming = join(source, 'saves/Alpha'), archive = join(exports, 'existing.zip'); await writeFile(archive, 'KEEP')
+  for (const saveName of ['../Outside', 'a/b', 'NUL', '']) {
+    await expect(service.importSave({ instancePath: destination, path: incoming, saveName })).rejects.toThrow()
+    await expect(service.exportSave({ instancePath: source, saveName, destination: archive })).rejects.toThrow()
+  }
+  await expect(service.importSave({ instancePath: destination, path: incoming, curseforge: { projectId: -1, fileId: 2 } })).rejects.toThrow()
+  await expect(service.exportSave({ instancePath: source, saveName: 'Alpha', destination: archive })).rejects.toMatchObject({ name: 'WorldDestinationExistsError' })
+  await expect(service.exportSave({ instancePath: source, saveName: 'Alpha', destination: join(destination, 'inside.zip') })).rejects.toThrow()
+  expect(await readFile(archive, 'utf8')).toBe('KEEP'); expect(await readdir(join(destination, 'saves'))).toEqual([])
+  processes = [{ options: { gameDirectory: source } }]
+  await expect(service.importSave({ instancePath: destination, path: incoming })).rejects.toMatchObject({ name: 'InstanceRunningError' })
+  await expect(service.exportSave({ instancePath: source, saveName: 'Alpha', destination: join(exports, 'busy'), zip: false })).rejects.toMatchObject({ name: 'InstanceRunningError' })
+})
+
+it('exports the actual saves directory as ZIP or independent folder and never merges into an existing folder', async () => {
+  const save = join(source, 'saves/Alpha'); await writeFile(join(save, '.keep'), 'HIDDEN'); await mkdir(join(save, 'empty'))
+  const path = join(exports, 'Alpha.zip'); await service.exportSave({ instancePath: source, saveName: 'Alpha', destination: path })
+  const zip = await open(path)
+  try {
+    const entries = await readAllEntries(zip); expect(entries.map(entry => entry.fileName)).toEqual(expect.arrayContaining(['level.dat', '.keep', 'empty/']))
+    expect((await readEntry(zip, entries.find(entry => entry.fileName === 'level.dat')!)).toString()).toBe('original-world')
+  } finally { zip.close() }
+  const folder = join(exports, 'Alpha.folder'); await service.exportSave({ instancePath: source, saveName: 'Alpha', destination: folder, zip: false })
+  expect(await readFile(join(folder, '.keep'), 'utf8')).toBe('HIDDEN'); expect((await lstat(join(folder, 'empty'))).isDirectory()).toBe(true)
+  expect((await lstat(join(folder, 'level.dat'), { bigint: true })).ino).not.toBe((await lstat(join(save, 'level.dat'), { bigint: true })).ino)
+  await expect(service.exportSave({ instancePath: source, saveName: 'Alpha', destination: folder, zip: false })).rejects.toMatchObject({ name: 'WorldDestinationExistsError' })
+  expect(await readFile(join(folder, 'level.dat'), 'utf8')).toBe('original-world')
 })

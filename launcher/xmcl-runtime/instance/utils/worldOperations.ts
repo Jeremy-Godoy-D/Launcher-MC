@@ -2,7 +2,7 @@ import type { WorldFileOperation, WorldFileReview } from '@xmcl/runtime-api/src/
 import { checksum } from '@xmcl/core'
 import { createHash, randomUUID } from 'node:crypto'
 import { constants } from 'node:fs'
-import { copyFile, lstat, mkdir, mkdtemp, realpath, rename, rm, unlink, writeFile } from 'node:fs/promises'
+import { copyFile, lstat, mkdir, mkdtemp, realpath, rename, rm, symlink, unlink, writeFile } from 'node:fs/promises'
 import { dirname, isAbsolute, join, parse, relative, sep } from 'node:path'
 import { ZipFile } from 'yazl'
 import { assertInstallDirectory } from '../../instanceIO/utils/pendingInstall'
@@ -22,13 +22,17 @@ function contains(parent: string, child: string) { const path = relative(parent,
 function operationInput(input: WorldFileOperation): WorldFileOperation {
   if (!input || typeof input.instancePath !== 'string' || !isAbsolute(input.instancePath)) throw new Error('Invalid world operation')
   const base = { instancePath: input.instancePath, saveName: worldName(input.saveName) }
-  if (input.type === 'import' && typeof input.sourcePath === 'string' && isAbsolute(input.sourcePath)) return { ...base, type: 'import', sourcePath: input.sourcePath }
+  if (input.type === 'import' && typeof input.sourcePath === 'string' && isAbsolute(input.sourcePath)) {
+    const ids = input.curseforge
+    if (ids !== undefined && (!ids || !Number.isSafeInteger(ids.projectId) || ids.projectId <= 0 || !Number.isSafeInteger(ids.fileId) || ids.fileId <= 0)) throw new Error('Invalid world provider metadata')
+    return { ...base, type: 'import', sourcePath: input.sourcePath, ...(ids ? { curseforge: { projectId: ids.projectId, fileId: ids.fileId } } : {}) }
+  }
   if (input.type === 'metadata') return { ...base, type: 'metadata', metadata: validateWorldMetadata(input.metadata) }
   if (input.type === 'import-datapack' && typeof input.sourcePath === 'string' && isAbsolute(input.sourcePath)) return { ...base, type: 'import-datapack', sourcePath: input.sourcePath, ...(typeof input.fileName === 'string' && input.fileName ? { fileName: datapackFileName(input.fileName) } : {}) }
   if (input.type === 'remove-datapack') return { ...base, type: 'remove-datapack', fileName: datapackFileName(input.fileName) }
   if (input.type === 'remove') return { ...base, type: 'remove' }
   if (input.type === 'copy' && typeof input.destinationInstancePath === 'string' && isAbsolute(input.destinationInstancePath)) return { ...base, type: 'copy', destinationInstancePath: input.destinationInstancePath, destinationName: worldName(input.destinationName) }
-  if (input.type === 'export' && typeof input.destinationDirectory === 'string' && isAbsolute(input.destinationDirectory) && /\.zip$/i.test(input.fileName)) return { ...base, type: 'export', destinationDirectory: input.destinationDirectory, fileName: worldName(input.fileName) }
+  if (input.type === 'export' && typeof input.destinationDirectory === 'string' && isAbsolute(input.destinationDirectory) && (input.format === undefined || input.format === 'folder') && (input.format === 'folder' || /\.zip$/i.test(input.fileName))) return { ...base, type: 'export', destinationDirectory: input.destinationDirectory, fileName: worldName(input.fileName), ...(input.format ? { format: input.format } : {}) }
   throw new Error('Invalid world operation')
 }
 async function sourceLocation(operation: WorldFileOperation, sharedRoot: string) {
@@ -100,7 +104,7 @@ async function plan(input: WorldFileOperation, sharedRoot: string) {
 }
 export async function previewWorldFiles(input: WorldFileOperation, sharedRoot: string) { return (await plan(input, sharedRoot)).review }
 
-export async function applyWorldFiles(review: WorldFileReview, sharedRoot: string, verify: (review: WorldFileReview, beforeWorldRename?: boolean) => Promise<void> = async () => {}) {
+export async function applyWorldFiles(review: WorldFileReview, sharedRoot: string, verify: (review: WorldFileReview, beforeWorldRename?: boolean) => Promise<void> = async () => {}, linkSharedWorld = false) {
   if (!review || typeof review.snapshot !== 'string' || !/^[a-f0-9]{64}$/.test(review.snapshot)) throw changed()
   const current = await plan(review.operation, sharedRoot)
   if (current.review.snapshot !== review.snapshot) throw changed()
@@ -220,6 +224,14 @@ export async function applyWorldFiles(review: WorldFileReview, sharedRoot: strin
     if (directory.root !== current.parent || directory.identity !== current.authority) throw changed()
     await mkdir(current.parent).catch(error => { if (error.code !== 'EEXIST') throw error })
     const destination = await worldsLocation(instance, sharedRoot)
+    if (linkSharedWorld) {
+      // Only the legacy enable-world action may publish a link to a direct child of our depot.
+      if (operation.type !== 'copy' || current.source.linked || destination.shared || relative(dirname(current.source.root), join(await realpath(sharedRoot), 'saves')) !== '') throw new Error('Invalid shared world link')
+      await unchanged()
+      if ((await worldsLocation(instance, sharedRoot)).identity !== destination.identity) throw changed()
+      await symlink(current.source.root, current.target, process.platform === 'win32' ? 'junction' : 'dir')
+      return { path: join(instance, 'saves', name) }
+    }
     await mkdir(current.target)
     try {
       const targetInfo = await lstat(current.target, { bigint: true })
@@ -229,6 +241,13 @@ export async function applyWorldFiles(review: WorldFileReview, sharedRoot: strin
       }
       if (current.archive) { await extractWorldArchive(current.archive, current.target, verifyDestination); await unchanged(); await verifyDestination() }
       else await copyInto(current.target, verifyDestination)
+      if (operation.type === 'import' && operation.curseforge) {
+        const temporary = join(current.target, `.world-provider-${randomUUID()}`)
+        try {
+          await verifyDestination(); await writeFile(temporary, JSON.stringify(operation.curseforge), { flag: 'wx' })
+          await unchanged(); await verifyDestination(); await rename(temporary, join(current.target, '.curseforge'))
+        } finally { await unlink(temporary).catch(error => { if (error.code !== 'ENOENT') throw error }) }
+      }
       return { path: join(instance, 'saves', name) }
     } catch (cause) { throw Object.assign(new Error('World copy incomplete; source and partial destination retained', { cause }), { name: cause instanceof Error && cause.name === 'WorldArchiveChecksumError' ? cause.name : 'WorldOperationIncompleteError', path: current.target }) }
   }
@@ -238,6 +257,18 @@ export async function applyWorldFiles(review: WorldFileReview, sharedRoot: strin
     if (!info.isDirectory() || info.isSymbolicLink() || digest([current.parent, info.ino.toString(), info.dev.toString()]) !== current.authority || await realpath(destinationDirectory) !== current.parent) throw changed()
   }
   await exportParent()
+  if (operation.format === 'folder') {
+    await mkdir(current.target)
+    const target = await lstat(current.target, { bigint: true })
+    try {
+      await copyInto(current.target, async () => {
+        await exportParent()
+        const info = await lstat(current.target, { bigint: true })
+        if (!info.isDirectory() || info.isSymbolicLink() || info.ino !== target.ino || info.dev !== target.dev) throw changed()
+      })
+      return { path: current.target }
+    } catch (cause) { throw Object.assign(new Error('World export incomplete; source and partial destination retained', { cause }), { name: 'WorldOperationIncompleteError', path: current.target }) }
+  }
   const temporary = await mkdtemp(join(current.parent, '.grimo-world-export-')), temporaryInfo = await lstat(temporary, { bigint: true })
   if (dirname(temporary) !== current.parent || !temporary.startsWith(join(current.parent, '.grimo-world-export-')) || parse(temporary).root === temporary) throw changed()
   try {

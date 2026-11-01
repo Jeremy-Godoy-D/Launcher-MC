@@ -1,10 +1,16 @@
-import { lstat, mkdir, readFile, readdir, symlink, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { lstat, mkdir, readFile, readdir, realpath, symlink, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
+import { createRequire } from 'node:module'
+import { createWriteStream } from 'node:fs'
+import { pipeline } from 'node:stream/promises'
 import { test, expect, type Page } from '../../helpers/scratch'
 import { makeReactWorld } from '../../helpers/react-world'
 import { javaWorldLock } from '../../helpers/java-world-lock'
 
 test.use({ launcherOptions: { locale: 'es-ES', gameDataParentAlias: true } })
+const require = createRequire(new URL('../../../xmcl-runtime/package.json', import.meta.url))
+const { ZipFile } = require('yazl'), { open, readAllEntries, readEntry } = require('@xmcl/unzip')
+async function writeZip(zip: any, path: string) { zip.end(); await pipeline(zip.outputStream, createWriteStream(path, { flags: 'wx' })) }
 async function instances(page: Page) {
   return page.evaluate(async () => {
     const service = (window as any).serviceChannels.open('InstanceService'), result: string[] = []
@@ -98,4 +104,63 @@ test('legacy datapack calls copy independently, retain sidecars in a backup and 
   expect(await rejected(page, 'importDatapack', { savePath: incoming, path: incoming })).toBe(true)
   expect(await rejected(page, 'deleteDatapack', { savePath: world, fileName: '../outside' })).toBe(true)
   expect(await readFile(join(incoming, 'pack.mcmeta'), 'utf8')).toContain('Fixture pack')
+})
+
+test('legacy imports and exports complete independent worlds with collision protection through the packaged bridge', async ({ launcher }) => {
+  const page = launcher.main, [instance] = await instances(page), external = join(dirname(launcher.gameDataPath), 'legacy-transfer')
+  await mkdir(external, { recursive: true })
+  const original = await makeReactWorld(external, 'Vanilla.world'), bytes = await readFile(join(original, 'level.dat'))
+  await mkdir(join(original, 'empty')); await writeFile(join(original, '.keep'), 'HIDDEN')
+  const installed = await call(page, 'importSave', { instancePath: instance, path: original })
+  expect(installed).toBe(join(instance, 'saves/Vanilla.world'))
+  expect((await lstat(join(installed, 'level.dat'), { bigint: true })).ino).not.toBe((await lstat(join(original, 'level.dat'), { bigint: true })).ino)
+  expect(await call(page, 'importSave', { instancePath: instance, path: original })).toBe(join(instance, 'saves/Vanilla.world (1)'))
+  const archive = join(external, 'Export.zip'), folder = join(external, 'Exported')
+  await call(page, 'exportSave', { instancePath: instance, saveName: 'Vanilla.world', destination: archive })
+  const zip = await open(archive)
+  try {
+    const entries = await readAllEntries(zip)
+    expect(entries.map((entry: { fileName: string }) => entry.fileName)).toEqual(expect.arrayContaining(['level.dat', '.keep', 'empty/']))
+    expect(await readEntry(zip, entries.find((entry: { fileName: string }) => entry.fileName === 'level.dat')!)).toEqual(bytes)
+  } finally { zip.close() }
+  await call(page, 'exportSave', { instancePath: instance, saveName: 'Vanilla.world', destination: folder, zip: false })
+  expect(await readFile(join(folder, 'level.dat'))).toEqual(bytes); expect(await readFile(join(folder, '.keep'), 'utf8')).toBe('HIDDEN')
+  expect((await lstat(join(folder, 'empty'))).isDirectory()).toBe(true)
+  expect((await lstat(join(folder, 'level.dat'), { bigint: true })).ino).not.toBe((await lstat(join(installed, 'level.dat'), { bigint: true })).ino)
+  expect(await rejected(page, 'exportSave', { instancePath: instance, saveName: 'Vanilla.world', destination: folder, zip: false })).toBe(true)
+  expect(await readFile(join(original, 'level.dat'))).toEqual(bytes)
+})
+
+test('legacy ZIP import validates archive roots and provider IDs before publishing a world', async ({ launcher }) => {
+  const page = launcher.main, [instance] = await instances(page), external = join(dirname(launcher.gameDataPath), 'legacy-zip')
+  await mkdir(external, { recursive: true }); const world = await makeReactWorld(external, 'Original'), bytes = await readFile(join(world, 'level.dat'))
+  const path = join(external, 'Wrapped.zip'), zip = new ZipFile(), curseforge = { projectId: 123, fileId: 456 }
+  zip.addBuffer(bytes, 'wrapper/level.dat'); zip.addBuffer(Buffer.from('SOURCE PROVIDER'), 'wrapper/.curseforge'); zip.addEmptyDirectory('wrapper/empty')
+  await writeZip(zip, path); const archiveBytes = await readFile(path)
+  const installed = await call(page, 'importSave', { instancePath: instance, path, curseforge })
+  expect(await readFile(join(installed, 'level.dat'))).toEqual(bytes)
+  expect(JSON.parse(await readFile(join(installed, '.curseforge'), 'utf8'))).toEqual(curseforge)
+  expect(await readFile(path)).toEqual(archiveBytes)
+  const invalid = new ZipFile(), bad = join(external, 'Ambiguous.zip')
+  invalid.addBuffer(bytes, 'one/level.dat'); invalid.addBuffer(bytes, 'two/level.dat'); await writeZip(invalid, bad)
+  expect(await rejected(page, 'importSave', { instancePath: instance, path: bad })).toBe(true)
+  expect(await rejected(page, 'importSave', { instancePath: instance, path, saveName: '../outside' })).toBe(true)
+  expect(await rejected(page, 'importSave', { instancePath: instance, path, saveName: 'Invalid IDs', curseforge: { projectId: 0, fileId: 1 } })).toBe(true)
+  for (const name of ['Ambiguous', 'Invalid IDs']) await expect(lstat(join(instance, 'saves', name))).rejects.toHaveProperty('code', 'ENOENT')
+})
+
+test('legacy shared-world activation respects a real Java session and preserves link semantics without losing the depot world', async ({ launcher }) => {
+  const page = launcher.main, [instance] = await instances(page), shared = await makeReactWorld(launcher.gameDataPath, 'SharedActivation')
+  const bytes = await readFile(join(shared, 'level.dat')); await writeFile(join(shared, 'session.lock'), '☃')
+  const external = await javaWorldLock(shared); expect(external.status).toBe('LOCKED')
+  try {
+    expect(await rejected(page, 'importSave', { instancePath: instance, path: shared, saveName: 'Waiting' })).toBe(true)
+    await expect(lstat(join(instance, 'saves/Waiting'))).rejects.toHaveProperty('code', 'ENOENT')
+  } finally { await external.release() }
+  const installed = await call(page, 'importSave', { instancePath: instance, path: shared })
+  expect((await lstat(installed)).isSymbolicLink()).toBe(true); expect(await realpath(installed)).toBe(await realpath(shared))
+  expect((await call(page, 'getInstanceSaves', instance))[0]).toMatchObject({ name: 'SharedActivation', linkTo: await realpath(shared) })
+  await call(page, 'deleteSave', { instancePath: instance, saveName: 'SharedActivation' })
+  await expect(lstat(installed)).rejects.toHaveProperty('code', 'ENOENT')
+  expect(await readFile(join(shared, 'level.dat'))).toEqual(bytes)
 })
