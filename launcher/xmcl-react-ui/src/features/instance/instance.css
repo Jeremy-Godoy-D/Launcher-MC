@@ -1,4 +1,13 @@
 @layer components {
+  .argument-editor { display: grid; gap: 8px; min-width: 0; }
+  .argument-editor p { margin: 0; }
+  .argument-editor select, .argument-row textarea { min-width: 0; width: 100%; padding: 10px 12px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; font: inherit; }
+  .argument-items { display: grid; gap: 8px; list-style: none; padding: 0; margin: 0; }
+  .argument-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 8px; }
+  .argument-row textarea { min-height: 40px; resize: vertical; font-family: ui-monospace, Consolas, monospace; }
+  .argument-row textarea::placeholder { color: var(--muted); opacity: 1; }
+  .argument-actions { display: flex; gap: 4px; }
+  .argument-add { justify-self: start; }
   .content-info { padding: 16px; margin: 16px 0; border-radius: 14px; background: var(--glass-elevated); }
   .content-info p, .content-info ul, .content-info h4 { margin: 12px 0; line-height: 1.6; }
   .content-info ul { padding-left: 20px; overflow-wrap: anywhere; }

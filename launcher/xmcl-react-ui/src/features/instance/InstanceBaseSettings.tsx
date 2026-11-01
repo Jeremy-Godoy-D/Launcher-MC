@@ -17,6 +17,7 @@ import { JavaServiceKey, JavaState } from '@xmcl/runtime-api/src/services/JavaSe
 import { useService, useSharedState } from '../../runtime'
 import { useI18n } from '../../i18n'
 import type { SavedInstance } from '../library/model'
+import { ArgumentEditor } from './ArgumentEditor'
 
 interface Props {
   instance: SavedInstance
@@ -43,8 +44,8 @@ export function InstanceBaseSettings({ instance, running }: Props) {
   const [maxMemory, setMaxMemory] = useState<number>(instance.maxMemory ?? 4096)
 
   // JVM & MC options
-  const [vmOptions, setVmOptions] = useState<string>((instance.vmOptions || []).join(' '))
-  const [mcOptions, setMcOptions] = useState<string>((instance.mcOptions || []).join(' '))
+  const [vmOptions, setVmOptions] = useState<string[] | undefined>(instance.vmOptions?.slice())
+  const [mcOptions, setMcOptions] = useState<string[] | undefined>(instance.mcOptions?.slice())
 
   // Resolution state
   const hasCustomRes = instance.resolution !== undefined && instance.resolution !== null
@@ -75,8 +76,8 @@ export function InstanceBaseSettings({ instance, running }: Props) {
     setMemoryMode(customMem ? 'manual' : 'inherit')
     setMinMemory(instance.minMemory ?? 1024)
     setMaxMemory(instance.maxMemory ?? 4096)
-    setVmOptions((instance.vmOptions || []).join(' '))
-    setMcOptions((instance.mcOptions || []).join(' '))
+    setVmOptions(instance.vmOptions?.slice())
+    setMcOptions(instance.mcOptions?.slice())
     const customRes = instance.resolution !== undefined && instance.resolution !== null
     setResolutionMode(customRes ? 'custom' : 'inherit')
     setResolutionWidth(instance.resolution?.width ?? 854)
@@ -122,9 +123,6 @@ export function InstanceBaseSettings({ instance, running }: Props) {
     setErrorMessage(null)
     setStatusMessage(null)
 
-    const vmArr = vmOptions.trim() ? vmOptions.trim().split(/\s+/).filter(Boolean) : null
-    const mcArr = mcOptions.trim() ? mcOptions.trim().split(/\s+/).filter(Boolean) : null
-
     try {
       await instanceService.editInstance({
         instancePath: instance.path,
@@ -132,8 +130,8 @@ export function InstanceBaseSettings({ instance, running }: Props) {
         assignMemory: memoryMode === 'manual' ? true : null,
         minMemory: memoryMode === 'manual' ? Number(minMemory) : null,
         maxMemory: memoryMode === 'manual' ? Number(maxMemory) : null,
-        vmOptions: vmArr,
-        mcOptions: mcArr,
+        vmOptions: vmOptions ?? null,
+        mcOptions: mcOptions ?? null,
         resolution:
           resolutionMode === 'custom'
             ? {
@@ -188,8 +186,8 @@ export function InstanceBaseSettings({ instance, running }: Props) {
       setMemoryMode('inherit')
       setMinMemory(1024)
       setMaxMemory(4096)
-      setVmOptions('')
-      setMcOptions('')
+      setVmOptions(undefined)
+      setMcOptions(undefined)
       setResolutionMode('inherit')
       setResolutionWidth(854)
       setResolutionHeight(480)
@@ -216,8 +214,8 @@ export function InstanceBaseSettings({ instance, running }: Props) {
     setMemoryMode(customMem ? 'manual' : 'inherit')
     setMinMemory(instance.minMemory ?? 1024)
     setMaxMemory(instance.maxMemory ?? 4096)
-    setVmOptions((instance.vmOptions || []).join(' '))
-    setMcOptions((instance.mcOptions || []).join(' '))
+    setVmOptions(instance.vmOptions?.slice())
+    setMcOptions(instance.mcOptions?.slice())
     const customRes = instance.resolution !== undefined && instance.resolution !== null
     setResolutionMode(customRes ? 'custom' : 'inherit')
     setResolutionWidth(instance.resolution?.width ?? 854)
@@ -447,39 +445,8 @@ export function InstanceBaseSettings({ instance, running }: Props) {
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div>
-            <label htmlFor="setting-vm-options" style={{ display: 'block', fontSize: '0.875rem', marginBottom: 6 }}>
-              {t('react.instanceSettings.jvmOptions')}
-            </label>
-            <input
-              id="setting-vm-options"
-              data-testid="setting-vm-options"
-              aria-label={t('react.instanceSettings.jvmOptions')}
-              type="text"
-              placeholder={t('react.instanceSettings.jvmPlaceholder')}
-              value={vmOptions}
-              onChange={(e) => setVmOptions(e.target.value)}
-              disabled={running || saving}
-              style={{ width: '100%', fontFamily: 'monospace' }}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="setting-mc-options" style={{ display: 'block', fontSize: '0.875rem', marginBottom: 6 }}>
-              {t('react.instanceSettings.mcOptions')}
-            </label>
-            <input
-              id="setting-mc-options"
-              data-testid="setting-mc-options"
-              aria-label={t('react.instanceSettings.mcOptions')}
-              type="text"
-              placeholder={t('react.instanceSettings.mcPlaceholder')}
-              value={mcOptions}
-              onChange={(e) => setMcOptions(e.target.value)}
-              disabled={running || saving}
-              style={{ width: '100%', fontFamily: 'monospace' }}
-            />
-          </div>
+          <div data-testid="setting-vm-options"><ArgumentEditor id="setting-vm-options" title={t('react.instanceSettings.jvmOptions')} value={vmOptions} change={setVmOptions} disabled={running || saving} /></div>
+          <div data-testid="setting-mc-options"><ArgumentEditor id="setting-mc-options" title={t('react.instanceSettings.mcOptions')} value={mcOptions} change={setMcOptions} disabled={running || saving} /></div>
         </div>
       </fieldset>
 

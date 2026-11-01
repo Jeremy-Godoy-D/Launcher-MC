@@ -77,7 +77,11 @@ test('instance base settings configures memory, JVM, resolution and server with 
 
   // Set JVM arguments
   const vmInput = settingsSec.getByTestId('setting-vm-options')
-  await vmInput.fill('-XX:+UseG1GC -Dtest.option=true')
+  await vmInput.getByRole('combobox').selectOption('custom')
+  for (const argument of ['-XX:+UseG1GC', '-Dtest.option=true']) {
+    await vmInput.getByRole('button', { name: 'Añadir argumento', exact: false }).click()
+    await vmInput.getByRole('textbox').last().fill(argument)
+  }
 
   // Switch to custom resolution
   const resCustom = settingsSec.getByTestId('setting-resolution-mode-custom')

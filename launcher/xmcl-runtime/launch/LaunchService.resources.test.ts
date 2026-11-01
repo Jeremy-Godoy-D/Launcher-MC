@@ -112,6 +112,13 @@ it.each(['client', 'server'] as const)('does not log the full %s environment or 
   expect(output.includes('NEVER_LOG_FIXTURE_ENV')).toBe(false)
   expect(output.includes('NEVER_LOG_FIXTURE_ARG')).toBe(false)
 })
+it.each(['client', 'server'] as const)('preserves exact %s argument boundaries, quotes and empty values', async side => {
+  const vmOptions = ['-Dpath=C:\\Games with spaces\\Java', '-Dquoted="literal value"', ''], mcOptions = ['--server', 'host with spaces', '', '"quoted"']
+  await service.launch({ ...options(side), vmOptions, mcOptions })
+  const actual = (side === 'client' ? mocks.launch : mocks.server).mock.calls[0][0]
+  expect(actual.extraJVMArgs).toEqual(vmOptions); expect(actual.extraMCArgs).toEqual(mcOptions)
+  expect(actual.extraJVMArgs).not.toBe(vmOptions); expect(actual.extraMCArgs).not.toBe(mcOptions)
+})
 it('allows another stop request after sending the first signal throws', async () => {
   const pid = await service.launch(options('client'))
   vi.mocked(child.kill).mockImplementationOnce(() => { throw new Error('Signal fixture failure') })
