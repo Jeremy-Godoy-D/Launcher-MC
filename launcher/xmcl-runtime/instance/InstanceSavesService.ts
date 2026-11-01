@@ -37,15 +37,15 @@ import { InstanceService } from '~/instance'
 import { LaunchService } from '~/launch'
 import { kMarketProvider } from '~/market'
 import { kResourceManager } from '~/resource'
-import { readInstanceSaveMetadata, readWorldGenSettings, updateSaveMetadata, listSaveDimensions, getSaveRegions, readSaveChunks, readSaveProgress, getRegionDir, kSaveWorker, type SaveWorker } from '~/save'
+import { readInstanceSaveMetadata, readWorldGenSettings, listSaveDimensions, getSaveRegions, readSaveChunks, readSaveProgress, getRegionDir, kSaveWorker, type SaveWorker } from '~/save'
 import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/service'
 import { LauncherApp, type WorldLock } from '../app/LauncherApp'
 import { copyPassively, isDirectory, linkDirectory, missing, pipeline, readdirIfPresent } from '../util/fs'
 import { isNonnull, requireObject, requireString } from '../util/object'
 import { includeAs, writeZipFile } from '../util/zip'
 import { readlinkSafe, isLinkTo } from './utils/readLinkSafe'
-import { readWorldDatapacks } from './utils/worldDatapacks'
-import { readBoundedFile, readWorlds, worldLocation, worldName, worldsLocation } from './utils/worldFiles'
+import { datapackFileName, readWorldDatapacks } from './utils/worldDatapacks'
+import { readBoundedFile, readWorlds, readWorldMetadata, worldLocation, worldName, worldsLocation } from './utils/worldFiles'
 import { assertInstallDirectory } from '../instanceIO/utils/pendingInstall'
 import { applyWorldFiles, previewWorldFiles } from './utils/worldOperations'
 import { applySaveChunkPlan, listSaveChunkBackups, planSaveChunkChanges } from './utils/worldChunks'
@@ -174,13 +174,13 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     if (!this.instanceService.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceNotFoundError')
   }
 
-  async #worldFiles<T>(operation: WorldFileOperation, action: () => Promise<T>): Promise<T> {
+  async #worldFiles<T>(operation: WorldFileOperation, action: () => Promise<T>, allowDepot = false): Promise<T> {
     if (!operation || !['copy', 'export', 'remove', 'import', 'metadata', 'import-datapack', 'remove-datapack'].includes(operation.type)) throw new Error('Invalid world operation')
     const paths = [...new Set([operation.instancePath, ...(operation.type === 'copy' ? [operation.destinationInstancePath] : [])])].sort()
-    for (const path of paths) await this.#javaInstance(path)
+    for (const path of paths) if (!allowDepot || path !== this.getPath()) await this.#javaInstance(path)
     const lock = async (index: number): Promise<T> => {
       if (index < paths.length) return this.mutex.of(LockKey.instance(paths[index])).runExclusive(() => lock(index + 1))
-      for (const path of paths) await this.#javaInstance(path)
+      for (const path of paths) if (!allowDepot || path !== this.getPath()) await this.#javaInstance(path)
       return action()
     }
     return this.mutex.of('resource-pack-options').runExclusive(async () => {
@@ -188,10 +188,11 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     })
   }
 
-  async #worldFilesIdle(review: WorldFileReview) {
+  async #worldFilesIdle(review: WorldFileReview, allowDepot = false) {
     const operation = review.operation, paths = [operation.instancePath, ...(operation.type === 'copy' ? [operation.destinationInstancePath] : [])]
-    for (const path of paths) await this.#javaInstance(path)
+    for (const path of paths) if (!allowDepot || path !== this.getPath()) await this.#javaInstance(path)
     const launch = await this.app.registry.get(LaunchService), processes = await launch.getGameProcesses()
+    if (allowDepot && paths.includes(this.getPath()) && processes.length) throw new AnyError('SharedWorldRunningError')
     if (processes.some(process => paths.includes(process.options.gameDirectory))) throw new AnyError('InstanceRunningError')
     if (processes.length) {
       const touched = await Promise.all(paths.map(path => realpath(path).catch(() => path)))
@@ -218,28 +219,36 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async previewWorldFiles(operation: WorldFileOperation) {
+    return this.#previewWorldFiles(operation)
+  }
+
+  // Depot authorization stays private; extra IPC arguments cannot enable it.
+  async #previewWorldFiles(operation: WorldFileOperation, allowDepot = false) {
     return this.#worldFiles(operation, async () => {
-      await this.#javaInstance(operation.instancePath)
       const review = await previewWorldFiles(operation, this.getPath())
-      await this.#worldFilesIdle(review)
+      await this.#worldFilesIdle(review, allowDepot)
       const lock = await this.#worldFileLock(review, false)
       try { await lock?.verify(); return review } finally { lock?.release() }
-    })
+    }, allowDepot)
   }
 
   async applyWorldFiles(review: WorldFileReview) {
+    return this.#applyWorldFiles(review)
+  }
+
+  async #applyWorldFiles(review: WorldFileReview, allowDepot = false) {
     return this.#worldFiles(review?.operation, async () => {
       let lock: WorldLock | undefined
       try {
         return await applyWorldFiles(review, this.getPath(), async (value, beforeWorldRename) => {
-          await this.#worldFilesIdle(value)
+          await this.#worldFilesIdle(value, allowDepot)
           lock ||= await this.#worldFileLock(value, true)
           await lock?.verify()
           // Windows directory rename rejects live child-file handles, including a game opened after release.
           if (beforeWorldRename) { lock?.release(); lock = undefined }
         })
       } finally { lock?.release() }
-    })
+    }, allowDepot)
   }
 
   async #worldFileLock(review: WorldFileReview, create: boolean) {
@@ -366,57 +375,33 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
    * @param options
    */
   async cloneSave(options: CloneSaveOptions) {
+    requireObject(options)
     const { srcInstancePath, destInstancePath, saveName, newSaveName } = options
-
-    requireString(saveName)
-
-    const destSaveName = newSaveName ?? saveName
-
-    const destInstancePaths = typeof destInstancePath === 'string' ? [destInstancePath] : destInstancePath
-
-    const srcSavePath = join(srcInstancePath, 'saves', saveName)
-
-    if (await missing(srcSavePath)) {
-      throw new AnyError('CloneSaveSaveNotFoundError', `Cannot find save ${saveName}`, undefined, {
-        saveName,
-      })
-    }
-    if (destInstancePaths.some(p => !this.instanceService.state.all[p])) {
-      const notFound = destInstancePaths.find(p => !this.instanceService.state.all[p])!
-      throw new AnyError('CloneSaveInstanceNotFoundError', `Cannot find managed instance ${notFound}`, undefined, {
-        instancePath: notFound,
-      })
-    }
-
-    const destSavePaths = destInstancePaths.map(d => join(d, 'saves', destSaveName))
-
-    for (const dest of destSavePaths) {
-      await copyPassively(srcSavePath, dest)
-    }
+    requireString(srcInstancePath, 'Invalid world source'); worldName(saveName)
+    const destinationName = worldName(newSaveName ?? saveName)
+    const destinations = typeof destInstancePath === 'string' ? [destInstancePath] : destInstancePath
+    if (!Array.isArray(destinations) || !destinations.length || destinations.length > 1000 || destinations.some(path => typeof path !== 'string')) throw new Error('Invalid world destinations')
+    const reviews: WorldFileReview[] = []
+    for (const destinationInstancePath of new Set(destinations)) reviews.push(await this.previewWorldFiles({ type: 'copy', instancePath: srcInstancePath, saveName, destinationInstancePath, destinationName }))
+    for (const review of reviews) await this.applyWorldFiles(review)
   }
 
-  /**
-   * Delete a save in a specific instance.
-   *
-   * @param options
-   */
+  /** Remove the world from its list while retaining the exact original in a backup. */
   async deleteSave(options: DeleteSaveOptions) {
-    const { saveName, instancePath } = options
-
-    requireString(saveName)
-
-    const savePath = instancePath ? join(instancePath, 'saves', saveName) : this.getPath('saves', saveName)
-
-    if (await missing(savePath)) {
-      return
-    }
-
-    await rm(savePath, { recursive: true, force: true })
-
-    if (instancePath) {
+    requireObject(options)
+    const saveName = worldName(options.saveName), depot = options.instancePath === undefined
+    const instancePath = depot ? this.getPath() : options.instancePath!
+    requireString(instancePath, 'Invalid world instance')
+    if (!depot) await this.#javaInstance(instancePath)
+    const directory = await worldsLocation(instancePath, this.getPath())
+    const entry = await lstat(join(directory.root, saveName)).catch(error => { if (error.code !== 'ENOENT') throw error })
+    if (!entry) return
+    const review = await this.#previewWorldFiles({ type: 'remove', instancePath, saveName }, depot)
+    await this.#applyWorldFiles(review, depot)
+    if (!depot) {
       const stateManager = await this.app.registry.get(ServiceStateManager)
       const state = stateManager.get<Saves>(getInstanceSaveKey(instancePath))
-      state?.instanceSaveRemove(savePath)
+      state?.instanceSaveRemove(join(instancePath, 'saves', saveName))
     }
   }
 
@@ -446,22 +431,23 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async updateSave(options: UpdateSaveOptions): Promise<void> {
-    const { instancePath, saveName, metadata } = options
-
-    requireString(saveName)
+    requireObject(options)
+    const { instancePath, metadata } = options, saveName = worldName(options.saveName)
     requireObject(metadata)
-
-    const savePath = join(instancePath, 'saves', saveName)
-
-    if (await missing(savePath)) {
-      throw new AnyError('InstanceUpdateNoSave', `Cannot find save ${saveName}`, undefined, {
-        saveName,
-      })
+    const keys = ['levelName', 'seed', 'difficulty', 'cheat'] as const
+    if (Object.keys(metadata).some(key => !keys.some(allowed => allowed === key))) throw new Error('Invalid world metadata')
+    await this.#javaInstance(instancePath)
+    const source = await worldLocation(instancePath, saveName, this.getPath()), current = await readWorldMetadata(source.root)
+    const before = { levelName: current.levelName, seed: current.seed, difficulty: (current.difficulty >= 0 && current.difficulty <= 3 ? current.difficulty : 2) as 0 | 1 | 2 | 3, cheat: current.cheat }
+    const target = {
+      levelName: metadata.levelName === undefined ? before.levelName : metadata.levelName,
+      seed: metadata.seed === undefined ? before.seed : metadata.seed,
+      difficulty: metadata.difficulty === undefined ? before.difficulty : metadata.difficulty as 0 | 1 | 2 | 3,
+      cheat: metadata.cheat === undefined ? before.cheat : metadata.cheat,
     }
-
-    this.log(`Update save ${saveName} in instance ${instancePath} with metadata`, metadata)
-
-    await updateSaveMetadata(savePath, metadata)
+    const review = await this.previewWorldFiles({ type: 'metadata', instancePath, saveName, metadata: target })
+    if ((await worldLocation(instancePath, saveName, this.getPath())).identity !== source.identity || keys.some(key => review.metadata?.before[key] !== before[key])) throw new AnyError('WorldFilesChangedError')
+    await this.applyWorldFiles(review)
   }
 
   async importSave(options: ImportSaveOptions) {
@@ -952,15 +938,18 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     })
   }
 
+  async #legacySaveContext(savePath: string) {
+    requireString(savePath, 'Invalid world path')
+    const source = await this.#saveLocation(savePath)
+    return { instancePath: source.matchedInstance?.path ?? this.getPath(), saveName: worldName(basename(source.root)), root: source.root, depot: !source.matchedInstance }
+  }
+
   async importDatapack(options: ImportDatapackOptions) {
-    const { savePath, path } = options
-    requireString(savePath)
-    requireString(path)
-    const datapacksDir = join(savePath, 'datapacks')
-    await ensureDir(datapacksDir)
-    const dest = join(datapacksDir, basename(path))
-    await copyPassively(path, dest)
-    return dest
+    requireObject(options)
+    requireString(options.path, 'Invalid datapack source')
+    const source = await this.#legacySaveContext(options.savePath)
+    const review = await this.#previewWorldFiles({ type: 'import-datapack', instancePath: source.instancePath, saveName: source.saveName, sourcePath: options.path }, source.depot)
+    return (await this.#applyWorldFiles(review, source.depot)).path
   }
 
   async getInstanceSaveDatapacks(instancePath: string) {
@@ -983,17 +972,17 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async deleteDatapack(options: DeleteDatapackOptions) {
-    const { savePath, fileName } = options
-    requireString(savePath)
-    requireString(fileName)
-    const target = join(savePath, 'datapacks', fileName)
-    if (await missing(target)) return
-    await rm(target, { recursive: true, force: true })
-    await rm(join(savePath, 'datapacks', `.${fileName}.curseforge`), { force: true }).catch(() => undefined)
-    await rm(join(savePath, 'datapacks', `.${fileName}.modrinth`), { force: true }).catch(() => undefined)
+    requireObject(options)
+    const fileName = datapackFileName(options.fileName), source = await this.#legacySaveContext(options.savePath)
+    const directory = join(source.root, 'datapacks')
+    await assertInstallDirectory(source.root, directory)
+    const entry = await lstat(join(directory, fileName)).catch(error => { if (error.code !== 'ENOENT') throw error })
+    if (!entry) return
+    const review = await this.#previewWorldFiles({ type: 'remove-datapack', instancePath: source.instancePath, saveName: source.saveName, fileName }, source.depot)
+    await this.#applyWorldFiles(review, source.depot)
     const stateManager = await this.app.registry.get(ServiceStateManager)
-    const state = stateManager.get<SaveDatapacks>(getInstanceSaveDatapacksKey(savePath))
-    state?.saveDatapackRemove(target)
+    const state = stateManager.get<SaveDatapacks>(getInstanceSaveDatapacksKey(options.savePath))
+    state?.saveDatapackRemove(join(options.savePath, 'datapacks', fileName))
   }
 
   async installDatapackFromMarket(options: InstallDatapackMarketOptions) {

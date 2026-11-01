@@ -76,7 +76,7 @@ async function parseLevel(raw: Buffer): Promise<Omit<SaveMetadata, 'advancements
     lastPlayed: Math.abs(number(level.LastPlayed)) <= 8.64e15 ? number(level.LastPlayed) : 0, time: number(level.Time), seed: typeof seed === 'bigint' || typeof seed === 'number' && Number.isSafeInteger(seed) ? String(seed) : '' }
 }
 
-async function readLevel(root: string): Promise<Omit<SaveMetadata, 'advancements'>> {
+export async function readWorldMetadata(root: string): Promise<Omit<SaveMetadata, 'advancements'>> {
   const data = await readBoundedFile(join(root, 'level.dat'), 4 * 1024 * 1024)
   const raw = data[0] === 10 ? data : await promisify(data[0] === 31 && data[1] === 139 ? gunzip : inflate)(data, { maxOutputLength: 16 * 1024 * 1024 })
   return parseLevel(raw)
@@ -156,7 +156,7 @@ export async function readWorlds(instance: string, sharedRoot: string): Promise<
     try { location = await worldLocation(instance, entry.name, sharedRoot) }
     catch { result.push({ ...header, error: 'unsafe' }); continue }
     try {
-      const metadata = await readLevel(location.root)
+      const metadata = await readWorldMetadata(location.root)
       const icon = await worldIcon(location.root)
       if ((await worldLocation(instance, entry.name, sharedRoot)).identity !== location.identity) throw changed()
       result.push({ ...header, ...metadata, ...(location.shared ? { linkTo: location.root } : {}), icon })
