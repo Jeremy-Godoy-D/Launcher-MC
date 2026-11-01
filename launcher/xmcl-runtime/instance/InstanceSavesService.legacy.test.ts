@@ -653,3 +653,18 @@ it('restores earlier observers when closing another observer fails before a fold
     for (const call of add.mock.results) if (call.value instanceof FSWatcher) await call.value.close()
   }
 })
+
+
+it('pauses a datapack observer before backing up its world and clears the detached state', async () => {
+  const savePath = await makeReactWorld(source, 'Alpha'), bytes = await readFile(join(savePath, 'level.dat'))
+  await mkdir(join(savePath, 'datapacks')); await downloadedPack(join(savePath, 'datapacks'))
+  const add = vi.spyOn(FSWatcher.prototype, 'add'), [state, dispose] = await service.watchSaveDatapacks(savePath) as any
+  const watcher = add.mock.results[0].value as FSWatcher, close = vi.spyOn(watcher, 'close')
+  try {
+    await service.deleteSave({ instancePath: source, saveName: 'Alpha' })
+    expect(close).toHaveBeenCalled(); expect(state.datapacks).toEqual([])
+    await expect(lstat(savePath)).rejects.toHaveProperty('code', 'ENOENT')
+    const [backup] = await readdir(join(source, '.backups'))
+    expect(await readFile(join(source, '.backups', backup, 'Alpha/level.dat'))).toEqual(bytes)
+  } finally { dispose(); await watcher.close() }
+})

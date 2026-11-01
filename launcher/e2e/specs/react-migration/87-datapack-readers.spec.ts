@@ -6,7 +6,10 @@ import { makeReactResourcePack } from '../../helpers/react-content'
 
 test.use({ launcherOptions: { locale: 'es-ES', gameDataParentAlias: true } })
 async function call(page: Page, method: string, ...args: any[]) {
-  return page.evaluate(({ method, args }) => (window as any).serviceChannels.open('InstanceSavesService').call(method, ...args), { method, args })
+  return page.evaluate(async ({ method, args }) => {
+    try { return await (window as any).serviceChannels.open('InstanceSavesService').call(method, ...args) }
+    catch (error) { throw new Error(JSON.stringify(error)) }
+  }, { method, args })
 }
 async function instance(page: Page) {
   return page.evaluate(() => (window as any).serviceChannels.open('InstanceService').call('createInstance', { name: 'Reader worlds', runtime: { minecraft: '1.21.1' } })) as Promise<string>
@@ -88,4 +91,23 @@ test('Native worlds and datapacks observers survive shared-folder replacement an
     await closeWatch(page)
     await page.evaluate(async () => { await (window as any).__readerWorlds.unref(); delete (window as any).__readerWorlds })
   }
+})
+
+test('Native datapack and world removal preserve backups with an active datapack observer', async ({ launcher }) => {
+  const page = launcher.main, path = await instance(page), world = await makeReactWorld(path, 'Alpha'), bytes = await readFile(join(world, 'level.dat'))
+  const folder = join(world, 'datapacks/Folder'); await mkdir(folder, { recursive: true }); await writeFile(join(folder, 'pack.mcmeta'), JSON.stringify({ pack: { pack_format: 48, description: 'Folder fixture' } }))
+  expect(await openWatch(page, world)).toHaveLength(1)
+  try {
+    await expect.poll(() => launcher.app.evaluate(() => ((process.report.getReport() as any).libuv || []).some((entry: any) => entry.type === 'fs_event' && typeof entry.filename === 'string' && entry.filename.replace(/\\/g, '/').endsWith('/Reader worlds/saves/Alpha/datapacks')))).toBe(true)
+    const review = await call(page, 'previewWorldFiles', { type: 'remove-datapack', instancePath: path, saveName: 'Alpha', fileName: 'Folder' })
+    const removed = await call(page, 'applyWorldFiles', review)
+    expect(await readFile(join(removed.backup, 'Alpha/Folder/pack.mcmeta'), 'utf8')).toContain('Folder fixture')
+    await expect.poll(() => latest(page)).toEqual([])
+    await call(page, 'deleteSave', { instancePath: path, saveName: 'Alpha' })
+    await expect(lstat(world)).rejects.toHaveProperty('code', 'ENOENT')
+    const backups = await readdir(join(path, '.backups'))
+    let preserved = false
+    for (const name of backups) { const saved = await readFile(join(path, '.backups', name, 'Alpha/level.dat')).catch(() => undefined); if (saved?.equals(bytes)) preserved = true }
+    expect(preserved).toBe(true)
+  } finally { await closeWatch(page) }
 })

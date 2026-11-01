@@ -48,12 +48,14 @@ import { assertInstallDirectory } from '../instanceIO/utils/pendingInstall'
 import { applyWorldFiles, previewWorldFiles } from './utils/worldOperations'
 import { applySaveChunkPlan, listSaveChunkBackups, planSaveChunkChanges } from './utils/worldChunks'
 
+type SaveObserver = { pause(): Promise<void>; resume(): Promise<void> }
+
 /**
  * Provide the ability to preview saves data of an instance
  */
 @ExposeServiceKey(InstanceSavesServiceKey)
 export class InstanceSavesService extends AbstractService implements IInstanceSavesService {
-  #saveWatchers = new Map<string, Set<{ pause(): Promise<void>; resume(): Promise<void> }>>()
+  #saveWatchers = new Map<string, Set<SaveObserver>>()
   constructor(@Inject(LauncherAppKey) app: LauncherApp,
     @Inject(InstanceService) private instanceService: InstanceService,
     @Inject(kResourceManager) resourceManager: ResourceManager,
@@ -252,15 +254,24 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
 
   async #applyWorldFilesLocked(review: WorldFileReview, allowDepot = false, linkSharedWorld = false) {
     let lock: WorldLock | undefined
+    const paused = new Set<SaveObserver>()
     try {
       return await applyWorldFiles(review, this.getPath(), async (value, beforeWorldRename) => {
         await this.#worldFilesIdle(value, allowDepot)
         lock ||= await this.#worldFileLock(value, true)
         await lock?.verify()
         // Windows directory rename rejects live child-file handles, including a game opened after release.
-        if (beforeWorldRename) { lock?.release(); lock = undefined }
+        if (beforeWorldRename) {
+          const groups = value.shared ? this.#saveWatchers.values() : [this.#saveWatchers.get(value.operation.instancePath) || new Set<SaveObserver>()]
+          for (const group of groups) for (const observer of group) { paused.add(observer); await observer.pause() }
+          await lock?.verify()
+          lock?.release(); lock = undefined
+        }
       }, linkSharedWorld)
-    } finally { lock?.release() }
+    } finally {
+      lock?.release()
+      for (const observer of paused) await observer.resume().catch(error => this.warn(error))
+    }
   }
 
   async #worldFileLock(review: WorldFileReview, create: boolean) {
