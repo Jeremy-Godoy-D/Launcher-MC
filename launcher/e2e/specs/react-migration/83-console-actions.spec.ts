@@ -1,7 +1,8 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { test, expect } from '../../helpers/scratch'
+import { test, expect, snap } from '../../helpers/scratch'
+import axe from 'axe-core'
 import type { LauncherFixture } from '../../fixtures/launcher'
 import { seedReactLibrary } from '../../helpers/react-library'
 
@@ -69,8 +70,8 @@ test('export captures the selected view, waits for real native writing and ignor
   expect(await readFile(join(path, 'logs/view.log'), 'utf8')).toBe(content)
 })
 
-test('export cancellation is quiet, write failure is recoverable and success requires an existing saved file', async ({ launcher }) => {
-  const { console } = await openConsole(launcher), blocked = join(launcher.gameDataPath, 'blocked.log'), destination = join(launcher.gameDataPath, 'saved.txt')
+test('export cancellation is quiet, write failure is recoverable and success requires an existing saved file', async ({ launcher }, testInfo) => {
+  const { page, console } = await openConsole(launcher), blocked = join(launcher.gameDataPath, 'blocked.log'), destination = join(launcher.gameDataPath, 'saved.txt')
   await mkdir(blocked)
   await launcher.app.evaluate(({ dialog }, destinations) => {
     const choices = [{ canceled: true }, { canceled: false, filePath: destinations.blocked }, { canceled: false, filePath: destinations.destination }]
@@ -80,6 +81,21 @@ test('export cancellation is quiet, write failure is recoverable and success req
   await save.click(); await expect(save).toBeEnabled(); await expect(save).toHaveText('Exportar a archivo')
   await expect(console.getByRole('alert')).toHaveCount(0)
   await save.click(); await expect(console.getByRole('alert')).toContainText('No se pudo guardar')
+  const win = await launcher.app.browserWindow(page)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  for (const theme of ['dark', 'light']) {
+    await page.evaluate(theme => { const key = 'launcher.react.preferences'; localStorage.setItem(key, JSON.stringify({ ...JSON.parse(localStorage.getItem(key)!), appearance: theme })); dispatchEvent(new StorageEvent('storage', { key, newValue: localStorage.getItem(key) })) }, theme)
+    for (const width of [1200, 800]) {
+      await win.evaluate((win, width) => win.setContentSize(width, width === 800 ? 400 : 720), width)
+      await expect.poll(() => console.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true)
+      await console.getByRole('alert').scrollIntoViewIfNeeded()
+      await page.addScriptTag({ content: axe.source })
+      const report = await page.evaluate(() => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }))
+      await writeFile(testInfo.outputPath(`console-export-${theme}-${width}-axe.json`), JSON.stringify(report, null, 2))
+      expect(report.violations).toEqual([])
+      await snap(launcher, `console-export-${theme}-${width}`, 'El fallo de guardado conserva el registro y permite elegir otro destino.')
+    }
+  }
   await expect(save).toBeEnabled(); await save.click(); await expect(save).toHaveText('Archivo guardado')
   expect(await readFile(destination, 'utf8')).toBe(content.slice(0, -1))
   await expect(console.getByRole('alert')).toHaveCount(0)
