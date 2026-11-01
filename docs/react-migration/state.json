@@ -19,8 +19,8 @@
     ],
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
-  "currentStage": 6,
-  "nextAction": "Etapa 5 completada íntegramente. Etapa 6 activa: Catálogos públicos y proveedores de contenido. Implementar navegación y búsqueda en /store para Modrinth y CurseForge (exclusivamente vía proxy seguro), filtros por tipo/cargador/versión y fichas detalladas /store/{provider}/:id con saneamiento DOMPurify. Gates 6 pending, Vue default/dist, PR4 borrador, producción/proxy intactos, Microsoft pospuesto.",
+  "currentStage": 5,
+  "nextAction": "Etapa 5 reabierta; fuente55e1481 corrige guardas físicas de chunks, backups y fixtures. 1052unitarias/104archivos,61NativeReact distintos entre recorridos,2Vue,12Axe0violaciones/12incomplete;CI nuevo requerido. Completar revisión Native y recuperación de chunks, autoridad/limites de lecturas, mapa acotado/teclado;preservar argumentos/cambios sin guardar en ajustes y validar streaming/virtualización de consola. K11/K12/K21 y gates5 pertinentes pending;6–9 pending. Ver STAGE5-CHUNK-SAFETY. Vue default/dist,PR4borrador,producción/proxy intactos,Microsoft pospuesto;DOMPurify WIP sin commit.",
   "stages": [
     {
       "id": 0,
@@ -589,7 +589,7 @@
     {
       "id": 5,
       "title": "Espacio de instancia",
-      "status": "complete",
+      "status": "active",
       "gates": [
         {
           "id": "instance-content",
@@ -762,13 +762,17 @@
             {
               "path": "docs/react-migration/STAGE5-CI-STABILITY.md",
               "sha256": "be773e4dda23ba79611ae994bcf131521cc8f2ab013f92da30d52ec7e4c60e78"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-CHUNK-SAFETY.md",
+              "sha256": "05372c8f1af452e623cbb3d09b4c71d2bac90c3f8659a07555d60520d05312d5"
             }
           ],
           "note": "Contenido local de instancia (mods, packs de recursos, shaders y grupos) completado con 34 escenarios React, 4 Vue, 9 evaluaciones Axe WCAG 2.1 AA con 0 violaciones, y pruebas unitarias completas."
         },
         {
           "id": "worlds-settings",
-          "status": "passed",
+          "status": "pending",
           "evidence": [
             {
               "path": "docs/react-migration/STAGE5-WORLDS-READ.md",
@@ -801,27 +805,35 @@
             {
               "path": "docs/react-migration/STAGE5-SETTINGS.md",
               "sha256": "3f7a090dd61cc62f785ab9f7b86e3ca4417474962202aa6bb6e6a051c3bd78fd"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-CHUNK-SAFETY.md",
+              "sha256": "05372c8f1af452e623cbb3d09b4c71d2bac90c3f8659a07555d60520d05312d5"
             }
           ],
-          "note": "Mundos y ajustes base completados. Resumen de instancia (K07) y panel de ajustes base (K12, K13) en STAGE5-SETTINGS.md con selector Java detectado/manual, asignación RAM automática/personalizada en MiB/GiB, argumentos JVM/MC, resolución pantalla, servidor de partida rápida y opciones de lanzamiento con persistencia en instance.json y restablecimiento global mediante null por IPC. Herramientas locales de mundos (K11, STAGE5-WORLD-TOOLS.md) con progreso, mapa 2D interactivo y operaciones de chunks con respaldo. 3 pruebas en 68-instance-settings.spec.ts y 19 en mundos aprobadas; accesibilidad Axe 0 violaciones WCAG 2.1 AA. Siguiente: Bloque E (consola aislada K21) para completar el espacio de instancia."
+          "note": "Cierre anterior corregido: CI41264504836/9733529 falla2/1037 en guardas de chunks. 55e1481:1052unitarias/104archivos y61NativeReact distintos entre recorridos+2Vue;revisión Native/atomicidad/lecturas/recuperación de chunks,mapa acotado/teclado y preservación de argumentos/cambios de ajustes siguen pendientes. Ver STAGE5-CHUNK-SAFETY;no aceptar K11/K12 por matrices parciales."
         },
         {
           "id": "console-isolation",
-          "status": "passed",
+          "status": "pending",
           "evidence": [
             {
               "path": "docs/react-migration/STAGE5-CONSOLE.md",
               "sha256": "d192a42c772ca462d8f86f9dee5dccf2661b2a5237ef58b8d1b5ce91d79aa57a"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-CHUNK-SAFETY.md",
+              "sha256": "05372c8f1af452e623cbb3d09b4c71d2bac90c3f8659a07555d60520d05312d5"
             }
           ],
-          "note": "Consola integrada y visor interactivo de registros completados en STAGE5-CONSOLE.md (c442934) con aislamiento estricto por instancia (LaunchService stdout/stderr/exit filtrado por gameDirectory), parseo de líneas con niveles, búsqueda en tiempo real, autoscroll, visor de latest.log y crash reports, exportación y enlace a logger.html. 4 pruebas en 69-instance-console.spec.ts y 0 violaciones Axe WCAG 2.1 AA."
+          "note": "Interfaz de consola y lectura de archivos implementadas;matriz corregida usa temas persistidos/ventanas nativas/Tab. Faltan pruebas de streaming real aislado entre procesos,fragmentos/lotes,virtualización,pausa por scroll y recuperación de copiar/exportar. El informe de cierre previo no acredita estos criterios;ver STAGE5-CHUNK-SAFETY."
         }
       ]
     },
     {
       "id": 6,
       "title": "Catálogo público",
-      "status": "active",
+      "status": "pending",
       "gates": [
         {
           "id": "catalog-search",

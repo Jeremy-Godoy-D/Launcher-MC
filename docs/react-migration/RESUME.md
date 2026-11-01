@@ -6,14 +6,19 @@ Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio
 
 ## Bloque actual
 
-Etapa 5 completada íntegramente (`complete`). La consola de procesos aislada por instancia (`K21`, `STAGE5-CONSOLE.md`) culmina el espacio de instancia (`Espacio de instancia`), validando los 3 criterios de aceptación (`instance-content`, `worlds-settings`, `console-isolation` en estado `passed`): streaming de procesos en tiempo real con aislamiento estricto por ruta de instancia, parseo cromático estructurado de líneas de registro (INFO, WARN, ERROR, DEBUG), filtrado por severidad, búsqueda en tiempo real, seguimiento automático (*autoscroll*), selector de registros archivados (`latest.log`) e informes de fallos (*crash reports*), copia, exportación y enlace a ventana independiente. 4 pruebas E2E aprobadas en `69-instance-console.spec.ts` (11,4 s), 0 violaciones de accesibilidad WCAG 2.1 AA en matriz Axe; suite de mundos (61/62/64/65/66/67), ajustes (68) y consola (69) en verde; tipos y lint aprobados con 0 errores en los 6 paquetes. Avanzando a la **Etapa 6: Catálogos públicos y proveedores de contenido** (`active`).
+**Etapa 5 reabierta y activa**. El cierre en `9733529` fue prematuro: CI41264504836 falló 2/1037 pruebas en las guardas de chunks (Vue; React cancelado). Fuente `55e1481` corrige autoridad física, registro Java, consulta de procesos que falla cerrada, locks/revalidación y backups verificados. También repara 21 localizadores ambiguos tras añadir atajos al resumen y matrices que no comprobaban tamaños/temas nativos correctamente. Ver `STAGE5-CHUNK-SAFETY.md`, que prevalece sobre las conclusiones de cierre anteriores.
+
+Evidencia local: 1052 unitarias/104 archivos; tipos y lint sin errores (un aviso previo React); 61 escenarios React distintos aprobados entre recorridos, 2 Vue, 12 Axe sin violaciones/12 incompletos de contraste. El primer recorrido amplio terminó 59/61 por dos aserciones de reenfoque; las matrices corregidas recorren Tab real y pasaron 7/7, y herramientas 4/4 con restauración real del payload de un chunk. No sumar esas repeticiones como escenarios nuevos. Dist Vue restaurado. Fuente y pruebas no equivalen a partida real ni aceptación completa.
+
+K11/K12/K21, `worlds-settings` y `console-isolation` vuelven a `pending`; etapa 6 vuelve a pendiente, etapas 7–9 pendientes. PR4 permanece borrador y producción/proxy no cambian. Dos modificaciones DOMPurify (`launcher/xmcl-react-ui/package.json`, `launcher/pnpm-lock.yaml`) estaban presentes al retomar, siguen WIP fuera de commits; el lock incluye churn no relacionado que debe evitarse al conectar catálogo.
 
 ## Siguiente acción
 
-1. Implementar la Etapa 6 (`Catálogos públicos y proveedores de contenido`): conectar `/store` con búsqueda pública unificada, paginación, filtros de categoría y compatibilidad con versiones y cargadores de Minecraft, integrando Modrinth y CurseForge (exclusivamente vía el proxy existente sin exponer claves ni endpoints no autorizados).
-2. Desarrollar las fichas detalladas de proyecto `/store/{curseforge,modrinth}/:id` con galerías, versiones, dependencias y saneamiento seguro de HTML/descripciones con DOMPurify.
-3. Crear las pruebas E2E correspondientes (búsqueda, instalación, manejo independiente de fallos de red) y documentar evidencias en `STAGE6-*.md`.
-4. Mantener `ANALISIS_ARQUITECTURA.md` intacto y fuera de commits, Vue como renderer por defecto hasta la etapa 8 y las evidencias en LF verificadas con `node launcher/scripts/react-migration.mjs check`.
+1. Verificar CI del nuevo bloque sobre su SHA exacto; no asumir verde ni reiniciar una ejecución viva. El último confirmado al retomar fue 41264504836 fallido.
+2. Completar K11: revisión Native de regiones con huellas/cambios obsoletos, autoridad y límites de copiar/leer/renderizar, NBT/descompresión acotados y recuperación/publicación de MCA ante fallos. Revisar enlaces físicos y reubicación de entidades de bloque; el helper heredado advierte pérdida al mover terreno. Mantener todas las herramientas locales confirmadas por el usuario.
+3. Acotar mapa (cola, caché, `ImageBitmap.close`, identidad de mundo/altura y resultados obsoletos) y habilitar navegación/selección por teclado. En ajustes, conservar argumentos con espacios/comillas y cambios sin guardar al navegar/cambiar instancia, más herencia real. K12 sigue pendiente.
+4. Validar y completar K21: streaming aislado de dos procesos, fragmentos parciales, lotes/virtualización, pausa al revisar logs y volver al final, copiar/exportar con recuperación. Las pruebas existentes de archivos y toolbar no certifican ese recorrido.
+5. Cerrar 5 solo con sus criterios satisfechos. Entonces continuar 6: catálogo público Modrinth/CurseForge por proxy, filtros/fichas saneadas, historial/scroll/compatibilidad/instalación y fallos independientes; después 7–9. Mantener `ANALISIS_ARQUITECTURA.md` intacto y fuera de commits.
 
 ## Restricciones y hechos que no deben perderse
 
