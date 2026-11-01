@@ -9,7 +9,7 @@ import { readShaderProperties, writeShaderProperties } from './shaderProperties'
 
 export interface ShaderSelectionContext { engines: ShaderEngine[]; fingerprint: string; metadataPending: boolean }
 const changed = () => Object.assign(new Error('Shader selection changed'), { name: 'ShaderSelectionChangedError' })
-async function inspect(path: string) { return lstat(path).catch(error => { if (error.code !== 'ENOENT') throw error }) }
+async function inspect(path: string) { return lstat(path, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error }) }
 async function selection(path: string, sharedRoot: string, context: ShaderSelectionContext) {
   const source = await instanceFileSource(path, 'shaderpacks', sharedRoot, true), root = join(source.root, source.path), info = await inspect(root)
   if (info && !info.isDirectory()) throw new Error('Unsafe shader directory')
@@ -17,14 +17,14 @@ async function selection(path: string, sharedRoot: string, context: ShaderSelect
   if (names.length > 10000) throw new Error('Too many shaders')
   const entries = []
   for (const name of names) {
-    importPathParts(name); const file = await lstat(join(root, name))
+    importPathParts(name); const file = await lstat(join(root, name), { bigint: true })
     if (!file.isFile() && !file.isDirectory()) throw new Error('Unsafe shader entry')
-    entries.push([name, file.ino, file.dev, file.mtimeMs, file.ctimeMs, file.size])
+    entries.push([name, ...[file.ino, file.dev, file.mtimeNs, file.ctimeNs, file.size].map(value => value.toString())])
   }
   const engines = ['optifine', 'iris', 'oculus'] as const, properties = await Promise.all(engines.map(engine => readShaderProperties(path, engine)))
   const engine = context.engines.length === 1 && !context.metadataPending ? context.engines[0] : null
   const current = engine ? properties[engines.indexOf(engine)].values : {}, pack = current.shaderPack === 'OFF' ? '' : current.shaderPack || ''
-  const state: ShaderPackSelection = { snapshot: createHash('sha256').update(JSON.stringify([context, source, info && [info.ino, info.dev], entries, properties.map(file => file.snapshot)])).digest('hex'), engines: context.engines, engine, pack, enabled: !!pack && pack !== 'OFF' && (engine === 'optifine' || pack !== '(internal)' && current.enableShaders !== 'false'), shared: source.root !== await realpath(path), metadataPending: context.metadataPending }
+  const state: ShaderPackSelection = { snapshot: createHash('sha256').update(JSON.stringify([context, source, info && [info.ino.toString(), info.dev.toString()], entries, properties.map(file => file.snapshot)])).digest('hex'), engines: context.engines, engine, pack, enabled: !!pack && pack !== 'OFF' && (engine === 'optifine' || pack !== '(internal)' && current.enableShaders !== 'false'), shared: source.root !== await realpath(path), metadataPending: context.metadataPending }
   return { state, properties, root }
 }
 export async function readShaderSelection(path: string, root: string, context: ShaderSelectionContext) {

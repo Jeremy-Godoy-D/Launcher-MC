@@ -1,12 +1,23 @@
-import { afterEach, beforeEach, expect, it } from 'vitest'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { link, lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import type { ShaderEngine } from '@xmcl/runtime-api/src/services/InstanceShaderPacksService'
 import { readShaderSelection, writeShaderSelection, type ShaderSelectionContext } from './shaderSelection'
 
+const clock = vi.hoisted(() => ({ offset: 0n }))
+vi.mock('node:fs/promises', async original => {
+  const fs = await original<typeof import('node:fs/promises')>()
+  return { ...fs, lstat: async (...args: Parameters<typeof fs.lstat>) => {
+    const info = await fs.lstat(...args)
+    if (String(args[0]).endsWith('New.zip') && 'mtimeNs' in info) info.mtimeNs += clock.offset
+    return info
+  } }
+})
+
 let root: string, path: string, context: ShaderSelectionContext
 beforeEach(async () => {
+  clock.offset = 0n
   root = await mkdtemp(join(tmpdir(), 'grimo-shader-selection-')); path = join(root, 'instance')
   await mkdir(join(path, 'shaderpacks'), { recursive: true }); await mkdir(join(path, 'config'))
   await writeFile(join(path, 'shaderpacks/New.zip'), 'PACK')
@@ -43,6 +54,12 @@ it('rejects a changed engine at the last guard and cleans its temporary file', a
   const before = await read(); let calls = 0
   await expect(writeShaderSelection(path, root, { snapshot: before.snapshot, engine: 'iris', pack: 'New.zip', enabled: true }, async () => ++calls === 1 ? context : { ...context, engines: ['oculus'] })).rejects.toHaveProperty('name', 'ShaderSelectionChangedError')
   expect(await readdir(join(path, 'config'))).toEqual([])
+})
+it('rejects an inventory change visible only at nanosecond precision', async () => {
+  const before = await read(); clock.offset = 1n
+  await expect(writeShaderSelection(path, root, { snapshot: before.snapshot, engine: 'iris', pack: 'New.zip', enabled: true }, async () => context)).rejects.toHaveProperty('name', 'ShaderSelectionChangedError')
+  expect(await readdir(join(path, 'config'))).toEqual([])
+  expect(await readFile(join(path, 'shaderpacks/New.zip'), 'utf8')).toBe('PACK')
 })
 it.each(([[], ['iris', 'oculus'], ['iris']] as ShaderEngine[][]).map(engines => ({ engines })))('does not change configs with missing, ambiguous or pending engines: $engines', async ({ engines }) => {
   context = { ...context, engines, metadataPending: engines.length === 1 }
