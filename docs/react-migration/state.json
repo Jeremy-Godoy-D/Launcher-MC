@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa. K12 aceptado: CI 41297391323/0bc6c6f limpio (212 main, 1 Strict, 8 Vue, 2 opt-in omitidos, 0 flaky); no repetir ajustes. 4fff469 corrige solicitudes cruzadas de logs con ALL_PARAMS: 3 regresiones unitarias y Native 76 fallaban antes; 1142 unitarias/115 archivos, 5 React y 3 Vue, tipos/lint, 9 harness. CI 41299557622/e9a9436 en curso, no reiniciarlo. Continuar K21: autoridad, rutas y lecturas/gzip/historial acotados con errores visibles; después identidad, orden/multibyte y memoria de streams, virtualización/scroll y copiar/exportar con confirmación Native. K11 pendiente de aceptación integral, IPC legacy y escritores no NIO. Conservar todas las herramientas locales de Mundos. Etapas 6–9 pendientes, PR 4 borrador; producción/proxy intactos, Microsoft pospuesto y DOMPurify WIP excluido. Ver STAGE5-CONSOLE-REQUEST-ISOLATION y RESUME.",
+  "nextAction": "Etapa 5 activa. 0bf7a01/c4a8b77 protegen archivos directos de consola: instancia Java registrada, rutas/enlaces/identidad, 16 MiB raw/gzip, 10.000 entradas, errores/reintento y etiquetas accesibles. 1152 unitarias/115 archivos, 13 focales, 8 React + 4 Vue y 2 matrices React repetidas; tipos/lint, 9 harness, E2E 56 base. Dist Vue restaurado. Ver STAGE5-CONSOLE-FILE-BOUNDARY. CI 41299557622/e9a9436 limpio: 213 main + 1 Strict + 9 Vue, 2 omitidos, 0 flaky; verificar nuevo CI sin reiniciar vivo. K21 sigue pending: LaunchHistoryStore no está acotado ni protegido por localLogs; endurecer sus lectores/captura/manifest y symlinks. Acotar filas/texto del renderer, streams por launchId/directorio con orden/multibyte y memoria, arranque/lotes/virtualización/scroll, copiar/exportar Native y logger por instancia. K12 pass; K11 aceptación integral/IPC legacy/no NIO pendiente, conservando todas las herramientas locales de Mundos y chunks. 6–9 pendientes, PR 4 borrador, producción/proxy intactos, Microsoft pospuesto; excluir DOMPurify WIP y ANALISIS_ARQUITECTURA.md.",
   "stages": [
     {
       "id": 0,
@@ -868,9 +868,13 @@
             {
               "path": "docs/react-migration/STAGE5-CONSOLE-REQUEST-ISOLATION.md",
               "sha256": "6bc138b95440ccf2df7d6db973a6863409a1c58eb1e9d3d90ba1714f77676392"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-CONSOLE-FILE-BOUNDARY.md",
+              "sha256": "ec5311bb6f3a5a32fc4c22f93be29e32858b04fbbfccdaf64f91f86948d620c2"
             }
           ],
-          "note": "4fff469 corrige deduplicacion cruzada conALL_PARAMS,3focales y76Native;1142unitarias,5React+3Vue. K21 pending por autoridad/limites/errores delectores,streaming/token/orden/fragmentos/lotes,memoria/virtualizacion,scroll ycopiar/exportar. No cierre por esta correccion. CI nuevo pendiente;verSTAGE5-CONSOLE-REQUEST-ISOLATION."
+          "note": "0bf7a01/c4a8b77: archivos directos registrados y acotados, 13 focales, 1152 unitarias, 8 React/4 Vue y dos matrices repetidas. K21 pending: historial/captura aún fuera de esas garantías, presupuestos de renderer, streams/token/orden/multibyte, virtualización/scroll/copiar/exportar/logger. Ver STAGE5-CONSOLE-FILE-BOUNDARY. CI nuevo pendiente; gate y etapa permanecen pendientes/activa."
         }
       ]
     },
@@ -1007,5 +1011,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-01T10:58:27.999098+00:00"
+  "updatedAt": "2026-11-01T11:24:33.908991+00:00"
 }

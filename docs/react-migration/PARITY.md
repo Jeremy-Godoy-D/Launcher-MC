@@ -291,3 +291,7 @@ STAGE5-SETTINGS-INHERITANCE aporta9casos de borrador/InstanceState/LaunchStore c
 ## Consola: identidad de solicitudes (`4fff469`); K12 aceptado
 
 STAGE5-CONSOLE-REQUEST-ISOLATION corrige mezclas de listados/lecturas/eliminaciones simultáneos mediante ALL_PARAMS existente,3regresiones y76Native.1.142unitarias/115archivos,5React+3Vue,4Axe0violaciones/4incomplete,9harness,tipos/lintaprobados,E2E56base. CI41297391323/0bc6c6f pasó ambos sin flaky:212main+1Strict+8Vue,2opt-inomitidos. K12 pasa a pass;K11/K21 y5 siguen pendientes. Verificar nuevoCI ycontinuar fronteras/streaming/virtualización/errores de consola. Mundos completo en alcance,Microsoft pospuesto,producción/proxy intactos.
+
+## Consola: archivos directos protegidos, historial y streams pendientes
+
+STAGE5-CONSOLE-FILE-BOUNDARY (`0bf7a01`/`c4a8b77`) documenta autoridad Java, rutas/enlaces/identidad y presupuestos Native, fallos recuperables y corrección de etiquetas en la barra. 1.152 unitarias/115 archivos;8 React+4 Vue y dos matrices React repetidas. CI41299557622/e9a9436 limpio:213main+1Strict+9Vue,2opt-inomitidos,0flaky, valida el bloque anterior. K21 no se cierra: LaunchHistoryStore/captura no reciben aún estas garantías; faltan límites de filas/texto y streams/virtualización/scroll/copiar/exportar/logger. K12 pass,K11 pending; todas las herramientas locales de Mundos conservadas.
