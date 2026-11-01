@@ -6,18 +6,17 @@ Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio
 
 ## Bloque actual
 
-**Etapa5 activa**, K11/K12/K21 y gates mundos/ajustes/consola pending;6–9pending. Fuente `91edfda` implementa revisión Native de chunks por huella y rechazo obsoleto, backups persistidos/verificados, publicación sin truncar, recuperación ante fallo parcial y restauración revisada que conserva cambios posteriores. Mapa con teclado/coordenadas,2RPC pendientes,32bitmaps y liberación explícita. Conservar todas las herramientas locales aprobadas.
+**Etapa 5 activa**, K11/K12/K21 y gates mundos/ajustes/consola pending; 6–9 pendientes. `ae982ec` autoriza progreso/worldgen por mundo e instancia registrados, verifica locale y acota worldgen/NBT, conservando semilla 0. `STAGE5-WORLD-READ-AUTHORITY.md`: 1081 unitarias /108 archivos,39 focales,7 React+2 Vue,8 Axe sin violaciones/8 incompletos y9 harness; tipos/lint/builds aprobados y E2E56diagnósticos base sin nuevos. Dist Vue restaurado.
 
-`STAGE5-CHUNK-REVIEW.md`:1063unitarias/105archivos,31escenarios React distintos entre dos recorridos disjuntos y2Vue,52Axe seleccionados sin violaciones/88incomplete,9harness;tipos/lint/builds aprobados,E2E56diagnósticos base sin nuevos. La matriz de teclado70 añade comprobación de foco atrapado y scroll de cuerpo; no contar repeticiones como escenarios nuevos. Dist Vue restaurado. CI41274791753/157b2f3 falló1051/1052 por aserción del mock lógico/físico, ahora sustituida por el motor real/fixture canónica; revisar el CI de este bloque al subirlo.
-
-PR4 borrador, sin publicación ni cambio de versión. DOMPurify package.json/lock siguen WIP fuera de commits (evitar churn al conectar catálogo). Microsoft pospuesto; proxy y datos habituales intactos. No usar DevTools CLI.
+Se conserva el bloque `91edfda` de revisión/recuperación Native de chunks y mapa con teclado,2RPC y32bitmaps; no rehacerlo. Evidencia en STAGE5-CHUNK-REVIEW. CI41279948321/2525449 seguía con Vue aprobado y React en curso al registrar este informe: comprobar el resultado y el nuevo SHA después de subir. PR4 borrador, producción v0.2.0-beta.2 intacta; Microsoft pospuesto y DOMPurify package.json/lock WIP fuera de commits.
 
 ## Siguiente acción
 
-1. Verificar nuevo CI sobre SHA exacto; registrar hechos sin declarar verde por adelantado ni reintentar uno vivo.
-2. K11: autoridad/límites de getWorldGenSettings/getInstanceSaveProgress, sus lectores/parseos y raíces de instancia; bloqueo externo session.lock además de procesos administrados. No repetir el motor de revisión/recuperación ya probado. Mantener explícito alcance inline1/2/3 y entidades/POI/mods separados; no prometer mover lo que el payload no contiene. Auditoría IPC de escrituras legacy en8.
-3. K12: argumentos con espacios/comillas sin join/split destructivo, vacío explícito vs herencia, cambios sin guardar al navegar/cambiar instancia y conflictos. K21: streaming real aislado de dos procesos, fragmentos, lotes, virtualización y scroll/copia/exportación con recuperación.
-4. Cerrar5 solo al cumplir criterios. Luego6 catálogo público Modrinth/CurseForge por proxy y7–9. Mantener ANALISIS_ARQUITECTURA.md intacto y fuera de commits. No tocar temporales/junctions protegidos ni producir nuevas publicaciones mientras falten gates.
+1. Comprobar CI exacto, sin reintentar ejecuciones vivas. Registrar sus límites; el CI antiguo41274791753 falló por la aserción de mock lógico/físico ya sustituida por archivos y motor reales.
+2. K11: proteger lectores internos de progreso (progress.ts: archivos/dir/enlaces, JSON/SNBT, imágenes/modelos recursivos/JAR, caché/timeout), versiones/avances en advancements.ts e idiomas en minecraftLang.ts. Las raíces de mundo/instancia ya están autorizadas y worldgen acotado; no repetirlos ni confundirlos con toda la seguridad de progreso. Mantener avances, misiones, estadísticas e iconos locales.
+3. Revisar session.lock para partidas externas, además del bloqueo de procesos administrados. Mantener explícitos los límites inline1/2/3 y entidades/POI/mods separados. Auditoría IPC de escrituras legacy en8.
+4. K12: argv exactos con espacios/comillas, vacío explícito/herencia, cambios sin guardar y conflictos. K21: streaming aislado de dos procesos, fragmentos/lotes, virtualización, scroll/copia/exportación con recuperación. No extender el diseño ni saltar a6 todavía.
+5. Cerrar5 solo al cumplir criterios; luego catálogo y7–9. Mantener ANALISIS_ARQUITECTURA.md intacto, temporales/junctions protegidos y producción sin cambios hasta pasar gates.
 
 ## Restricciones y hechos que no deben perderse
 

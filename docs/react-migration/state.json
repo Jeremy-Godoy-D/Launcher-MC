@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa; fuente91edfda: revisión Native y recuperación de chunks, mapa con teclado/caché32/cola2,1063unitarias/105archivos,31React distintos+2Vue,52Axe0violaciones/88incomplete,9harness. Verificar nuevo CI exacto y completar autoridad/límites de progreso/worldgen y bloqueo de partidas externas; luego argv/herencia/cambios sin guardar K12 y streaming/virtualización K21. K11/K12/K21 y gates pertinentes pending;6–9pending. Ver STAGE5-CHUNK-REVIEW. Vue default/dist,PR4borrador,producción/proxy intactos,Microsoft pospuesto;DOMPurify WIP sin commit.",
+  "nextAction": "Etapa 5 activa; ae982ec autoriza progreso por instancia/mundo y limita worldgen, conserva semilla0.1081unitarias/108archivos,39focales,7React+2Vue,8Axe0violaciones/8incomplete,9harness. Verificar CI41279948321/2525449 (Vue success,React en curso al registrar) y nuevo SHA al subir. K11: límites/seguridad internos de progreso/texturas/JAR/SNBT/versiones/idiomas y session.lock externo; luego K12 argv/herencia/cambios sin guardar y K21 streaming/virtualización. K11/K12/K21 y gates pertinentes pending;6–9pending. Ver STAGE5-WORLD-READ-AUTHORITY; no repetir chunks revisados ni worldgen. Vue default/dist,PR4borrador,producción/proxy intactos,Microsoft pospuesto;DOMPurify WIP sin commit.",
   "stages": [
     {
       "id": 0,
@@ -813,9 +813,13 @@
             {
               "path": "docs/react-migration/STAGE5-CHUNK-REVIEW.md",
               "sha256": "08ae37e048630afd4836fe445d31b136e2f90ef4af83fa81e46f63b62c24c87c"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-WORLD-READ-AUTHORITY.md",
+              "sha256": "9b93eb5832e53a1afa10ffad684950bcf013ba20603d759b7c5318608d0eb2ca"
             }
           ],
-          "note": "91edfda: revisión/huella Native, backup verificado, publicación por rename y recuperación revisada; mapa teclado/cola2/caché32/liberación.1063unitarias,31React,2Vue;faltan autoridad/límites de progreso/worldgen y partidas externas,K12 argv/herencia/cambios sin guardar. K11/K12 pending;ver STAGE5-CHUNK-REVIEW."
+          "note": "ae982ec autoriza getInstanceSaveProgress por mundo/instancia/locale y acota worldgen/NBT;1081unitarias,7React+2Vue. Siguen pendientes lectores internos de progreso/texturas/JAR/idiomas/SNBT/versiones y session.lock externo,además de K12. Ver STAGE5-WORLD-READ-AUTHORITY;K11/K12 pending."
         },
         {
           "id": "console-isolation",
@@ -967,5 +971,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-01T06:12:23.773533+00:00"
+  "updatedAt": "2026-11-01T06:28:54.216177+00:00"
 }

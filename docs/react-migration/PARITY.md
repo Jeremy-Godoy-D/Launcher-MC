@@ -259,3 +259,7 @@ La etapa 5 vuelve a activa. K11/K12/K21 quedan `pending`: sus componentes existe
 ## Revisión y recuperación de chunks (`91edfda`)
 
 `STAGE5-CHUNK-REVIEW.md` incorpora revisión/huella Native, rechazo obsoleto, backups/journal persistidos, sustitución por rename y restauración revisada tras errores parciales o recarga; preservación de sectores ajenos y coordenadas de cofres/ticks. Mapa con teclado/coordenadas, cola2/caché32 y liberación de bitmaps.1063unitarias,31React distintos+2Vue,52Axe0violaciones/88incomplete y9harness. CI previo41274791753 falló una aserción de mock lógico/físico; verificar el nuevo SHA. K11 sigue pending por autoridad/límites de progreso/worldgen y partidas externas; K12 por argv/herencia/cambios sin guardar; K21 por streaming/virtualización/recuperación. Etapa5 activa,6–9pendientes; sin publicación.
+
+## Autoridad de progreso y worldgen (`ae982ec`)
+
+STAGE5-WORLD-READ-AUTHORITY protege las raíces de lectura por instancia Java/mundo registrados, incluidos alias/compartidos, rechaza recursos de otra instancia y locale de ruta, y limita worldgen/NBT conservando semilla0.1081unitarias/108archivos,39focales,7React+2Vue,8Axe0violaciones/8incomplete y9harness. K11 sigue pending por lectores secundarios de progreso, archivos/JAR/texturas/modelos/SNBT/versiones/idiomas y partidas externas; K12/K21 también pending. Etapa5 activa,6–9pendientes,PR4borrador;no publicación.
