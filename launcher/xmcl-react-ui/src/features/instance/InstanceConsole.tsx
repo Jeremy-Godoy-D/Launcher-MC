@@ -145,6 +145,12 @@ export function InstanceConsole({ instance }: { instance: SavedInstance }) {
     useFlushSync: false,
   })
   useLayoutEffect(() => { virtualizer.measure() }, [selectedSource, levelFilter, searchQuery, fileView])
+  useLayoutEffect(() => {
+    // The virtualizer retains sizes by key after old live rows leave the window budget.
+    if (virtualizer.itemSizeCache.size <= filteredEntries.length) return
+    const keys = new Set(filteredEntries.map(entry => entry.id))
+    for (const key of virtualizer.itemSizeCache.keys()) if (!keys.has(String(key))) virtualizer.itemSizeCache.delete(key)
+  }, [filteredEntries])
 
   // Autoscroll
   useLayoutEffect(() => {
@@ -221,7 +227,7 @@ export function InstanceConsole({ instance }: { instance: SavedInstance }) {
         <span className="console-level">[{entry.level}]</span>
         {entry.source && <span className="console-source">[{entry.source}]</span>}
         <span className="console-text">{entry.text}</span>
-      </> : <span className="console-text" aria-hidden="true">{'\u00a0'}</span>}
+      </> : <span className="console-text" aria-hidden="true">{entry.raw || '\u00a0'}</span>}
     </div>
   }
 
