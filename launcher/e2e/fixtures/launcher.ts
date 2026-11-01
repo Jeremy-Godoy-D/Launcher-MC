@@ -157,6 +157,8 @@ export interface LauncherOptions {
    * Pass an instance descriptor to also create a synthetic instance + version.
    */
   seed?: SeedInstance | true
+  /** Seed isolated files before startup services run. */
+  prepareGameData?: (gameDataPath: string) => Promise<void>
   /** Locale override (defaults to project metadata). */
   locale?: string
 }
@@ -209,6 +211,7 @@ export const test = base.extend<{
       const inst = launcherOptions.seed === true ? undefined : launcherOptions.seed
       await seedSandbox(gameDataPath, inst)
     }
+    await launcherOptions.prepareGameData?.(gameDataPath)
 
     const app = await _electron.launch({
       executablePath: ELECTRON_BIN,

@@ -29,7 +29,7 @@ beforeEach(() => {
   const mutexOf = vi.fn(key => { of(key); if (key === 'resource-pack-options') return global; if (key === LockKey.instance('source')) return lock; if (!others.has(key)) others.set(key, new Mutex()); return others.get(key)! })
   session = { verify: vi.fn(async () => {}), release: vi.fn() }; acquireSession = vi.fn(async () => session)
   const app = { acquireWorldLock: acquireSession, mutex: { of: mutexOf }, registry: { get: async () => ({ getGameProcesses: async () => processes }) } }
-  service = new InstanceSavesService(app as any, { initialize: async () => {}, state: { get instances() { return instances } } } as any, {} as any, () => 'root', {} as any)
+  service = new InstanceSavesService(app as any, { initialize: async () => {}, state: { get instances() { return instances } } } as any, () => 'root', {} as any)
 })
 it('requires both source and destination to be registered Java instances before filesystem review', async () => {
   for (const path of ['source', 'destination']) for (const edition of ['missing', 'bedrock']) {

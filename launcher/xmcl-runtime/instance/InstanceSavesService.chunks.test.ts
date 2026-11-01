@@ -71,7 +71,6 @@ describe('InstanceSavesService chunk operations and safety', () => {
     service = new InstanceSavesService(
       app as any,
       { initialize: async () => {}, state: { get instances() { return instances } } } as any,
-      {} as any,
       () => testRoot,
       {} as any,
     )

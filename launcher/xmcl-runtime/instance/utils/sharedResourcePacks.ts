@@ -13,14 +13,15 @@ type Entry = { path: string; directory: boolean; size: number; hash?: string }
 const changed = () => Object.assign(new Error('Resource packs changed since review'), { name: 'ResourcePacksChangedError' })
 const inspect = (path: string) => lstat(path, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
 const digest = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex')
-export async function readFolderSnapshot(root: string, ignoredFile?: string) {
+export async function readFolderSnapshot(root: string, ignoredFile?: string | readonly string[]) {
   const info = await inspect(root), entries: Entry[] = [], seen = new Set<string>()
+  const omitted = new Set(typeof ignoredFile === 'string' ? [ignoredFile] : ignoredFile)
   if (!info) return { entries, identity: null }
   if (!info.isDirectory() || info.isSymbolicLink()) throw new Error('Unsafe pack directory')
   async function scan(path: string, prefix = '', depth = 0) {
     if (depth > 64) throw new Error('Pack directory is too deep')
     for (const name of (await readdir(path)).sort()) {
-      if (prefix + name === ignoredFile) continue
+      if (omitted.has(prefix + name)) continue
       const relative = prefix + name; importPathParts(relative)
       if (entries.length >= 100000 || seen.has(relative.toLowerCase())) throw new Error('Oversized or ambiguous pack directory')
       seen.add(relative.toLowerCase())
@@ -69,7 +70,7 @@ async function plan(path: string, shared: boolean, sharedRoot: string, domain: '
 export async function previewResourcePackSharing(path: string, shared: boolean, root: string, domain: 'resourcepacks' | 'shaderpacks' = 'resourcepacks') {
   return (await plan(path, shared, root, domain)).review
 }
-async function copyEntries(source: string, target: string, entries: Entry[]) {
+export async function copyFolderSnapshotEntries(source: string, target: string, entries: Entry[]) {
   for (const entry of entries) {
     const file = join(target, ...importPathParts(entry.path))
     await assertInstallDirectory(target, dirname(file))
@@ -95,14 +96,14 @@ export async function applyResourcePackSharing(path: string, review: ResourcePac
       const stagedLink = join(backup, 'link')
       await symlink(current.global, stagedLink, process.platform === 'win32' ? 'junction' : 'dir')
       const copied = current.copy.flatMap(name => branch(current.localTree.entries, name))
-      await copyEntries(current.local, current.global, copied)
+      await copyFolderSnapshotEntries(current.local, current.global, copied)
       if (contents((await readFolderSnapshot(current.local)).entries) !== contents(current.localTree.entries) || contents((await readFolderSnapshot(current.global)).entries) !== contents([...current.globalTree.entries, ...copied])) throw changed()
       if (current.localTree.identity) await move(current.local, join(backup, 'previous'), { overwrite: false })
       await move(stagedLink, current.local, { overwrite: false })
       if (current.localTree.identity) return { backup }
     } else {
       const privateCopy = join(backup, 'private'); await mkdir(privateCopy)
-      await copyEntries(current.global, privateCopy, current.globalTree.entries)
+      await copyFolderSnapshotEntries(current.global, privateCopy, current.globalTree.entries)
       if ((await plan(path, false, root, domain)).review.snapshot !== current.review.snapshot) throw changed()
       await unlink(current.local)
       await move(privateCopy, current.local, { overwrite: false })

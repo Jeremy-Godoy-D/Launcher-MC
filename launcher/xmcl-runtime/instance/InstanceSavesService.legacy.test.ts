@@ -65,7 +65,7 @@ beforeEach(async () => {
       sessions.push(session); return session
     },
   }
-  service = new InstanceSavesService(app as any, { initialize: async () => {}, state: { get instances() { return instances } } } as any, {} as any, (...parts) => join(root, ...parts), {} as any)
+  service = new InstanceSavesService(app as any, { initialize: async () => {}, state: { get instances() { return instances } } } as any, (...parts) => join(root, ...parts), {} as any)
   ;(service as any).warn = vi.fn(); (service as any).error = vi.fn()
 })
 afterEach(async () => {

@@ -1,4 +1,4 @@
-import { ResourceManager, isValidCurseforgeRef, isValidModrinthRef } from '@xmcl/resource'
+import { isValidCurseforgeRef, isValidModrinthRef } from '@xmcl/resource'
 import { checksum } from '@xmcl/core'
 import {
   InstanceSavesServiceKey,
@@ -27,9 +27,10 @@ import { AnyError, isSystemError } from '@xmcl/utils'
 import { FSWatcher } from 'chokidar'
 import filenamify from 'filenamify'
 import { existsSync } from 'fs'
-import { lstat, mkdir, mkdtemp, realpath, symlink } from 'node:fs/promises'
+import { copyFile, lstat, mkdir, mkdtemp, realpath, symlink } from 'node:fs/promises'
+import { constants } from 'node:fs'
 import { randomUUID } from 'node:crypto'
-import { ensureDir, readdir, rename, rm, rmdir, unlink } from 'fs-extra'
+import { readdir, rename, rm } from 'fs-extra'
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'path'
 import { Inject, LauncherAppKey, kGameDataPath, type PathResolver } from '~/app'
 import { InstanceService } from '~/instance'
@@ -47,6 +48,8 @@ import { readBoundedFile, readWorlds, readLegacyWorlds, readWorldMetadata, world
 import { assertInstallDirectory } from '../instanceIO/utils/pendingInstall'
 import { applyWorldFiles, previewWorldFiles } from './utils/worldOperations'
 import { applySaveChunkPlan, listSaveChunkBackups, planSaveChunkChanges } from './utils/worldChunks'
+import { copyFolderSnapshotEntries, readFolderSnapshot } from './utils/sharedResourcePacks'
+import { importPathParts } from '../util/importFile'
 
 type SaveObserver = { pause(): Promise<void>; resume(): Promise<void> }
 
@@ -58,34 +61,94 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   #saveWatchers = new Map<string, Set<SaveObserver>>()
   constructor(@Inject(LauncherAppKey) app: LauncherApp,
     @Inject(InstanceService) private instanceService: InstanceService,
-    @Inject(kResourceManager) resourceManager: ResourceManager,
     @Inject(kGameDataPath) private getPath: PathResolver,
     @Inject(kSaveWorker) private saveWorker: SaveWorker,
   ) {
     super(app, async () => {
       try {
-        const snapshopts = await resourceManager.getSnapshotsUnderDomainedPath('saves')
-        const valid = await Promise.all(snapshopts.map(v => resourceManager.validateSnapshotFile(v)))
-        for (const file of valid) {
-          if (!file) continue
-          // unlink if the file last access time is 3 days ago
-          if (file.atime < Date.now() - 1000 * 60 * 60 * 24 * 3) {
-            await unlink(file.path)
-          }
-        }
-        await ensureDir(this.getPath('saves'))
-        if (existsSync(this.getPath('shared-saves'))) {
-          // move all shared saves to saves
-          const sharedSaves = await readdir(this.getPath('shared-saves'))
-          for (const save of sharedSaves) {
-            await rename(this.getPath('shared-saves', save), this.getPath('saves', save))
-          }
-          await rmdir(this.getPath('shared-saves'))
-        }
+        await this.#worldPaths([this.getPath()], () => this.#migrateSharedSaves(), true)
       } catch (e) {
         this.error(e as any)
       }
     })
+  }
+
+  async #migrateSharedSaves() {
+    const root = await realpath(this.getPath()), legacy = join(root, 'shared-saves'), depot = join(root, 'saves')
+    const changed = () => new AnyError('WorldFilesChangedError')
+    await assertInstallDirectory(root, depot); await mkdir(depot, { recursive: true }); await assertInstallDirectory(root, depot)
+    const authority = (await worldsLocation(this.getPath(), this.getPath())).identity
+    const destinationUnchanged = async () => { if ((await worldsLocation(this.getPath(), this.getPath())).identity !== authority) throw changed() }
+    const old = await lstat(legacy, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
+    if (!old) return
+    await assertInstallDirectory(root, legacy)
+    if (!old.isDirectory() || old.isSymbolicLink()) throw new Error('Unsafe legacy worlds directory')
+    const names = (await readdir(legacy)).sort(), locks: WorldLock[] = [], ignored: string[] = []
+    if (names.length > 1000) throw new Error('Too many legacy world entries')
+    const idle = async () => { if ((await (await this.app.registry.get(LaunchService)).getGameProcesses()).length) throw new AnyError('SharedWorldRunningError') }
+    try {
+      await idle()
+      for (const name of names) {
+        importPathParts(name)
+        const path = join(legacy, name), info = await lstat(path)
+        if (info.isSymbolicLink() || !info.isDirectory() && !info.isFile()) throw new Error('Unsafe legacy world entry')
+        if (!info.isDirectory()) continue
+        ignored.push(name + '/session.lock')
+        const level = await lstat(join(path, 'level.dat')).catch(error => { if (error.code !== 'ENOENT') throw error })
+        if (!level) continue
+        if (!level.isFile() || level.isSymbolicLink()) throw new Error('Unsafe legacy world metadata')
+        const lock = await this.app.acquireWorldLock(path, true)
+        if (!lock) throw new AnyError('WorldLockUnavailableError')
+        locks.push(lock)
+      }
+      const snapshot = await readFolderSnapshot(legacy, ignored)
+      const verify = async () => {
+        await idle(); for (const lock of locks) await lock.verify()
+        await destinationUnchanged()
+        await assertInstallDirectory(root, legacy); await assertInstallDirectory(root, depot)
+        if (JSON.stringify(await readFolderSnapshot(legacy, ignored)) !== JSON.stringify(snapshot)) throw changed()
+      }
+      const contents = (entries: typeof snapshot.entries) => JSON.stringify(entries)
+      for (const name of names) {
+        const top = snapshot.entries.find(entry => entry.path === name)!
+        const entries = snapshot.entries.filter(entry => entry.path.startsWith(name + '/')).map(entry => ({ ...entry, path: entry.path.slice(name.length + 1) }))
+        for (let index = 0; ; index++) {
+          if (index > 1000) throw new Error('Too many conflicting legacy world names')
+          const candidate = index ? `${name.slice(0, 240)} (${index})` : name, target = join(depot, candidate)
+          const existing = await lstat(target).catch(error => { if (error.code !== 'ENOENT') throw error })
+          if (existing) {
+            if (existing.isSymbolicLink() || existing.isDirectory() !== top.directory) continue
+            if (top.directory) {
+              if (contents((await readFolderSnapshot(target, 'session.lock')).entries) === contents(entries)) break
+            } else if (existing.isFile() && await checksum(target, 'sha256') === top.hash) break
+            continue
+          }
+          await idle(); for (const lock of locks) await lock.verify()
+          await destinationUnchanged()
+          await assertInstallDirectory(root, depot)
+          if (top.directory) {
+            await mkdir(target)
+            const owned = (await readFolderSnapshot(target)).identity
+            await copyFolderSnapshotEntries(join(legacy, name), target, entries)
+            const copied = await readFolderSnapshot(target, 'session.lock')
+            if (JSON.stringify(copied.identity) !== JSON.stringify(owned) || contents(copied.entries) !== contents(entries)) throw changed()
+          } else {
+            await copyFile(join(legacy, name), target, constants.COPYFILE_EXCL)
+            if (await checksum(target, 'sha256') !== top.hash) throw changed()
+          }
+          break
+        }
+      }
+      await verify()
+      const backups = join(root, '.backups'); await assertInstallDirectory(root, backups); await mkdir(backups, { recursive: true }); await assertInstallDirectory(root, backups)
+      const parent = await mkdtemp(join(backups, 'legacy-worlds-')), backup = join(parent, 'shared-saves')
+      const current = await lstat(legacy, { bigint: true })
+      if (current.ino !== old.ino || current.dev !== old.dev || current.isSymbolicLink()) throw changed()
+      // Release child handles immediately before the Windows directory rename; originals stay in the backup.
+      for (const lock of locks.splice(0)) lock.release()
+      await rename(legacy, backup)
+      this.log(`Legacy worlds migrated; original data retained in ${backup}`)
+    } finally { for (const lock of locks) lock.release() }
   }
 
   async getLinkedSaveWorld(instancePath: string): Promise<string | undefined> {
