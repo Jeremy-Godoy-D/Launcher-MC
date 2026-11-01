@@ -685,9 +685,9 @@ export class LaunchService extends AbstractService implements ILaunchService {
     }
   }
 
-  async kill(pid: number, force?: boolean) {
+  async kill(pid: number, force?: boolean, launchId?: string) {
     const process = this.processes[pid]
-    if (process) {
+    if (process && (launchId === undefined || process.launchId === launchId)) {
       if (process.stopping && !force) return
       process.stopping = true
       try {

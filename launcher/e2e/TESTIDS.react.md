@@ -6,7 +6,7 @@ This file is the contract between the launcher UI in `xmcl-react-ui/` and the Pl
 
 Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testids` with the selected LAUNCHER_RENDERER. Computed IDs are not resolved by this static registry.
 
-**Total anchors:** 122 (in 46 Vue/TSX files)
+**Total anchors:** 123 (in 46 Vue/TSX files)
 
 | Test ID | Defined in |
 |---|---|
@@ -17,19 +17,20 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `chunk-change-review` | [`xmcl-react-ui/src/features/instance/ChunkChangesDialog.tsx#L58`](../xmcl-react-ui/src/features/instance/ChunkChangesDialog.tsx#L58) |
 | `chunk-change-submit` | [`xmcl-react-ui/src/features/instance/ChunkChangesDialog.tsx#L73`](../xmcl-react-ui/src/features/instance/ChunkChangesDialog.tsx#L73) |
 | `confirm-dialog` | [`xmcl-react-ui/src/features/instance/ChunkChangesDialog.tsx#L45`](../xmcl-react-ui/src/features/instance/ChunkChangesDialog.tsx#L45) |
-| `console-autoscroll` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L357`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L357) |
-| `console-clear` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L394`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L394) |
-| `console-copy` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L370`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L370) |
-| `console-empty` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L449`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L449) |
-| `console-entries` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L441`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L441) |
-| `console-entry` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L457`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L457) |
-| `console-export` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L382`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L382) |
-| `console-file-select` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L296`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L296) |
-| `console-level-filter` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L327`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L327) |
-| `console-open-window` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L419`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L419) |
-| `console-refresh` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L430`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L430) |
-| `console-search` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L345`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L345) |
-| `console-show-file` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L407`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L407) |
+| `console-autoscroll` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L304`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L304) |
+| `console-clear` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L344`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L344) |
+| `console-copy` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L320`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L320) |
+| `console-empty` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L412`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L412) |
+| `console-entries` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L398`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L398) |
+| `console-entry` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L217`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L217) |
+| `console-export` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L332`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L332) |
+| `console-file-select` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L242`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L242) |
+| `console-follow` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L311`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L311) |
+| `console-level-filter` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L274`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L274) |
+| `console-open-window` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L369`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L369) |
+| `console-refresh` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L380`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L380) |
+| `console-search` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L292`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L292) |
+| `console-show-file` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L357`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L357) |
 | `content-groups-editor` | [`xmcl-react-ui/src/features/instance/ContentGroupsEditor.tsx#L46`](../xmcl-react-ui/src/features/instance/ContentGroupsEditor.tsx#L46) |
 | `copy-cancel` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L75`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L75) |
 | `copy-finish` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76) |
@@ -43,7 +44,7 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `featured-project-cover` | [`xmcl-react-ui/src/App.tsx#L610`](../xmcl-react-ui/src/App.tsx#L610) |
 | `group-confirm` | [`xmcl-react-ui/src/features/library/GroupsDialog.tsx#L69`](../xmcl-react-ui/src/features/library/GroupsDialog.tsx#L69) |
 | `instance-base-setting` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L125`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L125) |
-| `instance-console` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L283`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L283) |
+| `instance-console` | [`xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L229`](../xmcl-react-ui/src/features/instance/InstanceConsole.tsx#L229) |
 | `instance-copy` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L58`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L58) |
 | `instance-create-confirm` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L720`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L720) |
 | `instance-export` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L46`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L46) |

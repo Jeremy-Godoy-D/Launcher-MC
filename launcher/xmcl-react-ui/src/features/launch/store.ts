@@ -28,6 +28,7 @@ import { getAutoSelectedJava } from '@xmcl/runtime-api/src/util/java'
 import type { Instance } from '../../../../packages/instance/instance'
 import { validVersionId } from '../library/creation'
 import { readState } from './read'
+import { GameLogBuffer } from './gameLogs'
 
 export type LaunchReason =
   | 'copy'
@@ -114,7 +115,13 @@ export class LaunchStore {
   private cleanups: (() => void)[] = []
   private controller?: AbortController
   private initial?: Promise<void>
-  private exited = new Set<number>()
+  private attached = false
+  private query?: { changed: Set<number>; overflow: boolean }
+  private pendingStart?: { operationId?: string; process?: Running }
+  private gameLogs = new GameLogBuffer()
+  private logsSnapshot = this.gameLogs.snapshot()
+  private logListeners = new Set<() => void>()
+  private logTimer?: ReturnType<typeof setTimeout>
   private disposed = false
   private captured?: Instance
   private operation?: Promise<void>
@@ -132,20 +139,20 @@ export class LaunchStore {
   getSnapshot = () => this.snapshot
   private publish(update: Partial<LaunchSnapshot>) {
     if (this.disposed) return
-    this.snapshot = Object.freeze({ ...this.snapshot, ...update })
+    this.snapshot = Object.freeze({ ...this.snapshot, ...update,
+      ...(update.running ? { running: Object.freeze(update.running.map(value => Object.freeze(value))) } : {}),
+      ...(update.stopping ? { stopping: Object.freeze([...update.stopping]) } : {}),
+    })
     for (const listener of this.listeners) listener()
   }
   private markRunning = (process: Running) => {
-    this.exited.delete(process.pid)
-    const previous = this.snapshot.running.find((value) => value.pid === process.pid)
-    if (previous && !process.launchId) return
     this.publish({
       running: [...this.snapshot.running.filter((value) => value.pid !== process.pid), process],
     })
   }
-  private markStopped = (pid: number) => {
-    this.exited.add(pid)
-    if (this.exited.size > 256) this.exited.delete(this.exited.values().next().value!)
+  private markStopped = (pid: number, launchId: string) => {
+    const current = this.snapshot.running.find(process => process.pid === pid)
+    if (current?.launchId && current.launchId !== launchId) return
     const running = this.snapshot.running.filter((process) => process.pid !== pid)
     this.publish({
       running,
@@ -155,39 +162,97 @@ export class LaunchStore {
         : {}),
     })
   }
-  private start() {
-    if (this.initial && this.snapshot.processError) {
-      for (const stop of this.cleanups) stop()
-      this.cleanups = []
-      this.initial = undefined
-      this.publish({ processError: false })
-    }
-    if (this.initial) return this.initial
+  private touch(pid: number) {
+    if (!this.query) return
+    if (this.query.changed.size >= 256 && !this.query.changed.has(pid)) this.query.overflow = true
+    else this.query.changed.add(pid)
+  }
+  private attach() {
+    if (this.attached || this.disposed) return
+    this.attached = true
     this.cleanups.push(
-      this.client.listen(LaunchServiceKey, 'minecraft-start', (event) =>
-        this.markRunning({ pid: event.pid, launchId: event.launchId, path: event.gameDirectory }),
-      ),
-      this.client.listen(LaunchServiceKey, 'minecraft-exit', (event) =>
-        this.markStopped(event.pid),
-      ),
+      this.client.listen(LaunchServiceKey, 'minecraft-start', event => {
+        this.touch(event.pid)
+        const process = { pid: event.pid, launchId: event.launchId, path: event.gameDirectory }
+        this.markRunning(process)
+        if (this.pendingStart && this.pendingStart.operationId === event.operationId) this.pendingStart.process = process
+        if (this.gameLogs.start({ ...event, side: event.side ?? 'client' })) this.scheduleLogs()
+      }),
+      this.client.listen(LaunchServiceKey, 'minecraft-exit', event => {
+        this.touch(event.pid); this.markStopped(event.pid, event.launchId)
+        if (this.gameLogs.exit({ ...event, side: event.side ?? 'client' }, event)) this.scheduleLogs()
+      }),
+      this.client.listen(LaunchServiceKey, 'minecraft-stdout', event => {
+        if (this.gameLogs.output(event, 'stdout', event.stdout)) this.scheduleLogs()
+      }),
+      this.client.listen(LaunchServiceKey, 'minecraft-stderr', event => {
+        if (this.gameLogs.output(event, 'stderr', event.stderr)) this.scheduleLogs()
+      }),
     )
+  }
+  private start() {
+    this.attach()
+    return !this.initial || this.snapshot.processError ? this.refreshProcesses() : this.initial
+  }
+  refreshProcesses = () => {
+    if (this.disposed) return Promise.resolve()
+    this.attach()
+    if (this.query) return this.initial!
+    const query = this.query = { changed: new Set<number>(), overflow: false }
     this.initial = this.client
       .service(LaunchServiceKey)
       .getGameProcesses()
       .then((processes) => {
-        for (const process of processes)
-          if (!this.exited.has(process.pid))
-            this.markRunning({
-              pid: process.pid,
-              launchId: process.launchId,
-              path: process.options.gameDirectory,
-            })
+        if (this.disposed) return
+        if (query.overflow) { this.publish({ processError: true }); return }
+        const running = new Map(processes.map(process => [process.pid, {
+          pid: process.pid, launchId: process.launchId, path: process.options.gameDirectory,
+        }]))
+        // Events received after the query began are newer than its snapshot.
+        for (const pid of query.changed) {
+          const current = this.snapshot.running.find(process => process.pid === pid)
+          if (current) running.set(pid, current)
+          else running.delete(pid)
+        }
+        this.publish({ running: [...running.values()], processError: false,
+          ...(this.snapshot.phase === 'running' && ![...running.values()].some(process => process.path === this.snapshot.request?.path) ? { phase: 'idle' } : {}),
+        })
       })
       .catch(() => this.publish({ processError: true }))
       .finally(() => {
-        this.exited.clear()
+        if (this.query === query) this.query = undefined
       })
     return this.initial
+  }
+  getLogsSnapshot = () => this.logsSnapshot
+  private publishLogs = () => {
+    this.logTimer = undefined
+    if (this.disposed) return
+    this.logsSnapshot = this.gameLogs.snapshot()
+    for (const listener of this.logListeners) listener()
+  }
+  private scheduleLogs() {
+    if (this.logListeners.size && this.logTimer === undefined && !this.disposed)
+      this.logTimer = setTimeout(this.publishLogs, 34)
+  }
+  subscribeLogs = (listener: () => void) => {
+    if (this.disposed) return () => {}
+    if (this.logTimer !== undefined) clearTimeout(this.logTimer)
+    this.publishLogs()
+    this.logListeners.add(listener)
+    void this.start()
+    return () => {
+      this.logListeners.delete(listener)
+      if (!this.logListeners.size && this.logTimer !== undefined) {
+        clearTimeout(this.logTimer); this.logTimer = undefined
+      }
+    }
+  }
+  clearLogs = (path: string) => {
+    if (this.disposed) return
+    this.gameLogs.clear(path)
+    if (this.logTimer !== undefined) clearTimeout(this.logTimer)
+    this.publishLogs()
   }
   subscribe = (listener: () => void) => {
     this.listeners.add(listener)
@@ -508,14 +573,19 @@ export class LaunchStore {
     options.user = await this.user(profile, signal)
     if (this.snapshot.running.some((process) => process.path === instance.path))
       throw new Blocked('process')
-    const pid = await this.client.service(LaunchServiceKey).launch(options)
+    const pendingLaunch = this.pendingStart = { operationId: options.operationId, process: undefined as Running | undefined }
+    let pid: number | undefined
+    try { pid = await this.client.service(LaunchServiceKey).launch(options) }
+    finally { if (this.pendingStart === pendingLaunch) this.pendingStart = undefined }
     if (!pid) throw new Blocked('process')
     if (signal.aborted) {
-      await this.client.service(LaunchServiceKey).kill(pid)
+      const process = pendingLaunch.process?.pid === pid ? pendingLaunch.process : await this.client.service(LaunchServiceKey).getGameProcess(pid).then(process =>
+        process && process.options.operationId === options.operationId && process.options.gameDirectory === instance.path ? process : undefined)
+      if (process) await this.client.service(LaunchServiceKey).kill(pid, false, process.launchId)
       throw new Blocked('cancelled')
     }
     // A short-lived process may exit before the launch promise resolves.
-    if (!this.exited.has(pid)) this.markRunning({ pid, path: instance.path, launchId: '' })
+    if (!pendingLaunch.process) await this.refreshProcesses()
     this.publish({
       phase: this.snapshot.running.some((process) => process.path === instance.path)
         ? 'running'
@@ -543,15 +613,17 @@ export class LaunchStore {
       if (!controller.signal.aborted) this.publish({ phase: 'error', reason: 'java' })
     }
   }
-  stop = async (pid: number) => {
+  stop = async (pid: number, launchId?: string) => {
+    const process = this.snapshot.running.find(process => process.pid === pid)
     if (
-      !this.snapshot.running.some((process) => process.pid === pid) ||
+      !process || (launchId !== undefined && process.launchId !== launchId) ||
       this.snapshot.stopping.includes(pid)
     )
       return
     this.publish({ stopping: [...this.snapshot.stopping, pid] })
     try {
-      await this.client.service(LaunchServiceKey).kill(pid)
+      if (!process.launchId) { await this.refreshProcesses(); return }
+      await this.client.service(LaunchServiceKey).kill(pid, false, process.launchId)
     } catch {
       this.publish({ reason: 'process', phase: 'error' })
     } finally {
@@ -564,5 +636,7 @@ export class LaunchStore {
     for (const stop of this.cleanups) stop()
     this.cleanups = []
     this.listeners.clear()
+    this.logListeners.clear()
+    if (this.logTimer !== undefined) clearTimeout(this.logTimer)
   }
 }

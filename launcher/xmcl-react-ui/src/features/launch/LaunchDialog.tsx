@@ -124,7 +124,7 @@ export function LaunchDialog({
                   className="button secondary"
                   disabled={launch.stopping.includes(process.pid)}
                   onClick={() => {
-                    void launch.store.stop(process.pid)
+                    void launch.store.stop(process.pid, process.launchId)
                   }}
                 >
                   <Square size={16} aria-hidden="true" />

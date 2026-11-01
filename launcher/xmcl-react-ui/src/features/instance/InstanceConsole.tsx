@@ -8,6 +8,7 @@ import {
   ExternalLink,
   FolderOpen,
   RefreshCw,
+  ArrowDownToLine,
 } from 'lucide-react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { parseLogFile, parseLogLine, type LogEntry } from './consoleLog'
@@ -16,16 +17,26 @@ import { LaunchServiceKey } from '@xmcl/runtime-api/src/services/LaunchService'
 import type { SavedInstance } from '../library/model'
 import { useService, useServiceEvent } from '../../runtime'
 import { useI18n } from '../../i18n'
+import { useGameLogs, useLaunch } from '../launch/context'
 
-export function InstanceConsole({ instance, running }: { instance: SavedInstance; running: boolean }) {
+export function InstanceConsole({ instance }: { instance: SavedInstance }) {
   const { t } = useI18n()
   const logService = useService(InstanceLogServiceKey)
-  const launchService = useService(LaunchServiceKey)
+  const launch = useLaunch()
+  const logs = useGameLogs()
 
   const [selectedSource, setSelectedSource] = useState<'__live__' | string>('__live__')
   const [logFiles, setLogFiles] = useState<string[]>([])
   const [crashReports, setCrashReports] = useState<string[]>([])
-  const [liveEntries, setLiveEntries] = useState<LogEntry[]>([])
+  const liveEntries = useMemo(() => logs.entries.filter(entry => entry.gameDirectory === instance.path).map(entry => {
+    if (!entry.system) return entry
+    const message = entry.system
+    const text = message.kind === 'start' ? t('react.instanceConsole.started', { pid: message.pid })
+      : message.signal ? t('react.instanceConsole.exitedSignal', { pid: message.pid, signal: message.signal })
+        : message.code !== undefined ? t('react.instanceConsole.exitedCode', { pid: message.pid, code: message.code })
+          : t('react.instanceConsole.exited', { pid: message.pid })
+    return { ...entry, ...parseLogLine(`[${entry.timestamp}] [${t('react.instanceConsole.system')}/INFO]: ${text}`, 0), id: entry.id }
+  }), [logs, instance.path, t])
   const [fileView, setFileView] = useState<{ source: string; entries: LogEntry[]; limited: boolean }>()
   const [levelFilter, setLevelFilter] = useState<'all' | 'info' | 'warn' | 'error' | 'debug'>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -36,23 +47,12 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
   const [fileRevision, setFileRevision] = useState(0)
   const [fileErrors, setFileErrors] = useState<Partial<Record<'list' | 'read' | 'show', string>>>({})
   const loading = listing || reading
-  const [hasActiveProcess, setHasActiveProcess] = useState(running)
+  const hasActiveProcess = !!launch?.running.some(process => process.path === instance.path)
 
-  const activePids = useRef<Set<number>>(new Set())
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const listRequest = useRef(0)
   const showRequest = useRef(0)
   const fileErrorKey = (error: unknown) => error && typeof error === 'object' && 'name' in error && error.name === 'InstanceLogTooLarge' ? 'tooLarge' : 'fileError'
-
-  // Load existing processes for this instance path
-  useEffect(() => {
-    launchService.getGameProcesses().then((processes) => {
-      const mine = processes.filter((p) => p.options?.gameDirectory === instance.path)
-      activePids.current.clear()
-      mine.forEach((p) => activePids.current.add(p.pid))
-      setHasActiveProcess(mine.length > 0 || running)
-    }).catch(() => {})
-  }, [launchService, instance.path, running])
 
   // Load available log and crash report files
   const refreshFiles = useCallback(() => {
@@ -76,54 +76,8 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
     return () => { listRequest.current++; showRequest.current++ }
   }, [refreshFiles])
 
-  // Real-time events with instance process isolation
-  useServiceEvent(LaunchServiceKey, 'minecraft-start', (event) => {
-    if (event.gameDirectory === instance.path) {
-      activePids.current.add(event.pid)
-      setHasActiveProcess(true)
-      const now = new Date().toTimeString().slice(0, 8)
-      setLiveEntries((prev) => [
-        ...prev,
-        parseLogLine(`[${now}] [Sistema/INFO]: Proceso iniciado (PID ${event.pid})`, prev.length),
-      ])
-    }
-  })
-
-  useServiceEvent(LaunchServiceKey, 'minecraft-stdout', ({ pid, stdout }) => {
-    if (activePids.current.has(pid)) {
-      const lines = stdout.split(/\r?\n/).filter((l) => l.trim().length > 0)
-      if (lines.length > 0) {
-        setLiveEntries((prev) => [
-          ...prev,
-          ...lines.map((l, i) => parseLogLine(l, prev.length + i)),
-        ])
-      }
-    }
-  })
-
-  useServiceEvent(LaunchServiceKey, 'minecraft-stderr', ({ pid, stderr }) => {
-    if (activePids.current.has(pid)) {
-      const lines = stderr.split(/\r?\n/).filter((l) => l.trim().length > 0)
-      if (lines.length > 0) {
-        setLiveEntries((prev) => [
-          ...prev,
-          ...lines.map((l, i) => parseLogLine(l, prev.length + i, 'error')),
-        ])
-      }
-    }
-  })
-
   useServiceEvent(LaunchServiceKey, 'minecraft-exit', (event) => {
-    if (activePids.current.has(event.pid)) {
-      activePids.current.delete(event.pid)
-      setHasActiveProcess(activePids.current.size > 0)
-      const now = new Date().toTimeString().slice(0, 8)
-      setLiveEntries((prev) => [
-        ...prev,
-        parseLogLine(`[${now}] [Sistema/INFO]: Proceso terminado (Código ${event.code ?? 0})`, prev.length),
-      ])
-      refreshFiles()
-    }
+    if (event.gameDirectory === instance.path) refreshFiles()
   })
 
   // Load file content when a stored log or crash report is selected
@@ -193,11 +147,11 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
   useLayoutEffect(() => { virtualizer.measure() }, [selectedSource, levelFilter, searchQuery, fileView])
 
   // Autoscroll
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (autoscroll && scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight
     }
-  }, [filteredEntries, autoscroll])
+  }, [filteredEntries, autoscroll, virtualizer.getTotalSize()])
 
   // Copy
   async function copyLogs() {
@@ -223,7 +177,7 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
   // Clear
   function clearLogs() {
     if (selectedSource === '__live__') {
-      setLiveEntries([])
+      launch?.store.clearLogs(instance.path)
     } else {
       setFileView(undefined)
     }
@@ -354,6 +308,9 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
             />
             {t('react.instanceConsole.autoscroll')}
           </label>
+          {!autoscroll && <button type="button" className="button secondary" data-testid="console-follow" onClick={() => setAutoscroll(true)}>
+            <ArrowDownToLine size={16} aria-hidden="true" />{t('react.instanceConsole.follow')}
+          </button>}
         </div>
 
         <div className="console-toolbar-group">
@@ -421,7 +378,7 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
             type="button"
             className="button secondary"
             data-testid="console-refresh"
-            onClick={() => { refreshFiles(); setFileRevision(value => value + 1) }}
+            onClick={() => { refreshFiles(); setFileRevision(value => value + 1); void launch?.store.refreshProcesses() }}
             disabled={loading}
             title={t('react.instanceConsole.refresh')}
           >
@@ -433,6 +390,8 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
       <div>
         {Object.entries(fileErrors).filter(([, value]) => value).map(([operation, key]) => <p key={operation} className="form-error" role="alert">{t(`react.instanceConsole.${key}`)}</p>)}
         {fileView?.source === selectedSource && fileView.limited && <p className="form-description" role="status">{t('react.instanceConsole.limited')}</p>}
+        {selectedSource === '__live__' && logs.limited && <p className="form-description" role="status">{t('react.instanceConsole.liveLimited')}</p>}
+        {launch?.processError && <p className="form-error" role="alert">{t('react.instanceConsole.processError')}</p>}
       </div>
 
       <div
@@ -465,7 +424,7 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
         <div className="console-process-status">
           <span className={`console-status-dot ${hasActiveProcess ? 'active' : ''}`} aria-hidden="true" />
           <span>
-            {hasActiveProcess
+            {launch?.processError ? t('react.instanceConsole.processUnknown') : hasActiveProcess
               ? t('react.instanceConsole.processRunning')
               : t('react.instanceConsole.processStopped')}
           </span>

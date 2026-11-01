@@ -48,13 +48,13 @@ export async function mockLaunchRuntime(
         return { result: [...processes.values()] }
       if (service === 'LaunchService' && method === 'kill') {
         const process = processes.get(args[0])
-        if (process) {
+        if (process && (args[2] === undefined || process.launchId === args[2])) {
           processes.delete(args[0])
           for (const win of BrowserWindow.getAllWindows())
             win.webContents.send('service-event', {
               service,
               event: 'minecraft-exit',
-              args: [{ pid: args[0], launchId: process.launchId, code: 0 }],
+              args: [{ ...process.options, pid: args[0], launchId: process.launchId, code: 0 }],
             })
         }
         return { result: undefined }
@@ -69,9 +69,20 @@ export async function mockLaunchRuntime(
       }
       if (service === 'LaunchService' && method === 'launch') {
         ;(globalThis as any).__launchCalls.push(args[0])
+        // The normal no-spawn hook publishes a real launch ID; reuse its public history record.
+        let record
+        for (let attempt = 0; attempt < 200; attempt++) {
+          const history = await original(event, 'InstanceLogService', 'listLaunches', args[0].gameDirectory)
+          record = history.result.find((value: any) => value.pid === response.result && value.operationId === args[0].operationId)
+          if (record) break
+          await new Promise(resolve => setTimeout(resolve, 25))
+        }
+        if (!record) throw new Error('No-spawn fixture launch identity missing')
         processes.set(response.result, {
           pid: response.result,
-          launchId: 'fixture-recovered-process',
+          launchId: record.launchId,
+          side: args[0].side ?? 'client',
+          ready: true,
           options: args[0],
         })
       }

@@ -109,6 +109,16 @@ it('does not send duplicate graceful stop commands while waiting for exit', asyn
   await service.kill(pid); await service.kill(pid)
   expect(write).toHaveBeenCalledTimes(1)
 })
+it.each(['client', 'server'] as const)('refuses a stale launch identity before graceful or forced %s termination', async side => {
+  const pid = await service.launch(options(side)), current = (await service.getGameProcess(pid))!
+  watcher.emit('minecraft-window-ready')
+  const write = vi.spyOn(child.stdin!, 'write')
+  await service.kill(pid, false, 'old-launch'); await service.kill(pid, true, 'old-launch')
+  expect(child.kill).not.toHaveBeenCalled(); expect(write).not.toHaveBeenCalled(); expect(mocks.command).not.toHaveBeenCalled()
+  await service.kill(pid, false, current.launchId)
+  if (side === 'client') expect(child.kill).toHaveBeenCalledOnce()
+  else expect(write).toHaveBeenCalledWith('/stop\n')
+})
 it.each(['client', 'server'] as const)('does not log the full %s environment or user arguments', async side => {
   const log = vi.spyOn(service as any, 'log')
   await service.launch({ ...options(side), env: { GRIMO_FIXTURE_SECRET: 'NEVER_LOG_FIXTURE_ENV' }, vmOptions: ['-Dfixture=NEVER_LOG_FIXTURE_ARG'] })

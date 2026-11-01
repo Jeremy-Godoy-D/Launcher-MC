@@ -69,6 +69,16 @@ test('packaged Native delivers and archives real Java pipes with Unicode and lau
       summary.push({ launchId: start.launchId, pid: pids[index], events: output.length, stdoutUnits: stdout.length, state: archive.record.state })
     }
     await writeFile(testInfo.outputPath('java-output-summary.json'), JSON.stringify(summary, null, 2), 'utf8')
+    if (process.env.LAUNCHER_RENDERER === 'react') {
+      await page.getByTestId('nav-library').click()
+      await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click()
+      await page.getByTestId('instance-workspace').getByLabel('Secciones de la instancia').getByRole('link', { name: 'Consola', exact: true }).click()
+      const console = page.getByTestId('instance-console')
+      await expect(console.getByTestId('console-entry').filter({ hasText: 'café 漢字 😀' })).toHaveCount(1)
+      await expect(console.getByTestId('console-entry').filter({ hasText: 'error café' })).toHaveAttribute('data-level', 'error')
+      await expect(console.locator('.console-statusbar')).toContainText('No hay procesos activos')
+      await expect(console.getByTestId('console-entries')).not.toContainText(String(pids[1]))
+    }
   } finally {
     for (const pid of pids) await page.evaluate(async pid => (window as any).serviceChannels.open('LaunchService').call('kill', pid, true), pid)
     await page.evaluate(() => { const state = window as any; for (const [name, listener] of state.__javaOutputHandlers ?? []) state.__javaOutputChannel.removeListener(name, listener) })

@@ -97,6 +97,7 @@ function fixture(startup?: () => Promise<any[]>) {
   const pending = shared(new InstanceInstallStatus(), 'pending')
   const mods = shared(new ResourceState(), 'mods')
   const events = new Map<string, EventEmitter>()
+  const processes = new Map<number, any>()
   let manifest: any
   const call = vi.fn(async (service: string, method: string, ...args: any[]): Promise<any> => {
     const key = `${service}.${method}`
@@ -150,11 +151,19 @@ function fixture(startup?: () => Promise<any[]>) {
       case 'InstanceModsService.watch':
         return mods.raw
       case 'LaunchService.getGameProcesses':
-        return startup ? startup() : []
+        return startup ? startup() : [...processes.values()]
+      case 'LaunchService.getGameProcess':
+        return processes.get(args[0])
       case 'LaunchService.launch':
+        processes.set(4242, { pid: 4242, launchId: 'fixture-launch', options: args[0] })
+        events.get('LaunchService')?.emit('minecraft-start', { ...args[0], pid: 4242, launchId: 'fixture-launch' })
         return 4242
       case 'LaunchService.kill':
-        events.get('LaunchService')?.emit('minecraft-exit', { pid: args[0] })
+        if (!args[2] || processes.get(args[0])?.launchId === args[2]) {
+          const process = processes.get(args[0])
+          processes.delete(args[0])
+          events.get('LaunchService')?.emit('minecraft-exit', { pid: args[0], launchId: process?.launchId, ...process?.options })
+        }
         return
       default:
         throw new Error(`Unexpected ${key}`)
@@ -273,7 +282,7 @@ describe('Java launch flow', () => {
           f.events
             .get(service)
             ?.emit('minecraft-start', { pid: 4242, launchId: 'short', gameDirectory: f.path })
-          f.events.get(service)?.emit('minecraft-exit', { pid: 4242 })
+          f.events.get(service)?.emit('minecraft-exit', { pid: 4242, launchId: 'short', gameDirectory: f.path })
           return 4242
         }
         return original(service, method, ...args)
@@ -507,12 +516,94 @@ describe('Java launch flow', () => {
     g.events
       .get('LaunchService')
       ?.emit('minecraft-start', { pid: 55, launchId: 'owned', gameDirectory: g.path })
-    g.events.get('LaunchService')?.emit('minecraft-exit', { pid: 55 })
+    g.events.get('LaunchService')?.emit('minecraft-exit', { pid: 55, launchId: 'owned', gameDirectory: g.path })
     resolve([{ pid: 55, launchId: 'owned', options: { gameDirectory: g.path } }])
     await settle()
     expect(g.flow.getSnapshot().running).toEqual([])
     await g.dispose()
     expect(g.events.get('LaunchService')?.listenerCount('minecraft-start')).toBe(0)
+  })
+  it('keeps a newer launch over a stale bootstrap snapshot and ignores the old exit for a reused PID', async () => {
+    const pending = Promise.withResolvers<any[]>(), f = fixture(() => pending.promise)
+    await settle()
+    const channel = f.events.get('LaunchService')!
+    channel.emit('minecraft-start', { pid: 55, launchId: 'new', gameDirectory: '/qa/New' })
+    channel.emit('minecraft-exit', { pid: 55, launchId: 'old', gameDirectory: f.path })
+    pending.resolve([{ pid: 55, launchId: 'old', options: { gameDirectory: f.path } }])
+    await settle()
+    expect(f.flow.getSnapshot().running).toEqual([{ pid: 55, launchId: 'new', path: '/qa/New' }])
+    await f.flow.stop(55, 'old')
+    expect(f.call.mock.calls.some(([service, method]) => service === 'LaunchService' && method === 'kill')).toBe(false)
+    expect(Object.isFrozen(f.flow.getSnapshot().running[0])).toBe(true)
+    await f.dispose()
+  })
+  it('retries process discovery without duplicate listeners, removes absent entries and shares concurrent queries', async () => {
+    let fail = true, calls = 0
+    const pending = Promise.withResolvers<any[]>(), f = fixture(async () => { calls++; if (fail) throw new Error('fixture query failure'); return pending.promise })
+    await settle(); expect(f.flow.getSnapshot().processError).toBe(true)
+    f.events.get('LaunchService')!.emit('minecraft-start', { pid: 55, launchId: 'gone', gameDirectory: f.path })
+    fail = false
+    const first = f.flow.refreshProcesses(), second = f.flow.refreshProcesses()
+    expect(first).toBe(second); expect(calls).toBe(2)
+    expect(f.events.get('LaunchService')!.listenerCount('minecraft-start')).toBe(1)
+    pending.resolve([]); await first
+    expect(f.flow.getSnapshot()).toMatchObject({ running: [], processError: false })
+    await f.dispose()
+  })
+  it('does not publish a late process result after disposal', async () => {
+    const pending = Promise.withResolvers<any[]>(), f = fixture(() => pending.promise), observer = vi.fn()
+    f.flow.subscribe(observer)
+    const snapshot = f.flow.getSnapshot()
+    await f.dispose()
+    pending.resolve([{ pid: 55, launchId: 'late', options: { gameDirectory: f.path } }])
+    await settle()
+    expect(f.flow.getSnapshot()).toBe(snapshot); expect(observer).not.toHaveBeenCalled()
+  })
+  it('batches live publications, captures while the console is closed and cleans timers and listeners', async () => {
+    vi.useFakeTimers()
+    const f = fixture()
+    try {
+      await settle()
+      const channel = f.events.get('LaunchService')!, identity = { pid: 42, launchId: 'stream', gameDirectory: f.path, side: 'client' }
+      channel.emit('minecraft-start', identity)
+      channel.emit('minecraft-stdout', { ...identity, sequence: 1, stdout: 'before-' })
+      const listener = vi.fn(), stop = f.flow.subscribeLogs(listener), initial = f.flow.getLogsSnapshot()
+      expect(initial.entries.at(-1)?.raw).toBe('before-')
+      for (let sequence = 2; sequence <= 101; sequence++) channel.emit('minecraft-stdout', { ...identity, sequence, stdout: 'x' })
+      expect(f.flow.getLogsSnapshot()).toBe(initial); expect(listener).not.toHaveBeenCalled()
+      await vi.advanceTimersByTimeAsync(33); expect(listener).not.toHaveBeenCalled()
+      await vi.advanceTimersByTimeAsync(1); expect(listener).toHaveBeenCalledTimes(1)
+      expect(f.flow.getLogsSnapshot().entries.at(-1)?.raw).toBe('before-' + 'x'.repeat(100))
+      channel.emit('minecraft-stdout', { ...identity, sequence: 102, stdout: '-after' })
+      stop(); expect(vi.getTimerCount()).toBe(0)
+      channel.emit('minecraft-exit', { ...identity, code: 0 })
+      const again = f.flow.subscribeLogs(listener)
+      expect(f.flow.getLogsSnapshot().entries.at(-2)?.raw).toContain('-after')
+      f.flow.clearLogs(f.path); expect(f.flow.getLogsSnapshot().entries).toEqual([])
+      again(); await f.dispose()
+      expect(vi.getTimerCount()).toBe(0)
+      for (const name of ['minecraft-start', 'minecraft-exit', 'minecraft-stdout', 'minecraft-stderr']) expect(channel.listenerCount(name)).toBe(0)
+    } finally { await f.dispose(); vi.useRealTimers() }
+  })
+  it('cancels a slow launch using its captured identity after the PID has already been reused', async () => {
+    const f = fixture(), entered = Promise.withResolvers<void>(), release = Promise.withResolvers<void>()
+    await f.ready()
+    const original = f.call.getMockImplementation()!
+    f.call.mockImplementation(async (service, method, ...args) => {
+      if (service === 'LaunchService' && method === 'launch') {
+        f.events.get(service)!.emit('minecraft-start', { ...args[0], pid: 4242, launchId: 'cancelled-launch' })
+        entered.resolve(); await release.promise
+        return 4242
+      }
+      if (service === 'LaunchService' && method === 'kill') return
+      return original(service, method, ...args)
+    })
+    const running = f.flow.run(); await entered.promise; f.flow.cancel()
+    f.events.get('LaunchService')!.emit('minecraft-start', { pid: 4242, launchId: 'next-launch', gameDirectory: '/qa/Other', operationId: 'other-operation' })
+    release.resolve(); await running
+    expect(f.call.mock.calls.find(([service, method]) => service === 'LaunchService' && method === 'kill')?.slice(2)).toEqual([4242, false, 'cancelled-launch'])
+    expect(f.flow.getSnapshot().running[0]).toMatchObject({ launchId: 'next-launch', path: '/qa/Other' })
+    await f.dispose()
   })
   it('cancels a pending shared-state read and releases its late native acquisition', async () => {
     const f = fixture()
