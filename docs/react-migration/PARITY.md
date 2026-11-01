@@ -303,3 +303,7 @@ STAGE5-CONSOLE-BOUNDED-VIEW (`4849893`/`ca6e281`/`381e52c`/`78642d0`) documenta 
 ## Seguimiento de CI: commits duraderos de chunks
 
 STAGE5-CI-CHUNK-COMMITS (`1d3c9b4`) registra CI 41305967989: 1.156/1.157 por timeout de pasteSaveChunks y cleanup ENOTEMPTY; Vue cancelado, Native no ejecutado. Solo cambia fixture/presupuesto de tres commits reales y espera su final antes de limpiar; refuerza state=complete. Pasan la suite local de 1.157/116 archivos, 25 focales finales, tipos/lint Runtime y nueve tests del harness. Nuevo CI pendiente, incluido foco de 72. K11/K21 y etapa 5 no se cierran. Se documenta el runner Windows de Actions como alternativa de NSIS/delta para etapa 9.
+
+## Historial local y CI anterior confirmado
+
+STAGE5-LAUNCH-HISTORY (`31f2c84`) protege archivos/manifiestos/captura y fallback por launchId, instancia y lado reales, con retención conservadora sin rm recursivo. 1.188 unitarias/118 archivos;14 React+7 Vue locales, cinco escenarios compartidos por selector;12 Axe sin violaciones/12 incomplete. CI41307887151/c683bd0 success confirma chunks/foco72 anteriores:1157 unitarias,219 React+1Strict+10Vue,2omitidos,0flaky. Validar nuevo CI para este bloque. K21 mantiene streams/orden/multibyte/memoria/arranque/copiar/exportar Native/logger pendientes; historial y vista de archivos ya acotados. K12 pass, K11 integral/IPC legacy/no NIO pendiente; Mundos y chunks conservados, etapa5 activa.
