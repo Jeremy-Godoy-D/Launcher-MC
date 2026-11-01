@@ -10,6 +10,7 @@ import { InstanceMods } from './InstanceMods'
 import { InstanceShaders } from './InstanceShaders'
 import { InstanceWorlds } from './InstanceWorlds'
 import { InstanceResourcePacks } from './InstanceResourcePacks'
+import { InstanceBaseSettings } from './InstanceBaseSettings'
 import './instance.css'
 
 const tabs = [['summary', '/instance'], ['mods', '/instance/mods'], ['packs', '/instance/resourcepacks'], ['shaders', '/instance/shaderpacks'], ['worlds', '/instance/save'], ['settings', '/instance/base-setting'], ['console', '/instance/console']] as const
@@ -47,8 +48,15 @@ export function InstanceWorkspace({ instance, media, cover, headerRef, play, opt
       <dl className="instance-details"><div><dt>Minecraft</dt><dd>{instance.runtime.minecraft || instance.version || t('react.workspace.unknown')}</dd></div><div><dt>Loader</dt><dd>{loaderName(instance)}</dd></div>
         <div><dt>{t('react.workspace.lastPlayed')}</dt><dd>{instance.lastPlayedDate > 0 ? d(instance.lastPlayedDate) : t('react.workspace.never')}</dd></div>
         <div><dt>{t('react.workspace.playtime')}</dt><dd>{t('react.workspace.minutes', { value: n(Math.floor(instance.playtime / 60000)) })}</dd></div>
+        {instance.server?.host && <div><dt>{t('react.instanceSettings.serverTitle')}</dt><dd>{instance.server.host}{instance.server.port ? `:${instance.server.port}` : ''}</dd></div>}
       </dl>
+      <div className="content-selection" style={{ padding: '12px 0', gap: 8, flexWrap: 'wrap' }}>
+        <NavLink to="/instance/base-setting" className="button secondary">{t('react.workspace.settings')}</NavLink>
+        <NavLink to="/instance/mods" className="button secondary">{t('react.workspace.mods')}</NavLink>
+        <NavLink to="/instance/save" className="button secondary">{t('react.workspace.worlds')}</NavLink>
+        <NavLink to="/instance/console" className="button secondary">{t('react.workspace.console')}</NavLink>
+      </div>
       <p className="instance-path">{t('react.workspace.folder')}: {instance.path}</p>
-    </section> : tab === 'mods' ? <InstanceMods key={instance.path} path={instance.path} runtime={instance.runtime} running={running} configuredJava={instance.java} /> : tab === 'packs' ? <InstanceResourcePacks key={instance.path} path={instance.path} running={running} runtime={instance.runtime} /> : tab === 'shaders' ? <InstanceShaders key={instance.path} path={instance.path} running={running} runtime={instance.runtime} /> : tab === 'worlds' ? <InstanceWorlds key={instance.path} path={instance.path} running={running} /> : tab ? <div role="status" className="empty"><h2>{t(`react.workspace.${tab}`)}</h2><p>{t('react.instances.featurePending')}</p></div> : <div className="empty"><h2>{t('react.workspace.notFound')}</h2><Link to="/instance" className="button secondary">{t('react.workspace.summary')}</Link></div>}
+    </section> : tab === 'mods' ? <InstanceMods key={instance.path} path={instance.path} runtime={instance.runtime} running={running} configuredJava={instance.java} /> : tab === 'packs' ? <InstanceResourcePacks key={instance.path} path={instance.path} running={running} runtime={instance.runtime} /> : tab === 'shaders' ? <InstanceShaders key={instance.path} path={instance.path} running={running} runtime={instance.runtime} /> : tab === 'worlds' ? <InstanceWorlds key={instance.path} path={instance.path} running={running} /> : tab === 'settings' ? <InstanceBaseSettings key={instance.path} instance={instance} running={running} /> : tab ? <div role="status" className="empty"><h2>{t(`react.workspace.${tab}`)}</h2><p>{t('react.instances.featurePending')}</p></div> : <div className="empty"><h2>{t('react.workspace.notFound')}</h2><Link to="/instance" className="button secondary">{t('react.workspace.summary')}</Link></div>}
   </section>
 }

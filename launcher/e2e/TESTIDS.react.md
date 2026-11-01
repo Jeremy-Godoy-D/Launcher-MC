@@ -6,7 +6,7 @@ This file is the contract between the launcher UI in `xmcl-react-ui/` and the Pl
 
 Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testids` with the selected LAUNCHER_RENDERER. Computed IDs are not resolved by this static registry.
 
-**Total anchors:** 83 (in 42 Vue/TSX files)
+**Total anchors:** 106 (in 43 Vue/TSX files)
 
 | Test ID | Defined in |
 |---|---|
@@ -26,6 +26,7 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `featured-play` | [`xmcl-react-ui/src/App.tsx#L617`](../xmcl-react-ui/src/App.tsx#L617) |
 | `featured-project-cover` | [`xmcl-react-ui/src/App.tsx#L609`](../xmcl-react-ui/src/App.tsx#L609) |
 | `group-confirm` | [`xmcl-react-ui/src/features/library/GroupsDialog.tsx#L69`](../xmcl-react-ui/src/features/library/GroupsDialog.tsx#L69) |
+| `instance-base-setting` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L239`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L239) |
 | `instance-copy` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L58`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L58) |
 | `instance-create-confirm` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L720`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L720) |
 | `instance-export` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L46`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L46) |
@@ -37,7 +38,7 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `instance-operations` | [`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L62`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L62) |
 | `instance-resourcepacks` | [`xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L140`](../xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L140) |
 | `instance-shaders` | [`xmcl-react-ui/src/features/instance/InstanceShaders.tsx#L179`](../xmcl-react-ui/src/features/instance/InstanceShaders.tsx#L179) |
-| `instance-workspace` | [`xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L32`](../xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L32) |
+| `instance-workspace` | [`xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L33`](../xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L33) |
 | `instance-worlds` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L45`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L45) |
 | `launch-confirm` | [`xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157`](../xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157) |
 | `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L700`](../xmcl-react-ui/src/App.tsx#L700) |
@@ -76,6 +77,28 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `save-world-map-paste` | [`xmcl-react-ui/src/features/instance/WorldMap.tsx#L516`](../xmcl-react-ui/src/features/instance/WorldMap.tsx#L516) |
 | `save-world-map-reset` | [`xmcl-react-ui/src/features/instance/WorldMap.tsx#L446`](../xmcl-react-ui/src/features/instance/WorldMap.tsx#L446) |
 | `save-world-map-selected-count` | [`xmcl-react-ui/src/features/instance/WorldMap.tsx#L477`](../xmcl-react-ui/src/features/instance/WorldMap.tsx#L477) |
+| `setting-discard-btn` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L730`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L730) |
+| `setting-fast-launch` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L678`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L678) |
+| `setting-hide-launcher` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L690`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L690) |
+| `setting-java-browse` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L328`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L328) |
+| `setting-java-select` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L307`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L307) |
+| `setting-mc-options` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L473`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L473) |
+| `setting-memory-max` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L413`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L413) |
+| `setting-memory-min` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L391`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L391) |
+| `setting-memory-mode-custom` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L373`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L373) |
+| `setting-memory-mode-inherit` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L361`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L361) |
+| `setting-reset-btn` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L718`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L718) |
+| `setting-resolution-fullscreen` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L572`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L572) |
+| `setting-resolution-height` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L556`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L556) |
+| `setting-resolution-mode-custom` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L520`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L520) |
+| `setting-resolution-mode-inherit` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L508`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L508) |
+| `setting-resolution-width` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L538`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L538) |
+| `setting-save-btn` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L742`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L742) |
+| `setting-server-clear` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L645`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L645) |
+| `setting-server-host` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L609`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L609) |
+| `setting-server-port` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L629`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L629) |
+| `setting-show-log` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L702`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L702) |
+| `setting-vm-options` | [`xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L456`](../xmcl-react-ui/src/features/instance/InstanceBaseSettings.tsx#L456) |
 | `setup-next` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L345`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L345) |
 | `setup-path` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L233`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L233) |
 | `setup-root` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L153`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L153) |
