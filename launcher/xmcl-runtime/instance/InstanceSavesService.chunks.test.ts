@@ -41,6 +41,7 @@ describe('InstanceSavesService chunk operations and safety', () => {
   let processError: Error | undefined
   let locks: Map<string, Mutex>
   let mutexOf: ReturnType<typeof vi.fn<(key: string) => Mutex>>
+  let acquireWorldLock: ReturnType<typeof vi.fn>
 
   beforeEach(async () => {
     vi.clearAllMocks()
@@ -59,7 +60,9 @@ describe('InstanceSavesService chunk operations and safety', () => {
       return locks.get(key)!
     })
 
+    acquireWorldLock = vi.fn(async (_: string, create: boolean) => create ? { verify: async () => {}, release: () => {} } : undefined)
     const app = {
+      acquireWorldLock,
       mutex: { of: mutexOf },
       registry: { get: async () => ({ getGameProcesses: async () => { if (processError) throw processError; return processes } }) },
     }
@@ -76,6 +79,12 @@ describe('InstanceSavesService chunk operations and safety', () => {
     expect(dirname(resolve(testRoot))).toBe(await realpath(tmpdir()))
     expect(testRoot).toContain('xmcl-chunks-test-')
     await rm(testRoot, { recursive: true, force: true })
+  })
+
+  it('does not create a session control for a stale chunk review', async () => {
+    const change = { type: 'delete' as const, savePath, dimension: 'minecraft:overworld', chunks: [{ chunkX: 0, chunkZ: 0 }] }
+    await expect(service.applySaveChunkChanges(change, '0'.repeat(64))).rejects.toHaveProperty('name', 'WorldChunksChangedError')
+    expect(acquireWorldLock).toHaveBeenCalledExactlyOnceWith(savePath, false)
   })
 
   it('rejects worldgen and progress reads outside registered worlds', async () => {

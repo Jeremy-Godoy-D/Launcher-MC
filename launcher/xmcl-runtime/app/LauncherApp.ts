@@ -32,6 +32,11 @@ import { createBootstrapSession } from '../setup/bootstrapSession'
 
 export const LauncherAppKey: InjectionKey<LauncherApp> = Symbol('LauncherAppKey')
 
+export interface WorldLock {
+  verify(): Promise<void>
+  release(): void
+}
+
 export interface MicrosoftAuthTelemetryEvent {
   name: 'microsoft-auth-start' | 'microsoft-auth-broker-result' | 'microsoft-auth-webview-result' | 'microsoft-auth-complete'
   properties: Record<string, string | number | boolean>
@@ -104,6 +109,10 @@ export interface LogEmitter extends EventEmitter {
 }
 
 export class LauncherApp extends EventEmitter {
+  async acquireWorldLock(_world: string, _create: boolean): Promise<WorldLock | undefined> {
+    throw Object.assign(new Error('World session locking is unavailable on this host'), { name: 'WorldLockUnavailableError' })
+  }
+
   /**
    * Launcher %APPDATA%/xmcl path
    */

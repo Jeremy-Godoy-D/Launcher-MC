@@ -77,7 +77,7 @@ async function plan(input: WorldFileOperation, sharedRoot: string) {
   }
   const linkOnly = operation.type === 'remove' && source.linked
   const archive = source.file ? await inspectWorldArchive(source.root) : undefined
-  const sourceTree = archive ? { identity: [archive.hash], entries: archive.files.map(file => ({ path: file.path, directory: file.directory, size: file.size, hash: undefined as string | undefined })) } : linkOnly ? { identity: null, entries: [] } : await readFolderSnapshot(source.root)
+  const sourceTree = archive ? { identity: [archive.hash], entries: archive.files.map(file => ({ path: file.path, directory: file.directory, size: file.size, hash: undefined as string | undefined })) } : linkOnly ? { identity: null, entries: [] } : await readFolderSnapshot(source.root, 'session.lock')
   if (!sourceTree.identity && !linkOnly) throw changed()
   if (operation.type !== 'remove' && !sourceTree.entries.some(file => file.path === 'level.dat' && !file.directory)) throw Object.assign(new Error('World has no level.dat'), { name: operation.type === 'import' ? 'WorldImportInvalidError' : 'Error' })
   let parent = '', target = '', authority = '', shared = source.shared
@@ -100,13 +100,13 @@ async function plan(input: WorldFileOperation, sharedRoot: string) {
 }
 export async function previewWorldFiles(input: WorldFileOperation, sharedRoot: string) { return (await plan(input, sharedRoot)).review }
 
-export async function applyWorldFiles(review: WorldFileReview, sharedRoot: string, verify: (review: WorldFileReview) => Promise<void> = async () => {}) {
+export async function applyWorldFiles(review: WorldFileReview, sharedRoot: string, verify: (review: WorldFileReview, beforeWorldRename?: boolean) => Promise<void> = async () => {}) {
   if (!review || typeof review.snapshot !== 'string' || !/^[a-f0-9]{64}$/.test(review.snapshot)) throw changed()
   const current = await plan(review.operation, sharedRoot)
   if (current.review.snapshot !== review.snapshot) throw changed()
   await verify(current.review)
   const { operation } = current.review
-  async function unchanged() {
+  async function unchanged(beforeWorldRename = false) {
     if ((await sourceLocation(operation, sharedRoot)).identity !== current.source.identity) throw changed()
     if (current.level && operation.type === 'metadata') {
       const next = await prepareWorldMetadata(current.source.root, operation.metadata).catch(error => { if (error?.name === 'WorldChangedError') throw changed(); throw error })
@@ -117,8 +117,8 @@ export async function applyWorldFiles(review: WorldFileReview, sharedRoot: strin
       const next = await inspectInstalledDatapack(current.parent, operation.fileName).catch(() => { throw changed() })
       if (digest(next.identity) !== digest(current.installedDatapack.identity)) throw changed()
     } else if (current.archive) await assertWorldArchiveUnchanged(current.archive)
-    else if (!current.review.linkOnly && digest(await readFolderSnapshot(current.source.root)) !== digest(current.sourceTree)) throw changed()
-    await verify(current.review)
+    else if (!current.review.linkOnly && digest(await readFolderSnapshot(current.source.root, 'session.lock')) !== digest(current.sourceTree)) throw changed()
+    await verify(current.review, beforeWorldRename)
   }
   if (operation.type === 'import-datapack') {
     await assertInstallDirectory(current.source.root, current.parent); await mkdir(current.parent, { recursive: true }); await assertInstallDirectory(current.source.root, current.parent)
@@ -186,7 +186,7 @@ export async function applyWorldFiles(review: WorldFileReview, sharedRoot: strin
   if (operation.type === 'remove') {
     const instance = await realpath(operation.instancePath), backup = join(instance, '.backups', `world-${randomUUID()}`)
     await assertInstallDirectory(instance, backup); await mkdir(backup, { recursive: true }); await assertInstallDirectory(instance, backup)
-    await unchanged()
+    await unchanged(true)
     // Rename keeps the original bytes (or just the owned link); cross-device moves fail without deleting anything.
     await rename(current.review.linkOnly ? current.source.logical : current.source.root, join(backup, operation.saveName))
     return { path: current.source.logical, backup }

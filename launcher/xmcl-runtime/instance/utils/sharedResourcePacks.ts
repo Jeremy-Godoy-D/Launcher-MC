@@ -13,13 +13,14 @@ type Entry = { path: string; directory: boolean; size: number; hash?: string }
 const changed = () => Object.assign(new Error('Resource packs changed since review'), { name: 'ResourcePacksChangedError' })
 const inspect = (path: string) => lstat(path).catch(error => { if (error.code !== 'ENOENT') throw error })
 const digest = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex')
-export async function readFolderSnapshot(root: string) {
+export async function readFolderSnapshot(root: string, ignoredFile?: string) {
   const info = await inspect(root), entries: Entry[] = [], seen = new Set<string>()
   if (!info) return { entries, identity: null }
   if (!info.isDirectory() || info.isSymbolicLink()) throw new Error('Unsafe pack directory')
   async function scan(path: string, prefix = '', depth = 0) {
     if (depth > 64) throw new Error('Pack directory is too deep')
     for (const name of (await readdir(path)).sort()) {
+      if (prefix + name === ignoredFile) continue
       const relative = prefix + name; importPathParts(relative)
       if (entries.length >= 100000 || seen.has(relative.toLowerCase())) throw new Error('Oversized or ambiguous pack directory')
       seen.add(relative.toLowerCase())

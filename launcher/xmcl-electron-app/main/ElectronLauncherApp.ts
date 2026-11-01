@@ -145,6 +145,11 @@ function getErrorCode(e: Error) {
 }
 
 export default class ElectronLauncherApp extends LauncherApp {
+  override async acquireWorldLock(world: string, create: boolean) {
+    if (process.platform !== 'win32') return super.acquireWorldLock(world, create)
+    return (await import('./utils/worldLock')).acquireWindowsWorldLock(world, create)
+  }
+
   readonly session: ElectronSession
 
   /**

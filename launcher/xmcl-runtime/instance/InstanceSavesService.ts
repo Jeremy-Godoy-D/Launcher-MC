@@ -39,7 +39,7 @@ import { kMarketProvider } from '~/market'
 import { kResourceManager } from '~/resource'
 import { readInstanceSaveMetadata, readWorldGenSettings, updateSaveMetadata, listSaveDimensions, getSaveRegions, readSaveChunks, readSaveProgress, getRegionDir, kSaveWorker, type SaveWorker } from '~/save'
 import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/service'
-import { LauncherApp } from '../app/LauncherApp'
+import { LauncherApp, type WorldLock } from '../app/LauncherApp'
 import { copyPassively, isDirectory, linkDirectory, missing, pipeline, readdirIfPresent } from '../util/fs'
 import { isNonnull, requireObject, requireString } from '../util/object'
 import { includeAs, writeZipFile } from '../util/zip'
@@ -222,12 +222,38 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       await this.#javaInstance(operation.instancePath)
       const review = await previewWorldFiles(operation, this.getPath())
       await this.#worldFilesIdle(review)
-      return review
+      const lock = await this.#worldFileLock(review, false)
+      try { await lock?.verify(); return review } finally { lock?.release() }
     })
   }
 
   async applyWorldFiles(review: WorldFileReview) {
-    return this.#worldFiles(review?.operation, async () => applyWorldFiles(review, this.getPath(), value => this.#worldFilesIdle(value)))
+    return this.#worldFiles(review?.operation, async () => {
+      let lock: WorldLock | undefined
+      try {
+        return await applyWorldFiles(review, this.getPath(), async (value, beforeWorldRename) => {
+          await this.#worldFilesIdle(value)
+          lock ||= await this.#worldFileLock(value, true)
+          await lock?.verify()
+          // Windows directory rename rejects live child-file handles, including a game opened after release.
+          if (beforeWorldRename) { lock?.release(); lock = undefined }
+        })
+      } finally { lock?.release() }
+    })
+  }
+
+  async #worldFileLock(review: WorldFileReview, create: boolean) {
+    if (review.linkOnly) return undefined
+    const operation = review.operation
+    if (operation.type === 'import') {
+      if (!(await lstat(operation.sourcePath)).isDirectory()) return undefined
+      // Import sources are read-only; a missing lock is rechecked at every snapshot verification.
+      return this.app.acquireWorldLock(await realpath(operation.sourcePath), false)
+    }
+    const source = await worldLocation(operation.instancePath, operation.saveName, this.getPath())
+    const lock = await this.app.acquireWorldLock(source.root, create)
+    if (create && !lock) throw new AnyError('WorldLockUnavailableError')
+    return lock
   }
 
   /**
@@ -678,17 +704,29 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     })
   }
 
-  async #chunkChanges<T>(change: SaveChunkChange, action: (source: { root: string; identity: string; shared: boolean }, verify: () => Promise<void>) => Promise<T>) {
+  async #chunkChanges<T>(change: SaveChunkChange, action: (source: { root: string; identity: string; shared: boolean }, verify: () => Promise<void>) => Promise<T>, write = false) {
     if (!change || typeof change.savePath !== 'string') throw new Error('Invalid chunk operation')
     const first = await this.#assertSaveWritable(change.savePath)
     return this.mutex.of('resource-pack-options').runExclusive(async () => {
       const run = async () => {
         const source = await this.#assertSaveWritable(change.savePath)
         if (source.identity !== first.identity) throw new AnyError('WorldChangedError')
-        const verify = async () => {
-          if ((await this.#assertSaveWritable(change.savePath)).identity !== first.identity) throw new AnyError('WorldChangedError')
-        }
-        return action(source, verify)
+        let lock = await this.app.acquireWorldLock(source.root, false)
+        try {
+          const verify = async () => {
+            if ((await this.#assertSaveWritable(change.savePath)).identity !== first.identity) throw new AnyError('WorldChangedError')
+            if (!lock && write) {
+              lock = await this.app.acquireWorldLock(source.root, true)
+              if (!lock) throw new AnyError('WorldLockUnavailableError')
+            }
+            if (lock) await lock.verify()
+            else {
+              const probe = await this.app.acquireWorldLock(source.root, false)
+              try { await probe?.verify() } finally { probe?.release() }
+            }
+          }
+          return await action(source, verify)
+        } finally { lock?.release() }
       }
       return first.matchedInstance ? this.mutex.of(LockKey.instance(first.matchedInstance.path)).runExclusive(run) : run()
     })
@@ -708,7 +746,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       const plan = await planSaveChunkChanges(source.root, change, source)
       if (plan.review.snapshot !== snapshot) throw new AnyError('WorldChunksChangedError')
       return applySaveChunkPlan(plan, verify)
-    })
+    }, true)
   }
 
   async getSaveChunkBackups(savePath: string) {
