@@ -63,7 +63,8 @@ test('native shared folders and hard-linked options copy independently and expor
     const dialog = page.getByTestId('instance-operations')
     await expect(dialog.getByRole('checkbox', { name: /resourcepacks\/pack.zip/ })).toBeChecked()
     await expect(dialog.getByRole('checkbox', { name: /shaderpacks\/shader.zip/ })).toBeChecked()
-    for (const name of [/saves\/World/, /options.txt/, /servers.dat/]) { await expect(dialog.getByRole('checkbox', { name })).not.toBeChecked(); await dialog.getByRole('checkbox', { name }).check() }
+    for (const checkbox of await dialog.getByRole('checkbox', { name: /^saves\/World\// }).all()) await expect(checkbox).not.toBeChecked()
+    for (const name of [/^saves\/World\/level\.dat /, /options.txt/, /servers.dat/]) { await expect(dialog.getByRole('checkbox', { name })).not.toBeChecked(); await dialog.getByRole('checkbox', { name }).check() }
     await expect(dialog.getByText('resourcepacks/token.json', { exact: true })).toHaveCount(0)
     for (const width of [1200, 800]) {
       await win.evaluate((win, width) => win.setContentSize(width, width === 800 ? 400 : 720), width)
@@ -89,6 +90,7 @@ test('native shared folders and hard-linked options copy independently and expor
   await expect(page.getByTestId('instance-operations').getByRole('status')).toHaveText('Copia guardada.')
   const exported = await contents((await page.getByTestId('export-result').textContent())!)
   expect(exported['overrides/saves/World/level.dat']).toBe('shared-world')
+  expect(exported).not.toHaveProperty('overrides/saves/World/session.lock')
   expect(exported['overrides/resourcepacks/pack.zip']).toBe('shared-pack')
   expect(exported['overrides/shaderpacks/shader.zip']).toBe('shared-shader')
   expect(exported['overrides/options.txt']).toBe('shared-options'); expect(exported['overrides/servers.dat']).toBe('shared-servers')
