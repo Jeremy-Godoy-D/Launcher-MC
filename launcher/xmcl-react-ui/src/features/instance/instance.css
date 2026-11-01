@@ -113,6 +113,15 @@
 
 @layer components {
   .world-files-dialog form { display: flex; flex-direction: column; min-height: 0; }
+  .chunk-backups { margin-block: 16px; }
+  .chunk-backups summary { cursor: pointer; padding-block: 10px; }
+  .chunk-backups summary svg { vertical-align: middle; }
+  .chunk-backups .field { display: grid; gap: 8px; margin-block: 12px; }
+  .chunk-backups select { min-width: 0; max-width: 100%; }
+  .chunk-backups select, .world-map-coordinates input { padding: 10px 12px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; font: inherit; }
+  .world-map-coordinates { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; margin-block: 12px; }
+  .world-map-coordinates .field { display: grid; gap: 6px; min-width: 0; }
+  .world-map-coordinates input { width: 150px; max-width: 100%; }
   .world-list .content-actions { margin-top: 10px; }
 }
 

@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Mutex } from 'async-mutex'
+import { serialize, TagType } from '@xmcl/nbt'
+import { readSaveChunks, writeSaveChunks } from '../save/region'
 import { LockKey } from '@xmcl/runtime-api'
-import { mkdir, mkdtemp, rm, writeFile, readFile, symlink, rename, unlink } from 'node:fs/promises'
+import { mkdir, mkdtemp, rm, writeFile, readFile, symlink, rename, unlink, realpath } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 
@@ -10,14 +12,10 @@ vi.mock('~/instance', () => ({ InstanceService: class {} }))
 vi.mock('~/launch', () => ({ LaunchService: class {} }))
 vi.mock('~/resource', () => ({ kResourceManager: Symbol('resources') }))
 vi.mock('~/market', () => ({ kMarketProvider: Symbol('market') }))
-vi.mock('~/save', async (importOriginal) => {
-  const actual: any = await importOriginal()
-  return {
-    ...actual,
-    kSaveWorker: Symbol('save'),
-    deleteSaveChunks: vi.fn(),
-    writeSaveChunks: vi.fn(),
-  }
+vi.mock('~/save', async original => ({ ...await original<typeof import('~/save')>(), kSaveWorker: Symbol('save') }))
+vi.mock('./utils/worldChunks', async original => {
+  const actual = await original<typeof import('./utils/worldChunks')>()
+  return { ...actual, applySaveChunkPlan: vi.fn(actual.applySaveChunkPlan) }
 })
 vi.mock('~/service', () => ({
   AbstractService: class { constructor(public app: any) {} get mutex() { return this.app.mutex } log() {} error() {} warn() {} },
@@ -26,7 +24,12 @@ vi.mock('~/service', () => ({
 }))
 
 const { InstanceSavesService } = await import('./InstanceSavesService')
-const { deleteSaveChunks, writeSaveChunks } = await import('~/save')
+const { applySaveChunkPlan } = await import('./utils/worldChunks')
+class Chunk { @TagType(TagType.Int) xPos = 0; @TagType(TagType.Int) zPos = 0 }
+async function payload(chunkX = 0, chunkZ = 0) {
+  const value = new Chunk(); value.xPos = chunkX; value.zPos = chunkZ
+  return { chunkX, chunkZ, compression: 2, data: await serialize(value, { compressed: 'deflate' }) }
+}
 
 describe('InstanceSavesService chunk operations and safety', () => {
   let service: InstanceType<typeof InstanceSavesService>
@@ -41,14 +44,12 @@ describe('InstanceSavesService chunk operations and safety', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks()
-    testRoot = await mkdtemp(join(tmpdir(), 'xmcl-chunks-test-'))
+    testRoot = await realpath(await mkdtemp(join(tmpdir(), 'xmcl-chunks-test-')))
     instancePath = join(testRoot, 'instance-a')
     savePath = join(instancePath, 'saves', 'WorldOne')
     await mkdir(savePath, { recursive: true })
     await writeFile(join(savePath, 'level.dat'), Buffer.from('mock-level-dat'))
-    const regionDir = join(savePath, 'region')
-    await mkdir(regionDir, { recursive: true })
-    await writeFile(join(regionDir, 'r.0.0.mca'), Buffer.from('dummy-region-bytes-at-least-8192'.repeat(300)))
+    await writeSaveChunks(savePath, 'minecraft:overworld', [await payload(), await payload(1, 1)])
 
     instances = [{ path: instancePath, edition: 'java' }]
     processes = []; processError = undefined
@@ -72,7 +73,7 @@ describe('InstanceSavesService chunk operations and safety', () => {
   })
 
   afterEach(async () => {
-    expect(dirname(resolve(testRoot))).toBe(resolve(tmpdir()))
+    expect(dirname(resolve(testRoot))).toBe(await realpath(tmpdir()))
     expect(testRoot).toContain('xmcl-chunks-test-')
     await rm(testRoot, { recursive: true, force: true })
   })
@@ -87,20 +88,20 @@ describe('InstanceSavesService chunk operations and safety', () => {
     instances = [{ path: registered, edition: 'java' }]
     processes = [{ options: { gameDirectory: game } }]
     await expect(service.deleteSaveChunks({ savePath: join(physical, 'instance', 'saves', 'WorldOne'), dimension: 'minecraft:overworld', chunks: [{ chunkX: 0, chunkZ: 0 }] })).rejects.toHaveProperty('name', 'InstanceRunningError')
-    expect(deleteSaveChunks).not.toHaveBeenCalled()
+    expect(applySaveChunkPlan).not.toHaveBeenCalled()
   })
 
   it('rejects a world outside registered Java instances and the owned shared depot', async () => {
     const foreign = join(testRoot, 'foreign')
     await mkdir(foreign); await writeFile(join(foreign, 'level.dat'), 'level')
     await expect(service.deleteSaveChunks({ savePath: foreign, dimension: 'minecraft:overworld', chunks: [{ chunkX: 0, chunkZ: 0 }] })).rejects.toHaveProperty('name', 'WorldNotFoundError')
-    expect(deleteSaveChunks).not.toHaveBeenCalled()
+    expect(applySaveChunkPlan).not.toHaveBeenCalled()
   })
 
   it('fails closed when game process state cannot be read', async () => {
     processError = new Error('Process state unavailable')
     await expect(service.deleteSaveChunks({ savePath, dimension: 'minecraft:overworld', chunks: [{ chunkX: 0, chunkZ: 0 }] })).rejects.toThrow('Process state unavailable')
-    expect(deleteSaveChunks).not.toHaveBeenCalled()
+    expect(applySaveChunkPlan).not.toHaveBeenCalled()
   })
 
   it('rejects dimensions and chunk coordinates that cannot identify local region files', async () => {
@@ -110,7 +111,7 @@ describe('InstanceSavesService chunk operations and safety', () => {
     for (const chunkX of [NaN, Infinity, 0.5, 2147483648]) {
       await expect(service.deleteSaveChunks({ savePath, dimension: 'minecraft:overworld', chunks: [{ chunkX, chunkZ: 0 }] })).rejects.toThrow()
     }
-    expect(deleteSaveChunks).not.toHaveBeenCalled()
+    expect(applySaveChunkPlan).not.toHaveBeenCalled()
   })
 
   it('rechecks the active game and Java registration after waiting for the instance lock', async () => {
@@ -125,32 +126,58 @@ describe('InstanceSavesService chunk operations and safety', () => {
       else instances = []
       release(); await failure
     }
-    expect(deleteSaveChunks).not.toHaveBeenCalled()
+    expect(applySaveChunkPlan).not.toHaveBeenCalled()
   })
 
   it('rejects linked region and backup directories before any chunk mutation', async () => {
     const foreign = join(testRoot, 'foreign-regions')
     await mkdir(foreign)
     await writeFile(join(foreign, 'r.0.0.mca'), 'untouched')
-    const region = join(savePath, 'region', 'r.0.0.mca'), original = join(testRoot, 'original-region')
+    const region = join(savePath, 'region', 'r.0.0.mca'), original = join(testRoot, 'original-region'), local = await readFile(region)
     await rename(dirname(region), original)
     await symlink(foreign, dirname(region), 'junction')
     const input = { savePath, dimension: 'minecraft:overworld', chunks: [{ chunkX: 0, chunkZ: 0 }] }
     await expect(service.deleteSaveChunks(input)).rejects.toThrow('Unsafe install directory')
     expect(await readFile(join(foreign, 'r.0.0.mca'), 'utf8')).toBe('untouched')
-    await unlink(dirname(region)); await rename(original, dirname(region)); await writeFile(region, 'local')
+    await unlink(dirname(region)); await rename(original, dirname(region))
     await symlink(foreign, join(savePath, '.backups'), 'junction')
     await expect(service.deleteSaveChunks(input)).rejects.toThrow('Unsafe install directory')
-    expect(await readFile(region, 'utf8')).toBe('local')
-    expect(deleteSaveChunks).not.toHaveBeenCalled()
+    expect(await readFile(region)).toEqual(local)
+    expect(applySaveChunkPlan).not.toHaveBeenCalled()
   })
 
   it('validates pasted bytes and offsets before backing up or writing regions', async () => {
-    const base = { savePath, dimension: 'minecraft:overworld', chunks: [{ chunkX: 0, chunkZ: 0, compression: 2, data: Buffer.from('abc') }] }
+    const base = { savePath, dimension: 'minecraft:overworld', chunks: [await payload()] }
     await expect(service.pasteSaveChunks({ ...base, offsetX: Infinity })).rejects.toThrow('Invalid chunk coordinates')
     await expect(service.pasteSaveChunks({ ...base, chunks: [{ ...base.chunks[0], compression: 128 }] })).rejects.toThrow('Invalid chunk payload')
     await expect(service.pasteSaveChunks({ ...base, chunks: [{ ...base.chunks[0], data: Buffer.alloc(255 * 4096) }] })).rejects.toThrow('Invalid chunk payload')
-    expect(writeSaveChunks).not.toHaveBeenCalled()
+    expect(applySaveChunkPlan).not.toHaveBeenCalled()
+  })
+
+  it('uses the physical world for successful writes through an aliased registered parent', async () => {
+    const physical = join(testRoot, 'physical'), alias = join(testRoot, 'alias'), own = join(physical, 'instance')
+    const world = join(own, 'saves', 'AliasWorld'); await mkdir(world, { recursive: true }); await writeFile(join(world, 'level.dat'), 'metadata')
+    await writeSaveChunks(world, 'minecraft:overworld', [await payload()]); await symlink(physical, alias, 'junction')
+    instances = [{ path: join(alias, 'instance'), edition: 'java' }]
+    await service.deleteSaveChunks({ savePath: join(alias, 'instance/saves/AliasWorld'), dimension: 'minecraft:overworld', chunks: [{ chunkX: 0, chunkZ: 0 }] })
+    expect(await readSaveChunks(world, 'minecraft:overworld', [{ chunkX: 0, chunkZ: 0 }])).toEqual([])
+    expect((await service.getSaveChunkBackups(world)).entries).toHaveLength(1)
+  })
+
+  it('requires world authority for copying and rejects a changed review before creating backups', async () => {
+    const foreign = join(testRoot, 'foreign'); await mkdir(foreign); await writeFile(join(foreign, 'level.dat'), 'metadata')
+    await expect(service.copySaveChunks({ savePath: foreign, dimension: 'minecraft:overworld', chunks: [{ chunkX: 0, chunkZ: 0 }] })).rejects.toHaveProperty('name', 'WorldNotFoundError')
+    await expect(service.listSaveDimensions(foreign)).rejects.toHaveProperty('name', 'WorldNotFoundError')
+    await expect(service.getSaveRegions(foreign, 'minecraft:overworld')).rejects.toHaveProperty('name', 'WorldNotFoundError')
+    await expect(service.renderSaveRegion(foreign, 'minecraft:overworld', 0, 0)).rejects.toHaveProperty('name', 'WorldNotFoundError')
+    const change = { type: 'delete', savePath, dimension: 'minecraft:overworld', chunks: [{ chunkX: 0, chunkZ: 0 }] } as const
+    const review = await service.previewSaveChunkChanges({ ...change, chunks: [...change.chunks] })
+    await writeSaveChunks(savePath, 'minecraft:overworld', [await payload(2, 0)])
+    const current = await readFile(join(savePath, 'region/r.0.0.mca'))
+    await expect(service.applySaveChunkChanges({ ...change, chunks: [...change.chunks] }, review.snapshot)).rejects.toHaveProperty('name', 'WorldChunksChangedError')
+    expect(await readFile(join(savePath, 'region/r.0.0.mca'))).toEqual(current)
+    expect((await service.getSaveChunkBackups(savePath)).entries).toEqual([])
+    expect(applySaveChunkPlan).not.toHaveBeenCalled()
   })
 
   it('rejects deleteSaveChunks if save directory does not contain level.dat', async () => {
@@ -169,7 +196,7 @@ describe('InstanceSavesService chunk operations and safety', () => {
       dimension: 'minecraft:overworld',
       chunks: [{ chunkX: 0, chunkZ: 0 }],
     })).rejects.toHaveProperty('name', 'InstanceRunningError')
-    expect(deleteSaveChunks).not.toHaveBeenCalled()
+    expect(applySaveChunkPlan).not.toHaveBeenCalled()
   })
 
   it('rejects deleteSaveChunks if a shared world is running in any instance', async () => {
@@ -183,7 +210,7 @@ describe('InstanceSavesService chunk operations and safety', () => {
       dimension: 'minecraft:overworld',
       chunks: [{ chunkX: 0, chunkZ: 0 }],
     })).rejects.toHaveProperty('name', 'SharedWorldRunningError')
-    expect(deleteSaveChunks).not.toHaveBeenCalled()
+    expect(applySaveChunkPlan).not.toHaveBeenCalled()
   })
 
   it('creates backup in .backups/world-chunks-* and executes deleteSaveChunks when not running', async () => {
@@ -193,7 +220,8 @@ describe('InstanceSavesService chunk operations and safety', () => {
       chunks: [{ chunkX: 1, chunkZ: 1 }],
     })
 
-    expect(deleteSaveChunks).toHaveBeenCalledWith(savePath, 'minecraft:overworld', [{ chunkX: 1, chunkZ: 1 }])
+    expect(applySaveChunkPlan).toHaveBeenCalledOnce()
+    expect(await readSaveChunks(savePath, 'minecraft:overworld', [{ chunkX: 1, chunkZ: 1 }])).toEqual([])
 
     // Verify backup was created
     const backupsDir = join(savePath, '.backups')
@@ -208,23 +236,24 @@ describe('InstanceSavesService chunk operations and safety', () => {
     await expect(service.pasteSaveChunks({
       savePath,
       dimension: 'minecraft:overworld',
-      chunks: [{ chunkX: 0, chunkZ: 0, compression: 2, data: Buffer.from('abc') }],
+      chunks: [await payload()],
       offsetX: 0,
       offsetZ: 0,
     })).rejects.toHaveProperty('name', 'InstanceRunningError')
-    expect(writeSaveChunks).not.toHaveBeenCalled()
+    expect(applySaveChunkPlan).not.toHaveBeenCalled()
   })
 
   it('creates backup and executes pasteSaveChunks when not running', async () => {
     await service.pasteSaveChunks({
       savePath,
       dimension: 'minecraft:overworld',
-      chunks: [{ chunkX: 0, chunkZ: 0, compression: 2, data: Buffer.from('abc') }],
+      chunks: [await payload()],
       offsetX: 5,
       offsetZ: 5,
     })
 
-    expect(writeSaveChunks).toHaveBeenCalled()
+    expect(applySaveChunkPlan).toHaveBeenCalledOnce()
+    expect(await readSaveChunks(savePath, 'minecraft:overworld', [{ chunkX: 5, chunkZ: 5 }])).toHaveLength(1)
     const backupsDir = join(savePath, '.backups')
     const { readdir } = await import('fs-extra')
     const backupFolders = await readdir(backupsDir)

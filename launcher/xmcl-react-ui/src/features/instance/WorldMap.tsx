@@ -1,23 +1,23 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
-  Check,
   Clipboard,
   Copy,
   Crosshair,
   Grid,
   Layers,
-  MapPin,
   RefreshCw,
   Sliders,
   Trash2,
   X,
 } from 'lucide-react'
-import * as Dialog from '@radix-ui/react-dialog'
 import { InstanceSavesServiceKey } from '@xmcl/runtime-api/src/services/InstanceSavesService'
-import type { SaveRegionInfo } from '@xmcl/runtime-api/src/services/InstanceSavesService'
+import type { SaveChunkChange, SaveRegionInfo } from '@xmcl/runtime-api/src/services/InstanceSavesService'
 import { useService } from '../../runtime'
 import { useI18n } from '../../i18n'
 import { useSavesChunkClipboard } from './savesChunkClipboard'
+import { ChunkBackups, ChunkChangesDialog } from './ChunkChangesDialog'
+
+const EMPTY_REGIONS: SaveRegionInfo[] = []
 
 export function WorldMap({
   savePath,
@@ -32,7 +32,7 @@ export function WorldMap({
 
   const [dimensions, setDimensions] = useState<string[]>([])
   const [dimension, setDimension] = useState<string>('minecraft:overworld')
-  const [regions, setRegions] = useState<SaveRegionInfo[]>([])
+  const [regionState, setRegionState] = useState<{ key: string; rows: SaveRegionInfo[] }>({ key: '', rows: [] })
   const [loading, setLoading] = useState(true)
   const [renderingCount, setRenderingCount] = useState(0)
   const [error, setError] = useState<string | null>(null)
@@ -46,11 +46,16 @@ export function WorldMap({
 
   // Selection & operations
   const [selectedChunks, setSelectedChunks] = useState<Set<string>>(new Set())
-  const [deleting, setDeleting] = useState(false)
-  const [pasting, setPasting] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
-  const [confirmPaste, setConfirmPaste] = useState(false)
-  const [pasteOffset, setPasteOffset] = useState<{ x: number; z: number }>({ x: 0, z: 0 })
+  const [change, setChange] = useState<SaveChunkChange | null>(null)
+  const [revision, setRevision] = useState(0)
+  const sourceKey = `${savePath}:${dimension}:${revision}`
+  const regions = regionState.key === sourceKey ? regionState.rows : EMPTY_REGIONS
+  const [copying, setCopying] = useState(false), copyPending = useRef(false), statusTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const [goX, setGoX] = useState('0'), [goZ, setGoZ] = useState('0')
+  useEffect(() => () => clearTimeout(statusTimer.current), [])
+  const returnTo = useRef<HTMLElement | null>(null)
+  const changed = (complete = false) => { setSelectedChunks(new Set()); setRevision(value => value + 1); if (complete) { clearTimeout(statusTimer.current); setStatusMessage(t('react.chunkChanges.done')) } }
+  const openChange = (value: SaveChunkChange) => { returnTo.current = document.activeElement as HTMLElement; setChange(value) }
 
   // Dragging state
   const [dragging, setDragging] = useState(false)
@@ -61,6 +66,25 @@ export function WorldMap({
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const tileCacheRef = useRef<Map<string, ImageBitmap>>(new Map())
   const fetchingRegionsRef = useRef<Set<string>>(new Set())
+  const failedRegionsRef = useRef<Set<string>>(new Set())
+  const generation = useRef(0), alive = useRef(true), activeRegion = useRef(false), drawRef = useRef<() => void>(() => {})
+  const [zoomLimited, setZoomLimited] = useState(false)
+  const invalidate = useCallback(() => {
+    generation.current++
+    for (const bitmap of tileCacheRef.current.values()) bitmap.close()
+    tileCacheRef.current.clear(); failedRegionsRef.current.clear()
+  }, [])
+  useLayoutEffect(() => { alive.current = true; return () => { alive.current = false; invalidate() } }, [invalidate])
+  useLayoutEffect(() => { invalidate() }, [savePath, dimension, renderHeight, revision, running, invalidate])
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const observer = new IntersectionObserver(([entry]) => { activeRegion.current = entry.isIntersecting; drawRef.current() })
+    observer.observe(canvas)
+    const redraw = () => drawRef.current()
+    document.addEventListener('visibilitychange', redraw); window.addEventListener('focus', redraw); window.addEventListener('blur', redraw)
+    return () => { observer.disconnect(); document.removeEventListener('visibilitychange', redraw); window.removeEventListener('focus', redraw); window.removeEventListener('blur', redraw) }
+  }, [])
 
   const heightBounds = dimension === 'minecraft:overworld' ? { min: -64, max: 320 } : { min: 0, max: 256 }
   const atTop = renderHeight >= heightBounds.max
@@ -97,10 +121,10 @@ export function WorldMap({
       setLoading(true)
       setError(null)
       setSelectedChunks(new Set())
-      tileCacheRef.current.clear()
       try {
+        if (running) return
         const list = await service.getSaveRegions(savePath, dimension)
-        if (active) setRegions(list)
+        if (active) setRegionState({ key: sourceKey, rows: list })
       } catch {
         if (active) setError(t('react.worldMap.loadFailed'))
       } finally {
@@ -111,7 +135,7 @@ export function WorldMap({
     return () => {
       active = false
     }
-  }, [service, savePath, dimension])
+  }, [service, savePath, dimension, revision, running])
 
   // Track modifier keys
   useEffect(() => {
@@ -134,7 +158,7 @@ export function WorldMap({
   // Canvas drawing loop
   const draw = useCallback(() => {
     const canvas = canvasRef.current
-    if (!canvas) return
+    if (!canvas || !alive.current) return
     const rect = canvas.getBoundingClientRect()
     const dpr = window.devicePixelRatio || 1
     const w = rect.width
@@ -163,45 +187,41 @@ export function WorldMap({
       y: h / 2 + (bz - center.z) * scale,
     })
 
-    // Draw regions
-    for (const reg of regions) {
-      const rx = reg.regionX
-      const rz = reg.regionZ
-      const key = `${dimension}:${rx},${rz}:${atTop ? 'top' : renderHeight}`
-      const bitmap = tileCacheRef.current.get(key)
-      const screen = toScreen(rx * 512, rz * 512)
-      const size = 512 * scale
-
-      // Check visibility
-      if (screen.x + size < 0 || screen.x > w || screen.y + size < 0 || screen.y > h) {
-        continue
-      }
-
+    const visible = regions.filter(reg => {
+      const screen = toScreen(reg.regionX * 512, reg.regionZ * 512), size = 512 * scale
+      return screen.x + size >= 0 && screen.x <= w && screen.y + size >= 0 && screen.y <= h
+    }).sort((a, b) => Math.hypot(a.regionX * 512 + 256 - center.x, a.regionZ * 512 + 256 - center.z) - Math.hypot(b.regionX * 512 + 256 - center.x, b.regionZ * 512 + 256 - center.z))
+    setZoomLimited(visible.length > 32)
+    const mayRead = activeRegion.current && !document.hidden && document.hasFocus() && !running && !change
+    for (const [index, reg] of visible.entries()) {
+      const rx = reg.regionX, rz = reg.regionZ, epoch = generation.current
+      const key = `${epoch}:${savePath}:${dimension}:${rx},${rz}:${atTop ? 'top' : renderHeight}`
+      const bitmap = index < 32 ? tileCacheRef.current.get(key) : undefined, screen = toScreen(rx * 512, rz * 512), size = 512 * scale
       if (bitmap) {
-        ctx.imageSmoothingEnabled = false
-        ctx.drawImage(bitmap, screen.x, screen.y, size, size)
-      } else if (!fetchingRegionsRef.current.has(key)) {
-        // Fetch region
-        fetchingRegionsRef.current.add(key)
-        setRenderingCount((c) => c + 1)
-        void service
-          .renderSaveRegion(savePath, dimension, rx, rz, atTop ? undefined : renderHeight)
-          .then(async (rendered) => {
-            const clamped = new Uint8ClampedArray(
-              rendered.data.buffer,
-              rendered.data.byteOffset,
-              rendered.data.byteLength,
-            )
-            const imgData = new ImageData(clamped as any, 512, 512)
-            const bmp = await createImageBitmap(imgData)
-            tileCacheRef.current.set(key, bmp)
-            draw()
-          })
-          .catch(() => {})
-          .finally(() => {
-            fetchingRegionsRef.current.delete(key)
-            setRenderingCount((c) => Math.max(0, c - 1))
-          })
+        tileCacheRef.current.delete(key); tileCacheRef.current.set(key, bitmap)
+        ctx.imageSmoothingEnabled = false; ctx.drawImage(bitmap, screen.x, screen.y, size, size)
+      } else if (index < 32 && mayRead && fetchingRegionsRef.current.size < 2 && !fetchingRegionsRef.current.has(key) && !failedRegionsRef.current.has(key)) {
+        fetchingRegionsRef.current.add(key); setRenderingCount(fetchingRegionsRef.current.size)
+        void service.renderSaveRegion(savePath, dimension, rx, rz, atTop ? undefined : renderHeight).then(async rendered => {
+          if (!alive.current || generation.current !== epoch) return
+          if (rendered.data.byteLength !== 512 * 512 * 4) throw new Error('Invalid region pixels')
+          const bitmap = await createImageBitmap(new ImageData(new Uint8ClampedArray(rendered.data), 512, 512))
+          if (!alive.current || generation.current !== epoch) { bitmap.close(); return }
+          tileCacheRef.current.get(key)?.close(); tileCacheRef.current.set(key, bitmap)
+          while (tileCacheRef.current.size > 32) {
+            const oldest = tileCacheRef.current.keys().next().value!
+            tileCacheRef.current.get(oldest)!.close(); tileCacheRef.current.delete(oldest)
+          }
+        }).catch(() => {
+          if (alive.current && generation.current === epoch) {
+            failedRegionsRef.current.add(key)
+            while (failedRegionsRef.current.size > 128) failedRegionsRef.current.delete(failedRegionsRef.current.values().next().value!)
+            setError(t('react.worldMap.loadFailed'))
+          }
+        }).finally(() => {
+          fetchingRegionsRef.current.delete(key)
+          if (alive.current) { setRenderingCount(fetchingRegionsRef.current.size); drawRef.current() }
+        })
       }
 
       // Draw region borders
@@ -226,11 +246,9 @@ export function WorldMap({
         ctx.strokeRect(screen.x, screen.y, chunkSize, chunkSize)
       }
     }
-  }, [center, dimension, regions, renderHeight, atTop, savePath, scale, service, showGrid, selectedChunks])
+  }, [center, dimension, regions, renderHeight, atTop, savePath, scale, service, showGrid, selectedChunks, running, change, t])
 
-  useEffect(() => {
-    draw()
-  }, [draw])
+  useLayoutEffect(() => { drawRef.current = draw; draw() }, [draw])
 
   // Resize observer
   useEffect(() => {
@@ -312,11 +330,13 @@ export function WorldMap({
     })
   }
 
-  const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
-    e.preventDefault()
-    const factor = e.deltaY < 0 ? 1.25 : 0.8
-    setScale((s) => Math.max(0.05, Math.min(8, s * factor)))
-  }
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const wheel = (event: WheelEvent) => { event.preventDefault(); setScale(value => Math.max(0.05, Math.min(8, value * (event.deltaY < 0 ? 1.25 : 0.8)))) }
+    canvas.addEventListener('wheel', wheel, { passive: false })
+    return () => canvas.removeEventListener('wheel', wheel)
+  }, [])
 
   const resetView = () => {
     setCenter({ x: 0, z: 0 })
@@ -329,7 +349,9 @@ export function WorldMap({
 
   // Copy Chunks
   const handleCopy = async () => {
-    if (selectedChunks.size === 0) return
+    if (selectedChunks.size === 0 || copyPending.current) return
+    copyPending.current = true; setCopying(true)
+    const epoch = generation.current
     setError(null)
     const chunks = Array.from(selectedChunks).map((k) => {
       const [chunkX, chunkZ] = k.split(',').map(Number)
@@ -337,72 +359,18 @@ export function WorldMap({
     })
     try {
       const copied = await service.copySaveChunks({ savePath, dimension, chunks })
+      if (!alive.current || generation.current !== epoch) return
       setClipboard(copied)
       setStatusMessage(t('react.worldMap.copiedChunks', { count: n(copied.length) }))
-      setTimeout(() => setStatusMessage(null), 4000)
+      clearTimeout(statusTimer.current); statusTimer.current = setTimeout(() => { if (alive.current) setStatusMessage(null) }, 4000)
     } catch {
-      setError(t('react.worldMap.opFailed'))
-    }
+      if (alive.current && generation.current === epoch) setError(t('react.worldMap.opFailed'))
+    } finally { copyPending.current = false; if (alive.current) setCopying(false) }
   }
 
-  // Delete Chunks
-  const handleDeleteConfirm = async () => {
-    setDeleting(true)
-    setError(null)
-    const chunks = Array.from(selectedChunks).map((k) => {
-      const [chunkX, chunkZ] = k.split(',').map(Number)
-      return { chunkX, chunkZ }
-    })
-    try {
-      await service.deleteSaveChunks({ savePath, dimension, chunks })
-      setSelectedChunks(new Set())
-      tileCacheRef.current.clear()
-      setConfirmDelete(false)
-      setStatusMessage(t('react.worldMap.deleteDone', { count: n(chunks.length) }))
-      draw()
-      setTimeout(() => setStatusMessage(null), 4000)
-    } catch (err: any) {
-      if (err?.name === 'InstanceRunningError' || err?.name === 'SharedWorldRunningError') {
-        setError(t('react.worldMap.runningError'))
-      } else {
-        setError(t('react.worldMap.opFailed'))
-      }
-    } finally {
-      setDeleting(false)
-    }
-  }
-
-  // Paste Chunks
-  const handlePasteConfirm = async () => {
-    if (!clipboard.length) return
-    setPasting(true)
-    setError(null)
-    try {
-      await service.pasteSaveChunks({
-        savePath,
-        dimension,
-        chunks: clipboard,
-        offsetX: pasteOffset.x,
-        offsetZ: pasteOffset.z,
-      })
-      tileCacheRef.current.clear()
-      setConfirmPaste(false)
-      setStatusMessage(t('react.worldMap.pasteDone', { count: n(clipboard.length) }))
-      draw()
-      setTimeout(() => setStatusMessage(null), 4000)
-    } catch (err: any) {
-      if (err?.name === 'InstanceRunningError' || err?.name === 'SharedWorldRunningError') {
-        setError(t('react.worldMap.runningError'))
-      } else {
-        setError(t('react.worldMap.opFailed'))
-      }
-    } finally {
-      setPasting(false)
-    }
-  }
 
   return (
-    <section className="world-map-container" data-testid="world-map" aria-label={t('react.worldMap.tab')} style={{ display: 'flex', flexDirection: 'column', height: '600px', position: 'relative' }}>
+    <section className="world-map-container" data-testid="world-map" data-rendered-regions={tileCacheRef.current.size} aria-busy={loading || renderingCount > 0} aria-label={t('react.worldMap.tab')} style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
       {/* Top Toolbar */}
       <div className="section-heading" style={{ flexWrap: 'wrap', gap: 8, zIndex: 10, padding: '8px 12px', background: 'var(--glass-elevated)', borderRadius: 8, marginBottom: 8 }}>
         <div className="content-selection" style={{ padding: 0 }}>
@@ -451,6 +419,8 @@ export function WorldMap({
           </button>
         </div>
 
+        <button type="button" className="button secondary" disabled={running || loading} onClick={() => setRevision(value => value + 1)}><RefreshCw size={16} aria-hidden="true" />{t('react.worldMap.refresh')}</button>
+
         {/* Height Slider */}
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }} data-testid="save-world-map-height">
           <Sliders size={16} className="text-muted" />
@@ -490,6 +460,7 @@ export function WorldMap({
                 type="button"
                 className="button secondary"
                 data-testid="save-world-map-copy"
+                disabled={copying}
                 onClick={handleCopy}
               >
                 <Copy size={15} />
@@ -498,9 +469,9 @@ export function WorldMap({
               <button
                 type="button"
                 className="button secondary"
-                disabled={deleting || running}
+                disabled={running}
                 data-testid="save-world-map-delete"
-                onClick={() => setConfirmDelete(true)}
+                onClick={() => openChange({ type: 'delete', savePath, dimension, chunks: [...selectedChunks].map(key => { const [chunkX, chunkZ] = key.split(',').map(Number); return { chunkX, chunkZ } }) })}
               >
                 <Trash2 size={15} />
                 {t('react.worldMap.deleteChunks')}
@@ -512,9 +483,9 @@ export function WorldMap({
             <button
               type="button"
               className="button primary"
-              disabled={pasting || running}
+              disabled={running}
               data-testid="save-world-map-paste"
-              onClick={() => setConfirmPaste(true)}
+              onClick={() => openChange({ type: 'paste', savePath, dimension, chunks: clipboard })}
             >
               <Clipboard size={15} />
               {t('react.worldMap.pasteChunks', { count: n(clipboard.length) })}
@@ -566,11 +537,24 @@ export function WorldMap({
         </p>
       )}
 
+      <p id="save-world-map-help" className="packs-help">{t('react.worldMap.keyboardHelp')}</p>
+      <form className="world-map-coordinates" onSubmit={event => {
+        event.preventDefault()
+        const values = [goX, goZ]
+        if (!values.every(value => /^-?\d+$/.test(value) && Number.isInteger(Number(value)) && Number(value) >= -2147483648 && Number(value) <= 2147483647)) { setError(t('react.chunkChanges.offsetInvalid')); return }
+        setCenter({ x: (Number(goX) + 0.5) * 16, z: (Number(goZ) + 0.5) * 16 }); canvasRef.current?.focus()
+      }}>
+        <label className="field">{t('react.worldMap.chunkX')}<input required type="number" step="1" min="-2147483648" max="2147483647" value={goX} onChange={event => setGoX(event.target.value)} /></label>
+        <label className="field">{t('react.worldMap.chunkZ')}<input required type="number" step="1" min="-2147483648" max="2147483647" value={goZ} onChange={event => setGoZ(event.target.value)} /></label>
+        <button type="submit" className="button secondary">{t('react.worldMap.go')}</button>
+      </form>
+      <p data-testid="world-map-cursor">{t('react.worldMap.cursor', { x: n(Math.floor(center.x / 16)), z: n(Math.floor(center.z / 16)) })}</p>
       {/* Main Canvas Viewport */}
       <div
         style={{
-          flex: 1,
-          minHeight: 380,
+          minHeight: 220,
+          height: 'clamp(220px, calc(100dvh - 250px), 500px)',
+          flexShrink: 0,
           background: '#0d1117',
           borderRadius: 8,
           overflow: 'hidden',
@@ -580,13 +564,36 @@ export function WorldMap({
       >
         <canvas
           ref={canvasRef}
+          tabIndex={0}
+          aria-label={t('react.worldMap.canvas')}
           data-testid="save-world-map-canvas"
           style={{ width: '100%', height: '100%', display: 'block' }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onClick={handleClick}
-          onWheel={handleWheel}
+          onKeyDown={event => {
+            const key = event.key.toLowerCase(), step = event.shiftKey ? 512 : 16
+            if (['arrowleft', 'arrowright', 'arrowup', 'arrowdown'].includes(key)) {
+              event.preventDefault()
+              setCenter(value => ({ x: value.x + (key === 'arrowleft' ? -step : key === 'arrowright' ? step : 0), z: value.z + (key === 'arrowup' ? -step : key === 'arrowdown' ? step : 0) }))
+            } else if (key === '+' || key === '=' || key === '-') {
+              event.preventDefault(); setScale(value => Math.max(0.05, Math.min(8, value * (key === '-' ? 0.8 : 1.25))))
+            } else if (key === 'enter' || key === ' ') {
+              event.preventDefault()
+              const selected = `${Math.floor(center.x / 16)},${Math.floor(center.z / 16)}`
+              setSelectedChunks(values => { const next = new Set(values); if (next.has(selected)) next.delete(selected); else next.add(selected); return next })
+            } else if (key === 'escape' && selectedChunks.size) {
+              event.preventDefault(); event.stopPropagation(); clearSelection()
+            } else if (key === 'c' && (event.ctrlKey || event.metaKey)) {
+              event.preventDefault(); void handleCopy()
+            } else if (key === 'v' && (event.ctrlKey || event.metaKey) && clipboard.length && !running) {
+              event.preventDefault(); openChange({ type: 'paste', savePath, dimension, chunks: clipboard })
+            } else if (key === 'delete' && selectedChunks.size && !running) {
+              event.preventDefault(); openChange({ type: 'delete', savePath, dimension, chunks: [...selectedChunks].map(key => { const [chunkX, chunkZ] = key.split(',').map(Number); return { chunkX, chunkZ } }) })
+            }
+          }}
+          aria-describedby="save-world-map-help"
         />
 
         {!loading && regions.length === 0 && (
@@ -606,99 +613,9 @@ export function WorldMap({
         )}
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      {confirmDelete && (
-        <Dialog.Root open onOpenChange={(open) => !open && !deleting && setConfirmDelete(false)}>
-          <Dialog.Portal>
-            <Dialog.Overlay className="dialog-backdrop" />
-            <Dialog.Content className="dialog" data-testid="confirm-dialog">
-              <Dialog.Title>{t('react.worldMap.deleteChunksTitle')}</Dialog.Title>
-              <Dialog.Description>
-                {t('react.worldMap.deleteChunksConfirm', { count: n(selectedChunks.size) })}
-              </Dialog.Description>
-              <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: 8 }}>
-                {t('react.worldMap.backupNotice')}
-              </p>
-              <div className="content-actions" style={{ justifyContent: 'flex-end', marginTop: 16 }}>
-                <button
-                  type="button"
-                  className="button secondary"
-                  disabled={deleting}
-                  onClick={() => setConfirmDelete(false)}
-                >
-                  {t('react.workspace.cancel')}
-                </button>
-                <button
-                  type="button"
-                  className="button primary"
-                  disabled={deleting}
-                  onClick={handleDeleteConfirm}
-                >
-                  {deleting ? t('react.worldMap.deleting') : t('react.worldMap.deleteChunks')}
-                </button>
-              </div>
-            </Dialog.Content>
-          </Dialog.Portal>
-        </Dialog.Root>
-      )}
-
-      {/* Paste Confirmation Dialog */}
-      {confirmPaste && (
-        <Dialog.Root open onOpenChange={(open) => !open && !pasting && setConfirmPaste(false)}>
-          <Dialog.Portal>
-            <Dialog.Overlay className="dialog-backdrop" />
-            <Dialog.Content className="dialog" data-testid="confirm-dialog">
-              <Dialog.Title>{t('react.worldMap.pasteChunksTitle')}</Dialog.Title>
-              <Dialog.Description>
-                {t('react.worldMap.pasteChunksConfirm', {
-                  count: n(clipboard.length),
-                  offsetX: pasteOffset.x,
-                  offsetZ: pasteOffset.z,
-                })}
-              </Dialog.Description>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, margin: '12px 0' }}>
-                <label className="field">
-                  Offset X (chunks)
-                  <input
-                    type="number"
-                    value={pasteOffset.x}
-                    onChange={(e) => setPasteOffset({ ...pasteOffset, x: parseInt(e.target.value) || 0 })}
-                  />
-                </label>
-                <label className="field">
-                  Offset Z (chunks)
-                  <input
-                    type="number"
-                    value={pasteOffset.z}
-                    onChange={(e) => setPasteOffset({ ...pasteOffset, z: parseInt(e.target.value) || 0 })}
-                  />
-                </label>
-              </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>
-                {t('react.worldMap.backupNotice')}
-              </p>
-              <div className="content-actions" style={{ justifyContent: 'flex-end', marginTop: 16 }}>
-                <button
-                  type="button"
-                  className="button secondary"
-                  disabled={pasting}
-                  onClick={() => setConfirmPaste(false)}
-                >
-                  {t('react.workspace.cancel')}
-                </button>
-                <button
-                  type="button"
-                  className="button primary"
-                  disabled={pasting}
-                  onClick={handlePasteConfirm}
-                >
-                  {pasting ? t('react.worldMap.pasting') : t('react.worldMap.pasteChunks', { count: n(clipboard.length) })}
-                </button>
-              </div>
-            </Dialog.Content>
-          </Dialog.Portal>
-        </Dialog.Root>
-      )}
+      {zoomLimited && <p role="status">{t('react.worldMap.zoomForDetails')}</p>}
+      <ChunkBackups savePath={savePath} running={running} revision={revision} restore={id => openChange({ type: 'restore', savePath, backupId: id })} />
+      {change?.savePath === savePath && <ChunkChangesDialog key={`${change.type}:${change.type === 'restore' ? change.backupId : ''}`} change={change} running={running} close={() => setChange(null)} returnFocus={() => { if (returnTo.current?.isConnected) returnTo.current.focus(); else canvasRef.current?.focus() }} changed={changed} recover={id => setChange({ type: 'restore', savePath, backupId: id })} />}
     </section>
   )
 }

@@ -906,6 +906,14 @@ react:
     jumps: "Saltos"
 
   worldMap:
+    keyboardHelp: Con el mapa enfocado, usa las flechas para mover el cursor, Mayús para avanzar más, Enter o Espacio para seleccionar, Supr para revisar una eliminación y +/− para ampliar. Ctrl+C y Ctrl+V copian y pegan chunks; Escape limpia la selección.
+    chunkX: Coordenada X del chunk
+    chunkZ: Coordenada Z del chunk
+    go: Ir al chunk
+    cursor: "Cursor en el chunk {x}, {z}"
+    canvas: Mapa del mundo
+    zoomForDetails: Acércate para ver más detalle; se muestran hasta 32 regiones a la vez.
+    refresh: Actualizar mapa
     tab: "Mapa y Chunks"
     dim: "Dimensión"
     overworld: "Overworld"
@@ -1010,3 +1018,36 @@ react:
     processStopped: "No hay procesos activos en ejecución para esta instancia"
     linesCount: "{count} líneas"
     refresh: "Actualizar archivos"
+  chunkChanges:
+    deleteTitle: Eliminar chunks seleccionados
+    pasteTitle: Pegar chunks
+    restoreTitle: Restaurar cambio de chunks
+    deleteHelp: Revisa el mundo, los chunks existentes y las regiones afectadas antes de eliminar terreno.
+    pasteHelp: Revisa el destino y el desplazamiento antes de reemplazar terreno. El origen y el portapapeles se conservan.
+    restoreHelp: Revisa la restauración del respaldo. Si hubo cambios posteriores, se detendrá para conservarlos.
+    review: Revisar cambios de chunks
+    confirm: Confirmar cambios de chunks
+    chunks: Chunks afectados
+    regions: Archivos de región afectados
+    bytes: Bytes de regiones actuales
+    offsetX: Desplazamiento X (chunks)
+    offsetZ: Desplazamiento Z (chunks)
+    offsetInvalid: Introduce desplazamientos enteros válidos, sin decimales ni campos vacíos.
+    terrainScope: Trabaja sobre terreno, entidades de bloque y ticks guardados en el chunk. No copia archivos separados de entidades o POI; las referencias de posiciones propias de mods pueden necesitar revisión.
+    noChanges: No hay regiones que cambiar. Puedes cerrar esta revisión.
+    stale: El mundo o sus regiones cambiaron desde la revisión. Revisa de nuevo antes de confirmar.
+    restoreConflict: Hay cambios posteriores al respaldo. Se conservan; abre la carpeta para revisarlos antes de restaurar.
+    running: Detén las partidas que utilizan este mundo antes de modificarlo.
+    incomplete: La operación se interrumpió. Conservamos el respaldo y los archivos preparados; restaura ese cambio antes de repetirla.
+    failed: No se pudieron preparar o aplicar los cambios. Comprueba los permisos, el espacio libre y que las regiones y los chunks tengan un formato compatible.
+    done: Cambios de chunks aplicados; respaldo conservado.
+    backups: Respaldos de chunks
+    backup: Respaldo que se va a restaurar
+    restore: Revisar restauración
+    openBackup: Abrir carpeta de respaldos
+    historyFailed: No se pudieron leer los respaldos. Comprueba los permisos y vuelve a intentar.
+    unreadableBackups: Algunos respaldos antiguos o dañados requieren revisión manual en la carpeta de respaldos. Sus archivos se conservan.
+    noBackups: Todavía no hay cambios revisados de chunks para restaurar.
+    prepared: Preparado
+    complete: Completado
+    incompleteState: Interrumpido

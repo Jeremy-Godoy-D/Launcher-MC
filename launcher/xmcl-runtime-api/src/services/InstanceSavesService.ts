@@ -284,10 +284,39 @@ export interface PasteSaveChunksOptions {
   offsetZ?: number
 }
 
+export type SaveChunkChange =
+  | ({ type: 'delete' } & DeleteSaveChunksOptions)
+  | ({ type: 'paste' } & PasteSaveChunksOptions)
+  | { type: 'restore'; savePath: string; backupId: string }
+
+export interface SaveChunkReview {
+  snapshot: string
+  type: SaveChunkChange['type']
+  savePath: string
+  dimension: string
+  chunks: number
+  files: number
+  bytes: number
+  shared: boolean
+  backup?: SaveChunkBackup
+}
+
+export interface SaveChunkBackup {
+  id: string
+  createdAt: number
+  type: SaveChunkChange['type']
+  dimension: string
+  files: number
+  state: 'prepared' | 'complete' | 'incomplete'
+}
+
 /**
  * Provide the ability to preview saves data of an instance
  */
 export interface InstanceSavesService {
+  previewSaveChunkChanges(change: SaveChunkChange): Promise<SaveChunkReview>
+  applySaveChunkChanges(change: SaveChunkChange, snapshot: string): Promise<{ backupId?: string; backupPath?: string }>
+  getSaveChunkBackups(savePath: string): Promise<{ entries: SaveChunkBackup[]; unreadable: number }>
   previewWorldFiles(operation: WorldFileOperation): Promise<WorldFileReview>
   applyWorldFiles(review: WorldFileReview): Promise<{ path: string; backup?: string }>
   getWorldDatapacks(instancePath: string, saveName: string): Promise<InstanceDatapack[]>

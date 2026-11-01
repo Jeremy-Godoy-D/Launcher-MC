@@ -1,7 +1,7 @@
 import { test, expect, snap, type Page } from '../../helpers/scratch'
 import { seedReactLibrary } from '../../helpers/react-library'
 import { makeReactWorld } from '../../helpers/react-world'
-import { activateLauncherControl } from '../../helpers/focus-launcher'
+import { activateLauncherControl, focusLauncher } from '../../helpers/focus-launcher'
 import { copyFile, mkdir, readdir, readFile, writeFile, symlink, unlink } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -142,7 +142,8 @@ test('world map renders canvas, selects chunks, copies to clipboard and deletes 
   await expect(mapSec.getByTestId('save-world-map-height')).toBeVisible()
   await expect(mapSec.getByTestId('save-world-map-legend')).toBeVisible()
 
-  // Click on canvas with Ctrl to select a chunk
+  // Center inside chunk 0; the default camera sits on four chunk boundaries.
+  await activateLauncherControl(launcher, mapSec.getByRole('button', { name: 'Ir al chunk', exact: true }))
   await canvas.scrollIntoViewIfNeeded()
   await canvas.click({ modifiers: ['Control'] })
 
@@ -172,7 +173,9 @@ test('world map renders canvas, selects chunks, copies to clipboard and deletes 
   await expect(confirmModal.getByText('Se creará automáticamente una copia de seguridad')).toBeVisible()
 
   // Confirm deletion
-  await confirmModal.getByRole('button', { name: 'Eliminar chunks', exact: true }).click()
+  await activateLauncherControl(launcher, confirmModal.getByTestId('chunk-change-submit'))
+  await expect(confirmModal.getByTestId('chunk-change-review')).toBeVisible()
+  await activateLauncherControl(launcher, confirmModal.getByTestId('chunk-change-submit'))
   await expect(confirmModal).toHaveCount(0)
 
   // Verify backup created in .backups/world-chunks-*
@@ -240,6 +243,10 @@ test('world tools maintain accessibility and responsiveness across theme/size ma
     for (const [width, height] of [[1200, 720], [800, 400]]) {
       await win.evaluate((win, size) => win.setContentSize(size[0], size[1]), [width, height])
       await expect(info.getByTestId('world-map')).toBeVisible()
+      await focusLauncher(launcher)
+      await info.getByRole('button', { name: 'Ir al chunk', exact: true }).focus(); await page.keyboard.press('Tab')
+      await expect(info.getByTestId('save-world-map-canvas')).toBeFocused()
+      await expect(info.getByTestId('save-world-map-canvas')).toBeInViewport({ ratio: 1 })
       expect(await info.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true)
       await page.addScriptTag({ content: axe.source })
       const report = await page.evaluate(async () => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }))

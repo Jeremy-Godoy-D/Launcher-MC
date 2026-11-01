@@ -1,8 +1,11 @@
+import { readBoundedFile } from '../../util/readBoundedFile'
+export { readBoundedFile } from '../../util/readBoundedFile'
 import { deserialize } from '@xmcl/nbt'
+import { validateNbt } from '../../save/nbtValidation'
 import type { InstanceSavePreview, SaveMetadata } from '@xmcl/runtime-api/src/entities/save'
 import type { WorldMetadataInput } from '@xmcl/runtime-api/src/services/InstanceSavesService'
 import { createHash } from 'node:crypto'
-import { lstat, open, opendir, realpath } from 'node:fs/promises'
+import { lstat, opendir, realpath } from 'node:fs/promises'
 import { basename, isAbsolute, join, relative } from 'node:path'
 import { promisify } from 'node:util'
 import { deflate, gunzip, gzip, inflate } from 'node:zlib'
@@ -42,23 +45,6 @@ export async function worldLocation(instance: string, name: string, sharedRoot: 
     identity: digest([directory.identity, entry, link.ino, link.dev, root, info.ino, info.dev]) }
 }
 
-export async function readBoundedFile(file: string, limit: number) {
-  const before = await lstat(file)
-  if (!before.isFile() || before.isSymbolicLink() || before.size > limit) throw new Error('Unsafe world metadata')
-  const handle = await open(file, 'r')
-  let data: Buffer
-  try {
-    const info = await handle.stat()
-    if (info.ino !== before.ino || info.dev !== before.dev || !info.isFile()) throw changed()
-    const buffer = Buffer.alloc(Math.min(limit, before.size) + 1); let size = 0
-    while (size < buffer.length) { const read = await handle.read(buffer, size, buffer.length - size, size); if (!read.bytesRead) break; size += read.bytesRead }
-    if (size > limit) throw new Error('Oversized world metadata')
-    data = buffer.subarray(0, size)
-  } finally { await handle.close() }
-  const after = await lstat(file)
-  if (after.isSymbolicLink() || before.ino !== after.ino || before.dev !== after.dev || before.size !== after.size || before.mtimeMs !== after.mtimeMs || before.ctimeMs !== after.ctimeMs) throw changed()
-  return data
-}
 
 export function staticPngDataUrl(data: Buffer) {
   if (data.length < 33 || data.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a' || data.toString('ascii', 12, 16) !== 'IHDR' || !data.readUInt32BE(16) || !data.readUInt32BE(20) || data.readUInt32BE(16) > 512 || data.readUInt32BE(20) > 512) return ''
@@ -78,49 +64,9 @@ async function worldIcon(root: string) {
   return ''
 }
 
-type NbtChild = { start: number; type: number; key: string; valueStart: number; end: number; children?: NbtChild[]; closeOffset?: number }
-// The shared decoder allocates from NBT counts; bound structure before giving it untrusted saves.
-function validateLevelNbt(data: Buffer) {
-  let offset = 0, nodes = 0
-  const skip = (size: number) => { if (!Number.isSafeInteger(size) || size < 0 || size > data.length - offset) throw new Error('Invalid NBT length'); offset += size }
-  const byte = () => { skip(1); return data[offset - 1] }
-  const length = () => { skip(4); const size = data.readInt32BE(offset - 4); if (size < 0 || size > 100000) throw new Error('NBT collection too large'); return size }
-  const string = (name = false) => {
-    skip(2); const size = data.readUInt16BE(offset - 2), start = offset; skip(size)
-    const text = name ? data.toString('utf8', start, offset) : ''
-    if (name && text === '__proto__') throw new Error('Unsafe NBT key')
-    return text
-  }
-  function value(type: number, depth: number): { children?: NbtChild[]; closeOffset?: number } {
-    if (++nodes > 200000 || depth > 64) throw new Error('NBT structure too large')
-    if (type >= 1 && type <= 6) { skip([0, 1, 2, 4, 8, 4, 8][type]); return {} }
-    if (type === 8) { string(); return {} }
-    if (type === 7 || type === 11 || type === 12) { skip(length() * (type === 7 ? 1 : type === 11 ? 4 : 8)); return {} }
-    if (type === 9) {
-      const item = byte(), count = length()
-      if (item > 12 || !item && count) throw new Error('Invalid NBT list type')
-      for (let index = 0; index < count; index++) value(item, depth + 1)
-      return {}
-    }
-    if (type === 10) {
-      const children: NbtChild[] = []
-      for (let start = offset, child = byte(); child; start = offset, child = byte()) {
-        const key = string(true), valueStart = offset, nested = depth <= 2 ? value(child, depth + 1) : (value(child, depth + 1), {})
-        if (depth <= 2) children.push({ start, type: child, key, valueStart, end: offset, ...nested })
-      }
-      return depth <= 2 ? { children, closeOffset: offset - 1 } : {}
-    }
-    throw new Error('Invalid NBT type')
-  }
-  if (byte() !== 10) throw new Error('Invalid NBT root')
-  string(true)
-  const root = value(10, 0)
-  if (offset !== data.length) throw new Error('Trailing NBT data')
-  return root.children || []
-}
 
 async function parseLevel(raw: Buffer): Promise<Omit<SaveMetadata, 'advancements'>> {
-  validateLevelNbt(raw)
+  validateNbt(raw)
   const parsed = await deserialize<{ Data?: Record<string, any> }>(raw), level = parsed.Data
   if (!level || typeof level !== 'object' || typeof level.LevelName !== 'string' || !Number.isInteger(level.GameType) || level.GameType < 0 || level.GameType > 3) throw new Error('Invalid world metadata')
   const number = (value: unknown) => { const result = Number(value); return Number.isSafeInteger(result) && result >= 0 ? result : 0 }
@@ -165,7 +111,7 @@ export async function prepareWorldMetadata(root: string, input: WorldMetadataInp
   const raw = compression === 'none' ? data : await promisify(compression === 'gzip' ? gunzip : inflate)(data, { maxOutputLength: 16 * 1024 * 1024 })
   const current = await parseLevel(raw)
   if (current.seed && !target.seed) throw Object.assign(new Error('Invalid world metadata input'), { name: 'WorldMetadataInvalidError' })
-  const rootChildren = validateLevelNbt(raw), dataTag = rootChildren.find(child => child.key === 'Data' && child.type === 10)
+  const rootChildren = validateNbt(raw), dataTag = rootChildren.find(child => child.key === 'Data' && child.type === 10)
   if (!dataTag?.children || dataTag.closeOffset === undefined) throw new Error('Invalid world metadata')
   let hasName = false, hasDifficulty = false, hasCheats = false, hasSeed = false
   const parts: Buffer[] = []

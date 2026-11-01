@@ -1,3 +1,5 @@
+import { assertInstallDirectory } from '../../util/assertDirectory'
+export { assertInstallDirectory } from '../../util/assertDirectory'
 import { InstanceInstallLock } from '@xmcl/instance'
 import { isSystemError } from '@xmcl/utils'
 import { readJson, readdir, rename } from 'fs-extra'
@@ -6,17 +8,6 @@ import { randomUUID } from 'node:crypto'
 import { basename, dirname, isAbsolute, join, relative, sep } from 'path'
 import { setTimeout } from 'timers/promises'
 
-export async function assertInstallDirectory(instancePath: string, path: string) {
-  const inside = relative(instancePath, path)
-  if (!isAbsolute(instancePath) || !isAbsolute(path) || inside === '..' || inside.startsWith(`..${sep}`) || isAbsolute(inside)) throw new Error('Unsafe install directory')
-  let current = instancePath
-  for (const part of ['', ...inside.split(sep).filter(Boolean)]) {
-    current = join(current, part)
-    const info = await lstat(current).catch(error => { if (error.code !== 'ENOENT') throw error })
-    if (!info) return
-    if (!info.isDirectory()) throw new Error('Unsafe install directory')
-  }
-}
 
 export function isLegacyInstallWorkspace(instancePath: string, profilePath: string, state: InstanceInstallLock) {
   return profilePath === join(instancePath, '.install-profile') && dirname(state.workspace) === dirname(instancePath) &&

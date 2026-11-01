@@ -906,6 +906,14 @@ react:
     jumps: "Jumps"
 
   worldMap:
+    keyboardHelp: With the map focused, use arrow keys to move the cursor, Shift for larger steps, Enter or Space to select, Delete to review deletion, and +/− to zoom. Ctrl+C and Ctrl+V copy and paste chunks; Escape clears selection.
+    chunkX: Chunk X coordinate
+    chunkZ: Chunk Z coordinate
+    go: Go to chunk
+    cursor: "Cursor at chunk {x}, {z}"
+    canvas: World map
+    zoomForDetails: Zoom in for more detail; up to 32 regions are shown at once.
+    refresh: Refresh map
     tab: "Map & Chunks"
     dim: "Dimension"
     overworld: "Overworld"
@@ -1010,3 +1018,36 @@ react:
     processStopped: "No active processes running for this instance"
     linesCount: "{count} lines"
     refresh: "Refresh files"
+  chunkChanges:
+    deleteTitle: Delete selected chunks
+    pasteTitle: Paste chunks
+    restoreTitle: Restore chunk change
+    deleteHelp: Review the world, existing chunks and affected regions before deleting terrain.
+    pasteHelp: Review the destination and offset before replacing terrain. The source and clipboard are preserved.
+    restoreHelp: Review restoring the backup. Later changes stop restoration so they are preserved.
+    review: Review chunk changes
+    confirm: Confirm chunk changes
+    chunks: Affected chunks
+    regions: Affected region files
+    bytes: Current region bytes
+    offsetX: X offset (chunks)
+    offsetZ: Z offset (chunks)
+    offsetInvalid: Enter valid integer offsets without decimals or empty fields.
+    terrainScope: Works on terrain, block entities and scheduled ticks stored in the chunk. Separate entity or POI files are not copied; custom mod position references may need review.
+    noChanges: There are no regions to change. You can close this review.
+    stale: The world or its regions changed since review. Review again before confirming.
+    restoreConflict: The world has changes made after this backup. They are preserved; open the folder and review them before restoring.
+    running: Stop games using this world before changing it.
+    incomplete: The operation stopped. Backups and prepared files are preserved; restore this change before trying again.
+    failed: Could not prepare or apply changes. Check permissions, free space and that the regions and chunks use a supported format.
+    done: Chunk changes applied; backup preserved.
+    backups: Chunk backups
+    backup: Backup to restore
+    restore: Review restoration
+    openBackup: Open backup folder
+    historyFailed: Could not read backups. Check permissions and try again.
+    unreadableBackups: Some old or damaged backups need manual review in the backup folder. Their files are preserved.
+    noBackups: There are no reviewed chunk changes to restore yet.
+    prepared: Prepared
+    complete: Completed
+    incompleteState: Interrupted
