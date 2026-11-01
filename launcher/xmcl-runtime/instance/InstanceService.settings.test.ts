@@ -77,3 +77,7 @@ it('rejects a delayed legacy minimum when a reviewed maximum changed the coupled
   finally { release(); await refusal }
   expect(state.all[path]).toMatchObject({ minMemory: 1024, maxMemory: 2048 })
 })
+it('allows an explicit zero maximum, which leaves Java without a launcher maximum', async () => {
+  await service.editInstanceSettings({ instancePath: path, expected: snapshot(), changes: { assignMemory: true, minMemory: 1024, maxMemory: 0 } })
+  expect(state.all[path]).toMatchObject({ assignMemory: true, minMemory: 1024, maxMemory: 0 })
+})

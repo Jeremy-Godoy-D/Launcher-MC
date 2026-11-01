@@ -724,7 +724,7 @@ export class InstanceService extends StatefulService<InstanceState> implements I
         const snapshot = instanceSettingsSnapshot(instance)
         if (keys.some(key => !isDeepStrictEqual(snapshot[key], expected[key]))) throw new AnyError('InstanceSettingsChanged')
         const next = { ...snapshot, ...changes }
-        if (next.assignMemory === true && next.minMemory !== null && next.maxMemory !== null && next.minMemory > next.maxMemory) throw Object.assign(new AnyError('InstanceSettingsInvalid'), { field: 'minMemory' })
+        if (next.assignMemory === true && next.minMemory !== null && next.maxMemory !== null && next.maxMemory > 0 && next.minMemory > next.maxMemory) throw Object.assign(new AnyError('InstanceSettingsInvalid'), { field: 'minMemory' })
         return instance
       }
       current()

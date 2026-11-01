@@ -21,7 +21,7 @@ const argumentsSchema = z.array(cleanText).max(1024).refine(values => values.red
 const changesSchema = snapshotSchema.extend({
   java: cleanText.min(1).nullable(),
   minMemory: z.number().int().min(0).max(2147483647).nullable(),
-  maxMemory: z.number().int().min(1).max(2147483647).nullable(),
+  maxMemory: z.number().int().min(0).max(2147483647).nullable(),
   vmOptions: argumentsSchema.nullable(), mcOptions: argumentsSchema.nullable(),
   resolution: resolution.extend({ width: z.number().int().min(1).max(32768).nullable(), height: z.number().int().min(1).max(32768).nullable(), monitor: cleanText.nullable() }).nullable(),
   server: server.extend({ host: cleanText.refine(value => !!value.trim() && !/[\r\n]/.test(value)), port: z.number().int().min(1).max(65535).nullable(), name: cleanText.nullable() }).nullable(),

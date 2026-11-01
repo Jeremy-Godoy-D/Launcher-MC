@@ -27,3 +27,6 @@ it('accepts exact argument values and reviews memory fields as one coupled group
   expect(changes.vmOptions).toEqual(['  literal  ', '', 'a\nb'])
   expect(new Set(instanceSettingsReviewKeys(changes))).toEqual(new Set(['vmOptions', 'assignMemory', 'minMemory', 'maxMemory']))
 })
+it('keeps zero memory limits distinct from inherited limits for the existing launch contract', () => {
+  expect(parseInstanceSettingsChanges({ assignMemory: true, minMemory: 0, maxMemory: 0 })).toEqual({ assignMemory: true, minMemory: 0, maxMemory: 0 })
+})
