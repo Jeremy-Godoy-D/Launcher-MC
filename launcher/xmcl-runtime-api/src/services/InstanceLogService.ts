@@ -1,6 +1,6 @@
 import { ServiceKey } from './Service'
 
-export type LaunchEvidenceAvailability = 'available' | 'absent' | 'ambiguous'
+export type LaunchEvidenceAvailability = 'available' | 'absent' | 'ambiguous' | 'unavailable'
 
 export interface LaunchHistoryRecord {
   launchId: string

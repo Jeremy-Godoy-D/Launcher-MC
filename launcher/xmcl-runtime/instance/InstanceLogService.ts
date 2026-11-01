@@ -7,6 +7,7 @@ import { kEncodingWorker, type EncodingWorker } from '~/encoding'
 import { AbstractService, ALL_PARAMS, ExposeServiceKey, Singleton } from '~/service'
 import { LauncherApp } from '../app/LauncherApp'
 import { LaunchHistoryStore } from '../launch/LaunchHistoryStore'
+import { LaunchService } from '../launch/LaunchService'
 import { UTF8 } from '../util/encoding'
 import { InstanceService } from './InstanceService'
 import { listLocalLogs, localLogPath, readLocalLog, removeLocalLog, type LogArea } from './utils/localLogs'
@@ -19,7 +20,7 @@ export class InstanceLogService extends AbstractService implements IInstanceLogS
     @Inject(kEncodingWorker) private encoder: EncodingWorker,
   ) {
     super(app)
-    this.launchHistory = new LaunchHistoryStore(this.getAppDataPath('launch-history'))
+    this.launchHistory = new LaunchHistoryStore(this.getAppDataPath('launch-history'), async () => (await this.app.registry.get(LaunchService)).getGameProcesses())
   }
 
   async #javaRoot(path: string) {

@@ -1,5 +1,5 @@
-import { ensureDir, mkdtemp, readdir, rm, writeFile } from 'fs-extra'
-import { join } from 'path'
+import { ensureDir, mkdtemp, readdir, realpath, rm, utimes, writeFile } from 'fs-extra'
+import { basename, dirname, join } from 'path'
 import { tmpdir } from 'os'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { LaunchHistoryStore } from './LaunchHistoryStore'
@@ -8,14 +8,22 @@ describe('LaunchHistoryStore', () => {
   let root: string
   let instancePath: string
   let store: LaunchHistoryStore
+  let active: any[]
 
   beforeEach(async () => {
-    root = await mkdtemp(join(tmpdir(), 'xmcl-launch-history-'))
+    root = await realpath(await mkdtemp(join(tmpdir(), 'xmcl-launch-history-')))
     instancePath = join(root, 'instance')
-    store = new LaunchHistoryStore(join(root, 'history'))
+    await ensureDir(join(instancePath, 'logs'))
+    await ensureDir(join(instancePath, 'crash-reports'))
+    active = []
+    store = new LaunchHistoryStore(join(root, 'history'), async () => active)
   })
 
-  afterEach(() => rm(root, { recursive: true, force: true }))
+  afterEach(async () => {
+    expect(dirname(root)).toBe(await realpath(tmpdir()))
+    expect(basename(root)).toMatch(/^xmcl-launch-history-/)
+    await rm(root, { recursive: true, force: true })
+  })
 
   test('records a launch even when no evidence exists', async () => {
     const launchId = '11111111-1111-4111-8111-111111111111'
@@ -43,12 +51,13 @@ describe('LaunchHistoryStore', () => {
 
   test('snapshots existing evidence associated with the launch', async () => {
     const launchId = '22222222-2222-4222-8222-222222222222'
-    const gameLog = join(root, 'latest.log')
-    const debugLog = join(root, 'debug.log')
-    const crashReport = join(root, 'crash.txt')
+    const gameLog = join(instancePath, 'logs/latest.log')
+    const debugLog = join(instancePath, 'logs/debug.log')
+    const crashReport = join(instancePath, 'crash-reports/crash.txt')
     await writeFile(gameLog, 'game evidence')
     await writeFile(debugLog, 'debug evidence')
     await writeFile(crashReport, 'crash evidence')
+    for (const path of [gameLog, debugLog, crashReport]) await utimes(path, new Date(150), new Date(150))
     await store.begin(instancePath, {
       launchId,
       operationId: 'operation-b',
@@ -108,6 +117,7 @@ describe('LaunchHistoryStore', () => {
   test('reads a running launch game log without waiting for exit', async () => {
     const launchId = '55555555-5555-4555-8555-555555555555'
     const startedAt = Date.now() - 1_000
+    active = [{ launchId, side: 'client', options: { gameDirectory: instancePath } }]
     await ensureDir(join(instancePath, 'logs'))
     await store.begin(instancePath, {
       launchId,
@@ -131,6 +141,7 @@ describe('LaunchHistoryStore', () => {
   test('does not expose a live game log shared by overlapping launches', async () => {
     const firstLaunchId = '66666666-6666-4666-8666-666666666666'
     const secondLaunchId = '77777777-7777-4777-8777-777777777777'
+    active = [firstLaunchId, secondLaunchId].map(launchId => ({ launchId, side: 'client', options: { gameDirectory: instancePath } }))
     const startedAt = Date.now() - 1_000
     await ensureDir(join(instancePath, 'logs'))
     await store.begin(instancePath, {
@@ -160,7 +171,7 @@ describe('LaunchHistoryStore', () => {
 
   test('does not claim a shared game log for concurrent launches', async () => {
     const launchId = '33333333-3333-4333-8333-333333333333'
-    const gameLog = join(root, 'latest.log')
+    const gameLog = join(instancePath, 'logs/latest.log')
     await writeFile(gameLog, 'ambiguous evidence')
     await store.begin(instancePath, {
       launchId,

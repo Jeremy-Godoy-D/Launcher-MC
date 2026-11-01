@@ -52,7 +52,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
     @Inject(VersionService) private versionService: VersionService,
   ) {
     super(app)
-    this.launchHistory = new LaunchHistoryStore(this.getAppDataPath('launch-history'))
+    this.launchHistory = new LaunchHistoryStore(this.getAppDataPath('launch-history'), () => this.getGameProcesses())
   }
 
   registerMiddleware(plugin: LaunchMiddleware) {
@@ -385,7 +385,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
         version: options.version,
         minecraft: 'e2e-stub',
         startedAt: startTime,
-      })
+      }).catch(e => this.warn(e))
       this.emit('minecraft-start', {
         pid: fakePid,
         launchId,

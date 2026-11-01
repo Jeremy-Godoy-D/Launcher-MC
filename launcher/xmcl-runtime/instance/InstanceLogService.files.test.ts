@@ -6,6 +6,7 @@ import { gzipSync } from 'node:zlib'
 
 vi.mock('~/app', () => ({ Inject: () => () => {}, LauncherAppKey: Symbol('app') }))
 vi.mock('./InstanceService', () => ({ InstanceService: class {} }))
+vi.mock('../launch/LaunchService', () => ({ LaunchService: class {} }))
 vi.mock('node:fs/promises', async original => {
   const actual = await original<typeof import('node:fs/promises')>()
   return { ...actual, open: vi.fn(actual.open), opendir: vi.fn(actual.opendir) }
