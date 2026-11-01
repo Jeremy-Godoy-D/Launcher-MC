@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa. Ver STAGE5-LIVE-CONSOLE: 2b5c564/1aae267/84dd8e1 implementan historial vivo React acotado, ensamblado e identidad/lotes/carreras, parada por launchId, espacios y viewport mínimo. Pasaron 1234 unitarias, 57 focales, 29 React y 8 Vue al cierre (seis escenarios repetidos por CSS), 24 Axe con cero violaciones/24 incomplete y 9 harness; tsc E2E mantiene 56 diagnósticos base. Medición de consola de 60,74 s/192800 líneas sintéticas: CPU media renderer 1,33 %, heap final menor que inicial; no partida. Dist Vue restaurado en producción y paquetes separados. CI41319957467/f18fd64 success confirma bloque anterior; verificar CI exacto del push nuevo sin reiniciar vivo. Próximo K21: copiar/exportar con resultado Native, errores/cancelación y logger real por instancia con contexto fijado, reutilizando InstanceConsole/LaunchStore. No rehacer lectores/historial/pipes/vista viva aceptados salvo regresión. K11 integral/IPC legacy/noNIO y precisión BigInt de worldFiles/worldOperations/worldChunks/progressFiles siguen pendientes; K12 pass. Revisar preExecuteCommand en seguridad. Etapas 6–9 pendientes; NSIS/delta en runner Windows, Microsoft pospuesto, PR4 borrador y producción/proxy intactos. Conservar restricciones de RESUME; excluir DOMPurify WIP y ANALISIS_ARQUITECTURA.md.",
+  "nextAction": "Etapa 5 activa. Copiar/exportar Native implementados en 2d9a28f, fixtures 280d99a y compatibilidad ASCII 17fd9b8; ver STAGE5-CONSOLE-ACTIONS. Pasaron 1249 unitarias/122 archivos, tipos en siete paquetes y build DeskGap, 18 escenarios React distintos y ocho Vue; 20 Axe sin violaciones/20 incomplete, nueve harness, E2E 56 diagnósticos base. CI41326986337/c4c6d20 success (226 React +1 Strict +14 Vue, dos omitidos) confirma historial vivo; verificar CI exacto del push nuevo. Próximo K21: logger funcional por instancia/contexto capturado, reutilizar InstanceConsole/LaunchStore; revisar ElectronController.createMonitorWindow/getLoggerWindow/gameLaunch y auxiliary.tsx. Endurecer orígenes/navegación amplios en ambos hosts y auditar IPC antes de producción, además de preExecuteCommand. No rehacer lectores/historial/pipes/streaming/acciones aceptadas salvo regresión. K11 integral/IPC legacy/noNIO/BigInt en helpers de Mundos pending; todas las herramientas/chunks conservadas, K12 pass, 6–9 pendientes. Paquetes separados, dist Vue, Microsoft pospuesto, PR4 borrador, producción/proxy intactos. Mantener restricciones de RESUME y excluir DOMPurify WIP/ANALISIS_ARQUITECTURA.md.",
   "stages": [
     {
       "id": 0,
@@ -908,9 +908,13 @@
             {
               "path": "docs/react-migration/STAGE5-LIVE-CONSOLE.md",
               "sha256": "cd4ebe62978038759fcccd51a23d7063ecd8121df83bc9ef082d39d8e8f8ed78"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-CONSOLE-ACTIONS.md",
+              "sha256": "568da59daca83dcb0d8ab2f5ceb984dc47d291e5ba5e614587e7ddbfee93b593"
             }
           ],
-          "note": "2b5c564/1aae267/84dd8e1: historial vivo React acotado por ventana, fragmentos/canales/identidad, snapshots en lotes y consulta de procesos sin carreras; kill Native comprueba launchId opcional. 1234 unitarias/121 archivos, 57 focales, 29 ejecuciones React y 8 Vue aprobadas al cierre, incluidas seis repeticiones de tamaño; 24 Axe sin violaciones/24 incomplete. Consola medida 60,74 s: 192800 líneas sintéticas, CPU media renderer 1,33 %. K21 continúa pending por copiar/exportar Native y logger por instancia; revisar preExecuteCommand en seguridad. Ver STAGE5-LIVE-CONSOLE; CI nuevo pendiente."
+          "note": "2d9a28f/280d99a: copiar confirma Native; exportar usa selector Native, escritura atómica acotada y guard de emisor; cancelación/fallos/contextos tardíos probados. 1249 unitarias/122 archivos, siete paquetes con tipos, 18 escenarios React distintos y ocho Vue; 20 Axe sin violaciones/20 incomplete. 17fd9b8 conserva ASCII en dos patrones de texto de Mundos: 17 focales y build DeskGap aprobados, sin cambiar configuración. CI41326986337/c4c6d20 pasó el bloque previo; nuevo CI pendiente. K21 mantiene logger por instancia y aceptación de seguridad, incluido preExecuteCommand; ver STAGE5-CONSOLE-ACTIONS."
         }
       ]
     },
@@ -1047,5 +1051,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-01T16:30:43Z"
+  "updatedAt": "2026-11-01T17:35:38Z"
 }
