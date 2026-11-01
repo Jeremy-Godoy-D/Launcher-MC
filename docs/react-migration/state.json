@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa. Herramientas locales de mundos confirmadas por el usuario en SCOPE.md (1dccd35, STAGE5-WORLD-TOOLS.md: visor de progreso, mapa 2D, selector de dimensiones, altura Y y operaciones completas de chunks con aislamiento y respaldo), gestión de datapacks (15810a6, STAGE5-WORLD-DATAPACKS.md), metadatos (90d04ec) e importación (46a3771) completadas; 6 pruebas unitarias en chunks.test.ts, 37 en guardados/chunks, tipos/lint aprobados, 19 escenarios React de mundos (61/62/64/65/66/67) y 2 Vue (03/63) aprobados; accesibilidad Axe 0 violaciones. Próximo: Bloque D (resumen y ajustes base de instancia K07/K12/K13) y Bloque E (consola K21), seguidos de etapas 6–9. Gates 5/worlds-settings pending, Vue default/dist, PR4 borrador, producción/proxy intactos, Microsoft pospuesto.",
+  "nextAction": "Etapa 5 activa. Resumen de instancia (K07) y ajustes base (K12, K13) completados en STAGE5-SETTINGS.md (Java, RAM, JVM, resolución, servidor y opciones de lanzamiento con herencia/reset persistente en disco); herramientas locales de mundos (K11, STAGE5-WORLD-TOOLS.md: progreso, mapa 2D y chunks con respaldo), datapacks (STAGE5-WORLD-DATAPACKS.md), metadatos (STAGE5-WORLD-METADATA.md) e importación (STAGE5-WORLD-IMPORT.md) completadas; 3 pruebas en 68-instance-settings.spec.ts, 19 escenarios React de mundos (61/62/64/65/66/67) aprobados, accesibilidad Axe 0 violaciones. Próximo: Bloque E (consola aislada por instancia K21), cierre de Etapa 5 y avance a Etapa 6 (Catálogos y proveedores públicos). Gates 5/console-isolation pending, Vue default/dist, PR4 borrador, producción/proxy intactos, Microsoft pospuesto.",
   "stages": [
     {
       "id": 0,
@@ -768,7 +768,7 @@
         },
         {
           "id": "worlds-settings",
-          "status": "pending",
+          "status": "passed",
           "evidence": [
             {
               "path": "docs/react-migration/STAGE5-WORLDS-READ.md",
@@ -797,9 +797,13 @@
             {
               "path": "docs/react-migration/STAGE5-WORLD-TOOLS.md",
               "sha256": "42a9e8adb2b985f6fd532e554512fc144a056e75f82f9e66dd55326be7bc87f7"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-SETTINGS.md",
+              "sha256": "3f7a090dd61cc62f785ab9f7b86e3ca4417474962202aa6bb6e6a051c3bd78fd"
             }
           ],
-          "note": "Lectura inicial acotada de mundos en React (STAGE5-WORLDS-READ.md), operaciones locales revisadas de copia/ZIP/retirada con respaldo (9d7efeb, STAGE5-WORLD-OPERATIONS.md), estabilidad CI (20a0944, STAGE5-CI-STABILITY.md), importación revisada desde carpeta/ZIP (46a3771, STAGE5-WORLD-IMPORT.md), edición revisada de metadatos con respaldo de level.dat (90d04ec, STAGE5-WORLD-METADATA.md), gestión revisada de datapacks (15810a6, STAGE5-WORLD-DATAPACKS.md) y herramientas locales de mundos (1dccd35, STAGE5-WORLD-TOOLS.md: visor de progreso, mapa 2D, selector de dimensiones, cuadrícula, control de altura Y y operaciones completas de chunks con aislamiento, diálogo modal y respaldo) completadas. 6 pruebas unitarias en chunks.test.ts, 37 en guardados/chunks, 19 escenarios React de mundos (61/62/64/65/66/67) y accesibilidad Axe en matriz completa de temas/anchos con 0 violaciones. Siguiente: resumen de instancia (K07), ajustes base de Java/RAM/JVM/pantalla/servidor (K12, K13) y consola aislada (K21)."
+          "note": "Mundos y ajustes base completados. Resumen de instancia (K07) y panel de ajustes base (K12, K13) en STAGE5-SETTINGS.md con selector Java detectado/manual, asignación RAM automática/personalizada en MiB/GiB, argumentos JVM/MC, resolución pantalla, servidor de partida rápida y opciones de lanzamiento con persistencia en instance.json y restablecimiento global mediante null por IPC. Herramientas locales de mundos (K11, STAGE5-WORLD-TOOLS.md) con progreso, mapa 2D interactivo y operaciones de chunks con respaldo. 3 pruebas en 68-instance-settings.spec.ts y 19 en mundos aprobadas; accesibilidad Axe 0 violaciones WCAG 2.1 AA. Siguiente: Bloque E (consola aislada K21) para completar el espacio de instancia."
         },
         {
           "id": "console-isolation",
