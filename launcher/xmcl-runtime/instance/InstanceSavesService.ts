@@ -29,21 +29,21 @@ import filenamify from 'filenamify'
 import { existsSync } from 'fs'
 import { lstat, mkdir, mkdtemp, realpath, symlink } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
-import { ensureDir, readdir, rename, rm, rmdir, stat, unlink } from 'fs-extra'
+import { ensureDir, readdir, rename, rm, rmdir, unlink } from 'fs-extra'
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'path'
 import { Inject, LauncherAppKey, kGameDataPath, type PathResolver } from '~/app'
 import { InstanceService } from '~/instance'
 import { LaunchService } from '~/launch'
 import { kMarketProvider, type InstallResult } from '~/market'
 import { kResourceManager } from '~/resource'
-import { readInstanceSaveMetadata, readWorldGenSettings, listSaveDimensions, getSaveRegions, readSaveChunks, readSaveProgress, getRegionDir, kSaveWorker, type SaveWorker } from '~/save'
+import { readWorldGenSettings, listSaveDimensions, getSaveRegions, readSaveChunks, readSaveProgress, getRegionDir, kSaveWorker, type SaveWorker } from '~/save'
 import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/service'
 import { LauncherApp, type WorldLock } from '../app/LauncherApp'
 import { linkDirectory, missing, readdirIfPresent } from '../util/fs'
-import { isNonnull, requireObject, requireString } from '../util/object'
+import { requireObject, requireString } from '../util/object'
 import { readlinkSafe } from './utils/readLinkSafe'
 import { datapackFileName, readWorldDatapacks } from './utils/worldDatapacks'
-import { readBoundedFile, readWorlds, readWorldMetadata, worldLocation, worldName, worldsLocation } from './utils/worldFiles'
+import { readBoundedFile, readWorlds, readLegacyWorlds, readWorldMetadata, worldLocation, worldName, worldsLocation } from './utils/worldFiles'
 import { assertInstallDirectory } from '../instanceIO/utils/pendingInstall'
 import { applyWorldFiles, previewWorldFiles } from './utils/worldOperations'
 import { applySaveChunkPlan, listSaveChunkBackups, planSaveChunkChanges } from './utils/worldChunks'
@@ -295,100 +295,54 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   async watch(path: string) {
     await this.#javaInstance(path)
     await worldsLocation(path, this.getPath())
-    const lock = this.mutex.of(LockKey.instance(path))
-
-    const stateManager = await this.app.registry.get(ServiceStateManager)
-    const launchService = await this.app.registry.get(LaunchService)
-
+    const stateManager = await this.app.registry.get(ServiceStateManager), launchService = await this.app.registry.get(LaunchService)
     return stateManager.registerOrGet(getInstanceSaveKey(path), async ({ defineAsyncOperation }) => {
-      const pending: Set<string> = new Set()
-      const baseName = basename(path)
-      const savesDir = join(path, 'saves')
       const state = new Saves()
-
-      const onExit = (op: LaunchOptions) => {
-        if (op.gameDirectory !== path) return
-        for (const p of pending) {
-          updateSave(p)
-        }
-        pending.clear()
-      }
+      let watcher: FSWatcher | undefined, disposed = false, pending = false, dirty = false, refresh: Promise<void> | undefined
+      const revalidate = defineAsyncOperation(async () => {
+        if (disposed) return
+        dirty = true
+        if (refresh) return refresh
+        refresh = (async () => {
+          while (dirty && !disposed) {
+            dirty = false
+            try {
+              const rows = await this.#worldPaths([path], () => readLegacyWorlds(path, this.getPath()))
+              if (!disposed) state.instanceSaves(rows)
+            } catch (error) { if (!disposed) state.instanceSaves([]); throw error }
+          }
+        })()
+        try { await refresh } finally { refresh = undefined }
+      })
+      const update = () => { void revalidate().catch(error => this.warn(error)) }
+      const onExit = (options: LaunchOptions) => { if (options.gameDirectory === path && pending) { pending = false; update() } }
       launchService.on('minecraft-exit', onExit)
-
-      const updateSave = defineAsyncOperation(async (filePath: string) => {
-        await lock.runExclusive(() => readInstanceSaveMetadata(filePath, baseName).then((save) => {
-          state.instanceSaveUpdate(save)
-        }).catch((e) => {
-          this.warn(`Parse save in ${filePath} failed. Skip it.`)
-          this.warn(e)
-        }))
-      })
-
-      let watcher: FSWatcher | undefined, disposed = false
-      const startWatcher = () => new FSWatcher({
-        awaitWriteFinish: true,
-        ignorePermissionErrors: true,
-        followSymlinks: true,
-        cwd: path,
-        depth: 2,
-        ignored: (path, stat) => {
-          if (resolve(path) === savesDir) return false
-          const depth = relative(savesDir, path).split(sep).length
-          if (depth === 2) {
-            const fileName = basename(path)
-            return fileName !== 'level.dat'
-          }
-          if (depth > 2) {
-            return true
-          }
-          return false
-        },
-      })
-        .on('error', (e) => {
-          if ((e as any).code === 'EBUSY') {
-            return
-          }
-          if ((e as any).code === 'EPERM') {
-            return
-          }
-          if ((e as any).name === 'Error') {
-            (e as any).name = 'FSSaveWatcherError'
-          }
-          this.error(e as any)
-        })
-        .on('all', (event, file, stat) => {
-          const absPath = resolve(path, file)
-          if (file.endsWith('level.dat')) {
-            const savePath = dirname(absPath)
-            if (event === 'add' || event === 'change') {
-              if (launchService.isParked(path)) {
-                pending.add(savePath)
-              } else {
-                updateSave(savePath)
-              }
-            } else if (event === 'unlink') {
-              state.instanceSaveRemove(savePath)
-            }
-          } else if (event === 'unlinkDir' && (file === path || !file)) {
-            dispose()
-          }
-        })
-        .add(savesDir)
-
-      const revalidate = async () => {
-        const saves = await readdirIfPresent(savesDir).then(a => a.filter(s => !s.startsWith('.')))
-        const metadatas = await Promise.all(saves
-          .map(s => resolve(savesDir, s))
-          .map((p) => readInstanceSaveMetadata(p, baseName).catch(() => undefined)))
-        state.instanceSaves(metadatas.filter(isNonnull))
-      }
-
       const control = {
         pause: async () => { const old = watcher; await old?.close(); if (watcher === old) watcher = undefined },
         resume: async () => {
           if (disposed || watcher) return
-          watcher = startWatcher()
-          void revalidate().catch(error => this.warn(error))
+          await this.#javaInstance(path)
+          const local = await worldsLocation(path, this.getPath()), depot = await worldsLocation(this.getPath(), this.getPath())
+          const roots = [...new Set([local.root, depot.root])]
+          if (disposed || watcher) return
+          watcher = new FSWatcher({
+            awaitWriteFinish: true, ignorePermissionErrors: true, followSymlinks: false, depth: 1,
+            ignored: entry => {
+              const root = roots.find(root => {
+                const inside = relative(root, resolve(entry))
+                return !isAbsolute(inside) && inside !== '..' && !inside.startsWith('..' + sep)
+              })
+              if (!root) return false
+              const parts = relative(root, resolve(entry)).split(sep).filter(Boolean)
+              if (!parts.length) return false
+              if (parts.length === 1) return parts[0].startsWith('.')
+              return parts.length !== 2 || !['level.dat', '.curseforge', 'icon.png'].includes(parts[1])
+            },
+          })
+            .on('error', error => { if (!['EBUSY', 'EPERM'].includes((error as any).code)) this.error(error instanceof Error ? error : new Error('World observer failed', { cause: error })) })
+            .on('all', () => { if (launchService.isParked(path)) pending = true; else update() })
+            .add(roots)
+          update()
         },
       }
       const dispose = () => {
@@ -400,16 +354,14 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
         void control.pause().catch(error => this.warn(error))
       }
       try {
+        await revalidate()
         await this.#worldPaths([path], async () => {
-          await this.#javaInstance(path)
-          await worldsLocation(path, this.getPath())
           const observers = this.#saveWatchers.get(path) || new Set()
           observers.add(control); this.#saveWatchers.set(path, observers)
           await control.resume()
         })
       } catch (error) { dispose(); throw error }
-
-      return [state, dispose, revalidate]
+      return [state, dispose, async () => { await revalidate(); await this.#worldPaths([path], () => control.resume()) }]
     })
   }
 
@@ -669,17 +621,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async getSharedSaves() {
-    const sharedSave = this.getPath('saves')
-    const saves = await readdirIfPresent(sharedSave).then(a => a.filter(s => !s.startsWith('.')))
-    const results = await Promise.allSettled(saves
-      .map(s => resolve(sharedSave, s))
-      .map(async (p) => {
-        const fstat = await stat(p)
-        if (fstat.isDirectory()) {
-          return await readInstanceSaveMetadata(p, '')
-        }
-      }))
-    return results.map(r => r.status === 'fulfilled' ? r.value : undefined).filter(isNonnull)
+    return this.#worldPaths([this.getPath()], async () => (await readLegacyWorlds(this.getPath(), this.getPath())).map(row => ({ ...row, instanceName: '', linkTo: undefined })), true)
   }
 
   async installFromMarket(options: InstallMarketOptionWithInstance): Promise<string> {

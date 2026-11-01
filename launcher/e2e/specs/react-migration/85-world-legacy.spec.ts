@@ -172,7 +172,10 @@ test('sharing worlds retains collision contents, originals and notes while disco
   const page = launcher.main, [instance] = await instances(page)
   const original = await makeReactWorld(instance, 'Alpha', 'LOCAL ALPHA'), originalBytes = await readFile(join(original, 'level.dat'))
   await call(page, 'watch', instance)
-  const watchActive = () => launcher.app.evaluate(() => ((process.report.getReport() as any).libuv ?? []).some((handle: any) => handle.type === 'fs_event' && typeof handle.filename === 'string' && handle.filename.replace(/\\/g, '/').endsWith('/Legacy source/saves')))
+  const watchActive = async () => {
+    const root = (await realpath(join(instance, 'saves'))).replace(/\\/g, '/').toLowerCase()
+    return launcher.app.evaluate((_electron, root) => ((process.report.getReport() as any).libuv ?? []).some((handle: any) => handle.type === 'fs_event' && typeof handle.filename === 'string' && handle.filename.replace(/\\/g, '/').toLowerCase().endsWith(root)), root)
+  }
   await expect.poll(watchActive).toBe(true)
   const occupied = await makeReactWorld(launcher.gameDataPath, 'Alpha', 'DEPOT ALPHA'), occupiedBytes = await readFile(join(occupied, 'level.dat'))
   await call(page, 'shareSave', { instancePath: instance, saveName: 'Alpha' })

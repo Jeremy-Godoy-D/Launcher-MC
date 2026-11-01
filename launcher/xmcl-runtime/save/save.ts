@@ -4,7 +4,6 @@ import { InstanceSave, InstanceSaveHeader, ResourceSaveMetadata, SaveMetadata } 
 import { FileSystem } from '@xmcl/system'
 import { readdir, readFile, readlink, writeFile } from 'fs-extra'
 import { basename, join } from 'path'
-import { exists } from '../util/fs'
 import { readBoundedFile } from '../util/readBoundedFile'
 import { validateNbt } from './nbtValidation'
 import { gunzip, inflate } from 'node:zlib'
@@ -71,10 +70,11 @@ export async function readResourceSaveMetadata(resourcePath: string | Uint8Array
   }
 }
 
-export async function readLinkedCurseforge(path: string) {
-  const cfMetadata = join(path, '.curseforge')
-  if (!await exists(cfMetadata)) return undefined
-  return JSON.parse(await readFile(cfMetadata, 'utf-8')) as { projectId: number; fileId: number }
+export async function readLinkedCurseforge(path: string): Promise<{ projectId: number; fileId: number } | undefined> {
+  try {
+    const value = JSON.parse((await readBoundedFile(join(path, '.curseforge'), 64 * 1024)).toString('utf8'))
+    if (value && !Array.isArray(value) && Number.isSafeInteger(value.projectId) && value.projectId > 0 && Number.isSafeInteger(value.fileId) && value.fileId > 0) return { projectId: value.projectId, fileId: value.fileId }
+  } catch { /* Missing or malformed optional provenance does not hide the world. */ }
 }
 
 /**

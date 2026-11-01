@@ -2,7 +2,9 @@ import { readBoundedFile } from '../../util/readBoundedFile'
 export { readBoundedFile } from '../../util/readBoundedFile'
 import { deserialize } from '@xmcl/nbt'
 import { validateNbt } from '../../save/nbtValidation'
-import type { InstanceSavePreview, SaveMetadata } from '@xmcl/runtime-api/src/entities/save'
+import { readLinkedCurseforge } from '../../save/save'
+import { assertInstallDirectory } from '../../util/assertDirectory'
+import type { InstanceSave, InstanceSavePreview, SaveMetadata } from '@xmcl/runtime-api/src/entities/save'
 import type { WorldMetadataInput } from '@xmcl/runtime-api/src/services/InstanceSavesService'
 import { createHash } from 'node:crypto'
 import { lstat, opendir, realpath } from 'node:fs/promises'
@@ -143,7 +145,31 @@ export async function prepareWorldMetadata(root: string, input: WorldMetadataInp
   return { hash, size: data.length, bytes, before, after }
 }
 
-export async function readWorlds(instance: string, sharedRoot: string): Promise<InstanceSavePreview[]> {
+export function readWorlds(instance: string, sharedRoot: string): Promise<InstanceSavePreview[]> {
+  return readSaves(instance, sharedRoot, false)
+}
+
+export async function readLegacyWorlds(instance: string, sharedRoot: string): Promise<InstanceSave[]> {
+  // Complete metadata rows include the legacy player-file count; invalid rows are omitted.
+  return await readSaves(instance, sharedRoot, true) as InstanceSave[]
+}
+
+async function advancementFileCount(root: string) {
+  const path = join(root, 'advancements'); await assertInstallDirectory(root, path)
+  const before = await inspect(path)
+  if (!before) return 0
+  if (!before.isDirectory() || before.isSymbolicLink()) throw new Error('Unsafe advancement directory')
+  const directory = await opendir(path); let entries = 0, count = 0
+  for await (const entry of directory) {
+    if (++entries > 10000) throw new Error('Too many advancement files')
+    if (entry.isFile() && entry.name.endsWith('.json')) count++
+  }
+  const after = await inspect(path)
+  if (!after || after.isSymbolicLink() || before.ino !== after.ino || before.dev !== after.dev || before.mtimeNs !== after.mtimeNs || before.ctimeNs !== after.ctimeNs) throw changed()
+  return count
+}
+
+async function readSaves(instance: string, sharedRoot: string, legacy: boolean): Promise<InstanceSavePreview[]> {
   const directory = await worldsLocation(instance, sharedRoot), result: InstanceSavePreview[] = []
   const folder = await opendir(directory.root).catch(error => { if (error.code !== 'ENOENT') throw error })
   if (!folder) return result
@@ -154,13 +180,14 @@ export async function readWorlds(instance: string, sharedRoot: string): Promise<
     const header: InstanceSavePreview = { name: entry.name, path: join(instance, 'saves', entry.name), instanceName: basename(instance), icon: '' }
     let location: Awaited<ReturnType<typeof worldLocation>>
     try { location = await worldLocation(instance, entry.name, sharedRoot) }
-    catch { result.push({ ...header, error: 'unsafe' }); continue }
+    catch { if (!legacy) result.push({ ...header, error: 'unsafe' }); continue }
     try {
       const metadata = await readWorldMetadata(location.root)
-      const icon = await worldIcon(location.root)
+      const icon = await worldIcon(location.root), curseforge = await readLinkedCurseforge(location.root)
+      const details = legacy ? { advancements: await advancementFileCount(location.root) } : {}
       if ((await worldLocation(instance, entry.name, sharedRoot)).identity !== location.identity) throw changed()
-      result.push({ ...header, ...metadata, ...(location.shared ? { linkTo: location.root } : {}), icon })
-    } catch { result.push({ ...header, error: 'metadata' }) }
+      result.push({ ...header, ...metadata, ...details, ...(location.shared ? { linkTo: location.root } : {}), icon, curseforge })
+    } catch { if (!legacy) result.push({ ...header, error: 'metadata' }) }
   }
   if ((await worldsLocation(instance, sharedRoot)).identity !== directory.identity) throw changed()
   return result.sort((a, b) => a.name.localeCompare(b.name))

@@ -397,7 +397,7 @@ it('waits for the instance mutation before starting a new watcher and disposes t
   expect(add).not.toHaveBeenCalled()
   unlock()
   const [, dispose] = await pending as any
-  expect(add).toHaveBeenCalledWith(join(source, 'saves'))
+  expect(add).toHaveBeenCalledWith([join(source, 'saves'), join(root, 'saves')])
   const watcher = add.mock.results[0].value as FSWatcher
   dispose(); await watcher.close()
 })
@@ -690,4 +690,30 @@ it('serializes shared datapack observer registration after its initial read with
   expect(add).not.toHaveBeenCalled(); unlock!()
   const [, dispose] = await pending as any
   dispose(); for (const call of add.mock.results) if (call.value instanceof FSWatcher) await call.value.close()
+})
+
+
+it('reads only the owned shared depot with bounded complete metadata and preserves logical shared headers', async () => {
+  const world = await makeReactWorld(root, 'Shared'), bytes = await readFile(join(world, 'level.dat'))
+  await mkdir(join(world, 'advancements')); await writeFile(join(world, 'advancements/player.json'), '{}')
+  await writeFile(join(world, '.curseforge'), JSON.stringify({ projectId: 1, fileId: 2, extra: 'NO' }))
+  const foreign = await makeReactWorld(exports, 'Foreign'); await symlink(foreign, join(root, 'saves/Foreign'), 'junction')
+  const rows = await service.getSharedSaves()
+  expect(rows).toHaveLength(1)
+  expect(rows[0]).toMatchObject({ path: world, instanceName: '', name: 'Shared', advancements: 1, curseforge: { projectId: 1, fileId: 2 } })
+  expect(rows[0].linkTo).toBeUndefined(); expect(rows[0].curseforge).not.toHaveProperty('extra')
+  expect(await readFile(join(world, 'level.dat'))).toEqual(bytes)
+})
+
+it('refreshes a bounded world snapshot rather than reading event-supplied paths and clears revoked authority', async () => {
+  const world = await makeReactWorld(source, 'Alpha'), add = vi.spyOn(FSWatcher.prototype, 'add')
+  const [state, dispose, refresh] = await service.watch(source) as any
+  const watcher = add.mock.results[0].value as FSWatcher
+  try {
+    await refresh(); expect(state.saves).toHaveLength(1); expect(state.saves[0]).toMatchObject({ path: world, levelName: 'Alpha', cheat: true, advancements: 0 })
+    const updated = await prepareWorldMetadata(world, { levelName: 'Updated safely', seed: '0', cheat: true, difficulty: 2 }); await writeFile(join(world, 'level.dat'), updated.bytes)
+    watcher.emit('all', 'change', join(exports, 'PRIVATE/level.dat'))
+    await vi.waitFor(() => expect(state.saves[0].levelName).toBe('Updated safely'))
+    instances = []; await expect(refresh()).rejects.toHaveProperty('name', 'InstanceNotFoundError'); expect(state.saves).toEqual([])
+  } finally { dispose(); for (const item of add.mock.results) if (item.value instanceof FSWatcher) await item.value.close() }
 })

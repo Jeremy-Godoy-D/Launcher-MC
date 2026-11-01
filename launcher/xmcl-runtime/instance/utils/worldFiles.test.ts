@@ -3,7 +3,7 @@ import { serialize, TagType } from '@xmcl/nbt'
 import { lstat, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { gzipSync } from 'node:zlib'
-import { readWorlds, worldLocation, worldName } from './worldFiles'
+import { readWorlds, readLegacyWorlds, worldLocation, worldName } from './worldFiles'
 
 class Version { @TagType(TagType.String) Name = '1.21.1' }
 class Level {
@@ -74,4 +74,37 @@ it('rejects forged collection counts and excessive nesting before the shared NBT
     expect((await readWorlds(instance, root))[0].error).toBe('metadata')
     expect(await readFile(join(instance, 'saves/Alpha/level.dat'))).toEqual(bytes)
   }
+})
+
+
+it('preserves complete legacy metadata, counts only regular player JSON files and normalizes provenance', async () => {
+  const world = join(instance, 'saves/Alpha'), bytes = await readFile(join(world, 'level.dat'))
+  await mkdir(join(world, 'advancements')); await writeFile(join(world, 'advancements/one.json'), '{}'); await writeFile(join(world, 'advancements/two.json'), '{INVALID JSON')
+  await writeFile(join(world, 'advancements/notes.txt'), 'KEEP')
+  const linked = join(root, 'linked-progress'); await mkdir(linked); await writeFile(join(linked, 'player.json'), 'PRIVATE'); await symlink(linked, join(world, 'advancements/linked.json'), 'junction')
+  await writeFile(join(world, '.curseforge'), JSON.stringify({ projectId: 123, fileId: 456, ignored: 'OTHER' }))
+  const [legacy] = await readLegacyWorlds(instance, root)
+  expect(legacy).toMatchObject({ path: world, instanceName: 'instance', advancements: 2, seed: '0', cheat: true, curseforge: { projectId: 123, fileId: 456 } })
+  expect(legacy.curseforge).not.toHaveProperty('ignored')
+  expect((await readWorlds(instance, root))[0].advancements).toBeUndefined()
+  expect(await readFile(join(world, 'level.dat'))).toEqual(bytes)
+})
+
+it('ignores malformed, oversized and linked optional provenance without hiding a valid world', async () => {
+  const world = join(instance, 'saves/Alpha'), path = join(world, '.curseforge')
+  for (const data of ['{INVALID', JSON.stringify({ projectId: 0, fileId: 1 }), JSON.stringify({ projectId: 1, fileId: 2, extra: 'x'.repeat(65536) })]) {
+    await writeFile(path, data)
+    const rows = await readWorlds(instance, root); expect(rows).toHaveLength(1); expect(rows[0].error).toBeUndefined(); expect(rows[0].curseforge).toBeUndefined()
+  }
+  const foreign = join(root, 'foreign-provenance'); await mkdir(foreign); await writeFile(join(foreign, 'metadata.json'), JSON.stringify({ projectId: 9, fileId: 8 }))
+  await rm(path); await symlink(foreign, path, 'junction')
+  expect((await readWorlds(instance, root))[0].curseforge).toBeUndefined(); expect(await readFile(join(foreign, 'metadata.json'), 'utf8')).toContain('9')
+})
+
+it('never counts player files through a foreign advancements directory', async () => {
+  const foreign = join(root, 'foreign-progress'); await mkdir(foreign); await writeFile(join(foreign, 'player.json'), 'PRIVATE')
+  await symlink(foreign, join(instance, 'saves/Alpha/advancements'), 'junction')
+  expect(await readLegacyWorlds(instance, root)).toEqual([])
+  expect((await readWorlds(instance, root))[0].error).toBeUndefined()
+  expect(await readFile(join(foreign, 'player.json'), 'utf8')).toBe('PRIVATE')
 })
