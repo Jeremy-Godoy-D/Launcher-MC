@@ -74,7 +74,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async #migrateSharedSaves() {
-    const root = await realpath(this.getPath()), legacy = join(root, 'shared-saves'), depot = join(root, 'saves')
+    const root = await realpath(this.getPath()), legacy = join(root, 'shared-saves'), depot = (await worldsLocation(this.getPath(), this.getPath())).root
     const changed = () => new AnyError('WorldFilesChangedError')
     await assertInstallDirectory(root, depot); await mkdir(depot, { recursive: true }); await assertInstallDirectory(root, depot)
     const authority = (await worldsLocation(this.getPath(), this.getPath())).identity

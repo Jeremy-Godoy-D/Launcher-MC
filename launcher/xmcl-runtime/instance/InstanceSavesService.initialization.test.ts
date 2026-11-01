@@ -32,6 +32,11 @@ it('never deletes old archives by access time and does not require resource-cach
   await utimes(archive, new Date(0), new Date(0)); await service().initialize()
   expect(await readFile(archive, 'utf8')).toBe('KEEP'); expect(logger.error).not.toHaveBeenCalled(); expect(app.acquireWorldLock).not.toHaveBeenCalled()
 })
+it('validates the configured data root before creating a worlds directory through a junction', async () => {
+  const foreign = join(root, 'foreign'), alias = join(root, 'alias'); await mkdir(foreign); await symlink(foreign, alias, 'junction')
+  await new InstanceSavesService(app, {} as any, (...parts) => join(alias, ...parts), {} as any).initialize()
+  expect(logger.error).toHaveBeenCalled(); expect(await readdir(foreign)).toEqual([])
+})
 it('copies legacy worlds and notes independently, preserves collisions and archives all originals', async () => {
   const source = await world('World'), hidden = await world('.Hidden')
   await writeFile(join(root, 'shared-saves/note.txt'), 'NOTE')
