@@ -333,3 +333,8 @@ K11 permanece pending. STAGE5-WORLD-IDENTITIES.md documenta BigInt, huellas JSON
 ## Writers legacy de Mundos — primer bloque
 
 STAGE5-WORLD-LEGACY.md registra cloneSave/deleteSave/updateSave/importDatapack/deleteDatapack reutilizando revisión/aplicación, respaldos y sesiones; la excepción del depósito es privada. 62 focales, 17 React distintos y6 Vue más4 repetidos finales por host; tipos/lint/build DeskGap y9harness. CI41338119274/c913135 success confirma identidades anteriores; nuevo CI pendiente. K11 conserva import/export/share/enlaces/mercados/lectores e IPC/noNIO/aceptación integral pendientes. K12/K21 pass, todas las herramientas/chunks en alcance y5 activa;6–9 pendientes, sin publicación.
+
+
+## Importación y exportación legacy de Mundos
+
+STAGE5-WORLD-TRANSFERS.md/0ce2170 elimina extracción ZIP/copia/exportación sin revisión; conserva carpeta independiente, enlace del depósito mediante opción privada y proveedor validado en snapshot. ZIP/carpeta exportados desde saves con publicación exclusiva y conservación de fallos parciales.71focales,19React+9Vue,24Axe0violaciones/44incomplete,9harness/tipos/lint/builds;E2E56base. CI41341682892/c2d3a55 success confirma bloque previo, nuevo pendiente. K11 mantiene compartir/enlaces/mercados/lectores/watchers/IPC/noNIO/aceptación integral;K12/K21pass,5activa,6–9pendientes. Todas las herramientas/chunks conservadas, Microsoft pospuesto, producción/proxy sin cambios.
