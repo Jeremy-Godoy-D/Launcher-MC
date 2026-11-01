@@ -11,6 +11,7 @@ import { InstanceShaders } from './InstanceShaders'
 import { InstanceWorlds } from './InstanceWorlds'
 import { InstanceResourcePacks } from './InstanceResourcePacks'
 import { InstanceBaseSettings } from './InstanceBaseSettings'
+import { InstanceConsole } from './InstanceConsole'
 import './instance.css'
 
 const tabs = [['summary', '/instance'], ['mods', '/instance/mods'], ['packs', '/instance/resourcepacks'], ['shaders', '/instance/shaderpacks'], ['worlds', '/instance/save'], ['settings', '/instance/base-setting'], ['console', '/instance/console']] as const
@@ -57,6 +58,6 @@ export function InstanceWorkspace({ instance, media, cover, headerRef, play, opt
         <NavLink to="/instance/console" className="button secondary">{t('react.workspace.console')}</NavLink>
       </div>
       <p className="instance-path">{t('react.workspace.folder')}: {instance.path}</p>
-    </section> : tab === 'mods' ? <InstanceMods key={instance.path} path={instance.path} runtime={instance.runtime} running={running} configuredJava={instance.java} /> : tab === 'packs' ? <InstanceResourcePacks key={instance.path} path={instance.path} running={running} runtime={instance.runtime} /> : tab === 'shaders' ? <InstanceShaders key={instance.path} path={instance.path} running={running} runtime={instance.runtime} /> : tab === 'worlds' ? <InstanceWorlds key={instance.path} path={instance.path} running={running} /> : tab === 'settings' ? <InstanceBaseSettings key={instance.path} instance={instance} running={running} /> : tab ? <div role="status" className="empty"><h2>{t(`react.workspace.${tab}`)}</h2><p>{t('react.instances.featurePending')}</p></div> : <div className="empty"><h2>{t('react.workspace.notFound')}</h2><Link to="/instance" className="button secondary">{t('react.workspace.summary')}</Link></div>}
+    </section> : tab === 'mods' ? <InstanceMods key={instance.path} path={instance.path} runtime={instance.runtime} running={running} configuredJava={instance.java} /> : tab === 'packs' ? <InstanceResourcePacks key={instance.path} path={instance.path} running={running} runtime={instance.runtime} /> : tab === 'shaders' ? <InstanceShaders key={instance.path} path={instance.path} running={running} runtime={instance.runtime} /> : tab === 'worlds' ? <InstanceWorlds key={instance.path} path={instance.path} running={running} /> : tab === 'settings' ? <InstanceBaseSettings key={instance.path} instance={instance} running={running} /> : tab === 'console' ? <InstanceConsole key={instance.path} instance={instance} running={running} /> : tab ? <div role="status" className="empty"><h2>{t(`react.workspace.${tab}`)}</h2><p>{t('react.instances.featurePending')}</p></div> : <div className="empty"><h2>{t('react.workspace.notFound')}</h2><Link to="/instance" className="button secondary">{t('react.workspace.summary')}</Link></div>}
   </section>
 }

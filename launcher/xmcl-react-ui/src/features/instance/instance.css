@@ -115,3 +115,32 @@
   .world-files-dialog form { display: flex; flex-direction: column; min-height: 0; }
   .world-list .content-actions { margin-top: 10px; }
 }
+
+@layer components {
+  .instance-console { display: flex; flex-direction: column; gap: 16px; margin: 16px 0; }
+  .console-header { display: flex; flex-direction: column; gap: 4px; }
+  .console-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding: 12px; background: var(--glass-elevated); border: 1px solid var(--line); border-radius: 12px; }
+  .console-toolbar-group { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .console-toolbar select, .console-toolbar input[type="text"] { padding: 8px 12px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; font-size: 13px; }
+  .console-toolbar select:focus-visible, .console-toolbar input:focus-visible { outline: 2px solid var(--accent); }
+  .console-autoscroll-label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink); cursor: pointer; user-select: none; }
+  .console-autoscroll-label input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+  .console-entries { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; line-height: 1.5; background: #0c0e14; color: #f3f4f6; border: 1px solid var(--line); border-radius: 12px; padding: 12px; height: 500px; overflow-y: auto; overflow-x: auto; tab-size: 4; word-break: break-all; }
+  .console-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--muted); font-family: inherit; font-size: 14px; text-align: center; }
+  .console-line { display: flex; gap: 8px; padding: 2px 4px; border-radius: 4px; min-width: 0; }
+  .console-line:hover { background: rgba(255, 255, 255, 0.05); }
+  .console-time { color: #9ca3af; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  .console-level { font-weight: 700; flex-shrink: 0; padding: 0 4px; border-radius: 3px; font-size: 11px; text-transform: uppercase; }
+  .level-info .console-level { color: #38bdf8; background: rgba(56, 189, 248, 0.15); }
+  .level-warn .console-level { color: #f59e0b; background: rgba(245, 158, 11, 0.15); }
+  .level-error .console-level { color: #ef4444; background: rgba(239, 68, 68, 0.15); }
+  .level-debug .console-level { color: #c084fc; background: rgba(192, 132, 252, 0.15); }
+  .level-error { color: #fca5a5; }
+  .level-warn { color: #fde68a; }
+  .console-source { color: #a78bfa; flex-shrink: 0; }
+  .console-text { white-space: pre-wrap; word-break: break-word; flex: 1; }
+  .console-statusbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; font-size: 12px; color: var(--muted); }
+  .console-process-status { display: flex; align-items: center; gap: 6px; }
+  .console-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #6b7280; }
+  .console-status-dot.active { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+}
