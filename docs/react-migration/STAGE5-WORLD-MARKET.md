@@ -1,6 +1,6 @@
 # Etapa 5 — descargas de mundos/datapacks y precisión de shaders
 
-K11 permanece pendiente. Fuentes: `f800a03576ffc9f3bb575a86f0b9a07bb8489818`, `9b6041a46f1687550bc1002004a4acd8bcc3c7c2`, `ac3f43e0824b5af77b1f099d5704b6b1abcb2c52` y cierre de código `754c57ce8f468f2dc713f04a9b1647bcc8e9cad0`. No hay publicación ni cambio del proxy.
+K11 permanece pendiente. Fuentes: `f800a03576ffc9f3bb575a86f0b9a07bb8489818`, `9b6041a46f1687550bc1002004a4acd8bcc3c7c2`, `ac3f43e0824b5af77b1f099d5704b6b1abcb2c52` y cierre de código `754c57ce8f468f2dc713f04a9b1647bcc8e9cad0`. Configuración CI adicional `4ce32ab88f15f8cfc913d65ee90419801ee469c1`; no cambia las fuentes de aplicación probadas. No hay publicación ni cambio del proxy.
 
 ## Comportamiento
 
@@ -19,6 +19,7 @@ Un fallo durante la publicación de metadatos o de archivos posteriores puede co
 - El proveedor esperaba `registry.get(InstanceInstallService)` antes de registrarse. Un perfil nuevo que abría Mundos podía esperar indefinidamente sin haber visitado otra pantalla. La dependencia ahora se crea con `getOrCreate` dentro de `installInstanceFile`; descargar un archivo no depende de abrir otra pantalla.
 - Dos pruebas iniciales de publicación detectaron un orden distinto de campos del objeto revisado cuando el nombre era implícito. Se canoniza también esa operación; no se relajaron los snapshots.
 - La primera fixture Native interceptaba Undici, pero los metadatos usan la implementación `ElectronLauncherApp.fetch` mediante `net.fetch`. Respondía el servicio real con una lista vacía para el ID ficticio. Se sustituyó la intercepción por una redirección de las rutas de metadatos al servidor HTTP local mediante la API oficial [WebRequest.onBeforeRequest](https://www.electronjs.org/docs/latest/api/web-request#webrequestonbeforerequestfilter-listener). Los bytes, hashes, archivos, tareas y guardas siguen usando el pipeline nativo. Se retira el listener al terminar. El diagnóstico temporal de IDs se eliminó del código antes del cierre; sus paquetes/logs no son evidencia final.
+- El workflow de migración no recibía `CURSEFORGE_PROXY_URL`, aunque el de release sí. `4ce32ab` proporciona esa misma variable pública del repositorio al build. Se comprobó que existe y contiene únicamente un origen HTTPS válido, sin guardar/imprimir su valor. No se añade ninguna API key al cliente. CI `41352235867` de `2d356e9` comenzó antes de esta corrección; no prueba la configuración nueva.
 - CI `41347979179` sobre `8306911` falló en la detección de inventario de shaders modificado; React quedó cancelado por la matriz. Las huellas usaban identidades/timestamps Number. Se usan BigInt e identidades/nanosegundos serializados como strings. Una regresión determinista cambia solamente un nanosegundo y exige rechazar la escritura conservando el shader y sus opciones. No se aumentaron timeouts ni redujeron aserciones.
 
 ## Validación final
@@ -31,7 +32,7 @@ Un fallo durante la publicación de metadatos o de archivos posteriores puede co
 
 Comandos desde `launcher`: `pnpm exec vitest run <selectors del workflow> --maxWorkers=4 --reporter=dot`; `pnpm check`; `pnpm --prefix xmcl-runtime check`; `pnpm --prefix deskgap-app check`; `pnpm lint`; `pnpm --dir e2e exec tsc --noEmit` con comparación normalizada contra `stage5-console-actions-e2e-types.log`; `LAUNCHER_RENDERER=react|vue pnpm --prefix xmcl-electron-app build`; `pnpm --dir e2e exec playwright test <specs indicadas> --workers=1 --retries=0 --max-failures=1 --reporter=line --output=artifacts/stage5-world-market-head-<renderer>` con `XMCL_E2E_EXECUTABLE` del paquete y `XMCL_E2E_LOCALES=es-ES`; `NODE_ENV=production LAUNCHER_RENDERER=vue pnpm --prefix deskgap-app build`. Desde raíz: `node --test launcher/scripts/react-migration.test.mjs` y `node launcher/scripts/react-migration.mjs check`.
 
-Manifest ignorado `launcher/e2e/artifacts/stage5-world-market-manifest.json`, SHA-256 `ac6401a5dc9e9597a5960747e3f3918d8295c359c904500c8e015f592a002572`: **10 fuentes Git canónicas y 154 artefactos propios**. Identifica también intentos previos/fallos; los grupos `head-react` y `head-vue` son la aceptación final. Caches del perfil, reparse points, operaciones del PR y el post-check quedan excluidos. CI de este push todavía debe verificarse; el fallo previo no se presenta como éxito.
+Manifest ignorado `launcher/e2e/artifacts/stage5-world-market-manifest.json`, SHA-256 `0ddc07b292c0a25741ad80a1f2d1e2a6632fdaff889c9f898d58ce8b1397f14c`: **10 fuentes Git canónicas y 155 artefactos propios**. Identifica también intentos previos/fallos; los grupos `head-react` y `head-vue` son la aceptación final. Caches del perfil, reparse points, operaciones del PR y el post-check quedan excluidos. CI de este push todavía debe verificarse; el fallo previo no se presenta como éxito.
 
 ## Continuación
 

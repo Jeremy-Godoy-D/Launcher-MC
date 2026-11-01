@@ -8,7 +8,7 @@ Código vigente: 754c57ce8f468f2dc713f04a9b1647bcc8e9cad0. STAGE5-WORLD-MARKET.m
 
 Final:1327unitarias/130archivos,35.71s,cuatro workers y ejecución independiente; React22/22 y Vue15/15 empaquetados del SHA, un worker/cero reintentos;16Axe cero violaciones/28incomplete. Tipos de seis paquetes y DeskGap, lint cero errores/un warning previo queryModUpdates, build DeskGap producción y9harness. E2E mantiene exactamente56 diagnósticos base, no tsc verde. Dist quedó Vue; paquetes React/Vue separados. No juego Minecraft real, NSIS/delta ni certificación AA manual global. Avisos Buffer deprecated/GPU al cerrar registrados.
 
-CI41347979179/8306911 terminó failure en shaderSelection inventory; React cancelado por matriz. Se corrige la huella con BigInt/nanosegundos y un test determinista de un nanosegundo. Verificar nuevo CI por SHA exacto después del push; no reiniciar/cancelar un job solo por tardar. CI41343639177/2fa2c94 success confirma el bloque anterior a compartir, no este.
+CI41347979179/8306911 terminó failure en shaderSelection inventory; React cancelado por matriz. Se corrige la huella con BigInt/nanosegundos y un test determinista de un nanosegundo. ConfigCI4ce32ab añade CURSEFORGE_PROXY_URL desde la variable pública del repo, igual que release; la variable existe y su origen HTTPS fue validado sin guardar/imprimir valor. No es una API key. CI41352235867/2d356e9 empezó antes de esa corrección. Verificar nuevo CI por SHA exacto después del push; no reiniciar/cancelar un job solo por tardar. CI41343639177/2fa2c94 success confirma el bloque anterior a compartir, no este.
 
 ## Siguiente tarea
 

@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa: K12/K21 pass,K11 pending. STAGE5-WORLD-MARKET/754c57c cierra staging nativo, referencias, publicación/sidecars y sesiones de installDatapackFromMarket e installFromMarket; proveedor sin dependencia de otra pantalla y espera todas las descargas antes de limpiar. Shaders usa BigInt/nanosegundos tras fallo de CI41347979179/8306911. Final1327unitarias/130archivos (4workers,35.71s),React22/Vue15 empaquetados sin reintentos,16Axe0violaciones/28incomplete,tipos/lint/DeskGapbuild/9harness,E2E56base. DistVue y paquetes separados. Próximo: verificar CI nuevo; asegurar lectores/watchers legacy de saves/datapacks con autoridad Java/depósito y lectores acotados (watchSaveDatapacks aún crea carpeta antes de validar; readDatapack lee sin límites); preservación de mundos al borrar en InstanceService; aceptación integral y noNIO. Reusar helpers y no rehacer writers/consola comprobados salvo regresión. Mantener todas herramientas/chunks; auditoría IPC/extras global8, mercados públicos6,6–9pendientes,Microsoft pospuesto,PR4borrador,producción/proxy intactos. DOMPurify WIP/ANALISIS excluidos; no reintentar acciones denegadas.",
+  "nextAction": "Etapa5 activa: K12/K21 pass,K11 pending. STAGE5-WORLD-MARKET/754c57c cierra staging nativo, referencias, publicación/sidecars y sesiones de installDatapackFromMarket e installFromMarket; proveedor sin dependencia de otra pantalla y espera todas las descargas antes de limpiar. Shaders usa BigInt/nanosegundos tras fallo de CI41347979179/8306911. Final1327unitarias/130archivos (4workers,35.71s),React22/Vue15 empaquetados sin reintentos,16Axe0violaciones/28incomplete,tipos/lint/DeskGapbuild/9harness,E2E56base. DistVue y paquetes separados. ConfigCI4ce32ab añade la URL pública del proxy de la variable del repo, validada sin guardar/imprimir valor; aplicación probada754c57c intacta. Próximo: verificar CI del nuevo push (41352235867/2d356e9 comenzó sin ese env); asegurar lectores/watchers legacy de saves/datapacks con autoridad Java/depósito y lectores acotados (watchSaveDatapacks aún crea carpeta antes de validar; readDatapack lee sin límites); preservación de mundos al borrar en InstanceService; aceptación integral y noNIO. Reusar helpers y no rehacer writers/consola comprobados salvo regresión. Mantener todas herramientas/chunks; auditoría IPC/extras global8, mercados públicos6,6–9pendientes,Microsoft pospuesto,PR4borrador,producción/proxy intactos. DOMPurify WIP/ANALISIS excluidos; no reintentar acciones denegadas.",
   "stages": [
     {
       "id": 0,
@@ -884,7 +884,7 @@
             },
             {
               "path": "docs/react-migration/STAGE5-WORLD-MARKET.md",
-              "sha256": "01ab43092f4cf15886a0cb0d6fa721f92277ae24bb82ccf0a9bcb24b05223972"
+              "sha256": "e8a79ebff03c4fe65824fb74a414aa4a76d0c06dbee2863007cd4382fc174ea0"
             }
           ],
           "note": "K11 pending; todas herramientas/chunks conservadas. Mercado de datapacks/mundos con staging, publicación revisada/sidecars y sesiones; proveedor sin dependencia de pantalla. 1327unitarias/130archivos,React22/Vue15,16Axe0violaciones/28incomplete,tipos/lint/DeskGap/9harness,E2E56base. Shaders con huellas exactas tras CI anterior fallido. Pendientes lectores/watchers legacy, preservación al borrar, integral/noNIO y CI del push. K12/K21 pass;5activa,6–9pendientes."
