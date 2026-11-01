@@ -355,3 +355,9 @@ ConfigCI4ce32ab propaga únicamente la URL pública CurseForge desde vars del re
 ## Lectores/observadores de datapacks (b32b42d; EXE65bf168)
 
 STAGE5-DATAPACK-READERS.md asegura watchSaveDatapacks/getInstanceSaveDatapacks sin mkdir al leer, parser/autoridad acotados, rutas lógicas y proveedores válidos. Registro de observadores bajo global+instancia, pausa para rename del mundo, recuperación de contenedor fallido/restauración; EPERM Native corregido. Final1338unitarias/130archivos,70focales,React20distintos/Vue18 másfocos,8Axe0violaciones/16incomplete,tipos/lint/DeskGap/9harness/E2E56base. CI41352397505/cb196d4 falló selector ambiguo spec24 por session.lock; fijado/probado y workflow1worker/0retries, nuevo CI pendiente. K11 sigue pending por lectores/init de mundos,preservación al borrar instancias,integral/noNIO;K12/K21pass,5activa,6–9pendientes. Todas herramientas/chunks conservadas,Microsoft pospuesto,PR4borrador,distVue/producción/proxy intactos.
+
+## Lectores de metadatos y observadores de Mundos (765a054)
+
+STAGE5-WORLD-METADATA-READERS.md cierra getSharedSaves/watch con parser acotado, autoridad Java/depósito, recuentos legacy/procedencia y raíces canónicas sin seguir enlaces ajenos. Pasan 1.343 unitarias/130 archivos, 72 focales, React22/Vue21 sin reintentos, cuatro Axe sin violaciones/ocho incomplete, tipos/lint/builds y nueve harness; E2E conserva56 diagnósticos base.
+
+CI41355748466/28039b0: Vue pasó30 Native y1.338 unitarias; React aún en curso al registrar el bloque. Nuevo SHA pendiente. K11 permanece pending por init legacy, conservación al borrar instancias e integral/noNIO. K12/K21 pass, etapa5 activa,6–9 pendientes. Todas las herramientas/chunks conservadas, Microsoft pospuesto, PR4 borrador y distVue/producción/proxy intactos.
