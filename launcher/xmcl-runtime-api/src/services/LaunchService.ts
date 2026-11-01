@@ -4,6 +4,15 @@ import { GenericEventEmitter } from '../events'
 import { AUTHORITY_DEV } from '../util/authority'
 import { ServiceKey } from './Service'
 
+export interface GameOutputIdentity {
+  pid: number
+  launchId: string
+  gameDirectory: string
+  side: 'client' | 'server'
+  /** Monotonic publication order across both pipes for this launch. */
+  sequence: number
+}
+
 interface LaunchServiceEventMap {
   'minecraft-window-ready': { pid: number; launchId: string }
   'minecraft-start': {
@@ -27,8 +36,8 @@ interface LaunchServiceEventMap {
     elyByAuthlibReplaced?: boolean
     elyByMinecraftVersion?: string
   }
-  'minecraft-stdout': { pid: number; stdout: string }
-  'minecraft-stderr': { pid: number; stderr: string }
+  'minecraft-stdout': GameOutputIdentity & { stdout: string }
+  'minecraft-stderr': GameOutputIdentity & { stderr: string }
   'error': LaunchException | Error
 }
 

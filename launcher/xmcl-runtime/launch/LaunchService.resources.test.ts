@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { Mutex } from 'async-mutex'
-import { EventEmitter } from 'node:events'
+import { EventEmitter, once } from 'node:events'
 import { PassThrough } from 'node:stream'
 import { setImmediate } from 'node:timers/promises'
 import type { ChildProcess } from 'node:child_process'
 import type { LaunchOptions } from '@xmcl/runtime-api'
 import { LaunchException, LockKey } from '@xmcl/runtime-api'
 
-const mocks = vi.hoisted(() => ({ launch: vi.fn(), server: vi.fn(), watcher: vi.fn(), history: vi.fn(), command: vi.fn() }))
+const mocks = vi.hoisted(() => ({ launch: vi.fn(), server: vi.fn(), watcher: vi.fn(), history: vi.fn(), complete: vi.fn(), ready: vi.fn(), command: vi.fn() }))
 vi.mock('child_process', async original => ({ ...await original<typeof import('node:child_process')>(), spawn: mocks.command }))
 vi.mock('@xmcl/core', async original => ({ ...await original<typeof import('@xmcl/core')>(), launch: mocks.launch, launchServer: mocks.server, createMinecraftProcessWatcher: mocks.watcher }))
 vi.mock('~/app', () => ({ Inject: () => () => {}, LauncherAppKey: Symbol('app'), kGameDataPath: Symbol('data') }))
@@ -27,7 +27,7 @@ vi.mock('~/service', async () => {
 vi.mock('create-desktop-shortcuts', () => ({ default: () => true }))
 vi.mock('create-desktop-shortcuts/src/windows.vbs', () => ({ default: '' }))
 vi.mock('./VersionService', () => ({ VersionService: class {} }))
-vi.mock('./LaunchHistoryStore', () => ({ LaunchHistoryStore: class { begin = mocks.history; markReady = async () => {}; complete = async () => {} } }))
+vi.mock('./LaunchHistoryStore', () => ({ LaunchHistoryStore: class { begin = mocks.history; markReady = mocks.ready; complete = mocks.complete } }))
 vi.mock('../infra/telemetry_context', () => ({ runWithInternalSpan: (_name: string, work: () => unknown) => work() }))
 vi.mock('../instance/instanceCopy', () => ({ assertInstanceCopyComplete: async () => {} }))
 vi.mock('fs-extra', async original => {
@@ -36,17 +36,21 @@ vi.mock('fs-extra', async original => {
 })
 const { LaunchService } = await import('./LaunchService')
 let service: InstanceType<typeof LaunchService>, locks: Map<string, Mutex>, child: ChildProcess, watcher: EventEmitter
+let extraChildren: ChildProcess[]
 const path = 'fixture-instance', key = 'resource-pack-options'
 const options = (side: 'client' | 'server' = 'server'): LaunchOptions => ({ version: 'fixture', gameDirectory: path, side, java: 'fixture-java', user: { id: 'local', username: 'Local', selectedProfile: 'profile', profiles: { profile: { id: 'profile', name: 'Local' } } } as any })
 beforeEach(() => {
-  vi.stubEnv('XMCL_E2E_NO_LAUNCH', ''); vi.clearAllMocks()
+  vi.stubEnv('XMCL_E2E_NO_LAUNCH', ''); vi.clearAllMocks(); extraChildren = []
   locks = new Map(); const of = (key: string) => { if (!locks.has(key)) locks.set(key, new Mutex()); return locks.get(key)! }
   child = Object.assign(new EventEmitter(), { pid: 12345, stdout: new PassThrough(), stderr: new PassThrough(), stdin: new PassThrough(), unref: vi.fn(), kill: vi.fn() }) as unknown as ChildProcess
-  watcher = new EventEmitter(); mocks.watcher.mockReturnValue(watcher); mocks.launch.mockResolvedValue(child); mocks.server.mockResolvedValue(child); mocks.history.mockResolvedValue(undefined)
+  watcher = new EventEmitter(); mocks.watcher.mockReturnValue(watcher); mocks.launch.mockResolvedValue(child); mocks.server.mockResolvedValue(child); mocks.history.mockResolvedValue(undefined); mocks.complete.mockResolvedValue(undefined); mocks.ready.mockResolvedValue(undefined)
   const version = { id: 'fixture', minecraftVersion: '1.21.1', mainClass: 'Fixture', libraries: [], arguments: { jvm: [], game: [] } }
-  service = new LaunchService({ mutex: { of }, platform: { os: 'windows', osRelease: 'fixture' }, version: 'fixture' } as any, () => 'fixture-root', { get: async () => undefined } as any, {} as any, { resolveLocalVersion: async () => ({ ...version, inheritances: ['1.21.1'] }), resolveServerVersion: async () => version } as any)
+  service = new LaunchService({ mutex: { of }, platform: { os: 'windows', osRelease: 'fixture' }, version: 'fixture' } as any, () => 'fixture-root', { get: async () => undefined } as any, { guessEncodingByBuffer: async () => 'windows1252' } as any, { resolveLocalVersion: async () => ({ ...version, inheritances: ['1.21.1'] }), resolveServerVersion: async () => version } as any)
 })
-afterEach(() => { vi.unstubAllEnvs(); vi.restoreAllMocks() })
+afterEach(async () => {
+  for (const process of [child, ...extraChildren]) for (const stream of [process.stdout, process.stderr]) if (stream instanceof PassThrough) stream.end()
+  await setImmediate(); vi.unstubAllEnvs(); vi.restoreAllMocks()
+})
 const lock = (name: string) => { if (!locks.has(name)) locks.set(name, new Mutex()); return locks.get(name)! }
 
 it.each(['client', 'server'] as const)('waits for a pack mutation before %s middleware and spawn', async side => {
@@ -126,4 +130,99 @@ it('allows another stop request after sending the first signal throws', async ()
   await service.kill(pid)
   expect(vi.mocked(child.kill).mock.calls.length).toBe(2)
   expect((await service.getGameProcesses()).length).toBe(1)
+})
+
+it('subscribes before slow history and preserves both decoded pipes and authoritative launch identity', async () => {
+  let now = 100
+  vi.spyOn(Date, 'now').mockImplementation(() => now)
+  const core = await vi.importActual<typeof import('@xmcl/core')>('@xmcl/core')
+  mocks.watcher.mockImplementationOnce(core.createMinecraftProcessWatcher)
+  const history = Promise.withResolvers<void>(), entered = Promise.withResolvers<void>()
+  mocks.history.mockImplementation(() => { entered.resolve(); return history.promise })
+  const events: any[] = []
+  for (const name of ['minecraft-start', 'minecraft-stdout', 'minecraft-stderr', 'minecraft-exit']) service.on(name, event => events.push({ name, ...event }))
+  const ended = once(service, 'minecraft-exit')
+  const pending = service.launch({ ...options(), pid: 999, launchId: 'spoofed-id' } as any)
+  try {
+    await entered.promise
+    expect(events[0]).toMatchObject({ name: 'minecraft-start', pid: 12345 })
+    expect(events[0].launchId).not.toBe('spoofed-id')
+    const bytes = Buffer.from('ASCII café 漢字 😀\n')
+    for (const byte of bytes) (child.stdout as PassThrough).write(Buffer.from([byte]))
+    ;(child.stderr as PassThrough).write(Buffer.from('error caf')); (child.stderr as PassThrough).end(Buffer.from([0xe9, 10]))
+    now = 200; child.emit('exit', 0, null); (child.stdout as PassThrough).end()
+    expect(await service.getGameProcesses()).toEqual([])
+    await setImmediate()
+    expect(events.some(event => event.name === 'minecraft-exit')).toBe(false)
+    now = 500
+  } finally { history.resolve() }
+  expect(await pending).toBe(12345)
+  const [exit] = await ended
+  expect(events.filter(event => event.name === 'minecraft-stdout').map(event => event.stdout).join('')).toBe('ASCII café 漢字 😀\n')
+  expect(events.filter(event => event.name === 'minecraft-stderr').map(event => event.stderr).join('')).toBe('error café\n')
+  const output = events.filter(event => event.sequence !== undefined)
+  expect(output.map(event => event.sequence)).toEqual(output.map((_, index) => index + 1))
+  for (const event of output) expect(event).toMatchObject({ pid: 12345, launchId: events[0].launchId, gameDirectory: path, side: 'server' })
+  expect(exit).toMatchObject({ pid: 12345, launchId: events[0].launchId, code: 0, errorLog: 'error café\n', stdLog: 'ASCII café 漢字 😀\n' })
+  expect(exit.signal).toBeUndefined(); expect(events.at(-1).name).toBe('minecraft-exit'); expect(mocks.complete).toHaveBeenCalledOnce()
+  expect(exit.duration).toBe(100); expect(mocks.complete.mock.calls[0][2].endedAt).toBe(200)
+})
+it('captures a Unicode crash location arriving after the process exit notification', async () => {
+  const core = await vi.importActual<typeof import('@xmcl/core')>('@xmcl/core'); mocks.watcher.mockImplementationOnce(core.createMinecraftProcessWatcher)
+  await service.launch(options())
+  const ended = once(service, 'minecraft-exit')
+  child.emit('exit', 1, null)
+  const bytes = Buffer.from('---- Minecraft Crash Report ----\nCrash report saved to: #@!@# C:/Mundos/café-😀.txt\n')
+  for (const byte of bytes) (child.stdout as PassThrough).write(Buffer.from([byte]))
+  ;(child.stdout as PassThrough).end(); (child.stderr as PassThrough).end()
+  const [event] = await ended
+  expect(event.crashReportLocation).toBe('C:/Mundos/café-😀.txt')
+  expect(mocks.complete.mock.calls[0][2]).toMatchObject({ crashReportPath: 'C:/Mundos/café-😀.txt', crashed: true })
+})
+it('keeps all captured summaries finite when pipes produce megabytes of output', async () => {
+  const core = await vi.importActual<typeof import('@xmcl/core')>('@xmcl/core'); mocks.watcher.mockImplementationOnce(core.createMinecraftProcessWatcher)
+  await service.launch(options()); const ended = once(service, 'minecraft-exit')
+  ;(child.stdout as PassThrough).end(Buffer.alloc(3 * 1024 * 1024, 0x61)); (child.stderr as PassThrough).end(Buffer.alloc(3 * 1024 * 1024, 0x62)); child.emit('exit', 1, null)
+  const [event] = await ended
+  for (const text of [event.errorLog, event.stdLog, mocks.complete.mock.calls[0][2].launcherOutput]) { expect(text.length).toBeLessThanOrEqual(1024 * 1024); expect(text).toMatch(/^\[earlier output truncated\]\n/) }
+})
+it('does not remove a newer process with a reused PID when the older pipe finally closes', async () => {
+  const core = await vi.importActual<typeof import('@xmcl/core')>('@xmcl/core'); mocks.watcher.mockImplementation(core.createMinecraftProcessWatcher)
+  await service.launch(options()); const first = (await service.getGameProcesses())[0]
+  child.emit('exit', 0, null)
+  const second = Object.assign(new EventEmitter(), { pid: 12345, stdout: new PassThrough(), stderr: new PassThrough(), stdin: new PassThrough(), unref: vi.fn(), kill: vi.fn() }) as unknown as ChildProcess
+  extraChildren.push(second); mocks.server.mockResolvedValueOnce(second)
+  await service.launch(options()); const current = (await service.getGameProcesses())[0]
+  expect(current.launchId).not.toBe(first.launchId)
+  const ended = once(service, 'minecraft-exit')
+  ;(child.stdout as PassThrough).end(); (child.stderr as PassThrough).end()
+  expect((await ended)[0].launchId).toBe(first.launchId)
+  expect((await service.getGameProcesses())[0].launchId).toBe(current.launchId)
+  const secondEnd = once(service, 'minecraft-exit')
+  ;(second.stdout as PassThrough).end(); (second.stderr as PassThrough).end(); second.emit('exit', 0, null)
+  await secondEnd; expect(await service.getGameProcesses()).toEqual([])
+})
+
+it('decodes a real owned Node child through the Native launch lifecycle and drains both OS pipes', async () => {
+  const core = await vi.importActual<typeof import('@xmcl/core')>('@xmcl/core')
+  const { spawn } = await vi.importActual<typeof import('node:child_process')>('node:child_process')
+  mocks.watcher.mockImplementationOnce(core.createMinecraftProcessWatcher)
+  const script = "(async()=>{const wait=()=>new Promise(r=>setTimeout(r,2));process.stdout.write('start\\n');for(const b of Buffer.from('café 漢字 😀\\n')){process.stdout.write(Buffer.from([b]));await wait()}process.stderr.write('error caf');process.stderr.write(Buffer.from([0xe9]));await wait();process.stderr.write('\\n');process.exitCode=1})()"
+  const process = spawn(globalThis.process.execPath, ['-e', script], { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] })
+  extraChildren.push(process); mocks.server.mockResolvedValueOnce(process)
+  const closed = once(process, 'close'), ended = once(service, 'minecraft-exit'), output: any[] = []
+  for (const channel of ['minecraft-stdout', 'minecraft-stderr']) service.on(channel, event => output.push({ channel, ...event }))
+  try {
+    expect(await service.launch(options())).toBe(process.pid)
+    const [event] = await ended
+    expect(output.filter(value => value.channel === 'minecraft-stdout').map(value => value.stdout).join('')).toBe('start\ncafé 漢字 😀\n')
+    expect(output.filter(value => value.channel === 'minecraft-stderr').map(value => value.stderr).join('')).toBe('error café\n')
+    expect(output.map(value => value.sequence)).toEqual(output.map((_, index) => index + 1))
+    for (const value of output) expect(value).toMatchObject({ pid: process.pid, launchId: event.launchId, gameDirectory: path, side: 'server' })
+    expect(event).toMatchObject({ code: 1, stdLog: 'start\ncafé 漢字 😀\n', errorLog: 'error café\n' })
+    expect(event.signal).toBeUndefined(); expect(mocks.complete).toHaveBeenCalledOnce()
+  } finally {
+    if (process.exitCode === null && process.signalCode === null) process.kill()
+    await closed
+  }
 })

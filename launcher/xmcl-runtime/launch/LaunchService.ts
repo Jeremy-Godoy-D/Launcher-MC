@@ -5,9 +5,9 @@ import { ChildProcess, spawn } from 'child_process'
 import createDesktopShortcut, { type ShortcutOptions } from 'create-desktop-shortcuts'
 import vbTextContent from 'create-desktop-shortcuts/src/windows.vbs'
 import { randomUUID } from 'crypto'
+import { EventEmitter } from 'node:events'
 import { constants, existsSync } from 'fs'
 import { access, stat, writeFile } from 'fs-extra'
-import { EOL } from 'os'
 import { basename, dirname, join } from 'path'
 import { Readable } from 'stream'
 import { finished } from 'stream/promises'
@@ -22,12 +22,12 @@ import { normalizeCommandLine } from './utils/cmd'
 import { isSystemError } from '@xmcl/utils'
 import { VersionService } from './VersionService'
 import { LauncherApp } from '../app/LauncherApp'
-import { UTF8 } from '../util/encoding'
 import type { LaunchMiddleware } from './LaunchMiddleware'
 import { ensureDir } from '@xmcl/installer/utils'
 import { LaunchHistoryStore } from './LaunchHistoryStore'
 import { runWithInternalSpan } from '../infra/telemetry_context'
 import { assertInstanceCopyComplete } from '../instance/instanceCopy'
+import { appendGameOutput, consumeGameOutput } from './gameOutput'
 
 type TrackedGameProcess = GameProcess & {
   process: ChildProcess
@@ -36,7 +36,6 @@ type TrackedGameProcess = GameProcess & {
   stopping?: boolean
 }
 
-const MAX_LAUNCH_OUTPUT_LENGTH = 1024 * 1024
 
 @ExposeServiceKey(LaunchServiceKey)
 export class LaunchService extends AbstractService implements ILaunchService {
@@ -369,8 +368,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
     await assertInstanceCopyComplete(options.gameDirectory)
     // E2E hook: when XMCL_E2E_NO_LAUNCH is set, never spawn a real Java
     // process. Emit synthetic minecraft-start / window-ready events so the
-    // renderer reflects a "launched" state, then return a fake pid. The
-    // process is also recorded in #processes so kill() works during tests.
+    // renderer reflects a "launched" state, then return a fake pid.
     if (process.env.XMCL_E2E_NO_LAUNCH) {
       const fakePid = Math.floor(Math.random() * 100_000) + 100_000
       const operationId = options.operationId || randomUUID()
@@ -387,17 +385,17 @@ export class LaunchService extends AbstractService implements ILaunchService {
         startedAt: startTime,
       }).catch(e => this.warn(e))
       this.emit('minecraft-start', {
+        ...options,
         pid: fakePid,
         launchId,
         operationId,
         minecraft: 'e2e-stub',
-        ...options,
         startTime,
       })
       // Pretend the window came up after a short delay.
       setTimeout(500).then(() => {
         void this.launchHistory.markReady(options.gameDirectory, launchId, Date.now()).catch(e => this.warn(e))
-        this.emit('minecraft-window-ready', { pid: fakePid, launchId, ...options })
+        this.emit('minecraft-window-ready', { ...options, pid: fakePid, launchId })
       })
       return fakePid
     }
@@ -543,82 +541,55 @@ export class LaunchService extends AbstractService implements ILaunchService {
         gameLogAmbiguous: false,
       }
       this.processes[process.pid] = processData
+      let processExitedAt: number | undefined
+      process.once('exit', () => {
+        processExitedAt = Date.now()
+        if (this.processes[processData.pid] === processData) delete this.processes[processData.pid]
+      })
       releaseInstance(); releaseInstance = undefined
       releaseResources(); releaseResources = undefined
 
       for (const tracked of Object.values(this.processes)) {
-        if (tracked.pid !== process.pid && tracked.options.gameDirectory === options.gameDirectory) {
+        if (tracked.pid !== process.pid && tracked.side === side && tracked.options.gameDirectory === options.gameDirectory) {
           tracked.gameLogAmbiguous = true
           processData.gameLogAmbiguous = true
         }
       }
 
-      const watcher = createMinecraftProcessWatcher(process)
-      const errorLogs = [] as string[]
-      const stdLogs = [] as string[]
+      const decodedStdout = new EventEmitter()
+      const watcher = createMinecraftProcessWatcher(process, undefined, decodedStdout)
       const startTime = Date.now()
-      let launchOutput = ''
-      const appendLaunchOutput = (stream: 'stdout' | 'stderr', content: string) => {
-        launchOutput += `[${stream}] ${content}`
-        if (launchOutput.length > MAX_LAUNCH_OUTPUT_LENGTH) {
-          launchOutput = `[earlier output truncated]\n${launchOutput.slice(-MAX_LAUNCH_OUTPUT_LENGTH)}`
-        }
-      }
-      await this.launchHistory.begin(options.gameDirectory, {
-        launchId,
-        operationId,
-        pid: process.pid,
-        side,
-        version: version.id,
-        minecraft: version.minecraftVersion,
-        startedAt: startTime,
+      let launchOutput = '', errorLog = '', stdLog = '', sequence = 0, exited = false
+      const history = this.launchHistory.begin(options.gameDirectory, {
+        launchId, operationId, pid: process.pid, side, version: version.id,
+        minecraft: version.minecraftVersion, startedAt: startTime,
       }).catch(e => this.warn(e))
       this.emit('minecraft-start', {
-        pid: process.pid,
-        launchId,
-        operationId,
-        minecraft: version.minecraftVersion,
-        ...options,
-        startTime,
+        ...options, pid: process.pid, launchId, operationId,
+        minecraft: version.minecraftVersion, side, startTime,
       })
-
-      let encoding = undefined as string | undefined
-      const processError = async (buf: Buffer) => {
-        if (!encoding) {
-          encoding = await this.encoder.guessEncodingByBuffer(buf).catch(e => UTF8) || UTF8
+      const consume = (channel: 'stdout' | 'stderr') => consumeGameOutput(process[channel], data => this.encoder.guessEncodingByBuffer(data), text => {
+        const identity = { pid: process.pid, launchId, gameDirectory: options.gameDirectory, side, sequence: ++sequence }
+        launchOutput = appendGameOutput(launchOutput, `[${channel}] ${text}`)
+        if (channel === 'stdout') {
+          decodedStdout.emit('data', text)
+          if (!processData.ready) stdLog = appendGameOutput(stdLog, text)
+          this.emit('minecraft-stdout', { ...identity, stdout: text })
+        } else {
+          errorLog = appendGameOutput(errorLog, text)
+          this.warn(text)
+          this.emit('minecraft-stderr', { ...identity, stderr: text })
         }
-        const result = await this.encoder.decode(buf, encoding)
-        appendLaunchOutput('stderr', result)
-        this.emit('minecraft-stderr', { pid: process.pid, stderr: result })
-        const lines = result.split(EOL)
-        errorLogs.push(...lines)
-        this.warn(result)
-      }
-      const processLog = async (buf: any) => {
-        if (!encoding) {
-          encoding = await this.encoder.guessEncodingByBuffer(buf).catch(e => UTF8) || UTF8
-        }
-        const result = await this.encoder.decode(buf, encoding)
-        appendLaunchOutput('stdout', result)
-        this.emit('minecraft-stdout', { pid: process.pid, stdout: result })
-        if (!processData.ready) {
-          stdLogs.push(...result.split(EOL))
-        }
-      }
-
-      const errPromises = [] as Promise<any>[]
-      process.stderr?.on('data', async (buf: any) => {
-        errPromises.push(processError(buf))
-      })
-      process.stdout?.on('data', (s) => {
-        const p = processLog(s).catch(this.error)
-        errPromises.push(p)
-      })
+      }).catch(error => this.error(error))
+      const streams = [consume('stdout').finally(() => { decodedStdout.emit('end') }), consume('stderr')]
 
       watcher.on('error', (err) => {
         this.emit('error', err)
       }).on('minecraft-exit', ({ code, signal, crashReport, crashReportLocation }) => {
-        const endTime = Date.now()
+        if (exited) return
+        exited = true
+        if (this.processes[processData.pid] === processData) delete this.processes[processData.pid]
+        const endTime = processExitedAt ?? Date.now()
         const playTime = endTime - startTime
 
         if (crashReport && code === 0) {
@@ -629,12 +600,10 @@ export class LaunchService extends AbstractService implements ILaunchService {
         if (crashReportLocation) {
           crashReportLocation = crashReportLocation.substring(0, crashReportLocation.lastIndexOf('.txt') + 4)
         }
-        void Promise.all(errPromises).catch((e) => { this.error(e) }).then(async () => {
-          const errorLog = errorLogs.join('\n');
-          const stdLog = stdLogs.join('\n')
+        void Promise.all([history, ...streams]).then(async () => {
           for (const plugin of this.middlewares) {
             try {
-              plugin.onAfterLaunch?.({ code, signal, crashReport, crashReportLocation, errorLog }, options, { version, options: launchOptions, side } as any, context)
+              plugin.onAfterLaunch?.({ code: code ?? -1, signal: signal ?? '', crashReport, crashReportLocation, errorLog }, options, { version, options: launchOptions, side } as any, context)
             } catch (e) {
               this.warn('Fail to run plugin')
               this.error(e as any)
@@ -667,12 +636,13 @@ export class LaunchService extends AbstractService implements ILaunchService {
           }).catch(e => this.warn(e))
 
           this.emit('minecraft-exit', {
+            ...options,
             pid: process.pid,
             launchId,
-            ...options,
-            code,
+            side,
+            code: code ?? undefined,
             operationId,
-            signal,
+            signal: signal ?? undefined,
             crashReport,
             duration: playTime,
             crashReportLocation: crashReportLocation ? crashReportLocation.replace('\r\n', '').trim() : '',
@@ -681,15 +651,16 @@ export class LaunchService extends AbstractService implements ILaunchService {
             elyByAuthlibReplaced: context.elyByAuthlibReplaced,
             elyByMinecraftVersion: context.elyByMinecraftVersion,
           })
-        })
-        delete this.processes[processData.pid]
+        }).catch(error => this.error(error))
       }).on('minecraft-window-ready', () => {
+        if (exited) return
         processData.ready = true
-        stdLogs.splice(0, stdLogs.length)
+        stdLog = ''
         void this.launchHistory.markReady(options.gameDirectory, launchId, Date.now()).catch(e => this.warn(e))
-        this.emit('minecraft-window-ready', { pid: processData.pid, launchId, ...options })
+        this.emit('minecraft-window-ready', { ...options, pid: processData.pid, launchId, side })
       })
       process.unref()
+      await history
 
       return process.pid
     } catch (e) {
