@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa: K12 y K21 pass; K11 pending. Identidades exactas completadas en a3b4ba8/a41faf8, ver STAGE5-WORLD-IDENTITIES. 1271 unitarias/127 archivos y 54 focales finales; React39/39, luego10/10 y boot1/1, Vue4/4; tipos/lint/build DeskGap/nueve harness. Un paquete falló 11 arranques Windows0xc000007b; reempaquetar mismo código resolvió, causa no atribuida y debe validarse cada artefacto. Próximo: auditar y asegurar writers legacy de InstanceSavesService, reutilizar preview/apply/NIO sin duplicar locks. AddInstance.tsx todavía usa linkSharedSave: preservar creación y preferencias; auditar cloneSave/deleteSave/shareSave/updateSave/importSave/exportSave, datapacks y enlaces globales, y escritores noNIO. IPC compartido pluginServicesHandler.ts; auditoría global también etapa8. No rehacer consola/identidades salvo regresión. CI41336065433/12a1125 in_progress al cerrar; consultar resultado exacto y nuevo push. Etapas6–9 pendientes, todos los tools/chunks conservados, Microsoft pospuesto, PR4 borrador, dist Vue, producción beta.2/proxy intactos. Excluir DOMPurify WIP/ANALISIS y mantener restricciones de RESUME.",
+  "nextAction": "Etapa5 activa: K12/K21 pass, K11 pending. STAGE5-WORLD-LEGACY asegura cloneSave/deleteSave/updateSave/importDatapack/deleteDatapack mediante revisión/aplicación/respaldos/NIO; autorización del depósito privada y acceso directo marcado compartido. Código2a1d8a1/d343c1e, fixture316b39e: 62 focales/6 archivos, 17 React distintos +4 finales repetidos y6 Vue +4 finales repetidos; tipos/lint/build DeskGap/nueve harness. CI41338119274/c913135 success (234React+1Strict+14Vue,2opt-in omitidos), nuevo CI por verificar. Próximo: importSave ZIP/carpeta y exportSave; preservar enlace del depósito al habilitar un mundo. Luego shareSave/linkSharedSave/unlinkSharedSave y mercado datapacks, lectores/IPC legacy/noNIO/aceptación integral. AddInstance.tsx usa linkSharedSave; conservar preferencias. IPC global también etapa8. No rehacer consola/identidades sin regresión. Etapas6–9 pendientes, herramientas/chunks conservados, Microsoft pospuesto, PR4 borrador, dist Vue, producción/proxy intactos. Excluir DOMPurify WIP/ANALISIS; no reintentar acciones denegadas, ver RESUME.",
   "stages": [
     {
       "id": 0,
@@ -869,9 +869,13 @@
             {
               "path": "docs/react-migration/STAGE5-WORLD-IDENTITIES.md",
               "sha256": "c8ab43e4cfd5403a233e4f9bf36163a92c4df9ded2c274549ca63ea01d0c8e1f"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-WORLD-LEGACY.md",
+              "sha256": "4f47d7e0e3e8ad7a6c20d1b96ea902f077dd1d413d1cbaf41c77dfc0ad2d07d0"
             }
           ],
-          "note": "K12 pass. K11 mantiene aceptación integral, IPC legacy, escritores no NIO e identidades Number de helpers de Mundos; todas las herramientas/chunks conservadas. CI41319957467/f18fd64 pasó React y Vue y confirma la corrección BigInt de logs/assert de copia del bloque anterior; no certifica las tareas K11 pendientes ni los cambios nuevos de React. a3b4ba8/a41faf8: identidades BigInt y tokens normalizados completados en lectores/operaciones/chunks/progreso/depósito y snapshots compartidos. 1271 unitarias/127 archivos, 54 focales finales, 39 recorridos React +10 focales repetidos/uno de arranque y cuatro Vue; ver STAGE5-WORLD-IDENTITIES. Once arranques de un paquete fallaron 0xc000007b, reempaquetar mismo código pasó; causa definitiva pendiente de validación de artefactos. K11 sigue pending por IPC/writers legacy/noNIO y aceptación integral; no rehacer IDs."
+          "note": "K11 pending: herramientas locales/chunks conservadas, identidades exactas y cinco writers legacy completados. STAGE5-WORLD-LEGACY documenta 62 focales, 17 React distintos y6 Vue, más4 repetidos por host con el ajuste final. Importación/exportación, compartir/enlaces globales, mercados/lectores/IPC legacy, escritores noNIO y aceptación integral pendientes. K12/K21 pass; no cerrar etapa5 todavía."
         },
         {
           "id": "console-isolation",

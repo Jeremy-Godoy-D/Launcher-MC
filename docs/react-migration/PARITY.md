@@ -328,3 +328,8 @@ K21 pasa. STAGE5-LOGGER-WINDOWS.md registra contexto Native fijo por instancia/f
 ## Identidades exactas de Mundos (a41faf8)
 
 K11 permanece pending. STAGE5-WORLD-IDENTITIES.md documenta BigInt, huellas JSON normalizadas y cachés exactas: 1271 unitarias/127 archivos, 54 focales finales, 39 escenarios React y 10 repetidos más boot, cuatro Vue. Un artefacto falló al arrancar y el mismo código reempaquetado pasó; validar cada entrega. Faltan writers/IPC legacy, escritores noNIO y aceptación integral. La creación usa linkSharedSave; preservar esa compatibilidad al asegurarla. K12/K21 pass, etapas6–9 pendientes.
+
+
+## Writers legacy de Mundos — primer bloque
+
+STAGE5-WORLD-LEGACY.md registra cloneSave/deleteSave/updateSave/importDatapack/deleteDatapack reutilizando revisión/aplicación, respaldos y sesiones; la excepción del depósito es privada. 62 focales, 17 React distintos y6 Vue más4 repetidos finales por host; tipos/lint/build DeskGap y9harness. CI41338119274/c913135 success confirma identidades anteriores; nuevo CI pendiente. K11 conserva import/export/share/enlaces/mercados/lectores e IPC/noNIO/aceptación integral pendientes. K12/K21 pass, todas las herramientas/chunks en alcance y5 activa;6–9 pendientes, sin publicación.
