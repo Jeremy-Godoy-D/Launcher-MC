@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa: K12/K21 pass,K11 pending. STAGE5-WORLD-MARKET/754c57c cierra staging nativo, referencias, publicación/sidecars y sesiones de installDatapackFromMarket e installFromMarket; proveedor sin dependencia de otra pantalla y espera todas las descargas antes de limpiar. Shaders usa BigInt/nanosegundos tras fallo de CI41347979179/8306911. Final1327unitarias/130archivos (4workers,35.71s),React22/Vue15 empaquetados sin reintentos,16Axe0violaciones/28incomplete,tipos/lint/DeskGapbuild/9harness,E2E56base. DistVue y paquetes separados. ConfigCI4ce32ab añade la URL pública del proxy de la variable del repo, validada sin guardar/imprimir valor; aplicación probada754c57c intacta. Próximo: verificar CI del nuevo push (41352235867/2d356e9 comenzó sin ese env); asegurar lectores/watchers legacy de saves/datapacks con autoridad Java/depósito y lectores acotados (watchSaveDatapacks aún crea carpeta antes de validar; readDatapack lee sin límites); preservación de mundos al borrar en InstanceService; aceptación integral y noNIO. Reusar helpers y no rehacer writers/consola comprobados salvo regresión. Mantener todas herramientas/chunks; auditoría IPC/extras global8, mercados públicos6,6–9pendientes,Microsoft pospuesto,PR4borrador,producción/proxy intactos. DOMPurify WIP/ANALISIS excluidos; no reintentar acciones denegadas.",
+  "nextAction": "Etapa5 activa: K12/K21 pass,K11 pending. STAGE5-DATAPACK-READERS/b32b42d (EXE65bf168, aplicación4e914b7) cierra lectores/watchers datapacks con parser acotado, autoridad/rutas/proveedores y sin mkdir; observadores global/instancia serializados, pausa antes de mover mundo, recuperación de estados fallidos/restaurados. Final1338unitarias/130archivos(4workers,26.99s),70focales,React20distintos/Vue18 y focos sin reintentos,8Axe0violaciones/16incomplete,tipos/lint/DeskGapbuild/9harness,E2E56base. CI41352397505/cb196d4 failure:Vue26,React245+2omitidos+1fallo selector spec24 por session.lock, corregido/probado1/1; workflow ahora1worker/0retries. Verificar nuevo CI exacto tras push. Próximo K11:getSharedSaves y watch/readInstanceSaveMetadata todavía usan lecturas generales legacy; revisar también init (limpieza snapshots saves y migración shared-saves), conservar recuentos/proveedores con lecturas acotadas; luego InstanceService.moveSavesToShared/deleteInstance,integral/noNIO. No reabrir datapacks/writers/consola sin regresión. Todas herramientas/chunks conservadas,5activa,6–9pendientes,Microsoft pospuesto,PR4borrador,distVue/paquetes separados y producción/proxy intactos. DOMPurify WIP/ANALISIS excluidos; acciones denegadas no se reintentan.",
   "stages": [
     {
       "id": 0,
@@ -885,9 +885,13 @@
             {
               "path": "docs/react-migration/STAGE5-WORLD-MARKET.md",
               "sha256": "e8a79ebff03c4fe65824fb74a414aa4a76d0c06dbee2863007cd4382fc174ea0"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-DATAPACK-READERS.md",
+              "sha256": "68f276b015564f4bb51fa7a82ad21e3dd152c70d3849cf918a66cd760d022254"
             }
           ],
-          "note": "K11 pending; todas herramientas/chunks conservadas. Mercado de datapacks/mundos con staging, publicación revisada/sidecars y sesiones; proveedor sin dependencia de pantalla. 1327unitarias/130archivos,React22/Vue15,16Axe0violaciones/28incomplete,tipos/lint/DeskGap/9harness,E2E56base. Shaders con huellas exactas tras CI anterior fallido. Pendientes lectores/watchers legacy, preservación al borrar, integral/noNIO y CI del push. K12/K21 pass;5activa,6–9pendientes."
+          "note": "K11 pending. Datapack readers/watchers seguros: sin mkdir al leer, helper privado/parser existente, rutas/proveedores válidos, límite agregado y lecturas agrupadas. Observadores coordinados/registro global; EPERM al borrar mundo y retry de estado inicial fallido corregidos. 1338unitarias/130archivos,70focales,React20distintos/Vue18+focos,8Axe0violaciones/16incomplete,tipos/lint/DeskGap/9harness,E2E56base. CIcb196d4 falló en selector ambiguo spec24, corregido y probado; nuevo CI pendiente. Faltan lectores generales/init de mundos,preservación al borrar instancias,integral/noNIO;K12/K21pass,5activa."
         },
         {
           "id": "console-isolation",
