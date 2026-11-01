@@ -96,12 +96,31 @@ it('runs user pre-commands before taking the non-reentrant pack and instance loc
   mocks.command.mockImplementation(() => { entered.resolve(); return pre })
   const pending = service.launch({ ...options(), preExecuteCommand: 'fixture command' })
   await entered.promise; expect(lock(LockKey.instance(path)).isLocked()).toBe(false)
+  expect(mocks.command).toHaveBeenCalledWith('fixture command', { shell: true, cwd: path, stdio: 'ignore', windowsHide: true })
   pre.emit('exit', 0); await setImmediate(); expect(mocks.server).not.toHaveBeenCalled()
   release(); expect(await pending).toBe(12345)
 })
 it('allows Java/version middleware to use its own locks without acquiring the resource lock again', async () => {
   service.registerMiddleware({ name: 'java-install-lock-fixture', onBeforeLaunch: () => lock('java-install-fixture').runExclusive(() => lock(LockKey.instanceVersion(path)).runExclusive(async () => {})) })
   expect(await service.launch(options())).toBe(12345)
+})
+
+it.each(['exit', 'signal', 'error', 'throw'] as const)('keeps the pre-command and output out of %s failures and launcher logs', async failure => {
+  const marker = 'PRIVATE_FIXTURE_COMMAND', pre = new EventEmitter(), entered = Promise.withResolvers<void>()
+  const logs = [vi.spyOn(service as any, 'log'), vi.spyOn(service as any, 'warn'), vi.spyOn(service as any, 'error')]
+  mocks.command.mockImplementationOnce(() => { entered.resolve(); if (failure === 'throw') throw new Error(marker); return pre })
+  const pending = service.launch({ ...options(), preExecuteCommand: `echo ${marker}` }).catch(error => error)
+  await entered.promise
+  if (failure === 'exit') pre.emit('exit', 7, null)
+  if (failure === 'signal') pre.emit('exit', null, 'SIGTERM')
+  if (failure === 'error') pre.emit('error', new Error(marker))
+  const error = await pending
+  expect(error).toBeInstanceOf(LaunchException)
+  expect(error.exception).toEqual({ type: 'launchPreExecuteCommandFailed', command: '[redacted]', error: failure === 'exit' ? 'Exit code 7' : failure === 'signal' ? 'Signal SIGTERM' : 'Could not start command' })
+  expect(JSON.stringify([error, logs.map(log => log.mock.calls)])).not.toContain(marker)
+  expect(mocks.server).not.toHaveBeenCalled()
+  expect(lock(key).isLocked()).toBe(false)
+  expect(lock(LockKey.instance(path)).isLocked()).toBe(false)
 })
 it('does not send duplicate graceful stop commands while waiting for exit', async () => {
   const pid = await service.launch(options()), write = vi.spyOn(child.stdin!, 'write')

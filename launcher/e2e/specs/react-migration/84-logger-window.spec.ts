@@ -73,6 +73,7 @@ test('logger captures the selected instance and file, reuses its window and foll
       expect(report.violations).toEqual([])
       await snap({ ...launcher, main: firstWindow }, `logger-${theme}-${width}`, 'Consola independiente de Mi mundo: archivo real, instancia fija y controles accesibles con scroll.')
       await firstWindow.getByTestId('console-entries').scrollIntoViewIfNeeded()
+      await expect(firstWindow.getByTestId('console-entries')).toBeInViewport({ ratio: 1 })
       await expect(firstWindow.getByTestId('console-entry')).toBeInViewport()
       await snap({ ...launcher, main: firstWindow }, `logger-${theme}-${width}-records`, 'Registros y estado accesibles mediante el scroll de la consola independiente.')
     }

@@ -66,57 +66,20 @@ export class LaunchService extends AbstractService implements ILaunchService {
     return await access(javaPath, constants.X_OK).then(() => true).catch(() => false)
   }
 
-  /**
-   * Execute pre-launch command
-   * @param command The command to execute
-   * @param cwd The working directory
-   * @param operationId The operation id
-   */
+  /** Run the user's local command without collecting potentially sensitive output. */
   async #execPreCommand(command: string, cwd: string): Promise<void> {
-    if (!command.trim()) return;
-
-    this.log(`Executing pre-launch command: ${command}`);
-    try {
-      const process = spawn(command, {
-        shell: true,
-        cwd,
-        stdio: 'pipe',
-      });
-
-      return await new Promise<void>((resolve, reject) => {
-        const stdoutChunks: Buffer[] = [];
-        const stderrChunks: Buffer[] = [];
-
-        process.stdout?.on('data', (data) => {
-          stdoutChunks.push(Buffer.from(data));
-          this.log(`[Pre-Launch CMD] ${data.toString('utf-8').trim()}`);
-        });
-
-        process.stderr?.on('data', (data) => {
-          stderrChunks.push(Buffer.from(data));
-          this.warn(`[Pre-Launch CMD Error] ${data.toString('utf-8').trim()}`);
-        });
-
-        process.on('error', (err) => {
-          this.warn(`Pre-launch command failed: ${err.message}`);
-          reject(new LaunchException({ type: 'launchPreExecuteCommandFailed', command, error: err.message }, 'Failed to execute pre-command'));
-        });
-
-        process.on('exit', (code) => {
-          if (code === 0) {
-            this.log('Pre-launch command executed successfully');
-            resolve();
-          } else {
-            const stderr = Buffer.concat(stderrChunks).toString('utf-8');
-            const error = `Pre-launch command exited with code ${code}. Error: ${stderr}`;
-            reject(new LaunchException({ type: 'launchPreExecuteCommandFailed', command, error }, 'Pre-launch command failed'));
-          }
-        });
-      });
-    } catch (e) {
-      this.warn(`Failed to spawn pre-launch command: ${e}`);
-      throw new LaunchException({ type: 'launchPreExecuteCommandFailed', command, error: (e as Error).message }, 'Failed to execute pre-command');
-    }
+    if (!command.trim()) return
+    return new Promise<void>((resolve, reject) => {
+      const fail = (error: string) => reject(new LaunchException({ type: 'launchPreExecuteCommandFailed', command: '[redacted]', error }, 'Pre-launch command failed'))
+      try {
+        const child = spawn(command, { shell: true, cwd, stdio: 'ignore', windowsHide: true })
+        child.once('error', () => fail('Could not start command'))
+        child.once('exit', (code, signal) => {
+          if (code === 0) resolve()
+          else fail(signal ? `Signal ${signal}` : `Exit code ${code}`)
+        })
+      } catch { fail('Could not start command') }
+    })
   }
 
   async generateServerOptions(options: LaunchOptions, version: ResolvedServerVersion) {
@@ -436,7 +399,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
 
       // Execute pre-launch command if specified
       if (options.preExecuteCommand) {
-        this.log(`Executing pre-execute command: ${options.preExecuteCommand}`)
+        this.log('Executing configured pre-launch command.')
         await this.#track(
           () => this.#execPreCommand(options.preExecuteCommand!, options.gameDirectory),
           'pre_execute_command',

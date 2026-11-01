@@ -85,7 +85,7 @@ test('virtual console measures wrapped rows at both themes and supported native 
       await viewport.scrollIntoViewIfNeeded()
       await writeFile(testInfo.outputPath(`console-layout-${theme}-${width}.json`), JSON.stringify(await viewport.evaluate(element => {
         const layout = []
-        for (let node: HTMLElement | null = element; node; node = node.parentElement) {
+        for (let node: Element | null = element; node; node = node.parentElement) {
           const rect = node.getBoundingClientRect(), style = getComputedStyle(node)
           layout.push({ tag: node.tagName, class: node.className, rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height }, clientHeight: node.clientHeight, scrollHeight: node.scrollHeight, scrollTop: node.scrollTop, overflow: style.overflow, scrollPadding: style.scrollPadding, flex: style.flex })
         }
