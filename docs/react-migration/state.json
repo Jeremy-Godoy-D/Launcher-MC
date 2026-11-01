@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa. Foco shaders/apertura de updates y sincronización de fixtures corregidos en a72caba/20a0944;999 unidades/100archivos,tipos/lint;15 ejecuciones focales12/44/53,22 regresiones shaders y10 de59/62 aprobadas;4casos repetidos3veces=12/12;Vue03 final aprobado. CI41180899154/04e9ed0 falló antes de estas correcciones:3failed/2flaky/162passed/2skipped. Verificar CI nuevo;no afirmar estabilidad remota todavía. Usuario confirmó conservar TODAS herramientas locales de Mundos,incluido editar chunks;SCOPE yK11 actualizados,hash3cd5ff5. Próximo:CI,importar/editar mundos/datapacks,mapa/progreso/dimensiones/regiones/chunks,ajustes/consola;etapas6–9. Gates5/K11 pending,Vue default/dist,PR4 borrador,producción/proxy intactos,Microsoft pospuesto.",
+  "nextAction": "Etapa 5 activa. Importación revisada de mundos (46a3771, STAGE5-WORLD-IMPORT.md) y edición revisada de metadatos con respaldo (90d04ec, STAGE5-WORLD-METADATA.md) completadas; 1027 unidades / 101 archivos, tipos/lint (0 avisos en xmcl-runtime), 13 escenarios React de mundos (61/62/64/65) y 2 Vue (03/63) aprobados; 4 estados Axe de metadatos con 0 violaciones / 8 incompletos. CI 41254221156 sobre 14209e4 terminó en success en ambos jobs (172 React + 1 Strict + 8 Vue, 0 flaky). Próximo: datapacks y herramientas locales de mundos confirmadas por el usuario (mapa, progreso, dimensiones, regiones y edición/copia/pegado/eliminación de chunks), seguidos de resumen/ajustes base (K07, K12, K13), consola (K21) y etapas 6–9. Gates 5/K11 pending, Vue default/dist, PR4 borrador, producción/proxy intactos, Microsoft pospuesto.",
   "stages": [
     {
       "id": 0,
@@ -785,9 +785,13 @@
             {
               "path": "docs/react-migration/STAGE5-WORLD-IMPORT.md",
               "sha256": "3434510addd5a3fd046a18c3fd38f56ef356392d09e3f967e697e65e82d7c133"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-WORLD-METADATA.md",
+              "sha256": "246f16308cc6ce7d56d952251d47229e49bb9fc42cdf4ae2ef0a561f0f86d538"
             }
           ],
-          "notes": "Lectura inicial acotada de mundos en React: lista, b?squeda, ficha de solo lectura, errores de lectura visibles, iconos data:image validados, enlaces compartidos hacia el dep?sito de mundos de la app y bloqueo mientras la instancia est? en ejecuci?n. Operaciones locales revisadas a?adidas en 9d7efeb: copia en la misma instancia o hacia otra instancia, exportaci?n ZIP e inutilizaci?n segura mediante traslado a .backups/world-<uuid>, con previsualizaci?n Native, bloqueo con partida activa y preservaci?n de enlaces compartidos. Correcciones de estabilidad CI e intermitencias registradas en 20a0944 (STAGE5-CI-STABILITY.md) y verificadas en CI 41211315936 (168 React + 1 Strict + 8 Vue). Importaci?n revisada de mundos desde carpeta externa o archivo ZIP a?adida en 46a3771 (STAGE5-WORLD-IMPORT.md) con validaci?n de archivo/rutas/CRC-32/SHA-256, copia independiente y bloqueo por alias f?sico de partida activa. Siguen pendientes editar metadatos, datapacks, todas las herramientas locales de mundos confirmadas por el usuario (mapa, progreso, dimensiones, regiones y consultar/copiar/pegar/eliminar/editar chunks), resumen y ajustes base de instancia."
+          "note": "Lectura inicial acotada de mundos en React (STAGE5-WORLDS-READ.md), operaciones locales revisadas de copia/ZIP/retirada con respaldo (9d7efeb, STAGE5-WORLD-OPERATIONS.md), estabilidad CI (20a0944, STAGE5-CI-STABILITY.md), importación revisada desde carpeta/ZIP (46a3771, STAGE5-WORLD-IMPORT.md) y edición revisada de metadatos con respaldo de level.dat (90d04ec, STAGE5-WORLD-METADATA.md) completadas; CI 41254221156 verde en ambos jobs (172 React + 1 Strict + 8 Vue). Siguen pendientes datapacks, todas las herramientas locales de mundos confirmadas por el usuario (mapa, progreso, dimensiones, regiones y consultar/copiar/pegar/eliminar/editar chunks), resumen y ajustes base de instancia."
         },
         {
           "id": "console-isolation",
