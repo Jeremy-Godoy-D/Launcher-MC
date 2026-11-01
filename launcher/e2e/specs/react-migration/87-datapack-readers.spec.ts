@@ -53,11 +53,11 @@ test('Native datapack watch discovers a missing folder, publishes live bounded m
   const page = launcher.main, path = await instance(page), world = await makeReactWorld(path, 'Alpha'), bytes = await readFile(join(world, 'level.dat'))
   expect(await openWatch(page, world)).toEqual([])
   await expect(lstat(join(world, 'datapacks'))).rejects.toHaveProperty('code', 'ENOENT')
-  const active = () => launcher.app.evaluate(() => ((process.report.getReport() as any).libuv || []).some((entry: any) => entry.type === 'fs_event' && typeof entry.filename === 'string' && /\/Reader worlds\/saves\/Alpha(?:\/datapacks)?$/.test(entry.filename.replace(/\\/g, '/'))))
+  const active = () => launcher.app.evaluate(() => ((process.report.getReport() as any).libuv || []).some((entry: any) => entry.type === 'fs_event' && typeof entry.filename === 'string' && entry.filename.replace(/\\/g, '/').endsWith('/Reader worlds/saves/Alpha/datapacks')))
   try {
-    await expect.poll(active).toBe(true)
     const source = join(launcher.gameDataPath, 'reader-source'); await makeReactResourcePack(source, 'Pack', 'Native datapack metadata', 48)
     await mkdir(join(world, 'datapacks')); await copyFile(join(source, 'resourcepacks/Pack.zip'), join(world, 'datapacks/Pack.zip'))
+    await expect.poll(active).toBe(true)
     await expect.poll(async () => (await latest(page)).map((row: any) => row.fileName), { timeout: 10000 }).toEqual(['Pack.zip'])
     await writeFile(join(world, 'datapacks/.Pack.zip.curseforge'), JSON.stringify({ projectId: 123, fileId: 456, ignored: 'EXTRA' }))
     await expect.poll(async () => (await latest(page))[0]?.curseforge, { timeout: 10000 }).toEqual({ projectId: 123, fileId: 456 })
@@ -71,6 +71,8 @@ test('Native datapack watch discovers a missing folder, publishes live bounded m
     expect(await readFile(join(world, 'level.dat'))).toEqual(bytes)
     await writeFile(testInfo.outputPath('reader-state.json'), JSON.stringify({ rows, foreignPreserved: true, gameStarted: false }, null, 2))
   } finally { await closeWatch(page) }
+  const remaining = await launcher.app.evaluate(() => ((process.report.getReport() as any).libuv || []).filter((entry: any) => entry.type === 'fs_event' && typeof entry.filename === 'string' && entry.filename.replace(/\\/g, '/').includes('/Reader worlds/saves/Alpha')).map((entry: any) => ({ type: entry.type, filename: entry.filename, active: entry.is_active })))
+  await writeFile(testInfo.outputPath('remaining-world-handles.json'), JSON.stringify(remaining, null, 2))
   await expect.poll(active).toBe(false)
 })
 
