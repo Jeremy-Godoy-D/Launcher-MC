@@ -343,3 +343,8 @@ STAGE5-WORLD-TRANSFERS.md/0ce2170 elimina extracción ZIP/copia/exportación sin
 ## Compartir/desconectar carpetas de Mundos
 
 STAGE5-WORLD-SHARING.md/3f0b98d asegura compartir/conectar/desconectar y autoridad Java de isSaveLinked, con copias independientes/colisiones, backups, guardas NIO y recuperación. VueEPERM por carpeta vigilada reproducido y corregido cerrando/recreando su observador y serializando nuevos observadores.82focales,React10+1creación,Vue11+1boot;tipos/lint/DeskGap/9harness,E2E56base. CI41343639177/2fa2c94 success confirma el bloque previo; nuevo pendiente. K11 conserva mercado datapacks/lectores/watchers/IPC/preservación al borrar/noNIO/aceptación integral pendientes;K12/K21pass,5activa,6–9pendientes. Todas herramientas/chunks conservadas, sin cambios en producción/proxy.
+
+
+## Descargas de Mundos/datapacks revisadas (754c57c)
+
+STAGE5-WORLD-MARKET.md registra staging propio, autoridad Java/depósito, revisión/publicación exclusiva con metadatos y sesiones, rechazo de respuestas vacías e IDs inválidos y espera de todas las descargas antes de limpiar. La descarga ya no espera que otra pantalla cree InstanceInstallService. CI41347979179/8306911 falló por la huella Number del inventario de shaders; se usan BigInt/nanosegundos con regresión determinista. Final1327unitarias/130archivos,React22/Vue15,16Axe0violaciones/28incomplete,tipos/lint/DeskGap/9harness y56diagnósticos E2E base. Nuevo CI pendiente; no producción. K11 mantiene lectores/watchers legacy, preservación al borrar e integral/noNIO pendientes;K12/K21pass,5activa,6–9pendientes. Todas herramientas/chunks conservadas;Microsoft pospuesto,PR4borrador,distVue y producción/proxy intactos.
