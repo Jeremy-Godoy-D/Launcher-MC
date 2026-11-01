@@ -811,9 +811,9 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       const sharedRoot = join(await realpath(this.getPath()), 'saves'), name = relative(sharedRoot, root)
       if (!name || name === '..' || isAbsolute(name) || name.includes(sep)) throw new AnyError('WorldNotFoundError')
       worldName(name)
-      const depot = await lstat(sharedRoot), info = await lstat(root)
+      const depot = await lstat(sharedRoot, { bigint: true }), info = await lstat(root, { bigint: true })
       if (!depot.isDirectory() || depot.isSymbolicLink() || !info.isDirectory() || info.isSymbolicLink()) throw new AnyError('WorldNotFoundError')
-      identity = JSON.stringify([sharedRoot, depot.ino, depot.dev, root, info.ino, info.dev]); isShared = true
+      identity = JSON.stringify([sharedRoot, depot.ino.toString(), depot.dev.toString(), root, info.ino.toString(), info.dev.toString()]); isShared = true
     }
     await readBoundedFile(join(root, 'level.dat'), 4 * 1024 * 1024).catch(() => { throw new AnyError('WorldNotFoundError') })
     return { root, identity, isShared, shared: isShared, matchedInstance }

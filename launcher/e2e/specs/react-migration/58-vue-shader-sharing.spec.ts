@@ -13,6 +13,6 @@ test('the Vue host keeps legacy shader link and unlink calls with independent re
   await page.evaluate(async path => (window as any).serviceChannels.open('InstanceShaderPacksService').call('unlinkShared', path), path)
   expect((await lstat(join(path, 'shaderpacks'))).isSymbolicLink()).toBe(false)
   expect(await readFile(join(path, 'shaderpacks/local.zip'))).toEqual(bytes)
-  expect((await lstat(join(path, 'shaderpacks/common.zip'))).ino).not.toBe((await lstat(join(root, 'shaderpacks/common.zip'))).ino)
+  expect((await lstat(join(path, 'shaderpacks/common.zip'), { bigint: true })).ino).not.toBe((await lstat(join(root, 'shaderpacks/common.zip'), { bigint: true })).ino)
   expect(await readFile(join(path, 'optionsshaders.txt'), 'utf8')).toBe('shaderPack=local.zip\n')
 })
