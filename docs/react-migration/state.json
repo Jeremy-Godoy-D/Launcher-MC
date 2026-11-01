@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa;fba696d/1221d41 protegen borradores,herencia,flags/RAM0/auto/false,monitor/name yguardado revisado.1130unitarias/114archivos,25React distintos(8 finales tras0),2Vue,16Axe0violaciones/20incomplete,9harness;tipos/lintaprobados,E2E56base,distVue restaurado. K12 aceptar herencia con globales no predeterminados/opciones resueltas,revisar incomplete Radix/contraste yCI nuevo;no rehacer formulario/argv. CI41289148508/97f2ed9 success ambos(202main+1Strict+8Vue,2opt-in omitidos);verificar nuevo SHA sin reiniciar. Despues K21 streaming/virtualizacion;K11 aceptacion integral/auditoria IPC legacy/escritores sinNIO pendientes. Todas las herramientas locales Mundos conservadas;5 activa,6–9pending,PR4borrador,produccion/proxy intactos,Microsoft pospuesto,DOMPurify WIP fuera de commits. Ver STAGE5-SETTINGS-DRAFTS.",
+  "nextAction": "Etapa5 activa;b59dedf/4cae7ee cubren herencia resuelta con9casos,contraste50elementos/tema(4.975dark/4.927light) yretiran beforeunload limpio antes de pintar.1139unitarias/114archivos,23focales,17React finales sinreintentos,16Axe0violaciones/20incomplete con revision de foco/contraste,9harness;E2E56base,distVue restaurado. K12 pendiente soloCI exacto nuevo;no rehacer borradores/argv/herencia. CI41294264006/827e792 success ambos,pero209main+1flaky74+2skipped,1Strict+8Vue;no es pasada limpia. Corregido ciclo del listener conregresion0vs1 ytresguardar/recargar;verificar nuevoCI sinreiniciar vivo. AvanzarK21(streaming,dosprocesos,fragmentos,lotes,virtualizacion,scroll,copiar/exportar),K11aceptacionintegral/IPClegacy/escritoresnoNIO. Todas herramientasMundos conservadas,5activa,6–9pending,PR4borrador,produccion/proxy intactos,Microsoft pospuesto,DOMPurify WIP fuera de commits. VerSTAGE5-SETTINGS-INHERITANCE.",
   "stages": [
     {
       "id": 0,
@@ -841,9 +841,13 @@
             {
               "path": "docs/react-migration/STAGE5-SETTINGS-DRAFTS.md",
               "sha256": "61743d85749e07df624ff499c5f7975c1b2e41b0373c15cfecb8491648cffa50"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-SETTINGS-INHERITANCE.md",
+              "sha256": "253e4cd34dbbd34535d72b4137a5832cc23605336540100a5f5182e8bc47b101"
             }
           ],
-          "note": "fba696d/1221d41 conservan borradores/herencia/flags/RAM0/auto/false/nested yguardan conCASvalidado/rollback.1130unitarias,25Reactdistintos(8finales),2Vue,16Axe0violaciones/20incomplete. K12 sigue pending por herencia global integrada/incompletos/CI nuevo;K11 por aceptacion integral/IPClegacy/escritores sinNIO. CI previo41289148508/97f2ed9 success ambos. Ver STAGE5-SETTINGS-DRAFTS;etapa5activa."
+          "note": "b59dedf/4cae7ee:K12 criterios locales cubiertos(herencia real/opciones resueltas/contraste/foco/cierre/recuperacion);pendienteCI nuevo sinflaky.1139unitarias,17Reactfinales,16Axe0violaciones/20incomplete,9harness. CI41294264006/827e792 ambos success,209main+1flaky74+2skipped,1Strict+8Vue;listener limpio corregido,verificar nuevoSHA. K11 aceptacionintegral/IPClegacy/noNIO pendiente. VerSTAGE5-SETTINGS-INHERITANCE;5activa."
         },
         {
           "id": "console-isolation",
@@ -995,5 +999,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-01T09:39:28.045090+00:00"
+  "updatedAt": "2026-11-01T10:23:13.871889+00:00"
 }
