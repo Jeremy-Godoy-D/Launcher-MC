@@ -1,14 +1,14 @@
 import { AnyError } from '@xmcl/utils'
 import { randomUUID } from 'node:crypto'
-import { constants, type Dirent, type Stats } from 'node:fs'
+import { constants, type Dirent, type BigIntStats } from 'node:fs'
 import { link, lstat, mkdir, open, opendir, unlink, type FileHandle } from 'node:fs/promises'
 import { join } from 'node:path'
 import { importPathParts } from './importFile'
 
 export const MAX_LOG_BYTES = 16 * 1024 * 1024
-export type LogLocation = { path: string; info: Stats }[]
-const inspect = (path: string) => lstat(path).catch(error => { if (error.code !== 'ENOENT') throw error })
-const same = (a: Stats, b: Stats) => a.dev === b.dev && a.ino === b.ino
+export type LogLocation = { path: string; info: BigIntStats }[]
+const inspect = (path: string) => lstat(path, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
+const same = (a: BigIntStats, b: BigIntStats) => a.dev === b.dev && a.ino === b.ino
 export const unsafeLogPath = () => new AnyError('InstanceLogUnsafePath')
 const changed = () => new AnyError('InstanceLogChanged')
 export function logFailure(error: unknown): never {
@@ -37,7 +37,7 @@ export async function logDirectory(root: string, path = '', create = false): Pro
 export async function verifyLogLocation(entries: LogLocation) {
   for (const { path, info } of entries) {
     const now = await inspect(path)
-    if (!now || now.isSymbolicLink() || !same(now, info) || now.isDirectory() !== info.isDirectory() || (now.isFile() && (now.nlink !== 1 || now.size < info.size))) throw changed()
+    if (!now || now.isSymbolicLink() || !same(now, info) || now.isDirectory() !== info.isDirectory() || (now.isFile() && (now.nlink !== 1n || now.size < info.size))) throw changed()
   }
 }
 
@@ -47,7 +47,7 @@ export async function logFile(root: string, path: string) {
   if (!entries) return undefined
   const target = join(entries[entries.length - 1].path, name), info = await inspect(target)
   if (!info) return undefined
-  if (!info.isFile() || info.isSymbolicLink() || info.nlink !== 1) throw unsafeLogPath()
+  if (!info.isFile() || info.isSymbolicLink() || info.nlink !== 1n) throw unsafeLogPath()
   entries.push({ path: target, info })
   return { path: target, info, entries }
 }
@@ -55,8 +55,8 @@ export async function logFile(root: string, path: string) {
 async function openLogFile(target: NonNullable<Awaited<ReturnType<typeof logFile>>>) {
   const handle = await open(target.path, constants.O_RDONLY | (constants.O_NOFOLLOW || 0) | (constants.O_NONBLOCK || 0))
   try {
-    const info = await handle.stat()
-    if (!info.isFile() || info.nlink !== 1 || !same(info, target.info) || info.size < target.info.size) throw changed()
+    const info = await handle.stat({ bigint: true })
+    if (!info.isFile() || info.nlink !== 1n || !same(info, target.info) || info.size < target.info.size) throw changed()
     await verifyLogLocation(target.entries)
     return handle
   } catch (error) { await handle.close(); throw error }
@@ -68,7 +68,7 @@ export async function readLogFile(root: string, path: string, limit = MAX_LOG_BY
     if (!target) return undefined
     if (target.info.size > limit) throw new AnyError('InstanceLogTooLarge')
     const handle = await openLogFile(target)
-    const data = Buffer.alloc(target.info.size)
+    const data = Buffer.alloc(Number(target.info.size))
     try {
       // A live log may append; read only its initial, bounded snapshot.
       let offset = 0
@@ -102,12 +102,12 @@ async function publishSnapshot(root: string, path: string, write: (handle: FileH
   const directory = entries[entries.length - 1].path
   const temporary = join(directory, `.snapshot-${randomUUID()}`)
   const handle = await open(temporary, 'wx', 0o600)
-  let info: Stats | undefined
+  let info: BigIntStats | undefined
   try {
-    try { info = await handle.stat(); await write(handle); await handle.sync() } finally { await handle.close() }
+    try { info = await handle.stat({ bigint: true }); await write(handle); await handle.sync() } finally { await handle.close() }
     await verifyLogLocation(entries)
     const now = await inspect(temporary)
-    if (!now || !same(now, info) || !now.isFile() || now.nlink !== 1) throw changed()
+    if (!now || !same(now, info) || !now.isFile() || now.nlink !== 1n) throw changed()
     // A completed snapshot is immutable; never replace an existing destination.
     await link(temporary, join(directory, name))
   } finally {
@@ -128,12 +128,13 @@ export async function copyLogSnapshot(sourceRoot: string, sourcePath: string, ro
   // Keep complete snapshots above the display limit, with a finite archive budget.
   if (target.info.size > 256 * 1024 * 1024) throw new AnyError('InstanceLogTooLarge')
   const source = await openLogFile(target)
+  const size = Number(target.info.size)
   try {
     await publishSnapshot(root, path, async destination => {
-      const buffer = Buffer.alloc(Math.min(target.info.size, 64 * 1024))
+      const buffer = Buffer.alloc(Math.min(size, 64 * 1024))
       let offset = 0
-      while (offset < target.info.size) {
-        const { bytesRead } = await source.read(buffer, 0, Math.min(buffer.length, target.info.size - offset), offset)
+      while (offset < size) {
+        const { bytesRead } = await source.read(buffer, 0, Math.min(buffer.length, size - offset), offset)
         if (!bytesRead) throw changed()
         await destination.writeFile(buffer.subarray(0, bytesRead))
         offset += bytesRead

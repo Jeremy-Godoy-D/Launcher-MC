@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { appendFile, link, mkdtemp, mkdir, open, opendir, readFile, realpath, rename, rm, symlink, truncate, writeFile } from 'node:fs/promises'
+import { appendFile, link, lstat, mkdtemp, mkdir, open, opendir, readFile, realpath, rename, rm, symlink, truncate, writeFile } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { gzipSync } from 'node:zlib'
@@ -9,7 +9,7 @@ vi.mock('./InstanceService', () => ({ InstanceService: class {} }))
 vi.mock('../launch/LaunchService', () => ({ LaunchService: class {} }))
 vi.mock('node:fs/promises', async original => {
   const actual = await original<typeof import('node:fs/promises')>()
-  return { ...actual, open: vi.fn(actual.open), opendir: vi.fn(actual.opendir) }
+  return { ...actual, open: vi.fn(actual.open), lstat: vi.fn(actual.lstat), opendir: vi.fn(actual.opendir) }
 })
 const { InstanceLogService } = await import('./InstanceLogService')
 let root: string, first: string, second: string, service: InstanceType<typeof InstanceLogService>
@@ -137,4 +137,27 @@ it('reports permission and decoder failures without exposing their raw details',
   await expect(service.getLogContent(first, 'private.log')).rejects.toMatchObject({ name: 'InstanceLogReadError', message: '' })
   vi.spyOn((service as any).encoder, 'decode').mockRejectedValueOnce(new Error('fixture-private-detail'))
   await expect(service.getLogContent(first, 'private.log')).rejects.toMatchObject({ name: 'InstanceLogReadError', message: '' })
+})
+
+it('detects distinct NTFS file ids that round to the same JavaScript number', async () => {
+  const path = join(first, 'logs/large-identity.log'); await writeFile(path, 'owned data')
+  const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises')
+  const inspected = 11258999068718408n, replaced = inspected + 1n
+  expect(Number(inspected)).toBe(Number(replaced))
+  vi.mocked(lstat).mockImplementation(async (target, options: any) => {
+    const info: any = await actual.lstat(target, options)
+    if (target === path) info.ino = options?.bigint ? inspected : Number(inspected)
+    return info
+  })
+  vi.mocked(open).mockImplementationOnce(async (...args) => {
+    const handle = await actual.open(...args), original = handle.stat.bind(handle)
+    vi.spyOn(handle, 'stat').mockImplementation(async (options: any) => {
+      const info: any = await original(options)
+      info.ino = options?.bigint ? replaced : Number(replaced)
+      return info
+    })
+    return handle
+  })
+  try { await expect(service.getLogContent(first, 'large-identity.log')).rejects.toHaveProperty('name', 'InstanceLogChanged') }
+  finally { vi.mocked(lstat).mockImplementation(actual.lstat) }
 })

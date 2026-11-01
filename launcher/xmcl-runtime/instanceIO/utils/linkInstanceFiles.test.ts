@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { linkInstanceFiles } from './linkInstanceFiles'
 import type { InstanceFile } from '@xmcl/instance'
-import { mkdtemp, rm, writeFile, mkdir, readFile, stat } from 'fs-extra'
+import { mkdtemp, rm, writeFile, mkdir, readFile } from 'fs-extra'
+import { stat } from 'node:fs/promises'
 import { pathToFileURL } from 'node:url'
 import { tmpdir, platform } from 'os'
 import { join } from 'path'
@@ -22,7 +23,7 @@ describe('linkInstanceFiles', () => {
       const finished = new Set<string>()
       await linkInstanceFiles([{ file: { ...file('saves/world/level.dat'), downloads: [pathToFileURL(src).href] }, src, destination }], PLATFORM, finished, [], new AbortController().signal)
       expect(finished.size).toBe(1)
-      expect((await stat(src)).ino).not.toBe((await stat(destination)).ino)
+      expect((await stat(src, { bigint: true })).ino).not.toBe((await stat(destination, { bigint: true })).ino)
       await writeFile(destination, 'changed world')
       expect(await readFile(src, 'utf8')).toBe('original world')
     } finally { await rm(dir, { recursive: true, force: true }) }
