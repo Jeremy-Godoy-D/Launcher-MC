@@ -12,7 +12,7 @@ async function disabled(path: string, id: string, title: string, depends: Record
 async function openMods(page: Page) {
   await page.getByTestId('nav-library').click()
   await page.getByRole('button', { name: 'Administrar Fabric QA', exact: true }).click()
-  await page.getByRole('link', { name: 'Mods', exact: true }).click()
+  await page.getByLabel('Secciones de la instancia').getByRole('link', { name: 'Mods', exact: true }).click()
   return page.getByTestId('instance-mods')
 }
 test('dependency changes require a review and cancellation preserves bytes before transitive enable and disable', async ({ launcher }) => {

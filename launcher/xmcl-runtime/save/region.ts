@@ -30,7 +30,9 @@ const DIMENSION_DIRS: Record<string, string> = {
 }
 
 function getDimensionDir(savePath: string, dimension: string): string {
+  if (typeof dimension !== 'string' || dimension.length > 1024 || !/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(dimension)) throw new Error('Invalid dimension id')
   const [namespace, path] = dimension.split(':')
+  if ([namespace, ...path.split('/')].some(part => !part || part === '.' || part === '..')) throw new Error('Invalid dimension id')
   const dimensionPath = namespace && path
     ? join(savePath, 'dimensions', namespace, ...path.split('/'))
     : undefined

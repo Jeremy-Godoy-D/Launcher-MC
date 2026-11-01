@@ -39,7 +39,7 @@ test('real recovery UI cancels a held download, reviews edited files, rejects a 
     await page.evaluate(async path => (window as any).serviceChannels.open('InstanceInstallService').call('stageInstanceFiles', { path, oldFiles: [], files: [{ path: 'config/other.txt', hashes: { sha1: 'c'.repeat(40) } }] }), path)
     const otherManifest = await readFile(join(path, '.install-manifest'))
     mode = 'hold'
-    await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Fabric QA', exact: true }).click(); await page.getByRole('link', { name: 'Mods', exact: true }).click()
+    await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Fabric QA', exact: true }).click(); await page.getByLabel('Secciones de la instancia').getByRole('link', { name: 'Mods', exact: true }).click()
     await page.getByRole('button', { name: 'Buscar actualizaciones', exact: true }).click()
     const dialog = page.getByRole('dialog', { name: 'Actualizar mods', exact: true })
     await dialog.getByRole('button', { name: 'Reanudar esta operación', exact: true }).click()

@@ -10,7 +10,7 @@ test.use({ launcherOptions: { locale: 'es-ES' } })
 async function openMods(page: Page, name: string) {
   await page.getByTestId('nav-library').click()
   await page.getByRole('button', { name: `Administrar ${name}`, exact: true }).click()
-  await page.getByRole('link', { name: 'Mods', exact: true }).click()
+  await page.getByLabel('Secciones de la instancia').getByRole('link', { name: 'Mods', exact: true }).click()
   const list = page.getByTestId('instance-mods')
   await expect(list.getByRole('button', { name: 'Gestionar grupos', exact: true })).toBeEnabled()
   return list
@@ -202,7 +202,7 @@ test('invalid native data stays intact and group operations refuse unregistered 
   await writeFile(file, broken)
   const legacy = { [path]: { 'example.jar': 'Preserve legacy' } }
   await page.evaluate(value => localStorage.setItem('modsGrouping', JSON.stringify(value)), legacy)
-  await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click(); await page.getByRole('link', { name: 'Mods', exact: true }).click()
+  await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click(); await page.getByLabel('Secciones de la instancia').getByRole('link', { name: 'Mods', exact: true }).click()
   const list = page.getByTestId('instance-mods')
   await expect(list.getByRole('alert').filter({ hasText: 'No se pudieron leer los grupos' })).toBeVisible()
   await expect(list.getByRole('button', { name: 'Gestionar grupos', exact: true })).toBeDisabled()

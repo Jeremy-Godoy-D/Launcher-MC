@@ -10,7 +10,7 @@ import { activateLauncherControl } from '../../helpers/focus-launcher'
 
 test.use({ launcherOptions: { locale: 'es-ES', gameDataParentAlias: true } })
 async function open(page: Page) {
-  await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click(); await page.getByRole('link', { name: 'Mundos', exact: true }).click()
+  await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click(); await page.getByLabel('Secciones de la instancia').getByRole('link', { name: 'Mundos', exact: true }).click()
   const area = page.getByTestId('instance-worlds'); await expect(area).toHaveAttribute('aria-busy', 'false'); return area
 }
 

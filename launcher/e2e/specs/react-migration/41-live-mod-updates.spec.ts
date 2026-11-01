@@ -22,7 +22,7 @@ for (const provider of ['modrinthOnly', 'curseforgeOnly']) test(`live ${provider
   await mkdir(join(path, 'mods'), { recursive: true }); await mkdir(join(path, 'saves/keep'), { recursive: true })
   await writeFile(join(path, 'mods', oldName), original); await writeFile(world, 'KEEP LIVE QA WORLD')
   await page.evaluate(({ path, provider }) => { localStorage.setItem(`modsUpgradePolicy:${path}`, JSON.stringify(provider)); localStorage.setItem(`modsUpgradeIgnoreAlphaBeta:${path}`, 'true') }, { path, provider })
-  await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Fabric QA', exact: true }).click(); await page.getByRole('link', { name: 'Mods', exact: true }).click()
+  await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Fabric QA', exact: true }).click(); await page.getByLabel('Secciones de la instancia').getByRole('link', { name: 'Mods', exact: true }).click()
   await expect(page.getByTestId('instance-mods').locator('.content-list li')).toHaveCount(1)
   await page.getByRole('button', { name: 'Buscar actualizaciones', exact: true }).click()
   const dialog = page.getByRole('dialog', { name: 'Actualizar mods', exact: true })

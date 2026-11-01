@@ -9,7 +9,7 @@ test.use({ launcherOptions: { locale: 'es-ES' } })
 async function openMods(page: Page, name = 'Mi mundo') {
   await page.getByTestId('nav-library').click()
   await page.getByRole('button', { name: `Administrar ${name}`, exact: true }).click()
-  await page.getByRole('link', { name: 'Mods', exact: true }).click()
+  await page.getByLabel('Secciones de la instancia').getByRole('link', { name: 'Mods', exact: true }).click()
   const list = page.getByTestId('instance-mods')
   await expect(list.getByRole('button', { name: 'Añadir archivos', exact: true })).toBeEnabled()
   return list

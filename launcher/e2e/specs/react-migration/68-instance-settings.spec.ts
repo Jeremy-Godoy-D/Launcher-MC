@@ -1,7 +1,8 @@
 import { test, expect, snap, type Page } from '../../helpers/scratch'
 import { seedReactLibrary } from '../../helpers/react-library'
 import { makeReactWorld } from '../../helpers/react-world'
-import { readFile } from 'node:fs/promises'
+import { focusLauncher } from '../../helpers/focus-launcher'
+import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import axe from 'axe-core'
 
@@ -156,23 +157,26 @@ test('instance settings maintain accessibility and responsiveness across theme/s
   const settingsSec = page.getByTestId('instance-base-setting')
   await expect(settingsSec).toBeVisible()
 
-  await page.evaluate((source) => {
-    eval(source)
-  }, axe.source)
-
+  const win = await launcher.app.browserWindow(page)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   for (const theme of ['dark', 'light'] as const) {
-    await page.evaluate((t) => {
-      document.documentElement.dataset.theme = t
-      document.documentElement.classList.toggle('dark', t === 'dark')
-    }, theme)
+    await page.evaluate(theme => { const key = 'launcher.react.preferences', prefs = JSON.parse(localStorage.getItem(key)!); localStorage.setItem(key, JSON.stringify({ ...prefs, appearance: theme })) }, theme)
+    await page.reload()
 
     for (const width of [1200, 800]) {
-      await page.setViewportSize({ width, height: 720 })
+      await win.evaluate((win, width) => win.setContentSize(width, width === 800 ? 400 : 720), width)
+      await expect.poll(() => page.evaluate(() => [innerWidth, innerHeight])).toEqual([width, width === 800 ? 400 : 720])
       await expect(settingsSec).toBeVisible()
-
+      const save = settingsSec.getByTestId('setting-save-btn')
+      await focusLauncher(launcher)
+      await settingsSec.getByTestId('setting-discard-btn').focus(); await page.keyboard.press('Tab')
+      await expect(save).toBeFocused(); await expect(save).toBeInViewport({ ratio: 1 })
+      expect(await settingsSec.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true)
+      await page.addScriptTag({ content: axe.source })
       const report = await page.evaluate(async () =>
-        (window as any).axe.run(document.body, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } }),
+        (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }),
       )
+      await writeFile(testInfo.outputPath(`settings-${theme}-${width}-axe.json`), JSON.stringify(report, null, 2))
       expect(report.violations).toEqual([])
 
       await snap(launcher, `instance-settings-${theme}-${width}`, 'Instance settings view.')

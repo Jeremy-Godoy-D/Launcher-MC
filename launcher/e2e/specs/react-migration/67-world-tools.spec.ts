@@ -2,7 +2,7 @@ import { test, expect, snap, type Page } from '../../helpers/scratch'
 import { seedReactLibrary } from '../../helpers/react-library'
 import { makeReactWorld } from '../../helpers/react-world'
 import { activateLauncherControl } from '../../helpers/focus-launcher'
-import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, readdir, readFile, writeFile, symlink, unlink } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import axe from 'axe-core'
@@ -14,7 +14,7 @@ const mockRegion = fileURLToPath(new URL('../../../mock/saves/1.19.3/region/r.0.
 async function open(page: Page) {
   await page.getByTestId('nav-library').click()
   await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click()
-  await page.getByRole('link', { name: 'Mundos', exact: true }).click()
+  await page.getByLabel('Secciones de la instancia').getByRole('link', { name: 'Mundos', exact: true }).click()
   const area = page.getByTestId('instance-worlds')
   await expect(area).toHaveAttribute('aria-busy', 'false')
   return area
@@ -189,6 +189,40 @@ test('world map renders canvas, selects chunks, copies to clipboard and deletes 
   await expect(info).toHaveCount(0)
 })
 
+test('native chunk writes reject foreign worlds, invalid dimensions and linked backups, and preserve exact region backups', async ({ launcher }) => {
+  const page = launcher.main, [path] = await seedReactLibrary(page)
+  const root = await makeReactWorld(path, 'Guarded'), foreign = await makeReactWorld(join(launcher.gameDataPath, 'external'), 'Foreign')
+  await mkdir(join(root, 'region'), { recursive: true })
+  await copyFile(mockRegion, join(root, 'region/r.0.0.mca'))
+  const original = await readFile(join(root, 'region/r.0.0.mca'))
+  const attempt = (savePath: string, dimension = 'minecraft:overworld') => page.evaluate(async options => {
+    try { await (window as any).serviceChannels.open('InstanceSavesService').call('deleteSaveChunks', { ...options, chunks: [{ chunkX: 0, chunkZ: 0 }] }); return 'unexpected success' }
+    catch (error: any) { return `${error.name}: ${error.message}` }
+  }, { savePath, dimension })
+  expect(await attempt(foreign)).toContain('WorldNotFoundError')
+  expect(await attempt(root, 'evil:../../outside')).toContain('Invalid dimension id')
+  const externalBackup = join(launcher.gameDataPath, 'external-backup')
+  await mkdir(externalBackup); await writeFile(join(externalBackup, 'sentinel'), 'unchanged')
+  await symlink(externalBackup, join(root, '.backups'), 'junction')
+  expect(await attempt(root)).toContain('Unsafe install directory')
+  expect(await readFile(join(root, 'region/r.0.0.mca'))).toEqual(original)
+  expect(await readdir(externalBackup)).toEqual(['sentinel'])
+  await unlink(join(root, '.backups'))
+  const restored = await page.evaluate(async savePath => {
+    const service = (window as any).serviceChannels.open('InstanceSavesService'), options = { savePath, dimension: 'minecraft:overworld', chunks: [{ chunkX: 0, chunkZ: 0 }] }
+    const before = await service.call('copySaveChunks', options)
+    await service.call('deleteSaveChunks', options)
+    const deleted = await service.call('copySaveChunks', options)
+    await service.call('pasteSaveChunks', { ...options, chunks: before })
+    const after = await service.call('copySaveChunks', options)
+    return { copied: before.length, deleted: deleted.length, restored: after.length, same: before.length === 1 && after.length === 1 && before[0].compression === after[0].compression && before[0].data.length === after[0].data.length && before[0].data.every((byte: number, index: number) => byte === after[0].data[index]) }
+  }, root)
+  expect(restored).toEqual({ copied: 1, deleted: 0, restored: 1, same: true })
+  const backups = (await readdir(join(root, '.backups'))).filter(name => name.startsWith('world-chunks-'))
+  const saved = await Promise.all(backups.map(name => readFile(join(root, '.backups', name, 'Guarded/minecraft_overworld/r.0.0.mca'))))
+  expect(saved.some(bytes => bytes.equals(original))).toBe(true)
+})
+
 test('world tools maintain accessibility and responsiveness across theme/size matrix', async ({ launcher }, testInfo) => {
   const page = launcher.main, [path] = await seedReactLibrary(page)
   const root = await makeReactWorld(path, 'Gamma', 'Gamma World')
@@ -196,38 +230,24 @@ test('world tools maintain accessibility and responsiveness across theme/size ma
   await mkdir(regionDir, { recursive: true })
   await copyFile(mockRegion, join(regionDir, 'r.0.0.mca'))
 
-  const area = await open(page)
-  await area.getByRole('button', { name: 'Gamma World', exact: true }).click()
-  const info = page.getByTestId('world-info')
-  await expect(info).toBeVisible()
-
-  // Switch to map tab
-  await info.getByTestId('world-tab-map').click()
-  await expect(info.getByTestId('world-map')).toBeVisible()
-
-  const matrix = [
-    { theme: 'dark' as const, width: 1200, height: 720 },
-    { theme: 'dark' as const, width: 800, height: 400 },
-    { theme: 'light' as const, width: 1200, height: 720 },
-    { theme: 'light' as const, width: 800, height: 400 },
-  ]
-
-  for (const { theme, width, height } of matrix) {
-    await page.setViewportSize({ width, height })
-    await page.evaluate((t) => {
-      document.documentElement.dataset.theme = t
-      document.body.dataset.theme = t
-    }, theme)
-
-    await page.addScriptTag({ content: axe.source })
-    const report = await page.evaluate(async () => (window as any).axe.run(document.body, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } }))
-    await writeFile(testInfo.outputPath(`tools-${theme}-${width}-axe.json`), JSON.stringify(report, null, 2))
-    expect(report.violations).toEqual([])
-
-    await snap(launcher, `world-tools-${theme}-${width}`, 'World tools map and progress viewer.')
+  const win = await launcher.app.browserWindow(page), info = page.getByTestId('world-info')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  for (const theme of ['dark', 'light']) {
+    await page.evaluate(theme => { const key = 'launcher.react.preferences', prefs = JSON.parse(localStorage.getItem(key)!); localStorage.setItem(key, JSON.stringify({ ...prefs, appearance: theme })) }, theme)
+    await page.reload()
+    const area = await open(page), trigger = area.getByRole('button', { name: 'Gamma World', exact: true })
+    await trigger.click(); await info.getByTestId('world-tab-map').click()
+    for (const [width, height] of [[1200, 720], [800, 400]]) {
+      await win.evaluate((win, size) => win.setContentSize(size[0], size[1]), [width, height])
+      await expect(info.getByTestId('world-map')).toBeVisible()
+      expect(await info.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true)
+      await page.addScriptTag({ content: axe.source })
+      const report = await page.evaluate(async () => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }))
+      await writeFile(testInfo.outputPath(`tools-${theme}-${width}-axe.json`), JSON.stringify(report, null, 2))
+      expect(report.violations).toEqual([])
+      await snap(launcher, `world-tools-${theme}-${width}`, 'World tools map in the native supported window size and persisted appearance.')
+    }
+    await page.keyboard.press('Escape'); await expect(info).toHaveCount(0)
+    await expect(trigger).toBeFocused()
   }
-
-  // Close info and check return focus
-  await page.keyboard.press('Escape')
-  await expect(info).toHaveCount(0)
 })

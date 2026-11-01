@@ -10,7 +10,7 @@ test.use({ launcherOptions: { locale: 'es-ES' } })
 async function openMods(page: Page, name = 'Mi mundo') {
   await page.getByTestId('nav-library').click()
   await page.getByRole('button', { name: `Administrar ${name}`, exact: true }).click()
-  await page.getByRole('link', { name: 'Mods', exact: true }).click()
+  await page.getByLabel('Secciones de la instancia').getByRole('link', { name: 'Mods', exact: true }).click()
   return page.getByTestId('instance-mods')
 }
 

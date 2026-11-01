@@ -1,4 +1,5 @@
 import { ResourceManager } from '@xmcl/resource'
+import { checksum } from '@xmcl/core'
 import {
   ImportSaveException,
   InstanceSavesServiceKey,
@@ -27,9 +28,9 @@ import { readPackMetaAndIcon } from '@xmcl/resourcepack'
 import { AnyError, isSystemError } from '@xmcl/utils'
 import { FSWatcher } from 'chokidar'
 import filenamify from 'filenamify'
-import { createWriteStream, existsSync } from 'fs'
+import { constants, createWriteStream, existsSync } from 'fs'
 import { randomUUID } from 'node:crypto'
-import { realpath } from 'node:fs/promises'
+import { lstat, realpath } from 'node:fs/promises'
 import { copyFile, ensureDir, ensureFile, readFile, readdir, rename, rm, rmdir, stat, unlink, writeFile } from 'fs-extra'
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'path'
 import { ZipFile } from 'yazl'
@@ -46,7 +47,8 @@ import { isNonnull, requireObject, requireString } from '../util/object'
 import { includeAs, writeZipFile } from '../util/zip'
 import { readlinkSafe, isLinkTo } from './utils/readLinkSafe'
 import { readWorldDatapacks } from './utils/worldDatapacks'
-import { readWorlds, worldsLocation } from './utils/worldFiles'
+import { readBoundedFile, readWorlds, worldLocation, worldName, worldsLocation } from './utils/worldFiles'
+import { assertInstallDirectory } from '../instanceIO/utils/pendingInstall'
 import { applyWorldFiles, previewWorldFiles } from './utils/worldOperations'
 
 /**
@@ -684,19 +686,18 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     const { savePath, dimension, chunks } = options
     requireString(savePath)
     requireString(dimension)
-    if (!Array.isArray(chunks) || chunks.length === 0) return
-    await this.#assertSaveWritable(savePath)
+    this.#validateChunks(chunks)
+    if (chunks.length === 0) return
     const regionKeys = new Set(chunks.map(c => `${c.chunkX >> 5}.${c.chunkZ >> 5}`))
-    await this.#backupRegionFiles(savePath, dimension, regionKeys)
-    this.log(`Deleting ${chunks.length} chunks from ${savePath} (${dimension})`)
-    await deleteSaveChunks(savePath, dimension, chunks)
+    await this.#writeSaveChunks(savePath, dimension, regionKeys, root => deleteSaveChunks(root, dimension, chunks))
   }
 
   async copySaveChunks(options: CopySaveChunksOptions) {
     const { savePath, dimension, chunks } = options
     requireString(savePath)
     requireString(dimension)
-    if (!Array.isArray(chunks) || chunks.length === 0) return []
+    this.#validateChunks(chunks)
+    if (chunks.length === 0) return []
     this.log(`Copying ${chunks.length} chunks from ${savePath} (${dimension})`)
     return await readSaveChunks(savePath, dimension, chunks)
   }
@@ -705,62 +706,80 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     const { savePath, dimension, chunks, offsetX = 0, offsetZ = 0 } = options
     requireString(savePath)
     requireString(dimension)
-    if (!Array.isArray(chunks) || chunks.length === 0) return
-    await this.#assertSaveWritable(savePath)
+    this.#validateChunks(chunks, offsetX, offsetZ)
+    if (chunks.length === 0) return
+    let bytes = 0
+    for (const chunk of chunks) {
+      if (![1, 2, 3].includes(chunk.compression) || !(chunk.data instanceof Uint8Array) || !chunk.data.byteLength || chunk.data.byteLength > 255 * 4096 - 5 || (bytes += chunk.data.byteLength) > 64 * 1024 * 1024) throw new Error('Invalid chunk payload')
+    }
     const regionKeys = new Set(chunks.map(c => `${(c.chunkX + offsetX) >> 5}.${(c.chunkZ + offsetZ) >> 5}`))
-    await this.#backupRegionFiles(savePath, dimension, regionKeys)
-    this.log(`Pasting ${chunks.length} chunks into ${savePath} (${dimension}) offset (${offsetX}, ${offsetZ})`)
     const relocated = relocateSaveChunks(chunks, offsetX, offsetZ)
-    await writeSaveChunks(savePath, dimension, relocated)
+    await this.#writeSaveChunks(savePath, dimension, regionKeys, root => writeSaveChunks(root, dimension, relocated))
+  }
+
+  #validateChunks(chunks: Array<{ chunkX: number; chunkZ: number }>, offsetX = 0, offsetZ = 0) {
+    const integer = (value: number) => Number.isInteger(value) && value >= -2147483648 && value <= 2147483647
+    if (!Array.isArray(chunks) || chunks.length > 4096 || !integer(offsetX) || !integer(offsetZ)) throw new Error('Invalid chunk coordinates')
+    const seen = new Set<string>()
+    for (const chunk of chunks) {
+      if (!chunk || !integer(chunk.chunkX) || !integer(chunk.chunkZ) || !integer(chunk.chunkX + offsetX) || !integer(chunk.chunkZ + offsetZ)) throw new Error('Invalid chunk coordinates')
+      const key = `${chunk.chunkX},${chunk.chunkZ}`
+      if (seen.has(key)) throw new Error('Duplicate chunk coordinates')
+      seen.add(key)
+    }
+  }
+
+  async #writeSaveChunks(savePath: string, dimension: string, regionKeys: Set<string>, action: (root: string) => Promise<void>) {
+    const first = await this.#assertSaveWritable(savePath)
+    getRegionDir(first.root, dimension)
+    return this.mutex.of('resource-pack-options').runExclusive(async () => {
+      const write = async () => {
+        const current = await this.#assertSaveWritable(savePath)
+        if (current.identity !== first.identity) throw new AnyError('WorldChangedError')
+        await this.#backupRegionFiles(current.root, dimension, regionKeys)
+        const final = await this.#assertSaveWritable(savePath)
+        if (final.identity !== first.identity) throw new AnyError('WorldChangedError')
+        await action(current.root)
+      }
+      return first.matchedInstance ? this.mutex.of(LockKey.instance(first.matchedInstance.path)).runExclusive(write) : write()
+    })
   }
 
   async #assertSaveWritable(savePath: string) {
     requireString(savePath)
-    const levelDat = join(savePath, 'level.dat')
-    let levelStat
-    try {
-      levelStat = await stat(levelDat)
-    } catch {
-      throw new AnyError('WorldNotFoundError', `Save path ${savePath} does not contain level.dat`)
+    if (!isAbsolute(savePath)) throw new AnyError('WorldNotFoundError')
+    await this.instanceService.initialize()
+    const root = await realpath(savePath).catch(() => { throw new AnyError('WorldNotFoundError') })
+    let matchedInstance: typeof this.instanceService.state.instances[number] | undefined
+    let identity = '', isShared = false
+    for (const instance of this.instanceService.state.instances) {
+      if (instance.edition !== 'java') continue
+      const instanceRoot = await realpath(instance.path).catch(error => { if (error.code !== 'ENOENT') throw error })
+      if (!instanceRoot) continue
+      const name = relative(join(instanceRoot, 'saves'), root)
+      if (!name || name === '..' || isAbsolute(name) || name.includes(sep)) continue
+      const source = await worldLocation(instance.path, worldName(name), this.getPath())
+      if (relative(source.root, root) !== '') throw new AnyError('WorldChangedError')
+      matchedInstance = instance; identity = source.identity; isShared = source.shared
+      break
     }
-    if (!levelStat.isFile()) {
-      throw new AnyError('WorldNotFoundError', `Save path ${savePath} does not contain a valid level.dat file`)
+    if (!matchedInstance) {
+      const sharedRoot = join(await realpath(this.getPath()), 'saves'), name = relative(sharedRoot, root)
+      if (!name || name === '..' || isAbsolute(name) || name.includes(sep)) throw new AnyError('WorldNotFoundError')
+      worldName(name)
+      const depot = await lstat(sharedRoot), info = await lstat(root)
+      if (!depot.isDirectory() || depot.isSymbolicLink() || !info.isDirectory() || info.isSymbolicLink()) throw new AnyError('WorldNotFoundError')
+      identity = JSON.stringify([sharedRoot, depot.ino, depot.dev, root, info.ino, info.dev]); isShared = true
     }
-
-    const resolvedSave = await realpath(savePath).catch(() => savePath)
-    const instances = this.instanceService.state.instances
-    const matchedInstance = instances.find(inst => {
-      const rel = relative(inst.path, resolvedSave)
-      return rel && !rel.startsWith('..') && !isAbsolute(rel)
-    })
-    const sharedRoot = join(await realpath(this.getPath()).catch(() => this.getPath()), 'saves')
-    const inShared = relative(sharedRoot, resolvedSave)
-    const isShared = !inShared || (inShared !== '..' && !inShared.startsWith('..' + sep) && !isAbsolute(inShared))
-
-    let processes: any[] = []
-    try {
-      const launch = await this.app.registry.get(LaunchService)
-      processes = await launch.getGameProcesses()
-    } catch {
-      processes = []
+    await readBoundedFile(join(root, 'level.dat'), 4 * 1024 * 1024).catch(() => { throw new AnyError('WorldNotFoundError') })
+    const launch = await this.app.registry.get(LaunchService), processes = await launch.getGameProcesses()
+    if (processes.length && isShared) throw new AnyError('SharedWorldRunningError')
+    if (matchedInstance && processes.length) {
+      const ownRoot = await realpath(matchedInstance.path)
+      const active = await Promise.all(processes.map(process => realpath(process.options.gameDirectory).catch(error => { if (error.code !== 'ENOENT') throw error; return process.options.gameDirectory })))
+      if (active.some(path => relative(ownRoot, path) === '')) throw new AnyError('InstanceRunningError')
     }
-
-    if (processes.length > 0) {
-      if (isShared) {
-        throw new AnyError('SharedWorldRunningError', 'Cannot modify chunks of a shared world while games are running')
-      }
-      if (matchedInstance) {
-        const matchedReal = await realpath(matchedInstance.path).catch(() => matchedInstance.path)
-        const isRunning = processes.some(p => {
-          const gameDir = p.options.gameDirectory
-          return gameDir === matchedInstance.path || relative(matchedReal, gameDir) === ''
-        })
-        if (isRunning) {
-          throw new AnyError('InstanceRunningError', `Instance ${matchedInstance.path} is running`)
-        }
-      }
-    }
-    return { isShared, matchedInstance }
+    return { root, identity, isShared, matchedInstance }
   }
 
   async #backupRegionFiles(savePath: string, dimension: string, regionKeys: Iterable<string>): Promise<string | undefined> {
@@ -769,18 +788,25 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     const sanitizedDim = dimension.replace(/[^a-zA-Z0-9_-]/g, '_')
     const backupDir = join(savePath, '.backups', `world-chunks-${backupId}`, saveName, sanitizedDim)
     const dir = getRegionDir(savePath, dimension)
+    await assertInstallDirectory(savePath, dir)
     let copiedAny = false
     for (const key of regionKeys) {
       const file = join(dir, `r.${key}.mca`)
       let fileStat
       try {
-        fileStat = await stat(file)
-      } catch {
-        fileStat = undefined
+        fileStat = await lstat(file)
+      } catch (error) {
+        if (!isSystemError(error) || error.code !== 'ENOENT') throw error
       }
-      if (fileStat?.isFile()) {
+      if (fileStat && (!fileStat.isFile() || fileStat.isSymbolicLink() || fileStat.size > 256 * 1024 * 1024)) throw new Error('Unsafe region file')
+      if (fileStat) {
+        await assertInstallDirectory(savePath, backupDir)
         await ensureDir(backupDir)
-        await copyFile(file, join(backupDir, `r.${key}.mca`))
+        await assertInstallDirectory(savePath, backupDir)
+        const target = join(backupDir, `r.${key}.mca`), before = await checksum(file, 'sha256')
+        await copyFile(file, target, constants.COPYFILE_EXCL)
+        const after = await lstat(file)
+        if (after.isSymbolicLink() || after.ino !== fileStat.ino || after.dev !== fileStat.dev || after.size !== fileStat.size || after.mtimeMs !== fileStat.mtimeMs || after.ctimeMs !== fileStat.ctimeMs || await checksum(target, 'sha256') !== before || await checksum(file, 'sha256') !== before) throw new AnyError('WorldChangedError')
         copiedAny = true
       }
     }

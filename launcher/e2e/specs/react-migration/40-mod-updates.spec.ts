@@ -55,7 +55,7 @@ async function fixture(launcher: LauncherFixture, mode: 'ready' | 'failed' | 'li
   return { path, original }
 }
 async function open(page: Page) {
-  await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Fabric QA', exact: true }).click(); await page.getByRole('link', { name: 'Mods', exact: true }).click()
+  await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Fabric QA', exact: true }).click(); await page.getByLabel('Secciones de la instancia').getByRole('link', { name: 'Mods', exact: true }).click()
   await expect(page.getByTestId('instance-mods').locator('.content-list li')).toHaveCount(1)
   const trigger = page.getByRole('button', { name: 'Buscar actualizaciones', exact: true })
   await trigger.click()

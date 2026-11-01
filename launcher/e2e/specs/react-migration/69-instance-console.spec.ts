@@ -1,5 +1,6 @@
 import { test, expect, snap, type Page } from '../../helpers/scratch'
 import { seedReactLibrary } from '../../helpers/react-library'
+import { focusLauncher } from '../../helpers/focus-launcher'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import axe from 'axe-core'
@@ -179,7 +180,7 @@ test('instance console displays crash reports with copy action and explorer inte
   await expect(copyBtn).toContainText('¡Copiado!')
 })
 
-test('instance console maintains WCAG 2.1 AA accessibility and responsiveness matrix', async ({ launcher }) => {
+test('instance console maintains WCAG 2.1 AA accessibility and responsiveness matrix', async ({ launcher }, testInfo) => {
   const page = launcher.main
   const [instPath] = await seedReactLibrary(page)
 
@@ -191,23 +192,29 @@ test('instance console maintains WCAG 2.1 AA accessibility and responsiveness ma
   await consoleSec.getByTestId('console-refresh').click()
   await consoleSec.getByTestId('console-file-select').selectOption('latest.log')
 
-  await page.evaluate((source) => {
-    eval(source)
-  }, axe.source)
-
+  const win = await launcher.app.browserWindow(page)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   for (const theme of ['dark', 'light'] as const) {
-    await page.evaluate((t) => {
-      document.documentElement.dataset.theme = t
-      document.documentElement.classList.toggle('dark', t === 'dark')
-    }, theme)
+    await page.evaluate(theme => { const key = 'launcher.react.preferences', prefs = JSON.parse(localStorage.getItem(key)!); localStorage.setItem(key, JSON.stringify({ ...prefs, appearance: theme })) }, theme)
+    await page.reload()
+    await consoleSec.getByTestId('console-refresh').click()
+    await consoleSec.getByTestId('console-file-select').selectOption('latest.log')
+    await expect(consoleSec.getByTestId('console-entry')).toHaveCount(1)
 
     for (const width of [1200, 800]) {
-      await page.setViewportSize({ width, height: 720 })
+      await win.evaluate((win, width) => win.setContentSize(width, width === 800 ? 400 : 720), width)
+      await expect.poll(() => page.evaluate(() => [innerWidth, innerHeight])).toEqual([width, width === 800 ? 400 : 720])
       await expect(consoleSec).toBeVisible()
-
+      const search = consoleSec.getByTestId('console-search')
+      await focusLauncher(launcher)
+      await consoleSec.getByTestId('console-level-filter').focus(); await page.keyboard.press('Tab')
+      await expect(search).toBeFocused(); await expect(search).toBeInViewport({ ratio: 1 })
+      expect(await consoleSec.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true)
+      await page.addScriptTag({ content: axe.source })
       const report = await page.evaluate(async () =>
-        (window as any).axe.run(document.body, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } }),
+        (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }),
       )
+      await writeFile(testInfo.outputPath(`console-${theme}-${width}-axe.json`), JSON.stringify(report, null, 2))
       expect(report.violations).toEqual([])
 
       await snap(launcher, `instance-console-${theme}-${width}`, 'Instance console view.')
