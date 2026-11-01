@@ -72,8 +72,8 @@ test('legacy shared-world deletion waits for a real Java session and preserves i
   try {
     expect(await rejected(page, 'deleteSave', { saveName: 'SharedLegacy' })).toBe(true)
     expect(await readFile(join(world, 'level.dat'))).toEqual(bytes)
-    expect(await readFile(join(world, 'session.lock'), 'utf8')).toBe('☃')
   } finally { await external.release() }
+  expect(await readFile(join(world, 'session.lock'), 'utf8')).toBe('☃')
   await call(page, 'deleteSave', { saveName: 'SharedLegacy' })
   await expect(lstat(world)).rejects.toHaveProperty('code', 'ENOENT')
   const backups = await readdir(join(launcher.gameDataPath, '.backups'))
