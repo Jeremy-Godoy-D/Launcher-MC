@@ -28,8 +28,9 @@ import { AnyError, isSystemError } from '@xmcl/utils'
 import { FSWatcher } from 'chokidar'
 import filenamify from 'filenamify'
 import { createWriteStream, existsSync } from 'fs'
+import { randomUUID } from 'node:crypto'
 import { realpath } from 'node:fs/promises'
-import { ensureDir, ensureFile, readFile, readdir, rename, rm, rmdir, stat, unlink, writeFile } from 'fs-extra'
+import { copyFile, ensureDir, ensureFile, readFile, readdir, rename, rm, rmdir, stat, unlink, writeFile } from 'fs-extra'
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'path'
 import { ZipFile } from 'yazl'
 import { Inject, LauncherAppKey, kGameDataPath, type PathResolver } from '~/app'
@@ -37,7 +38,7 @@ import { InstanceService } from '~/instance'
 import { LaunchService } from '~/launch'
 import { kMarketProvider } from '~/market'
 import { kResourceManager } from '~/resource'
-import { readInstanceSaveMetadata, readWorldGenSettings, updateSaveMetadata, listSaveDimensions, getSaveRegions, deleteSaveChunks, readSaveChunks, writeSaveChunks, relocateSaveChunks, readSaveProgress, kSaveWorker, type SaveWorker } from '~/save'
+import { readInstanceSaveMetadata, readWorldGenSettings, updateSaveMetadata, listSaveDimensions, getSaveRegions, deleteSaveChunks, readSaveChunks, writeSaveChunks, relocateSaveChunks, readSaveProgress, getRegionDir, kSaveWorker, type SaveWorker } from '~/save'
 import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/service'
 import { LauncherApp } from '../app/LauncherApp'
 import { copyPassively, isDirectory, linkDirectory, missing, pipeline, readdirIfPresent } from '../util/fs'
@@ -684,6 +685,9 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     requireString(savePath)
     requireString(dimension)
     if (!Array.isArray(chunks) || chunks.length === 0) return
+    await this.#assertSaveWritable(savePath)
+    const regionKeys = new Set(chunks.map(c => `${c.chunkX >> 5}.${c.chunkZ >> 5}`))
+    await this.#backupRegionFiles(savePath, dimension, regionKeys)
     this.log(`Deleting ${chunks.length} chunks from ${savePath} (${dimension})`)
     await deleteSaveChunks(savePath, dimension, chunks)
   }
@@ -702,9 +706,89 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     requireString(savePath)
     requireString(dimension)
     if (!Array.isArray(chunks) || chunks.length === 0) return
+    await this.#assertSaveWritable(savePath)
+    const regionKeys = new Set(chunks.map(c => `${(c.chunkX + offsetX) >> 5}.${(c.chunkZ + offsetZ) >> 5}`))
+    await this.#backupRegionFiles(savePath, dimension, regionKeys)
     this.log(`Pasting ${chunks.length} chunks into ${savePath} (${dimension}) offset (${offsetX}, ${offsetZ})`)
     const relocated = relocateSaveChunks(chunks, offsetX, offsetZ)
     await writeSaveChunks(savePath, dimension, relocated)
+  }
+
+  async #assertSaveWritable(savePath: string) {
+    requireString(savePath)
+    const levelDat = join(savePath, 'level.dat')
+    let levelStat
+    try {
+      levelStat = await stat(levelDat)
+    } catch {
+      throw new AnyError('WorldNotFoundError', `Save path ${savePath} does not contain level.dat`)
+    }
+    if (!levelStat.isFile()) {
+      throw new AnyError('WorldNotFoundError', `Save path ${savePath} does not contain a valid level.dat file`)
+    }
+
+    const resolvedSave = await realpath(savePath).catch(() => savePath)
+    const instances = this.instanceService.state.instances
+    const matchedInstance = instances.find(inst => {
+      const rel = relative(inst.path, resolvedSave)
+      return rel && !rel.startsWith('..') && !isAbsolute(rel)
+    })
+    const sharedRoot = join(await realpath(this.getPath()).catch(() => this.getPath()), 'saves')
+    const inShared = relative(sharedRoot, resolvedSave)
+    const isShared = !inShared || (inShared !== '..' && !inShared.startsWith('..' + sep) && !isAbsolute(inShared))
+
+    let processes: any[] = []
+    try {
+      const launch = await this.app.registry.get(LaunchService)
+      processes = await launch.getGameProcesses()
+    } catch {
+      processes = []
+    }
+
+    if (processes.length > 0) {
+      if (isShared) {
+        throw new AnyError('SharedWorldRunningError', 'Cannot modify chunks of a shared world while games are running')
+      }
+      if (matchedInstance) {
+        const matchedReal = await realpath(matchedInstance.path).catch(() => matchedInstance.path)
+        const isRunning = processes.some(p => {
+          const gameDir = p.options.gameDirectory
+          return gameDir === matchedInstance.path || relative(matchedReal, gameDir) === ''
+        })
+        if (isRunning) {
+          throw new AnyError('InstanceRunningError', `Instance ${matchedInstance.path} is running`)
+        }
+      }
+    }
+    return { isShared, matchedInstance }
+  }
+
+  async #backupRegionFiles(savePath: string, dimension: string, regionKeys: Iterable<string>): Promise<string | undefined> {
+    const backupId = randomUUID()
+    const saveName = basename(savePath)
+    const sanitizedDim = dimension.replace(/[^a-zA-Z0-9_-]/g, '_')
+    const backupDir = join(savePath, '.backups', `world-chunks-${backupId}`, saveName, sanitizedDim)
+    const dir = getRegionDir(savePath, dimension)
+    let copiedAny = false
+    for (const key of regionKeys) {
+      const file = join(dir, `r.${key}.mca`)
+      let fileStat
+      try {
+        fileStat = await stat(file)
+      } catch {
+        fileStat = undefined
+      }
+      if (fileStat?.isFile()) {
+        await ensureDir(backupDir)
+        await copyFile(file, join(backupDir, `r.${key}.mca`))
+        copiedAny = true
+      }
+    }
+    if (copiedAny) {
+      this.log(`Backed up region files to ${backupDir}`)
+      return backupDir
+    }
+    return undefined
   }
 
   private async readDatapack(savePath: string, fileName: string): Promise<InstanceDatapack | undefined> {

@@ -46,7 +46,7 @@ function getDimensionDir(savePath: string, dimension: string): string {
   return dimensionPath ?? savePath
 }
 
-function getRegionDir(savePath: string, dimension: string): string {
+export function getRegionDir(savePath: string, dimension: string): string {
   return join(getDimensionDir(savePath, dimension), 'region')
 }
 

@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
-import { FolderOpen, Layers, Map, Plus, RefreshCw, Search, X } from 'lucide-react'
+import { FolderOpen, Info, Layers, Map, Plus, RefreshCw, Search, Trophy, X } from 'lucide-react'
 import { InstanceSavesServiceKey } from '@xmcl/runtime-api/src/services/InstanceSavesService'
 import type { InstanceDatapack, InstanceSavePreview } from '@xmcl/runtime-api/src/entities/save'
 import { useService } from '../../runtime'
 import { useI18n } from '../../i18n'
 import { usePanelFocus } from './usePanelFocus'
 import { WorldFilesDialog } from './WorldFilesDialog'
+import { WorldProgress } from './WorldProgress'
+import { WorldMap } from './WorldMap'
 import type { WorldFileOperation } from '@xmcl/runtime-api/src/services/InstanceSavesService'
 
 export function InstanceWorlds({ path, running }: { path: string; running: boolean }) {
   const service = useService(InstanceSavesServiceKey), { t, d, n } = useI18n()
   const [worlds, setWorlds] = useState<InstanceSavePreview[]>([]), [query, setQuery] = useState(''), [reading, setReading] = useState(true)
   const [error, setError] = useState(false), [revision, setRevision] = useState(0), [opening, setOpening] = useState(false), [details, setDetails] = useState('')
+  const [initialTab, setInitialTab] = useState<'info' | 'progress' | 'map'>('info')
   const [action, setAction] = useState<{ name: string; type: WorldFileOperation['type']; datapackFileName?: string } | null>(null), actionTrigger = useRef<HTMLButtonElement | null>(null), search = useRef<HTMLInputElement>(null)
   const alive = useRef(true), openingFolder = useRef(false), trigger = useRef<HTMLButtonElement | null>(null)
   useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
@@ -38,7 +41,7 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
   }
   const selected = worlds.find(world => world.name === details)
   const visible = worlds.filter(world => `${world.levelName || ''} ${world.name} ${world.gameVersion || ''}`.toLocaleLowerCase().includes(query.toLocaleLowerCase()))
-  function closeDetails() { setDetails(''); trigger.current?.focus() }
+  function closeDetails() { setDetails(''); setInitialTab('info'); trigger.current?.focus() }
   return <section data-testid="instance-worlds" aria-labelledby="worlds-title" aria-busy={reading}>
     <div className="section-heading"><h2 id="worlds-title">{t('react.workspace.worlds')}</h2><div className="content-actions">
       <button className="button primary" disabled={reading || running || !window.windowController?.showOpenDialog} onClick={event => { actionTrigger.current = event.currentTarget; setAction({ type: 'import', name: '' }) }}><Plus size={17} aria-hidden="true" />{t('react.worldFiles.importTitle')}</button>
@@ -48,22 +51,71 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
     {error && <p className="form-error" role="alert">{t('react.worlds.loadFailed')}</p>}
     {running && <p role="status">{t('react.worlds.running')}</p>}
     <div className="content-filters"><label className="search"><Search size={17} aria-hidden="true" /><input ref={search} aria-label={t('react.worlds.search')} placeholder={t('react.worlds.search')} value={query} onChange={event => setQuery(event.target.value)} /></label><span aria-live="polite">{t(visible.length === 1 ? 'react.worlds.one' : 'react.worlds.count', { count: n(visible.length) })}</span></div>
-    {selected && <WorldDetails key={selected.name} path={path} world={selected} running={running} revision={revision} close={closeDetails} onAction={(act, btn) => { actionTrigger.current = btn; setAction(act) }} />}
+    {selected && <WorldDetails key={`${selected.name}:${initialTab}`} path={path} world={selected} running={running} revision={revision} initialTab={initialTab} close={closeDetails} onAction={(act, btn) => { actionTrigger.current = btn; setAction(act) }} />}
     {reading && <p role="status">{t('react.worlds.loading')}</p>}
     {!reading && !error && !visible.length && <p className="empty">{t(query ? 'react.worlds.noMatches' : 'react.worlds.empty')}</p>}
     <ul className="pack-list world-list" data-testid="worlds-list">{visible.map(world => <li key={world.name} data-world-name={world.name}>
       <div className="world-icon">{world.icon ? <img src={world.icon} alt="" loading="lazy" onError={event => { event.currentTarget.style.display = 'none' }} /> : <Map size={24} aria-hidden="true" />}</div>
-      <div><button className="content-file-name" onClick={event => { trigger.current = event.currentTarget; setDetails(world.name) }}>{world.levelName || world.name}</button><small>{world.name} · {world.gameVersion || t('react.workspace.unknown')}{world.linkTo ? ` · ${t('react.worlds.shared')}` : ''}</small>
+      <div><button className="content-file-name" onClick={event => { trigger.current = event.currentTarget; setInitialTab('info'); setDetails(world.name) }}>{world.levelName || world.name}</button><small>{world.name} · {world.gameVersion || t('react.workspace.unknown')}{world.linkTo ? ` · ${t('react.worlds.shared')}` : ''}</small>
         {world.error ? <p className="form-error">{t(`react.worlds.${world.error}`)}</p> : <small>{t(`react.worlds.mode${world.mode}`)} · {world.lastPlayed ? d(world.lastPlayed) : t('react.workspace.never')}</small>}
-        <div className="content-actions">{(['metadata', 'copy', 'export', 'remove'] as const).map(type => <button key={type} className="button secondary" disabled={running || reading || world.error === 'unsafe' || type === 'metadata' && !!world.error} aria-label={t(`react.worldFiles.${type}Name`, { name: world.name })} onClick={event => { actionTrigger.current = event.currentTarget; setAction({ name: world.name, type }) }}>{t(`react.worldFiles.${type}`)}</button>)}</div>
+        <div className="content-actions">
+          <button
+            type="button"
+            className="button secondary"
+            disabled={running || reading || !!world.error}
+            data-testid="world-action-progress"
+            aria-label={`${t('react.worldProgress.tab')}: ${world.name}`}
+            onClick={event => {
+              trigger.current = event.currentTarget
+              setInitialTab('progress')
+              setDetails(world.name)
+            }}
+          >
+            <Trophy size={14} aria-hidden="true" />
+            {t('react.worldProgress.tab')}
+          </button>
+          <button
+            type="button"
+            className="button secondary"
+            disabled={running || reading || !!world.error}
+            data-testid="world-action-map"
+            aria-label={`${t('react.worldMap.tab')}: ${world.name}`}
+            onClick={event => {
+              trigger.current = event.currentTarget
+              setInitialTab('map')
+              setDetails(world.name)
+            }}
+          >
+            <Map size={14} aria-hidden="true" />
+            {t('react.worldMap.tab')}
+          </button>
+          {(['metadata', 'copy', 'export', 'remove'] as const).map(type => <button key={type} className="button secondary" disabled={running || reading || world.error === 'unsafe' || type === 'metadata' && !!world.error} aria-label={t(`react.worldFiles.${type}Name`, { name: world.name })} onClick={event => { actionTrigger.current = event.currentTarget; setAction({ name: world.name, type }) }}>{t(`react.worldFiles.${type}`)}</button>)}
+        </div>
       </div>
     </li>)}</ul>
     {action && <WorldFilesDialog key={`${action.name}:${action.type}:${action.datapackFileName || ''}`} path={path} name={action.name} type={action.type} datapackFileName={action.datapackFileName} world={worlds.find(world => world.name === action.name)} close={() => setAction(null)} changed={() => { setRevision(value => value + 1) }} returnFocus={() => { const target = actionTrigger.current; if (target?.isConnected && !target.disabled) target.focus(); else search.current?.focus() }} />}
   </section>
 }
 
-function WorldDetails({ path, world, running, close, onAction, revision }: { path: string; world: InstanceSavePreview; running: boolean; close: () => void; onAction: (action: { name: string; type: WorldFileOperation['type']; datapackFileName?: string }, trigger: HTMLButtonElement) => void; revision: number }) {
+function WorldDetails({
+  path,
+  world,
+  running,
+  close,
+  onAction,
+  revision,
+  initialTab = 'info',
+}: {
+  path: string
+  world: InstanceSavePreview
+  running: boolean
+  close: () => void
+  onAction: (action: { name: string; type: WorldFileOperation['type']; datapackFileName?: string }, trigger: HTMLButtonElement) => void
+  revision: number
+  initialTab?: 'info' | 'progress' | 'map'
+}) {
   const service = useService(InstanceSavesServiceKey), { t, d, n } = useI18n(), panel = useRef<HTMLElement>(null), first = useRef<HTMLButtonElement>(null)
+  const [tab, setTab] = useState<'info' | 'progress' | 'map'>(initialTab)
   const [datapacks, setDatapacks] = useState<InstanceDatapack[]>([])
   const [loadingDatapacks, setLoadingDatapacks] = useState(true)
   const [dpError, setDpError] = useState(false)
@@ -90,72 +142,123 @@ function WorldDetails({ path, world, running, close, onAction, revision }: { pat
   }, [service, path, world.name, world.error, dpRevision, revision])
 
   return <section ref={panel} className="content-info" aria-labelledby="world-info-title" data-testid="world-info" onKeyDown={event => { if (event.key === 'Escape') { event.stopPropagation(); close() } }}>
-    <div className="section-heading"><h2 id="world-info-title">{world.levelName || world.name}</h2><button ref={first} className="icon-button" aria-label={t('react.worlds.close')} onClick={close}><X size={20} aria-hidden="true" /></button></div>
-    {world.error && <p className="form-error">{t(`react.worlds.${world.error}`)}</p>}
-    <dl className="content-metadata">
-      <dt>{t('react.worlds.folder')}</dt><dd>{world.name}</dd><dt>Minecraft</dt><dd>{world.gameVersion || unknown}</dd>
-      <dt>{t('react.worlds.mode')}</dt><dd>{world.mode === undefined ? unknown : t(`react.worlds.mode${world.mode}`)}</dd>
-      <dt>{t('react.worlds.difficulty')}</dt><dd>{world.difficulty === undefined || world.difficulty < 0 ? unknown : t(`react.worlds.difficulty${world.difficulty}`)}</dd>
-      <dt>{t('react.worlds.cheats')}</dt><dd>{world.cheat === undefined ? unknown : t(world.cheat ? 'react.worlds.enabled' : 'react.worlds.disabled')}</dd>
-      <dt>{t('react.workspace.lastPlayed')}</dt><dd>{world.lastPlayed ? d(world.lastPlayed) : unknown}</dd>
-      <dt>{t('react.worlds.time')}</dt><dd>{world.time === undefined ? unknown : n(Math.floor(world.time / 24000))}</dd>
-      <dt>{t('react.worlds.seed')}</dt><dd>{world.seed || unknown}</dd>
-      <dt>{t('react.workspace.folder')}</dt><dd>{world.path}</dd>
-    </dl>{world.linkTo && <p>{t('react.worlds.sharedHelp')}</p>}
-
-    <div className="section-heading" style={{ marginTop: '1.25rem' }}>
-      <h3>{t('react.worldDatapacks.title')}</h3>
-      <div className="content-actions">
-        <button
-          className="button secondary"
-          disabled={running || !!world.error || !window.windowController?.showOpenDialog}
-          data-testid="datapack-import"
-          onClick={event => onAction({ name: world.name, type: 'import-datapack' }, event.currentTarget)}
-        >
-          <Plus size={16} aria-hidden="true" />
-          {t('react.worldDatapacks.import')}
-        </button>
-        <button
-          className="button secondary"
-          disabled={loadingDatapacks || running || !!world.error}
-          data-testid="datapack-refresh"
-          onClick={() => setDpRevision(v => v + 1)}
-        >
-          <RefreshCw size={16} aria-hidden="true" />
-          {t('react.worldDatapacks.refresh')}
-        </button>
-      </div>
+    <div className="section-heading">
+      <h2 id="world-info-title">{world.levelName || world.name}</h2>
+      <button ref={first} className="icon-button" aria-label={t('react.worlds.close')} onClick={close}>
+        <X size={20} aria-hidden="true" />
+      </button>
     </div>
-    {loadingDatapacks && <p role="status">{t('react.worldDatapacks.loading')}</p>}
-    {dpError && <p className="form-error" role="alert">{t('react.worldDatapacks.loadFailed')}</p>}
-    {!loadingDatapacks && !dpError && !datapacks.length && <p className="empty">{t('react.worldDatapacks.empty')}</p>}
-    {!loadingDatapacks && !dpError && !!datapacks.length && (
-      <ul className="pack-list" data-testid="world-datapacks" aria-label={t('react.worldDatapacks.title')}>
-        {datapacks.map(dp => (
-          <li key={dp.fileName} data-datapack-name={dp.fileName}>
-            <div className="world-icon">
-              {dp.icon ? <img src={dp.icon} alt="" loading="lazy" onError={event => { event.currentTarget.style.display = 'none' }} /> : <Layers size={20} aria-hidden="true" />}
-            </div>
-            <div>
-              <strong>{dp.name}</strong>
-              <small>{dp.fileName} · {dp.directory ? t('react.worldDatapacks.folder') : 'ZIP'}{dp.packFormat !== undefined && dp.packFormat >= 0 ? ` · format ${dp.packFormat}` : ''}</small>
-              {dp.description && <p className="content-description">{dp.description}</p>}
-              {dp.error && <p className="form-error">{t(`react.worldDatapacks.${dp.error}`)}</p>}
-              <div className="content-actions">
-                <button
-                  className="button secondary"
-                  disabled={running || dp.error === 'unsafe'}
-                  data-testid="datapack-remove"
-                  aria-label={t('react.worldFiles.removeDatapackName', { name: dp.name })}
-                  onClick={event => onAction({ name: world.name, type: 'remove-datapack', datapackFileName: dp.fileName }, event.currentTarget)}
-                >
-                  {t('react.worldFiles.remove')}
-                </button>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+
+    <div className="content-selection" style={{ padding: '4px 0 12px 0', borderBottom: '1px solid var(--line)', marginBottom: '16px', gap: '8px' }}>
+      <button
+        type="button"
+        className={`button ${tab === 'info' ? 'primary' : 'secondary'}`}
+        data-testid="world-tab-info"
+        onClick={() => setTab('info')}
+      >
+        <Info size={15} aria-hidden="true" />
+        {t('react.worlds.tabInfo')}
+      </button>
+      <button
+        type="button"
+        className={`button ${tab === 'progress' ? 'primary' : 'secondary'}`}
+        data-testid="world-tab-progress"
+        disabled={!!world.error}
+        onClick={() => setTab('progress')}
+      >
+        <Trophy size={15} aria-hidden="true" />
+        {t('react.worldProgress.tab')}
+      </button>
+      <button
+        type="button"
+        className={`button ${tab === 'map' ? 'primary' : 'secondary'}`}
+        data-testid="world-tab-map"
+        disabled={!!world.error}
+        onClick={() => setTab('map')}
+      >
+        <Map size={15} aria-hidden="true" />
+        {t('react.worldMap.tab')}
+      </button>
+    </div>
+
+    {tab === 'info' && (
+      <>
+        {world.error && <p className="form-error">{t(`react.worlds.${world.error}`)}</p>}
+        <dl className="content-metadata">
+          <dt>{t('react.worlds.folder')}</dt><dd>{world.name}</dd><dt>Minecraft</dt><dd>{world.gameVersion || unknown}</dd>
+          <dt>{t('react.worlds.mode')}</dt><dd>{world.mode === undefined ? unknown : t(`react.worlds.mode${world.mode}`)}</dd>
+          <dt>{t('react.worlds.difficulty')}</dt><dd>{world.difficulty === undefined || world.difficulty < 0 ? unknown : t(`react.worlds.difficulty${world.difficulty}`)}</dd>
+          <dt>{t('react.worlds.cheats')}</dt><dd>{world.cheat === undefined ? unknown : t(world.cheat ? 'react.worlds.enabled' : 'react.worlds.disabled')}</dd>
+          <dt>{t('react.workspace.lastPlayed')}</dt><dd>{world.lastPlayed ? d(world.lastPlayed) : unknown}</dd>
+          <dt>{t('react.worlds.time')}</dt><dd>{world.time === undefined ? unknown : n(Math.floor(world.time / 24000))}</dd>
+          <dt>{t('react.worlds.seed')}</dt><dd>{world.seed || unknown}</dd>
+          <dt>{t('react.workspace.folder')}</dt><dd>{world.path}</dd>
+        </dl>{world.linkTo && <p>{t('react.worlds.sharedHelp')}</p>}
+
+        <div className="section-heading" style={{ marginTop: '1.25rem' }}>
+          <h3>{t('react.worldDatapacks.title')}</h3>
+          <div className="content-actions">
+            <button
+              className="button secondary"
+              disabled={running || !!world.error || !window.windowController?.showOpenDialog}
+              data-testid="datapack-import"
+              onClick={event => onAction({ name: world.name, type: 'import-datapack' }, event.currentTarget)}
+            >
+              <Plus size={16} aria-hidden="true" />
+              {t('react.worldDatapacks.import')}
+            </button>
+            <button
+              className="button secondary"
+              disabled={loadingDatapacks || running || !!world.error}
+              data-testid="datapack-refresh"
+              onClick={() => setDpRevision(v => v + 1)}
+            >
+              <RefreshCw size={16} aria-hidden="true" />
+              {t('react.worldDatapacks.refresh')}
+            </button>
+          </div>
+        </div>
+        {loadingDatapacks && <p role="status">{t('react.worldDatapacks.loading')}</p>}
+        {dpError && <p className="form-error" role="alert">{t('react.worldDatapacks.loadFailed')}</p>}
+        {!loadingDatapacks && !dpError && !datapacks.length && <p className="empty">{t('react.worldDatapacks.empty')}</p>}
+        {!loadingDatapacks && !dpError && !!datapacks.length && (
+          <ul className="pack-list" data-testid="world-datapacks" aria-label={t('react.worldDatapacks.title')}>
+            {datapacks.map(dp => (
+              <li key={dp.fileName} data-datapack-name={dp.fileName}>
+                <div className="world-icon">
+                  {dp.icon ? <img src={dp.icon} alt="" loading="lazy" onError={event => { event.currentTarget.style.display = 'none' }} /> : <Layers size={20} aria-hidden="true" />}
+                </div>
+                <div>
+                  <strong>{dp.name}</strong>
+                  <small>{dp.fileName} · {dp.directory ? t('react.worldDatapacks.folder') : 'ZIP'}{dp.packFormat !== undefined && dp.packFormat >= 0 ? ` · format ${dp.packFormat}` : ''}</small>
+                  {dp.description && <p className="content-description">{dp.description}</p>}
+                  {dp.error && <p className="form-error">{t(`react.worldDatapacks.${dp.error}`)}</p>}
+                  <div className="content-actions">
+                    <button
+                      className="button secondary"
+                      disabled={running || dp.error === 'unsafe'}
+                      data-testid="datapack-remove"
+                      aria-label={t('react.worldFiles.removeDatapackName', { name: dp.name })}
+                      onClick={event => onAction({ name: world.name, type: 'remove-datapack', datapackFileName: dp.fileName }, event.currentTarget)}
+                    >
+                      {t('react.worldFiles.remove')}
+                    </button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </>
+    )}
+
+    {tab === 'progress' && (
+      <WorldProgress savePath={world.path} instancePath={path} running={running} />
+    )}
+
+    {tab === 'map' && (
+      <WorldMap savePath={world.path} running={running} />
     )}
   </section>
 }
+
