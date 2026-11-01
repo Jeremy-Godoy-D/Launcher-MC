@@ -133,6 +133,10 @@ export interface InstanceDatapack {
     projectId: string
     versionId: string
   }
+  directory?: boolean
+  size?: number
+  entries?: number
+  error?: 'invalid' | 'unsafe'
 }
 
 export function getInstanceSaveDatapacksKey(savePath: string) {

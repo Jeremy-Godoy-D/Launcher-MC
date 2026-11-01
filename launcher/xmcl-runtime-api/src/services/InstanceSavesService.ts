@@ -108,11 +108,20 @@ export interface WorldMetadataInput {
   difficulty: 0 | 1 | 2 | 3
   cheat: boolean
 }
+export interface WorldDatapackReview {
+  name: string
+  fileName: string
+  directory: boolean
+  packFormat?: number
+  description: string
+}
 export type WorldFileOperation = { instancePath: string; saveName: string } & (
   { type: 'import'; sourcePath: string } |
   { type: 'copy'; destinationInstancePath: string; destinationName: string } |
   { type: 'export'; destinationDirectory: string; fileName: string } |
   { type: 'metadata'; metadata: WorldMetadataInput } |
+  { type: 'import-datapack'; sourcePath: string; fileName?: string } |
+  { type: 'remove-datapack'; fileName: string } |
   { type: 'remove' }
 )
 export interface WorldFileReview {
@@ -124,6 +133,7 @@ export interface WorldFileReview {
   linkOnly: boolean
   destination: string
   metadata?: { before: WorldMetadataInput; after: WorldMetadataInput }
+  datapack?: WorldDatapackReview
 }
 
 export function getInstanceSaveKey(path: string) {
@@ -280,6 +290,7 @@ export interface PasteSaveChunksOptions {
 export interface InstanceSavesService {
   previewWorldFiles(operation: WorldFileOperation): Promise<WorldFileReview>
   applyWorldFiles(review: WorldFileReview): Promise<{ path: string; backup?: string }>
+  getWorldDatapacks(instancePath: string, saveName: string): Promise<InstanceDatapack[]>
   showDirectory(instancePath: string): Promise<void>
   /**
    * Read all saves under the instance folder

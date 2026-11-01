@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { FolderOpen, Map, Plus, RefreshCw, Search, X } from 'lucide-react'
+import { FolderOpen, Layers, Map, Plus, RefreshCw, Search, X } from 'lucide-react'
 import { InstanceSavesServiceKey } from '@xmcl/runtime-api/src/services/InstanceSavesService'
-import type { InstanceSavePreview } from '@xmcl/runtime-api/src/entities/save'
+import type { InstanceDatapack, InstanceSavePreview } from '@xmcl/runtime-api/src/entities/save'
 import { useService } from '../../runtime'
 import { useI18n } from '../../i18n'
 import { usePanelFocus } from './usePanelFocus'
@@ -12,7 +12,7 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
   const service = useService(InstanceSavesServiceKey), { t, d, n } = useI18n()
   const [worlds, setWorlds] = useState<InstanceSavePreview[]>([]), [query, setQuery] = useState(''), [reading, setReading] = useState(true)
   const [error, setError] = useState(false), [revision, setRevision] = useState(0), [opening, setOpening] = useState(false), [details, setDetails] = useState('')
-  const [action, setAction] = useState<{ name: string; type: WorldFileOperation['type'] } | null>(null), actionTrigger = useRef<HTMLButtonElement | null>(null), search = useRef<HTMLInputElement>(null)
+  const [action, setAction] = useState<{ name: string; type: WorldFileOperation['type']; datapackFileName?: string } | null>(null), actionTrigger = useRef<HTMLButtonElement | null>(null), search = useRef<HTMLInputElement>(null)
   const alive = useRef(true), openingFolder = useRef(false), trigger = useRef<HTMLButtonElement | null>(null)
   useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
   useEffect(() => {
@@ -48,7 +48,7 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
     {error && <p className="form-error" role="alert">{t('react.worlds.loadFailed')}</p>}
     {running && <p role="status">{t('react.worlds.running')}</p>}
     <div className="content-filters"><label className="search"><Search size={17} aria-hidden="true" /><input ref={search} aria-label={t('react.worlds.search')} placeholder={t('react.worlds.search')} value={query} onChange={event => setQuery(event.target.value)} /></label><span aria-live="polite">{t(visible.length === 1 ? 'react.worlds.one' : 'react.worlds.count', { count: n(visible.length) })}</span></div>
-    {selected && <WorldDetails key={selected.name} world={selected} close={closeDetails} />}
+    {selected && <WorldDetails key={selected.name} path={path} world={selected} running={running} revision={revision} close={closeDetails} onAction={(act, btn) => { actionTrigger.current = btn; setAction(act) }} />}
     {reading && <p role="status">{t('react.worlds.loading')}</p>}
     {!reading && !error && !visible.length && <p className="empty">{t(query ? 'react.worlds.noMatches' : 'react.worlds.empty')}</p>}
     <ul className="pack-list world-list" data-testid="worlds-list">{visible.map(world => <li key={world.name} data-world-name={world.name}>
@@ -58,14 +58,37 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
         <div className="content-actions">{(['metadata', 'copy', 'export', 'remove'] as const).map(type => <button key={type} className="button secondary" disabled={running || reading || world.error === 'unsafe' || type === 'metadata' && !!world.error} aria-label={t(`react.worldFiles.${type}Name`, { name: world.name })} onClick={event => { actionTrigger.current = event.currentTarget; setAction({ name: world.name, type }) }}>{t(`react.worldFiles.${type}`)}</button>)}</div>
       </div>
     </li>)}</ul>
-    {action && <WorldFilesDialog key={`${action.name}:${action.type}`} path={path} name={action.name} type={action.type} world={worlds.find(world => world.name === action.name)} close={() => setAction(null)} changed={() => { setDetails(''); setRevision(value => value + 1) }} returnFocus={() => { const target = actionTrigger.current; if (target?.isConnected && !target.disabled) target.focus(); else search.current?.focus() }} />}
+    {action && <WorldFilesDialog key={`${action.name}:${action.type}:${action.datapackFileName || ''}`} path={path} name={action.name} type={action.type} datapackFileName={action.datapackFileName} world={worlds.find(world => world.name === action.name)} close={() => setAction(null)} changed={() => { setRevision(value => value + 1) }} returnFocus={() => { const target = actionTrigger.current; if (target?.isConnected && !target.disabled) target.focus(); else search.current?.focus() }} />}
   </section>
 }
 
-function WorldDetails({ world, close }: { world: InstanceSavePreview; close: () => void }) {
-  const { t, d, n } = useI18n(), panel = useRef<HTMLElement>(null), first = useRef<HTMLButtonElement>(null)
+function WorldDetails({ path, world, running, close, onAction, revision }: { path: string; world: InstanceSavePreview; running: boolean; close: () => void; onAction: (action: { name: string; type: WorldFileOperation['type']; datapackFileName?: string }, trigger: HTMLButtonElement) => void; revision: number }) {
+  const service = useService(InstanceSavesServiceKey), { t, d, n } = useI18n(), panel = useRef<HTMLElement>(null), first = useRef<HTMLButtonElement>(null)
+  const [datapacks, setDatapacks] = useState<InstanceDatapack[]>([])
+  const [loadingDatapacks, setLoadingDatapacks] = useState(true)
+  const [dpError, setDpError] = useState(false)
+  const [dpRevision, setDpRevision] = useState(0)
   usePanelFocus(panel, first)
   const unknown = t('react.workspace.unknown')
+
+  useEffect(() => {
+    let active = true
+    async function load() {
+      if (world.error) { setLoadingDatapacks(false); return }
+      setLoadingDatapacks(true); setDpError(false)
+      try {
+        const result = await service.getWorldDatapacks(path, world.name)
+        if (active) setDatapacks(result)
+      } catch {
+        if (active) setDpError(true)
+      } finally {
+        if (active) setLoadingDatapacks(false)
+      }
+    }
+    void load()
+    return () => { active = false }
+  }, [service, path, world.name, world.error, dpRevision, revision])
+
   return <section ref={panel} className="content-info" aria-labelledby="world-info-title" data-testid="world-info" onKeyDown={event => { if (event.key === 'Escape') { event.stopPropagation(); close() } }}>
     <div className="section-heading"><h2 id="world-info-title">{world.levelName || world.name}</h2><button ref={first} className="icon-button" aria-label={t('react.worlds.close')} onClick={close}><X size={20} aria-hidden="true" /></button></div>
     {world.error && <p className="form-error">{t(`react.worlds.${world.error}`)}</p>}
@@ -79,5 +102,60 @@ function WorldDetails({ world, close }: { world: InstanceSavePreview; close: () 
       <dt>{t('react.worlds.seed')}</dt><dd>{world.seed || unknown}</dd>
       <dt>{t('react.workspace.folder')}</dt><dd>{world.path}</dd>
     </dl>{world.linkTo && <p>{t('react.worlds.sharedHelp')}</p>}
+
+    <div className="section-heading" style={{ marginTop: '1.25rem' }}>
+      <h3>{t('react.worldDatapacks.title')}</h3>
+      <div className="content-actions">
+        <button
+          className="button secondary"
+          disabled={running || !!world.error || !window.windowController?.showOpenDialog}
+          data-testid="datapack-import"
+          onClick={event => onAction({ name: world.name, type: 'import-datapack' }, event.currentTarget)}
+        >
+          <Plus size={16} aria-hidden="true" />
+          {t('react.worldDatapacks.import')}
+        </button>
+        <button
+          className="button secondary"
+          disabled={loadingDatapacks || running || !!world.error}
+          data-testid="datapack-refresh"
+          onClick={() => setDpRevision(v => v + 1)}
+        >
+          <RefreshCw size={16} aria-hidden="true" />
+          {t('react.worldDatapacks.refresh')}
+        </button>
+      </div>
+    </div>
+    {loadingDatapacks && <p role="status">{t('react.worldDatapacks.loading')}</p>}
+    {dpError && <p className="form-error" role="alert">{t('react.worldDatapacks.loadFailed')}</p>}
+    {!loadingDatapacks && !dpError && !datapacks.length && <p className="empty">{t('react.worldDatapacks.empty')}</p>}
+    {!loadingDatapacks && !dpError && !!datapacks.length && (
+      <ul className="pack-list" data-testid="world-datapacks" aria-label={t('react.worldDatapacks.title')}>
+        {datapacks.map(dp => (
+          <li key={dp.fileName} data-datapack-name={dp.fileName}>
+            <div className="world-icon">
+              {dp.icon ? <img src={dp.icon} alt="" loading="lazy" onError={event => { event.currentTarget.style.display = 'none' }} /> : <Layers size={20} aria-hidden="true" />}
+            </div>
+            <div>
+              <strong>{dp.name}</strong>
+              <small>{dp.fileName} · {dp.directory ? t('react.worldDatapacks.folder') : 'ZIP'}{dp.packFormat !== undefined && dp.packFormat >= 0 ? ` · format ${dp.packFormat}` : ''}</small>
+              {dp.description && <p className="content-description">{dp.description}</p>}
+              {dp.error && <p className="form-error">{t(`react.worldDatapacks.${dp.error}`)}</p>}
+              <div className="content-actions">
+                <button
+                  className="button secondary"
+                  disabled={running || dp.error === 'unsafe'}
+                  data-testid="datapack-remove"
+                  aria-label={t('react.worldFiles.removeDatapackName', { name: dp.name })}
+                  onClick={event => onAction({ name: world.name, type: 'remove-datapack', datapackFileName: dp.fileName }, event.currentTarget)}
+                >
+                  {t('react.worldFiles.remove')}
+                </button>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    )}
   </section>
 }

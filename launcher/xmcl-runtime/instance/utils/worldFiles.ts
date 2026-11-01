@@ -42,7 +42,7 @@ export async function worldLocation(instance: string, name: string, sharedRoot: 
     identity: digest([directory.identity, entry, link.ino, link.dev, root, info.ino, info.dev]) }
 }
 
-async function readBoundedFile(file: string, limit: number) {
+export async function readBoundedFile(file: string, limit: number) {
   const before = await lstat(file)
   if (!before.isFile() || before.isSymbolicLink() || before.size > limit) throw new Error('Unsafe world metadata')
   const handle = await open(file, 'r')
@@ -60,16 +60,20 @@ async function readBoundedFile(file: string, limit: number) {
   return data
 }
 
+export function staticPngDataUrl(data: Buffer) {
+  if (data.length < 33 || data.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a' || data.toString('ascii', 12, 16) !== 'IHDR' || !data.readUInt32BE(16) || !data.readUInt32BE(20) || data.readUInt32BE(16) > 512 || data.readUInt32BE(20) > 512) return ''
+  for (let offset = 8; offset + 12 <= data.length;) {
+    const size = data.readUInt32BE(offset), type = data.toString('ascii', offset + 4, offset + 8)
+    if (size > data.length - offset - 12 || type === 'acTL') return ''
+    if (type === 'IEND') return 'data:image/png;base64,' + data.toString('base64')
+    offset += size + 12
+  }
+  return ''
+}
+
 async function worldIcon(root: string) {
   try {
-    const data = await readBoundedFile(join(root, 'icon.png'), 64 * 1024)
-    if (data.length < 33 || data.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a' || data.toString('ascii', 12, 16) !== 'IHDR' || !data.readUInt32BE(16) || !data.readUInt32BE(20) || data.readUInt32BE(16) > 512 || data.readUInt32BE(20) > 512) return ''
-    for (let offset = 8; offset + 12 <= data.length;) {
-      const size = data.readUInt32BE(offset), type = data.toString('ascii', offset + 4, offset + 8)
-      if (size > data.length - offset - 12 || type === 'acTL') return ''
-      if (type === 'IEND') return 'data:image/png;base64,' + data.toString('base64')
-      offset += size + 12
-    }
+    return staticPngDataUrl(await readBoundedFile(join(root, 'icon.png'), 64 * 1024))
   } catch { /* A missing or invalid icon uses the renderer's fallback. */ }
   return ''
 }

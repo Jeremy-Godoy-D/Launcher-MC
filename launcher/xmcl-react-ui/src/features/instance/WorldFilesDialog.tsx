@@ -8,25 +8,35 @@ import { useService } from '../../runtime'
 import { useI18n } from '../../i18n'
 import { useLibrary } from '../library/context'
 
-export function WorldFilesDialog({ path, name, type, world, close, returnFocus, changed }: { path: string; name: string; type: WorldFileOperation['type']; world?: InstanceSavePreview; close: () => void; returnFocus: () => void; changed: () => void }) {
+export function WorldFilesDialog({ path, name, type, world, close, returnFocus, changed, datapackFileName }: { path: string; name: string; type: WorldFileOperation['type']; world?: InstanceSavePreview; close: () => void; returnFocus: () => void; changed: () => void; datapackFileName?: string }) {
   const service = useService(InstanceSavesServiceKey), base = useService(BaseServiceKey), library = useLibrary(), { t, n } = useI18n()
-  const [input, setInput] = useState<WorldFileOperation>(() => type === 'import' ? { type, instancePath: path, saveName: '', sourcePath: '' } : type === 'metadata' ? { type, instancePath: path, saveName: name, metadata: { levelName: world?.levelName || name, seed: world?.seed ?? '', difficulty: (world?.difficulty !== undefined && world.difficulty >= 0 && world.difficulty <= 3 ? world.difficulty : 2) as 0 | 1 | 2 | 3, cheat: Boolean(world?.cheat) } } : type === 'copy' ? { type, instancePath: path, saveName: name, destinationInstancePath: path, destinationName: `${name} (copy)` } : type === 'export' ? { type, instancePath: path, saveName: name, destinationDirectory: '', fileName: `${name}.zip` } : { type, instancePath: path, saveName: name })
+  const [input, setInput] = useState<WorldFileOperation>(() => {
+    if (type === 'import') return { type, instancePath: path, saveName: '', sourcePath: '' }
+    if (type === 'metadata') return { type, instancePath: path, saveName: name, metadata: { levelName: world?.levelName || name, seed: world?.seed ?? '', difficulty: (world?.difficulty !== undefined && world.difficulty >= 0 && world.difficulty <= 3 ? world.difficulty : 2) as 0 | 1 | 2 | 3, cheat: Boolean(world?.cheat) } }
+    if (type === 'import-datapack') return { type, instancePath: path, saveName: name, sourcePath: '', fileName: '' }
+    if (type === 'remove-datapack') return { type, instancePath: path, saveName: name, fileName: datapackFileName || '' }
+    if (type === 'copy') return { type, instancePath: path, saveName: name, destinationInstancePath: path, destinationName: `${name} (copy)` }
+    if (type === 'export') return { type, instancePath: path, saveName: name, destinationDirectory: '', fileName: `${name}.zip` }
+    return { type, instancePath: path, saveName: name }
+  })
   const [review, setReview] = useState<WorldFileReview | null>(null), [busy, setBusy] = useState(false), [error, setError] = useState(''), [finished, setFinished] = useState(false), [folder, setFolder] = useState('')
   const alive = useRef(true), pending = useRef(false), body = useRef<HTMLDivElement>(null)
   useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
   useEffect(() => { if (error) body.current?.scrollTo({ top: 0 }) }, [error])
   function failure(error: unknown) {
     const name = error && typeof error === 'object' && 'name' in error ? String(error.name) : ''
-    return ['WorldFilesChangedError', 'WorldDestinationExistsError', 'WorldOperationIncompleteError', 'InstanceRunningError', 'SharedWorldRunningError', 'WorldArchiveInvalidError', 'WorldImportInvalidError', 'WorldImportLimitError', 'WorldArchiveChecksumError', 'WorldMetadataInvalidError'].includes(name) ? name : type === 'import' ? 'importFailed' : 'failed'
+    return ['WorldFilesChangedError', 'WorldDestinationExistsError', 'WorldOperationIncompleteError', 'InstanceRunningError', 'SharedWorldRunningError', 'WorldArchiveInvalidError', 'WorldImportInvalidError', 'WorldImportLimitError', 'WorldArchiveChecksumError', 'WorldMetadataInvalidError', 'WorldDatapackInvalidError'].includes(name) ? name : type === 'import' || type === 'import-datapack' ? 'importFailed' : 'failed'
   }
   async function chooseFolder(archive = false) {
     if (pending.current) return
     pending.current = true; setBusy(true); setError('')
     try {
-      const result = await window.windowController!.showOpenDialog!(archive ? { properties: ['openFile'], filters: [{ name: 'Minecraft world', extensions: ['zip'] }] } : { properties: ['openDirectory'] })
+      const isDatapack = input.type === 'import-datapack'
+      const result = await window.windowController!.showOpenDialog!(archive ? { properties: ['openFile'], filters: isDatapack ? [{ name: 'Minecraft datapack', extensions: ['zip'] }] : [{ name: 'Minecraft world', extensions: ['zip'] }] } : { properties: ['openDirectory'] })
       if (alive.current && !result.canceled && result.filePaths[0]) {
         if (input.type === 'export') setInput({ ...input, destinationDirectory: result.filePaths[0] })
         if (input.type === 'import') { const sourcePath = result.filePaths[0]; setInput({ ...input, sourcePath, saveName: sourcePath.replace(/\\/g, '/').split('/').pop()!.replace(/\.zip$/i, '') }) }
+        if (input.type === 'import-datapack') { const sourcePath = result.filePaths[0]; setInput({ ...input, sourcePath, fileName: sourcePath.replace(/\\/g, '/').split('/').pop()! }) }
         setReview(null)
       }
     } catch { if (alive.current) setError('failed') }
@@ -65,6 +75,13 @@ export function WorldFilesDialog({ path, name, type, world, close, returnFocus, 
           <label className="field">{t('react.worlds.cheats')}<select disabled={busy} value={input.metadata.cheat ? 'enabled' : 'disabled'} onChange={event => setInput({ ...input, metadata: { ...input.metadata, cheat: event.target.value === 'enabled' } })}><option value="enabled">{t('react.worlds.enabled')}</option><option value="disabled">{t('react.worlds.disabled')}</option></select></label>
           <label className="field">{t('react.worlds.seed')}<input required={Boolean(world?.seed)} maxLength={20} disabled={busy} value={input.metadata.seed} onChange={event => setInput({ ...input, metadata: { ...input.metadata, seed: event.target.value } })} /></label>
         </>}
+        {!finished && !review && input.type === 'import-datapack' && <>
+          <div className="content-actions"><button className="button secondary" type="button" disabled={busy} onClick={() => void chooseFolder(true)}>{t('react.worldFiles.chooseDatapackZip')}</button><button className="button secondary" type="button" disabled={busy} onClick={() => void chooseFolder()}>{t('react.worldFiles.chooseDatapackFolder')}</button></div>
+          <label className="field">{t('react.worldFiles.datapackName')}<input required maxLength={255} disabled={busy} value={input.fileName || ''} onChange={event => setInput({ ...input, fileName: event.target.value })} /></label>
+        </>}
+        {!finished && !review && input.type === 'remove-datapack' && <>
+          <p className="instance-path">{input.fileName}</p>
+        </>}
         {!finished && !review && input.type === 'copy' && <>
           <label className="field">{t('react.worldFiles.instance')}<select disabled={busy || !!review} value={input.destinationInstancePath} onChange={event => setInput({ ...input, destinationInstancePath: event.target.value })}>{library?.instances.map(instance => <option key={instance.path} value={instance.path}>{instance.name}</option>)}</select></label>
           <label className="field">{t('react.worldFiles.name')}<input required maxLength={255} disabled={busy || !!review} value={input.destinationName} onChange={event => setInput({ ...input, destinationName: event.target.value })} /></label>
@@ -81,7 +98,12 @@ export function WorldFilesDialog({ path, name, type, world, close, returnFocus, 
             <dt>{t('react.worlds.cheats')}</dt><dd>{t(review.metadata.after.cheat ? 'react.worlds.enabled' : 'react.worlds.disabled')}</dd>
             <dt>{t('react.worlds.seed')}</dt><dd>{review.metadata.after.seed || t('react.workspace.unknown')}</dd>
           </dl>}
-          {review.linkOnly ? <p>{t('react.worldFiles.linkOnly')}</p> : review.shared ? <p className="form-error">{t(input.type === 'import' ? 'react.worldFiles.importShared' : input.type === 'metadata' ? 'react.worldFiles.metadataShared' : 'react.worldFiles.shared')}</p> : null}
+          {review.datapack && <dl className="content-metadata">
+            <dt>{t('react.worldDatapacks.pack')}</dt><dd>{review.datapack.name}</dd>
+            <dt>{t('react.worldDatapacks.format')}</dt><dd>{review.datapack.packFormat !== undefined && review.datapack.packFormat >= 0 ? review.datapack.packFormat : t('react.workspace.unknown')}</dd>
+            <dt>{t('react.worldDatapacks.description')}</dt><dd>{review.datapack.description || t('react.workspace.unknown')}</dd>
+          </dl>}
+          {review.linkOnly ? <p>{t('react.worldFiles.linkOnly')}</p> : review.shared ? <p className="form-error">{t(input.type === 'import' ? 'react.worldFiles.importShared' : input.type === 'metadata' ? 'react.worldFiles.metadataShared' : (input.type === 'import-datapack' || input.type === 'remove-datapack') ? 'react.worldFiles.datapackShared' : 'react.worldFiles.shared')}</p> : null}
         </div>}
         {busy && <p role="status">{t('react.worldFiles.working')}</p>}
         {finished && <p role="status">{t(`react.worldFiles.${type}Done`)}</p>}
@@ -89,7 +111,7 @@ export function WorldFilesDialog({ path, name, type, world, close, returnFocus, 
       </div>
       <div className="dialog-actions"><button className="button secondary" type="button" disabled={busy} onClick={close}>{t('react.worldFiles.close')}</button>
         {review && !finished && <button className="button secondary" type="button" disabled={busy} onClick={() => setReview(null)}>{t('react.worldFiles.back')}</button>}
-        {!finished && <button className="button primary" type="submit" disabled={busy || input.type === 'export' && !input.destinationDirectory || input.type === 'import' && !input.sourcePath}>{t(review ? 'react.worldFiles.confirm' : 'react.worldFiles.review')}</button>}
+        {!finished && <button className="button primary" type="submit" disabled={busy || input.type === 'export' && !input.destinationDirectory || input.type === 'import' && !input.sourcePath || input.type === 'import-datapack' && (!input.sourcePath || !input.fileName)}>{t(review ? 'react.worldFiles.confirm' : 'react.worldFiles.review')}</button>}
       </div>
     </form>
   </Dialog.Content></Dialog.Portal></Dialog.Root>

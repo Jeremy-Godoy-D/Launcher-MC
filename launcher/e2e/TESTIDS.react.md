@@ -6,7 +6,7 @@ This file is the contract between the launcher UI in `xmcl-react-ui/` and the Pl
 
 Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testids` with the selected LAUNCHER_RENDERER. Computed IDs are not resolved by this static registry.
 
-**Total anchors:** 49 (in 40 Vue/TSX files)
+**Total anchors:** 53 (in 40 Vue/TSX files)
 
 | Test ID | Defined in |
 |---|---|
@@ -17,6 +17,9 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `copy-cancel` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L75`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L75) |
 | `copy-finish` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76) |
 | `copy-path` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L62`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L62) |
+| `datapack-import` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L112`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L112) |
+| `datapack-refresh` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L121`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L121) |
+| `datapack-remove` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L148`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L148) |
 | `export-confirm` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L88`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L88) |
 | `export-result` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L81`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L81) |
 | `featured-play` | [`xmcl-react-ui/src/App.tsx#L617`](../xmcl-react-ui/src/App.tsx#L617) |
@@ -54,8 +57,9 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `setup-path` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L233`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L233) |
 | `setup-root` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L153`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L153) |
 | `store-search` | [`xmcl-react-ui/src/App.tsx#L819`](../xmcl-react-ui/src/App.tsx#L819) |
-| `world-files-dialog` | [`xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L51`](../xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L51) |
-| `world-files-review` | [`xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L76`](../xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L76) |
-| `world-info` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L69`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L69) |
+| `world-datapacks` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L133`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L133) |
+| `world-files-dialog` | [`xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L61`](../xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L61) |
+| `world-files-review` | [`xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L93`](../xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L93) |
+| `world-info` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L92`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L92) |
 | `worlds-list` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L54`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L54) |
 | `worlds-refresh` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L45`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L45) |

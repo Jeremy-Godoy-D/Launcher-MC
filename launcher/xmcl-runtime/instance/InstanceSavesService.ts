@@ -44,6 +44,7 @@ import { copyPassively, isDirectory, linkDirectory, missing, pipeline, readdirIf
 import { isNonnull, requireObject, requireString } from '../util/object'
 import { includeAs, writeZipFile } from '../util/zip'
 import { readlinkSafe, isLinkTo } from './utils/readLinkSafe'
+import { readWorldDatapacks } from './utils/worldDatapacks'
 import { readWorlds, worldsLocation } from './utils/worldFiles'
 import { applyWorldFiles, previewWorldFiles } from './utils/worldOperations'
 
@@ -158,13 +159,21 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     })
   }
 
+  async getWorldDatapacks(instancePath: string, saveName: string) {
+    await this.#javaInstance(instancePath)
+    return this.mutex.of(LockKey.instance(instancePath)).runExclusive(async () => {
+      await this.#javaInstance(instancePath)
+      return readWorldDatapacks(instancePath, saveName, this.getPath())
+    })
+  }
+
   async #javaInstance(path: string) {
     await this.instanceService.initialize()
     if (!this.instanceService.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceNotFoundError')
   }
 
   async #worldFiles<T>(operation: WorldFileOperation, action: () => Promise<T>): Promise<T> {
-    if (!operation || !['copy', 'export', 'remove', 'import', 'metadata'].includes(operation.type)) throw new Error('Invalid world operation')
+    if (!operation || !['copy', 'export', 'remove', 'import', 'metadata', 'import-datapack', 'remove-datapack'].includes(operation.type)) throw new Error('Invalid world operation')
     const paths = [...new Set([operation.instancePath, ...(operation.type === 'copy' ? [operation.destinationInstancePath] : [])])].sort()
     for (const path of paths) await this.#javaInstance(path)
     const lock = async (index: number): Promise<T> => {
@@ -188,7 +197,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       if (touched.some(path => active.some(game => relative(path, game) === ''))) throw new AnyError('InstanceRunningError')
     }
     if (review.shared && !review.linkOnly && processes.length) throw new AnyError('SharedWorldRunningError')
-    if (operation.type === 'import' && processes.length) {
+    if ((operation.type === 'import' || operation.type === 'import-datapack') && processes.length) {
       const source = await realpath(operation.sourcePath), shared = join(await realpath(this.getPath()), 'saves'), inShared = relative(shared, source)
       if (!inShared || inShared !== '..' && !inShared.startsWith('..' + sep) && !isAbsolute(inShared)) throw new AnyError('SharedWorldRunningError')
       for (const process of processes) {
