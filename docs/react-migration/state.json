@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa. 4849893/ca6e281/381e52c/78642d0 acotan y virtualizan archivos de consola, conservan blancos/Unicode y homónimos, corrigen contraste (mínimos 5.896 etiquetas/17.530 vacío) y carga inmediata de Progreso. 1157 unitarias/116 archivos; 14 Native distintos, cinco matrices repetidas; 9 harness, E2E 56 base; dist Vue restaurado. Ver STAGE5-CONSOLE-BOUNDED-VIEW. CI 41301976771/21d27d0 falló React solo por foco 72 (215 pass,1fail,2skip; Vue success,Strict no ejecutado); corregido estado temprano/precondición de teclado,72 local3pass. Verificar nuevoCI sin reiniciar vivo. Continuar K21: LaunchHistoryStore/captura no están protegidos/acotados como localLogs; luego streams por launchId/directorio, orden/multibyte y presupuesto de liveEntries/errPromises/errorLogs/stdLogs, carreras de arranque, copiar/exportar Native y logger por instancia. La vista de archivos ya tiene presupuesto/virtualización/pausa/filtros: no rehacerla. K12 pass; K11 aceptación integral/IPC legacy/no NIO pendiente. Conservar todas las herramientas locales de Mundos y chunks; 6–9 pendientes, PR4borrador, producción/proxy intactos, Microsoft pospuesto, DOMPurify WIP y ANALISIS_ARQUITECTURA.md excluidos.",
+  "nextAction": "Etapa 5 activa. CI 41305967989/a31a7f1 pasó tipos/lint y falló unitarias 1156/1157: pasteSaveChunks excedió 5 s y cleanup ENOTEMPTY; Vue cancelado, Native no ejecutado. 1d3c9b4 calibra solo tres commits de backup a 30 s, espera sus promesas antes de limpiar y exige state=complete. Local: 1157/116 archivos, 25 focales finales, tipos/lint Runtime y 9 harness. Ver STAGE5-CI-CHUNK-COMMITS. Verificar nuevo CI exacto sin reiniciar vivo, incluida corrección de foco 72 (381e52c) aún sin validar remotamente. No rehacer la vista de archivos de consola (4849893..78642d0): acotada/virtualizada y con contraste medido. Continuar K21: LaunchHistoryStore/captura, identidad/orden/multibyte y memoria de streams/liveEntries/errPromises, carreras de arranque, copiar/exportar Native y logger por instancia. K12 pass; K11 integral/IPC legacy/no NIO pendiente. Mundos completo y chunks en alcance; 6–9 pendientes. Para 9, runner Windows de Actions como alternativa de NSIS/delta aislados antes de pedir VM local. PR 4 borrador, producción/proxy intactos, Microsoft pospuesto; excluir DOMPurify WIP y ANALISIS_ARQUITECTURA.md.",
   "stages": [
     {
       "id": 0,
@@ -853,9 +853,13 @@
             {
               "path": "docs/react-migration/STAGE5-CONSOLE-BOUNDED-VIEW.md",
               "sha256": "080422f370de30659abcbf62207ab3ecc51c40c9f85876fdcb875b59cb64f1fa"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-CI-CHUNK-COMMITS.md",
+              "sha256": "65fe539a4de7f4e4397c452f9cc1b03c3c6659a854909ec388c9ba2f6bdcd9e0"
             }
           ],
-          "note": "K12 pass. K11 integral/IPC legacy/no NIO pendiente. CI41301976771 falló en foco de Progreso72;381e52c inicia carga al pedir actualización,fixture exige busy final/foco antes de Tab;3Native locales pasan,nuevoCI pendiente. Mantener todas las herramientas locales y chunks;gate/5 permanecen pending/activa."
+          "note": "K12 pass. K11 integral/IPC legacy/no NIO pendiente. CI41301976771 falló en foco de Progreso72;381e52c inicia carga al pedir actualización,fixture exige busy final/foco antes de Tab;3Native locales pasan,nuevoCI pendiente. Mantener todas las herramientas locales y chunks;gate/5 permanecen pending/activa. CI41305967989 falló por timeout de commit en unitarias,antes de Native;1d3c9b4 calibra tres casos/teardown y fortalece backups;1157 generales/25focales locales. Ver STAGE5-CI-CHUNK-COMMITS y validar nuevo CI;sin cierre de gate."
         },
         {
           "id": "console-isolation",
@@ -880,9 +884,13 @@
             {
               "path": "docs/react-migration/STAGE5-CONSOLE-BOUNDED-VIEW.md",
               "sha256": "080422f370de30659abcbf62207ab3ecc51c40c9f85876fdcb875b59cb64f1fa"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-CI-CHUNK-COMMITS.md",
+              "sha256": "65fe539a4de7f4e4397c452f9cc1b03c3c6659a854909ec388c9ba2f6bdcd9e0"
             }
           ],
-          "note": "4849893..78642d0: vista de archivos acotada/virtualizada y contraste medido. 1157 unitarias,11Console+3Progress Native distintos,cinco matrices repetidas. K21 pending: historial/captura,streams/identidad/orden/multibyte/memoria,inicialización,copiar/exportar/logger. No ampliar las garantías de archivos a liveEntries. Ver STAGE5-CONSOLE-BOUNDED-VIEW;CI nuevo pendiente."
+          "note": "4849893..78642d0: vista de archivos acotada/virtualizada y contraste medido. 1157 unitarias,11Console+3Progress Native distintos,cinco matrices repetidas. K21 pending: historial/captura,streams/identidad/orden/multibyte/memoria,inicialización,copiar/exportar/logger. No ampliar las garantías de archivos a liveEntries. Ver STAGE5-CONSOLE-BOUNDED-VIEW;CI nuevo pendiente. CI41305967989 falló por timeout de commit en unitarias,antes de Native;1d3c9b4 calibra tres casos/teardown y fortalece backups;1157 generales/25focales locales. Ver STAGE5-CI-CHUNK-COMMITS y validar nuevo CI;sin cierre de gate."
         }
       ]
     },
@@ -1019,5 +1027,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-01T12:17:27.630534+00:00"
+  "updatedAt": "2026-11-01T12:42:04.135210+00:00"
 }

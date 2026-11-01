@@ -299,3 +299,7 @@ STAGE5-CONSOLE-FILE-BOUNDARY (`0bf7a01`/`c4a8b77`) documenta autoridad Java, rut
 ## Consola: vista acotada y progreso pendiente de CI
 
 STAGE5-CONSOLE-BOUNDED-VIEW (`4849893`/`ca6e281`/`381e52c`/`78642d0`) documenta el presupuesto de archivos, virtualización, homónimos, blancos/Unicode y contraste medido. Pasan 1.157 unitarias/116 archivos y 14 escenarios Native distintos, con cinco matrices repetidas. CI 41301976771 falló por teclado en 72; la corrección pasa tres casos locales y necesita CI nuevo. K21 mantiene historial/captura, streams/memoria, copiar/exportar Native y logger pendientes; la vista de archivos está acotada, liveEntries aún no. K12 pass, K11 pending; Mundos completo en alcance y etapa 5 activa.
+
+## Seguimiento de CI: commits duraderos de chunks
+
+STAGE5-CI-CHUNK-COMMITS (`1d3c9b4`) registra CI 41305967989: 1.156/1.157 por timeout de pasteSaveChunks y cleanup ENOTEMPTY; Vue cancelado, Native no ejecutado. Solo cambia fixture/presupuesto de tres commits reales y espera su final antes de limpiar; refuerza state=complete. Pasan la suite local de 1.157/116 archivos, 25 focales finales, tipos/lint Runtime y nueve tests del harness. Nuevo CI pendiente, incluido foco de 72. K11/K21 y etapa 5 no se cierran. Se documenta el runner Windows de Actions como alternativa de NSIS/delta para etapa 9.
