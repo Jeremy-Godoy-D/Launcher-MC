@@ -83,7 +83,7 @@ test('instance console loads stored log files, parses formatted lines and suppor
 
   // Select latest.log in the dropdown
   const sourceSelect = consoleSec.getByTestId('console-file-select')
-  await sourceSelect.selectOption('latest.log')
+  await sourceSelect.selectOption('log:latest.log')
 
   // Verify all 7 entries appear
   const entries = consoleSec.locator('[data-testid="console-entry"]')
@@ -165,19 +165,20 @@ test('instance console displays crash reports with copy action and explorer inte
   await consoleSec.getByTestId('console-refresh').click()
 
   const sourceSelect = consoleSec.getByTestId('console-file-select')
-  await sourceSelect.selectOption('crash-2026-10-31_20.00.00-client.txt')
+  await sourceSelect.selectOption('crash:crash-2026-10-31_20.00.00-client.txt')
 
   // Verify show file button is visible when a file is selected
   await expect(consoleSec.getByTestId('console-show-file')).toBeVisible()
 
   // Verify crash lines loaded and error lines highlighted
   const entries = consoleSec.locator('[data-testid="console-entry"]')
-  await expect(entries).toHaveCount(7)
+  await expect(entries).toHaveCount(9)
 
   // Test Copy action feedback
   const copyBtn = consoleSec.getByTestId('console-copy')
   await copyBtn.click()
   await expect(copyBtn).toContainText('¡Copiado!')
+  expect((await launcher.app.evaluate(({ clipboard }) => clipboard.readText())).replace(/\r\n/g, '\n')).toBe(crashContent)
 })
 
 test('instance console maintains WCAG 2.1 AA accessibility and responsiveness matrix', async ({ launcher }, testInfo) => {
@@ -190,7 +191,7 @@ test('instance console maintains WCAG 2.1 AA accessibility and responsiveness ma
 
   const consoleSec = await openWorkspaceConsole(page)
   await consoleSec.getByTestId('console-refresh').click()
-  await consoleSec.getByTestId('console-file-select').selectOption('latest.log')
+  await consoleSec.getByTestId('console-file-select').selectOption('log:latest.log')
 
   const win = await launcher.app.browserWindow(page)
   await page.emulateMedia({ reducedMotion: 'reduce' })
@@ -198,7 +199,7 @@ test('instance console maintains WCAG 2.1 AA accessibility and responsiveness ma
     await page.evaluate(theme => { const key = 'launcher.react.preferences', prefs = JSON.parse(localStorage.getItem(key)!); localStorage.setItem(key, JSON.stringify({ ...prefs, appearance: theme })) }, theme)
     await page.reload()
     await consoleSec.getByTestId('console-refresh').click()
-    await consoleSec.getByTestId('console-file-select').selectOption('latest.log')
+    await consoleSec.getByTestId('console-file-select').selectOption('log:latest.log')
     await expect(consoleSec.getByTestId('console-entry')).toHaveCount(1)
 
     for (const width of [1200, 800]) {

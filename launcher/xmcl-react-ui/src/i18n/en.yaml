@@ -1068,6 +1068,7 @@ react:
     processStopped: "No active processes running for this instance"
     linesCount: "{count} lines"
     refresh: "Refresh files"
+    limited: "This view is limited to keep the launcher responsive. Filters, Copy and Export apply to this view. Use Show file to inspect the full log."
     fileError: "Could not access the log. Check permissions and press Refresh to retry."
     tooLarge: "The file exceeds 16 MiB or the folder contains more than 10,000 entries. View the log outside the launcher and refresh again."
   chunkChanges:

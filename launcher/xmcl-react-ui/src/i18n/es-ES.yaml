@@ -1068,6 +1068,7 @@ react:
     processStopped: "No hay procesos activos en ejecución para esta instancia"
     linesCount: "{count} líneas"
     refresh: "Actualizar archivos"
+    limited: "Vista limitada para mantener el launcher ágil. Los filtros, Copiar y Exportar abarcan esta vista. Usa Mostrar archivo para consultar el registro completo."
     fileError: "No se pudo acceder al registro. Comprueba los permisos y pulsa Actualizar para reintentar."
     tooLarge: "El archivo supera 16 MiB o la carpeta contiene más de 10.000 entradas. Consulta el registro fuera del launcher y vuelve a actualizar."
   chunkChanges:

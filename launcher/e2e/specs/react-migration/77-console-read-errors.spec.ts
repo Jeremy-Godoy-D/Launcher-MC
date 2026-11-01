@@ -18,7 +18,7 @@ test('stored log read failures stay visible and Refresh retries the same file af
   const page = launcher.main, [path] = await seedReactLibrary(page)
   await mkdir(join(path, 'logs')); await writeFile(join(path, 'logs/broken.gz'), 'not gzip')
   const console = await openConsole(page)
-  await console.getByTestId('console-file-select').selectOption('broken.gz')
+  await console.getByTestId('console-file-select').selectOption('log:broken.gz')
   await expect(console.getByRole('alert')).toContainText('No se pudo acceder')
   await expect(console.getByTestId('console-entry')).toHaveCount(0)
   await expect(console.getByTestId('console-copy')).toBeDisabled()
@@ -30,7 +30,7 @@ test('stored log read failures stay visible and Refresh retries the same file af
   await snap(launcher, 'console-recovered-log', 'Actualizar vuelve a leer el mismo archivo y muestra su contenido.')
   await writeFile(join(path, 'logs/large.log'), ''); await truncate(join(path, 'logs/large.log'), 16 * 1024 * 1024 + 1)
   await console.getByTestId('console-refresh').click()
-  await console.getByTestId('console-file-select').selectOption('large.log')
+  await console.getByTestId('console-file-select').selectOption('log:large.log')
   await expect(console.getByRole('alert')).toContainText('16 MiB')
   await expect(console.getByTestId('console-show-file')).toBeEnabled()
 })
@@ -43,7 +43,7 @@ test('console file errors remain accessible in both themes and supported window 
   for (const theme of ['dark', 'light']) {
     await page.evaluate(theme => { const key = 'launcher.react.preferences'; localStorage.setItem(key, JSON.stringify({ ...JSON.parse(localStorage.getItem(key)!), appearance: theme })) }, theme)
     await page.reload()
-    await console.getByTestId('console-file-select').selectOption('broken.gz')
+    await console.getByTestId('console-file-select').selectOption('log:broken.gz')
     await expect(console.getByRole('alert')).toBeVisible()
     for (const width of [1200, 800]) {
       const height = width === 800 ? 400 : 720

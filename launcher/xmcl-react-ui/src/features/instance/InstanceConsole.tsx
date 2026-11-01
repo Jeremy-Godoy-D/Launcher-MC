@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback, useLayoutEffect, type CSSProperties } from 'react'
 import {
   Terminal,
   Copy,
@@ -9,63 +9,13 @@ import {
   FolderOpen,
   RefreshCw,
 } from 'lucide-react'
+import { useVirtualizer } from '@tanstack/react-virtual'
+import { parseLogFile, parseLogLine, type LogEntry } from './consoleLog'
 import { InstanceLogServiceKey } from '@xmcl/runtime-api/src/services/InstanceLogService'
 import { LaunchServiceKey } from '@xmcl/runtime-api/src/services/LaunchService'
 import type { SavedInstance } from '../library/model'
 import { useService, useServiceEvent } from '../../runtime'
 import { useI18n } from '../../i18n'
-
-export interface LogEntry {
-  id: string
-  timestamp?: string
-  level: 'info' | 'warn' | 'error' | 'debug'
-  source?: string
-  text: string
-  raw: string
-}
-
-export function parseLogLine(line: string, index: number, defaultLevel?: 'info' | 'warn' | 'error' | 'debug'): LogEntry {
-  const match = line.match(/^\[(\d{2}:\d{2}:\d{2})\]\s+\[([^\]]+)\]:?\s*(.*)$/)
-  if (match) {
-    const [, timestamp, tag, text] = match
-    const parts = tag.split('/')
-    let level: 'info' | 'warn' | 'error' | 'debug' = 'info'
-    let source = tag
-    if (parts.length >= 2) {
-      source = parts[0]
-      const lvl = parts[parts.length - 1].toUpperCase()
-      if (lvl === 'WARN' || lvl === 'WARNING') level = 'warn'
-      else if (lvl === 'ERROR' || lvl === 'FATAL') level = 'error'
-      else if (lvl === 'DEBUG' || lvl === 'TRACE') level = 'debug'
-      else level = 'info'
-    }
-    return {
-      id: `entry-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 6)}`,
-      timestamp,
-      source,
-      level,
-      text: text || '',
-      raw: line,
-    }
-  }
-
-  let level: 'info' | 'warn' | 'error' | 'debug' = defaultLevel ?? 'info'
-  const upper = line.toUpperCase()
-  if (upper.includes('ERROR') || upper.includes('EXCEPTION') || line.trim().startsWith('at ')) {
-    level = 'error'
-  } else if (upper.includes('WARN')) {
-    level = 'warn'
-  } else if (upper.includes('DEBUG')) {
-    level = 'debug'
-  }
-
-  return {
-    id: `entry-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 6)}`,
-    level,
-    text: line,
-    raw: line,
-  }
-}
 
 export function InstanceConsole({ instance, running }: { instance: SavedInstance; running: boolean }) {
   const { t } = useI18n()
@@ -76,7 +26,7 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
   const [logFiles, setLogFiles] = useState<string[]>([])
   const [crashReports, setCrashReports] = useState<string[]>([])
   const [liveEntries, setLiveEntries] = useState<LogEntry[]>([])
-  const [fileEntries, setFileEntries] = useState<LogEntry[]>([])
+  const [fileView, setFileView] = useState<{ source: string; entries: LogEntry[]; limited: boolean }>()
   const [levelFilter, setLevelFilter] = useState<'all' | 'info' | 'warn' | 'error' | 'debug'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [autoscroll, setAutoscroll] = useState(true)
@@ -113,6 +63,8 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
       if (listRequest.current !== request) return
       if (logs.status === 'fulfilled') setLogFiles(logs.value)
       if (crashes.status === 'fulfilled') setCrashReports(crashes.value)
+      setSelectedSource(previous => previous.startsWith('log:') && logs.status === 'fulfilled' && !logs.value.includes(previous.slice(4))
+        || previous.startsWith('crash:') && crashes.status === 'fulfilled' && !crashes.value.includes(previous.slice(6)) ? '__live__' : previous)
       const failure = [logs, crashes].find(result => result.status === 'rejected')
       if (failure?.status === 'rejected') setFileErrors(previous => ({ ...previous, list: fileErrorKey(failure.reason) }))
       setListing(false)
@@ -179,41 +131,40 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
     let cancelled = false
     showRequest.current++
     setFileErrors(previous => ({ ...previous, read: undefined, show: undefined }))
-    setFileEntries([])
     if (selectedSource === '__live__') {
+      setFileView(undefined)
       setReading(false)
       return
     }
 
     setReading(true)
-    const isCrash = crashReports.includes(selectedSource)
+    const isCrash = selectedSource.startsWith('crash:')
     const loadPromise = isCrash
-      ? logService.getCrashReportContent(instance.path, selectedSource)
-      : logService.getLogContent(instance.path, selectedSource)
+      ? logService.getCrashReportContent(instance.path, selectedSource.slice(6))
+      : logService.getLogContent(instance.path, selectedSource.slice(4))
 
     loadPromise
       .then((content) => {
         if (cancelled) return
-        const lines = content.split(/\r?\n/).filter((l) => l.length > 0)
-        setFileEntries(lines.map((l, i) => parseLogLine(l, i, isCrash ? 'error' : 'info')))
+        setFileView({ source: selectedSource, ...parseLogFile(content, isCrash ? 'error' : 'info') })
       })
       .catch((error) => {
-        if (!cancelled) setFileErrors(previous => ({ ...previous, read: fileErrorKey(error) }))
+        if (!cancelled) { setFileView(undefined); setFileErrors(previous => ({ ...previous, read: fileErrorKey(error) })) }
       })
       .finally(() => {
         if (!cancelled) setReading(false)
       })
     return () => { cancelled = true }
-  }, [selectedSource, instance.path, crashReports, logService, fileRevision])
+  }, [selectedSource, instance.path, logService, fileRevision])
 
   // Filter entries based on level and search query
-  const currentEntries = selectedSource === '__live__' ? liveEntries : fileEntries
+  const currentEntries = useMemo(() => selectedSource === '__live__' ? liveEntries : fileView?.source === selectedSource ? fileView.entries : [], [selectedSource, liveEntries, fileView])
 
   const filteredEntries = useMemo(() => {
     let result = currentEntries
 
     if (levelFilter !== 'all') {
-      result = result.filter((e) => e.level === levelFilter)
+      result = result.filter((e) => e.raw.trim() && e.level === levelFilter)
     }
 
     if (searchQuery.trim()) {
@@ -228,6 +179,18 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
 
     return result
   }, [currentEntries, levelFilter, searchQuery])
+
+  const large = filteredEntries.length > 80
+  const virtualizer = useVirtualizer<HTMLDivElement, HTMLDivElement>({
+    count: filteredEntries.length,
+    enabled: large,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => 22,
+    getItemKey: useCallback((index: number) => filteredEntries[index].id, [filteredEntries]),
+    overscan: 8,
+    useFlushSync: false,
+  })
+  useLayoutEffect(() => { virtualizer.measure() }, [selectedSource, levelFilter, searchQuery, fileView])
 
   // Autoscroll
   useEffect(() => {
@@ -262,7 +225,7 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
     if (selectedSource === '__live__') {
       setLiveEntries([])
     } else {
-      setFileEntries([])
+      setFileView(undefined)
     }
   }
 
@@ -273,7 +236,7 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `${instance.name.replace(/[^a-zA-Z0-9_-]/g, '_')}-${selectedSource === '__live__' ? 'live' : selectedSource}-${Date.now()}.log`
+    a.download = `${instance.name.replace(/[^a-zA-Z0-9_-]/g, '_')}-${selectedSource === '__live__' ? 'live' : selectedSource.slice(selectedSource.startsWith('crash:') ? 6 : 4).replace(/[^a-zA-Z0-9_.-]/g, '_')}-${Date.now()}.log`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -289,10 +252,23 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
     setFileErrors(previous => ({ ...previous, show: undefined }))
     if (selectedSource && selectedSource !== '__live__') {
       try {
-        if (crashReports.includes(selectedSource)) await logService.showCrash(instance.path, selectedSource)
-        else await logService.showLog(instance.path, selectedSource)
+        if (selectedSource.startsWith('crash:')) await logService.showCrash(instance.path, selectedSource.slice(6))
+        else await logService.showLog(instance.path, selectedSource.slice(4))
       } catch (error) { if (showRequest.current === request) setFileErrors(previous => ({ ...previous, show: fileErrorKey(error) })) }
     }
+  }
+
+  function row(entry: LogEntry, index: number, style?: CSSProperties) {
+    return <div key={entry.id} ref={large ? virtualizer.measureElement : undefined} data-index={index} style={style}
+      data-testid="console-entry" data-level={entry.level} className={`console-line level-${entry.level}`}
+      role="listitem" aria-posinset={index + 1} aria-setsize={filteredEntries.length}>
+      {entry.raw.trim() ? <>
+        {entry.timestamp && <span className="console-time">[{entry.timestamp}]</span>}
+        <span className="console-level">[{entry.level}]</span>
+        {entry.source && <span className="console-source">[{entry.source}]</span>}
+        <span className="console-text">{entry.text}</span>
+      </> : <span className="console-text" aria-hidden="true">{'\u00a0'}</span>}
+    </div>
   }
 
   return (
@@ -311,6 +287,7 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
             id="console-file-select"
             data-testid="console-file-select"
             value={selectedSource}
+            title={selectedSource === '__live__' ? t('react.instanceConsole.liveLogs') : selectedSource.slice(selectedSource.startsWith('crash:') ? 6 : 4)}
             onChange={(e) => setSelectedSource(e.target.value)}
             aria-label={t('react.instanceConsole.sourceLabel')}
           >
@@ -318,7 +295,7 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
             {logFiles.length > 0 && (
               <optgroup label={t('react.instanceConsole.logsHeader')}>
                 {logFiles.map((file) => (
-                  <option key={file} value={file}>
+                  <option key={file} value={`log:${file}`}>
                     {file}
                   </option>
                 ))}
@@ -327,7 +304,7 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
             {crashReports.length > 0 && (
               <optgroup label={t('react.instanceConsole.crashesHeader')}>
                 {crashReports.map((file) => (
-                  <option key={file} value={file}>
+                  <option key={file} value={`crash:${file}`}>
                     {file}
                   </option>
                 ))}
@@ -455,6 +432,7 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
 
       <div>
         {Object.entries(fileErrors).filter(([, value]) => value).map(([operation, key]) => <p key={operation} className="form-error" role="alert">{t(`react.instanceConsole.${key}`)}</p>)}
+        {fileView?.source === selectedSource && fileView.limited && <p className="form-description" role="status">{t('react.instanceConsole.limited')}</p>}
       </div>
 
       <div
@@ -464,6 +442,12 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
         role="region"
         aria-label={t('react.instanceConsole.title')}
         tabIndex={0}
+        onScroll={event => { const element = event.currentTarget; if (autoscroll && element.scrollHeight - element.clientHeight - element.scrollTop > 32) setAutoscroll(false) }}
+        onKeyDown={event => {
+          if (event.target !== event.currentTarget || event.altKey || event.ctrlKey || event.metaKey || !['Home', 'End'].includes(event.key)) return
+          event.preventDefault(); setAutoscroll(false)
+          event.currentTarget.scrollTop = event.key === 'Home' ? 0 : event.currentTarget.scrollHeight
+        }}
       >
         {filteredEntries.length === 0 ? (
           <div data-testid="console-empty" className="console-empty">
@@ -471,19 +455,9 @@ export function InstanceConsole({ instance, running }: { instance: SavedInstance
             <p>{searchQuery ? t('react.instanceConsole.noMatches') : t('react.instanceConsole.empty')}</p>
           </div>
         ) : (
-          filteredEntries.map((entry) => (
-            <div
-              key={entry.id}
-              data-testid="console-entry"
-              data-level={entry.level}
-              className={`console-line level-${entry.level}`}
-            >
-              {entry.timestamp && <span className="console-time">[{entry.timestamp}]</span>}
-              <span className="console-level">[{entry.level}]</span>
-              {entry.source && <span className="console-source">[{entry.source}]</span>}
-              <span className="console-text">{entry.text}</span>
-            </div>
-          ))
+          <div role="list" aria-label={t('react.instanceConsole.title')} style={large ? { height: virtualizer.getTotalSize(), position: 'relative' } : undefined}>
+            {large ? virtualizer.getVirtualItems().map(item => row(filteredEntries[item.index], item.index, { position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${item.start}px)` })) : filteredEntries.map((entry, index) => row(entry, index))}
+          </div>
         )}
       </div>
 
