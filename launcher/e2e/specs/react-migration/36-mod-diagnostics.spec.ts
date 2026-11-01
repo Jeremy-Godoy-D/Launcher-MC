@@ -5,6 +5,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createHash } from 'node:crypto'
 import axe from 'axe-core'
+import { activateLauncherControl, focusLauncher } from '../../helpers/focus-launcher'
 
 test.use({ launcherOptions: { locale: 'es-ES' } })
 async function openMods(page: Page, name = 'Fabric QA') {
@@ -20,7 +21,7 @@ test('diagnostics use real archive dependencies, update after file changes and n
   await makeReactMod(path, 'bad', 'Bad')
   const original = await readFile(join(path, 'mods/root.jar')), list = await openMods(page)
   const trigger = list.getByRole('button', { name: 'Revisar mods', exact: true }), panel = page.getByRole('region', { name: 'Diagnóstico de mods', exact: true })
-  await trigger.focus(); await page.keyboard.press('Enter')
+  await activateLauncherControl(launcher, trigger)
   await expect(panel.getByRole('button', { name: 'Cerrar diagnóstico de mods' })).toBeFocused()
   await expect(panel).toHaveAttribute('aria-busy', 'false')
   await expect(panel).toContainText('Dependencia no satisfecha'); await expect(panel).toContainText('library · >=2')
@@ -76,6 +77,7 @@ test('diagnostics remain readable in both themes and supported sizes with keyboa
     for (const size of [[1200, 720], [800, 400]]) {
       const win = await launcher.app.browserWindow(page)
       await win.evaluate((win, size) => win.setContentSize(size[0], size[1]), size)
+      await focusLauncher(launcher)
       const close = panel.getByRole('button', { name: 'Cerrar diagnóstico de mods' })
       await close.focus(); await expect(close).toBeInViewport({ ratio: 1 })
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
@@ -83,6 +85,7 @@ test('diagnostics remain readable in both themes and supported sizes with keyboa
       const result = await page.evaluate(async () => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } }))
       await writeFile(testInfo.outputPath(`diagnostics-axe-${theme}-${size[0]}.json`), JSON.stringify(result, null, 2)); expect(result.violations).toEqual([])
       await snap(launcher, `diagnostics-${theme}-${size[0]}`, 'Saved loader and real archive metadata; automatic Java remains explicitly unverified.')
+      await focusLauncher(launcher); await expect(close).toBeFocused()
       await page.keyboard.press('Tab'); await expect(panel.getByRole('button', { name: 'Ver información de root.jar' }).first()).toBeFocused()
       await panel.getByRole('button', { name: 'Ver información de root.jar' }).last().focus()
       await expect(panel.getByRole('button', { name: 'Ver información de root.jar' }).last()).toBeInViewport({ ratio: 1 })

@@ -86,6 +86,7 @@ test('progress success and read errors retain keyboard recovery in both themes a
         await activateLauncherControl(launcher, refresh)
         if (state === 'ready') {
           await expect(progress.getByTestId('progress-list')).toContainText('Avance comprobado')
+          await expect(refresh).toBeEnabled(); await focusLauncher(launcher)
           await refresh.press('Tab'); await expect(progress.getByTestId('progress-filter')).toBeFocused(); await expect(progress.getByTestId('progress-filter')).toBeInViewport({ ratio: 1 })
         } else { await expect(progress.getByRole('alert')).toBeVisible(); await refresh.focus(); await expect(refresh).toBeInViewport({ ratio: 1 }) }
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
