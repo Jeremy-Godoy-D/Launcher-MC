@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 reabierta; fuente55e1481 corrige guardas físicas de chunks, backups y fixtures. 1052unitarias/104archivos,61NativeReact distintos entre recorridos,2Vue,12Axe0violaciones/12incomplete;CI nuevo requerido. Completar revisión Native y recuperación de chunks, autoridad/limites de lecturas, mapa acotado/teclado;preservar argumentos/cambios sin guardar en ajustes y validar streaming/virtualización de consola. K11/K12/K21 y gates5 pertinentes pending;6–9 pending. Ver STAGE5-CHUNK-SAFETY. Vue default/dist,PR4borrador,producción/proxy intactos,Microsoft pospuesto;DOMPurify WIP sin commit.",
+  "nextAction": "Etapa5 activa; fuente91edfda: revisión Native y recuperación de chunks, mapa con teclado/caché32/cola2,1063unitarias/105archivos,31React distintos+2Vue,52Axe0violaciones/88incomplete,9harness. Verificar nuevo CI exacto y completar autoridad/límites de progreso/worldgen y bloqueo de partidas externas; luego argv/herencia/cambios sin guardar K12 y streaming/virtualización K21. K11/K12/K21 y gates pertinentes pending;6–9pending. Ver STAGE5-CHUNK-REVIEW. Vue default/dist,PR4borrador,producción/proxy intactos,Microsoft pospuesto;DOMPurify WIP sin commit.",
   "stages": [
     {
       "id": 0,
@@ -809,9 +809,13 @@
             {
               "path": "docs/react-migration/STAGE5-CHUNK-SAFETY.md",
               "sha256": "05372c8f1af452e623cbb3d09b4c71d2bac90c3f8659a07555d60520d05312d5"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-CHUNK-REVIEW.md",
+              "sha256": "08ae37e048630afd4836fe445d31b136e2f90ef4af83fa81e46f63b62c24c87c"
             }
           ],
-          "note": "Cierre anterior corregido: CI41264504836/9733529 falla2/1037 en guardas de chunks. 55e1481:1052unitarias/104archivos y61NativeReact distintos entre recorridos+2Vue;revisión Native/atomicidad/lecturas/recuperación de chunks,mapa acotado/teclado y preservación de argumentos/cambios de ajustes siguen pendientes. Ver STAGE5-CHUNK-SAFETY;no aceptar K11/K12 por matrices parciales."
+          "note": "91edfda: revisión/huella Native, backup verificado, publicación por rename y recuperación revisada; mapa teclado/cola2/caché32/liberación.1063unitarias,31React,2Vue;faltan autoridad/límites de progreso/worldgen y partidas externas,K12 argv/herencia/cambios sin guardar. K11/K12 pending;ver STAGE5-CHUNK-REVIEW."
         },
         {
           "id": "console-isolation",
@@ -963,5 +967,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-10-31"
+  "updatedAt": "2026-11-01T06:12:23.773533+00:00"
 }

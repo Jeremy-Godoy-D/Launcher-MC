@@ -255,3 +255,7 @@ K21 completado e integrado en React. `STAGE5-CONSOLE.md` incorpora la consola in
 ## Corrección de aceptación tras CI y auditoría (55e1481)
 
 La etapa 5 vuelve a activa. K11/K12/K21 quedan `pending`: sus componentes existen, pero faltan criterios de seguridad, recuperación, teclado y consola en vivo. `STAGE5-CHUNK-SAFETY.md` sustituye las conclusiones anteriores de cierre; documenta CI41264504836 fallido, guardas corregidas, 1052 unitarias, 61 escenarios React distintos entre recorridos y 2 Vue, además de los casos concretos pendientes. No retirar ninguna herramienta de mundos aprobada ni pasar a etapa 6 todavía.
+
+## Revisión y recuperación de chunks (`91edfda`)
+
+`STAGE5-CHUNK-REVIEW.md` incorpora revisión/huella Native, rechazo obsoleto, backups/journal persistidos, sustitución por rename y restauración revisada tras errores parciales o recarga; preservación de sectores ajenos y coordenadas de cofres/ticks. Mapa con teclado/coordenadas, cola2/caché32 y liberación de bitmaps.1063unitarias,31React distintos+2Vue,52Axe0violaciones/88incomplete y9harness. CI previo41274791753 falló una aserción de mock lógico/físico; verificar el nuevo SHA. K11 sigue pending por autoridad/límites de progreso/worldgen y partidas externas; K12 por argv/herencia/cambios sin guardar; K21 por streaming/virtualización/recuperación. Etapa5 activa,6–9pendientes; sin publicación.

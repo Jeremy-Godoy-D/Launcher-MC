@@ -2,23 +2,22 @@
 
 ## Objetivo
 
-Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio/barra lateral. Modpacks usan recursos que ellos proporcionan vía sus metadatos; buscar en internet los recursos Vanilla/fallback, sin generar arte IA. Publicación prevista: v0.3.0-beta.1. Referencia: v0.2.0-beta.2.
+Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio/barra lateral. Todas las herramientas locales de mundos, incluida edición de chunks, confirmadas por el usuario. Modpacks con medios propios; Vanilla/fallback real de internet, sin imágenes IA. Objetivo v0.3.0-beta.1; producción actual v0.2.0-beta.2.
 
 ## Bloque actual
 
-**Etapa 5 reabierta y activa**. El cierre en `9733529` fue prematuro: CI41264504836 falló 2/1037 pruebas en las guardas de chunks (Vue; React cancelado). Fuente `55e1481` corrige autoridad física, registro Java, consulta de procesos que falla cerrada, locks/revalidación y backups verificados. También repara 21 localizadores ambiguos tras añadir atajos al resumen y matrices que no comprobaban tamaños/temas nativos correctamente. Ver `STAGE5-CHUNK-SAFETY.md`, que prevalece sobre las conclusiones de cierre anteriores.
+**Etapa5 activa**, K11/K12/K21 y gates mundos/ajustes/consola pending;6–9pending. Fuente `91edfda` implementa revisión Native de chunks por huella y rechazo obsoleto, backups persistidos/verificados, publicación sin truncar, recuperación ante fallo parcial y restauración revisada que conserva cambios posteriores. Mapa con teclado/coordenadas,2RPC pendientes,32bitmaps y liberación explícita. Conservar todas las herramientas locales aprobadas.
 
-Evidencia local: 1052 unitarias/104 archivos; tipos y lint sin errores (un aviso previo React); 61 escenarios React distintos aprobados entre recorridos, 2 Vue, 12 Axe sin violaciones/12 incompletos de contraste. El primer recorrido amplio terminó 59/61 por dos aserciones de reenfoque; las matrices corregidas recorren Tab real y pasaron 7/7, y herramientas 4/4 con restauración real del payload de un chunk. No sumar esas repeticiones como escenarios nuevos. Dist Vue restaurado. Fuente y pruebas no equivalen a partida real ni aceptación completa.
+`STAGE5-CHUNK-REVIEW.md`:1063unitarias/105archivos,31escenarios React distintos entre dos recorridos disjuntos y2Vue,52Axe seleccionados sin violaciones/88incomplete,9harness;tipos/lint/builds aprobados,E2E56diagnósticos base sin nuevos. La matriz de teclado70 añade comprobación de foco atrapado y scroll de cuerpo; no contar repeticiones como escenarios nuevos. Dist Vue restaurado. CI41274791753/157b2f3 falló1051/1052 por aserción del mock lógico/físico, ahora sustituida por el motor real/fixture canónica; revisar el CI de este bloque al subirlo.
 
-K11/K12/K21, `worlds-settings` y `console-isolation` vuelven a `pending`; etapa 6 vuelve a pendiente, etapas 7–9 pendientes. PR4 permanece borrador y producción/proxy no cambian. Dos modificaciones DOMPurify (`launcher/xmcl-react-ui/package.json`, `launcher/pnpm-lock.yaml`) estaban presentes al retomar, siguen WIP fuera de commits; el lock incluye churn no relacionado que debe evitarse al conectar catálogo.
+PR4 borrador, sin publicación ni cambio de versión. DOMPurify package.json/lock siguen WIP fuera de commits (evitar churn al conectar catálogo). Microsoft pospuesto; proxy y datos habituales intactos. No usar DevTools CLI.
 
 ## Siguiente acción
 
-1. Verificar CI del nuevo bloque sobre su SHA exacto; no asumir verde ni reiniciar una ejecución viva. El último confirmado al retomar fue 41264504836 fallido.
-2. Completar K11: revisión Native de regiones con huellas/cambios obsoletos, autoridad y límites de copiar/leer/renderizar, NBT/descompresión acotados y recuperación/publicación de MCA ante fallos. Revisar enlaces físicos y reubicación de entidades de bloque; el helper heredado advierte pérdida al mover terreno. Mantener todas las herramientas locales confirmadas por el usuario.
-3. Acotar mapa (cola, caché, `ImageBitmap.close`, identidad de mundo/altura y resultados obsoletos) y habilitar navegación/selección por teclado. En ajustes, conservar argumentos con espacios/comillas y cambios sin guardar al navegar/cambiar instancia, más herencia real. K12 sigue pendiente.
-4. Validar y completar K21: streaming aislado de dos procesos, fragmentos parciales, lotes/virtualización, pausa al revisar logs y volver al final, copiar/exportar con recuperación. Las pruebas existentes de archivos y toolbar no certifican ese recorrido.
-5. Cerrar 5 solo con sus criterios satisfechos. Entonces continuar 6: catálogo público Modrinth/CurseForge por proxy, filtros/fichas saneadas, historial/scroll/compatibilidad/instalación y fallos independientes; después 7–9. Mantener `ANALISIS_ARQUITECTURA.md` intacto y fuera de commits.
+1. Verificar nuevo CI sobre SHA exacto; registrar hechos sin declarar verde por adelantado ni reintentar uno vivo.
+2. K11: autoridad/límites de getWorldGenSettings/getInstanceSaveProgress, sus lectores/parseos y raíces de instancia; bloqueo externo session.lock además de procesos administrados. No repetir el motor de revisión/recuperación ya probado. Mantener explícito alcance inline1/2/3 y entidades/POI/mods separados; no prometer mover lo que el payload no contiene. Auditoría IPC de escrituras legacy en8.
+3. K12: argumentos con espacios/comillas sin join/split destructivo, vacío explícito vs herencia, cambios sin guardar al navegar/cambiar instancia y conflictos. K21: streaming real aislado de dos procesos, fragmentos, lotes, virtualización y scroll/copia/exportación con recuperación.
+4. Cerrar5 solo al cumplir criterios. Luego6 catálogo público Modrinth/CurseForge por proxy y7–9. Mantener ANALISIS_ARQUITECTURA.md intacto y fuera de commits. No tocar temporales/junctions protegidos ni producir nuevas publicaciones mientras falten gates.
 
 ## Restricciones y hechos que no deben perderse
 
