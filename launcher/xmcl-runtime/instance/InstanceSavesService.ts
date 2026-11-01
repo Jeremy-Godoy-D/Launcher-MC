@@ -380,8 +380,14 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
         if (this.#saveWatchers.get(path) === control) this.#saveWatchers.delete(path)
         void control.pause()
       }
-      this.#saveWatchers.set(path, control)
-      control.resume()
+      try {
+        await lock.runExclusive(async () => {
+          await this.#javaInstance(path)
+          await worldsLocation(path, this.getPath())
+          this.#saveWatchers.set(path, control)
+          control.resume()
+        })
+      } catch (error) { dispose(); throw error }
 
       return [state, dispose, revalidate]
     })

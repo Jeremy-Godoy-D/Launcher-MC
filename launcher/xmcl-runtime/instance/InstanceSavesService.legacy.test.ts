@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { Mutex } from 'async-mutex'
+import { FSWatcher } from 'chokidar'
+import { LockKey } from '@xmcl/runtime-api'
 import { lstat, mkdir, mkdtemp, readFile, readdir, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { open, readAllEntries, readEntry } from '@xmcl/unzip'
@@ -364,4 +366,32 @@ it.each([false, true])('retains original bytes after link publication fails, pre
     expect(await readFile(join(source, 'saves/Alpha/level.dat'), 'utf8')).toBe('original-world')
   }
   expect(await readFile(join(root, 'saves/Alpha/level.dat'), 'utf8')).toBe('original-world')
+})
+
+it('waits for the instance mutation before starting a new watcher and disposes the observer', async () => {
+  await makeReactWorld(source, 'Alpha')
+  const app = (service as any).app
+  const register = vi.fn(async (_key, factory) => factory({ defineAsyncOperation: (fn: any) => fn }))
+  app.registry.get = async () => ({ registerOrGet: register, on: vi.fn(), off: vi.fn(), isParked: () => false })
+  ;(service as any).warn = vi.fn()
+  const add = vi.spyOn(FSWatcher.prototype, 'add'), unlock = await app.mutex.of(LockKey.instance(source)).acquire()
+  const pending = service.watch(source)
+  await vi.waitFor(() => expect(register).toHaveBeenCalled())
+  expect(add).not.toHaveBeenCalled()
+  unlock()
+  const [, dispose] = await pending as any
+  expect(add).toHaveBeenCalledWith(join(source, 'saves'))
+  const watcher = add.mock.results[0].value as FSWatcher
+  dispose(); await watcher.close()
+})
+
+it('removes the launch listener if a queued watcher can no longer initialize', async () => {
+  const app = (service as any).app, off = vi.fn()
+  const register = vi.fn(async (_key, factory) => factory({ defineAsyncOperation: (fn: any) => fn }))
+  app.registry.get = async () => ({ registerOrGet: register, on: vi.fn(), off, isParked: () => false })
+  const unlock = await app.mutex.of(LockKey.instance(source)).acquire(), pending = service.watch(source)
+  await vi.waitFor(() => expect(register).toHaveBeenCalled())
+  instances = []; unlock()
+  await expect(pending).rejects.toHaveProperty('name', 'InstanceNotFoundError')
+  expect(off).toHaveBeenCalledWith('minecraft-exit', expect.any(Function))
 })
