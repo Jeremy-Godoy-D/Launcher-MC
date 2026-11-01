@@ -271,3 +271,7 @@ STAGE5-PROGRESS-READERS conserva avances/misiones/estadísticas y recursos local
 ## Sesión externa de mundos en Windows (`08578db`)
 
 STAGE5-SESSION-LOCK incorpora LockFile nativo compatible con Java FileChannel durante cambios revisados de archivos/chunks, comprobación de identidad y liberación al fallar. Preview sin crear control, importación externa de solo lectura y retirada protegida por rename Windows ante una sesión que aparece después de liberar el handle.1099unitarias/111archivos,45focales,31React+2Vue,52Axe0violaciones/88incomplete y9harness. CI previo41285066451/dcb31c5:Vue success,React failure por36 y72flaky;194pass,1failed,1flaky,2skipped. Corregir activación/foco y verificar el nuevo SHA. K11 sigue pending por aceptación integral/auditoría IPC legacy y escritores ajenos aNIO;K12/K21 pending,etapa5 activa,6–9pendientes,sin publicación.
+
+## Activación de teclado en CI (`fe45be7`)
+
+STAGE5-CI-KEYBOARD-ACTIVATION registra CI41285066451/dcb31c5 (194pass,1failed,1flaky,2skipped;Vue success/React failure), contextos descargados y corrección de fixtures36/72 mediante el helper Native y espera de disponibilidad. Mantiene aserciones de foco/Tab/retorno,6React sin reintentos,12Axe0violaciones/12incomplete,E2E56base sin nuevos. Verificar nuevo CI; esta corrección de pruebas no cierra K11/K12/K21 ni etapa5. Producción/proxy sin cambios,Microsoft pospuesto.
