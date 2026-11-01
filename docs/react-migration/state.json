@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa; 2b1c02b protege lectores secundarios de progreso, JSON/SNBT/JAR/idiomas/versiones/texturas y recuperacion UI.1092unitarias/110archivos,33focales,13React+2Vue,20Axe0violaciones/24incomplete,9harness. CI41279948321/2525449 y41281063903/b23a888 success Vue+React; verificar nuevo SHA tras push. K11: session.lock externo para escrituras; despues K12 argv exactos/herencia/cambios sin guardar y K21 streaming/virtualizacion. K11/K12/K21 y gates pertinentes pending;6–9pending. Ver STAGE5-PROGRESS-READERS; no repetir chunks ni lectores ya revisados. Vue default/dist,PR4borrador,produccion/proxy intactos,Microsoft pospuesto;DOMPurify WIP sin commit.",
+  "nextAction": "Etapa5 activa;08578db protege cambios revisados de mundos con LockFile Windows/JavaNIO,verifica identidad y libera handles,incluida carrera de retirada.1099unitarias/111archivos,45focales,31React+2Vue,52Axe0violaciones/88incomplete,9harness. CI41285066451/dcb31c5 fallo React:36 panel no abierto con Enter y72 foco inactivo flaky;194pass,1failed,1flaky,2skipped;Vue success. Corregir activacion nativa sin quitar aserciones y repetir afectados;artefacto descargado en stage5-progress-readers-ci-download. Despues K12 argv/herencia/cambios sin guardar yK21 streaming/virtualizacion. K11 pending por aceptacion integral/auditoria IPC legacy y escritores sin protocoloNIO;5 activa,6–9pending. Vue default/dist,PR4borrador,produccion/proxy intactos,Microsoft pospuesto,DOMPurify WIP sin commit.",
   "stages": [
     {
       "id": 0,
@@ -821,9 +821,13 @@
             {
               "path": "docs/react-migration/STAGE5-PROGRESS-READERS.md",
               "sha256": "8904d91eeaddcd12d51fbf01e4a8c7fd50dec7eae37c49e276f81cf33b7d5f9e"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-SESSION-LOCK.md",
+              "sha256": "0dddc6e49822707065ea579209dabf3b0e5c642cd849b79a0deb2ced6f811c4e"
             }
           ],
-          "note": "2b1c02b protege lectores secundarios de progreso/JAR/JSON/SNBT/versiones/idiomas/modelos y recuperacion UI;1092unitarias,13React+2Vue,20Axe0violaciones/24incomplete. K11 sigue pending por bloqueo real session.lock externo y auditoria IPC posterior; K12 por argv/herencia/cambios sin guardar. Ver STAGE5-PROGRESS-READERS. Etapa5 activa;no cerrar con evidencia parcial."
+          "note": "08578db guarda cambios revisados de mundos mediante LockFile Windows y JavaNIO real,con identidad/CAS/backups/liberacion y retirada que falla ante una carrera externa.1099unitarias,31React+2Vue,52Axe0violaciones/88incomplete. K11 pendiente por aceptacion integral/auditoria IPC legacy y protocolos de escritores noNIO;K12 argv/herencia/cambios sin guardar. CI anterior41285066451 fallo36 y72 flaky:corregir activacion antes de cierre. Ver STAGE5-SESSION-LOCK;etapa5 activa."
         },
         {
           "id": "console-isolation",
