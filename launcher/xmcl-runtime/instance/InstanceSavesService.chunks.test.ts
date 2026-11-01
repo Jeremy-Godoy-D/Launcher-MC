@@ -42,9 +42,11 @@ describe('InstanceSavesService chunk operations and safety', () => {
   let locks: Map<string, Mutex>
   let mutexOf: ReturnType<typeof vi.fn<(key: string) => Mutex>>
   let acquireWorldLock: ReturnType<typeof vi.fn>
+  let activeCommit: Promise<unknown> | undefined
 
   beforeEach(async () => {
     vi.clearAllMocks()
+    activeCommit = undefined
     testRoot = await realpath(await mkdtemp(join(tmpdir(), 'xmcl-chunks-test-')))
     instancePath = join(testRoot, 'instance-a')
     savePath = join(instancePath, 'saves', 'WorldOne')
@@ -76,9 +78,11 @@ describe('InstanceSavesService chunk operations and safety', () => {
   })
 
   afterEach(async () => {
-    expect(dirname(resolve(testRoot))).toBe(await realpath(tmpdir()))
-    expect(testRoot).toContain('xmcl-chunks-test-')
-    await rm(testRoot, { recursive: true, force: true })
+    const ownedRoot = testRoot, commit = activeCommit
+    await commit?.catch(() => {})
+    expect(dirname(resolve(ownedRoot))).toBe(await realpath(tmpdir()))
+    expect(ownedRoot).toContain('xmcl-chunks-test-')
+    await rm(ownedRoot, { recursive: true, force: true })
   })
 
   it('does not create a session control for a stale chunk review', async () => {
@@ -188,10 +192,11 @@ describe('InstanceSavesService chunk operations and safety', () => {
     const world = join(own, 'saves', 'AliasWorld'); await mkdir(world, { recursive: true }); await writeFile(join(world, 'level.dat'), 'metadata')
     await writeSaveChunks(world, 'minecraft:overworld', [await payload()]); await symlink(physical, alias, 'junction')
     instances = [{ path: join(alias, 'instance'), edition: 'java' }]
-    await service.deleteSaveChunks({ savePath: join(alias, 'instance/saves/AliasWorld'), dimension: 'minecraft:overworld', chunks: [{ chunkX: 0, chunkZ: 0 }] })
+    activeCommit = service.deleteSaveChunks({ savePath: join(alias, 'instance/saves/AliasWorld'), dimension: 'minecraft:overworld', chunks: [{ chunkX: 0, chunkZ: 0 }] })
+    await activeCommit
     expect(await readSaveChunks(world, 'minecraft:overworld', [{ chunkX: 0, chunkZ: 0 }])).toEqual([])
     expect((await service.getSaveChunkBackups(world)).entries).toHaveLength(1)
-  })
+  }, 30000)
 
   it('requires world authority for copying and rejects a changed review before creating backups', async () => {
     const foreign = join(testRoot, 'foreign'); await mkdir(foreign); await writeFile(join(foreign, 'level.dat'), 'metadata')
@@ -243,11 +248,12 @@ describe('InstanceSavesService chunk operations and safety', () => {
   })
 
   it('creates backup in .backups/world-chunks-* and executes deleteSaveChunks when not running', async () => {
-    await service.deleteSaveChunks({
+    activeCommit = service.deleteSaveChunks({
       savePath,
       dimension: 'minecraft:overworld',
       chunks: [{ chunkX: 1, chunkZ: 1 }],
     })
+    await activeCommit
 
     expect(applySaveChunkPlan).toHaveBeenCalledOnce()
     expect(await readSaveChunks(savePath, 'minecraft:overworld', [{ chunkX: 1, chunkZ: 1 }])).toEqual([])
@@ -258,7 +264,8 @@ describe('InstanceSavesService chunk operations and safety', () => {
     const backupFolders = await readdir(backupsDir)
     expect(backupFolders.length).toBeGreaterThan(0)
     expect(backupFolders[0]).toMatch(/^world-chunks-/)
-  })
+    expect(await service.getSaveChunkBackups(savePath)).toMatchObject({ entries: [{ state: 'complete' }] })
+  }, 30000) // Real backup writes and fsync can exceed the 5 s unit budget on hosted Windows.
 
   it('rejects pasteSaveChunks if the instance is running', async () => {
     processes = [{ options: { gameDirectory: instancePath } }]
@@ -273,13 +280,14 @@ describe('InstanceSavesService chunk operations and safety', () => {
   })
 
   it('creates backup and executes pasteSaveChunks when not running', async () => {
-    await service.pasteSaveChunks({
+    activeCommit = service.pasteSaveChunks({
       savePath,
       dimension: 'minecraft:overworld',
       chunks: [await payload()],
       offsetX: 5,
       offsetZ: 5,
     })
+    await activeCommit
 
     expect(applySaveChunkPlan).toHaveBeenCalledOnce()
     expect(await readSaveChunks(savePath, 'minecraft:overworld', [{ chunkX: 5, chunkZ: 5 }])).toHaveLength(1)
@@ -287,5 +295,6 @@ describe('InstanceSavesService chunk operations and safety', () => {
     const { readdir } = await import('fs-extra')
     const backupFolders = await readdir(backupsDir)
     expect(backupFolders.length).toBeGreaterThan(0)
-  })
+    expect(await service.getSaveChunkBackups(savePath)).toMatchObject({ entries: [{ state: 'complete' }] })
+  }, 30000)
 })
