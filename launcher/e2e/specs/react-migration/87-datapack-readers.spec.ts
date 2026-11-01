@@ -96,7 +96,8 @@ test('Native worlds and datapacks observers survive shared-folder replacement an
     expect(await readFile(join(launcher.gameDataPath, 'saves/Alpha/datapacks/Pack.zip'))).toEqual(await readFile(join(source, 'resourcepacks/Pack.zip')))
   } finally {
     await closeWatch(page)
-    await page.evaluate(async () => { await (window as any).__readerWorlds.unref(); delete (window as any).__readerWorlds })
+    // Vue may own this window's worlds state; closing the fixture releases the shared window reference.
+    await page.evaluate(() => { delete (window as any).__readerWorlds })
   }
 })
 
