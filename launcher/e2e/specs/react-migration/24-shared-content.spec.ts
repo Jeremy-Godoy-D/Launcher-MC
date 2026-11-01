@@ -90,7 +90,7 @@ test('native shared folders and hard-linked options copy independently and expor
   await expect(page.getByTestId('instance-operations').getByRole('status')).toHaveText('Copia guardada.')
   const exported = await contents((await page.getByTestId('export-result').textContent())!)
   expect(exported['overrides/saves/World/level.dat']).toBe('shared-world')
-  expect(exported).not.toHaveProperty('overrides/saves/World/session.lock')
+  expect(Object.keys(exported)).not.toContain('overrides/saves/World/session.lock')
   expect(exported['overrides/resourcepacks/pack.zip']).toBe('shared-pack')
   expect(exported['overrides/shaderpacks/shader.zip']).toBe('shared-shader')
   expect(exported['overrides/options.txt']).toBe('shared-options'); expect(exported['overrides/servers.dat']).toBe('shared-servers')
