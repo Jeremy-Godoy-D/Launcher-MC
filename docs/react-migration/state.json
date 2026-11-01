@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa5 activa;f2220b5 conserva argv exactos JVM/MC en editor por campos y lanzamiento,con [] distinto de herencia.1101unitarias/111archivos,35focales,145React/lanzamiento finales,5React+2Vue,8Axe0violaciones/8incomplete,9harness. CI41287115212/cfa9bfc success Vue+React:200main+1Strict+8Vue,2proveedores opt-in omitidos,0flaky;verificar nuevo SHA tras push. Continuar K12 flags con herencia y memoria auto/false,evitar perdida de resolution.monitor/server.name,borradores/navegacion/seleccion/conflictos yvalidacion Native especifica;no repetir ArgumentEditor ni join/split. Despues K21 streaming/virtualizacion. K11 aceptacion integral/IPC legacy/escritores sinNIO pending;5 activa,6–9pending. Ver STAGE5-INSTANCE-ARGUMENTS. Vue default/dist,PR4borrador,produccion/proxy intactos,Microsoft pospuesto,DOMPurify WIP fuera de commits.",
+  "nextAction": "Etapa5 activa;fba696d/1221d41 protegen borradores,herencia,flags/RAM0/auto/false,monitor/name yguardado revisado.1130unitarias/114archivos,25React distintos(8 finales tras0),2Vue,16Axe0violaciones/20incomplete,9harness;tipos/lintaprobados,E2E56base,distVue restaurado. K12 aceptar herencia con globales no predeterminados/opciones resueltas,revisar incomplete Radix/contraste yCI nuevo;no rehacer formulario/argv. CI41289148508/97f2ed9 success ambos(202main+1Strict+8Vue,2opt-in omitidos);verificar nuevo SHA sin reiniciar. Despues K21 streaming/virtualizacion;K11 aceptacion integral/auditoria IPC legacy/escritores sinNIO pendientes. Todas las herramientas locales Mundos conservadas;5 activa,6–9pending,PR4borrador,produccion/proxy intactos,Microsoft pospuesto,DOMPurify WIP fuera de commits. Ver STAGE5-SETTINGS-DRAFTS.",
   "stages": [
     {
       "id": 0,
@@ -837,9 +837,13 @@
             {
               "path": "docs/react-migration/STAGE5-INSTANCE-ARGUMENTS.md",
               "sha256": "a0f2def800fc3e3129b43e5aedc2161a3afb4d198c6fbb93d6e0456d5f73b132"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-SETTINGS-DRAFTS.md",
+              "sha256": "61743d85749e07df624ff499c5f7975c1b2e41b0373c15cfecb8491648cffa50"
             }
           ],
-          "note": "f2220b5 conserva argv exactos,[] yherencia enUI/disco/lanzamiento;1101unitarias,5React+2Vue,8Axe0violaciones/8incomplete. K12 pending por flags/RAM heredados,borradores/navegacion/seleccion/conflictos/validacion Native;K11 por aceptacion integral/auditoria IPC legacy y escritores sinNIO. CI41287115212/cfa9bfc paso ambos jobs;verificar nuevo SHA. Ver STAGE5-INSTANCE-ARGUMENTS;etapa5 activa."
+          "note": "fba696d/1221d41 conservan borradores/herencia/flags/RAM0/auto/false/nested yguardan conCASvalidado/rollback.1130unitarias,25Reactdistintos(8finales),2Vue,16Axe0violaciones/20incomplete. K12 sigue pending por herencia global integrada/incompletos/CI nuevo;K11 por aceptacion integral/IPClegacy/escritores sinNIO. CI previo41289148508/97f2ed9 success ambos. Ver STAGE5-SETTINGS-DRAFTS;etapa5activa."
         },
         {
           "id": "console-isolation",
@@ -991,5 +995,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-01T06:28:54.216177+00:00"
+  "updatedAt": "2026-11-01T09:39:28.045090+00:00"
 }
