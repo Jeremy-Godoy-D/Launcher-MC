@@ -52,6 +52,7 @@ import { applySaveChunkPlan, listSaveChunkBackups, planSaveChunkChanges } from '
  */
 @ExposeServiceKey(InstanceSavesServiceKey)
 export class InstanceSavesService extends AbstractService implements IInstanceSavesService {
+  #saveWatchers = new Map<string, { pause(): Promise<void>; resume(): void }>()
   constructor(@Inject(LauncherAppKey) app: LauncherApp,
     @Inject(InstanceService) private instanceService: InstanceService,
     @Inject(kResourceManager) resourceManager: ResourceManager,
@@ -275,7 +276,8 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
    * @param path
    */
   async watch(path: string) {
-    requireString(path)
+    await this.#javaInstance(path)
+    await worldsLocation(path, this.getPath())
     const lock = this.mutex.of(LockKey.instance(path))
 
     const stateManager = await this.app.registry.get(ServiceStateManager)
@@ -305,7 +307,8 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
         }))
       })
 
-      const watcher = new FSWatcher({
+      let watcher: FSWatcher | undefined, disposed = false
+      const startWatcher = () => new FSWatcher({
         awaitWriteFinish: true,
         ignorePermissionErrors: true,
         followSymlinks: true,
@@ -324,8 +327,6 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
           return false
         },
       })
-
-      watcher
         .on('error', (e) => {
           if ((e as any).code === 'EBUSY') {
             return
@@ -365,10 +366,22 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
         state.instanceSaves(metadatas.filter(isNonnull))
       }
 
-      const dispose = () => {
-        launchService.off('minecraft-exit', onExit)
-        watcher?.close()
+      const control = {
+        pause: async () => { const old = watcher; watcher = undefined; await old?.close() },
+        resume: () => {
+          if (disposed || watcher) return
+          watcher = startWatcher()
+          void revalidate().catch(error => this.warn(error))
+        },
       }
+      const dispose = () => {
+        disposed = true
+        launchService.off('minecraft-exit', onExit)
+        if (this.#saveWatchers.get(path) === control) this.#saveWatchers.delete(path)
+        void control.pause()
+      }
+      this.#saveWatchers.set(path, control)
+      control.resume()
 
       return [state, dispose, revalidate]
     })
@@ -549,8 +562,11 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     const global = (await worldsLocation(this.getPath(), this.getPath())).root
     const original = await lstat(local, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
     if (!linked && !original?.isSymbolicLink()) return
-    const guards = await this.#worldFolderLocks(instancePath, true)
+    const observer = this.#saveWatchers.get(instancePath)
+    await observer?.pause()
+    let guards: (WorldLock & { releaseLocal(directory: string): void }) | undefined
     try {
+      guards = await this.#worldFolderLocks(instancePath, true)
       await guards.verify()
       for (const original of originals) if ((await previewWorldFiles(original.operation, this.getPath())).snapshot !== original.snapshot) throw new AnyError('WorldFilesChangedError')
       await assertInstallDirectory(await realpath(this.getPath()), global)
@@ -578,7 +594,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
         }
         throw Object.assign(new Error('World sharing incomplete; original folder retained', { cause }), { name: 'WorldSharingIncompleteError', backup })
       }
-    } finally { guards.release() }
+    } finally { guards?.release(); observer?.resume() }
   }
 
   async isSaveLinked(instancePath: string) {

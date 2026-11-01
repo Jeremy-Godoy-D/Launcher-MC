@@ -19,7 +19,10 @@ async function instances(page: Page) {
   })
 }
 async function call(page: Page, method: string, ...args: any[]) {
-  return page.evaluate(({ method, args }) => (window as any).serviceChannels.open('InstanceSavesService').call(method, ...args), { method, args })
+  return page.evaluate(async ({ method, args }) => {
+    try { return await (window as any).serviceChannels.open('InstanceSavesService').call(method, ...args) }
+    catch (error) { throw new Error(`${method}: ${JSON.stringify(error)}`) }
+  }, { method, args })
 }
 async function rejected(page: Page, method: string, ...args: any[]) {
   return page.evaluate(async ({ method, args }) => {
@@ -165,9 +168,11 @@ test('legacy shared-world activation respects a real Java session and preserves 
   expect(await readFile(join(shared, 'level.dat'))).toEqual(bytes)
 })
 
-test('sharing worlds retains collision contents, originals and notes while disconnecting preserves the depot', async ({ launcher }) => {
+test('sharing worlds retains collision contents, originals and notes while disconnecting preserves the depot', async ({ launcher }, testInfo) => {
   const page = launcher.main, [instance] = await instances(page)
   const original = await makeReactWorld(instance, 'Alpha', 'LOCAL ALPHA'), originalBytes = await readFile(join(original, 'level.dat'))
+  await call(page, 'watch', instance)
+  await expect.poll(() => launcher.app.evaluate(() => ((process.report.getReport() as any).libuv ?? []).some((handle: any) => handle.type === 'fs_event' && typeof handle.filename === 'string' && handle.filename.replace(/\\/g, '/').endsWith('/Legacy source/saves')))).toBe(true)
   const occupied = await makeReactWorld(launcher.gameDataPath, 'Alpha', 'DEPOT ALPHA'), occupiedBytes = await readFile(join(occupied, 'level.dat'))
   await call(page, 'shareSave', { instancePath: instance, saveName: 'Alpha' })
   await expect(lstat(original)).rejects.toHaveProperty('code', 'ENOENT')
@@ -180,6 +185,8 @@ test('sharing worlds retains collision contents, originals and notes while disco
   await makeReactWorld(launcher.gameDataPath, 'Beta', 'DEPOT BETA'); await writeFile(join(instance, 'saves/.note'), 'LOCAL NOTE')
   await symlink(occupied, join(instance, 'saves/Owned alias'), 'junction')
   const folderID = (await lstat(join(instance, 'saves'), { bigint: true })).ino
+  const watches = await launcher.app.evaluate(() => ((process.report.getReport() as any).libuv ?? []).filter((handle: any) => handle.type === 'fs_event').map((handle: any) => ({ type: handle.type, filename: handle.filename, is_active: handle.is_active })))
+  await writeFile(testInfo.outputPath('folder-watches.json'), JSON.stringify(watches, null, 2))
   await call(page, 'linkSharedSave', instance)
   expect(await call(page, 'isSaveLinked', instance)).toBe(true)
   expect((await lstat(join(instance, 'saves'))).isSymbolicLink()).toBe(true)
