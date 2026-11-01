@@ -1,5 +1,5 @@
 import { PresentationServiceKey } from '@xmcl/runtime-api/src/services/PresentationService'
-import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { InstanceServiceKey, InstanceState } from '@xmcl/runtime-api/src/services/InstanceService'
 import { useService, useSharedStateStore, type StateDescriptor } from '../../runtime'
 import { StoredSelection } from '../accounts/selection'
@@ -20,7 +20,9 @@ function useLibraryState() {
   const service = useService(InstanceServiceKey)
   const media = useService(PresentationServiceKey)
   const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
-  const path = useSyncExternalStore(selection.subscribe, selection.getSnapshot, selection.getSnapshot)
+  const storedPath = useSyncExternalStore(selection.subscribe, selection.getSnapshot, selection.getSnapshot)
+  const [path, setPath] = useState(storedPath)
+  const selectionGuard = useRef<((next: string, proceed: () => void) => boolean) | null>(null)
   const instances = useMemo(() => javaInstances(snapshot.data?.instances ?? []), [snapshot.data])
   const current = selectedInstance(instances, path)
   const home = useMemo(() => homeOrder(instances, current?.path || ''), [instances, current?.path])
@@ -36,15 +38,27 @@ function useLibraryState() {
     await service.updateInstanceGroups(previous, action(previous))
   }
   useEffect(() => {
-    if (snapshot.status === 'ready' && !path && current) selection.set(current.path)
+    if (snapshot.status === 'ready' && !path && current) { selection.set(current.path); setPath(current.path) }
   }, [snapshot.status, path, current?.path])
-  const select = (nextPath: string) => {
+  useEffect(() => {
+    if (storedPath === path) return
+    const proceed = () => setPath(storedPath)
+    if (!selectionGuard.current || selectionGuard.current(storedPath, proceed)) proceed()
+  }, [storedPath, path])
+  const select = (nextPath: string, after?: () => void) => {
     const latest = store.getSnapshot()
     if (latest.status !== 'ready' || !latest.data?.instances.some(instance => instance.path === nextPath && instance.edition !== 'bedrock')) return false
-    selection.set(nextPath)
-    return true
+    const proceed = () => {
+      const latest = store.getSnapshot()
+      if (latest.status !== 'ready' || !latest.data?.instances.some(instance => instance.path === nextPath && instance.edition !== 'bedrock')) return false
+      setPath(nextPath); selection.set(nextPath); after?.(); return true
+    }
+    if (selectionGuard.current && !selectionGuard.current(nextPath, proceed)) return false
+    return proceed()
   }
-  return { ...snapshot, media, instances, ordered, home, current, path, select, retry: store.revalidate, storageError: selection.failed() || sortSelection.failed(), sort,
+  return { ...snapshot, media, instances, ordered, home, current, path, select, selectionGuard,
+    readInstance: (path: string) => store.getSnapshot().data?.instances.find(instance => instance.path === path && instance.edition !== 'bedrock'),
+    retry: store.revalidate, storageError: selection.failed() || sortSelection.failed(), sort,
     setSort: (value: string) => { if (['manual', 'name', 'recent'].includes(value)) sortSelection.set(value) },
     assignGroup: (path: string, group: string, name: string) => arrange(path, groups => assignGroup(groups, path, group, name, createOperationId())),
     move: (path: string, direction: -1 | 1) => arrange(path, groups => moveInGroups(groups, instances, path, direction)),

@@ -22,6 +22,8 @@ import { AnyError, isSystemError } from '@xmcl/utils'
 import filenamify from 'filenamify'
 import { fileTypeFromBuffer } from 'file-type'
 import { createHash } from 'node:crypto'
+import { isDeepStrictEqual } from 'node:util'
+import { instanceSettingsSnapshot, instanceSettingsEdit, instanceSettingsKeys, instanceSettingsReviewKeys, parseInstanceSettingsChanges, parseInstanceSettingsSnapshot } from '@xmcl/runtime-api/src/util/instanceSettings'
 import { existsSync } from 'fs'
 import { ensureDir, lstat, mkdir, realpath, readdir, readlink, readJson, rename, rm, writeJson } from 'fs-extra'
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'path'
@@ -710,6 +712,45 @@ export class InstanceService extends StatefulService<InstanceState> implements I
     return this.#editInstanceFields(options)
   }
 
+  async editInstanceSettings(options: Parameters<IInstanceService['editInstanceSettings']>[0]) {
+    requireObject(options); requireString(options.instancePath)
+    if (!isAbsolute(options.instancePath)) throw new AnyError('InstanceNotFoundError')
+    const expected = parseInstanceSettingsSnapshot(options.expected), changes = parseInstanceSettingsChanges(options.changes), keys = instanceSettingsReviewKeys(changes)
+    await this.initialize()
+    return this.mutex.of(LockKey.instance(options.instancePath)).runExclusive(async () => {
+      const current = () => {
+        const instance = this.state.all[options.instancePath]
+        if (!instance || instance.edition !== 'java') throw new AnyError('InstanceNotFoundError')
+        const snapshot = instanceSettingsSnapshot(instance)
+        if (keys.some(key => !isDeepStrictEqual(snapshot[key], expected[key]))) throw new AnyError('InstanceSettingsChanged')
+        const next = { ...snapshot, ...changes }
+        if (next.assignMemory === true && next.minMemory !== null && next.maxMemory !== null && next.minMemory > next.maxMemory) throw Object.assign(new AnyError('InstanceSettingsInvalid'), { field: 'minMemory' })
+        return instance
+      }
+      current()
+      const { LaunchService } = await import('../launch/LaunchService')
+      const processes = await (await this.app.registry.get(LaunchService)).getGameProcesses()
+      const root = await realpath(options.instancePath)
+      const active = await Promise.all(processes.map(process => realpath(process.options.gameDirectory).catch(error => { if (error.code !== 'ENOENT') throw error; return process.options.gameDirectory })))
+      if (active.some(path => relative(root, path) === '')) throw new AnyError('InstanceRunningError')
+      const before = instanceSettingsSnapshot(current())
+      if (!Object.keys(changes).length) return before
+      this.state.instanceEdit({ path: options.instancePath, ...instanceSettingsEdit(changes) } as Parameters<InstanceState['instanceEdit']>[0])
+      try { await this.#instanceWrites.get(options.instancePath) }
+      catch {
+        const instance = this.state.all[options.instancePath]
+        if (instance) {
+          const now = instanceSettingsSnapshot(instance), applied = { ...before, ...changes }
+          const rollback = Object.fromEntries(Object.keys(changes).filter(key => isDeepStrictEqual(Reflect.get(now, key), Reflect.get(applied, key))).map(key => [key, Reflect.get(before, key)]))
+          this.state.instanceEdit({ path: options.instancePath, ...instanceSettingsEdit(rollback) } as Parameters<InstanceState['instanceEdit']>[0])
+          await this.#instanceWrites.get(options.instancePath)?.catch(() => {})
+        }
+        throw new AnyError('InstanceSettingsWriteFailed')
+      }
+      return instanceSettingsSnapshot(this.state.all[options.instancePath])
+    })
+  }
+
   async #editInstanceFields(options: Parameters<IInstanceService['editInstance']>[0]) {
     const instancePath = options.instancePath
 
@@ -738,6 +779,9 @@ export class InstanceService extends StatefulService<InstanceState> implements I
       }
     }
 
+    const settingsKeys = instanceSettingsReviewKeys(Object.fromEntries(instanceSettingsKeys.filter(key => Object.hasOwn(options, key)).map(key => [key, null])))
+    const settingsBefore = settingsKeys.length ? instanceSettingsSnapshot(state) : undefined
+
     if (options.name) {
       if (this.isUnderManaged(instancePath)) {
         const newPath = join(dirname(instancePath), options.name)
@@ -763,6 +807,12 @@ export class InstanceService extends StatefulService<InstanceState> implements I
 
     if (Object.keys(result).length > 0) {
       checkMetadata()
+      // Legacy callers can await icon processing without the reviewed-settings mutex.
+      if (settingsBefore) {
+        const current = this.state.all[instancePath]
+        const latest = current && instanceSettingsSnapshot(current)
+        if (!latest || settingsKeys.some(key => !isDeepStrictEqual(latest[key], settingsBefore[key]))) throw new AnyError('InstanceSettingsChanged')
+      }
     this.log(`Modified instance ${instancePath}`)
       // A reset-to-global field is represented as `undefined` in `result`.
       // The mutation payload is broadcast to renderer processes over Electron

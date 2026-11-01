@@ -97,8 +97,8 @@ test('instance base settings configures memory, JVM, resolution and server with 
   await resHeight.fill('720')
 
   const resFullscreen = settingsSec.getByTestId('setting-resolution-fullscreen')
-  await resFullscreen.check()
-  await expect(resFullscreen).toBeChecked()
+  await resFullscreen.selectOption('enabled')
+  await expect(resFullscreen).toHaveValue('enabled')
 
   // Set quick play server
   const srvHost = settingsSec.getByTestId('setting-server-host')
@@ -109,10 +109,10 @@ test('instance base settings configures memory, JVM, resolution and server with 
 
   // Set launch flags
   const fastLaunch = settingsSec.getByTestId('setting-fast-launch')
-  await fastLaunch.check()
+  await fastLaunch.selectOption('enabled')
 
   const hideLauncher = settingsSec.getByTestId('setting-hide-launcher')
-  await hideLauncher.check()
+  await hideLauncher.selectOption('enabled')
 
   // Save changes
   const saveBtn = settingsSec.getByTestId('setting-save-btn')
@@ -136,6 +136,7 @@ test('instance base settings configures memory, JVM, resolution and server with 
   // Test "Restablecer a valores globales"
   const resetBtn = settingsSec.getByTestId('setting-reset-btn')
   await resetBtn.click()
+  await page.getByTestId('settings-reset-confirm').click()
 
   await expect(settingsSec.getByRole('status')).toContainText('Ajustes restablecidos a los valores globales')
 
@@ -147,8 +148,8 @@ test('instance base settings configures memory, JVM, resolution and server with 
   expect(resetData.vmOptions).toBeUndefined()
   expect(resetData.resolution).toBeUndefined()
   expect(resetData.server).toBeUndefined()
-  expect(resetData.fastLaunch).toBe(false)
-  expect(resetData.hideLauncher).toBe(false)
+  expect(resetData.fastLaunch).toBeUndefined()
+  expect(resetData.hideLauncher).toBeUndefined()
 })
 
 test('instance settings maintain accessibility and responsiveness across theme/size matrix', async ({ launcher }, testInfo) => {

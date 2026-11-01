@@ -392,18 +392,19 @@ export function App() {
     setGroup('')
   }, [location.pathname])
   const play = (instance: Instance) => {
-    if (!savedLibrary?.select(instance.id)) return
-    if (savedLibrary.data?.pendingCopies[instance.id]) { openOptions(instance, 'duplicate'); return }
-    restoreFocus.current = document.activeElement as HTMLElement
-    const selected = accounts?.selected
-    launch?.store.open(instance.id, instance.name, selected && accounts.profile ? { userId: selected.id, profileId: accounts.profile.id, name: accounts.profile.name } : undefined)
+    savedLibrary?.select(instance.id, () => {
+      if (savedLibrary.data?.pendingCopies[instance.id]) { openOptions(instance, 'duplicate'); return }
+      restoreFocus.current = document.activeElement as HTMLElement
+      const selected = accounts?.selected
+      launch?.store.open(instance.id, instance.name, selected && accounts.profile ? { userId: selected.id, profileId: accounts.profile.id, name: accounts.profile.name } : undefined)
+    })
   }
   const changeFeatured = (direction: number) => {
     setPaused(true)
     if (instances.length) setFeaturedPath(instances[nextFeatured(featured, instances.length, direction)].id)
   }
   const manage = (item: Instance) => {
-    if (savedLibrary?.select(item.id)) navigate('/instance')
+    savedLibrary?.select(item.id, () => void navigate('/instance'))
   }
   const openCreation = (mode: 'create' | 'import' = 'create') => {
     restoreFocus.current = document.activeElement as HTMLElement
@@ -978,12 +979,11 @@ export function App() {
       {launch && <LaunchDialog launch={launch} returnFocus={restoreFocus} />}
       {managingGroups && <GroupsDialog returnFocus={restoreFocus} onClose={() => setManagingGroups(false)} onRemoved={id => { if (group === `id:${id}`) setGroup('') }} />}
       {operating && <InstanceOperations key={operating.path} initialMode={operatingMode} instance={operating} onClose={() => setOperating(undefined)} returnFocus={restoreFocus} onCreated={path => {
-        if (savedLibrary?.select(path)) void navigate('/instance')
+        savedLibrary?.select(path, () => void navigate('/instance'))
       }} />}
       {savedLibrary && <AddInstance open={!!adding} initialMode={adding ?? 'create'} onClose={() => setAdding(undefined)} returnFocus={restoreFocus} onCreated={path => {
         setAdding(undefined)
-        if (savedLibrary.select(path)) void navigate('/instance')
-        else void navigate('/me')
+        savedLibrary.select(path, () => void navigate('/instance'))
       }} />}
       <Dialog.Root
         open={!!dialog || showCredits}

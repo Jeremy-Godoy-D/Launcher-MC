@@ -14,6 +14,7 @@ import type { Task } from '../task'
 import type { SharedState } from '../util/SharedState'
 import type { InvalidDirectoryErrorCode } from './BaseService'
 import type { ServiceKey } from './Service'
+import type { EditInstanceSettingsOptions, InstanceSettingsSnapshot } from '../util/instanceSettings'
 
 export interface DuplicateInstanceTask extends Task {
   type: 'duplicateInstance'
@@ -123,6 +124,8 @@ export interface InstanceService {
    * Otherwise, it will edit the instance on the provided path.
    */
   editInstance(options: EditInstanceOptions & { instancePath: string; expectedMetadata?: { name: string; description: string; author: string; icon?: string } }): Promise<void>
+  /** Apply only reviewed Java launch settings; reject stale data and invalid overrides. */
+  editInstanceSettings(options: EditInstanceSettingsOptions): Promise<InstanceSettingsSnapshot>
   /**
    * Get or create a MANAGED instance via your unique id
    * @param id The unique id, can be any string, but it will convert to a string can be file name
