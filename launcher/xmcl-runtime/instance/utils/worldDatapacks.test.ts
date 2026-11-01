@@ -22,6 +22,41 @@ afterEach(async () => {
   }
 })
 
+it('binds provider IDs to the datapack review and publishes exclusive sidecars for folders', async () => {
+  const incoming = join(external, 'ProviderPack'); await mkdir(incoming)
+  await writeFile(join(incoming, 'pack.mcmeta'), JSON.stringify({ pack: { pack_format: 48, description: 'Provider folder' } }))
+  const op: WorldFileOperation = { type: 'import-datapack', instancePath: instance, saveName: 'Alpha', sourcePath: incoming, providers: { curseforge: { projectId: 1, fileId: 2 }, modrinth: { projectId: 'project1', versionId: 'version2' } } }
+  const review = await previewWorldFiles(op, join(root, 'data'))
+  if (review.operation.type !== 'import-datapack') throw new Error('Wrong review')
+  review.operation.providers!.curseforge!.fileId = 3
+  await expect(applyWorldFiles(review, join(root, 'data'))).rejects.toHaveProperty('name', 'WorldFilesChangedError')
+  await expect(lstat(join(world, 'datapacks'))).rejects.toHaveProperty('code', 'ENOENT')
+  const result = await applyWorldFiles(await previewWorldFiles(op, join(root, 'data')), join(root, 'data'))
+  expect(JSON.parse(await readFile(join(world, 'datapacks/.ProviderPack.curseforge'), 'utf8'))).toEqual({ projectId: 1, fileId: 2 })
+  expect(JSON.parse(await readFile(join(world, 'datapacks/.ProviderPack.modrinth'), 'utf8'))).toEqual({ projectId: 'project1', versionId: 'version2' })
+  expect((await readWorldDatapacks(instance, 'Alpha', join(root, 'data')))[0]).toMatchObject({ path: result.path, curseforge: { projectId: 1, fileId: 2 } })
+})
+
+it('rejects malformed provider metadata without creating a datapacks directory', async () => {
+  const incoming = join(external, 'Pack'); await mkdir(incoming)
+  await writeFile(join(incoming, 'pack.mcmeta'), JSON.stringify({ pack: { pack_format: 48, description: '' } }))
+  for (const providers of [null, [], { curseforge: { projectId: 0, fileId: 1 } }, { modrinth: { projectId: 'a/b', versionId: 'v1' } }]) {
+    await expect(previewWorldFiles({ type: 'import-datapack', instancePath: instance, saveName: 'Alpha', sourcePath: incoming, providers } as any, join(root, 'data'))).rejects.toThrow()
+  }
+  await expect(lstat(join(world, 'datapacks'))).rejects.toHaveProperty('code', 'ENOENT')
+})
+
+it('preserves a competing sidecar created after the archive was published', async () => {
+  const path = join(external, 'pack.zip'); await createZip({ 'pack.mcmeta': JSON.stringify({ pack: { pack_format: 48, description: '' } }) }, path)
+  const review = await previewWorldFiles({ type: 'import-datapack', instancePath: instance, saveName: 'Alpha', sourcePath: path, providers: { curseforge: { projectId: 1, fileId: 2 } } }, join(root, 'data'))
+  const sidecar = join(world, 'datapacks/.pack.zip.curseforge'); let written = false
+  await expect(applyWorldFiles(review, join(root, 'data'), async () => {
+    if (!written && await lstat(join(world, 'datapacks/pack.zip')).catch(() => undefined)) { written = true; await writeFile(sidecar, 'OTHER METADATA', { flag: 'wx' }) }
+  })).rejects.toHaveProperty('code', 'EEXIST')
+  expect(await readFile(sidecar, 'utf8')).toBe('OTHER METADATA')
+  expect(await readFile(join(world, 'datapacks/pack.zip'))).toEqual(await readFile(path))
+})
+
 async function createZip(files: Record<string, string>, target: string) {
   const zip = new ZipFile()
   for (const [path, data] of Object.entries(files)) {

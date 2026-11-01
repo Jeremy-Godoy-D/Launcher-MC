@@ -354,14 +354,13 @@ export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
 
       const files = await getFiles(options)
 
-      const result = await Promise.all(
-        files.map(async (file) => {
-          const result = await downloadFile(file, options.directory, downloadOptions)
-          await postprocess(result, options.directory, file.icon)
-          return result
-        }),
-      )
-      return result
+      const downloads = files.map(async (file) => {
+        const result = await downloadFile(file, options.directory, downloadOptions)
+        await postprocess(result, options.directory, file.icon)
+        return result
+      })
+      try { return await Promise.all(downloads) }
+      catch (error) { await Promise.allSettled(downloads); throw error }
     },
     installInstanceFile: async (options: InstallMarketInstanceOptions) => {
       const files = await getFiles(options)

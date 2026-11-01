@@ -1,4 +1,4 @@
-import type { WorldFileOperation, WorldFileReview } from '@xmcl/runtime-api/src/services/InstanceSavesService'
+import type { WorldFileOperation, WorldFileReview, WorldDatapackProviders } from '@xmcl/runtime-api/src/services/InstanceSavesService'
 import { checksum } from '@xmcl/core'
 import { createHash, randomUUID } from 'node:crypto'
 import { constants } from 'node:fs'
@@ -19,6 +19,14 @@ const digest = (value: unknown) => createHash('sha256').update(JSON.stringify(va
 const changed = () => Object.assign(new Error('World files changed since review'), { name: 'WorldFilesChangedError' })
 const inspect = (path: string) => lstat(path, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
 function contains(parent: string, child: string) { const path = relative(parent, child); return path !== '..' && !path.startsWith('..' + sep) && !isAbsolute(path) }
+function providerMetadata(input: WorldDatapackProviders | undefined) {
+  if (input === undefined) return undefined
+  if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('Invalid datapack provider metadata')
+  const cf = input.curseforge, mr = input.modrinth, id = (value: unknown) => typeof value === 'string' && /^[a-zA-Z0-9_-]{1,128}$/.test(value)
+  if (cf !== undefined && (!cf || !Number.isSafeInteger(cf.projectId) || cf.projectId <= 0 || !Number.isSafeInteger(cf.fileId) || cf.fileId <= 0)) throw new Error('Invalid CurseForge datapack metadata')
+  if (mr !== undefined && (!mr || !id(mr.projectId) || !id(mr.versionId))) throw new Error('Invalid Modrinth datapack metadata')
+  return { ...(cf ? { curseforge: { projectId: cf.projectId, fileId: cf.fileId } } : {}), ...(mr ? { modrinth: { projectId: mr.projectId, versionId: mr.versionId } } : {}) }
+}
 function operationInput(input: WorldFileOperation): WorldFileOperation {
   if (!input || typeof input.instancePath !== 'string' || !isAbsolute(input.instancePath)) throw new Error('Invalid world operation')
   const base = { instancePath: input.instancePath, saveName: worldName(input.saveName) }
@@ -28,7 +36,7 @@ function operationInput(input: WorldFileOperation): WorldFileOperation {
     return { ...base, type: 'import', sourcePath: input.sourcePath, ...(ids ? { curseforge: { projectId: ids.projectId, fileId: ids.fileId } } : {}) }
   }
   if (input.type === 'metadata') return { ...base, type: 'metadata', metadata: validateWorldMetadata(input.metadata) }
-  if (input.type === 'import-datapack' && typeof input.sourcePath === 'string' && isAbsolute(input.sourcePath)) return { ...base, type: 'import-datapack', sourcePath: input.sourcePath, ...(typeof input.fileName === 'string' && input.fileName ? { fileName: datapackFileName(input.fileName) } : {}) }
+  if (input.type === 'import-datapack' && typeof input.sourcePath === 'string' && isAbsolute(input.sourcePath)) return { ...base, type: 'import-datapack', sourcePath: input.sourcePath, ...(typeof input.fileName === 'string' && input.fileName ? { fileName: datapackFileName(input.fileName) } : {}), ...(input.providers === undefined ? {} : { providers: providerMetadata(input.providers) }) }
   if (input.type === 'remove-datapack') return { ...base, type: 'remove-datapack', fileName: datapackFileName(input.fileName) }
   if (input.type === 'remove') return { ...base, type: 'remove' }
   if (input.type === 'copy' && typeof input.destinationInstancePath === 'string' && isAbsolute(input.destinationInstancePath)) return { ...base, type: 'copy', destinationInstancePath: input.destinationInstancePath, destinationName: worldName(input.destinationName) }
@@ -61,11 +69,12 @@ async function plan(input: WorldFileOperation, sharedRoot: string) {
     if (contains(pack.root, target) || contains(target, pack.root)) throw new Error('Datapack copy overlaps its source')
     if (dpDir) {
       const names = await readdir(parent)
-      if (names.some(name => name.toLowerCase() === pack.fileName.toLowerCase()) || await inspect(target)) throw Object.assign(new Error('World destination already exists'), { name: 'WorldDestinationExistsError' })
+      const reserved = [pack.fileName, `.${pack.fileName}.curseforge`, `.${pack.fileName}.modrinth`].map(name => name.toLowerCase())
+      if (names.some(name => reserved.includes(name.toLowerCase())) || await inspect(target)) throw Object.assign(new Error('World destination already exists'), { name: 'WorldDestinationExistsError' })
     }
     if ((await sourceLocation(operation, sharedRoot)).identity !== source.identity) throw changed()
     const datapack = { name: pack.name, fileName: pack.fileName, directory: pack.kind === 'folder', packFormat: pack.packFormat, description: pack.description }
-    const normalized: WorldFileOperation = { ...operation, fileName: pack.fileName }
+    const normalized = operationInput({ ...operation, fileName: pack.fileName })
     const authority = digest([source.identity, dpDir && [dpDir.ino.toString(), dpDir.dev.toString()]])
     const review: WorldFileReview = { operation: normalized, snapshot: digest([normalized, source, authority, pack.identity, pack.hash, datapack]), files: pack.files, bytes: pack.size, shared: source.shared, linkOnly: false, destination: join(operation.instancePath, 'saves', operation.saveName, 'datapacks', pack.fileName), datapack }
     return { review, source, sourceTree: pack.kind === 'folder' ? pack.snapshot : { identity: [pack.hash], entries: [] }, parent, target, authority, archive: undefined, level: undefined, datapackSource: pack, installedDatapack: undefined }
@@ -129,6 +138,22 @@ export async function applyWorldFiles(review: WorldFileReview, sharedRoot: strin
     const dpDir = await inspect(current.parent)
     if (!dpDir?.isDirectory() || dpDir.isSymbolicLink()) throw changed()
     if ((await readdir(current.parent)).some(name => name.toLowerCase() === current.datapackSource!.fileName.toLowerCase()) || await inspect(current.target)) throw Object.assign(new Error('World destination already exists'), { name: 'WorldDestinationExistsError' })
+    async function publishProviders(identity: { ino: bigint; dev: bigint }) {
+      async function stableDestination() {
+        await unchanged(); await assertInstallDirectory(current.source.root, current.parent)
+        const parent = await lstat(current.parent, { bigint: true }), installed = await lstat(current.target, { bigint: true })
+        if (parent.ino !== dpDir!.ino || parent.dev !== dpDir!.dev || installed.isSymbolicLink() || installed.ino !== identity.ino || installed.dev !== identity.dev) throw changed()
+      }
+      for (const [provider, metadata] of Object.entries(operation.type === 'import-datapack' ? operation.providers ?? {} : {})) {
+        const temporary = join(current.parent, `.datapack-provider-${randomUUID()}`), target = join(current.parent, `.${current.datapackSource!.fileName}.${provider}`)
+        try {
+          await stableDestination()
+          await writeFile(temporary, JSON.stringify(metadata), { flag: 'wx' })
+          await stableDestination()
+          await linkOrCopyFile(temporary, target, true)
+        } finally { await unlink(temporary).catch(error => { if (error.code !== 'ENOENT') throw error }) }
+      }
+    }
     if (current.datapackSource!.kind === 'zip') {
       const temporary = join(current.parent, `.datapack-import-${randomUUID()}`)
       try {
@@ -136,6 +161,7 @@ export async function applyWorldFiles(review: WorldFileReview, sharedRoot: strin
         if (await checksum(temporary, 'sha256') !== current.datapackSource!.hash) throw changed()
         await unchanged()
         await linkOrCopyFile(temporary, current.target, true)
+        await publishProviders(await lstat(current.target, { bigint: true }))
         return { path: current.review.destination }
       } finally {
         await unlink(temporary).catch(error => { if (error.code !== 'ENOENT') throw error })
@@ -159,6 +185,7 @@ export async function applyWorldFiles(review: WorldFileReview, sharedRoot: strin
         }
       }
       await unchanged()
+      await publishProviders(targetInfo)
       return { path: current.review.destination }
     } catch (cause) { throw Object.assign(new Error('Datapack copy incomplete; source and partial destination retained', { cause }), { name: 'WorldOperationIncompleteError', path: current.target }) }
   }

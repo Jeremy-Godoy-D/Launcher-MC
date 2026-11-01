@@ -115,12 +115,13 @@ export interface WorldDatapackReview {
   packFormat?: number
   description: string
 }
+export type WorldDatapackProviders = Pick<InstanceDatapack, 'curseforge' | 'modrinth'>
 export type WorldFileOperation = { instancePath: string; saveName: string } & (
   { type: 'import'; sourcePath: string; curseforge?: { projectId: number; fileId: number } } |
   { type: 'copy'; destinationInstancePath: string; destinationName: string } |
   { type: 'export'; destinationDirectory: string; fileName: string; format?: 'folder' } |
   { type: 'metadata'; metadata: WorldMetadataInput } |
-  { type: 'import-datapack'; sourcePath: string; fileName?: string } |
+  { type: 'import-datapack'; sourcePath: string; fileName?: string; providers?: WorldDatapackProviders } |
   { type: 'remove-datapack'; fileName: string } |
   { type: 'remove' }
 )

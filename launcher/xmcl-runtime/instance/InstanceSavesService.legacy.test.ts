@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { Mutex } from 'async-mutex'
 import { FSWatcher } from 'chokidar'
-import { LockKey } from '@xmcl/runtime-api'
+import { LockKey, MarketType } from '@xmcl/runtime-api'
 import { lstat, mkdir, mkdtemp, readFile, readdir, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { open, readAllEntries, readEntry } from '@xmcl/unzip'
@@ -30,6 +30,13 @@ vi.mock('~/service', () => ({ AbstractService: class { constructor(public app: a
 const { InstanceSavesService } = await import('./InstanceSavesService')
 let root: string, exports: string, source: string, destination: string, third: string, service: InstanceType<typeof InstanceSavesService>
 let instances: { path: string; edition: string }[], processes: any[], sessions: { verify: ReturnType<typeof vi.fn>; release: ReturnType<typeof vi.fn> }[]
+let installFile: ReturnType<typeof vi.fn>
+async function downloadedPack(directory: string, fileName = 'Market.zip', metadata: any = { curseforge: { projectId: 1, fileId: 2 } }) {
+  const path = join(directory, fileName), zip = new ZipFile()
+  zip.addBuffer(Buffer.from(JSON.stringify({ pack: { pack_format: 48, description: 'Market pack' } })), 'pack.mcmeta')
+  await writeZipFile(zip, path)
+  return { path, metadata, uris: [] }
+}
 async function world(instance: string, name = 'Alpha') {
   const path = join(instance, 'saves', name); await mkdir(path, { recursive: true }); await writeFile(join(path, 'level.dat'), 'original-world')
   return path
@@ -39,11 +46,12 @@ beforeEach(async () => {
   root = await mkdtemp(join(process.cwd(), '.world-legacy-test-')); source = join(root, 'source'); destination = join(root, 'destination'); third = join(root, 'third')
   exports = await mkdtemp(join(process.cwd(), '.world-legacy-export-'))
   instances = [source, destination, third].map(path => ({ path, edition: 'java' })); processes = []; sessions = []
+  installFile = vi.fn()
   for (const path of [source, destination, third, root]) await mkdir(join(path, 'saves'), { recursive: true })
   await world(source)
   const locks = new Map<string, Mutex>(), of = (key: string) => { if (!locks.has(key)) locks.set(key, new Mutex()); return locks.get(key)! }
   const app = {
-    mutex: { of }, registry: { get: async () => ({ getGameProcesses: async () => processes, get: () => undefined }) },
+    mutex: { of }, registry: { get: async () => ({ getGameProcesses: async () => processes, get: () => undefined, installFile }) },
     acquireWorldLock: async () => {
       const session = { verify: vi.fn(async () => { expect(of('resource-pack-options').isLocked()).toBe(true) }), release: vi.fn() }
       sessions.push(session); return session
@@ -394,4 +402,123 @@ it('removes the launch listener if a queued watcher can no longer initialize', a
   instances = []; unlock()
   await expect(pending).rejects.toHaveProperty('name', 'InstanceNotFoundError')
   expect(off).toHaveBeenCalledWith('minecraft-exit', expect.any(Function))
+})
+
+it.each([MarketType.CurseForge, MarketType.Modrinth])('installs a reviewed market batch into a new datapacks directory with provider sidecars: %s', async (market) => {
+  const savePath = join(source, 'saves/Alpha'), metadata = market === MarketType.CurseForge ? { curseforge: { projectId: 1, fileId: 2 } } : { modrinth: { projectId: 'project1', versionId: 'version2' } }
+  let staging = ''; const inodes: bigint[] = []
+  installFile.mockImplementation(async (options) => {
+    staging = options.directory
+    expect(options).not.toHaveProperty('domain'); expect(options).not.toHaveProperty('savePath')
+    expect(dirname(staging)).toBe(root); expect(staging).not.toBe(join(savePath, 'datapacks'))
+    await expect(lstat(join(savePath, 'datapacks'))).rejects.toHaveProperty('code', 'ENOENT')
+    const files = [await downloadedPack(staging, 'First.zip', metadata), await downloadedPack(staging, 'Second.zip', metadata)]
+    for (const file of files) inodes.push((await lstat(file.path, { bigint: true })).ino)
+    return files
+  })
+  const paths = await service.installDatapackFromMarket({ market, savePath, ...(market === MarketType.CurseForge ? { file: { fileId: 1 } } : { version: { versionId: 'version2' } }), domain: '../forbidden' } as any)
+  expect(paths).toEqual(['First.zip', 'Second.zip'].map(name => join(savePath, 'datapacks', name)))
+  for (const [index, path] of paths.entries()) {
+    expect((await lstat(path, { bigint: true })).ino).not.toBe(inodes[index])
+    const provider = market === MarketType.CurseForge ? 'curseforge' : 'modrinth'
+    expect(JSON.parse(await readFile(join(savePath, 'datapacks', `.${index ? 'Second' : 'First'}.zip.${provider}`), 'utf8'))).toEqual((metadata as any)[provider])
+  }
+  await expect(lstat(staging)).rejects.toHaveProperty('code', 'ENOENT')
+  expect(await readFile(join(savePath, 'level.dat'), 'utf8')).toBe('original-world')
+})
+
+it('validates market destinations and managed processes before any download and rechecks after downloading', async () => {
+  const savePath = join(source, 'saves/Alpha'), foreign = await world(exports, 'Foreign')
+  await expect(service.installDatapackFromMarket({ market: MarketType.CurseForge, file: { fileId: 1 }, savePath: foreign } as any)).rejects.toThrow()
+  processes = [{ options: { gameDirectory: source } }]
+  await expect(service.installDatapackFromMarket({ market: MarketType.CurseForge, file: { fileId: 1 }, savePath } as any)).rejects.toHaveProperty('name', 'InstanceRunningError')
+  expect(installFile).not.toHaveBeenCalled(); processes = []
+  let staging = ''
+  installFile.mockImplementation(async ({ directory }) => { staging = directory; const file = await downloadedPack(directory); processes = [{ options: { gameDirectory: source } }]; return [file] })
+  await expect(service.installDatapackFromMarket({ market: MarketType.CurseForge, file: { fileId: 1 }, savePath } as any)).rejects.toHaveProperty('name', 'InstanceRunningError')
+  await expect(lstat(join(savePath, 'datapacks'))).rejects.toHaveProperty('code', 'ENOENT')
+  await expect(lstat(staging)).rejects.toHaveProperty('code', 'ENOENT')
+})
+
+it.each(['invalid archive', 'invalid IDs', 'duplicate name'])('preflights the complete market batch and keeps the world untouched for %s', async (failure) => {
+  const savePath = join(source, 'saves/Alpha')
+  installFile.mockImplementation(async ({ directory }) => {
+    const first = await downloadedPack(directory, 'First.zip'), second = await downloadedPack(directory, 'Second.zip')
+    if (failure === 'invalid archive') await writeFile(second.path, 'INVALID ZIP')
+    if (failure === 'invalid IDs') second.metadata = { curseforge: { projectId: -1, fileId: 2 } }
+    return [first, failure === 'duplicate name' ? first : second]
+  })
+  await expect(service.installDatapackFromMarket({ market: MarketType.CurseForge, file: { fileId: 1 }, savePath } as any)).rejects.toThrow()
+  await expect(lstat(join(savePath, 'datapacks'))).rejects.toHaveProperty('code', 'ENOENT')
+  expect((await readdir(root)).some(name => name.startsWith('.datapack-download-'))).toBe(false)
+})
+
+it('refuses orphan provider metadata instead of adopting or replacing it during market installation', async () => {
+  const savePath = join(source, 'saves/Alpha'), sidecar = join(savePath, 'datapacks/.Market.zip.modrinth')
+  await mkdir(dirname(sidecar)); await writeFile(sidecar, 'ORPHAN DATA')
+  installFile.mockImplementation(async ({ directory }) => [await downloadedPack(directory)])
+  await expect(service.installDatapackFromMarket({ market: MarketType.CurseForge, file: { fileId: 1 }, savePath } as any)).rejects.toHaveProperty('name', 'WorldDestinationExistsError')
+  expect(await readFile(sidecar, 'utf8')).toBe('ORPHAN DATA')
+  await expect(lstat(join(savePath, 'datapacks/Market.zip'))).rejects.toHaveProperty('code', 'ENOENT')
+})
+
+it('binds market installation to the reviewed world rather than a replacement at the same path', async () => {
+  const savePath = join(source, 'saves/Alpha')
+  installFile.mockImplementation(async ({ directory }) => {
+    await rename(savePath, join(source, 'retained-world')); await world(source)
+    return [await downloadedPack(directory)]
+  })
+  await expect(service.installDatapackFromMarket({ market: MarketType.CurseForge, file: { fileId: 1 }, savePath } as any)).rejects.toHaveProperty('name', 'WorldFilesChangedError')
+  expect(await readFile(join(source, 'retained-world/level.dat'), 'utf8')).toBe('original-world')
+  await expect(lstat(join(savePath, 'datapacks'))).rejects.toHaveProperty('code', 'ENOENT')
+})
+
+it('rejects provider paths outside the staging workspace and never removes external data', async () => {
+  const file = await downloadedPack(exports), bytes = await readFile(file.path), savePath = join(source, 'saves/Alpha')
+  installFile.mockResolvedValue([file])
+  await expect(service.installDatapackFromMarket({ market: MarketType.CurseForge, file: { fileId: 1 }, savePath } as any)).rejects.toThrow('Invalid staged market file')
+  expect(await readFile(file.path)).toEqual(bytes)
+  await expect(lstat(join(savePath, 'datapacks'))).rejects.toHaveProperty('code', 'ENOENT')
+})
+
+it('does not clean a rebound download workspace or publish into the world', async () => {
+  const file = await downloadedPack(exports), bytes = await readFile(file.path), savePath = join(source, 'saves/Alpha')
+  installFile.mockImplementation(async ({ directory }) => { await rename(directory, directory + '-retained'); await symlink(exports, directory, 'junction'); return [file] })
+  await expect(service.installDatapackFromMarket({ market: MarketType.CurseForge, file: { fileId: 1 }, savePath } as any)).rejects.toHaveProperty('name', 'WorldFilesChangedError')
+  expect(await readFile(file.path)).toEqual(bytes)
+  await expect(lstat(join(savePath, 'datapacks'))).rejects.toHaveProperty('code', 'ENOENT')
+})
+
+
+it('rejects invalid market references and unsafe datapack folders before contacting a provider', async () => {
+  const savePath = join(source, 'saves/Alpha')
+  for (const input of [
+    { market: MarketType.CurseForge, file: { fileId: 0 } },
+    { market: MarketType.CurseForge, file: Array.from({ length: 1001 }, () => ({ fileId: 1 })) },
+    { market: MarketType.Modrinth, version: { versionId: '../escape' } },
+    { market: MarketType.Modrinth, version: { versionId: 'v1', filename: '../escape.zip' } },
+    { market: MarketType.CurseForge, file: { fileId: 1, icon: 'bad\nicon' } },
+  ]) await expect(service.installDatapackFromMarket({ ...input, savePath } as any)).rejects.toThrow()
+  await symlink(exports, join(savePath, 'datapacks'), 'junction')
+  await expect(service.installDatapackFromMarket({ market: MarketType.CurseForge, file: { fileId: 1 }, savePath })).rejects.toThrow()
+  expect(installFile).not.toHaveBeenCalled(); expect(await readdir(exports)).toEqual([])
+})
+
+
+it('uses the same owned staging for a CurseForge world and preserves occupied user archives', async () => {
+  const occupied = join(root, 'saves/World.zip'); await writeFile(occupied, 'USER ARCHIVE')
+  installFile.mockImplementation(async ({ directory, ...request }) => {
+    expect(request).not.toHaveProperty('domain'); expect(request).not.toHaveProperty('instancePath')
+    const zip = new ZipFile(), path = join(directory, 'World.zip'); zip.addBuffer(Buffer.from('IMPORTED WORLD'), 'level.dat'); await writeZipFile(zip, path)
+    return [{ path, metadata: { curseforge: { projectId: 1, fileId: 2 } }, uris: [] }]
+  })
+  const path = await service.installFromMarket({ market: MarketType.CurseForge, file: { fileId: 2 }, instancePath: destination, domain: '../outside' } as any)
+  expect(path).toBe(join(destination, 'saves/World')); expect(await readFile(join(path, 'level.dat'), 'utf8')).toBe('IMPORTED WORLD')
+  expect(await readFile(occupied, 'utf8')).toBe('USER ARCHIVE')
+  expect((await readdir(root)).some(name => name.startsWith('.datapack-download-'))).toBe(false)
+})
+
+it('validates a world market destination before downloading', async () => {
+  await expect(service.installFromMarket({ market: MarketType.CurseForge, file: { fileId: 2 }, instancePath: exports })).rejects.toHaveProperty('name', 'InstanceNotFoundError')
+  expect(installFile).not.toHaveBeenCalled()
 })

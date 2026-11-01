@@ -1,4 +1,5 @@
 import { ResourceManager } from '@xmcl/resource'
+import { checksum } from '@xmcl/core'
 import {
   InstanceSavesServiceKey,
   LockKey,
@@ -14,6 +15,7 @@ import {
   type InstanceSavesService as IInstanceSavesService,
   type ImportSaveOptions,
   type InstallMarketOptionWithInstance,
+  type InstallMarketOptions,
   type InstanceDatapack,
   type LaunchOptions,
   type LinkSaveAsServerWorldOptions,
@@ -26,14 +28,14 @@ import { AnyError, isSystemError } from '@xmcl/utils'
 import { FSWatcher } from 'chokidar'
 import filenamify from 'filenamify'
 import { existsSync } from 'fs'
-import { lstat, mkdir, realpath, symlink } from 'node:fs/promises'
+import { lstat, mkdir, mkdtemp, realpath, symlink } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 import { ensureDir, readFile, readdir, rename, rm, rmdir, stat, unlink, writeFile } from 'fs-extra'
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'path'
 import { Inject, LauncherAppKey, kGameDataPath, type PathResolver } from '~/app'
 import { InstanceService } from '~/instance'
 import { LaunchService } from '~/launch'
-import { kMarketProvider } from '~/market'
+import { kMarketProvider, type InstallResult } from '~/market'
 import { kResourceManager } from '~/resource'
 import { readInstanceSaveMetadata, readWorldGenSettings, listSaveDimensions, getSaveRegions, readSaveChunks, readSaveProgress, getRegionDir, kSaveWorker, type SaveWorker } from '~/save'
 import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/service'
@@ -190,8 +192,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     })
   }
 
-  async #worldFilesIdle(review: WorldFileReview, allowDepot = false) {
-    const operation = review.operation, paths = [operation.instancePath, ...(operation.type === 'copy' ? [operation.destinationInstancePath] : [])]
+  async #worldsIdle(paths: string[], shared: boolean, linkOnly: boolean, allowDepot = false) {
     for (const path of paths) if (!allowDepot || path !== this.getPath()) await this.#javaInstance(path)
     const launch = await this.app.registry.get(LaunchService), processes = await launch.getGameProcesses()
     if (allowDepot && paths.includes(this.getPath()) && processes.length) throw new AnyError('SharedWorldRunningError')
@@ -201,7 +202,13 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       const active = await Promise.all(processes.map(process => realpath(process.options.gameDirectory).catch(() => process.options.gameDirectory)))
       if (touched.some(path => active.some(game => relative(path, game) === ''))) throw new AnyError('InstanceRunningError')
     }
-    if (review.shared && !review.linkOnly && processes.length) throw new AnyError('SharedWorldRunningError')
+    if (shared && !linkOnly && processes.length) throw new AnyError('SharedWorldRunningError')
+    return processes
+  }
+
+  async #worldFilesIdle(review: WorldFileReview, allowDepot = false) {
+    const operation = review.operation, paths = [operation.instancePath, ...(operation.type === 'copy' ? [operation.destinationInstancePath] : [])]
+    const processes = await this.#worldsIdle(paths, review.shared, review.linkOnly, allowDepot)
     if ((operation.type === 'import' || operation.type === 'import-datapack') && processes.length) {
       const source = await realpath(operation.sourcePath), shared = join(await realpath(this.getPath()), 'saves'), inShared = relative(shared, source)
       if (!inShared || inShared !== '..' && !inShared.startsWith('..' + sep) && !isAbsolute(inShared)) throw new AnyError('SharedWorldRunningError')
@@ -660,23 +667,13 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async installFromMarket(options: InstallMarketOptionWithInstance): Promise<string> {
-    if (options.market !== MarketType.CurseForge) {
-      throw new TypeError('Unsupported market type')
-    }
-    const provider = await this.app.registry.get(kMarketProvider)
-    const [result] = await provider.installFile({
-      ...options,
-      directory: this.getPath('saves'),
+    requireObject(options)
+    if (options.market !== MarketType.CurseForge) throw new TypeError('Unsupported world market')
+    await this.#javaInstance(options.instancePath)
+    return this.#withMarketFiles(this.#marketRequest(options), async (results) => {
+      if (results.length !== 1 || !results[0].metadata?.curseforge) throw new Error('Expected one downloaded world')
+      return this.importSave({ path: results[0].path, curseforge: results[0].metadata.curseforge, instancePath: options.instancePath })
     })
-    const savePath = await this.importSave({
-      path: result.path,
-      curseforge: {
-        projectId: result.metadata.curseforge!.projectId,
-        fileId: result.metadata.curseforge!.fileId,
-      },
-      instancePath: options.instancePath,
-    })
-    return savePath
   }
 
   async getWorldGenSettings(savePath: string) {
@@ -995,38 +992,89 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     state?.saveDatapackRemove(join(options.savePath, 'datapacks', fileName))
   }
 
+  async #withMarketFiles<T>(request: InstallMarketOptions, action: (results: InstallResult[], staging: string) => Promise<T>) {
+    const root = await realpath(this.getPath()), prefix = join(root, '.datapack-download-'), staging = await mkdtemp(prefix), identity = await lstat(staging, { bigint: true })
+    try {
+      const provider = await this.app.registry.get(kMarketProvider)
+      const results = await provider.installFile({ ...request, directory: staging })
+      if (!Array.isArray(results) || results.length > 1000) throw new Error('Invalid datapack download batch')
+      const workspace = await lstat(staging, { bigint: true })
+      if (!workspace.isDirectory() || workspace.isSymbolicLink() || workspace.ino !== identity.ino || workspace.dev !== identity.dev || await realpath(staging) !== staging) throw new AnyError('WorldFilesChangedError')
+      for (const result of results) {
+        const actual = await realpath(result.path), info = await lstat(result.path, { bigint: true })
+        if (!info.isFile() || info.isSymbolicLink() || relative(dirname(actual), staging) !== '') throw new Error('Invalid staged market file')
+        await assertInstallDirectory(staging, dirname(result.path))
+      }
+      return await action(results, staging)
+    } finally {
+      // Only this owned download workspace may be removed; never follow a rebound root.
+      const current = await lstat(staging, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
+      if (dirname(staging) === root && staging.startsWith(prefix) && current?.isDirectory() && !current.isSymbolicLink() && current.ino === identity.ino && current.dev === identity.dev && await realpath(this.getPath()) === root) await rm(staging, { recursive: true, force: true })
+    }
+  }
+
+  #marketRequest(options: InstallMarketOptions): InstallMarketOptions {
+    const icon = (value: unknown) => { if (value !== undefined && (typeof value !== 'string' || value.length > 8192 || /[\u0000-\u001f\u007f]/.test(value))) throw new Error('Invalid datapack icon'); return value as string | undefined }
+    let request: InstallMarketOptions
+    if (options.market === MarketType.CurseForge) {
+      const refs = Array.isArray(options.file) ? options.file : [options.file]
+      if (refs.length > 1000 || refs.some(ref => !ref || !Number.isSafeInteger(ref.fileId) || ref.fileId <= 0)) throw new Error('Invalid CurseForge datapack references')
+      request = { market: MarketType.CurseForge, file: refs.map(ref => ({ fileId: ref.fileId, icon: icon(ref.icon) })) }
+    } else {
+      const refs = Array.isArray(options.version) ? options.version : [options.version]
+      if (refs.length > 1000 || refs.some(ref => !ref || typeof ref.versionId !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(ref.versionId))) throw new Error('Invalid Modrinth datapack references')
+      request = { market: MarketType.Modrinth, version: refs.map(ref => ({ versionId: ref.versionId, ...(ref.filename === undefined ? {} : { filename: datapackFileName(ref.filename, true) }), icon: icon(ref.icon) })) }
+    }
+    return request
+  }
+
   async installDatapackFromMarket(options: InstallDatapackMarketOptions) {
-    const { savePath } = options
-    requireString(savePath)
-    const datapacksDir = join(savePath, 'datapacks')
-    await ensureDir(datapacksDir)
-    const provider = await this.app.registry.get(kMarketProvider)
-    const results = await provider.installFile({
-      ...options,
-      directory: datapacksDir,
-    })
-
-    for (const r of results) {
-      if (r.metadata?.curseforge) {
-        await writeFile(join(datapacksDir, `.${basename(r.path)}.curseforge`), JSON.stringify(r.metadata.curseforge)).catch(() => undefined)
+    requireObject(options)
+    const { savePath } = options, source = await this.#legacySaveContext(savePath)
+    if (![MarketType.CurseForge, MarketType.Modrinth].includes(options.market)) throw new Error('Unsupported datapack market')
+    const request = this.#marketRequest(options)
+    const binding = await this.#worldPaths([source.instancePath], async () => {
+      const location = await worldLocation(source.instancePath, source.saveName, this.getPath())
+      await assertInstallDirectory(location.root, join(location.root, 'datapacks'))
+      await this.#worldsIdle([source.instancePath], location.shared, false, source.depot)
+      const lock = await this.app.acquireWorldLock(location.root, false)
+      try { await lock?.verify(); return location } finally { lock?.release() }
+    }, source.depot)
+    return this.#withMarketFiles(request, async (results, staging) => {
+      if ((await worldLocation(source.instancePath, source.saveName, this.getPath())).identity !== binding.identity) throw new AnyError('WorldFilesChangedError')
+      const reviews: { review: WorldFileReview; hash: string }[] = [], names = new Set<string>(), directory = join(binding.root, 'datapacks')
+      const originalParent = await lstat(directory, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
+      for (const result of results) {
+        const path = await realpath(result.path), fileName = datapackFileName(basename(result.path))
+        if (relative(dirname(path), staging) !== '' || names.has(fileName.toLowerCase())) throw new Error('Invalid staged datapack')
+        await assertInstallDirectory(staging, dirname(result.path)); names.add(fileName.toLowerCase())
+        const providers = { ...(result.metadata?.curseforge ? { curseforge: result.metadata.curseforge } : {}), ...(result.metadata?.modrinth ? { modrinth: result.metadata.modrinth } : {}) }
+        const hash = await checksum(result.path, 'sha256')
+        if (typeof hash !== 'string' || !/^[a-f0-9]{64}$/.test(hash)) throw new AnyError('WorldFilesChangedError')
+        const review = await this.#previewWorldFiles({ type: 'import-datapack', instancePath: source.instancePath, saveName: source.saveName, sourcePath: result.path, fileName, providers }, source.depot)
+        if (await checksum(result.path, 'sha256') !== hash) throw new AnyError('WorldFilesChangedError')
+        reviews.push({ review, hash })
       }
-      if (r.metadata?.modrinth) {
-        await writeFile(join(datapacksDir, `.${basename(r.path)}.modrinth`), JSON.stringify(r.metadata.modrinth)).catch(() => undefined)
-      }
-    }
-
-    const stateManager = await this.app.registry.get(ServiceStateManager)
-    const state = stateManager.get<SaveDatapacks>(getInstanceSaveDatapacksKey(savePath))
-    if (state) {
-      for (const r of results) {
-        const dp = await this.readDatapack(savePath, basename(r.path)).catch(() => undefined)
-        if (dp) {
-          state.saveDatapackUpdate(dp)
+      await this.#worldPaths([source.instancePath], async () => {
+        let parent = originalParent
+        for (const { review, hash } of reviews) {
+          if ((await worldLocation(source.instancePath, source.saveName, this.getPath())).identity !== binding.identity) throw new AnyError('WorldFilesChangedError')
+          const current = await lstat(directory, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
+          if (Boolean(parent) !== Boolean(current) || parent && current && (parent.ino !== current.ino || parent.dev !== current.dev || current.isSymbolicLink())) throw new AnyError('WorldFilesChangedError')
+          const fresh = await this.#previewWorldFilesLocked(review.operation, source.depot)
+          if (review.operation.type !== 'import-datapack' || await checksum(review.operation.sourcePath, 'sha256') !== hash) throw new AnyError('WorldFilesChangedError')
+          await this.#applyWorldFilesLocked(fresh, source.depot)
+          parent = await lstat(directory, { bigint: true })
         }
+      }, source.depot)
+      const paths = reviews.map(({ review }) => join(savePath, 'datapacks', (review.operation as Extract<WorldFileOperation, { type: 'import-datapack' }>).fileName!))
+      const state = (await this.app.registry.get(ServiceStateManager)).get<SaveDatapacks>(getInstanceSaveDatapacksKey(savePath))
+      if (state) {
+        const rows = await readWorldDatapacks(source.instancePath, source.saveName, this.getPath())
+        for (const path of paths) { const row = rows.find(row => row.fileName === basename(path)); if (row) state.saveDatapackUpdate({ ...row, path, savePath }) }
       }
-    }
-
-    return results.map(r => r.path)
+      return paths
+    })
   }
 
   async getInstanceSaveProgress(options: { savePath: string; instancePath?: string; locale?: string }) {
