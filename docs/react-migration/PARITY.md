@@ -263,3 +263,7 @@ La etapa 5 vuelve a activa. K11/K12/K21 quedan `pending`: sus componentes existe
 ## Autoridad de progreso y worldgen (`ae982ec`)
 
 STAGE5-WORLD-READ-AUTHORITY protege las raíces de lectura por instancia Java/mundo registrados, incluidos alias/compartidos, rechaza recursos de otra instancia y locale de ruta, y limita worldgen/NBT conservando semilla0.1081unitarias/108archivos,39focales,7React+2Vue,8Axe0violaciones/8incomplete y9harness. K11 sigue pending por lectores secundarios de progreso, archivos/JAR/texturas/modelos/SNBT/versiones/idiomas y partidas externas; K12/K21 también pending. Etapa5 activa,6–9pendientes,PR4borrador;no publicación.
+
+## Lectores internos de progreso y recuperación (`2b1c02b`)
+
+STAGE5-PROGRESS-READERS conserva avances/misiones/estadísticas y recursos locales con presupuesto común, validación de archivos/enlaces/JSON/SNBT, JAR acotado con CRC, versiones/idiomas autorizados, modelos sin ciclos y arte opcional que termina/cierra recursos. Locale real, errores visibles/reintento, estado pendiente vs bloqueado y foco/lista/árbol corregidos.1.092unitarias/110archivos,33focales,13React+2Vue,20Axe0violaciones/24incomplete y9harness. CI41279948321/2525449 y41281063903/b23a888 success Vue+React,verificar nuevo SHA. K11 sigue pending por session.lock externo;K12 por argv/herencia/cambios sin guardar;K21 por streaming/virtualización/recuperación. Etapa5 activa,6–9pendientes,PR4borrador,sin publicación.

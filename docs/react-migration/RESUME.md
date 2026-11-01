@@ -6,17 +6,17 @@ Implementar `PLAN.md`: React en paralelo, núcleo Java sin extras, gaming propio
 
 ## Bloque actual
 
-**Etapa 5 activa**, K11/K12/K21 y gates mundos/ajustes/consola pending; 6–9 pendientes. `ae982ec` autoriza progreso/worldgen por mundo e instancia registrados, verifica locale y acota worldgen/NBT, conservando semilla 0. `STAGE5-WORLD-READ-AUTHORITY.md`: 1081 unitarias /108 archivos,39 focales,7 React+2 Vue,8 Axe sin violaciones/8 incompletos y9 harness; tipos/lint/builds aprobados y E2E56diagnósticos base sin nuevos. Dist Vue restaurado.
+**Etapa 5 activa**, K11/K12/K21 y gates mundos/ajustes/consola pending; 6–9 pendientes. `2b1c02b` protege los lectores internos de progreso: archivos/directorios/enlaces, JSON/SNBT, JAR/CRC, versiones/idiomas, modelos/texturas/caché y finalización del trabajo opcional. Conserva avances, misiones y estadísticas, con recuperación visible y locale real en React. `STAGE5-PROGRESS-READERS.md`: 1.092 unitarias /110 archivos,33 focales,13 React+2 Vue,20 Axe sin violaciones/24 incompletos y9 harness. Tipos/lint/builds aprobados; E2E mantiene56 diagnósticos base. Dist Vue restaurado; ASAR/main y capturas tienen copias propias.
 
-Se conserva el bloque `91edfda` de revisión/recuperación Native de chunks y mapa con teclado,2RPC y32bitmaps; no rehacerlo. Evidencia en STAGE5-CHUNK-REVIEW. CI41279948321/2525449 seguía con Vue aprobado y React en curso al registrar este informe: comprobar el resultado y el nuevo SHA después de subir. PR4 borrador, producción v0.2.0-beta.2 intacta; Microsoft pospuesto y DOMPurify package.json/lock WIP fuera de commits.
+Se conservan revisión/recuperación de chunks/mapa `91edfda` y autoridad/worldgen `ae982ec`. No rehacer esos bloques ni los lectores internos ya cubiertos. CI41279948321/2525449 y41281063903/b23a888 completos, success en ambos jobs; comprobar el SHA nuevo tras subir. PR4 borrador, producción v0.2.0-beta.2 intacta, Microsoft pospuesto y DOMPurify package.json/lock WIP fuera de commits.
 
 ## Siguiente acción
 
-1. Comprobar CI exacto, sin reintentar ejecuciones vivas. Registrar sus límites; el CI antiguo41274791753 falló por la aserción de mock lógico/físico ya sustituida por archivos y motor reales.
-2. K11: proteger lectores internos de progreso (progress.ts: archivos/dir/enlaces, JSON/SNBT, imágenes/modelos recursivos/JAR, caché/timeout), versiones/avances en advancements.ts e idiomas en minecraftLang.ts. Las raíces de mundo/instancia ya están autorizadas y worldgen acotado; no repetirlos ni confundirlos con toda la seguridad de progreso. Mantener avances, misiones, estadísticas e iconos locales.
-3. Revisar session.lock para partidas externas, además del bloqueo de procesos administrados. Mantener explícitos los límites inline1/2/3 y entidades/POI/mods separados. Auditoría IPC de escrituras legacy en8.
-4. K12: argv exactos con espacios/comillas, vacío explícito/herencia, cambios sin guardar y conflictos. K21: streaming aislado de dos procesos, fragmentos/lotes, virtualización, scroll/copia/exportación con recuperación. No extender el diseño ni saltar a6 todavía.
-5. Cerrar5 solo al cumplir criterios; luego catálogo y7–9. Mantener ANALISIS_ARQUITECTURA.md intacto, temporales/junctions protegidos y producción sin cambios hasta pasar gates.
+1. K11: implementar y probar bloqueo real de session.lock para partidas externas durante las escrituras revisadas, además de los procesos administrados. Mantener autoridad/CAS/backups y datos del mundo. No confundir presencia de un archivo antiguo con un bloqueo activo. Auditoría de operaciones IPC legacy en8.
+2. K12: argv exactos con espacios/comillas, vacío explícito/herencia, cambios sin guardar y conflictos. K21: streaming aislado de dos procesos, fragmentos/lotes, virtualización, scroll y recuperación de copia/exportación.
+3. Comprobar CI exacto del nuevo commit, sin reiniciar ejecuciones vivas. El fallo antiguo41274791753 por mock lógico/físico ya tiene evidencia real y ambos CI posteriores verdes.
+4. Cerrar5 solo cuando pasen sus criterios; después catálogo y7–9. Mantener ANALISIS_ARQUITECTURA.md intacto, temporales/junctions protegidos y producción sin cambios hasta pasar gates.
+5. Los logs ZIP conservan aviso Native DEP0005 Buffer(); no se trazó el origen. Packs enormes pueden alcanzar límites explícitos del lector. AA manual/IPC integral y juego/instalador/rendimiento finales siguen sus gates; no presentar fixtures como prueba de una partida real.
 
 ## Restricciones y hechos que no deben perderse
 
