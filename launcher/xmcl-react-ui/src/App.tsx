@@ -63,6 +63,8 @@ declare global {
       maximize(): void
       close(): void
       showOpenDialog?: import('@xmcl/runtime-api/src/controller').WindowController['showOpenDialog']
+      writeClipboard?: import('@xmcl/runtime-api/src/controller').WindowController['writeClipboard']
+      exportLogView?: import('@xmcl/runtime-api/src/controller').WindowController['exportLogView']
       on(channel: 'window-active', listener: (active: boolean) => void): unknown
       removeListener(channel: 'window-active', listener: (active: boolean) => void): unknown
     }

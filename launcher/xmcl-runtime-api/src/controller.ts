@@ -127,7 +127,10 @@ export interface WindowController extends GenericEventEmitter<WindowControllerEv
 
   getMonitors(): Promise<MonitorInfo[]>
 
-  writeClipboard(text: string): void
+  writeClipboard(text: string): Promise<void>
+
+  /** Save a bounded log view through a native picker; false means cancellation. */
+  exportLogView(text: string, name: string): Promise<boolean>
 
   writeClipboardImage(imageUrl: string): void
 

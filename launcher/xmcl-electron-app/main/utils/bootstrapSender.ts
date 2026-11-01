@@ -5,6 +5,6 @@ export function isBootstrapSender(event: Pick<IpcMainInvokeEvent, 'sender' | 'se
   try {
     const actual = new URL(event.senderFrame!.url)
     const expected = new URL(rendererUrl)
-    return actual.origin === expected.origin && actual.pathname === expected.pathname
+    return !actual.username && !actual.password && actual.protocol === expected.protocol && actual.hostname === expected.hostname && actual.origin === expected.origin && actual.pathname === expected.pathname
   } catch { return false }
 }

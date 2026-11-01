@@ -1,4 +1,5 @@
 import { parseOAuthRedirect } from '@xmcl/runtime/user/accountSystems/oauthRedirect'
+import { exportLogView } from '@xmcl/runtime/util/exportLogView'
 import type { InstalledAppManifest } from '@xmcl/runtime-api'
 import type { Client, LauncherAppController } from '@xmcl/runtime/app'
 import type { Logger } from '@xmcl/runtime/infra'
@@ -528,10 +529,23 @@ export class DeskGapController implements LauncherAppController {
   }
 
   private registerWindowHandlers() {
+    const exporting = new WeakSet<Client>()
     this.handle('window.focus', ({ sender }) => this.getWindow(sender).focus())
     this.handle('window.write-clipboard', (_, text: string) => clipboard.writeText(text))
     this.handle('window.show-open-dialog', ({ sender }, options) => dialog.showOpenDialog(this.getWindow(sender), options))
     this.handle('window.show-save-dialog', ({ sender }, options) => dialog.showSaveDialog(this.getWindow(sender), options))
+    this.handle('window.export-log-view', async ({ sender }, text, name) => {
+      const window = this.getWindow(sender)
+      if (exporting.has(sender)) throw new Error('Log export is already open')
+      exporting.add(sender)
+      try {
+        return await exportLogView(text, name, async defaultPath => {
+          const choice = await dialog.showSaveDialog(window, { defaultPath, filters: [{ name: 'Logs', extensions: ['log', 'txt'] }] })
+          if (!choice.canceled && (window.isDestroyed() || this.getWindow(sender) !== window)) throw new Error('Log export window closed')
+          return choice
+        })
+      } finally { exporting.delete(sender) }
+    })
     this.handle('window.find-in-page', ({ sender }, text, options) => this.getWindow(sender).webView.findInPage(text, options))
     this.handle('window.stop-find-in-page', ({ sender }) => this.getWindow(sender).webView.stopFindInPage('clearSelection'))
     this.handle('window.start-profiling', () => false)

@@ -14,3 +14,11 @@ test('bootstrap accepts only the built-in renderer document in the main window a
     expect(isBootstrapSender(event, main, 'http://xmcl.runtime/index.html')).toBe(false)
   }
 })
+test('an embedded file document cannot be replaced by another null-origin scheme or file host', () => {
+  const frame = { url: 'file:///C:/launcher/renderer/logger.html?instance=owned' }, main = { mainFrame: frame } as any
+  const event = { sender: main, senderFrame: frame } as any, expected = 'file:///C:/launcher/renderer/logger.html'
+  expect(isBootstrapSender(event, main, expected)).toBe(true)
+  for (const url of ['file://remote/C:/launcher/renderer/logger.html', 'custom:/C:/launcher/renderer/logger.html']) {
+    frame.url = url; expect(isBootstrapSender(event, main, expected)).toBe(false)
+  }
+})

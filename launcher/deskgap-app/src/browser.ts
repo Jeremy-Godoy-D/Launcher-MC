@@ -271,7 +271,8 @@ function installBridge(deskgap: DeskGapBrowserClient) {
     maximize: () => { void invoke('window.control', 'maximize') },
     queryAudioPermission: () => invoke<boolean>('window.query-audio-permission'),
     getMonitors: () => invoke('window.get-monitors'),
-    writeClipboard: (text: string) => { void invoke('window.write-clipboard', text) },
+    writeClipboard: (text: string) => invoke<void>('window.write-clipboard', text),
+    exportLogView: (text, name) => invoke<boolean>('window.export-log-view', text, name),
     writeClipboardImage: (imageUrl: string) => { void invoke('window.write-clipboard-image', imageUrl) },
     getPathForFile(file: File) {
       const index = droppedEntries.findIndex(entry =>

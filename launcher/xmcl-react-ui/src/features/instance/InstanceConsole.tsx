@@ -41,7 +41,13 @@ export function InstanceConsole({ instance }: { instance: SavedInstance }) {
   const [levelFilter, setLevelFilter] = useState<'all' | 'info' | 'warn' | 'error' | 'debug'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [autoscroll, setAutoscroll] = useState(true)
-  const [copied, setCopied] = useState(false)
+  const [action, setAction] = useState<'copy' | 'export'>()
+  const [success, setSuccess] = useState<'copy' | 'export'>()
+  const [actionError, setActionError] = useState<'copyError' | 'exportError'>()
+  const actionBusy = useRef(false)
+  const actionEpoch = useRef(0)
+  const mounted = useRef(false)
+  const successTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const [listing, setListing] = useState(false)
   const [reading, setReading] = useState(false)
   const [fileRevision, setFileRevision] = useState(0)
@@ -159,46 +165,54 @@ export function InstanceConsole({ instance }: { instance: SavedInstance }) {
     }
   }, [filteredEntries, autoscroll, virtualizer.getTotalSize()])
 
-  // Copy
-  async function copyLogs() {
+  useLayoutEffect(() => {
+    mounted.current = true; actionEpoch.current++
+    setSuccess(undefined); setActionError(undefined)
+    if (successTimer.current !== undefined) clearTimeout(successTimer.current)
+    return () => {
+      mounted.current = false; actionEpoch.current++
+      if (successTimer.current !== undefined) clearTimeout(successTimer.current)
+    }
+  }, [selectedSource, levelFilter, searchQuery])
+
+  async function runAction(kind: 'copy' | 'export') {
+    if (actionBusy.current || !filteredEntries.length) return
+    actionBusy.current = true; setAction(kind); setSuccess(undefined); setActionError(undefined)
+    if (successTimer.current !== undefined) clearTimeout(successTimer.current)
+    const epoch = actionEpoch.current
     const text = filteredEntries.map((e) => e.raw).join('\n')
+    const source = selectedSource === '__live__' ? 'live' : selectedSource.slice(selectedSource.startsWith('crash:') ? 6 : 4)
+    const name = `${`${instance.name}-${source}`.replace(/[^a-zA-Z0-9_.-]/g, '_').slice(0, 140)}-${Date.now()}.log`
     try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text)
+      const controller = window.windowController
+      if (kind === 'copy') {
+        if (!controller?.writeClipboard) throw new Error('Native clipboard unavailable')
+        await controller.writeClipboard(text)
       } else {
-        const textarea = document.createElement('textarea')
-        textarea.value = text
-        document.body.appendChild(textarea)
-        textarea.select()
-        document.execCommand('copy')
-        textarea.remove()
+        if (!controller?.exportLogView) throw new Error('Native log export unavailable')
+        if (!await controller.exportLogView(text, name)) return
       }
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      if (mounted.current && epoch === actionEpoch.current) {
+        setSuccess(kind)
+        successTimer.current = setTimeout(() => { if (mounted.current && epoch === actionEpoch.current) setSuccess(undefined) }, 2000)
+      }
     } catch {
-      // Ignore
+      if (mounted.current && epoch === actionEpoch.current) setActionError(kind === 'copy' ? 'copyError' : 'exportError')
+    } finally {
+      actionBusy.current = false
+      if (mounted.current) setAction(undefined)
     }
   }
 
   // Clear
   function clearLogs() {
+    setSuccess(undefined); setActionError(undefined)
+    if (successTimer.current !== undefined) clearTimeout(successTimer.current)
     if (selectedSource === '__live__') {
       launch?.store.clearLogs(instance.path)
     } else {
       setFileView(undefined)
     }
-  }
-
-  // Export
-  function exportLogs() {
-    const text = filteredEntries.map((e) => e.raw).join('\n')
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${instance.name.replace(/[^a-zA-Z0-9_-]/g, '_')}-${selectedSource === '__live__' ? 'live' : selectedSource.slice(selectedSource.startsWith('crash:') ? 6 : 4).replace(/[^a-zA-Z0-9_.-]/g, '_')}-${Date.now()}.log`
-    a.click()
-    URL.revokeObjectURL(url)
   }
 
   // Open external window
@@ -324,24 +338,26 @@ export function InstanceConsole({ instance }: { instance: SavedInstance }) {
             type="button"
             className="button secondary"
             data-testid="console-copy"
-            onClick={copyLogs}
-            disabled={filteredEntries.length === 0}
+            onClick={() => { void runAction('copy') }}
+            disabled={filteredEntries.length === 0 || !!action}
+            aria-busy={action === 'copy'}
             title={t('react.instanceConsole.copy')}
           >
-            {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
-            {copied ? t('react.instanceConsole.copied') : t('react.instanceConsole.copy')}
+            {success === 'copy' ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
+            <span aria-live="polite">{action === 'copy' ? t('react.instanceConsole.copyPending') : success === 'copy' ? t('react.instanceConsole.copied') : t('react.instanceConsole.copy')}</span>
           </button>
 
           <button
             type="button"
             className="button secondary"
             data-testid="console-export"
-            onClick={exportLogs}
-            disabled={filteredEntries.length === 0}
+            onClick={() => { void runAction('export') }}
+            disabled={filteredEntries.length === 0 || !!action}
+            aria-busy={action === 'export'}
             title={t('react.instanceConsole.export')}
           >
             <Download size={16} aria-hidden="true" />
-            {t('react.instanceConsole.export')}
+            <span aria-live="polite">{action === 'export' ? t('react.instanceConsole.exportPending') : success === 'export' ? t('react.instanceConsole.exported') : t('react.instanceConsole.export')}</span>
           </button>
 
           <button
@@ -349,7 +365,7 @@ export function InstanceConsole({ instance }: { instance: SavedInstance }) {
             className="button secondary"
             data-testid="console-clear"
             onClick={clearLogs}
-            disabled={currentEntries.length === 0}
+            disabled={currentEntries.length === 0 || !!action}
             title={t('react.instanceConsole.clear')}
           >
             <Trash2 size={16} aria-hidden="true" />
@@ -394,6 +410,7 @@ export function InstanceConsole({ instance }: { instance: SavedInstance }) {
       </div>
 
       <div>
+        {actionError && <p className="form-error" role="alert">{t(`react.instanceConsole.${actionError}`)}</p>}
         {Object.entries(fileErrors).filter(([, value]) => value).map(([operation, key]) => <p key={operation} className="form-error" role="alert">{t(`react.instanceConsole.${key}`)}</p>)}
         {fileView?.source === selectedSource && fileView.limited && <p className="form-description" role="status">{t('react.instanceConsole.limited')}</p>}
         {selectedSource === '__live__' && logs.limited && <p className="form-description" role="status">{t('react.instanceConsole.liveLimited')}</p>}
