@@ -19,6 +19,7 @@ jobs:
         renderer: [vue, react]
     env:
       LAUNCHER_RENDERER: ${{ matrix.renderer }}
+      CURSEFORGE_PROXY_URL: ${{ vars.CURSEFORGE_PROXY_URL }}
     defaults:
       run:
         working-directory: launcher
