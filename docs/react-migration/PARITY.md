@@ -338,3 +338,8 @@ STAGE5-WORLD-LEGACY.md registra cloneSave/deleteSave/updateSave/importDatapack/d
 ## Importación y exportación legacy de Mundos
 
 STAGE5-WORLD-TRANSFERS.md/0ce2170 elimina extracción ZIP/copia/exportación sin revisión; conserva carpeta independiente, enlace del depósito mediante opción privada y proveedor validado en snapshot. ZIP/carpeta exportados desde saves con publicación exclusiva y conservación de fallos parciales.71focales,19React+9Vue,24Axe0violaciones/44incomplete,9harness/tipos/lint/builds;E2E56base. CI41341682892/c2d3a55 success confirma bloque previo, nuevo pendiente. K11 mantiene compartir/enlaces/mercados/lectores/watchers/IPC/noNIO/aceptación integral;K12/K21pass,5activa,6–9pendientes. Todas las herramientas/chunks conservadas, Microsoft pospuesto, producción/proxy sin cambios.
+
+
+## Compartir/desconectar carpetas de Mundos
+
+STAGE5-WORLD-SHARING.md/3f0b98d asegura compartir/conectar/desconectar y autoridad Java de isSaveLinked, con copias independientes/colisiones, backups, guardas NIO y recuperación. VueEPERM por carpeta vigilada reproducido y corregido cerrando/recreando su observador y serializando nuevos observadores.82focales,React10+1creación,Vue11+1boot;tipos/lint/DeskGap/9harness,E2E56base. CI41343639177/2fa2c94 success confirma el bloque previo; nuevo pendiente. K11 conserva mercado datapacks/lectores/watchers/IPC/preservación al borrar/noNIO/aceptación integral pendientes;K12/K21pass,5activa,6–9pendientes. Todas herramientas/chunks conservadas, sin cambios en producción/proxy.
