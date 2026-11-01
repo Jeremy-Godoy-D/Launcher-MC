@@ -323,3 +323,8 @@ STAGE5-CONSOLE-ACTIONS (2d9a28f/280d99a/17fd9b8) registra confirmación de copia
 ## Consola independiente aceptada (4504f02)
 
 K21 pasa. STAGE5-LOGGER-WINDOWS.md registra contexto Native fijo por instancia/fuente, archivos y salida vivos, acciones y reintentos, navegación restringida y precomandos sin salida/credenciales en logs. 1264 unitarias/125 archivos, 28 escenarios React distintos y ocho Vue; cuatro Axe finales de logger con cero violaciones/tres incomplete. Los fallos de capas y margen de scroll se corrigieron conservando las aserciones. CI41332318544/3657285 confirma el bloque anterior; comprobar el nuevo. K11 sigue pending, todas sus herramientas/chunks conservadas. Auditoría global IPC/extras, juego real, rendimiento e instalador/delta antes de producción.
+
+
+## Identidades exactas de Mundos (a41faf8)
+
+K11 permanece pending. STAGE5-WORLD-IDENTITIES.md documenta BigInt, huellas JSON normalizadas y cachés exactas: 1271 unitarias/127 archivos, 54 focales finales, 39 escenarios React y 10 repetidos más boot, cuatro Vue. Un artefacto falló al arrancar y el mismo código reempaquetado pasó; validar cada entrega. Faltan writers/IPC legacy, escritores noNIO y aceptación integral. La creación usa linkSharedSave; preservar esa compatibilidad al asegurarla. K12/K21 pass, etapas6–9 pendientes.

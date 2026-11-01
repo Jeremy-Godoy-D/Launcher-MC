@@ -1,3 +1,11 @@
+## Último bloque — identidades de Mundos (a41faf8, 2026-11-01)
+
+K11 sigue pending; K12/K21 pass. Leer STAGE5-WORLD-IDENTITIES.md. BigInt de ino/dev/mtimeNs/ctimeNs y serialización normalizada completos en worldFiles/worldOperations/worldChunks/worldArchive/worldDatapacks/progressFiles/progress/readBoundedFile, snapshots compartidos y autoridad de depósito en InstanceSavesService. No repetir esa conversión. 1271 unitarias/127 archivos +54 focales finales; React39/39 a3b4ba8, y tras ajuste depósito/fixture a41faf8 boot1/1 +10/10; Vue4/4. 69 Axe iniciales cero violaciones/126 incomplete;20 finales cero/32. Nueve harness, tipos/lint/build DeskGap. Dist Vue y paquetes separados.
+
+Once lanzamientos del primer paquete a41faf8 fallaron antes del renderer con0xc000007b; mismo código reempaquetado pasó. Guardados hash/diagnóstico/logs en artefactos propios stage5-world-identities-*. No atribuir causa definitiva ni publicar sin comprobar cada artefacto. Boot tuvo dos avisos GPU al cerrar; grupo final ninguno. No juego real/DeskGap funcional/AA global/instalador aislado. CI41336065433/12a1125 seguía in_progress: verificar ese SHA y el nuevo, no inventar verde.
+
+Siguiente K11: asegurar writers/IPC legacy y noNIO. InstanceSavesService: cloneSave/deleteSave/shareSave/updateSave/importSave/exportSave/linkSharedSave/unlinkSharedSave e importación/retirada de datapacks. Reutilizar guardas/preview/apply si mantienen contrato y orden de locks, evitando mutex reentrantes. AddInstance.tsx llama linkSharedSave al crear: no negar todo legacy y romper esa preferencia. Dispatcher IPC global: xmcl-runtime/service/pluginServicesHandler.ts; completar su auditoría en etapa8. Mantener todas las herramientas/chunks. Sin extras nuevos, Microsoft pospuesto, PR4 borrador, producción/proxy intactos, DOMPurify WIP/ANALISIS excluidos. No reintentar acciones rechazadas.
+
 
 ## Último bloque — logger independiente (4504f02, 2026-11-01)
 
