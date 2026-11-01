@@ -78,10 +78,20 @@ test('virtual console measures wrapped rows at both themes and supported native 
       const height = width === 800 ? 400 : 720
       await win.evaluate((win, size) => win.setContentSize(size.width, size.height), { width, height })
       await expect.poll(() => page.evaluate(() => [innerWidth, innerHeight])).toEqual([width, height])
+      expect(await page.locator('.app').evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ')[0])).toBe(width === 800 ? '72px' : '224px')
       const viewport = console.getByTestId('console-entries'), entries = console.getByTestId('console-entry')
       await focusLauncher(launcher)
       await viewport.focus(); await page.keyboard.press('Home')
-      await viewport.scrollIntoViewIfNeeded(); await expect(viewport).toBeInViewport({ ratio: 1 })
+      await viewport.scrollIntoViewIfNeeded()
+      await writeFile(testInfo.outputPath(`console-layout-${theme}-${width}.json`), JSON.stringify(await viewport.evaluate(element => {
+        const layout = []
+        for (let node: HTMLElement | null = element; node; node = node.parentElement) {
+          const rect = node.getBoundingClientRect(), style = getComputedStyle(node)
+          layout.push({ tag: node.tagName, class: node.className, rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height }, clientHeight: node.clientHeight, scrollHeight: node.scrollHeight, scrollTop: node.scrollTop, overflow: style.overflow, scrollPadding: style.scrollPadding, flex: style.flex })
+        }
+        return layout
+      }), null, 2))
+      await expect(viewport).toBeInViewport({ ratio: 1 })
       await expect(entries.filter({ hasText: 'wrapped-0 ' })).toBeInViewport()
       await page.keyboard.press('End'); await expect(entries.filter({ hasText: 'wrapped-239 ' })).toBeInViewport()
       await page.mouse.move(1, 1)

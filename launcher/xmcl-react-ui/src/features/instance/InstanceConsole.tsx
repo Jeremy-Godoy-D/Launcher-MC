@@ -256,10 +256,10 @@ export function InstanceConsole({ instance, initialSource = '__live__', detached
 
   return (
     <section className="instance-console" data-testid="instance-console" aria-label={t('react.instanceConsole.title')}>
-      <div className="console-header">
+      {!detached && <div className="console-header">
         <h2>{t('react.instanceConsole.title')}</h2>
         <p className="form-description">{t('react.instanceConsole.description')}</p>
-      </div>
+      </div>}
 
       <div className="console-toolbar" role="toolbar" aria-label={t('react.instanceConsole.title')}>
         <div className="console-toolbar-group">

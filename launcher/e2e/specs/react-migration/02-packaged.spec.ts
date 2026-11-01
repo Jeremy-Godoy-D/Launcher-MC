@@ -9,6 +9,7 @@ test('selected React package boots all entries and decodes its shipped video', a
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   await expect(page.getByTestId('react-prototype')).toBeVisible()
+  expect(await page.evaluate(() => document.styleSheets[0].cssRules[0].cssText)).toBe('@layer base, layout, components, responsive;')
   await seedReactLibrary(page)
   await expect(page.locator('.featured h2')).toHaveText('Mi mundo')
   expect(page.url()).toMatch(/xmcl\.runtime\/index\.html/)

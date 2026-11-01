@@ -72,6 +72,9 @@ test('logger captures the selected instance and file, reuses its window and foll
       await writeFile(testInfo.outputPath(`logger-${theme}-${width}-axe.json`), JSON.stringify(report, null, 2))
       expect(report.violations).toEqual([])
       await snap({ ...launcher, main: firstWindow }, `logger-${theme}-${width}`, 'Consola independiente de Mi mundo: archivo real, instancia fija y controles accesibles con scroll.')
+      await firstWindow.getByTestId('console-entries').scrollIntoViewIfNeeded()
+      await expect(firstWindow.getByTestId('console-entry')).toBeInViewport()
+      await snap({ ...launcher, main: firstWindow }, `logger-${theme}-${width}-records`, 'Registros y estado accesibles mediante el scroll de la consola independiente.')
     }
   }
   await firstWindow.reload()
@@ -131,4 +134,31 @@ test('renderer navigation cannot grant privileges through a frame name, host pre
   const foreignWindow = await opening
   for (const method of ['getLoggerContext', 'openLogger']) expect(await foreignWindow.evaluate(async ({ method, path }) => { try { await (window as any).windowController[method](path); return 'unexpected' } catch { return 'denied' } }, { method, path })).toBe('denied')
   await foreignWindow.close()
+})
+
+test('logger opening recovers from a native failure and showLog opens one fixed window for concurrent requests', async ({ launcher }) => {
+  const [first, second] = await seedReactLibrary(launcher.main), console = await openConsole(launcher.main)
+  await launcher.app.evaluate(({ ipcMain }) => {
+    const original = (ipcMain as any)._invokeHandlers.get('open-logger')
+    let fail = true
+    ipcMain.removeHandler('open-logger')
+    ipcMain.handle('open-logger', (event: any, ...args: any[]) => { if (fail) { fail = false; throw new Error('Fixture window unavailable') }; return original(event, ...args) })
+  })
+  await console.getByTestId('console-open-window').click()
+  await expect(console.getByRole('alert')).toContainText('No se pudo abrir')
+  const opening = launcher.app.waitForEvent('window')
+  await console.getByTestId('console-open-window').click()
+  const firstWindow = await opening
+  await expect(firstWindow.getByTestId('logger-instance-name')).toHaveText('Mi mundo')
+  expect(await firstWindow.evaluate(() => (window as any).windowController.getLoggerContext())).toEqual({ instancePath: first, source: '__live__' })
+  await expect(console.getByRole('alert')).toHaveCount(0)
+  // The existing no-spawn hook emits real service lifecycle events; it does not start Java.
+  const automatic = launcher.app.waitForEvent('window')
+  await launcher.main.evaluate(async path => {
+    const service = (window as any).serviceChannels.open('LaunchService')
+    await Promise.all([service.call('launch', { gameDirectory: path, version: 'fixture', showLog: true }), service.call('launch', { gameDirectory: path, version: 'fixture', showLog: true })])
+  }, second)
+  const secondWindow = await automatic
+  await expect(secondWindow.getByTestId('logger-instance-name')).toHaveText('Fabric QA')
+  expect(launcher.app.windows().filter(page => page.url().includes('/logger.html'))).toHaveLength(2)
 })
