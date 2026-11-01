@@ -302,7 +302,8 @@ describe('InstanceInstallService progressive installation', () => {
       await installing
     }
     expect(await readPendingInstalls(f.instancePath)).toEqual([])
-  }, 10_000)
+    // Keep setup/finalization outside the unchanged 10s readiness assertion.
+  }, 20_000)
 
   it('does not resurrect an older project version when unrelated pending files resume', async () => {
     const f = await fixture()

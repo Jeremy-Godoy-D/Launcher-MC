@@ -72,6 +72,7 @@ test('world progress viewer displays advancements, stats, search filters and vie
   // Advancements visible
   await expect(progressSec.getByTestId('progress-advancements')).toBeVisible()
   await expect(progressSec.getByTestId('progress-advancements-container')).toBeVisible()
+  await expect(progressSec.locator('li[data-advancement-id="minecraft:story/upgrade_tools"]')).toContainText('Pendiente')
 
   // Search filter
   const filterInput = progressSec.getByTestId('progress-filter')
@@ -86,7 +87,9 @@ test('world progress viewer displays advancements, stats, search filters and vie
 
   // Switch to tree view
   const viewModeBtn = progressSec.getByTestId('progress-view-mode')
+  await expect(viewModeBtn).toHaveAttribute('aria-label', 'Vista de árbol')
   await viewModeBtn.click()
+  await expect(viewModeBtn).toHaveAttribute('aria-label', 'Vista de lista')
   await expect(progressSec.getByTestId('progress-tree')).toBeVisible()
 
   // Switch to stats tab

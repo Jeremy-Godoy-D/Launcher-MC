@@ -28,7 +28,7 @@ export function WorldProgress({
   running: boolean
 }) {
   const service = useService(InstanceSavesServiceKey)
-  const { t, n } = useI18n()
+  const { t, n, locale } = useI18n()
   const [progress, setProgress] = useState<InstanceSaveProgress | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -43,13 +43,12 @@ export function WorldProgress({
     async function load() {
       setLoading(true)
       setError(false)
+      setProgress(null)
       try {
-        const res = await service.getInstanceSaveProgress({ savePath, instancePath })
+        const res = await service.getInstanceSaveProgress({ savePath, instancePath, locale })
         if (active) {
           setProgress(res)
-          if (res.quests?.chapters?.length && !selectedChapterId) {
-            setSelectedChapterId(res.quests.chapters[0].id)
-          }
+          setSelectedChapterId(current => res.quests?.chapters.some(chapter => chapter.id === current) ? current : res.quests?.chapters[0]?.id || '')
         }
       } catch {
         if (active) setError(true)
@@ -61,7 +60,7 @@ export function WorldProgress({
     return () => {
       active = false
     }
-  }, [service, savePath, instancePath, revision])
+  }, [service, savePath, instancePath, revision, locale])
 
   const advancements = progress?.advancements?.items ?? []
   const hasAdvancements = advancements.length > 0
@@ -157,6 +156,7 @@ export function WorldProgress({
             onClick={() => setRevision((v) => v + 1)}
           >
             <RefreshCw size={16} aria-hidden="true" />
+            {error && t('react.worlds.refresh')}
           </button>
         </div>
       </div>
@@ -192,7 +192,7 @@ export function WorldProgress({
                     type="button"
                     className={`button ${viewMode === 'list' ? 'primary' : 'secondary'}`}
                     data-testid="progress-view-mode"
-                    aria-label={t('react.worldProgress.viewList')}
+                    aria-label={t(viewMode === 'list' ? 'react.worldProgress.viewTree' : 'react.worldProgress.viewList')}
                     onClick={() => setViewMode(viewMode === 'list' ? 'tree' : 'list')}
                   >
                     {viewMode === 'list' ? <List size={16} /> : <FolderTree size={16} />}
@@ -261,7 +261,7 @@ export function WorldProgress({
                         style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}
                       >
                         {q.done ? <CheckCircle size={14} /> : <Circle size={14} />}
-                        {q.done ? t('react.worldProgress.completed') : t('react.worldProgress.locked')}
+                        {q.done ? t('react.worldProgress.completed') : t(q.locked ? 'react.worldProgress.locked' : 'react.worldProgress.incomplete')}
                       </span>
                     </div>
                   </li>
@@ -330,10 +330,10 @@ function AdvancementRow({ item, t }: { item: InstanceProgressAdvancement; t: (ke
           <Award size={22} aria-hidden="true" />
         )}
       </div>
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div className="content-file">
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
           <strong>{item.title || item.id}</strong>
-          {item.frame && <span className="badge text-xs">{item.frame}</span>}
+          {item.frame && <span className="badge text-xs">{t(`react.worldProgress.frame.${item.frame}`)}</span>}
           {item.mod && <small className="text-muted">{item.mod}</small>}
         </div>
         {item.description && <p className="content-description">{item.description}</p>}
@@ -349,7 +349,7 @@ function AdvancementRow({ item, t }: { item: InstanceProgressAdvancement; t: (ke
           style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}
         >
           {item.done ? <CheckCircle size={14} /> : <Circle size={14} />}
-          {item.done ? t('react.worldProgress.completed') : t('react.worldProgress.locked')}
+          {item.done ? t('react.worldProgress.completed') : t('react.worldProgress.incomplete')}
         </span>
       </div>
     </li>
@@ -412,7 +412,7 @@ function TreeNode({
           style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: '0.75rem' }}
         >
           {node.done ? <CheckCircle size={12} /> : <Circle size={12} />}
-          {node.done ? t('react.worldProgress.completed') : t('react.worldProgress.locked')}
+          {node.done ? t('react.worldProgress.completed') : t('react.worldProgress.incomplete')}
         </span>
       </div>
       {children.map((child) => (

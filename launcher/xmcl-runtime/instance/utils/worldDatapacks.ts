@@ -1,13 +1,11 @@
 import { checksum } from '@xmcl/core'
 import type { InstanceDatapack } from '@xmcl/runtime-api/src/entities/save'
 import type { WorldDatapackReview } from '@xmcl/runtime-api/src/services/InstanceSavesService'
-import { open as openZip, openEntryReadStream, walkEntriesGenerator } from '@xmcl/unzip'
-import { Crc32 } from '@aws-crypto/crc32'
+import { open as openZip, walkEntriesGenerator } from '@xmcl/unzip'
 import { createHash } from 'node:crypto'
 import { lstat, opendir, realpath } from 'node:fs/promises'
 import { basename, join, parse } from 'node:path'
-import { Transform } from 'node:stream'
-import { pipeline } from 'node:stream/promises'
+import { readBoundedZipEntry } from '../../util/readBoundedZipEntry'
 import { importPathParts } from '../../util/importFile'
 import { readFolderSnapshot } from './sharedResourcePacks'
 import { readBoundedFile, staticPngDataUrl, worldLocation } from './worldFiles'
@@ -56,19 +54,7 @@ export function parsePackMcmeta(data: Buffer) {
 }
 
 async function readZipEntryBuffer(zip: Awaited<ReturnType<typeof openZip>>, entry: any, limit: number) {
-  if (!Number.isSafeInteger(entry.uncompressedSize) || entry.uncompressedSize < 0 || entry.uncompressedSize > limit) throw invalid()
-  const chunks: Buffer[] = [], crc = new Crc32(); let bytes = 0
-  const stream = await openEntryReadStream(zip, entry)
-  const collector = new Transform({
-    transform(chunk: Buffer, _encoding, callback) {
-      bytes += chunk.length
-      if (bytes > entry.uncompressedSize || bytes > limit) { callback(invalid()); return }
-      crc.update(chunk); chunks.push(chunk); callback()
-    },
-  })
-  await pipeline(stream, collector)
-  if (bytes !== entry.uncompressedSize || crc.digest() !== entry.crc32) throw invalid()
-  return Buffer.concat(chunks, bytes)
+  try { return await readBoundedZipEntry(zip, entry, limit) } catch { throw invalid() }
 }
 
 async function inspectDatapackZip(filePath: string) {

@@ -56,7 +56,7 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
     {!reading && !error && !visible.length && <p className="empty">{t(query ? 'react.worlds.noMatches' : 'react.worlds.empty')}</p>}
     <ul className="pack-list world-list" data-testid="worlds-list">{visible.map(world => <li key={world.name} data-world-name={world.name}>
       <div className="world-icon">{world.icon ? <img src={world.icon} alt="" loading="lazy" onError={event => { event.currentTarget.style.display = 'none' }} /> : <Map size={24} aria-hidden="true" />}</div>
-      <div><button className="content-file-name" onClick={event => { trigger.current = event.currentTarget; setInitialTab('info'); setDetails(world.name) }}>{world.levelName || world.name}</button><small>{world.name} · {world.gameVersion || t('react.workspace.unknown')}{world.linkTo ? ` · ${t('react.worlds.shared')}` : ''}</small>
+      <div className="content-file"><button className="content-file-name" onClick={event => { trigger.current = event.currentTarget; setInitialTab('info'); setDetails(world.name) }}>{world.levelName || world.name}</button><small>{world.name} · {world.gameVersion || t('react.workspace.unknown')}{world.linkTo ? ` · ${t('react.worlds.shared')}` : ''}</small>
         {world.error ? <p className="form-error">{t(`react.worlds.${world.error}`)}</p> : <small>{t(`react.worlds.mode${world.mode}`)} · {world.lastPlayed ? d(world.lastPlayed) : t('react.workspace.never')}</small>}
         <div className="content-actions">
           <button

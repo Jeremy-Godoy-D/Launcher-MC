@@ -6,22 +6,24 @@ import {
   InstanceProgressStats,
   InstanceSaveProgress,
 } from '@xmcl/runtime-api'
-import { FileSystem, openFileSystem } from '@xmcl/system'
-import { pathExists, readdir, readFile, stat } from 'fs-extra'
+import { FileSystem } from '@xmcl/system'
 import { basename, dirname, join } from 'path'
-import { exists } from '../util/fs'
 import { parseSnbt } from './snbt'
 import { AdvancementDefinition, readAdvancementDefinitions, resolveProgressVersion } from './advancements'
+import { chargeProgress, listProgressFiles, openProgressArchive, parseProgressJson, progressBudget, progressIdentifier, progressInfo, readProgressFile, type ProgressBudget } from './progressFiles'
+import { staticPngDataUrl } from '../instance/utils/worldFiles'
+import { instanceFileSource } from '../instanceIO/utils/instanceFileSource'
 
 function normalizeId(id: unknown): string {
-  if (id === undefined || id === null) return ''
+  if (!['string', 'number', 'bigint'].includes(typeof id)) return ''
   return String(id)
 }
 
 export function extractCleanItemId(raw: any): string {
   if (!raw) return ''
   if (typeof raw === 'object') {
-    return raw.id || raw.name || raw.item || ''
+    const id = raw.id || raw.name || raw.item
+    return typeof id === 'string' ? id : ''
   }
   let s = String(raw).trim()
   const imgMatch = s.match(/\{image:([^\s}]+)/i)
@@ -37,7 +39,7 @@ export function extractCleanItemId(raw: any): string {
 }
 
 export function cleanTitle(title?: string): string {
-  if (!title) return ''
+  if (!title || typeof title !== 'string') return ''
   let cleaned = title
     .replace(/\{image:[^}]+\}/gi, '')
     .replace(/\u00a7[0-9a-fk-or]/gi, '')
@@ -47,13 +49,13 @@ export function cleanTitle(title?: string): string {
   return cleaned || title.trim()
 }
 
-async function findLatestFile(dir: string, preferredUuid?: string): Promise<{ file: string; uuid: string } | undefined> {
-  if (!await exists(dir)) return undefined
-  const files = await readdir(dir).catch(() => [] as string[])
+async function findLatestFile(dir: string, preferredUuid: string | undefined, root: string, budget: ProgressBudget): Promise<{ file: string; uuid: string } | undefined> {
+  const files = await listProgressFiles(root, dir, budget)
   const jsonFiles = files.filter(f => f.endsWith('.json'))
   if (jsonFiles.length === 0) return undefined
 
   if (preferredUuid) {
+    progressIdentifier(preferredUuid)
     const match = jsonFiles.find(f => f.toLowerCase() === `${preferredUuid.toLowerCase()}.json`)
     if (match) {
       return { file: join(dir, match), uuid: match.replace(/\.json$/, '') }
@@ -64,7 +66,8 @@ async function findLatestFile(dir: string, preferredUuid?: string): Promise<{ fi
   let latestMtime = 0
   for (const f of jsonFiles) {
     try {
-      const s = await stat(join(dir, f))
+      const s = await progressInfo(root, join(dir, f), budget)
+      if (!s?.isFile()) throw new Error('Invalid progress file')
       if (s.mtimeMs > latestMtime) {
         latestMtime = s.mtimeMs
         latestFile = f
@@ -81,6 +84,8 @@ export async function parseAdvancements(
   filePath?: string,
   extraDefinitions: Record<string, AdvancementDefinition> = {},
   includeUnearned: boolean = false,
+  budget = progressBudget(),
+  root = filePath ? dirname(filePath) : process.cwd(),
 ): Promise<{
   completed: number
   categories: Record<string, number>
@@ -88,13 +93,13 @@ export async function parseAdvancements(
 }> {
   try {
     let json: Record<string, any> = {}
-    if (filePath && await pathExists(filePath)) {
-      const content = await readFile(filePath, 'utf-8')
-      json = JSON.parse(content)
+    if (filePath) {
+      const content = await readProgressFile(root, filePath, budget).catch(error => { if (error.code !== 'ENOENT') throw error })
+      if (content) json = parseProgressJson(content.toString('utf8'))
     }
 
     const items: InstanceProgressAdvancement[] = []
-    const categories: Record<string, number> = {}
+    const categories: Record<string, number> = Object.create(null)
     let completed = 0
 
     const allDefs = extraDefinitions
@@ -103,6 +108,7 @@ export async function parseAdvancements(
     const keys = includeUnearned
       ? new Set([...Object.keys(allDefs), ...validPlayerKeys])
       : validPlayerKeys
+    if ((keys instanceof Set ? keys.size : keys.length) > 10000) throw new Error('Too many progress advancements')
 
     for (const key of keys) {
       const data = json[key]
@@ -125,7 +131,7 @@ export async function parseAdvancements(
         done,
         criteriaCompleted,
         totalCriteria: def?.totalCriteria ?? criteriaCompleted,
-        completedTime: done && criteriaCompleted > 0 ? (Object.values(criteria)[0] as string) : undefined,
+        completedTime: done && criteriaCompleted > 0 && typeof Object.values(criteria)[0] === 'string' ? Object.values(criteria)[0] as string : undefined,
         parent: def?.parent,
         icon: def?.icon || '',
         frame: def?.frame || 'task',
@@ -153,11 +159,6 @@ export async function parseAdvancements(
  * Assign coordinates (x, y) for 2D tree layout per branch
  */
 function layoutAdvancementTree(items: InstanceProgressAdvancement[]) {
-  const itemMap = new Map<string, InstanceProgressAdvancement>()
-  for (const item of items) {
-    itemMap.set(item.id, item)
-  }
-
   // Group by branch key (e.g. minecraft:story, minecraft:adventure)
   const branchMap = new Map<string, InstanceProgressAdvancement[]>()
   for (const item of items) {
@@ -191,37 +192,35 @@ function layoutAdvancementTree(items: InstanceProgressAdvancement[]) {
     }
 
     let yOffset = 0
-    for (const root of roots) {
-      function positionNode(node: InstanceProgressAdvancement, depth: number, yPos: number): number {
-        node.x = depth * 1.8
-        node.y = yPos
-
-        const children = childrenMap.get(node.id) || []
-        if (children.length === 0) {
-          return yPos + 1.2
-        }
-
-        let nextY = yPos
-        for (const child of children) {
-          nextY = positionNode(child, depth + 1, nextY)
-        }
-        return nextY
+    const visited = new Set<string>()
+    for (const root of [...roots, ...branchItems]) {
+      if (visited.has(root.id)) continue
+      const stack = [{ node: root, depth: 0 }]
+      while (stack.length) {
+        const { node, depth } = stack.pop()!
+        if (visited.has(node.id)) continue
+        visited.add(node.id); node.x = depth * 1.8; node.y = yOffset
+        const children = (childrenMap.get(node.id) || []).filter(child => !visited.has(child.id))
+        if (!children.length) yOffset += 1.2
+        else for (const child of [...children].reverse()) stack.push({ node: child, depth: depth + 1 })
       }
-
-      const nextRootY = positionNode(root, 0, yOffset)
-      yOffset = nextRootY + 1.0
+      yOffset += 1
     }
   }
 }
 
-export async function parseStats(filePath: string): Promise<InstanceProgressStats | undefined> {
+export async function parseStats(filePath: string, budget = progressBudget(), root = dirname(filePath)): Promise<InstanceProgressStats | undefined> {
   try {
-    const content = await readFile(filePath, 'utf-8')
-    const json = JSON.parse(content)
+    const content = await readProgressFile(root, filePath, budget)
+    const json = parseProgressJson(content.toString('utf8'))
     const statsObj = json.stats || json
 
     const custom = statsObj['minecraft:custom'] || statsObj
     const mined = statsObj['minecraft:mined'] || {}
+    const count = (value: unknown) => {
+      if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > Number.MAX_SAFE_INTEGER) throw new Error('Invalid world statistic')
+      return value
+    }
 
     const playTimeTicks = custom['minecraft:play_time'] ??
       custom['minecraft:total_world_time'] ??
@@ -239,20 +238,21 @@ export async function parseStats(filePath: string): Promise<InstanceProgressStat
     }
 
     return {
-      playTimeTicks,
-      deaths,
-      mobKills,
-      damageDealt,
-      damageTaken,
-      jump,
-      minedBlocksTotal,
+      playTimeTicks: count(playTimeTicks),
+      deaths: count(deaths),
+      mobKills: count(mobKills),
+      damageDealt: count(damageDealt),
+      damageTaken: count(damageTaken),
+      jump: count(jump),
+      minedBlocksTotal: count(minedBlocksTotal),
     }
-  } catch {
-    return undefined
+  } catch (cause) {
+    if ((cause as NodeJS.ErrnoException).code === 'ENOENT') return undefined
+    throw new Error(`Cannot read statistics: ${filePath}`, { cause })
   }
 }
 
-export async function locateFtbPlayerFile(savePath: string, playerUuid?: string): Promise<string | undefined> {
+export async function locateFtbPlayerFile(savePath: string, playerUuid?: string, budget = progressBudget()): Promise<string | undefined> {
   const possiblePlayerDirs = [
     join(savePath, 'ftbquests', 'players'),
     join(savePath, 'ftbquests', 'teams'),
@@ -263,22 +263,25 @@ export async function locateFtbPlayerFile(savePath: string, playerUuid?: string)
   ]
 
   for (const dir of possiblePlayerDirs) {
-    if (!await exists(dir)) continue
+    const directory = await progressInfo(savePath, dir, budget)
+    if (!directory) continue
+    if (!directory.isDirectory()) throw new Error('Invalid progress directory')
     if (playerUuid) {
+      progressIdentifier(playerUuid)
       const candidate = join(dir, `${playerUuid}.snbt`)
-      if (await exists(candidate)) {
+      if ((await progressInfo(savePath, candidate, budget))?.isFile()) {
         return candidate
       }
     }
-    const files = await readdir(dir).catch(() => [] as string[])
+    const files = await listProgressFiles(savePath, dir, budget)
     const snbtCandidates = files.filter(f => f.endsWith('.snbt') && !['data.snbt', 'chapter_groups.snbt', 'snbt'].includes(f.toLowerCase()))
     if (snbtCandidates.length > 0) {
       let newestFile: string | undefined
       let newestMtime = -1
       for (const f of snbtCandidates) {
         const filePath = join(dir, f)
-        const s = await stat(filePath).catch(() => undefined)
-        if (s && s.mtimeMs > newestMtime) {
+        const s = await progressInfo(savePath, filePath, budget)
+        if (s?.isFile() && s.mtimeMs > newestMtime) {
           newestMtime = s.mtimeMs
           newestFile = filePath
         }
@@ -291,10 +294,10 @@ export async function locateFtbPlayerFile(savePath: string, playerUuid?: string)
   return undefined
 }
 
-export async function readCompletedQuestIds(playerProgressFile: string): Promise<Set<string>> {
+export async function readCompletedQuestIds(playerProgressFile: string, budget = progressBudget(), root = dirname(playerProgressFile)): Promise<Set<string>> {
   const completedQuestIds = new Set<string>()
   try {
-    const raw = await readFile(playerProgressFile, 'utf-8')
+    const raw = (await readProgressFile(root, playerProgressFile, budget)).toString('utf8')
     const parsed = parseSnbt(raw)
     if (parsed) {
       if (parsed.completed) {
@@ -317,22 +320,27 @@ export async function parseFtbQuests(
   savePath: string,
   instancePath: string,
   playerUuid?: string,
+  budget = progressBudget(),
 ): Promise<InstanceProgressQuests | undefined> {
   try {
     let chaptersDir: string | undefined
+    let chaptersRoot = instancePath
     const possibleChapterDirs = [
-      join(instancePath, 'config', 'ftbquests', 'quests', 'chapters'),
-      join(instancePath, 'config', 'ftbquests', 'chapters'),
-      join(savePath, 'ftbquests', 'quests', 'chapters'),
-      join(savePath, 'ftbquests', 'chapters'),
-      join(instancePath, 'config', 'ftbquests', 'normal', 'chapters'),
-      join(instancePath, 'defaultconfigs', 'ftbquests', 'quests', 'chapters'),
-      join(instancePath, 'defaultconfigs', 'ftbquests', 'chapters'),
-      join(instancePath, 'kubejs', 'data', 'ftbquests', 'chapters'),
+      [instancePath, 'config/ftbquests/quests/chapters'],
+      [instancePath, 'config/ftbquests/chapters'],
+      [savePath, 'ftbquests/quests/chapters'],
+      [savePath, 'ftbquests/chapters'],
+      [instancePath, 'config/ftbquests/normal/chapters'],
+      [instancePath, 'defaultconfigs/ftbquests/quests/chapters'],
+      [instancePath, 'defaultconfigs/ftbquests/chapters'],
+      [instancePath, 'kubejs/data/ftbquests/chapters'],
     ]
 
-    for (const dir of possibleChapterDirs) {
-      if (await exists(dir)) {
+    for (const [root, path] of possibleChapterDirs) {
+      const dir = join(root, path), info = await progressInfo(root, dir, budget)
+      if (info) {
+        if (!info.isDirectory()) throw new Error('Invalid quest directory')
+        chaptersRoot = root
         chaptersDir = dir
         break
       }
@@ -340,13 +348,14 @@ export async function parseFtbQuests(
 
     if (!chaptersDir) return undefined
 
-    const chapterFiles = await readdir(chaptersDir).catch(() => [] as string[])
+    const chapterFiles = await listProgressFiles(chaptersRoot, chaptersDir, budget)
     const snbtFiles = chapterFiles.filter(f => f.endsWith('.snbt'))
+    if (snbtFiles.length > 256) throw new Error('Too many quest chapters')
     if (snbtFiles.length === 0) return undefined
 
     // 1. Locate player progress first to calculate completion & locked state
-    const playerProgressFile = await locateFtbPlayerFile(savePath, playerUuid)
-    const completedQuestIds = playerProgressFile ? await readCompletedQuestIds(playerProgressFile) : new Set<string>()
+    const playerProgressFile = await locateFtbPlayerFile(savePath, playerUuid, budget)
+    const completedQuestIds = playerProgressFile ? await readCompletedQuestIds(playerProgressFile, budget, savePath) : new Set<string>()
 
     // 2. Parse chapters with quest coordinates, shapes, icons, and dependencies
     const chapters: InstanceProgressChapter[] = []
@@ -355,7 +364,7 @@ export async function parseFtbQuests(
 
     for (const file of snbtFiles) {
       try {
-        const raw = await readFile(join(chaptersDir, file), 'utf-8')
+        const raw = (await readProgressFile(chaptersRoot, join(chaptersDir, file), budget)).toString('utf8')
         const parsed = parseSnbt(raw)
         if (!parsed) continue
 
@@ -369,6 +378,7 @@ export async function parseFtbQuests(
         }
         const defaultShape = parsed.default_quest_shape || 'circle'
         const rawQuests = Array.isArray(parsed.quests) ? parsed.quests : []
+        if (totalAllQuests + rawQuests.length > 10000) throw new Error('Too many world quests')
 
         const questItems: InstanceProgressQuestItem[] = []
         let chCompleted = 0
@@ -408,10 +418,11 @@ export async function parseFtbQuests(
           }
 
           // Extract coordinates
-          const x = typeof q?.x === 'number' ? q.x : (parseFloat(q?.x) || 0)
-          const y = typeof q?.y === 'number' ? q.y : (parseFloat(q?.y) || 0)
+          const x = typeof q?.x === 'number' ? q.x : (typeof q?.x === 'string' ? parseFloat(q.x) || 0 : 0)
+          const y = typeof q?.y === 'number' ? q.y : (typeof q?.y === 'string' ? parseFloat(q.y) || 0 : 0)
           const size = typeof q?.size === 'number' ? q.size : 1
-          const shape = q?.shape || defaultShape
+          if (!Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > 1e6 || Math.abs(y) > 1e6 || !Number.isFinite(size) || size <= 0 || size > 128) throw new Error('Invalid quest coordinates or size')
+          const shape = typeof q?.shape === 'string' ? q.shape : typeof defaultShape === 'string' ? defaultShape : 'circle'
 
           // Format description
           let description: string | undefined
@@ -481,7 +492,11 @@ export async function parseFtbQuests(
 /**
  * Extract textures from local client jar or mod jars
  */
-const localTextureCache = new Map<string, string>()
+const localTextureCache = new Map<string, { value?: string; expires: number }>()
+function cacheTexture(key: string, value?: string) {
+  localTextureCache.delete(key); localTextureCache.set(key, { value, expires: Date.now() + 30000 })
+  while (localTextureCache.size > 128 || [...localTextureCache.values()].reduce((sum, item) => sum + (item.value?.length || 0), 0) > 4 * 1024 * 1024) localTextureCache.delete(localTextureCache.keys().next().value!)
+}
 
 const NS_ALIASES: Record<string, string[]> = {
   ae2: ['appliedenergistics2', 'ae2'],
@@ -518,180 +533,102 @@ function getTextureSubpaths(name: string): string[] {
   ]
 }
 
-async function extractLocalTextures(
-  itemIds: string[],
-  instancePath: string,
-  clientJarPath?: string,
-): Promise<Record<string, string>> {
-  const result: Record<string, string> = {}
-  if (itemIds.length === 0) return result
-  const clientStat = clientJarPath && await pathExists(clientJarPath) ? await stat(clientJarPath) : undefined
-  const cacheKey = (id: string) => JSON.stringify([instancePath, clientJarPath, clientStat?.mtimeMs, clientStat?.size, id])
+function validTextureResource(ns: string, name: string) {
+  return /^[a-z0-9_.-]+$/.test(ns) && name.length <= 2048 && /^[a-z0-9_./-]+$/.test(name) && name.split('/').every(part => part && part !== '.' && part !== '..')
+}
 
-  const missingIds: string[] = []
-  for (const id of itemIds) {
-    const cached = localTextureCache.get(cacheKey(id))
-    if (cached !== undefined) {
-      if (cached) result[id] = cached
-    } else {
-      missingIds.push(id)
-    }
-  }
-  if (missingIds.length === 0) return result
-
-  const openedFs: FileSystem[] = []
-
+async function extractLocalTextures(itemIds: string[], instancePath: string, clientJarPath: string | undefined, gameDataPath: string | undefined, budget: ProgressBudget): Promise<Record<string, string>> {
+  const result: Record<string, string> = Object.create(null)
+  if (!itemIds.length) return result
+  budget.expires = Math.min(budget.expires, Date.now() + 3000)
+  const opened: FileSystem[] = [], jars = new Map<string, FileSystem | null>()
   try {
+    const clientStat = clientJarPath && gameDataPath ? await progressInfo(gameDataPath, clientJarPath, budget).catch(() => undefined) : undefined
+    const key = (id: string) => JSON.stringify([instancePath, clientJarPath, clientStat?.ino, clientStat?.mtimeMs, clientStat?.size, id])
+    const targets: string[] = []
+    for (const id of [...new Set(itemIds)].slice(0, 150)) {
+      if (typeof id !== 'string' || id.length > 2048) continue
+      const cached = localTextureCache.get(key(id))
+      if (cached && cached.expires > Date.now()) { localTextureCache.delete(key(id)); localTextureCache.set(key(id), cached); if (cached.value) result[id] = cached.value }
+      else { localTextureCache.delete(key(id)); targets.push(id) }
+    }
+    if (!targets.length) return result
     let clientFs: FileSystem | undefined
-    if (clientJarPath) {
-      clientFs = await openFileSystem(clientJarPath).catch(() => undefined)
-      if (clientFs) openedFs.push(clientFs)
+    if (clientJarPath && gameDataPath && clientStat) {
+      clientFs = await openProgressArchive(gameDataPath, clientJarPath, budget).catch(() => undefined)
+      if (clientFs) opened.push(clientFs)
     }
-
-    // Search local instance disk assets (KubeJS, openloader, resources, resourcepacks)
-    const localAssetDirs: string[] = []
-    const baseDirs = [
-      join(instancePath, 'kubejs', 'assets'),
-      join(instancePath, 'resources'),
-      join(instancePath, 'config', 'openloader', 'resources'),
-    ]
-    for (const d of baseDirs) {
-      if (await pathExists(d)) localAssetDirs.push(d)
+    const directories: Array<{ root: string; path: string }> = []
+    for (const path of ['kubejs/assets', 'resources', 'config/openloader/resources']) {
+      const directory = join(instancePath, path)
+      if ((await progressInfo(instancePath, directory, budget).catch(() => undefined))?.isDirectory()) directories.push({ root: instancePath, path: directory })
     }
-
-    const subPackDirs = [
-      join(instancePath, 'resourcepacks'),
-      join(instancePath, 'config', 'openloader', 'resources'),
-    ]
-    for (const dir of subPackDirs) {
-      if (await pathExists(dir)) {
-        const entries = await readdir(dir).catch(() => [] as string[])
-        for (const entry of entries) {
-          const candidate = join(dir, entry, 'assets')
-          if (await pathExists(candidate)) localAssetDirs.push(candidate)
-        }
+    const packs = await instanceFileSource(instancePath, 'resourcepacks', gameDataPath, true).catch(() => undefined)
+    for (const source of [{ root: instancePath, path: 'config/openloader/resources' }, ...(packs ? [packs] : [])]) {
+      const directory = join(source.root, source.path)
+      for (const name of await listProgressFiles(source.root, directory, budget).catch(() => [])) {
+        const path = join(directory, name, 'assets')
+        if ((await progressInfo(source.root, path, budget).catch(() => undefined))?.isDirectory()) directories.push({ root: source.root, path })
       }
     }
-
-    // Search instance mods directory for modded textures
-    const modsDir = join(instancePath, 'mods')
-    const modFiles = await readdir(modsDir).catch(() => [] as string[])
-    const modJars = modFiles.filter(f => f.endsWith('.jar'))
-    const jarPromiseMap = new Map<string, Promise<FileSystem | null>>()
-
-    function getOrOpenJar(modJar: string): Promise<FileSystem | null> {
-      let p = jarPromiseMap.get(modJar)
-      if (!p) {
-        p = openFileSystem(join(modsDir, modJar)).catch(() => null).then(fs => {
-          if (fs) openedFs.push(fs)
-          return fs
-        })
-        jarPromiseMap.set(modJar, p)
-      }
-      return p
-    }
-
-    const targetIds = missingIds.slice(0, 150)
-
-    const extractionWork = Promise.all(targetIds.map(async (itemId) => {
-      if (!itemId) return
+    const modsDir = join(instancePath, 'mods'), modJars = (await listProgressFiles(instancePath, modsDir, budget).catch(() => [])).filter(name => name.endsWith('.jar'))
+    for (const itemId of targets) {
+      chargeProgress(budget)
       const cleanId = extractCleanItemId(itemId)
-
-      const colonIdx = cleanId.indexOf(':')
-      const ns = colonIdx !== -1 ? cleanId.substring(0, colonIdx) : 'minecraft'
-      const name = colonIdx !== -1 ? cleanId.substring(colonIdx + 1) : cleanId
-
-      let foundDataUrl: string | undefined
-
-      // Check local disk folders first (fastest)
-      for (const baseDir of localAssetDirs) {
-        foundDataUrl = await readTextureFromDisk(baseDir, ns, name)
-        if (foundDataUrl) break
-      }
-
-      if (!foundDataUrl && ns === 'minecraft' && clientFs) {
-        foundDataUrl = await readTextureFromFs(clientFs, ns, name)
-      } else if (!foundDataUrl) {
-        const aliases = NS_ALIASES[ns.toLowerCase()] || [ns.toLowerCase()]
-        const candidateJars = modJars.filter(j => {
-          const jLower = j.toLowerCase()
-          return aliases.some(a => jLower.includes(a))
-        }).slice(0, 2)
-
-        for (const modJar of candidateJars) {
-          const fs = await getOrOpenJar(modJar)
-          if (fs) {
-            foundDataUrl = await readTextureFromFs(fs, ns, name)
-            if (foundDataUrl) break
+      if (typeof cleanId !== 'string') continue
+      const colon = cleanId.indexOf(':'), ns = colon < 0 ? 'minecraft' : cleanId.slice(0, colon), name = colon < 0 ? cleanId : cleanId.slice(colon + 1)
+      if (!validTextureResource(ns, name)) continue
+      let value: string | undefined
+      for (const directory of directories) { value = await readTextureFromDisk(directory.root, directory.path, ns, name, budget); if (value) break }
+      if (!value && ns === 'minecraft' && clientFs) value = await readTextureFromFs(clientFs, ns, name)
+      if (!value && ns !== 'minecraft') {
+        const aliases = Object.hasOwn(NS_ALIASES, ns) ? NS_ALIASES[ns] : [ns]
+        for (const mod of modJars.filter(jar => aliases.some(alias => jar.toLowerCase().includes(alias))).slice(0, 2)) {
+          if (!jars.has(mod)) {
+            const fs = opened.length < 32 ? await openProgressArchive(instancePath, join(modsDir, mod), budget).catch(() => null) : null
+            jars.set(mod, fs); if (fs) opened.push(fs)
           }
+          const fs = jars.get(mod)
+          if (fs) value = await readTextureFromFs(fs, ns, name)
+          if (value) break
         }
-
-        if (!foundDataUrl && clientFs) {
-          foundDataUrl = await readTextureFromFs(clientFs, 'minecraft', name)
-        }
+        if (!value && clientFs) value = await readTextureFromFs(clientFs, 'minecraft', name)
       }
-
-      if (foundDataUrl) {
-        result[itemId] = foundDataUrl
-        result[cleanId] = foundDataUrl
-        localTextureCache.set(cacheKey(itemId), foundDataUrl)
-        localTextureCache.set(cacheKey(cleanId), foundDataUrl)
-      }
-    }))
-
-    await Promise.race([
-      extractionWork,
-      new Promise(resolve => setTimeout(resolve, 3000)),
-    ])
-  } catch {
-  } finally {
-    for (const fs of openedFs) {
-      try { fs.close() } catch {}
+      cacheTexture(key(itemId), value); if (cleanId !== itemId) cacheTexture(key(cleanId), value)
+      if (value) { result[itemId] = value; result[cleanId] = value }
     }
-  }
-
+  } catch {
+    // Optional artwork falls back; every started read completes before its archive closes.
+  } finally { for (const fs of opened) fs.close() }
   return result
 }
 
-async function readTextureFromDisk(baseDir: string, ns: string, name: string): Promise<string | undefined> {
+async function readTextureFromDisk(root: string, baseDir: string, ns: string, name: string, budget: ProgressBudget, visited = new Set<string>()): Promise<string | undefined> {
+  chargeProgress(budget)
+  const key = ns + ':' + name
+  if (!validTextureResource(ns, name) || visited.has(key) || visited.size >= 8) return undefined
+  visited.add(key)
   for (const sub of getTextureSubpaths(name)) {
-    try {
-      const p = join(baseDir, ns, sub)
-      if (await pathExists(p)) {
-        const buf = await readFile(p)
-        if (buf && buf.length > 0) return `data:image/png;base64,${buf.toString('base64')}`
-      }
-    } catch {}
+    try { const value = staticPngDataUrl(await readProgressFile(root, join(baseDir, ns, sub), budget, 64 * 1024)); if (value) return value } catch {}
   }
-
-  // Fallback: check models/item and models/block
-  const cleanName = name.replace(/^\/+/, '').replace(/\.png$/i, '')
+  const cleanName = name.replace(/\.png$/i, '')
   for (const sub of ['item', 'block']) {
     try {
-      const mp = join(baseDir, ns, 'models', sub, `${cleanName}.json`)
-      if (await pathExists(mp)) {
-        const json = JSON.parse(await readFile(mp, 'utf-8'))
-        const texRef = json?.textures?.layer0 || json?.textures?.particle || (json?.textures && Object.values(json.textures)[0])
-        if (typeof texRef === 'string') {
-          const colon = texRef.indexOf(':')
-          const targetNs = colon !== -1 ? texRef.substring(0, colon) : ns
-          const targetName = colon !== -1 ? texRef.substring(colon + 1) : texRef
-          const res = await readTextureFromDisk(baseDir, targetNs, targetName)
-          if (res) return res
-        }
-      }
+      const bytes = await readProgressFile(root, join(baseDir, ns, 'models', sub, cleanName + '.json'), budget, 256 * 1024)
+      const model = parseProgressJson(bytes.toString('utf8')), ref = model?.textures?.layer0 || model?.textures?.particle || (model?.textures && Object.values(model.textures)[0])
+      if (typeof ref !== 'string') continue
+      const colon = ref.indexOf(':'), targetNs = colon < 0 ? ns : ref.slice(0, colon), target = colon < 0 ? ref : ref.slice(colon + 1)
+      const value = await readTextureFromDisk(root, baseDir, targetNs, target, budget, visited)
+      if (value) return value
     } catch {}
   }
-
   return undefined
 }
 
 async function readTextureFromFs(fs: FileSystem, ns: string, name: string): Promise<string | undefined> {
-  for (const sub of getTextureSubpaths(name)) {
-    try {
-      const buf = await fs.readFileBuffered(`assets/${ns}/${sub}`)
-      if (buf && buf.length > 0) return `data:image/png;base64,${Buffer.from(buf).toString('base64')}`
-    } catch {}
+  if (!validTextureResource(ns, name)) return undefined
+  for (const path of getTextureSubpaths(name)) {
+    try { const value = staticPngDataUrl(Buffer.from(await fs.readFileBuffered(`assets/${ns}/${path}`))); if (value) return value } catch {}
   }
   return undefined
 }
@@ -705,34 +642,35 @@ export async function readSaveProgress(
   versionId?: string,
 ): Promise<InstanceSaveProgress> {
   const saveName = basename(savePath)
+  const budget = progressBudget()
 
   const levelDatPath = join(savePath, 'level.dat')
   let levelDatMtime = 0
   try {
-    const s = await stat(levelDatPath).catch(() => undefined)
+    const s = await progressInfo(savePath, levelDatPath, budget)
     if (s) levelDatMtime = s.mtimeMs
   } catch {}
 
-  const advInfo = await findLatestFile(join(savePath, 'advancements'), preferredPlayerUuid)
-  const statsInfo = await findLatestFile(join(savePath, 'stats'), preferredPlayerUuid || advInfo?.uuid)
+  const advInfo = await findLatestFile(join(savePath, 'advancements'), preferredPlayerUuid, savePath, budget)
+  const statsInfo = await findLatestFile(join(savePath, 'stats'), preferredPlayerUuid || advInfo?.uuid, savePath, budget)
   const playerUuid = advInfo?.uuid || statsInfo?.uuid || preferredPlayerUuid
-  const version = await resolveProgressVersion(instancePath, gameDataPath, versionId)
+  const version = await resolveProgressVersion(instancePath, gameDataPath, versionId, budget)
   let definitions: Record<string, AdvancementDefinition> = {}
   let clientFs: FileSystem | undefined
   try {
-    if (version && await pathExists(version.clientJarPath)) {
-      clientFs = await openFileSystem(version.clientJarPath)
-      definitions = await readAdvancementDefinitions(clientFs, locale, gameDataPath, version.assetIndex)
+    if (version && gameDataPath && await progressInfo(gameDataPath, version.clientJarPath, budget)) {
+      clientFs = await openProgressArchive(gameDataPath, version.clientJarPath, budget)
+      definitions = await readAdvancementDefinitions(clientFs, locale, gameDataPath, version.assetIndex, budget)
     }
   } finally {
     clientFs?.close()
   }
 
-  const quests = await parseFtbQuests(savePath, instancePath, playerUuid)
+  const quests = await parseFtbQuests(savePath, instancePath, playerUuid, budget)
   const isFtbPack = !!quests && quests.chapters.length > 0
 
-  const advancements = await parseAdvancements(advInfo?.file, definitions, !isFtbPack)
-  const stats = statsInfo ? await parseStats(statsInfo.file) : undefined
+  const advancements = await parseAdvancements(advInfo?.file, definitions, !isFtbPack, budget, savePath)
+  const stats = statsInfo ? await parseStats(statsInfo.file, budget, savePath) : undefined
 
   // Collect item icons needed
   const iconItemIds = new Set<string>()
@@ -753,20 +691,20 @@ export async function readSaveProgress(
   let icons: Record<string, string> = {}
   try {
     // Extract textures locally from Minecraft JAR & mods
-    icons = await extractLocalTextures(Array.from(iconItemIds), instancePath, version?.clientJarPath)
+    icons = await extractLocalTextures(Array.from(iconItemIds), instancePath, version?.clientJarPath, gameDataPath, budget)
   } catch {}
 
   // Assign data URLs
   for (const adv of advancements.items) {
-    if (adv.icon && icons[adv.icon]) {
+    if (adv.icon && typeof icons[adv.icon] === 'string') {
       adv.iconDataUrl = icons[adv.icon]
     }
   }
   if (quests) {
     for (const ch of quests.chapters) {
-      if (ch.icon && icons[ch.icon]) ch.iconDataUrl = icons[ch.icon]
+      if (ch.icon && typeof icons[ch.icon] === 'string') ch.iconDataUrl = icons[ch.icon]
       for (const q of ch.quests) {
-        if (q.icon && icons[q.icon]) q.iconDataUrl = icons[q.icon]
+        if (q.icon && typeof icons[q.icon] === 'string') q.iconDataUrl = icons[q.icon]
       }
     }
   }

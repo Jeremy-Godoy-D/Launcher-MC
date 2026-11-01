@@ -71,14 +71,14 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `nav-store` | [`xmcl-react-ui/src/App.tsx#L480`](../xmcl-react-ui/src/App.tsx#L480) |
 | `profile-appearance` | [`xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35`](../xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35) |
 | `profile-appearance-save` | [`xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L75`](../xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L75) |
-| `progress-advancements` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L113`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L113) |
+| `progress-advancements` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L112`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L112) |
 | `progress-advancements-container` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L206`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L206) |
 | `progress-filter` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L182`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L182) |
 | `progress-list` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L208`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L208) |
-| `progress-quests` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L128`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L128) |
+| `progress-quests` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L127`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L127) |
 | `progress-quests-container` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L220`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L220) |
-| `progress-refresh` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L155`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L155) |
-| `progress-stats` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L142`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L142) |
+| `progress-refresh` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L154`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L154) |
+| `progress-stats` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L141`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L141) |
 | `progress-stats-container` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L274`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L274) |
 | `progress-tree` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L381`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L381) |
 | `progress-view-mode` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L194`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L194) |
@@ -128,7 +128,7 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `world-info` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L144`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L144) |
 | `world-map` | [`xmcl-react-ui/src/features/instance/WorldMap.tsx#L373`](../xmcl-react-ui/src/features/instance/WorldMap.tsx#L373) |
 | `world-map-cursor` | [`xmcl-react-ui/src/features/instance/WorldMap.tsx#L551`](../xmcl-react-ui/src/features/instance/WorldMap.tsx#L551) |
-| `world-progress` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L107`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L107) |
+| `world-progress` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L106`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L106) |
 | `world-tab-info` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L156`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L156) |
 | `world-tab-map` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L175`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L175) |
 | `world-tab-progress` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L165`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L165) |

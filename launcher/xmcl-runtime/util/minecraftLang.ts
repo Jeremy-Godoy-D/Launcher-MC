@@ -1,6 +1,6 @@
 import { FileSystem } from '@xmcl/system'
-import { pathExists, readFile, readJson } from 'fs-extra'
 import { join } from 'path'
+import { parseProgressJson, progressBudget, progressIdentifier, readProgressFile, type ProgressBudget } from '../save/progressFiles'
 
 export function toMcLang(locale: string): string {
   const lower = (locale || 'en').toLowerCase().replace(/-/g, '_')
@@ -24,11 +24,12 @@ export async function assignJarLang(
   target: Record<string, string>,
 ): Promise<void> {
   if (!fs) return
+  if (!/^[a-z0-9_.-]+$/.test(namespace) || !/^[a-z0-9_]+$/.test(code)) throw new Error('Invalid Minecraft language resource')
   for (const extension of ['json', 'lang']) {
     const path = `assets/${namespace}/lang/${code}.${extension}`
     if (!await fs.existsFile(path)) continue
     const content = await fs.readFile(path, 'utf-8')
-    Object.assign(target, extension === 'json' ? JSON.parse(content) : parseLegacyLang(content))
+    Object.assign(target, extension === 'json' ? parseProgressJson(content) : parseLegacyLang(content))
     return
   }
 }
@@ -39,17 +40,19 @@ function parseLegacyLang(content: string): Record<string, string> {
 }
 
 /** Read only the asset index belonging to the selected game version. */
-export async function readVanillaLangFromAssets(root: string, indexId: string, code: string): Promise<Record<string, string> | undefined> {
+export async function readVanillaLangFromAssets(root: string, indexId: string, code: string, budget: ProgressBudget = progressBudget()): Promise<Record<string, string> | undefined> {
+  progressIdentifier(indexId); progressIdentifier(code)
   const indexPath = join(root, 'assets', 'indexes', `${indexId}.json`)
-  if (!await pathExists(indexPath)) return undefined
-  const index = await readJson(indexPath)
+  const content = await readProgressFile(root, indexPath, budget).catch(error => { if (error.code !== 'ENOENT') throw error })
+  if (!content) return undefined
+  const index = parseProgressJson(content.toString('utf8'))
   for (const extension of ['json', 'lang']) {
     const hash = index.objects?.[`minecraft/lang/${code}.${extension}`]?.hash
     if (typeof hash !== 'string' || !/^[a-f0-9]{40}$/i.test(hash)) continue
     const objectPath = join(root, 'assets', 'objects', hash.slice(0, 2), hash)
-    if (!await pathExists(objectPath)) return undefined
-    if (extension === 'json') return readJson(objectPath)
-    return parseLegacyLang(await readFile(objectPath, 'utf-8'))
+    const bytes = await readProgressFile(root, objectPath, budget).catch(error => { if (error.code !== 'ENOENT') throw error })
+    if (!bytes) return undefined
+    return extension === 'json' ? parseProgressJson(bytes.toString('utf8')) : parseLegacyLang(bytes.toString('utf8'))
   }
   return undefined
 }

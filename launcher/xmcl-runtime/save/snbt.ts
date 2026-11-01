@@ -6,10 +6,12 @@
 export function parseSnbt(input: string): any {
   let pos = 0
   const len = input.length
+  let nodes = 0
 
   function syntaxError(message: string): never {
     throw new SyntaxError(`${message} at position ${pos}`)
   }
+  if (len > 4 * 1024 * 1024) syntaxError('SNBT exceeds size limit')
 
   function skipWhitespaceAndComments() {
     while (pos < len) {
@@ -81,16 +83,17 @@ export function parseSnbt(input: string): any {
     return input.substring(start, pos)
   }
 
-  function parseValue(): any {
+  function parseValue(depth = 0): any {
+    if (++nodes > 100000 || depth > 64) syntaxError('SNBT exceeds structure limit')
     skipWhitespaceAndComments()
     if (pos >= len) syntaxError('Expected a value')
 
     const ch = input[pos]
     if (ch === '{') {
-      return parseCompound()
+      return parseCompound(depth + 1)
     }
     if (ch === '[') {
-      return parseList()
+      return parseList(depth + 1)
     }
     if (ch === '"' || ch === "'") {
       return parseString()
@@ -104,6 +107,7 @@ export function parseSnbt(input: string): any {
     // Check if number with optional type suffix (b, s, l, f, d, B, S, L, F, D)
     const longMatch = /^([+-]?\d+)[lL]$/.exec(token)
     if (longMatch) {
+      if (longMatch[1].length > 128) syntaxError('SNBT number exceeds size limit')
       const value = BigInt(longMatch[1])
       return value >= BigInt(Number.MIN_SAFE_INTEGER) && value <= BigInt(Number.MAX_SAFE_INTEGER)
         ? Number(value)
@@ -111,21 +115,21 @@ export function parseSnbt(input: string): any {
     }
     const numMatch = /^([+-]?(?:0x[0-9a-fA-F]+|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?))[bsfdBSFD]?$/.exec(token)
     if (numMatch) {
+      if (numMatch[1].length > 128) syntaxError('SNBT number exceeds size limit')
       const numStr = numMatch[1]
       if (numStr.startsWith('0x') || numStr.startsWith('-0x') || numStr.startsWith('+0x')) {
         const hexVal = parseInt(numStr, 16)
         if (!Number.isNaN(hexVal)) return hexVal
       }
       const num = Number(numStr)
-      if (!Number.isNaN(num)) {
-        return num
-      }
+      if (!Number.isFinite(num)) syntaxError('Invalid SNBT number')
+      return num
     }
 
     return token
   }
 
-  function parseCompound(): Record<string, any> {
+  function parseCompound(depth: number): Record<string, any> {
     pos++ // skip '{'
     const obj: Record<string, any> = {}
 
@@ -149,14 +153,15 @@ export function parseSnbt(input: string): any {
       if (input[pos] !== ':') syntaxError('Expected ":" after compound key')
       pos++
 
-      const val = parseValue()
+      if (key === '__proto__') syntaxError('Unsafe SNBT key')
+      const val = parseValue(depth)
       obj[key] = val
     }
 
     return syntaxError('Unterminated compound')
   }
 
-  function parseList(): any[] {
+  function parseList(depth: number): any[] {
     pos++ // skip '['
     skipWhitespaceAndComments()
 
@@ -173,7 +178,7 @@ export function parseSnbt(input: string): any {
         return list
       }
       if (pos >= len) syntaxError('Unterminated list')
-      const val = parseValue()
+      const val = parseValue(depth)
       list.push(val)
     }
 

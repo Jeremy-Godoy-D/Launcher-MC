@@ -885,18 +885,23 @@ react:
     unsafe: "The datapack link or folder is unsafe. Its content was not accessed."
 
   worldProgress:
+    frame:
+      task: Task
+      goal: Goal
+      challenge: Challenge
     tab: "Progress"
     advancements: "Advancements"
     quests: "Quests"
     stats: "Statistics"
     loading: "Reading world progress…"
-    loadFailed: "Could not read world progress."
+    loadFailed: "Could not read world progress. Close the game if it is running, then read again. If it continues, check the advancement, quest, and statistics files."
     empty: "No advancement, quest, or statistic data for this world."
     filter: "Search advancements or quests…"
     viewList: "List view"
     viewTree: "Tree view"
     completed: "Completed"
     locked: "Locked"
+    incomplete: "Incomplete"
     playTime: "Play time"
     deaths: "Deaths"
     mobKills: "Mobs killed"

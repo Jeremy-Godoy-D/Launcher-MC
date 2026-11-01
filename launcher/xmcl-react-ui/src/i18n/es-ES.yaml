@@ -885,18 +885,23 @@ react:
     unsafe: "El enlace o la carpeta del datapack no es seguro. No se accedió a su contenido."
 
   worldProgress:
+    frame:
+      task: Tarea
+      goal: Objetivo
+      challenge: Desafío
     tab: "Progreso"
     advancements: "Avances"
     quests: "Misiones"
     stats: "Estadísticas"
     loading: "Leyendo progreso del mundo…"
-    loadFailed: "No se pudo leer el progreso del mundo."
+    loadFailed: "No se pudo leer el progreso del mundo. Cierra el juego si está abierto y pulsa Volver a leer. Si persiste, revisa los archivos de avances, misiones o estadísticas."
     empty: "No hay datos de avances, misiones ni estadísticas para este mundo."
     filter: "Buscar avances o misiones…"
     viewList: "Vista de lista"
     viewTree: "Vista de árbol"
     completed: "Completado"
     locked: "Bloqueado"
+    incomplete: "Pendiente"
     playTime: "Tiempo jugado"
     deaths: "Muertes"
     mobKills: "Criaturas eliminadas"
