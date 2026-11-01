@@ -58,6 +58,12 @@ it('does not expose timestamps that cannot be formatted as JavaScript dates', as
   await writeFile(join(instance, 'saves/Alpha/level.dat'), await serialize(world, { compressed: 'gzip' }))
   expect((await readWorlds(instance, root))[0].lastPlayed).toBe(0)
 })
+it('treats the shared depot as shared even when its data root is also used as an instance', async () => {
+  await mkdir(join(root, 'saves/Depot'), { recursive: true })
+  await writeFile(join(root, 'saves/Depot/level.dat'), await readFile(join(instance, 'saves/Alpha/level.dat')))
+  expect(await worldLocation(root, 'Depot', root)).toMatchObject({ shared: true, linked: false })
+  expect((await readWorlds(root, root))[0]).toMatchObject({ name: 'Depot', linkTo: join(root, 'saves/Depot') })
+})
 it('rejects forged collection counts and excessive nesting before the shared NBT decoder allocates', async () => {
   const prefix = Buffer.from([10, 0, 0]), name = Buffer.from([0, 1, 120])
   const oversized = Buffer.from([9, ...name, 1, 0x7f, 0xff, 0xff, 0xff, 0])

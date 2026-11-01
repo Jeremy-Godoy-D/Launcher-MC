@@ -23,7 +23,7 @@ export function worldName(name: string) {
 export async function worldsLocation(instance: string, sharedRoot: string) {
   const source = await instanceFileSource(instance, 'saves', sharedRoot, true), root = join(source.root, source.path), info = await inspect(root)
   if (info && (!info.isDirectory() || info.isSymbolicLink())) throw new Error('Unsafe worlds directory')
-  return { root, shared: source.root !== await realpath(instance), identity: digest([root, info && [info.ino, info.dev].map(String)]) }
+  return { root, shared: source.root !== await realpath(instance) || relative(root, join(await realpath(sharedRoot), 'saves')) === '', identity: digest([root, info && [info.ino, info.dev].map(String)]) }
 }
 
 /** Only the launcher's own depot may be the target of a legacy per-world link. */
