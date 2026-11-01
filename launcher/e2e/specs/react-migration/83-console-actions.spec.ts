@@ -64,7 +64,7 @@ test('export captures the selected view, waits for real native writing and ignor
   const choices = await launcher.app.evaluate(() => (globalThis as any).__saveChoices)
   expect(choices).toHaveLength(1); expect(choices[0].defaultPath).toMatch(/^Mi_mundo-view\.log-\d+\.log$/)
   await console.getByTestId('console-level-filter').selectOption('error')
-  await launcher.app.evaluate(filePath => (globalThis as any).__saveResolve({ canceled: false, filePath }), destination)
+  await launcher.app.evaluate((_electron, filePath) => (globalThis as any).__saveResolve({ canceled: false, filePath }), destination)
   await expect(save).toBeEnabled(); await expect(save).toHaveText('Exportar a archivo')
   expect(await readFile(destination, 'utf8')).toBe(content.slice(0, -1))
   expect(await readFile(join(path, 'logs/view.log'), 'utf8')).toBe(content)
