@@ -7,6 +7,17 @@ import { ZipFile } from 'yazl'
 import { writeZipFile } from '../util/zip'
 import { makeReactWorld } from '../../e2e/helpers/react-world'
 import { prepareWorldMetadata, readWorldMetadata } from './utils/worldFiles'
+const sharingFailure = vi.hoisted(() => ({ publish: undefined as { path: string; occupy: boolean } | undefined }))
+vi.mock('node:fs/promises', async (original) => {
+  const fs = await original<typeof import('node:fs/promises')>()
+  return { ...fs, symlink: async (target: string, path: string, type: any) => {
+    if (sharingFailure.publish?.path === path) {
+      if (sharingFailure.publish.occupy) await fs.writeFile(path, 'OTHER ENTRY', { flag: 'wx' })
+      throw Object.assign(new Error('fixture publication failure'), { code: 'EIO' })
+    }
+    return fs.symlink(target, path, type)
+  } }
+})
 vi.mock('~/app', () => ({ Inject: () => () => {}, LauncherAppKey: Symbol('app'), kGameDataPath: Symbol('data') }))
 vi.mock('~/instance', () => ({ InstanceService: class {} }))
 vi.mock('~/launch', () => ({ LaunchService: class {} }))
@@ -22,6 +33,7 @@ async function world(instance: string, name = 'Alpha') {
   return path
 }
 beforeEach(async () => {
+  sharingFailure.publish = undefined
   root = await mkdtemp(join(process.cwd(), '.world-legacy-test-')); source = join(root, 'source'); destination = join(root, 'destination'); third = join(root, 'third')
   exports = await mkdtemp(join(process.cwd(), '.world-legacy-export-'))
   instances = [source, destination, third].map(path => ({ path, edition: 'java' })); processes = []; sessions = []
@@ -236,4 +248,120 @@ it('exports the actual saves directory as ZIP or independent folder and never me
   expect((await lstat(join(folder, 'level.dat'), { bigint: true })).ino).not.toBe((await lstat(join(save, 'level.dat'), { bigint: true })).ino)
   await expect(service.exportSave({ instancePath: source, saveName: 'Alpha', destination: folder, zip: false })).rejects.toMatchObject({ name: 'WorldDestinationExistsError' })
   expect(await readFile(join(folder, 'level.dat'), 'utf8')).toBe('original-world')
+})
+
+it('shares an independent world without replacing a depot collision and retains its exact original in a backup', async () => {
+  const existing = await world(root, 'Alpha'); await writeFile(join(existing, 'level.dat'), 'EXISTING DEPOT')
+  const original = join(source, 'saves/Alpha/level.dat'), info = await lstat(original, { bigint: true })
+  await service.shareSave({ instancePath: source, saveName: 'Alpha' })
+  expect(await readFile(join(existing, 'level.dat'), 'utf8')).toBe('EXISTING DEPOT')
+  const shared = join(root, 'saves/Alpha (1)/level.dat')
+  expect(await readFile(shared, 'utf8')).toBe('original-world'); expect((await lstat(shared, { bigint: true })).ino).not.toBe(info.ino)
+  await expect(lstat(original)).rejects.toHaveProperty('code', 'ENOENT')
+  const backup = (await readdir(join(source, '.backups')))[0]
+  expect((await lstat(join(source, '.backups', backup, 'Alpha/level.dat'), { bigint: true })).ino).toBe(info.ino)
+})
+
+it('sharing an owned per-world link detaches only the link and never copies or moves its depot target', async () => {
+  const shared = await world(root, 'Shared'); await symlink(shared, join(source, 'saves/Alias'), 'junction')
+  await service.shareSave({ instancePath: source, saveName: 'Alias' })
+  expect(await readdir(join(root, 'saves'))).toEqual(['Shared'])
+  expect(await readFile(join(shared, 'level.dat'), 'utf8')).toBe('original-world')
+  await expect(lstat(join(source, 'saves/Alias'))).rejects.toHaveProperty('code', 'ENOENT')
+})
+
+it('merges worlds with reserved collision names and backs up all original entries before linking; disconnect leaves an empty local folder', async () => {
+  const existing = await world(root, 'Alpha'), shared = await world(root, 'Shared')
+  await writeFile(join(existing, 'level.dat'), 'DEPOT'); await writeFile(join(source, 'saves/Alpha/level.dat'), 'FIRST')
+  const second = await world(source, 'Alpha (1)'); await writeFile(join(second, 'level.dat'), 'SECOND')
+  await writeFile(join(source, 'saves/.note'), 'LOCAL NOTE'); await symlink(shared, join(source, 'saves/Alias'), 'junction')
+  const original = await lstat(join(source, 'saves'), { bigint: true })
+  await service.linkSharedSave(source)
+  expect(await service.isSaveLinked(source)).toBe(true); expect((await lstat(join(source, 'saves'))).isSymbolicLink()).toBe(true)
+  expect(await readFile(join(root, 'saves/Alpha/level.dat'), 'utf8')).toBe('DEPOT')
+  expect(await readFile(join(root, 'saves/Alpha (1)/level.dat'), 'utf8')).toBe('FIRST')
+  expect(await readFile(join(root, 'saves/Alpha (1) (1)/level.dat'), 'utf8')).toBe('SECOND')
+  const [name] = await readdir(join(source, '.backups')), backup = join(source, '.backups', name, 'saves')
+  expect((await lstat(backup, { bigint: true })).ino).toBe(original.ino)
+  expect(await readFile(join(backup, '.note'), 'utf8')).toBe('LOCAL NOTE'); expect((await lstat(join(backup, 'Alias'))).isSymbolicLink()).toBe(true)
+  await service.linkSharedSave(source); expect(await readdir(join(source, '.backups'))).toEqual([name])
+  await service.unlinkSharedSave(source)
+  expect(await service.isSaveLinked(source)).toBe(false); expect(await readdir(join(source, 'saves'))).toEqual([])
+  expect(await readdir(join(source, '.backups'))).toHaveLength(2)
+  expect(await readFile(join(root, 'saves/Alpha/level.dat'), 'utf8')).toBe('DEPOT')
+  expect(await readFile(join(shared, 'level.dat'), 'utf8')).toBe('original-world')
+  await service.unlinkSharedSave(source)
+})
+
+it('links missing or empty saves for creation and refuses an unknown instance, Bedrock, traversal and a running game', async () => {
+  await rename(join(destination, 'saves'), join(destination, 'unused-empty-saves'))
+  await service.linkSharedSave(destination); expect(await service.isSaveLinked(destination)).toBe(true)
+  await service.linkSharedSave(third); expect(await service.isSaveLinked(third)).toBe(true)
+  for (const path of [join(root, 'unknown'), root]) {
+    await expect(service.linkSharedSave(path)).rejects.toMatchObject({ name: 'InstanceNotFoundError' })
+    await expect(service.unlinkSharedSave(path)).rejects.toMatchObject({ name: 'InstanceNotFoundError' })
+    await expect(service.isSaveLinked(path)).rejects.toMatchObject({ name: 'InstanceNotFoundError' })
+  }
+  await expect(service.shareSave({ instancePath: source, saveName: '../Outside' })).rejects.toThrow()
+  instances = instances.map(instance => instance.path === source ? { ...instance, edition: 'bedrock' } : instance)
+  await expect(service.linkSharedSave(source)).rejects.toMatchObject({ name: 'InstanceNotFoundError' })
+  instances = instances.map(instance => ({ ...instance, edition: 'java' })); processes = [{ options: { gameDirectory: third } }]
+  await expect(service.linkSharedSave(source)).rejects.toMatchObject({ name: 'SharedWorldRunningError' })
+  await expect(service.unlinkSharedSave(destination)).rejects.toMatchObject({ name: 'SharedWorldRunningError' })
+  await expect(service.shareSave({ instancePath: source, saveName: 'Alpha' })).rejects.toMatchObject({ name: 'SharedWorldRunningError' })
+  expect(await readFile(join(source, 'saves/Alpha/level.dat'), 'utf8')).toBe('original-world')
+})
+
+it('rejects foreign world links and unsafe backup roots before replacing the original folder', async () => {
+  const foreign = await world(exports, 'Foreign'); await symlink(foreign, join(source, 'saves/Foreign'), 'junction')
+  await expect(service.linkSharedSave(source)).rejects.toThrow()
+  expect(await readdir(join(root, 'saves'))).toEqual([])
+  expect(await readFile(join(foreign, 'level.dat'), 'utf8')).toBe('original-world')
+  const other = await world(destination, 'Beta')
+  await symlink(exports, join(destination, '.backups'), 'junction')
+  await expect(service.linkSharedSave(destination)).rejects.toThrow()
+  expect((await lstat(join(destination, 'saves'))).isDirectory()).toBe(true)
+  expect(await readFile(join(other, 'level.dat'), 'utf8')).toBe('original-world')
+  expect(await readdir(exports)).toEqual(['saves'])
+  expect(await readdir(join(root, 'saves'))).toEqual([])
+})
+
+it('releases earlier session handles on a preflight failure without publishing a copied world', async () => {
+  await world(source, 'Beta')
+  const acquire = (service as any).app.acquireWorldLock
+  vi.spyOn((service as any).app, 'acquireWorldLock').mockImplementationOnce(acquire).mockRejectedValueOnce(new Error('BUSY SESSION'))
+  await expect(service.linkSharedSave(source)).rejects.toThrow('BUSY SESSION')
+  expect(sessions).toHaveLength(1); expect(sessions[0].release).toHaveBeenCalledTimes(1)
+  expect(await readdir(join(root, 'saves'))).toEqual([])
+  expect(await readFile(join(source, 'saves/Alpha/level.dat'), 'utf8')).toBe('original-world')
+})
+
+it('rechecks copied worlds after acquiring the final folder guards and preserves a newer uncooperative write', async () => {
+  const app = (service as any).app, acquire = app.acquireWorldLock, path = join(source, 'saves/Alpha'); let writes = 0
+  vi.spyOn(app, 'acquireWorldLock').mockImplementation(async (root: any, create: any) => {
+    const lock = await acquire(root, create)
+    if (root === path && create && ++writes === 2) await writeFile(join(path, 'level.dat'), 'NEWER WORLD')
+    return lock
+  })
+  await expect(service.linkSharedSave(source)).rejects.toHaveProperty('name', 'WorldFilesChangedError')
+  expect(await readFile(join(path, 'level.dat'), 'utf8')).toBe('NEWER WORLD')
+  expect((await lstat(join(source, 'saves'))).isSymbolicLink()).toBe(false)
+  expect(await readFile(join(root, 'saves/Alpha/level.dat'), 'utf8')).toBe('original-world')
+  await expect(lstat(join(source, '.backups'))).rejects.toHaveProperty('code', 'ENOENT')
+})
+
+it.each([false, true])('retains original bytes after link publication fails, preserving a competing entry=%s', async (occupy) => {
+  const original = await lstat(join(source, 'saves'), { bigint: true })
+  sharingFailure.publish = { path: join(source, 'saves'), occupy }
+  await expect(service.linkSharedSave(source)).rejects.toMatchObject({ name: 'WorldSharingIncompleteError' })
+  if (occupy) {
+    expect(await readFile(join(source, 'saves'), 'utf8')).toBe('OTHER ENTRY')
+    const [backup] = await readdir(join(source, '.backups'))
+    expect((await lstat(join(source, '.backups', backup, 'saves'), { bigint: true })).ino).toBe(original.ino)
+    expect(await readFile(join(source, '.backups', backup, 'saves/Alpha/level.dat'), 'utf8')).toBe('original-world')
+  } else {
+    expect((await lstat(join(source, 'saves'), { bigint: true })).ino).toBe(original.ino)
+    expect(await readFile(join(source, 'saves/Alpha/level.dat'), 'utf8')).toBe('original-world')
+  }
+  expect(await readFile(join(root, 'saves/Alpha/level.dat'), 'utf8')).toBe('original-world')
 })

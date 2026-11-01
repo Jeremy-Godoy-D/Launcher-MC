@@ -26,7 +26,8 @@ import { AnyError, isSystemError } from '@xmcl/utils'
 import { FSWatcher } from 'chokidar'
 import filenamify from 'filenamify'
 import { existsSync } from 'fs'
-import { lstat, realpath } from 'node:fs/promises'
+import { lstat, mkdir, realpath, symlink } from 'node:fs/promises'
+import { randomUUID } from 'node:crypto'
 import { ensureDir, readFile, readdir, rename, rm, rmdir, stat, unlink, writeFile } from 'fs-extra'
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'path'
 import { Inject, LauncherAppKey, kGameDataPath, type PathResolver } from '~/app'
@@ -39,7 +40,7 @@ import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/servic
 import { LauncherApp, type WorldLock } from '../app/LauncherApp'
 import { linkDirectory, missing, readdirIfPresent } from '../util/fs'
 import { isNonnull, requireObject, requireString } from '../util/object'
-import { readlinkSafe, isLinkTo } from './utils/readLinkSafe'
+import { readlinkSafe } from './utils/readLinkSafe'
 import { datapackFileName, readWorldDatapacks } from './utils/worldDatapacks'
 import { readBoundedFile, readWorlds, readWorldMetadata, worldLocation, worldName, worldsLocation } from './utils/worldFiles'
 import { assertInstallDirectory } from '../instanceIO/utils/pendingInstall'
@@ -172,7 +173,11 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
 
   async #worldFiles<T>(operation: WorldFileOperation, action: () => Promise<T>, allowDepot = false): Promise<T> {
     if (!operation || !['copy', 'export', 'remove', 'import', 'metadata', 'import-datapack', 'remove-datapack'].includes(operation.type)) throw new Error('Invalid world operation')
-    const paths = [...new Set([operation.instancePath, ...(operation.type === 'copy' ? [operation.destinationInstancePath] : [])])].sort()
+    return this.#worldPaths([operation.instancePath, ...(operation.type === 'copy' ? [operation.destinationInstancePath] : [])], action, allowDepot)
+  }
+
+  async #worldPaths<T>(input: string[], action: () => Promise<T>, allowDepot = false): Promise<T> {
+    const paths = [...new Set(input)].sort()
     for (const path of paths) if (!allowDepot || path !== this.getPath()) await this.#javaInstance(path)
     const lock = async (index: number): Promise<T> => {
       if (index < paths.length) return this.mutex.of(LockKey.instance(paths[index])).runExclusive(() => lock(index + 1))
@@ -220,12 +225,14 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
 
   // Depot authorization stays private; extra IPC arguments cannot enable it.
   async #previewWorldFiles(operation: WorldFileOperation, allowDepot = false) {
-    return this.#worldFiles(operation, async () => {
-      const review = await previewWorldFiles(operation, this.getPath())
-      await this.#worldFilesIdle(review, allowDepot)
-      const lock = await this.#worldFileLock(review, false)
-      try { await lock?.verify(); return review } finally { lock?.release() }
-    }, allowDepot)
+    return this.#worldFiles(operation, () => this.#previewWorldFilesLocked(operation, allowDepot), allowDepot)
+  }
+
+  async #previewWorldFilesLocked(operation: WorldFileOperation, allowDepot = false) {
+    const review = await previewWorldFiles(operation, this.getPath())
+    await this.#worldFilesIdle(review, allowDepot)
+    const lock = await this.#worldFileLock(review, false)
+    try { await lock?.verify(); return review } finally { lock?.release() }
   }
 
   async applyWorldFiles(review: WorldFileReview) {
@@ -233,18 +240,20 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async #applyWorldFiles(review: WorldFileReview, allowDepot = false, linkSharedWorld = false) {
-    return this.#worldFiles(review?.operation, async () => {
-      let lock: WorldLock | undefined
-      try {
-        return await applyWorldFiles(review, this.getPath(), async (value, beforeWorldRename) => {
-          await this.#worldFilesIdle(value, allowDepot)
-          lock ||= await this.#worldFileLock(value, true)
-          await lock?.verify()
-          // Windows directory rename rejects live child-file handles, including a game opened after release.
-          if (beforeWorldRename) { lock?.release(); lock = undefined }
-        }, linkSharedWorld)
-      } finally { lock?.release() }
-    }, allowDepot)
+    return this.#worldFiles(review?.operation, () => this.#applyWorldFilesLocked(review, allowDepot, linkSharedWorld), allowDepot)
+  }
+
+  async #applyWorldFilesLocked(review: WorldFileReview, allowDepot = false, linkSharedWorld = false) {
+    let lock: WorldLock | undefined
+    try {
+      return await applyWorldFiles(review, this.getPath(), async (value, beforeWorldRename) => {
+        await this.#worldFilesIdle(value, allowDepot)
+        lock ||= await this.#worldFileLock(value, true)
+        await lock?.verify()
+        // Windows directory rename rejects live child-file handles, including a game opened after release.
+        if (beforeWorldRename) { lock?.release(); lock = undefined }
+      }, linkSharedWorld)
+    } finally { lock?.release() }
   }
 
   async #worldFileLock(review: WorldFileReview, create: boolean) {
@@ -402,28 +411,21 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async shareSave(options: ShareSaveOptions): Promise<void> {
-    const { instancePath, saveName } = options
-
-    requireString(saveName)
-
-    const savePath = join(instancePath, 'saves', saveName)
-
-    if (await missing(savePath)) {
-      throw new AnyError('InstanceDeleteNoSave', `Cannot find save ${saveName}`, undefined, {
-        saveName,
-      })
-    }
-
-    await ensureDir(this.getPath('saves'))
-    let destSharedSavePath = this.getPath('saves', saveName)
-
-    if (await missing(destSharedSavePath)) {
-      await rename(savePath, destSharedSavePath)
-    } else {
-      // move the save to shared save with a new name
-      destSharedSavePath = this.getPath('saves', `${saveName}-${Date.now()}`)
-      await rename(savePath, destSharedSavePath)
-    }
+    requireObject(options)
+    const { instancePath } = options, saveName = worldName(options.saveName)
+    await this.#javaInstance(instancePath)
+    await this.#worldPaths([instancePath, this.getPath()], async () => {
+      await this.#sharedSavesIdle(instancePath)
+      const source = await worldLocation(instancePath, saveName, this.getPath())
+      if (source.shared && !source.linked) throw new Error('Disconnect the shared worlds folder before sharing an individual world')
+      const remove = await this.#previewWorldFilesLocked({ type: 'remove', instancePath, saveName })
+      if (!source.linked) {
+        const destinationName = await this.#availableWorldName(this.getPath(), saveName)
+        const copy = await this.#previewWorldFilesLocked({ type: 'copy', instancePath, saveName, destinationInstancePath: this.getPath(), destinationName }, true)
+        await this.#applyWorldFilesLocked(copy, true)
+      }
+      await this.#applyWorldFilesLocked(remove)
+    }, true)
   }
 
   async updateSave(options: UpdateSaveOptions): Promise<void> {
@@ -452,13 +454,8 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     requireString(path, 'Invalid world import source')
     if (!isAbsolute(path)) throw new Error('Invalid world import source')
     await this.#javaInstance(instancePath)
-    const info = await lstat(path), canonical = await realpath(path), directory = await worldsLocation(instancePath, this.getPath())
-    const base = worldName(options.saveName ?? filenamify(info.isDirectory() ? basename(path) : basename(path, extname(path))))
-    let saveName = base, index = 1
-    while (await lstat(join(directory.root, saveName)).then(() => true, error => { if (error.code !== 'ENOENT') throw error; return false })) {
-      if (index > 1000) throw new Error('Too many conflicting world names')
-      saveName = worldName(`${base} (${index++})`)
-    }
+    const info = await lstat(path), canonical = await realpath(path)
+    const saveName = await this.#availableWorldName(instancePath, worldName(options.saveName ?? filenamify(info.isDirectory() ? basename(path) : basename(path, extname(path)))))
     const depot = info.isDirectory() && !info.isSymbolicLink() && relative(dirname(canonical), join(await realpath(this.getPath()), 'saves')) === ''
     let dest: string
     if (depot) {
@@ -493,62 +490,137 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     await this.applyWorldFiles(review)
   }
 
+  async #availableWorldName(instancePath: string, base: string, reserved = new Set<string>()) {
+    const directory = await worldsLocation(instancePath, this.getPath())
+    let name = worldName(base), index = 1
+    while (reserved.has(name.toLowerCase()) || await lstat(join(directory.root, name)).then(() => true, error => { if (error.code !== 'ENOENT') throw error; return false })) {
+      if (index > 1000) throw new Error('Too many conflicting world names')
+      name = worldName(`${base} (${index++})`)
+    }
+    reserved.add(name.toLowerCase())
+    return name
+  }
+
+  async #sharedSavesIdle(instancePath: string) {
+    await this.#javaInstance(instancePath)
+    if ((await (await this.app.registry.get(LaunchService)).getGameProcesses()).length) throw new AnyError('SharedWorldRunningError')
+  }
+
+  async #worldFolderLocks(instancePath: string, create: boolean) {
+    const directories: { instance: string; identity: string; names: string[] }[] = [], bindings: { instance: string; name: string; identity: string }[] = []
+    const held = new Map<string, WorldLock>()
+    const release = (root: string) => { const lock = held.get(root); if (lock) { held.delete(root); lock.release() } }
+    try {
+      for (const instance of new Set([instancePath, this.getPath()])) {
+        const directory = await worldsLocation(instance, this.getPath()), names = (await readdirIfPresent(directory.root)).sort()
+        if (names.length > 1000) throw new Error('Too many worlds to share')
+        directories.push({ instance, identity: directory.identity, names })
+        for (const name of names) {
+          const info = await lstat(join(directory.root, name), { bigint: true })
+          if (!info.isDirectory() && !info.isSymbolicLink()) continue
+          const location = await worldLocation(instance, name, this.getPath()), level = await lstat(join(location.root, 'level.dat'), { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
+          if (!level) continue
+          if (!level.isFile() || level.isSymbolicLink()) throw new Error('Unsafe world metadata')
+          bindings.push({ instance, name, identity: location.identity })
+          if (held.has(location.root)) continue
+          const lock = await this.app.acquireWorldLock(location.root, create)
+          if (create && !lock) throw new AnyError('WorldLockUnavailableError')
+          if (lock) held.set(location.root, lock)
+        }
+      }
+      return {
+        verify: async () => {
+          await this.#sharedSavesIdle(instancePath)
+          for (const lock of held.values()) await lock.verify()
+          for (const directory of directories) {
+            const current = await worldsLocation(directory.instance, this.getPath())
+            if (current.identity !== directory.identity || JSON.stringify((await readdirIfPresent(current.root)).sort()) !== JSON.stringify(directory.names)) throw new AnyError('WorldFilesChangedError')
+          }
+          for (const binding of bindings) if ((await worldLocation(binding.instance, binding.name, this.getPath())).identity !== binding.identity) throw new AnyError('WorldFilesChangedError')
+        },
+        releaseLocal: (directory: string) => { for (const root of [...held.keys()]) if (relative(dirname(root), directory) === '') release(root) },
+        release: () => { for (const root of [...held.keys()]) release(root) },
+      }
+    } catch (error) { for (const root of [...held.keys()]) release(root); throw error }
+  }
+
+  async #replaceWorldsFolder(instancePath: string, linked: boolean, originals: WorldFileReview[] = []) {
+    const instance = await realpath(instancePath), directory = await worldsLocation(instancePath, this.getPath()), local = join(instance, 'saves')
+    const global = (await worldsLocation(this.getPath(), this.getPath())).root
+    const original = await lstat(local, { bigint: true }).catch(error => { if (error.code !== 'ENOENT') throw error })
+    if (!linked && !original?.isSymbolicLink()) return
+    const guards = await this.#worldFolderLocks(instancePath, true)
+    try {
+      await guards.verify()
+      for (const original of originals) if ((await previewWorldFiles(original.operation, this.getPath())).snapshot !== original.snapshot) throw new AnyError('WorldFilesChangedError')
+      await assertInstallDirectory(await realpath(this.getPath()), global)
+      if (await realpath(instancePath) !== instance || (await worldsLocation(instancePath, this.getPath())).identity !== directory.identity) throw new AnyError('WorldFilesChangedError')
+      let backup: string | undefined
+      if (original) {
+        const parent = join(instance, '.backups', `world-sharing-${randomUUID()}`)
+        await assertInstallDirectory(instance, parent); await mkdir(parent, { recursive: true }); await assertInstallDirectory(instance, parent)
+        backup = join(parent, 'saves')
+        await guards.verify()
+        const current = await lstat(local, { bigint: true })
+        if (current.ino !== original.ino || current.dev !== original.dev || current.isSymbolicLink() !== original.isSymbolicLink()) throw new AnyError('WorldFilesChangedError')
+        // Release local child handles immediately before Windows rename; keep depot worlds locked.
+        guards.releaseLocal(local)
+        await rename(local, backup)
+      }
+      try {
+        if (linked) await symlink(global, local, process.platform === 'win32' ? 'junction' : 'dir')
+        else await mkdir(local)
+      } catch (cause) {
+        if (backup) {
+          const occupied = await lstat(local).catch(error => { if (error.code !== 'ENOENT') throw error })
+          const saved = await lstat(backup, { bigint: true })
+          if (!occupied && saved.ino === original!.ino && saved.dev === original!.dev) await rename(backup, local)
+        }
+        throw Object.assign(new Error('World sharing incomplete; original folder retained', { cause }), { name: 'WorldSharingIncompleteError', backup })
+      }
+    } finally { guards.release() }
+  }
+
   async isSaveLinked(instancePath: string) {
-    const sharedSave = this.getPath('saves')
-    const instanceSave = join(instancePath, 'saves')
-    return isLinkTo(instanceSave, sharedSave)
+    await this.#javaInstance(instancePath)
+    return (await worldsLocation(instancePath, this.getPath())).shared
   }
 
   async linkSharedSave(instancePath: string) {
-    const sharedSave = this.getPath('saves')
-    const instanceSaves = join(instancePath, 'saves')
-    await ensureDir(sharedSave)
-
-    if (await isLinkTo(instanceSaves, sharedSave)) {
-      return
-    }
-
-    if (await missing(instanceSaves)) {
-      await linkDirectory(sharedSave, instanceSaves, this)
-      return
-    }
-
-    // existed folder we need to merge to shared
-    // move all saves to shared
-    const saves = await readdir(instanceSaves)
-    for (const saveName of saves) {
-      const savePath = join(instanceSaves, saveName)
-      // check if shared folder has the same save
-      const sharedSavePath = join(sharedSave, saveName)
-      const isLinked = await readlinkSafe(savePath).catch(() => '')
-
-      if (isLinked) {
-        await unlink(savePath)
-        continue
+    await this.#javaInstance(instancePath)
+    return this.#worldPaths([instancePath, this.getPath()], async () => {
+      await this.#sharedSavesIdle(instancePath)
+      const directory = await worldsLocation(instancePath, this.getPath())
+      if (directory.shared) return
+      const instance = await realpath(instancePath)
+      await assertInstallDirectory(instance, join(instance, '.backups'))
+      const depot = (await worldsLocation(this.getPath(), this.getPath())).root
+      await assertInstallDirectory(await realpath(this.getPath()), depot); await mkdir(depot, { recursive: true }); await assertInstallDirectory(await realpath(this.getPath()), depot)
+      const preflight = await this.#worldFolderLocks(instancePath, false)
+      try { await preflight.verify() } finally { preflight.release() }
+      const names = (await readdirIfPresent(directory.root)).sort(), reserved = new Set<string>(), copies: WorldFileReview[] = [], originals: WorldFileReview[] = []
+      for (const name of names) {
+        const info = await lstat(join(directory.root, name), { bigint: true })
+        if (!info.isDirectory() && !info.isSymbolicLink()) continue
+        const location = await worldLocation(instancePath, name, this.getPath())
+        if (location.linked) continue
+        originals.push(await this.#previewWorldFilesLocked({ type: 'remove', instancePath, saveName: name }))
+        const destinationName = await this.#availableWorldName(this.getPath(), name, reserved)
+        copies.push(await this.#previewWorldFilesLocked({ type: 'copy', instancePath, saveName: name, destinationInstancePath: this.getPath(), destinationName }, true))
       }
-
-      if (await missing(sharedSavePath)) {
-        await rename(savePath, sharedSavePath)
-      } else {
-        // move to shared with a new name
-        const newName = `${saveName}-${Date.now()}`
-        await rename(savePath, join(sharedSave, newName))
-      }
-    }
-
-    await rm(instanceSaves, { recursive: true })
-    await linkDirectory(sharedSave, instanceSaves, this)
+      for (const copy of copies) await this.#applyWorldFilesLocked(copy, true)
+      if ((await worldsLocation(instancePath, this.getPath())).identity !== directory.identity || JSON.stringify((await readdirIfPresent(directory.root)).sort()) !== JSON.stringify([...names].sort())) throw new AnyError('WorldFilesChangedError')
+      await this.#replaceWorldsFolder(instancePath, true, originals)
+    }, true)
   }
 
   async unlinkSharedSave(instancePath: string) {
-    const sharedSave = this.getPath('saves')
-    const instanceSave = join(instancePath, 'saves')
-    if (!(await isLinkTo(instanceSave, sharedSave))) {
-      return
-    }
-
-    await unlink(instanceSave)
-    await ensureDir(instanceSave)
+    await this.#javaInstance(instancePath)
+    return this.#worldPaths([instancePath, this.getPath()], async () => {
+      await this.#sharedSavesIdle(instancePath)
+      if (!(await worldsLocation(instancePath, this.getPath())).shared) return
+      await this.#replaceWorldsFolder(instancePath, false)
+    }, true)
   }
 
   async getSharedSaves() {

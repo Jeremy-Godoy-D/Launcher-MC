@@ -1,4 +1,4 @@
-import { lstat, mkdir, readFile, readdir, realpath, symlink, writeFile } from 'node:fs/promises'
+import { lstat, mkdir, readFile, readdir, realpath, rename, symlink, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { createRequire } from 'node:module'
 import { createWriteStream } from 'node:fs'
@@ -163,4 +163,74 @@ test('legacy shared-world activation respects a real Java session and preserves 
   await call(page, 'deleteSave', { instancePath: instance, saveName: 'SharedActivation' })
   await expect(lstat(installed)).rejects.toHaveProperty('code', 'ENOENT')
   expect(await readFile(join(shared, 'level.dat'))).toEqual(bytes)
+})
+
+test('sharing worlds retains collision contents, originals and notes while disconnecting preserves the depot', async ({ launcher }) => {
+  const page = launcher.main, [instance] = await instances(page)
+  const original = await makeReactWorld(instance, 'Alpha', 'LOCAL ALPHA'), originalBytes = await readFile(join(original, 'level.dat'))
+  const occupied = await makeReactWorld(launcher.gameDataPath, 'Alpha', 'DEPOT ALPHA'), occupiedBytes = await readFile(join(occupied, 'level.dat'))
+  await call(page, 'shareSave', { instancePath: instance, saveName: 'Alpha' })
+  await expect(lstat(original)).rejects.toHaveProperty('code', 'ENOENT')
+  expect(await readFile(join(launcher.gameDataPath, 'saves/Alpha (1)/level.dat'))).toEqual(originalBytes)
+  expect(await readFile(join(occupied, 'level.dat'))).toEqual(occupiedBytes)
+  const [worldBackup] = await readdir(join(instance, '.backups'))
+  expect(await readFile(join(instance, '.backups', worldBackup, 'Alpha/level.dat'))).toEqual(originalBytes)
+  const first = await makeReactWorld(instance, 'Beta', 'FIRST BETA'), second = await makeReactWorld(instance, 'Beta (1)', 'SECOND BETA')
+  const firstBytes = await readFile(join(first, 'level.dat')), secondBytes = await readFile(join(second, 'level.dat'))
+  await makeReactWorld(launcher.gameDataPath, 'Beta', 'DEPOT BETA'); await writeFile(join(instance, 'saves/.note'), 'LOCAL NOTE')
+  await symlink(occupied, join(instance, 'saves/Owned alias'), 'junction')
+  const folderID = (await lstat(join(instance, 'saves'), { bigint: true })).ino
+  await call(page, 'linkSharedSave', instance)
+  expect(await call(page, 'isSaveLinked', instance)).toBe(true)
+  expect((await lstat(join(instance, 'saves'))).isSymbolicLink()).toBe(true)
+  expect(await readFile(join(launcher.gameDataPath, 'saves/Beta (1)/level.dat'))).toEqual(firstBytes)
+  expect(await readFile(join(launcher.gameDataPath, 'saves/Beta (1) (1)/level.dat'))).toEqual(secondBytes)
+  const folderBackup = (await readdir(join(instance, '.backups'))).find(name => name.startsWith('world-sharing-'))!
+  const retained = join(instance, '.backups', folderBackup, 'saves')
+  expect((await lstat(retained, { bigint: true })).ino).toBe(folderID)
+  expect(await readFile(join(retained, '.note'), 'utf8')).toBe('LOCAL NOTE')
+  expect((await lstat(join(retained, 'Owned alias'))).isSymbolicLink()).toBe(true)
+  await call(page, 'linkSharedSave', instance); expect(await readdir(join(instance, '.backups'))).toHaveLength(2)
+  await call(page, 'unlinkSharedSave', instance)
+  expect(await call(page, 'isSaveLinked', instance)).toBe(false); expect(await readdir(join(instance, 'saves'))).toEqual([])
+  expect(await readFile(join(occupied, 'level.dat'))).toEqual(occupiedBytes)
+  expect(await readFile(join(launcher.gameDataPath, 'saves/Beta (1)/level.dat'))).toEqual(firstBytes)
+  expect(await readdir(join(instance, '.backups'))).toHaveLength(3)
+})
+
+test('whole-folder sharing and disconnect refuse real external Java sessions before replacing the folder', async ({ launcher }) => {
+  const page = launcher.main, [instance] = await instances(page), world = await makeReactWorld(instance, 'Guarded')
+  const bytes = await readFile(join(world, 'level.dat')); await writeFile(join(world, 'session.lock'), '☃')
+  const external = await javaWorldLock(world); expect(external.status).toBe('LOCKED')
+  try {
+    expect(await rejected(page, 'linkSharedSave', instance)).toBe(true)
+    expect((await lstat(join(instance, 'saves'))).isSymbolicLink()).toBe(false)
+    await expect(lstat(join(launcher.gameDataPath, 'saves/Guarded'))).rejects.toHaveProperty('code', 'ENOENT')
+  } finally { await external.release() }
+  await call(page, 'linkSharedSave', instance)
+  const shared = join(launcher.gameDataPath, 'saves/Guarded'), active = await javaWorldLock(shared)
+  expect(active.status).toBe('LOCKED')
+  try {
+    expect(await rejected(page, 'unlinkSharedSave', instance)).toBe(true)
+    expect((await lstat(join(instance, 'saves'))).isSymbolicLink()).toBe(true)
+    expect(await readFile(join(shared, 'level.dat'))).toEqual(bytes)
+  } finally { await active.release() }
+  await call(page, 'unlinkSharedSave', instance)
+  expect(await readdir(join(instance, 'saves'))).toEqual([])
+  expect(await readFile(join(shared, 'level.dat'))).toEqual(bytes)
+})
+
+test('creation can link empty saves while whole-folder calls reject unregistered roots and foreign junctions', async ({ launcher }) => {
+  const page = launcher.main, [, empty, unsafe] = await instances(page)
+  await call(page, 'linkSharedSave', empty); expect(await call(page, 'isSaveLinked', empty)).toBe(true)
+  await call(page, 'unlinkSharedSave', empty); expect(await readdir(join(empty, 'saves'))).toEqual([])
+  const foreign = join(launcher.gameDataPath, 'foreign-saves'); await mkdir(foreign); await writeFile(join(foreign, 'private'), 'KEEP')
+  await mkdir(join(unsafe, 'saves'), { recursive: true }); await rename(join(unsafe, 'saves'), join(unsafe, 'retained-saves'))
+  await symlink(foreign, join(unsafe, 'saves'), 'junction')
+  for (const method of ['linkSharedSave', 'unlinkSharedSave', 'isSaveLinked']) {
+    expect(await rejected(page, method, unsafe)).toBe(true)
+    expect(await rejected(page, method, launcher.gameDataPath, true)).toBe(true)
+  }
+  expect(await readFile(join(foreign, 'private'), 'utf8')).toBe('KEEP')
+  expect((await lstat(join(unsafe, 'saves'))).isSymbolicLink()).toBe(true)
 })
