@@ -11,6 +11,8 @@ import { Settings } from '@xmcl/runtime-api/src/entities/setting'
 import { InstanceSchema } from '../../../../packages/instance/instance'
 import { LaunchStore } from './store'
 import { readState } from './read'
+import { instanceSettingsEdit, instanceSettingsSnapshot } from '@xmcl/runtime-api/src/util/instanceSettings'
+import { createInstanceSettingsDraft, instanceSettingsChanges, type InstanceSettingsForm } from '../instance/settingsDraft'
 
 function shared<T extends object>(model: T, id: string) {
   const events = new EventEmitter()
@@ -208,6 +210,48 @@ function fixture(startup?: () => Promise<any[]>) {
 }
 
 describe('Java launch flow', () => {
+  it.each([
+    { label: 'inherit every override', values: { java: '', assignMemory: null, minMemory: '', maxMemory: '', vmOptions: null, mcOptions: null, fastLaunch: null, hideLauncher: null, showLog: null }, inheritResolution: true, expected: { java: '/global-java', minMemory: 1536, maxMemory: 5120, vmOptions: ['-Dglobal=two words'], mcOptions: ['--global value'], hideLauncher: true, showLog: true, skipAssetsCheck: true, resolution: { width: 1500, height: 850, fullscreen: true, monitor: 'global-monitor' } } },
+    { label: 'explicit false and empty arrays override globals', values: { assignMemory: false, vmOptions: [], mcOptions: [] }, expected: { java: '/own-java', minMemory: undefined, maxMemory: undefined, vmOptions: [], mcOptions: [], hideLauncher: false, showLog: false, skipAssetsCheck: false } },
+    { label: 'automatic allocation ignores saved manual bounds', values: { assignMemory: 'auto' }, expected: { minMemory: 1024, maxMemory: undefined } },
+    { label: 'minimum inherits separately', values: { assignMemory: true, minMemory: '', maxMemory: '3072' }, expected: { minMemory: 1536, maxMemory: 3072 } },
+    { label: 'maximum inherits separately', values: { assignMemory: true, minMemory: '2048', maxMemory: '' }, expected: { minMemory: 2048, maxMemory: 5120 } },
+    { label: 'explicit zero limits do not inherit', values: { assignMemory: true, minMemory: '0', maxMemory: '0' }, expected: { minMemory: undefined, maxMemory: undefined } },
+    { label: 'inherited disabled allocation ignores saved bounds', values: { assignMemory: null }, globalAssignMemory: false, expected: { minMemory: undefined, maxMemory: undefined } },
+    { label: 'inherited automatic allocation ignores saved bounds', values: { assignMemory: null }, globalAssignMemory: 'auto', expected: { minMemory: 1024, maxMemory: undefined } },
+  ] as { label: string; values: Partial<InstanceSettingsForm>; inheritResolution?: boolean; globalAssignMemory?: boolean | 'auto'; expected: Record<string, unknown> }[])('resolves saved settings through the launch coordinator: $label', async ({ values, inheritResolution, globalAssignMemory = true, expected }) => {
+    const f = fixture()
+    try {
+      f.instances.mutate('instanceEdit', { path: f.path, java: '/own-java', assignMemory: true, minMemory: 768, maxMemory: 6144, vmOptions: ['-Down=two words', ''], mcOptions: ['--own value'], resolution: { width: 960, height: 540, monitor: 'own-monitor' }, fastLaunch: false, hideLauncher: false, showLog: false })
+      const draft = createInstanceSettingsDraft(instanceSettingsSnapshot(f.instances.raw.all[f.path]))
+      Object.assign(draft.values, values)
+      if (inheritResolution) draft.values.resolution.enabled = false
+      f.instances.mutate('instanceEdit', { path: f.path, ...instanceSettingsEdit(instanceSettingsChanges(draft)) })
+      f.java.raw.all = ['/own-java', '/global-java'].map(path => ({ path, version: '17', majorVersion: 17, valid: true }))
+      await f.ready()
+      // The global values change after inspection, before the user's launch confirmation.
+      f.settings.mutate('globalInstanceSetting', { ...f.settings.raw, globalJava: '/global-java', globalAssignMemory, globalMinMemory: 1536, globalMaxMemory: 5120, globalVmOptions: ['-Dglobal=two words'], globalMcOptions: ['--global value'], globalHideLauncher: true, globalShowLog: true, globalFastLaunch: true, globalResolution: { width: 1500, height: 850, fullscreen: true, monitor: 'global-monitor' } })
+      await f.flow.run()
+      const launches = f.call.mock.calls.filter(([key, method]) => key === 'LaunchService' && method === 'launch')
+      expect(launches).toHaveLength(1)
+      for (const [key, value] of Object.entries(expected)) expect(Reflect.get(launches[0][2], key)).toEqual(value)
+      expect(f.flow.getSnapshot().phase).toBe('running')
+      if (!Object.hasOwn(values, 'vmOptions')) expect(launches[0][2].vmOptions).toEqual(['-Down=two words', ''])
+      expect(f.settings.raw.globalVmOptions).toEqual(['-Dglobal=two words'])
+      if (!inheritResolution) expect(launches[0][2].resolution).toEqual({ width: 960, height: 540, monitor: 'own-monitor' })
+    } finally { await f.dispose() }
+  })
+  it('blocks a resolved inherited maximum below the saved minimum without losing either setting', async () => {
+    const f = fixture()
+    try {
+      f.instances.mutate('instanceEdit', { path: f.path, assignMemory: true, minMemory: 8192, maxMemory: null })
+      await f.ready(); await f.flow.run()
+      expect(f.flow.getSnapshot().reason).toBe('memory')
+      expect(f.call.mock.calls.some(([key, method]) => key === 'LaunchService' && method === 'launch')).toBe(false)
+      expect(f.instances.raw.all[f.path].minMemory).toBe(8192); expect(f.instances.raw.all[f.path].maxMemory).toBeUndefined()
+      expect(f.settings.raw.globalMaxMemory).toBe(4096)
+    } finally { await f.dispose() }
+  })
   it('blocks incomplete copies before installing files, Java or starting a process', async () => {
     const f = fixture()
     try {

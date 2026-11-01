@@ -6,6 +6,7 @@ import { test, expect, snap, type Page, type LauncherFixture } from '../../helpe
 import { seedReactLibrary } from '../../helpers/react-library'
 import { activateLauncherControl, focusLauncher } from '../../helpers/focus-launcher'
 import { stubOpenDialog } from '../../helpers/tasks/importModpack'
+import { readTextContrast } from '../../helpers/contrast'
 
 test.use({ launcherOptions: { locale: 'es-ES', gameDataParentAlias: true } })
 const call = (page: Page, method: string, ...args: any[]) => page.evaluate(({ method, args }) => (window as any).serviceChannels.open('InstanceService').call(method, ...args), { method, args })
@@ -176,10 +177,32 @@ test('invalid drafts and protected exit keep focus, actions and contrast in both
       await snap(launcher, `draft-invalid-${theme}-${size[0]}`, 'Invalid draft retained with Native validation, partial inheritance and preserved nested metadata.')
       await page.getByTestId('nav-library').click(); const modal = page.getByTestId('settings-draft-dialog'); await expect(modal).toBeVisible(); await expect(page.getByTestId('settings-stay')).toBeFocused()
       for (let index = 0; index < 5; index++) { await page.keyboard.press('Tab'); expect(await modal.evaluate(element => element.contains(document.activeElement))).toBe(true); await expect(page.locator(':focus')).toBeInViewport({ ratio: 1 }) }
+      for (let index = 0; index < 5; index++) { await page.keyboard.press('Shift+Tab'); expect(await modal.evaluate(element => element.contains(document.activeElement))).toBe(true) }
+      await page.getByTestId('nav-library').focus(); expect(await modal.evaluate(element => element.contains(document.activeElement))).toBe(true)
       const dialogReport = await page.evaluate(async () => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } })); await writeFile(testInfo.outputPath(`draft-dialog-${theme}-${size[0]}-axe.json`), JSON.stringify(dialogReport, null, 2)); expect(dialogReport.violations).toEqual([])
       await snap(launcher, `draft-exit-${theme}-${size[0]}`, 'Save/discard/stay dialog traps focus and keeps every action reachable in the minimum window.')
-      await page.keyboard.press('Escape'); await expect(modal).toHaveCount(0); await expect(page.getByTestId('nav-library')).toBeFocused(); await area.getByTestId('setting-discard-btn').click()
+      await page.keyboard.press('Escape'); await expect(modal).toHaveCount(0); await expect(page.locator('#root')).not.toHaveAttribute('aria-hidden', 'true'); await expect(page.getByTestId('nav-library')).toBeFocused(); await area.getByTestId('setting-discard-btn').click()
     }
   }
   expect(errors).toEqual([])
+})
+
+test('settings text keeps AA contrast over the worst uniform ambient luminance', async ({ launcher }, testInfo) => {
+  const page = launcher.main; await seedReactLibrary(page); await open(page); await page.emulateMedia({ reducedMotion: 'reduce' })
+  const reports: unknown[] = []
+  for (const theme of ['dark', 'light']) {
+    await page.evaluate(theme => { const key = 'launcher.react.preferences', prefs = JSON.parse(localStorage.getItem(key)!); localStorage.setItem(key, JSON.stringify({ ...prefs, appearance: theme })) }, theme); await page.reload()
+    await expect(settings(page)).toBeVisible()
+    await page.evaluate(theme => {
+      const backdrop = document.querySelector<HTMLElement>('.app-backdrop')!, canvas = document.createElement('canvas'); canvas.width = canvas.height = 1
+      const context = canvas.getContext('2d')!; context.fillStyle = theme === 'dark' ? '#fff' : '#000'; context.fillRect(0, 0, 1, 1)
+      context.fillStyle = getComputedStyle(backdrop, '::after').backgroundColor; context.fillRect(0, 0, 1, 1)
+      const color = context.getImageData(0, 0, 1, 1).data
+      // Replace poster + veil by their equivalent opaque color, so the ancestor-color helper is exact.
+      backdrop.parentElement!.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`; backdrop.style.visibility = 'hidden'
+    }, theme)
+    const result = await page.evaluate(readTextContrast, '.instance-settings .settings-status, .instance-settings label, .instance-settings legend, .instance-settings h2, .instance-settings p, .instance-settings select:not(:disabled), .instance-settings input:not([type=radio]):not([type=checkbox]):not(:disabled), .instance-settings textarea:not(:disabled), .instance-settings button:not(:disabled)')
+    reports.push({ theme, result }); await writeFile(testInfo.outputPath('settings-uniform-contrast.json'), JSON.stringify(reports, null, 2))
+    expect(result.length).toBeGreaterThan(15); expect(result.filter(value => value.ratio < 4.5)).toEqual([])
+  }
 })
