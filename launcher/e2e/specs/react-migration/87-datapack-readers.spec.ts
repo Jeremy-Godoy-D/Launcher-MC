@@ -114,5 +114,10 @@ test('Native datapack and world removal preserve backups with an active datapack
     let preserved = false
     for (const name of backups) { const saved = await readFile(join(path, '.backups', name, 'Alpha/level.dat')).catch(() => undefined); if (saved?.equals(bytes)) preserved = true }
     expect(preserved).toBe(true)
+    await makeReactWorld(path, 'Alpha'); await mkdir(join(world, 'datapacks'))
+    await page.evaluate(() => (window as any).__datapackReader.state.revalidate())
+    const source = join(launcher.gameDataPath, 'restored-source'); await makeReactResourcePack(source, 'Restored', 'Restored world pack', 48)
+    await copyFile(join(source, 'resourcepacks/Restored.zip'), join(world, 'datapacks/Restored.zip'))
+    await expect.poll(async () => (await latest(page)).map((row: any) => row.fileName), { timeout: 10000 }).toEqual(['Restored.zip'])
   } finally { await closeWatch(page) }
 })

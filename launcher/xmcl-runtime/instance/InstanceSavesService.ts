@@ -873,6 +873,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     const stateManager = await this.app.registry.get(ServiceStateManager)
     return stateManager.registerOrGet(getInstanceSaveDatapacksKey(savePath), async ({ defineAsyncOperation }) => {
       const state = new SaveDatapacks()
+      const key = source.depot && owner === source.instancePath ? 'resource-pack-options' : LockKey.instance(owner)
       let watcher: FSWatcher | undefined, disposed = false, refresh: Promise<void> | undefined, dirty = false
       const revalidate = defineAsyncOperation(async () => {
         if (disposed) return
@@ -910,7 +911,6 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       }
       try {
         await revalidate()
-        const key = source.depot && owner === source.instancePath ? 'resource-pack-options' : LockKey.instance(owner)
         await this.mutex.of(key).runExclusive(async () => {
           await this.#legacySaveContext(savePath)
           const observers = this.#saveWatchers.get(owner) || new Set()
@@ -918,7 +918,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
           await control.resume()
         })
       } catch (error) { dispose(); throw error }
-      return [state, dispose, revalidate]
+      return [state, dispose, async () => { await revalidate(); await this.mutex.of(key).runExclusive(() => control.resume()) }]
     })
   }
 
