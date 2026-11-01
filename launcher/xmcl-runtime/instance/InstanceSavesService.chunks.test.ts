@@ -78,6 +78,26 @@ describe('InstanceSavesService chunk operations and safety', () => {
     await rm(testRoot, { recursive: true, force: true })
   })
 
+  it('rejects worldgen and progress reads outside registered worlds', async () => {
+    const foreign = join(testRoot, 'foreign'); await mkdir(foreign); await writeFile(join(foreign, 'level.dat'), 'metadata')
+    await expect(service.getWorldGenSettings(foreign)).rejects.toHaveProperty('name', 'WorldNotFoundError')
+    await expect(service.getInstanceSaveProgress({ savePath: foreign, instancePath })).rejects.toHaveProperty('name', 'WorldNotFoundError')
+  })
+
+  it('binds progress resources to the selected registered instance and validates locale paths', async () => {
+    const other = join(testRoot, 'other'); await mkdir(join(other, 'saves/WorldOne'), { recursive: true }); await writeFile(join(other, 'saves/WorldOne/level.dat'), 'metadata')
+    instances.push({ path: other, edition: 'java' })
+    await expect(service.getInstanceSaveProgress({ savePath, instancePath: other })).rejects.toHaveProperty('name', 'WorldNotFoundError')
+    await expect(service.getInstanceSaveProgress({ savePath, instancePath, locale: '../../outside' })).rejects.toThrow('Invalid progress locale')
+    const progress = await service.getInstanceSaveProgress({ savePath, instancePath, locale: 'es-ES' })
+    expect(progress.savePath).toBe(savePath); expect(progress.saveName).toBe('WorldOne')
+    const alias = join(testRoot, 'instance-alias'); await symlink(instancePath, alias, 'junction')
+    expect((await service.getInstanceSaveProgress({ savePath, instancePath: alias })).savePath).toBe(savePath)
+    const shared = join(testRoot, 'saves/Shared'); await mkdir(shared, { recursive: true }); await writeFile(join(shared, 'level.dat'), 'metadata')
+    await symlink(shared, join(instancePath, 'saves/Shared'), 'junction')
+    expect((await service.getInstanceSaveProgress({ savePath: join(instancePath, 'saves/Shared'), instancePath })).savePath).toBe(shared)
+  })
+
   it.each(['registration', 'game'])('blocks writes through a parent directory alias in the %s path', async (aliasKind) => {
     const alias = join(testRoot, 'parent-alias'), physical = join(testRoot, 'physical')
     await mkdir(join(physical, 'instance', 'saves', 'WorldOne'), { recursive: true })

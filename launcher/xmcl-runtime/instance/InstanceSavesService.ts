@@ -658,10 +658,7 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async getWorldGenSettings(savePath: string) {
-    requireString(savePath)
-    this.log(`Reading world generation settings from ${savePath}`)
-    
-    return await readWorldGenSettings(savePath)
+    return this.#readSave(savePath, root => readWorldGenSettings(root))
   }
 
   async listSaveDimensions(savePath: string) {
@@ -738,22 +735,24 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
     await this.applySaveChunkChanges(change, review.snapshot)
   }
 
-  async #readSave<T>(savePath: string, action: (root: string) => Promise<T>) {
-    const first = await this.#saveLocation(savePath)
+  async #readSave<T>(savePath: string, action: (root: string, instance: InstanceService['state']['instances'][number] | undefined) => Promise<T>, instancePath?: string) {
+    const first = await this.#saveLocation(savePath, instancePath)
     const key = first.matchedInstance ? LockKey.instance(first.matchedInstance.path) : 'resource-pack-options'
     return this.mutex.of(key).runExclusive(async () => {
-      const source = await this.#saveLocation(savePath)
+      const source = await this.#saveLocation(savePath, instancePath)
       if (source.identity !== first.identity) throw new AnyError('WorldChangedError')
-      const result = await action(source.root)
-      if ((await this.#saveLocation(savePath)).identity !== first.identity) throw new AnyError('WorldChangedError')
+      const result = await action(source.root, source.matchedInstance)
+      if ((await this.#saveLocation(savePath, instancePath)).identity !== first.identity) throw new AnyError('WorldChangedError')
       return result
     })
   }
 
-  async #saveLocation(savePath: string) {
+  async #saveLocation(savePath: string, instancePath?: string) {
     requireString(savePath)
     if (!isAbsolute(savePath)) throw new AnyError('WorldNotFoundError')
     await this.instanceService.initialize()
+    if (instancePath !== undefined) { requireString(instancePath); if (!isAbsolute(instancePath)) throw new AnyError('WorldNotFoundError') }
+    const requested = instancePath === undefined ? undefined : await realpath(instancePath).catch(() => { throw new AnyError('WorldNotFoundError') })
     const root = await realpath(savePath).catch(() => { throw new AnyError('WorldNotFoundError') })
     let matchedInstance: typeof this.instanceService.state.instances[number] | undefined
     let identity = '', isShared = false
@@ -761,14 +760,16 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
       if (instance.edition !== 'java') continue
       const instanceRoot = await realpath(instance.path).catch(error => { if (error.code !== 'ENOENT') throw error })
       if (!instanceRoot) continue
-      const name = relative(join(instanceRoot, 'saves'), root)
+      if (requested && relative(instanceRoot, requested) !== '') continue
+      const name = requested ? basename(root) : relative(join(instanceRoot, 'saves'), root)
       if (!name || name === '..' || isAbsolute(name) || name.includes(sep)) continue
-      const source = await worldLocation(instance.path, worldName(name), this.getPath())
-      if (relative(source.root, root) !== '') throw new AnyError('WorldChangedError')
+      const source = await worldLocation(instance.path, worldName(name), this.getPath()).catch(error => { if (requested) throw new AnyError('WorldNotFoundError'); throw error })
+      if (relative(source.root, root) !== '') throw new AnyError(requested ? 'WorldNotFoundError' : 'WorldChangedError')
       matchedInstance = instance; identity = source.identity; isShared = source.shared
       break
     }
     if (!matchedInstance) {
+      if (requested) throw new AnyError('WorldNotFoundError')
       const sharedRoot = join(await realpath(this.getPath()), 'saves'), name = relative(sharedRoot, root)
       if (!name || name === '..' || isAbsolute(name) || name.includes(sep)) throw new AnyError('WorldNotFoundError')
       worldName(name)
@@ -992,12 +993,12 @@ export class InstanceSavesService extends AbstractService implements IInstanceSa
   }
 
   async getInstanceSaveProgress(options: { savePath: string; instancePath?: string; locale?: string }) {
-    const { savePath } = options
-    requireString(savePath)
-    const instancePath = options.instancePath || dirname(dirname(savePath))
-    const instance = this.instanceService.state.all[instancePath]
-    const versionId = instance?.version || instance?.runtime.minecraft
-    return await readSaveProgress(savePath, instancePath, this.getPath(), undefined, options.locale, versionId)
+    const { savePath, instancePath, locale } = options
+    if (locale !== undefined && (typeof locale !== 'string' || !/^[a-zA-Z]{2,8}(?:[-_][a-zA-Z0-9]{2,8}){0,3}$/.test(locale))) throw new Error('Invalid progress locale')
+    return this.#readSave(savePath, async (root, instance) => {
+      const directory = await realpath(instance?.path || this.getPath())
+      return readSaveProgress(root, directory, this.getPath(), undefined, locale, instance?.version || instance?.runtime?.minecraft)
+    }, instancePath)
   }
 }
 

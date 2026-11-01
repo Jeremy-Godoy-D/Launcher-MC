@@ -193,7 +193,7 @@ test('world map renders canvas, selects chunks, copies to clipboard and deletes 
 })
 
 test('native chunk writes reject foreign worlds, invalid dimensions and linked backups, and preserve exact region backups', async ({ launcher }) => {
-  const page = launcher.main, [path] = await seedReactLibrary(page)
+  const page = launcher.main, [path, other] = await seedReactLibrary(page)
   const root = await makeReactWorld(path, 'Guarded'), foreign = await makeReactWorld(join(launcher.gameDataPath, 'external'), 'Foreign')
   await mkdir(join(root, 'region'), { recursive: true })
   await copyFile(mockRegion, join(root, 'region/r.0.0.mca'))
@@ -203,6 +203,19 @@ test('native chunk writes reject foreign worlds, invalid dimensions and linked b
     catch (error: any) { return `${error.name}: ${error.message}` }
   }, { savePath, dimension })
   expect(await attempt(foreign)).toContain('WorldNotFoundError')
+  const readGuards = await page.evaluate(async ({ root, foreign, path, other }) => {
+    const service = (window as any).serviceChannels.open('InstanceSavesService'), errors: string[] = []
+    for (const [method, args] of [
+      ['getWorldGenSettings', [foreign]],
+      ['getInstanceSaveProgress', [{ savePath: foreign, instancePath: path }]],
+      ['getInstanceSaveProgress', [{ savePath: root, instancePath: other }]],
+    ] as Array<[string, unknown[]]>) {
+      try { await service.call(method, ...args); errors.push('unexpected success') } catch (error: any) { errors.push(error.name) }
+    }
+    const own = await service.call('getInstanceSaveProgress', { savePath: root, instancePath: path, locale: 'es-ES' })
+    return { errors, ownName: own.saveName, noWorldgen: await service.call('getWorldGenSettings', root) === undefined }
+  }, { root, foreign, path, other })
+  expect(readGuards).toEqual({ errors: ['WorldNotFoundError', 'WorldNotFoundError', 'WorldNotFoundError'], ownName: 'Guarded', noWorldgen: true })
   expect(await attempt(root, 'evil:../../outside')).toContain('Invalid dimension id')
   const externalBackup = join(launcher.gameDataPath, 'external-backup')
   await mkdir(externalBackup); await writeFile(join(externalBackup, 'sentinel'), 'unchanged')
