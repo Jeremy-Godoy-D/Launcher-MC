@@ -399,3 +399,9 @@ K14 sigue pass. K15/K16/catalog-install siguen pending por destinos de contenido
 STAGE6-CATALOG-CONTENT.md: app e974e30/flujos5a91e41,1460unitarias/143/28,62s,26NativeReact distintos/3Vue,4Axe0violaciones/8incomplete nuevos,tipos/lint/DeskGap0/E2E56base,hostVue. Instalar/actualizar mods,packs,shaders MR/CF con destino capturado, dependencias del mismo tipo/opcionales/conflictos, Iris, inventario esperado, null normalizado, POST/tarea nativa cancelables y recuperación parcial. No se reescribe el instalador y se conservan nombres/backups/autoridad; sin descarga prematura ni lanzamiento.
 
 K15/K16/catalog-install siguen pending por mundos desde ficha, packs existentes/Biblioteca, estados por versión y dependencias de otra clase. Los cruces actuales fallan explícitamente y no se instalan en dominio incorrecto. K14pass;6activa,7–9pendientes. CI0b8f2ce success; nuevo CI pendiente. Microsoft pospuesto,PR4 borrador,producción/proxy intactos; seguir hacia publicación completa, sin repetir0–5.
+
+## Mundos desde la ficha — 2026-11-02
+
+STAGE6-CATALOG-WORLDS.md acepta descarga verificadaCF hacia el importador existente, con destino capturado, confirmación preview/apply, colisiones/foco/integridad/cancelación/reintento y origen local sin identidadCF falsa. App969f7b7/fixturese10e1ff:3Native+13regresiones64/94,12focales,suite1460/143 heredada,tipos/lint/E2E56base,4Axe0violaciones/8incomplete y hostVue restaurado sin reconstruir Vue/DeskGap intactos.
+
+K15/K16/catalog-install aún pendientes por packs existentes/Biblioteca, estados por versión y dependencias de otra clase. No reimplementar mundos ni contenido aceptado. openModpack.config incluye xmclCache: whitelist antes de actualizar y ningún importModpack prematuro. CI9a64eb6 Vue success/React en curso;7–9 pendientes,Microsoft pospuesto,producción/proxy intactos.

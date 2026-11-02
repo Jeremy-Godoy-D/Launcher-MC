@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 6,
-  "nextAction": "Etapa6 activa. K14/search/network pass; K15/K16/catalog-install pending. STAGE6-CATALOG-CONTENT acepta instalación/actualización revisada de mods/packs/shaders MR/CF, dependencias del mismo tipo/opcionales/conflictos, Iris, cancelación POST y nativa, progreso y recuperación. App e974e30 (flujos5a91e41):1460/143unit,26React distintos/3VueNative,4Axe0/8incomplete nuevos,check/lint/DeskGap0/E2E56base; hostVue verificado. No rehacer estos flujos, el importador de packs nuevos ni0–5. Siguiente: mundos CF desde ficha hacia preview/applyWorldFiles sin instalar al abrir; actualizar packs existentes desde ficha/Biblioteca reutilizando importModpack/previewInstanceFiles/upstream/manifiestos; estados por versión y dependencias de otra clase (no ignorarlas ni instalarlas en el dominio equivocado). CI41431957014/0b8f2ce success; verificar nuevo push sin reiniciar runs terminados. Luego7 globales,8 defaultReact/recorte y9 QA/ActionsWindows desechable/publicación completa0.3.0-beta.1. Microsoft pospuesto; producción/proxy intactos; sin fetch sustituido/DevTools/limpiezas denegadas; ANALISIS excluido.",
+  "nextAction": "Etapa6 activa: K14/search/network pass; K15/K16/catalog-install pending. STAGE6-CATALOG-WORLDS acepta mundoCF hacia WorldFilesDialog/preview/apply confirmados, app969f7b7/fixturese10e1ff:3Native96+13regresiones64/94,12unitfocales,suite1460/143 heredada,check/lint0/E2E56base,4Axe0/8incomplete,hostVue restaurado sin reconstruir consumidores intactos. Contenido mods/packs/shaders e974e30 y packs nuevos ya aceptados: no rehacer. Siguiente: actualizar modpacks existentes desde ficha/Biblioteca (openModpack, esperar ready, previewInstanceFiles/upstream/manifiestos); no copiar config completa con xmclCache/argumentos ni llamar importModpack antes de confirmar. Mantener whitelist, identidad, backups, sesiones y datos/mundos. Completar estados por versión y dependencias de otra clase. CI41443432293/9a64eb6:Vue success,React en curso; verificar sin reiniciar. Luego7globales,8defaultReact/recorte y9QA/ActionsWindows desechable/publicación0.3.0-beta.1. Microsoft pospuesto,producción/proxy intactos;ANALISIS protegido;sin fetch sustituido/DevTools/limpiezas denegadas.",
   "stages": [
     {
       "id": 0,
@@ -986,9 +986,13 @@
             {
               "path": "docs/react-migration/STAGE6-CATALOG-CONTENT.md",
               "sha256": "c9d763a3159cc1a1387502b60822486fd8ceae1c477c13f4ebffcc36414a25e0"
+            },
+            {
+              "path": "docs/react-migration/STAGE6-CATALOG-WORLDS.md",
+              "sha256": "d8c91e49bf17785c88549ad8b9531fdec6fc1fef832e9dab2c988a78c6326a03"
             }
           ],
-          "note": "STAGE6-CATALOG-CONTENT: e974e30/flujos5a91e41,1460unitarias/143,26React distintos/3VueNative,4Axe0/8incomplete nuevos,tipos/lint/DeskGap0/E2E56base y hostVue. Instalar/actualizar mods,packs,shaders y recuperar parcial funciona. K15/K16/catalog-install mantienen mundos, packs existentes/Biblioteca, estados por versión y dependencias de otra clase pendientes. CI0b8f2ce success; nuevo CI pendiente. No publicar ni repetir0–5."
+          "note": "STAGE6-CATALOG-WORLDS:969f7b7/fixturese10e1ff;descargaCF verificada a importador existente con destino/confirmación/foco,3Native+13regresiones,12focales,1460/143heredada,tipos/lint/E2E56base,4Axe0/8incomplete y hostVue. K15/K16/catalog-install mantienen packs existentes/Biblioteca,estados por versión y dependencias cruzadas pendientes. CI9a64eb6 Vue success/React en curso; no repetir0–5 ni publicar."
         },
         {
           "id": "catalog-install",
@@ -1001,9 +1005,13 @@
             {
               "path": "docs/react-migration/STAGE6-CATALOG-CONTENT.md",
               "sha256": "c9d763a3159cc1a1387502b60822486fd8ceae1c477c13f4ebffcc36414a25e0"
+            },
+            {
+              "path": "docs/react-migration/STAGE6-CATALOG-WORLDS.md",
+              "sha256": "d8c91e49bf17785c88549ad8b9531fdec6fc1fef832e9dab2c988a78c6326a03"
             }
           ],
-          "note": "STAGE6-CATALOG-CONTENT: e974e30/flujos5a91e41,1460unitarias/143,26React distintos/3VueNative,4Axe0/8incomplete nuevos,tipos/lint/DeskGap0/E2E56base y hostVue. Instalar/actualizar mods,packs,shaders y recuperar parcial funciona. K15/K16/catalog-install mantienen mundos, packs existentes/Biblioteca, estados por versión y dependencias de otra clase pendientes. CI0b8f2ce success; nuevo CI pendiente. No publicar ni repetir0–5."
+          "note": "STAGE6-CATALOG-WORLDS:969f7b7/fixturese10e1ff;descargaCF verificada a importador existente con destino/confirmación/foco,3Native+13regresiones,12focales,1460/143heredada,tipos/lint/E2E56base,4Axe0/8incomplete y hostVue. K15/K16/catalog-install mantienen packs existentes/Biblioteca,estados por versión y dependencias cruzadas pendientes. CI9a64eb6 Vue success/React en curso; no repetir0–5 ni publicar."
         },
         {
           "id": "catalog-network-failures",
@@ -1020,9 +1028,13 @@
             {
               "path": "docs/react-migration/STAGE6-CATALOG-CONTENT.md",
               "sha256": "c9d763a3159cc1a1387502b60822486fd8ceae1c477c13f4ebffcc36414a25e0"
+            },
+            {
+              "path": "docs/react-migration/STAGE6-CATALOG-WORLDS.md",
+              "sha256": "d8c91e49bf17785c88549ad8b9531fdec6fc1fef832e9dab2c988a78c6326a03"
             }
           ],
-          "note": "STAGE6-CATALOG-CONTENT: e974e30/flujos5a91e41,1460unitarias/143,26React distintos/3VueNative,4Axe0/8incomplete nuevos,tipos/lint/DeskGap0/E2E56base y hostVue. Instalar/actualizar mods,packs,shaders y recuperar parcial funciona. K15/K16/catalog-install mantienen mundos, packs existentes/Biblioteca, estados por versión y dependencias de otra clase pendientes. CI0b8f2ce success; nuevo CI pendiente. No publicar ni repetir0–5."
+          "note": "STAGE6-CATALOG-WORLDS:969f7b7/fixturese10e1ff;descargaCF verificada a importador existente con destino/confirmación/foco,3Native+13regresiones,12focales,1460/143heredada,tipos/lint/E2E56base,4Axe0/8incomplete y hostVue. K15/K16/catalog-install mantienen packs existentes/Biblioteca,estados por versión y dependencias cruzadas pendientes. CI9a64eb6 Vue success/React en curso; no repetir0–5 ni publicar."
         }
       ]
     },
@@ -1137,5 +1149,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-02T12:15:10Z"
+  "updatedAt": "2026-11-02T12:34:17Z"
 }
