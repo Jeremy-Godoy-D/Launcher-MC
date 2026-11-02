@@ -5,7 +5,7 @@ export function migrationPathError(code: 'invalid' | 'occupied' | 'nested' | 'ch
   return Object.assign(new Error('Data migration cannot use this destination'), { name: 'DataMigrationUnsafe', code })
 }
 function validate(path: string) {
-  if (typeof path !== 'string' || !path || path.length > 32768 || /[\0\r\n]/.test(path) || !isAbsolute(path)) throw migrationPathError('invalid')
+  if (typeof path !== 'string' || !path || path.length > 32768 || path.includes('\0') || path.includes('\r') || path.includes('\n') || !isAbsolute(path)) throw migrationPathError('invalid')
 }
 async function canonical(path: string) {
   let current = resolve(path)

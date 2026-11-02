@@ -42,7 +42,6 @@ import { getTracker } from '~/util/taskHelper'
 import { addSteamShortcutToVdf } from './steamShortcut'
 import { writeFile as writeAtomically } from 'atomically'
 import { reviewMigrationPaths, migrationPathError } from './migrationPaths'
-import { LaunchService } from '~/launch'
 
 @ExposeServiceKey(BaseServiceKey)
 export class BaseService extends AbstractService implements IBaseService {
@@ -414,7 +413,9 @@ export class BaseService extends AbstractService implements IBaseService {
     const current = await this.getGameDataDirectory()
     const review = await reviewMigrationPaths(current, destination)
     if (review.unchanged) return review
-    if (this.tasks.getActiveTask() || (await (await this.app.registry.get(LaunchService)).getGameProcesses()).length) throw migrationPathError('busy')
+    if (this.tasks.getActiveTask()) throw migrationPathError('busy')
+    const { LaunchService } = await import('~/launch')
+    if ((await (await this.app.registry.get(LaunchService)).getGameProcesses()).length) throw migrationPathError('busy')
     const code = await validateDirectory(this.app.platform, review.destination, true)
     if (code) {
       throw new MigrationException({

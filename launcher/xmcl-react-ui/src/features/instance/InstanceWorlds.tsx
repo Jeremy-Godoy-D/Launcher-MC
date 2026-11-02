@@ -10,6 +10,7 @@ import { WorldProgress } from './WorldProgress'
 import { WorldMap } from './WorldMap'
 import type { WorldFileOperation } from '@xmcl/runtime-api/src/services/InstanceSavesService'
 import { WorldSharingDialog, type WorldSharingAction } from './WorldSharingDialog'
+import { useFileDrop } from '../files/FileDrop'
 
 export function InstanceWorlds({ path, running }: { path: string; running: boolean }) {
   const service = useService(InstanceSavesServiceKey), { t, d, n } = useI18n()
@@ -20,9 +21,10 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
   const recoveryFocus = useRef(false), retryButton = useRef<HTMLButtonElement>(null)
   const [common, setCommon] = useState<InstanceSavePreview[]>([]), [linked, setLinked] = useState<boolean | null>(null), [commonError, setCommonError] = useState(false)
   const [sharing, setSharing] = useState<WorldSharingAction | null>(null), shareTrigger = useRef<HTMLButtonElement | null>(null)
-  const [action, setAction] = useState<{ name: string; type: WorldFileOperation['type']; datapackFileName?: string } | null>(null), actionTrigger = useRef<HTMLButtonElement | null>(null), search = useRef<HTMLInputElement>(null)
+  const [action, setAction] = useState<{ name: string; type: WorldFileOperation['type']; datapackFileName?: string; sourcePath?: string } | null>(null), actionTrigger = useRef<HTMLButtonElement | null>(null), search = useRef<HTMLInputElement>(null)
   const alive = useRef(true), openingFolder = useRef(false), trigger = useRef<HTMLButtonElement | null>(null)
   useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
+  useFileDrop({ path, type: 'worlds', busy: reading || running || recovering, onFiles: files => { actionTrigger.current = null; setAction({ name: '', type: 'import', sourcePath: files[0] }) } })
   useEffect(() => {
     if (!recovering && recoveryFocus.current) { recoveryFocus.current = false; (migration?.status === 'ready' ? search.current : retryButton.current)?.focus() }
   }, [recovering, migration])
@@ -138,7 +140,7 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
       })}</ul>}
     </section>
     {sharing && <WorldSharingDialog key={`${sharing.type}:${'world' in sharing ? sharing.world.name : ''}`} path={path} action={sharing} close={() => setSharing(null)} changed={() => setRevision(value => value + 1)} returnFocus={() => { const button = shareTrigger.current; if (button?.isConnected && !button.disabled) button.focus(); else search.current?.focus() }} />}
-    {action && <WorldFilesDialog key={`${action.name}:${action.type}:${action.datapackFileName || ''}`} path={path} name={action.name} type={action.type} datapackFileName={action.datapackFileName} world={worlds.find(world => world.name === action.name)} close={() => setAction(null)} changed={() => { setRevision(value => value + 1) }} returnFocus={() => { const target = actionTrigger.current; if (target?.isConnected && !target.disabled) target.focus(); else search.current?.focus() }} />}
+    {action && <WorldFilesDialog key={`${action.name}:${action.type}:${action.datapackFileName || ''}`} path={path} name={action.name} type={action.type} datapackFileName={action.datapackFileName} initialImport={action.sourcePath ? { sourcePath: action.sourcePath, saveName: action.sourcePath.split(/[\\/]/).pop()!.replace(/\.zip$/i, ''), targetName: path } : undefined} world={worlds.find(world => world.name === action.name)} close={() => setAction(null)} changed={() => { setRevision(value => value + 1) }} returnFocus={() => { const target = actionTrigger.current; if (target?.isConnected && !target.disabled) target.focus(); else search.current?.focus() }} />}
   </section>
 }
 

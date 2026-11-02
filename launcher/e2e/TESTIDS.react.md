@@ -6,13 +6,13 @@ This file is the contract between the launcher UI in `xmcl-react-ui/` and the Pl
 
 Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testids` with the selected LAUNCHER_RENDERER. Computed IDs are not resolved by this static registry.
 
-**Total anchors:** 196 (in 57 Vue/TSX files)
+**Total anchors:** 199 (in 58 Vue/TSX files)
 
 | Test ID | Defined in |
 |---|---|
 | `accounts-page` | [`xmcl-react-ui/src/features/accounts/Accounts.tsx#L86`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L86) |
-| `app-backdrop` | [`xmcl-react-ui/src/App.tsx#L440`](../xmcl-react-ui/src/App.tsx#L440) |
-| `app-sidebar` | [`xmcl-react-ui/src/App.tsx#L475`](../xmcl-react-ui/src/App.tsx#L475) |
+| `app-backdrop` | [`xmcl-react-ui/src/App.tsx#L450`](../xmcl-react-ui/src/App.tsx#L450) |
+| `app-sidebar` | [`xmcl-react-ui/src/App.tsx#L486`](../xmcl-react-ui/src/App.tsx#L486) |
 | `catalog` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L239`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L239) |
 | `catalog-description` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L173`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L173) |
 | `catalog-download` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L109`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L109) |
@@ -55,24 +55,27 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `copy-cancel` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L75`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L75) |
 | `copy-finish` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76) |
 | `copy-path` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L62`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L62) |
-| `data-migration-choose` | [`xmcl-react-ui/src/features/settings/DataDirectory.tsx#L49`](../xmcl-react-ui/src/features/settings/DataDirectory.tsx#L49) |
-| `data-migration-destination` | [`xmcl-react-ui/src/features/settings/DataDirectory.tsx#L48`](../xmcl-react-ui/src/features/settings/DataDirectory.tsx#L48) |
-| `data-migration-dialog` | [`xmcl-react-ui/src/features/settings/DataDirectory.tsx#L45`](../xmcl-react-ui/src/features/settings/DataDirectory.tsx#L45) |
-| `data-migration-error` | [`xmcl-react-ui/src/features/settings/DataDirectory.tsx#L51`](../xmcl-react-ui/src/features/settings/DataDirectory.tsx#L51) |
-| `data-migration-review` | [`xmcl-react-ui/src/features/settings/DataDirectory.tsx#L50`](../xmcl-react-ui/src/features/settings/DataDirectory.tsx#L50) |
-| `datapack-import` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L249`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L249) |
-| `datapack-refresh` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L258`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L258) |
-| `datapack-remove` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L285`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L285) |
+| `data-migration-choose` | [`xmcl-react-ui/src/features/settings/DataDirectory.tsx#L50`](../xmcl-react-ui/src/features/settings/DataDirectory.tsx#L50) |
+| `data-migration-destination` | [`xmcl-react-ui/src/features/settings/DataDirectory.tsx#L49`](../xmcl-react-ui/src/features/settings/DataDirectory.tsx#L49) |
+| `data-migration-dialog` | [`xmcl-react-ui/src/features/settings/DataDirectory.tsx#L46`](../xmcl-react-ui/src/features/settings/DataDirectory.tsx#L46) |
+| `data-migration-error` | [`xmcl-react-ui/src/features/settings/DataDirectory.tsx#L52`](../xmcl-react-ui/src/features/settings/DataDirectory.tsx#L52) |
+| `data-migration-review` | [`xmcl-react-ui/src/features/settings/DataDirectory.tsx#L51`](../xmcl-react-ui/src/features/settings/DataDirectory.tsx#L51) |
+| `datapack-import` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L251`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L251) |
+| `datapack-refresh` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L260`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L260) |
+| `datapack-remove` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L287`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L287) |
 | `export-confirm` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L88`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L88) |
 | `export-result` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L81`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L81) |
-| `featured-play` | [`xmcl-react-ui/src/App.tsx#L627`](../xmcl-react-ui/src/App.tsx#L627) |
-| `featured-project-cover` | [`xmcl-react-ui/src/App.tsx#L619`](../xmcl-react-ui/src/App.tsx#L619) |
+| `featured-play` | [`xmcl-react-ui/src/App.tsx#L638`](../xmcl-react-ui/src/App.tsx#L638) |
+| `featured-project-cover` | [`xmcl-react-ui/src/App.tsx#L630`](../xmcl-react-ui/src/App.tsx#L630) |
+| `file-drop-confirm` | [`xmcl-react-ui/src/features/files/FileDrop.tsx#L66`](../xmcl-react-ui/src/features/files/FileDrop.tsx#L66) |
+| `file-drop-overlay` | [`xmcl-react-ui/src/features/files/FileDrop.tsx#L62`](../xmcl-react-ui/src/features/files/FileDrop.tsx#L62) |
+| `file-drop-review` | [`xmcl-react-ui/src/features/files/FileDrop.tsx#L63`](../xmcl-react-ui/src/features/files/FileDrop.tsx#L63) |
 | `global-activity` | [`xmcl-react-ui/src/features/activity/GlobalActivity.tsx#L29`](../xmcl-react-ui/src/features/activity/GlobalActivity.tsx#L29) |
 | `global-activity-item` | [`xmcl-react-ui/src/features/activity/GlobalActivity.tsx#L39`](../xmcl-react-ui/src/features/activity/GlobalActivity.tsx#L39) |
 | `global-cache-clear` | [`xmcl-react-ui/src/features/settings/VisualCache.tsx#L15`](../xmcl-react-ui/src/features/settings/VisualCache.tsx#L15) |
 | `global-cache-result` | [`xmcl-react-ui/src/features/settings/VisualCache.tsx#L16`](../xmcl-react-ui/src/features/settings/VisualCache.tsx#L16) |
 | `global-data-directory` | [`xmcl-react-ui/src/features/settings/GlobalSettings.tsx#L125`](../xmcl-react-ui/src/features/settings/GlobalSettings.tsx#L125) |
-| `global-data-migrate` | [`xmcl-react-ui/src/features/settings/DataDirectory.tsx#L44`](../xmcl-react-ui/src/features/settings/DataDirectory.tsx#L44) |
+| `global-data-migrate` | [`xmcl-react-ui/src/features/settings/DataDirectory.tsx#L45`](../xmcl-react-ui/src/features/settings/DataDirectory.tsx#L45) |
 | `global-java` | [`xmcl-react-ui/src/features/settings/GlobalSettings.tsx#L132`](../xmcl-react-ui/src/features/settings/GlobalSettings.tsx#L132) |
 | `global-java-browse` | [`xmcl-react-ui/src/features/settings/GlobalSettings.tsx#L132`](../xmcl-react-ui/src/features/settings/GlobalSettings.tsx#L132) |
 | `global-locale` | [`xmcl-react-ui/src/features/settings/GlobalSettings.tsx#L124`](../xmcl-react-ui/src/features/settings/GlobalSettings.tsx#L124) |
@@ -101,19 +104,19 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `instance-export` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L46`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L46) |
 | `instance-icon-choose` | [`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L125`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L125) |
 | `instance-minecraft` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L528`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L528) |
-| `instance-mods` | [`xmcl-react-ui/src/features/instance/InstanceMods.tsx#L106`](../xmcl-react-ui/src/features/instance/InstanceMods.tsx#L106) |
+| `instance-mods` | [`xmcl-react-ui/src/features/instance/InstanceMods.tsx#L112`](../xmcl-react-ui/src/features/instance/InstanceMods.tsx#L112) |
 | `instance-name` | [`xmcl-react-ui/src/features/library/AddInstance.tsx#L503`](../xmcl-react-ui/src/features/library/AddInstance.tsx#L503) |
 | `instance-operation-confirm` | [`xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76`](../xmcl-react-ui/src/features/library/DuplicateInstance.tsx#L76)<br>[`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L162`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L162) |
 | `instance-operations` | [`xmcl-react-ui/src/features/library/InstanceOperations.tsx#L64`](../xmcl-react-ui/src/features/library/InstanceOperations.tsx#L64) |
-| `instance-resourcepacks` | [`xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L140`](../xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L140) |
-| `instance-shaders` | [`xmcl-react-ui/src/features/instance/InstanceShaders.tsx#L179`](../xmcl-react-ui/src/features/instance/InstanceShaders.tsx#L179) |
+| `instance-resourcepacks` | [`xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L145`](../xmcl-react-ui/src/features/instance/InstanceResourcePacks.tsx#L145) |
+| `instance-shaders` | [`xmcl-react-ui/src/features/instance/InstanceShaders.tsx#L181`](../xmcl-react-ui/src/features/instance/InstanceShaders.tsx#L181) |
 | `instance-workspace` | [`xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L34`](../xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L34) |
-| `instance-worlds` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L70`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L70) |
+| `instance-worlds` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L72`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L72) |
 | `launch-confirm` | [`xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157`](../xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157) |
-| `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L710`](../xmcl-react-ui/src/App.tsx#L710) |
-| `library-groups` | [`xmcl-react-ui/src/App.tsx#L706`](../xmcl-react-ui/src/App.tsx#L706) |
+| `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L721`](../xmcl-react-ui/src/App.tsx#L721) |
+| `library-groups` | [`xmcl-react-ui/src/App.tsx#L717`](../xmcl-react-ui/src/App.tsx#L717) |
 | `library-groups-dialog` | [`xmcl-react-ui/src/features/library/GroupsDialog.tsx#L41`](../xmcl-react-ui/src/features/library/GroupsDialog.tsx#L41) |
-| `library-state` | [`xmcl-react-ui/src/App.tsx#L428`](../xmcl-react-ui/src/App.tsx#L428) |
+| `library-state` | [`xmcl-react-ui/src/App.tsx#L438`](../xmcl-react-ui/src/App.tsx#L438) |
 | `library-window` | [`xmcl-react-ui/src/features/library/LibraryWindow.tsx#L96`](../xmcl-react-ui/src/features/library/LibraryWindow.tsx#L96) |
 | `local-profile-name` | [`xmcl-react-ui/src/features/accounts/Accounts.tsx#L50`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L50)<br>[`xmcl-react-ui/src/features/accounts/Accounts.tsx#L179`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L179)<br>[`xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35`](../xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35) |
 | `logger-instance-name` | [`xmcl-react-ui/src/auxiliary.tsx#L39`](../xmcl-react-ui/src/auxiliary.tsx#L39) |
@@ -124,11 +127,11 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `modpack-update` | [`xmcl-react-ui/src/features/catalog/ModpackUpdateDialog.tsx#L99`](../xmcl-react-ui/src/features/catalog/ModpackUpdateDialog.tsx#L99) |
 | `modpack-update-complete` | [`xmcl-react-ui/src/features/catalog/ModpackUpdateDialog.tsx#L109`](../xmcl-react-ui/src/features/catalog/ModpackUpdateDialog.tsx#L109) |
 | `modpack-update-files` | [`xmcl-react-ui/src/features/catalog/ModpackUpdateDialog.tsx#L108`](../xmcl-react-ui/src/features/catalog/ModpackUpdateDialog.tsx#L108) |
-| `nav-accounts` | [`xmcl-react-ui/src/App.tsx#L529`](../xmcl-react-ui/src/App.tsx#L529) |
-| `nav-home` | [`xmcl-react-ui/src/App.tsx#L486`](../xmcl-react-ui/src/App.tsx#L486) |
-| `nav-library` | [`xmcl-react-ui/src/App.tsx#L487`](../xmcl-react-ui/src/App.tsx#L487) |
-| `nav-settings` | [`xmcl-react-ui/src/App.tsx#L521`](../xmcl-react-ui/src/App.tsx#L521) |
-| `nav-store` | [`xmcl-react-ui/src/App.tsx#L488`](../xmcl-react-ui/src/App.tsx#L488) |
+| `nav-accounts` | [`xmcl-react-ui/src/App.tsx#L540`](../xmcl-react-ui/src/App.tsx#L540) |
+| `nav-home` | [`xmcl-react-ui/src/App.tsx#L497`](../xmcl-react-ui/src/App.tsx#L497) |
+| `nav-library` | [`xmcl-react-ui/src/App.tsx#L498`](../xmcl-react-ui/src/App.tsx#L498) |
+| `nav-settings` | [`xmcl-react-ui/src/App.tsx#L532`](../xmcl-react-ui/src/App.tsx#L532) |
+| `nav-store` | [`xmcl-react-ui/src/App.tsx#L499`](../xmcl-react-ui/src/App.tsx#L499) |
 | `profile-appearance` | [`xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35`](../xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35) |
 | `profile-appearance-save` | [`xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L75`](../xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L75) |
 | `progress-advancements` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L112`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L112) |
@@ -144,7 +147,7 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `progress-view-mode` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L194`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L194) |
 | `react-logger-window` | [`xmcl-react-ui/src/auxiliary.tsx#L68`](../xmcl-react-ui/src/auxiliary.tsx#L68) |
 | `react-migration-window` | [`xmcl-react-ui/src/windows/MigrationWindow.tsx#L31`](../xmcl-react-ui/src/windows/MigrationWindow.tsx#L31) |
-| `react-prototype` | [`xmcl-react-ui/src/App.tsx#L437`](../xmcl-react-ui/src/App.tsx#L437) |
+| `react-prototype` | [`xmcl-react-ui/src/App.tsx#L447`](../xmcl-react-ui/src/App.tsx#L447) |
 | `save-world-map-canvas` | [`xmcl-react-ui/src/features/instance/WorldMap.tsx#L569`](../xmcl-react-ui/src/features/instance/WorldMap.tsx#L569) |
 | `save-world-map-clear-selection` | [`xmcl-react-ui/src/features/instance/WorldMap.tsx#L453`](../xmcl-react-ui/src/features/instance/WorldMap.tsx#L453) |
 | `save-world-map-copy` | [`xmcl-react-ui/src/features/instance/WorldMap.tsx#L462`](../xmcl-react-ui/src/features/instance/WorldMap.tsx#L462) |
@@ -189,20 +192,20 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `update-confirm-install` | [`xmcl-react-ui/src/features/settings/LauncherUpdates.tsx#L70`](../xmcl-react-ui/src/features/settings/LauncherUpdates.tsx#L70) |
 | `update-download` | [`xmcl-react-ui/src/features/settings/LauncherUpdates.tsx#L58`](../xmcl-react-ui/src/features/settings/LauncherUpdates.tsx#L58) |
 | `update-install` | [`xmcl-react-ui/src/features/settings/LauncherUpdates.tsx#L57`](../xmcl-react-ui/src/features/settings/LauncherUpdates.tsx#L57) |
-| `world-action-map` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L111`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L111) |
-| `world-action-progress` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L96`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L96) |
-| `world-datapacks` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L270`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L270) |
+| `world-action-map` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L113`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L113) |
+| `world-action-progress` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L98`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L98) |
+| `world-datapacks` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L272`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L272) |
 | `world-files-dialog` | [`xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L63`](../xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L63) |
 | `world-files-review` | [`xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L96`](../xmcl-react-ui/src/features/instance/WorldFilesDialog.tsx#L96) |
-| `world-info` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L189`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L189) |
+| `world-info` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L191`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L191) |
 | `world-map` | [`xmcl-react-ui/src/features/instance/WorldMap.tsx#L373`](../xmcl-react-ui/src/features/instance/WorldMap.tsx#L373) |
 | `world-map-cursor` | [`xmcl-react-ui/src/features/instance/WorldMap.tsx#L551`](../xmcl-react-ui/src/features/instance/WorldMap.tsx#L551) |
 | `world-progress` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L106`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L106) |
 | `world-sharing-dialog` | [`xmcl-react-ui/src/features/instance/WorldSharingDialog.tsx#L34`](../xmcl-react-ui/src/features/instance/WorldSharingDialog.tsx#L34) |
-| `world-tab-info` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L201`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L201) |
-| `world-tab-map` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L220`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L220) |
-| `world-tab-progress` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L210`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L210) |
-| `worlds-common` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L127`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L127) |
-| `worlds-list` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L87`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L87) |
-| `worlds-migration-warning` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L76`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L76) |
-| `worlds-refresh` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L73`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L73) |
+| `world-tab-info` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L203`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L203) |
+| `world-tab-map` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L222`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L222) |
+| `world-tab-progress` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L212`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L212) |
+| `worlds-common` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L129`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L129) |
+| `worlds-list` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L89`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L89) |
+| `worlds-migration-warning` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L78`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L78) |
+| `worlds-refresh` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L75`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L75) |

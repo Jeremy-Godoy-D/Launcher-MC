@@ -8,6 +8,7 @@ import {
   rename,
   rmdir,
   symlink,
+  stat,
   utimes,
   unlink,
 } from 'fs-extra'
@@ -66,7 +67,8 @@ async function move(from: string, to: string, onCopied?: OnCopied, onMoved?: (fr
     if (toStat) throw Object.assign(new Error('Migration destination exists'), { code: 'EEXIST' })
     try { await rename(from, to) } catch (error) {
       if (!isSystemError(error) || error.code !== 'EXDEV') throw error
-      await symlink(await readlink(from), to)
+      const type = process.platform === 'win32' && (await stat(from).catch(() => undefined))?.isDirectory() ? 'junction' : undefined
+      await symlink(await readlink(from), to, type)
       await unlink(from)
     }
     onMoved?.(from, to)

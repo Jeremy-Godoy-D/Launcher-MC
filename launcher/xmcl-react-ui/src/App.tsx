@@ -57,6 +57,7 @@ import { InstanceOperations } from './features/library/InstanceOperations'
 import { GroupsDialog } from './features/library/GroupsDialog'
 import { LibraryWindow } from './features/library/LibraryWindow'
 import { InstanceWorkspace } from './features/instance/InstanceWorkspace'
+import { FileDrop } from './features/files/FileDrop'
 
 declare global {
   interface Window {
@@ -64,6 +65,7 @@ declare global {
     windowController?: {
       hide(): void
       getMigrationContext(): Promise<{ from: string; to: string } | undefined>
+      getPathForFile(file: File): string
       minimize(): void
       maximize(): void
       close(): void
@@ -247,6 +249,14 @@ export function App() {
   const instances = (savedLibrary?.status === 'ready' ? savedLibrary.home : []).map(present)
   const location = useLocation()
   const navigate = useNavigate()
+  useEffect(() => {
+    const navigateHistory = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || !event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return
+      event.preventDefault(); void navigate(event.key === 'ArrowLeft' ? -1 : 1)
+    }
+    window.addEventListener('keydown', navigateHistory)
+    return () => window.removeEventListener('keydown', navigateHistory)
+  }, [navigate])
   const { preferences, set: setPreferences, error: preferencesError } = usePreferences()
   const systemDark = useMediaSetting('(prefers-color-scheme: dark)')
   const theme = preferences.appearance === 'system' ? systemDark ? 'dark' : 'light' : preferences.appearance
@@ -434,7 +444,7 @@ export function App() {
   ) : null
 
   return (
-    <div className="app" data-testid="react-prototype" data-performance={performanceMode} data-motion-state={JSON.stringify({ focused, nativeActive, visible, regionVisible, reducedMotion, hovered, focusWithin, paused, gameRunning: !!launch?.running.length })}>
+    <FileDrop disabled={savedLibrary?.status !== 'ready'} onArchive={path => { restoreFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setIncomingArchive(path); setAdding('import') }}><div className="app" data-testid="react-prototype" data-performance={performanceMode} data-motion-state={JSON.stringify({ focused, nativeActive, visible, regionVisible, reducedMotion, hovered, focusWithin, paused, gameRunning: !!launch?.running.length })}>
       <div
         className="app-backdrop"
         data-testid="app-backdrop"
@@ -442,8 +452,10 @@ export function App() {
         aria-hidden="true"
         style={{ backgroundImage: `url(${JSON.stringify((home ? instance?.ambientImage : current?.ambientImage) ?? sunset)}), url(${JSON.stringify(sunset)})` }}
       />
+      <a className="skip-content" href="#launcher-content" onClick={event => { event.preventDefault(); document.getElementById('launcher-content')?.focus() }}>{t('react.files.skip')}</a>
       <header className="titlebar">
         <div className="titlebar-left">
+          <div className="history-controls"><button type="button" className="icon-button" aria-label={t('react.files.back')} title={t('react.files.back')} disabled={!(window.history.state?.idx > 0)} onClick={() => void navigate(-1)}><ChevronLeft size={16} aria-hidden="true" /></button><button type="button" className="icon-button" aria-label={t('react.files.forward')} title={t('react.files.forward')} disabled={!(window.history.state?.idx < window.history.length - 1)} onClick={() => void navigate(1)}><ChevronRight size={16} aria-hidden="true" /></button></div>
           <img className="titlebar-logo" src={brandIcon} alt="" />
           <span>Grimo Launcher</span>
           <span className="preview-label">{accountsPage ? t('react.accounts.saved') : catalog ? t('react.catalog.connected') : t('react.instances.connected')}</span>
@@ -540,7 +552,7 @@ export function App() {
           </button>
         </div>
       </aside>
-      <main className="main">
+      <main className="main" id="launcher-content" tabIndex={-1}>
         <div className="page-toolbar">
           <div className="history">
             <button className="icon-button" aria-label="Atrás" onClick={() => navigate(-1)}>
@@ -940,6 +952,6 @@ export function App() {
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
-    </div>
+    </div></FileDrop>
   )
 }

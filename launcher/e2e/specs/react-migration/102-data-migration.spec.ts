@@ -3,12 +3,13 @@ import { dirname, join } from 'node:path'
 import axe from 'axe-core'
 import { test, expect, snap } from '../../helpers/scratch'
 import { stubOpenDialog } from '../../helpers/tasks/importModpack'
+import { selectSettingsCategory } from '../../helpers/react-settings'
 
 test.use({ launcherOptions: { locale: 'es-ES' } })
 test('data move reviews native paths, preserves occupied folders and cancels without relaunching', async ({ launcher }, info) => {
   const page = launcher.main, root = launcher.gameDataPath, target = join(dirname(root), 'empty-destination'), occupied = join(dirname(root), 'occupied-destination')
   await mkdir(target); await mkdir(occupied); await writeFile(join(occupied, 'keep.txt'), 'existing data')
-  await page.getByTestId('nav-settings').click(); await page.getByLabel('Apariencia', { exact: true }).selectOption('dark'); await page.getByTestId('settings-category-general').click(); await page.getByTestId('global-data-migrate').click()
+  await page.getByTestId('nav-settings').click(); await page.getByLabel('Apariencia', { exact: true }).selectOption('dark'); await selectSettingsCategory(page, 'general'); await page.getByTestId('global-data-migrate').click()
   await page.getByTestId('data-migration-destination').fill(occupied); await page.getByTestId('data-migration-check').click()
   await expect(page.getByTestId('data-migration-error')).toContainText('contiene archivos')
   expect(await readFile(join(occupied, 'keep.txt'), 'utf8')).toBe('existing data')

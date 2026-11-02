@@ -5,6 +5,7 @@ import { test, expect, snap } from '../../helpers/scratch'
 
 test.use({ launcherOptions: { locale: 'es-ES' } })
 test('migration preload shows progress, recovery and completion at its real 600 by 400 size', async ({ launcher }, info) => {
+  await launcher.main.getByTestId('nav-settings').click(); await launcher.main.getByLabel('Apariencia', { exact: true }).selectOption('dark')
   const opening = launcher.app.waitForEvent('window')
   await launcher.app.evaluate(async ({ BrowserWindow, app, ipcMain }, root) => {
     const parent = BrowserWindow.getAllWindows().find((win: any) => win.webContents.getURL().includes('/index.html'))!

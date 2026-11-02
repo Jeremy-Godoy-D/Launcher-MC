@@ -17,6 +17,7 @@ import { assignContentGroup, contentGroupMemberships } from './contentGroups'
 import type { ResourcePackSharingReview } from '@xmcl/runtime-api/src/services/InstanceResourcePacksService'
 import { SharePacksDialog } from './SharePacksDialog'
 import { ModUpdates } from './ModUpdates'
+import { useFileDrop } from '../files/FileDrop'
 
 export function InstanceShaders({ path, running, runtime }: { path: string; running: boolean; runtime: SavedInstance['runtime'] }) {
   const { t, n } = useI18n(), service = useService(InstanceShaderPacksServiceKey), base = useService(BaseServiceKey)
@@ -57,11 +58,11 @@ export function InstanceShaders({ path, running, runtime }: { path: string; runn
     catch { if (alive.current) setError(t('react.shaders.loadFailed')) }
     finally { operation.current = false; if (alive.current) setWorking(false) }
   }
-  async function add(folder: boolean, button: HTMLButtonElement) {
+  async function add(folder: boolean, button?: HTMLButtonElement, files?: string[]) {
     if (operation.current || fileBusy || running) return
-    operation.current = true; focusAfter.current = button; setWorking(true); setError(''); setNotice('')
+    operation.current = true; focusAfter.current = button ?? null; setWorking(true); setError(''); setNotice('')
     try {
-      const result = await window.windowController!.showOpenDialog!(folder ? { properties: ['openDirectory'] } : { properties: ['openFile', 'multiSelections'], filters: [{ name: 'Minecraft shaders', extensions: ['zip'] }] })
+      const result = files ? { canceled: false, filePaths: files } : await window.windowController!.showOpenDialog!(folder ? { properties: ['openDirectory'] } : { properties: ['openFile', 'multiSelections'], filters: [{ name: 'Minecraft shaders', extensions: ['zip'] }] })
       if (result.canceled || !result.filePaths.length || !alive.current) return
       await service.install({ path, files: result.filePaths })
       if (!alive.current) return
@@ -113,6 +114,7 @@ export function InstanceShaders({ path, running, runtime }: { path: string; runn
       }
     } finally { operation.current = false; if (alive.current) setWorking(false) }
   }
+  useFileDrop({ path, type: 'shaderpacks', busy: fileBusy || working || running, onFiles: files => add(false, undefined, files) })
   async function openBackup() {
     try { if (!await base.openDirectory(backup)) throw new Error('Missing backup') }
     catch { if (alive.current) setError(t('react.workspace.folderFailed')) }

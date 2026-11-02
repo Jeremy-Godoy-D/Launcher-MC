@@ -17,6 +17,7 @@ import { resourcePackFormat } from './resourcePackMetadata'
 import type { SavedInstance } from '../library/model'
 import { ModUpdates } from './ModUpdates'
 import { SharePacksDialog } from './SharePacksDialog'
+import { useFileDrop } from '../files/FileDrop'
 
 export function InstanceResourcePacks({ path, running, runtime }: { path: string; running: boolean; runtime: SavedInstance['runtime'] }) {
   const { t } = useI18n(), service = useService(InstanceResourcePacksServiceKey), options = useService(InstanceOptionsServiceKey)
@@ -85,7 +86,10 @@ export function InstanceResourcePacks({ path, running, runtime }: { path: string
   async function add(folder: boolean) {
     const result = await window.windowController!.showOpenDialog!(folder ? { properties: ['openDirectory'] } : { properties: ['openFile', 'multiSelections'], filters: [{ name: 'Minecraft resource packs', extensions: ['zip'] }] })
     if (result.canceled || !result.filePaths.length || !alive.current) return
-    await service.install({ path, files: result.filePaths })
+    await addFiles(result.filePaths)
+  }
+  async function addFiles(files: string[]) {
+    await service.install({ path, files })
     if (!alive.current) return
     await read(); if (alive.current) setNotice(t('react.packs.added'))
   }
@@ -100,6 +104,7 @@ export function InstanceResourcePacks({ path, running, runtime }: { path: string
       if (alive.current) setError(t(name === 'InstanceRunningError' ? 'react.packs.running' : name === 'SharedOptionsRunningError' ? 'react.packs.sharedRunning' : name === 'ResourcePackSelectionChangedError' ? 'react.packs.changed' : 'react.packs.failed'))
     } finally { pending.current = false; if (alive.current) setBusy(false) }
   }
+  useFileDrop({ path, type: 'resourcepacks', busy: busy || running || snapshot.status !== 'ready', onFiles: files => run(() => addFiles(files)) })
   const files = snapshot.data?.files || [], packs = selection?.packs || []
   const detailsFile = files.find(file => file.path === detailsPath)
   function closeDetails() { setDetailsPath(''); (detailsTrigger.current?.isConnected && !detailsTrigger.current.disabled ? detailsTrigger.current : search.current)?.focus() }

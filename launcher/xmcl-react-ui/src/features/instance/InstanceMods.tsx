@@ -19,6 +19,7 @@ import { ModUpdates } from './ModUpdates'
 import { modModel } from './modModel'
 import { planModChanges } from '@xmcl/runtime-api/src/util/modChanges'
 import { waitCatalogInventory } from '../catalog/inventory'
+import { useFileDrop } from '../files/FileDrop'
 
 type ModChangeReview = { plan: ReturnType<typeof planModChanges>; inventory: ModFilesSnapshot; revision: number; enable: boolean; incomplete: boolean }
 
@@ -103,13 +104,17 @@ export function InstanceMods({ path, runtime, running, configuredJava }: { path:
     if (diagnostics && active.current) setDiagnostics(inventory)
   }
   function closeRemoval() { setRemoving(null) }
+  async function addFiles(files: string[]) {
+    await service.install({ path, files })
+    if (active.current) await refreshFiles()
+  }
+  useFileDrop({ path, type: 'mods', busy: busy || running || snapshot.status !== 'ready', onFiles: files => run(() => addFiles(files), true) })
   return <section aria-labelledby="instance-mods-title" data-testid="instance-mods" data-instance-path={path} aria-busy={busy || snapshot.status === 'loading'}>
     <div className="section-heading"><h2 id="instance-mods-title">{t('react.workspace.mods')}</h2><div className="content-actions">
       <button className="button primary" disabled={busy || running || !window.windowController?.showOpenDialog} onClick={() => void run(async () => {
         const chosen = await window.windowController!.showOpenDialog!({ properties: ['openFile', 'multiSelections'], filters: [{ name: 'Minecraft mods', extensions: ['jar', 'zip', 'litemod'] }] })
         if (!chosen.canceled && chosen.filePaths.length && active.current) {
-          await service.install({ path, files: chosen.filePaths })
-          await refreshFiles()
+          await addFiles(chosen.filePaths)
         } else return false
       }, true)}><Plus size={16} aria-hidden="true" />{t('react.content.add')}</button>
       <button className="button secondary" disabled={busy} onClick={() => void run(() => service.showDirectory(path))}><FolderOpen size={16} aria-hidden="true" />{t('react.content.folder')}</button>

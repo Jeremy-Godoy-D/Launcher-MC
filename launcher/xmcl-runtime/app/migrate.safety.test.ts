@@ -85,6 +85,20 @@ it('restores moved data when committing the root pointer fails', async () => {
   expect(await readFile(join(app.appDataPath, 'root'), 'utf8')).toBe(app.source)
   expect(writeAtomically).toHaveBeenCalledWith(join(app.appDataPath, 'root'), app.destination)
 })
+it('copies directory links across volumes without copying or deleting their targets', async () => {
+  const app = await setup(), target = join(app.root, 'external')
+  await mkdir(target); await writeFile(join(target, 'keep.txt'), 'external data')
+  await createLink(target, join(app.source, 'instances', 'owned', 'link'), process.platform === 'win32' ? 'junction' : 'dir')
+  vi.mocked(rename).mockImplementation(async (from, to) => {
+    if (String(from).startsWith(app.source + sep)) throw failure('EXDEV')
+    return actualFs.rename(from, to)
+  })
+  expect(await handleMigrateRoot(app.source, app.logger, app)).toBe(app.destination)
+  expect((await lstat(join(app.destination, 'instances', 'owned', 'link'))).isSymbolicLink()).toBe(true)
+  expect(await readFile(join(target, 'keep.txt'), 'utf8')).toBe('external data')
+  expect(await readFile(join(app.destination, 'instances', 'owned', 'link', 'keep.txt'), 'utf8')).toBe('external data')
+  expect(symlink).toHaveBeenCalled()
+})
 it('reports incomplete recovery truthfully and retains both locations', async () => {
   const app = await setup()
   vi.mocked(rename).mockImplementation(async (from, to) => {

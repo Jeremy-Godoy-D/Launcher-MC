@@ -5,6 +5,7 @@ import axe from 'axe-core'
 import { test, expect, type Page, type LauncherFixture } from '../../helpers/scratch'
 import { activateLauncherControl } from '../../helpers/focus-launcher'
 import { stubOpenDialog } from '../../helpers/tasks/importModpack'
+import { selectSettingsCategory as category } from '../../helpers/react-settings'
 
 test.use({ launcherOptions: { locale: 'es-ES', prepareGameData: async path => {
   await writeFile(join(dirname(path), 'appData/LauncherMC/setting.json'), JSON.stringify({ locale: 'es-ES', globalVmOptions: ['-Dkeep=two words', ''], globalPreExecuteCommand: 'USER COMMAND', globalEnv: { OWNED: 'preserve' }, globalDisableAuthlibInjector: true }))
@@ -17,11 +18,6 @@ async function native(page: Page, mutation?: { method: string; value: unknown })
     if (mutation) await state.commit(mutation.method, mutation.value)
     return Object.fromEntries(['locale', 'globalJava', 'globalAssignMemory', 'globalMinMemory', 'globalMaxMemory', 'globalVmOptions', 'globalMcOptions', 'globalResolution', 'globalPreExecuteCommand', 'globalEnv', 'globalDisableAuthlibInjector', 'httpProxy', 'httpProxyEnabled', 'maxSockets', 'maxAPISockets', 'apiSetsPreference'].map(key => [key, state[key]]))
   }, mutation)
-}
-async function category(page: Page, id: string) {
-  const select = page.getByTestId('settings-category-select')
-  if (await select.isVisible()) await select.selectOption(id)
-  else await page.getByTestId(`settings-category-${id}`).click()
 }
 async function open(page: Page, id: string) { await page.getByTestId('nav-settings').click(); await expect(page.getByTestId('global-settings')).toBeVisible(); await category(page, id) }
 async function save(launcher: LauncherFixture) {

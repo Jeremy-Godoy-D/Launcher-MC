@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import axe from 'axe-core'
 import { test, expect } from '../../helpers/scratch'
 import { mockReactUpdater } from '../../helpers/react-updater'
+import { selectSettingsCategory } from '../../helpers/react-settings'
 import { activateLauncherControl } from '../../helpers/focus-launcher'
 
 test.use({ launcherOptions: { locale: 'es-ES' } })
@@ -11,9 +12,10 @@ async function exists(path: string) { try { await access(path); return true } ca
 
 test('real updater requests recover from network, cancellation and SHA failures through global activity', async ({ launcher }, info) => {
   const feed = await mockReactUpdater(launcher), page = launcher.main, errors: string[] = []
+  await (await launcher.app.browserWindow(page)).evaluate(win => win.setContentSize(800, 400))
   page.on('pageerror', error => errors.push(error.message))
   try {
-    await page.getByTestId('nav-settings').click(); await page.getByTestId('settings-category-updates').click()
+    await page.getByTestId('nav-settings').click(); await selectSettingsCategory(page, 'updates')
     const updates = page.getByTestId('global-updates')
     feed.state.feedStatus = 503; await page.getByTestId('update-check').click(); await expect(updates.getByRole('alert')).toBeVisible()
     feed.state.feedStatus = 200; await page.getByTestId('update-check').click(); await expect(updates).toContainText(`v${feed.version}`); await expect(updates.getByRole('alert')).toHaveCount(0)
