@@ -47,6 +47,16 @@ test('React explains blocked recovery and permits keyboard retry in both themes 
     for (const width of [1200, 800]) {
       await win.evaluate((win, width) => win.setContentSize(width, width === 800 ? 400 : 720), width)
       await expect(warning).toContainText('Sus originales se conservan'); await expect(warning).toContainText('Cierra todas las partidas')
+      await retry.scrollIntoViewIfNeeded(); await retry.focus()
+      await page.screenshot({ path: testInfo.outputPath(`recovery-before-${theme}-${width}.png`) })
+      await writeFile(testInfo.outputPath(`recovery-layout-${theme}-${width}.json`), JSON.stringify(await retry.evaluate(element => {
+        const ancestors = []
+        for (let node: Element | null = element; node; node = node.parentElement) {
+          const style = getComputedStyle(node)
+          ancestors.push({ tag: node.tagName, class: node.className, rect: node.getBoundingClientRect().toJSON(), clientHeight: node.clientHeight, scrollHeight: node.scrollHeight, scrollTop: node.scrollTop, overflow: style.overflow, overflowY: style.overflowY })
+        }
+        return ancestors
+      }), null, 2))
       await activateLauncherControl(launcher, retry); await expect(retry).toBeEnabled(); await expect(retry).toBeFocused(); await expect(retry).toBeInViewport({ ratio: 1 })
       expect(await call(page, 'getLegacyWorldMigrationStatus')).toEqual({ status: 'blocked', reason: 'running' })
       expect(await readFile(join(root, 'shared-saves/Legacy/level.dat'))).toEqual(bytes)

@@ -169,8 +169,11 @@ test('legacy shared-world activation respects a real Java session and preserves 
 })
 
 test('sharing worlds retains collision contents, originals and notes while disconnecting preserves the depot', async ({ launcher }, testInfo) => {
-  const page = launcher.main, [instance] = await instances(page)
-  const original = await makeReactWorld(instance, 'Alpha', 'LOCAL ALPHA'), originalBytes = await readFile(join(original, 'level.dat'))
+  const page = launcher.main, prepared = join(launcher.gameDataPath, 'instances/Legacy source')
+  // Vue can start its observer as soon as an instance is published; seed the fixture first.
+  const original = await makeReactWorld(prepared, 'Alpha', 'LOCAL ALPHA'), originalBytes = await readFile(join(original, 'level.dat'))
+  const instance = await page.evaluate(path => (window as any).serviceChannels.open('InstanceService').call('createInstance', { name: 'Legacy source', path, runtime: { minecraft: '1.21.1' } }), prepared)
+  expect(instance).toBe(prepared)
   await call(page, 'watch', instance)
   const watchActive = async () => {
     const root = (await realpath(join(instance, 'saves'))).replace(/\\/g, '/').toLowerCase()
