@@ -314,7 +314,11 @@ export interface SaveChunkBackup {
 /**
  * Provide the ability to preview saves data of an instance
  */
+export type LegacyWorldMigrationStatus = { status: 'ready' | 'running' } | { status: 'blocked'; reason: 'running' | 'session' | 'changed' | 'failed' }
+
 export interface InstanceSavesService {
+  getLegacyWorldMigrationStatus(): Promise<LegacyWorldMigrationStatus>
+  retryLegacyWorldMigration(): Promise<LegacyWorldMigrationStatus>
   previewSaveChunkChanges(change: SaveChunkChange): Promise<SaveChunkReview>
   applySaveChunkChanges(change: SaveChunkChange, snapshot: string): Promise<{ backupId?: string; backupPath?: string }>
   getSaveChunkBackups(savePath: string): Promise<{ entries: SaveChunkBackup[]; unreadable: number }>

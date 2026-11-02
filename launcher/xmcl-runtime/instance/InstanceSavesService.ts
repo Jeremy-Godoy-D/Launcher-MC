@@ -17,6 +17,7 @@ import {
   type InstallMarketOptionWithInstance,
   type InstallMarketOptions,
   type InstanceDatapack,
+  type LegacyWorldMigrationStatus,
   type LaunchOptions,
   type LinkSaveAsServerWorldOptions,
   type ShareSaveOptions,
@@ -61,18 +62,38 @@ type SaveObserver = { pause(): Promise<void>; resume(): Promise<void>; remove():
 @ExposeServiceKey(InstanceSavesServiceKey)
 export class InstanceSavesService extends AbstractService implements IInstanceSavesService {
   #saveWatchers = new Map<string, Set<SaveObserver>>()
+  #legacyMigration?: Promise<void>
+  #legacyMigrationStatus: LegacyWorldMigrationStatus = { status: 'ready' }
   constructor(@Inject(LauncherAppKey) app: LauncherApp,
     @Inject(InstanceService) private instanceService: InstanceService,
     @Inject(kGameDataPath) private getPath: PathResolver,
     @Inject(kSaveWorker) private saveWorker: SaveWorker,
   ) {
-    super(app, async () => {
-      try {
-        await this.#worldPaths([this.getPath()], () => this.#migrateSharedSaves(), true)
-      } catch (e) {
-        this.error(e as any)
-      }
+    super(app, () => this.#runLegacyMigration())
+  }
+
+  async getLegacyWorldMigrationStatus(): Promise<LegacyWorldMigrationStatus> {
+    return { ...this.#legacyMigrationStatus }
+  }
+
+  async retryLegacyWorldMigration(): Promise<LegacyWorldMigrationStatus> {
+    await this.#runLegacyMigration()
+    return this.getLegacyWorldMigrationStatus()
+  }
+
+  async #runLegacyMigration() {
+    if (this.#legacyMigration) return this.#legacyMigration
+    this.#legacyMigrationStatus = { status: 'running' }
+    const task = this.#worldPaths([this.getPath()], () => this.#migrateSharedSaves(), true).then(() => {
+      this.#legacyMigrationStatus = { status: 'ready' }
+    }, async error => {
+      const name = error instanceof Error ? error.name : ''
+      const pending = await lstat(join(this.getPath(), 'shared-saves')).catch(failure => failure.code !== 'ENOENT')
+      this.#legacyMigrationStatus = pending ? { status: 'blocked', reason: ['SharedWorldRunningError', 'InstanceRunningError'].includes(name) ? 'running' : name === 'WorldLockUnavailableError' ? 'session' : name === 'WorldFilesChangedError' ? 'changed' : 'failed' } : { status: 'ready' }
+      this.error(error)
     })
+    this.#legacyMigration = task
+    try { await task } finally { this.#legacyMigration = undefined }
   }
 
   // Called by InstanceService while its instance lock is held; never exposed as string IPC.

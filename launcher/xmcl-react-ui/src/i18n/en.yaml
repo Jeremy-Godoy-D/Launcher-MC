@@ -769,6 +769,14 @@ react:
     shared: "This folder is shared: updating its files affects every linked instance. Their configurations and groups remain local to each instance."
 
   worlds:
+    migrationPending: "Some worlds from an earlier version still need recovery. Their originals are preserved, but they may be missing from the list."
+    migrationProgress: "Recovering earlier worlds…"
+    migrationRetry: "Retry world recovery"
+    migrationReason:
+      running: "Close all Minecraft games, then retry."
+      session: "Could not safely protect a world session. Close Minecraft and retry. If it persists, check the launcher's diagnostics."
+      changed: "The files changed during recovery. Wait for other operations to finish, then retry."
+      failed: "Check folder permissions and free disk space, then retry. Existing worlds and backups are preserved."
     one: "1 world"
     refresh: "Refresh"
     loading: "Reading worlds…"

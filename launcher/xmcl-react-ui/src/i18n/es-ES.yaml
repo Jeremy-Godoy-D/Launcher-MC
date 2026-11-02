@@ -769,6 +769,14 @@ react:
     shared: "Esta carpeta está compartida: actualizar sus archivos afecta a todas las instancias vinculadas. Sus configuraciones y grupos permanecen propios de cada instancia."
 
   worlds:
+    migrationPending: "Hay mundos de una versión anterior pendientes de recuperar. Sus originales se conservan, pero pueden faltar en la lista."
+    migrationProgress: "Recuperando mundos anteriores…"
+    migrationRetry: "Reintentar recuperación de mundos"
+    migrationReason:
+      running: "Cierra todas las partidas de Minecraft y vuelve a intentarlo."
+      session: "No se pudo proteger la sesión de un mundo. Cierra Minecraft y vuelve a intentarlo. Si el problema continúa, consulta los diagnósticos del launcher."
+      changed: "Los archivos cambiaron durante la recuperación. Espera a que terminen otras operaciones y vuelve a intentarlo."
+      failed: "Revisa los permisos de la carpeta y el espacio libre y vuelve a intentarlo. Los mundos y respaldos existentes se conservan."
     one: "1 mundo"
     refresh: "Volver a leer"
     loading: "Leyendo mundos…"

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { FolderOpen, Info, Layers, Map, Plus, RefreshCw, Search, Trophy, X } from 'lucide-react'
-import { InstanceSavesServiceKey } from '@xmcl/runtime-api/src/services/InstanceSavesService'
+import { InstanceSavesServiceKey, type LegacyWorldMigrationStatus } from '@xmcl/runtime-api/src/services/InstanceSavesService'
 import type { InstanceDatapack, InstanceSavePreview } from '@xmcl/runtime-api/src/entities/save'
 import { useService } from '../../runtime'
 import { useI18n } from '../../i18n'
@@ -15,16 +15,27 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
   const [worlds, setWorlds] = useState<InstanceSavePreview[]>([]), [query, setQuery] = useState(''), [reading, setReading] = useState(true)
   const [error, setError] = useState(false), [revision, setRevision] = useState(0), [opening, setOpening] = useState(false), [details, setDetails] = useState('')
   const [initialTab, setInitialTab] = useState<'info' | 'progress' | 'map'>('info')
+  const [migration, setMigration] = useState<LegacyWorldMigrationStatus>(), [recovering, setRecovering] = useState(false), recovery = useRef(false)
+  const recoveryFocus = useRef(false), retryButton = useRef<HTMLButtonElement>(null)
   const [action, setAction] = useState<{ name: string; type: WorldFileOperation['type']; datapackFileName?: string } | null>(null), actionTrigger = useRef<HTMLButtonElement | null>(null), search = useRef<HTMLInputElement>(null)
   const alive = useRef(true), openingFolder = useRef(false), trigger = useRef<HTMLButtonElement | null>(null)
   useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
   useEffect(() => {
+    if (!recovering && recoveryFocus.current) { recoveryFocus.current = false; (migration?.status === 'ready' ? search.current : retryButton.current)?.focus() }
+  }, [recovering, migration])
+  useEffect(() => {
     let active = true, pending = false, again = false
     async function read() {
-      if (running) { setReading(false); return }
       if (pending) { again = true; return }
       pending = true; setReading(true); setError(false)
-      try { const value = await service.getInstanceSaves(path); if (active) setWorlds(value) }
+      try {
+        const [saves, status] = await Promise.allSettled([running ? Promise.resolve(undefined) : service.getInstanceSaves(path), service.getLegacyWorldMigrationStatus()])
+        if (active) {
+          if (saves.status === 'fulfilled' && saves.value) setWorlds(saves.value)
+          if (status.status === 'fulfilled') setMigration(status.value)
+          setError(saves.status === 'rejected' || status.status === 'rejected')
+        }
+      }
       catch { if (active) setError(true) }
       finally { pending = false; if (active) { setReading(false); if (again) { again = false; void read() } } }
     }
@@ -32,6 +43,13 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
     window.addEventListener('focus', read)
     return () => { active = false; window.removeEventListener('focus', read) }
   }, [service, path, running, revision])
+  async function recover() {
+    if (recovery.current) return
+    recovery.current = true; recoveryFocus.current = true; setRecovering(true)
+    try { const status = await service.retryLegacyWorldMigration(); if (alive.current) { setMigration(status); setRevision(value => value + 1) } }
+    catch { if (alive.current) setError(true) }
+    finally { recovery.current = false; if (alive.current) setRecovering(false) }
+  }
   async function openFolder() {
     if (openingFolder.current) return
     openingFolder.current = true; setOpening(true); setError(false)
@@ -48,6 +66,11 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
       <button className="button secondary" disabled={reading || running} onClick={() => setRevision(value => value + 1)} data-testid="worlds-refresh"><RefreshCw size={17} aria-hidden="true" />{t('react.worlds.refresh')}</button>
       <button className="button secondary" disabled={opening} onClick={() => void openFolder()}><FolderOpen size={17} aria-hidden="true" />{t('react.operations.openFolder')}</button>
     </div></div>
+    {migration && migration.status !== 'ready' && <div className="form-error" role="alert" data-testid="worlds-migration-warning">
+      <p>{t('react.worlds.migrationPending')}</p>
+      <p>{t(migration.status === 'blocked' && !recovering ? `react.worlds.migrationReason.${migration.reason}` : 'react.worlds.migrationProgress')}</p>
+      <button ref={retryButton} className="button secondary" disabled={running || recovering || migration.status === 'running'} onClick={() => void recover()}>{t(recovering ? 'react.worlds.migrationProgress' : 'react.worlds.migrationRetry')}</button>
+    </div>}
     {error && <p className="form-error" role="alert">{t('react.worlds.loadFailed')}</p>}
     {running && <p role="status">{t('react.worlds.running')}</p>}
     <div className="content-filters"><label className="search"><Search size={17} aria-hidden="true" /><input ref={search} aria-label={t('react.worlds.search')} placeholder={t('react.worlds.search')} value={query} onChange={event => setQuery(event.target.value)} /></label><span aria-live="polite">{t(visible.length === 1 ? 'react.worlds.one' : 'react.worlds.count', { count: n(visible.length) })}</span></div>

@@ -87,3 +87,44 @@ it('retains originals and releases all handles when a session changes during mig
   await service().initialize(); expect(logger.error).toHaveBeenCalled(); expect(await readFile(join(root, 'shared-saves/World/level.dat'), 'utf8')).toBe('World')
   expect(sessions[0].release).toHaveBeenCalledOnce(); expect(await readdir(join(root, 'saves'))).toEqual([])
 })
+
+it('reports blocked recovery without retrying on reads and recovers explicitly after games close', async () => {
+  await world('World'); processes = [{}]; const saves = service(); await saves.initialize()
+  const status = await saves.getLegacyWorldMigrationStatus(); expect(status).toEqual({ status: 'blocked', reason: 'running' })
+  if (status.status === 'blocked') status.reason = 'failed'
+  expect(await saves.getLegacyWorldMigrationStatus()).toEqual({ status: 'blocked', reason: 'running' })
+  expect(app.acquireWorldLock).not.toHaveBeenCalled(); expect(copyFile).not.toHaveBeenCalled()
+  processes = []; expect(await saves.retryLegacyWorldMigration()).toEqual({ status: 'ready' })
+  expect(await readFile(join(root, 'saves/World/level.dat'), 'utf8')).toBe('World')
+  await expect(lstat(join(root, 'shared-saves'))).rejects.toHaveProperty('code', 'ENOENT')
+})
+
+it('coalesces concurrent recovery requests and exposes pending state without duplicate copies', async () => {
+  const saves = service(); await saves.initialize(); await world('World')
+  const release = await app.mutex.of('resource-pack-options').acquire()
+  let first: Promise<unknown>, second: Promise<unknown>
+  try {
+    first = saves.retryLegacyWorldMigration(); second = saves.retryLegacyWorldMigration()
+    expect(await saves.getLegacyWorldMigrationStatus()).toEqual({ status: 'running' })
+    expect(app.acquireWorldLock).not.toHaveBeenCalled()
+  } finally { release() }
+  expect(await Promise.all([first!, second!])).toEqual([{ status: 'ready' }, { status: 'ready' }])
+  expect(app.acquireWorldLock).toHaveBeenCalledOnce(); expect(await readdir(join(root, 'saves'))).toEqual(['World'])
+})
+
+it('exposes bounded recovery reasons and never returns paths or raw errors', async () => {
+  await world('World'); app.acquireWorldLock.mockResolvedValue(undefined)
+  const saves = service(); await saves.initialize()
+  expect(await saves.getLegacyWorldMigrationStatus()).toEqual({ status: 'blocked', reason: 'session' })
+  app.acquireWorldLock.mockRejectedValueOnce(Object.assign(new Error(root + ' PRIVATE'), { name: 'WorldFilesChangedError' }))
+  expect(await saves.retryLegacyWorldMigration()).toEqual({ status: 'blocked', reason: 'changed' })
+  app.acquireWorldLock.mockRejectedValueOnce(new Error(root + ' PRIVATE'))
+  expect(await saves.retryLegacyWorldMigration()).toEqual({ status: 'blocked', reason: 'failed' })
+  expect(JSON.stringify(await saves.getLegacyWorldMigrationStatus())).not.toContain(root)
+  expect(await readFile(join(root, 'shared-saves/World/level.dat'), 'utf8')).toBe('World')
+})
+
+it('does not report missing legacy worlds as blocked when a game prevents initialization', async () => {
+  processes = [{}]; const saves = service(); await saves.initialize()
+  expect(await saves.getLegacyWorldMigrationStatus()).toEqual({ status: 'ready' })
+})
