@@ -73,7 +73,8 @@ test('CF world archive hands off to one confirmed importer and preserves existin
   expect(await readFile(join(paths[1], 'saves/Imported/marker.txt'), 'utf8')).toBe('WORLD MARKER')
   expect(JSON.parse(await readFile(join(paths[1], 'saves/Imported/.curseforge'), 'utf8'))).toEqual({ projectId: 1, fileId: 101 })
   expect(await readFile(join(existing, 'level.dat'))).toEqual(before); expect(await entries(join(paths[0], 'saves'))).toEqual([])
-  expect(catalog.state.requests.every(request => !request.key && !request.authorization)).toBe(true)
+  expect(catalog.state.requests.every(request => !request.key && !request.authorization && !request.cancellationId)).toBe(true)
+  const hops = await catalog.hops(); expect(hops.length).toBeGreaterThan(0); expect(hops.every(hop => hop.usedProxy)).toBe(true)
   await page.keyboard.press('Escape'); await expect(trigger).toBeFocused()
 })
 
