@@ -2,22 +2,17 @@
 
 ## Estado vigente
 
-Objetivo completo: PLAN.md y SCOPE.md; v0.3.0-beta.1 solo después de los gates. Producción v0.2.0-beta.2. Rama codex/react-migration, PR4 borrador. Etapas0–4 completas;5 activa: instance-content y console-isolation passed, worlds-settings pending. K12/K21 pass, K11 pendiente;6–9 pendientes. Estimación comunicada al usuario: aproximadamente63% total, no medida automática ni criterio de cierre.
+Objetivo completo PLAN/SCOPE; v0.3.0-beta.1 tras gates. Producción beta.2, PR4 borrador. Etapas0–4 completas;5 activa,K12/K21pass,K11pending;6–9 pendientes. Usuario insiste en terminar/publicar toda la migración, sin rehacer ni repetir innecesariamente. Aproximación comunicada63%, no gate.
 
-STAGE5-INSTANCE-REMOVAL.md: fuentes8c5391a, paquetes finales y fixturesc97d57f. Retirada/eliminación Java comprueba raíz/identidad, registro y sesiones; preserva colisiones, copias independientes, notas y carpetas sin level.dat y mueve los backups fuera de la instancia antes de borrarla. Conserva el handshake de instalación. Guarda Symbol privada para backend, tryAcquire global para evitar deadlock, observadores pausados/recuperados o vaciados/cerrados. rm fallido conserva el registro en la sesión; reintento Native probado. moveSavesToShared y uninstall PowerShell Bedrock retirados; archivos externos/de ediciones retiradas conservados.
+STAGE5-WORLD-RECOVERY.md: appReact42f65e5,Vue/fixtures630add6. Aviso/reintento de mundos heredados bloqueados, DTO sin errores/rutas crudas, coalescencia y guardas existentes. RPC cacheado ahora espera initialize: tres regresiones reprodujeron el fallo anterior. React23 escenarios distintos (22 del lote previo y UI corregida;85/91 finales12/12),Vue22+2skip;1372unitarias/134archivos,32.11s,4workers independiente;12Axe0violaciones/16incomplete;tipos/lint/9harness,E2E56base. Captura clara mínima revisada, scroll real/foco/recarga; no AA global ni Minecraft. HostVue verificado. Build DeskGap emitió archivos pero exit no recuperado tras interrupción; proceso propio ya no existe, no repetir solo por esa observación.
 
-1365unitarias/133archivos,36.73s,cuatro workers y ejecución final independiente;85focales. React16 y Vue16+1skip sobre paquetes c97d57f,80/85/90 y03 para Vue. Cuatro Axe0violaciones/8incomplete, claro/oscuro1200/800 y captura clara mínima revisada; no AA manual global. Tipos Runtime/React/DeskGap,lint0errores/unaviso,build DeskGap producción y9harness;E2E56diagnósticos base exactos. Ambos renderers se recompilaron antes de empaquetar; hostVue verificado por hash. Primer paquete con renderer obsoleto descartado como cierre visual y fixture de error corregida al sobre IPC real, sin relajar aserciones. No partida Minecraft,NSIS/delta ni DeskGap funcional.
-
-CI41388102938/0645052 failure: Vue35pass/1fallo compilando la clase propia Java de80; React cancelado por fail-fast. No hay señal/código de javac en ese log. Ahora80 compila antes de Electron y añade diagnóstico acotado, mantiene15s; pasó local en ambos. Verificar nuevo CI por SHA tras push; no afirmar timeout demostrado ni corrección remota sin resultado. Historial previo:41355748466 success,41357342729 fallo spec12; esa carrera de fixture fue reproducida y corregida en el bloque anterior.
-
-Manifest: `launcher/e2e/artifacts/stage5-instance-removal-manifest.json`, SHA-256 `4916e9cb8b183a50fc2cf94784ea9e2c5d3da9d16eca6f974da4daed5c2d77cc`; incluye fuentes canónicas, identidades, logs, trazas y capturas propias. Excluye perfiles/cachés/reparse points y operaciones posteriores de check/PR.
+CI41390951440/72bf920 failure:Vue39pass1skip1fallo85watch WorldChangedError,Reactcancelado por matriz;80Java pasó. Fixture85 prepara el mundo antes de publicar la instancia (Vue puede observarla inmediatamente); no se retiró la guarda de integridad. Confirmar nuevo CI, sin atribuir causalidad remota solo por pasar local. Manifest `stage5-world-recovery-manifest.json`, SHA-256 `8b19fb24c362737bab6181c4591180d9cdf8a7af31f65568a10e88ffa765e3e3`. Código nuevo aún no es release.
 
 ## Siguiente tarea
 
-1. Verificar CI del nuevo SHA. No publicar/mergear todavía; no reiniciar trabajos vivos por tardar.
-2. K11: aviso/reintento visible de migración heredada bloqueada. La inicialización ya conserva originales/copies/backups y registra fallos; no rehacerla ni el borrado aceptado salvo regresión.
-3. Aceptación integral/noNIO y paridad React de compartir/activar mundos locales, mapas/progreso/dimensiones/regiones y editar/copiar/pegar/eliminar chunks. Revisar los mensajes de sesiones compartidas y Java ausente. No inferir paridad de UI solo por asegurar endpoints heredados.
-4. Solo después6 catálogos,7 globales/actualizador/auxiliares,8 React default/recorte distribuido y9 QA/instalador/publicación. K12/K21 pass; no repetir lectores/datapacks/writers/consola aceptados sin regresión.
+1. Verificar CI por SHA tras push; no reiniciar jobs vivos por tardar. No rehacer lectores/writers/consola/borrado/recuperación aceptados sin regresión.
+2. K11: conectar compartir/activar mundos locales a React usando getSharedSaves/shareSave/importSave/linkSharedSave/unlinkSharedSave ya asegurados y confirmaciones claras. Conserva todos los mapas/progreso/dimensiones/regiones/chunks. No confundirlo con P2P retirado.
+3. Cerrar integral/noNIO/paridad de K11 con evidencia; K12/K21pass. Luego6catálogos,7globales/actualizador,8Reactdefault/recorte y9QA/instalador/publicación. No ampliar backend por perfeccionismo ni repetir suites completas sin cambios que lo justifiquen.
 
 ## Evidencia y decisiones técnicas que se conservan
 

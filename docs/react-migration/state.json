@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa: K12/K21 pass, K11 pending. STAGE5-INSTANCE-REMOVAL: fuentes8c5391a, paquetes/fixturesc97d57f. Retirada/eliminacion Java con copias verificadas, colisiones, backups externos, sesiones y cierre/recuperacion de observadores; sin bypass moveSavesToShared ni uninstall Bedrock. 1365 unitarias/133 archivos (36.73s,4workers independiente),85 focales; React16/Vue16+1skip,4Axe0violaciones/8incomplete,tipos/lint/DeskGap/9harness,E2E56base. Renderer recompilado antes de ambos paquetes; host Vue verificado. CI41388102938/0645052 fallo javac80 en Vue, React cancelado por matriz; preparacion80 ahora previa a Electron con diagnostico acotado y mismo limite15s, nuevo CI pendiente. Proximo: aviso/reintento visible de migracion heredada bloqueada, integral/noNIO y paridad de compartir/activar/chunks. No rehacer borrado/lectores/writers/consola aceptados sin regresion. Etapas6-9 pendientes, Microsoft pospuesto, PR4 borrador; produccion/proxy intactos. DOMPurify WIP/ANALISIS excluidos; no reintentar acciones denegadas.",
+  "nextAction": "Etapa5 activa,K12/K21pass,K11pending. STAGE5-WORLD-RECOVERY: appReact42f65e5,Vue/fixtures630add6. Aviso y reintento legacy terminados; estado acotado, coalescencia y proteccion de originales. Carrera RPC cacheado antes de initialize reproducida con3fallos anteriores y corregida. 1372unitarias/134archivos,32.11s/4workers independiente;React23distintos,Vue22+2skip;12Axe0violaciones,tipos/lint/9harness/E2E56base. HostVue verificado. Build DeskGap emitio salidas pero exit perdido por interrupcion; no repetir solo por eso. CI41390951440/72bf920:Vue39pass1skip1fallo85watch,Reactcancelado;80Java paso. Fixture85 ahora siembra antes de publicar; confirmar nuevo CI. Proximo: implementar paridad React de compartir/activar mundos y cerrar integral/noNIO/chunks; reutilizar servicios/evidencias existentes, sin rehacer. Despues6catalogos,7globales,8Reactdefault/recorte,9QA/instalador/publicacioncompleta. Microsoft pospuesto,PR4borrador,produccion/proxyintactos;DOMPurifyWIP/ANALISIS excluidos;no acciones denegadas.",
   "stages": [
     {
       "id": 0,
@@ -901,9 +901,13 @@
             {
               "path": "docs/react-migration/STAGE5-INSTANCE-REMOVAL.md",
               "sha256": "d24fe92fcb544d0b5457f6f041a14309d3b845cad309dc963d9163768b9750e2"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-WORLD-RECOVERY.md",
+              "sha256": "5435f5d4675c955fc433a1e8b07d544948d0333748459b543fadfb70ca2d6e75"
             }
           ],
-          "note": "K11 pending. STAGE5-INSTANCE-REMOVAL: guardas Java/canonicas/Symbol, copias y respaldos fuera de la instancia, sesiones y observadores, errores de rm sin desregistro indebido. Paquetes c97d57f React16/Vue16+1skip,1365 unitarias/133 archivos,4Axe0violaciones/8incomplete,tipos/lint/DeskGap/9harness,E2E56base. Pendientes aviso/reintento legacy e integral/noNIO/paridad local. K12/K21 pass;5 activa;6-9 pendientes."
+          "note": "K11 pending. STAGE5-WORLD-RECOVERY: aviso/reintento legacy, estado acotado y peticiones agrupadas; RPC cacheado espera inicializacion. React23 distintos/Vue22+2skip,1372unitarias/134archivos,12Axe0violaciones,tipos/lint/9harness,E2E56base. Pendiente paridad React de compartir/activar e integral/noNIO/chunks. K12/K21 pass;5activa;6-9pendientes."
         },
         {
           "id": "console-isolation",

@@ -373,3 +373,9 @@ CI28039b0 success;78903b4 falló spec12 por carrera de la fixture, reproducida y
 STAGE5-INSTANCE-REMOVAL.md: guardas de raíz/registro/sesión, copias y backups fuera de la instancia, colisiones y notas/carpetas no jugables conservadas; observadores cerrados o recuperados, y errores de rm sin desregistro indebido. Se retiran el bypass moveSavesToShared y el uninstall Bedrock. Paquetes c97d57f: React16/Vue16+1skip,1365unitarias/133archivos,4Axe0violaciones/8incomplete,tipos/lint/DeskGap/9harness,E2E56base. Primer renderer obsoleto descartado; cierre sobre renderer recompilado y hash del hostVue verificado.
 
 CI0645052 falló compilando javac80; React fue cancelado por la matriz. Preparación previa a Electron y diagnóstico acotado, mismo límite15s; nuevo CI pendiente. K11 mantiene aviso/reintento legacy e integral/noNIO/paridad local pendientes; K12/K21 pass,5 activa y6–9 pendientes. Herramientas locales y chunks conservados, Microsoft pospuesto, PR4 borrador y producción/proxy intactos.
+
+## Recuperación heredada y RPC inicializado — 2026-11-02
+
+STAGE5-WORLD-RECOVERY.md: aviso y reintento desde Mundos, DTO acotado/coalescencia, originales y sesiones protegidos; RPC cacheado espera initialize con regresión anterior reproducida. 1372unitarias/134archivos,React23distintos/Vue22+2skip,12Axe0violaciones,tipos/lint/9harness,E2E56base. HostVue verificado. Exit de build DeskGap perdido durante interrupción, no declarado confirmado ni repetido sin necesidad.
+
+CI72bf920:Vue39pass1skip1fallo85watch,Reactcancelado;80Java pasó. Fixture85 preparada antes de publicar, nuevo CI por confirmar. K11 mantiene paridad React compartir/activar e integral/noNIO/chunks pendientes;K12/K21pass,5activa,6–9pendientes. Prioridad terminar/publicar migración completa reutilizando lo existente. Microsoft pospuesto,producción/proxy intactos.
