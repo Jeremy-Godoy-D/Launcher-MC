@@ -2,7 +2,7 @@ import type { InstallMarketOptions } from '@xmcl/runtime-api/src/entities/market
 import type { CatalogProject, getCatalogVersions } from './api'
 
 export function modpackDownload(project: CatalogProject, result: Awaited<ReturnType<typeof getCatalogVersions>>, id: string): InstallMarketOptions {
-  if (project.kind !== 'modpack' || result.provider !== project.provider) throw new Error('Invalid modpack selection')
+  if (project.kind !== 'modpack' && !(project.kind === 'world' && project.provider === 'curseforge') || result.provider !== project.provider) throw new Error('Invalid catalog archive selection')
   if (result.provider === 'modrinth') {
     const version = result.versions.find(version => version.id === id && version.project_id === project.id)
     if (!Array.isArray(version?.files) || version.files.length > 128) throw new Error('Invalid modpack files')

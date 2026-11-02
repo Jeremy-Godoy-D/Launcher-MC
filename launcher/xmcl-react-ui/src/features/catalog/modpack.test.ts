@@ -14,6 +14,13 @@ describe('catalog modpack archive selection', () => {
   it('captures CF file identity and pack media only', () => {
     expect(modpackDownload({ ...project, provider: 'curseforge', id: '1', icon: 'https://example.test/icon' }, cf(), '101')).toEqual({ market: 1, file: { fileId: 101, projectId: 1, icon: 'https://example.test/icon' } })
   })
+  it('uses the verified CF ZIP pipeline for worlds and rejects other world sources', () => {
+    const world = { ...project, kind: 'world', provider: 'curseforge', id: '1' } as CatalogProject
+    expect(modpackDownload(world, cf(), '101')).toEqual({ market: 1, file: { fileId: 101, projectId: 1 } })
+    expect(() => modpackDownload({ ...world, provider: 'modrinth' }, mr(), 'VVVV0001')).toThrow()
+    expect(() => modpackDownload(world, cf({ modId: 2 }), '101')).toThrow()
+    expect(() => modpackDownload(world, cf({ fileName: 'world.exe' }), '101')).toThrow()
+  })
   it.each([[], [{ filename: '../pack.mrpack' }], [{ filename: 'pack.jar' }], [{ filename: 'a.mrpack' }, { filename: 'b.mrpack' }]].map(files => ({ files })))('rejects missing or ambiguous archives: %j', ({ files }) => {
     expect(() => modpackDownload(project, mr(files), 'VVVV0001')).toThrow()
   })

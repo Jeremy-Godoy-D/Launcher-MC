@@ -8,10 +8,12 @@ import { useService } from '../../runtime'
 import { useI18n } from '../../i18n'
 import { useLibrary } from '../library/context'
 
-export function WorldFilesDialog({ path, name, type, world, close, returnFocus, changed, datapackFileName }: { path: string; name: string; type: WorldFileOperation['type']; world?: InstanceSavePreview; close: () => void; returnFocus: () => void; changed: () => void; datapackFileName?: string }) {
+export type WorldArchiveImport = Pick<Extract<WorldFileOperation, { type: 'import' }>, 'sourcePath' | 'saveName' | 'curseforge'> & { targetName: string }
+
+export function WorldFilesDialog({ path, name, type, world, close, returnFocus, changed, datapackFileName, initialImport }: { path: string; name: string; type: WorldFileOperation['type']; world?: InstanceSavePreview; close: () => void; returnFocus: () => void; changed: () => void; datapackFileName?: string; initialImport?: WorldArchiveImport }) {
   const service = useService(InstanceSavesServiceKey), base = useService(BaseServiceKey), library = useLibrary(), { t, n } = useI18n()
   const [input, setInput] = useState<WorldFileOperation>(() => {
-    if (type === 'import') return { type, instancePath: path, saveName: '', sourcePath: '' }
+    if (type === 'import') return { type, instancePath: path, saveName: initialImport?.saveName || '', sourcePath: initialImport?.sourcePath || '', ...(initialImport?.curseforge ? { curseforge: initialImport.curseforge } : {}) }
     if (type === 'metadata') return { type, instancePath: path, saveName: name, metadata: { levelName: world?.levelName || name, seed: world?.seed ?? '', difficulty: (world?.difficulty !== undefined && world.difficulty >= 0 && world.difficulty <= 3 ? world.difficulty : 2) as 0 | 1 | 2 | 3, cheat: Boolean(world?.cheat) } }
     if (type === 'import-datapack') return { type, instancePath: path, saveName: name, sourcePath: '', fileName: '' }
     if (type === 'remove-datapack') return { type, instancePath: path, saveName: name, fileName: datapackFileName || '' }
@@ -35,7 +37,7 @@ export function WorldFilesDialog({ path, name, type, world, close, returnFocus, 
       const result = await window.windowController!.showOpenDialog!(archive ? { properties: ['openFile'], filters: isDatapack ? [{ name: 'Minecraft datapack', extensions: ['zip'] }] : [{ name: 'Minecraft world', extensions: ['zip'] }] } : { properties: ['openDirectory'] })
       if (alive.current && !result.canceled && result.filePaths[0]) {
         if (input.type === 'export') setInput({ ...input, destinationDirectory: result.filePaths[0] })
-        if (input.type === 'import') { const sourcePath = result.filePaths[0]; setInput({ ...input, sourcePath, saveName: sourcePath.replace(/\\/g, '/').split('/').pop()!.replace(/\.zip$/i, '') }) }
+        if (input.type === 'import') { const sourcePath = result.filePaths[0]; setInput({ ...input, sourcePath, saveName: sourcePath.replace(/\\/g, '/').split('/').pop()!.replace(/\.zip$/i, ''), curseforge: undefined }) }
         if (input.type === 'import-datapack') { const sourcePath = result.filePaths[0]; setInput({ ...input, sourcePath, fileName: sourcePath.replace(/\\/g, '/').split('/').pop()! }) }
         setReview(null)
       }
@@ -64,6 +66,7 @@ export function WorldFilesDialog({ path, name, type, world, close, returnFocus, 
     <form onSubmit={event => { event.preventDefault(); void submit() }}>
       <div className="creation-body" ref={body} role="region" aria-label={t('react.worldFiles.review')} tabIndex={0}>
         {error && <p role="alert" className="form-error">{t(`react.worldFiles.${error}`)}</p>}
+        {initialImport && <p><strong>{t('react.worldFiles.instance')}: {initialImport.targetName}</strong></p>}
         <p className="instance-path">{input.type === 'import' ? input.sourcePath : name}</p>
         {!finished && !review && input.type === 'import' && <>
           <div className="content-actions"><button className="button secondary" type="button" disabled={busy} onClick={() => void chooseFolder(true)}>{t('react.worldFiles.chooseZip')}</button><button className="button secondary" type="button" disabled={busy} onClick={() => void chooseFolder()}>{t('react.worldFiles.chooseWorldFolder')}</button></div>

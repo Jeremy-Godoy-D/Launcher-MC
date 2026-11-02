@@ -17,7 +17,10 @@ import { useService, useTasks } from '../../runtime'
 import { isOperationCancelled } from '../library/operations'
 import { modpackDownload } from './modpack'
 import { ContentInstall, type ContentSelection } from './ContentInstall'
+import { WorldFilesDialog, type WorldArchiveImport } from '../instance/WorldFilesDialog'
 import './catalog.css'
+
+type ArchiveImport = { path: string } & ({ kind: 'modpack' } | { kind: 'world'; target: ContentSelection['target']; import: WorldArchiveImport })
 
 function Image({ src, alt, fallback = vanilla, ...props }: { src: string; alt: string; fallback?: string; className?: string }) {
   return <img {...props} src={src || fallback} alt={alt} loading="lazy" referrerPolicy="no-referrer" onError={event => { if (event.currentTarget.src !== new URL(fallback, location.href).href) event.currentTarget.src = fallback }} />
@@ -33,7 +36,7 @@ function Failure({ error, retry, stale = false }: { error: unknown; retry: () =>
   </div>
 }
 
-function ProjectVersions({ detail, query, onBusy, onImport, onReview }: { detail: CatalogDetail; query: CatalogQuery; onBusy: (busy: boolean) => void; onImport: (path: string) => void; onReview: (selection: ContentSelection, trigger: HTMLButtonElement) => void }) {
+function ProjectVersions({ detail, query, onBusy, onImport, onReview }: { detail: CatalogDetail; query: CatalogQuery; onBusy: (busy: boolean) => void; onImport: (selection: ArchiveImport) => void; onReview: (selection: ContentSelection, trigger: HTMLButtonElement) => void }) {
   const { t, n, d } = useI18n(), library = useLibrary()
   const service = useService(ModpackServiceKey), tasks = useTasks()
   const [target, setTarget] = useState(detail.project.kind === 'modpack' ? '' : library?.current?.path || '')
@@ -51,11 +54,15 @@ function ProjectVersions({ detail, query, onBusy, onImport, onReview }: { detail
     if (running.current || !versions.data) return
     let options
     try { options = modpackDownload(detail.project, versions.data, id) } catch { setError('archiveUnavailable'); return }
+    const destination = detail.project.kind === 'world' && instance ? structuredClone(instance) : undefined
+    if (detail.project.kind === 'world' && (!destination || options.market !== 1 || Array.isArray(options.file) || versions.data.provider !== 'curseforge' || !versions.data.versions.find(file => String(file.id) === id)?.gameVersions.includes(destination.runtime.minecraft))) { setError('archiveUnavailable'); return }
     running.current = true; request.current = createOperationId(); setBusy(true); onBusy(true); setError(''); setCancelling(false)
     try {
       const paths = await service.installModapckFromMarket(options, request.current)
       if (paths.length !== 1 || typeof paths[0] !== 'string' || !paths[0]) throw new Error('Invalid archive result')
-      if (alive.current) onImport(paths[0])
+      if (alive.current) onImport(destination && options.market === 1 && !Array.isArray(options.file)
+        ? { kind: 'world', path: paths[0], target: destination, import: { sourcePath: paths[0], saveName: detail.project.name.replace(/[<>:"/\\|?*\p{Cc}]/gu, '-').trim().replace(/\.+$/, '').slice(0, 120) || 'World', targetName: `${destination.name} · ${destination.runtime.minecraft}`, curseforge: { projectId: Number(detail.project.id), fileId: options.file.fileId } } }
+        : { kind: 'modpack', path: paths[0] })
     } catch (failure) {
       if (alive.current) setError(isOperationCancelled(failure) ? 'downloadCancelled' : 'downloadFailed')
     } finally {
@@ -82,8 +89,9 @@ function ProjectVersions({ detail, query, onBusy, onImport, onReview }: { detail
       {detail.project.kind !== 'modpack' && library?.instances.map(instance => <option key={instance.path} value={instance.path}>{instance.name} · {instance.runtime.minecraft}</option>)}
     </select>
     <p className="form-help">{t('react.catalog.compatibility', { minecraft: minecraft || t('react.catalog.anyVersion'), loader: loader || t('react.catalog.anyLoader') })}</p>
-    {!instance && ['mod', 'resourcepack', 'shader'].includes(detail.project.kind) && <p className="form-help">{t('react.catalogInstall.chooseTarget')} <Link to="/me?add=create">{t('react.catalog.newInstance')}</Link></p>}
+    {!instance && ['mod', 'resourcepack', 'shader', 'world'].includes(detail.project.kind) && <p className="form-help">{t('react.catalogInstall.chooseTarget')} <Link to="/me?add=create">{t('react.catalog.newInstance')}</Link></p>}
     {detail.project.kind === 'modpack' && <p className="form-help">{t('react.catalog.importHelp')}</p>}
+    {detail.project.kind === 'world' && <p className="form-help">{t('react.catalog.worldImportHelp')}</p>}
     {busy && <div className="catalog-download" role="status" data-testid="catalog-download">
       <p>{t(cancelling ? 'react.catalog.cancelling' : progress && progress.total > 0 ? 'react.catalog.downloading' : 'react.catalog.preparingDownload', { progress: n(progress?.progress || 0), total: n(progress?.total || 0) })}</p>
       <progress aria-label={t('react.catalog.downloadProgress')} max={progress && progress.total > 0 ? progress.total : undefined} value={progress && progress.total > 0 ? progress.progress : undefined} />
@@ -97,7 +105,7 @@ function ProjectVersions({ detail, query, onBusy, onImport, onReview }: { detail
       {rows.map(row => <li key={row.id} data-version-id={row.id}>
         <strong>{row.name}</strong><span>{row.version}</span><span>{row.minecraft} {row.loaders && `· ${row.loaders}`}</span>
         <span>{t(`react.catalog.${row.release || 'release'}`)} · {Number.isFinite(Date.parse(row.date)) ? d(new Date(row.date), { dateStyle: 'medium' }) : t('react.catalog.unknownDate')}</span>
-        {detail.project.kind === 'modpack' && <button className="button primary" data-testid="catalog-import-version" disabled={busy || versions.isFetching} onClick={() => void download(row.id)}>{t('react.catalog.downloadImport')}</button>}
+        {['modpack', 'world'].includes(detail.project.kind) && <button className="button primary" data-testid="catalog-import-version" disabled={busy || versions.isFetching || detail.project.kind === 'world' && !instance} onClick={() => void download(row.id)}>{t('react.catalog.downloadImport')}</button>}
         {['mod', 'resourcepack', 'shader'].includes(detail.project.kind) && <button className="button primary" data-testid="catalog-review-version" disabled={busy || versions.isFetching || !instance} onClick={event => {
           if (!instance || !versions.data) return
           const result = versions.data
@@ -119,7 +127,7 @@ function ProjectVersions({ detail, query, onBusy, onImport, onReview }: { detail
   </section>
 }
 
-function ProjectSheet({ provider, id, query, close, returnFocus, onImport }: { provider: Provider; id: string; query: CatalogQuery; close: () => void; returnFocus: () => void; onImport: (path: string) => void }) {
+function ProjectSheet({ provider, id, query, close, returnFocus, onImport }: { provider: Provider; id: string; query: CatalogQuery; close: () => void; returnFocus: () => void; onImport: (selection: ArchiveImport) => void }) {
   const { t, n } = useI18n(), [tab, setTab] = useState('about')
   const [busy, setBusy] = useState(false)
   const [versionsVisited, setVersionsVisited] = useState(false)
@@ -173,7 +181,8 @@ function CatalogPage({ onImport }: { onImport: (path: string, trigger: HTMLEleme
   const query = readCatalogQuery(params), [text, setText] = useState(query.text), [filters, setFilters] = useState(false)
   const [minecraft, setMinecraft] = useState(query.minecraft)
   const restore = useRef<HTMLElement | null>(null), scroll = useRef(0), search = useRef<HTMLInputElement>(null)
-  const pendingImport = useRef(''), handoff = useRef(false)
+  const pendingImport = useRef<ArchiveImport | undefined>(undefined), handoff = useRef(false)
+  const [worldImport, setWorldImport] = useState<Extract<ArchiveImport, { kind: 'world' }>>()
   const result = useQuery({ queryKey: ['catalog-search', query], queryFn: ({ signal }) => searchCatalog(query, signal) })
   const route = /^\/store\/(modrinth|curseforge)\/([^/]+)\/?$/.exec(location.pathname)
   const change = (values: Record<string, string>, replace = false) => {
@@ -246,9 +255,14 @@ function CatalogPage({ onImport }: { onImport: (path: string, trigger: HTMLEleme
     {location.pathname !== '/store' && !route && <div role="alert"><p>{t('react.catalog.missing')}</p><Link className="button secondary" to={`/store${location.search}`}>{t('react.catalog.back')}</Link></div>}
     {route && <ProjectSheet key={`${route[1]}:${route[2]}`} provider={route[1] as Provider} id={route[2]} query={query} close={close} onImport={path => { pendingImport.current = path; handoff.current = true; close() }} returnFocus={() => {
       const trigger = restore.current?.isConnected ? restore.current : search.current
-      if (pendingImport.current) { const path = pendingImport.current; pendingImport.current = ''; onImport(path, trigger) }
+      if (pendingImport.current) {
+        const archive = pendingImport.current; pendingImport.current = undefined
+        if (archive.kind === 'world') setWorldImport(archive)
+        else onImport(archive.path, trigger)
+      }
       else trigger?.focus({ preventScroll: true })
     }} />}
+    {worldImport && <WorldFilesDialog type="import" path={worldImport.target.path} name="" initialImport={worldImport.import} changed={() => {}} close={() => setWorldImport(undefined)} returnFocus={() => (restore.current?.isConnected ? restore.current : search.current)?.focus({ preventScroll: true })} />}
   </section>
 }
 

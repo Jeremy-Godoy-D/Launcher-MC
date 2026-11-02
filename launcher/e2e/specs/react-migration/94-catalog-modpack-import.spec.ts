@@ -146,7 +146,7 @@ test('React preserves a pending native creation when a different downloaded pack
 test('React offers the source website for a CF file unavailable to applications', async ({ launcher, catalog }) => {
   const page = launcher.main; catalog.state.fileMode = 'blocked'; await openPack(launcher, 'curseforge')
   await page.getByTestId('catalog-import-version').click()
-  await expect(page.getByTestId('catalog-download-error')).toContainText('no ofrece un archivo de modpack disponible')
+  await expect(page.getByTestId('catalog-download-error')).toContainText('no ofrece un archivo compatible disponible')
   await expect(page.getByTestId('catalog-project').getByRole('link', { name: 'Ver en la web de origen', exact: true })).toBeVisible()
   expect(catalog.state.metadataStarted).toBe(false); expect(catalog.state.fileStarted).toBe(false)
   expect(await entries(join(launcher.gameDataPath, 'instances'))).toEqual([])
