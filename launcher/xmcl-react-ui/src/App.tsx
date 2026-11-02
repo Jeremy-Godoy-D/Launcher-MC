@@ -498,7 +498,7 @@ export function App() {
         </nav>
         <div className="sidebar-instance">
           <span className="sidebar-caption">Instancia seleccionada</span>
-          <button onClick={() => navigate('/instance')} title={current?.name} disabled={!current}>
+          <button onClick={() => navigate('/instance')} title={current?.name} aria-label={!current ? t('react.instances.noneSelected') : undefined} disabled={!current}>
             <Box size={20} />
             <span>
               <strong>{current?.name ?? t('react.instances.noneSelected')}</strong>
