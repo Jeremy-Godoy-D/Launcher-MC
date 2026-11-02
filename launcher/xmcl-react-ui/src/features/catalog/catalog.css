@@ -15,7 +15,7 @@
   .catalog-error { padding-block: 12px; display: grid; gap: 12px; justify-items: start; }
   .catalog-pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-block: 24px; font-size: 12px; font-variant-numeric: tabular-nums; }
   .dialog.catalog-sheet { width: min(980px, calc(100vw - 48px)); height: min(820px, calc(100dvh - 32px)); padding: 24px 24px 16px; gap: 12px; }
-  .catalog-project-heading { display: flex; gap: 14px; padding-inline-end: 28px; min-height: 60px; }
+  .catalog-project-heading { display: flex; flex-shrink: 0; gap: 14px; padding-inline-end: 28px; min-height: 60px; }
   .catalog-project-heading > img { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; }
   .catalog-project-heading > div { min-width: 0; }
   .catalog-project-heading h2 { font-size: 22px; overflow-wrap: anywhere; line-height: 1.25; }

@@ -95,6 +95,7 @@ test('React catalog and detail sheet stay accessible in both themes and supporte
       const trigger = page.locator('.project-card').first().getByRole('button', { name: 'Ver contenido', exact: true }); await trigger.scrollIntoViewIfNeeded(); await activateLauncherControl(launcher, trigger)
       const sheet = page.getByTestId('catalog-project'); await expect(page.getByTestId('catalog-description')).toContainText('Contenido seguro')
       await sheet.getByRole('button', { name: 'Versiones', exact: true }).click(); await expect(sheet.getByTestId('catalog-versions')).toContainText('Versión compatible 1.0')
+      await expect(sheet.getByRole('heading', { name: 'Proyecto AAAA0001', exact: true })).toBeInViewport({ ratio: 1 })
       await expect(sheet.locator('footer').getByRole('button', { name: 'Cerrar ficha', exact: true })).toBeInViewport({ ratio: 1 })
       expect(await sheet.evaluate(element => element.getBoundingClientRect().bottom - element.querySelector('footer')!.getBoundingClientRect().bottom)).toBeLessThanOrEqual(28)
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
