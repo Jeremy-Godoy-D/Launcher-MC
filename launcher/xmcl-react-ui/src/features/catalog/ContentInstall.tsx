@@ -68,7 +68,7 @@ export function ContentInstall({ selection, onBack, onBusy }: { selection: Conte
     request.current = createOperationId(); cancelling.current = false; setCancelRequested(false); cancelledTask.current = ''; setError(''); setPhase('prepare'); setReview(undefined)
     try {
       if ((await readPending()).length) throw Object.assign(new Error('Pending reviewed installation'), { code: 'pending' })
-      const sources = domain === 'mods' ? await mods.getModSources(path) : []
+      const sources = domain === 'mods' ? await mods.getModSources(path) : domain === 'shaderpacks' ? await shaders.getShaderSources(path) : await packs.getPackSources(path)
       const current = updateMods(resources.data.files, target.runtime, sources)
       let loader = ''
       try {
