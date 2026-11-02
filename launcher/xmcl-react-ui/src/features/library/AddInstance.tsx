@@ -143,12 +143,14 @@ function InstallationStatus({
 export function AddInstance({
   open,
   initialMode,
+  initialArchive,
   onClose,
   onCreated,
   returnFocus,
 }: {
   open: boolean
   initialMode: 'create' | 'import'
+  initialArchive?: string
   onClose: () => void
   onCreated: (path: string) => void
   returnFocus: RefObject<HTMLElement | null>
@@ -196,6 +198,7 @@ export function AddInstance({
   const folderDraft = useRef<FolderDraft>({ type: 'vanilla', path: '', candidates: [], selected: -1 })
   const suggestedName = useRef('')
   const operation = useRef(false)
+  const incomingArchive = useRef('')
   const nameInput = useRef<HTMLInputElement>(null)
   const errorMessage = useRef<HTMLParagraphElement>(null)
   const versionRequest = useRef<Promise<MinecraftVersions> | undefined>(undefined)
@@ -207,12 +210,21 @@ export function AddInstance({
     if (open && !session.current?.path && !name && !archive && !url && !folderDraft.current.path) setMode(initialMode)
   }, [open, initialMode])
   useEffect(() => {
+    if (!open || !initialArchive || incomingArchive.current === initialArchive) return
+    incomingArchive.current = initialArchive
+    if (session.current?.path) {
+      if (archive !== initialArchive) setError(t('react.catalog.pendingCreation'))
+      return
+    }
+    setMode('import'); setSource('file'); setArchive(initialArchive); setPreview(undefined); setError('')
+  }, [open, initialArchive])
+  useEffect(() => {
     if (local.data?.local.length)
       setMinecraft((current) => current || local.data!.local[0].minecraft)
   }, [local.data])
 
   useEffect(() => {
-    if (!open || mode !== 'create') return
+    if (!open || mode !== 'create' || initialArchive && archive !== initialArchive && !session.current?.path) return
     let active = true
     setMetadataLoading(true)
     setMetadataError(false)
@@ -394,6 +406,7 @@ export function AddInstance({
     setRetry((value) => value + 1)
   }
   function reset() {
+    incomingArchive.current = ''
     setName('')
     setArchive('')
     setUrl('')

@@ -10,6 +10,12 @@ import ocean from '../../assets/ambient/vanilla-ocean.webp'
 import { getCatalogDetail, getCatalogVersions, kinds, loaders, PAGE_SIZE, providers, readCatalogQuery, searchCatalog, sorts, type CatalogDetail, type CatalogQuery, type CatalogProject, type Provider } from './api'
 import { catalogError, catalogQueries } from './queries'
 import { catalogDescription } from './description'
+import { ModpackServiceKey } from '@xmcl/runtime-api/src/services/ModpackService'
+import { TaskState } from '@xmcl/runtime-api/src/task'
+import { createOperationId } from '@xmcl/runtime-api/src/util/launch'
+import { useService, useTasks } from '../../runtime'
+import { isOperationCancelled } from '../library/operations'
+import { modpackDownload } from './modpack'
 import './catalog.css'
 
 function Image({ src, alt, fallback = vanilla, ...props }: { src: string; alt: string; fallback?: string; className?: string }) {
@@ -26,10 +32,41 @@ function Failure({ error, retry, stale = false }: { error: unknown; retry: () =>
   </div>
 }
 
-function ProjectVersions({ detail, query }: { detail: CatalogDetail; query: CatalogQuery }) {
+function ProjectVersions({ detail, query, onBusy, onImport }: { detail: CatalogDetail; query: CatalogQuery; onBusy: (busy: boolean) => void; onImport: (path: string) => void }) {
   const { t, n, d } = useI18n(), library = useLibrary()
-  const [target, setTarget] = useState(library?.current?.path || '')
+  const service = useService(ModpackServiceKey), tasks = useTasks()
+  const [target, setTarget] = useState(detail.project.kind === 'modpack' ? '' : library?.current?.path || '')
   const [page, setPage] = useState(0)
+  const [busy, setBusy] = useState(false), [error, setError] = useState(''), [cancelling, setCancelling] = useState(false)
+  const running = useRef(false), request = useRef(''), alive = useRef(true)
+  const cancelButton = useRef<HTMLButtonElement>(null), downloadError = useRef<HTMLParagraphElement>(null)
+  const current = tasks.tasks.find(task => task.type === 'downloadModpack' && task.operationId === request.current)
+  const active = current?.state === TaskState.Running ? current : undefined
+  const progress = current?.progress && typeof current.progress === 'object' ? current.progress : undefined
+  useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
+  useEffect(() => { if (active && busy) cancelButton.current?.focus() }, [active?.id])
+  useEffect(() => { if (error) downloadError.current?.focus() }, [error])
+  async function download(id: string) {
+    if (running.current || !versions.data) return
+    let options
+    try { options = modpackDownload(detail.project, versions.data, id) } catch { setError('archiveUnavailable'); return }
+    running.current = true; request.current = createOperationId(); setBusy(true); onBusy(true); setError(''); setCancelling(false)
+    try {
+      const paths = await service.installModapckFromMarket(options, request.current)
+      if (paths.length !== 1 || typeof paths[0] !== 'string' || !paths[0]) throw new Error('Invalid archive result')
+      if (alive.current) onImport(paths[0])
+    } catch (failure) {
+      if (alive.current) setError(isOperationCancelled(failure) ? 'downloadCancelled' : 'downloadFailed')
+    } finally {
+      running.current = false
+      if (alive.current) { setBusy(false); setCancelling(false); onBusy(false) }
+    }
+  }
+  async function cancel() {
+    if (!active || cancelling) return
+    setCancelling(true)
+    try { await tasks.cancel(active.id) } catch { setError('cancelFailed'); setCancelling(false) }
+  }
   const instance = library?.instances.find(instance => instance.path === target)
   const minecraft = instance?.runtime.minecraft || query.minecraft
   const loader = detail.project.kind === 'mod' ? instance ? instance.runtime.fabricLoader ? 'fabric' : instance.runtime.quiltLoader ? 'quilt' : instance.runtime.neoForged ? 'neoforge' : instance.runtime.forge ? 'forge' : '' : query.loader : ''
@@ -39,11 +76,18 @@ function ProjectVersions({ detail, query }: { detail: CatalogDetail; query: Cata
     : versions.data?.versions.map(file => ({ id: String(file.id), name: file.displayName, version: file.fileName, minecraft: file.gameVersions.join(', '), loaders: '', date: file.fileDate, release: ({ 1: 'release', 2: 'beta', 3: 'alpha' })[file.releaseType] })) || []
   return <section aria-label={t('react.catalog.versions')} className="catalog-versions">
     <label htmlFor="catalog-target">{t('react.catalog.target')}</label>
-    <select id="catalog-target" value={target} onChange={event => { setTarget(event.target.value); setPage(0) }}>
+    <select id="catalog-target" value={target} disabled={busy} onChange={event => { setTarget(event.target.value); setPage(0) }}>
       <option value="">{t(detail.project.kind === 'modpack' ? 'react.catalog.newInstance' : 'react.catalog.allVersions')}</option>
-      {library?.instances.map(instance => <option key={instance.path} value={instance.path}>{instance.name} · {instance.runtime.minecraft}</option>)}
+      {detail.project.kind !== 'modpack' && library?.instances.map(instance => <option key={instance.path} value={instance.path}>{instance.name} · {instance.runtime.minecraft}</option>)}
     </select>
     <p className="form-help">{t('react.catalog.compatibility', { minecraft: minecraft || t('react.catalog.anyVersion'), loader: loader || t('react.catalog.anyLoader') })}</p>
+    {detail.project.kind === 'modpack' && <p className="form-help">{t('react.catalog.importHelp')}</p>}
+    {busy && <div className="catalog-download" role="status" data-testid="catalog-download">
+      <p>{t(cancelling ? 'react.catalog.cancelling' : progress && progress.total > 0 ? 'react.catalog.downloading' : 'react.catalog.preparingDownload', { progress: n(progress?.progress || 0), total: n(progress?.total || 0) })}</p>
+      <progress aria-label={t('react.catalog.downloadProgress')} max={progress && progress.total > 0 ? progress.total : undefined} value={progress && progress.total > 0 ? progress.progress : undefined} />
+      <button ref={cancelButton} className="button secondary" disabled={!active || cancelling} onClick={() => void cancel()}>{t('react.catalog.cancelDownload')}</button>
+    </div>}
+    {error && <p ref={downloadError} tabIndex={-1} role="alert" className="form-error" data-testid="catalog-download-error">{t(`react.catalog.${error}`)}</p>}
     {versions.isPending && <p role="status">{t(versions.fetchStatus === 'paused' ? 'react.catalog.offline' : 'react.catalog.loadingVersions')}</p>}
     {versions.isError && <Failure error={versions.error} retry={() => void versions.refetch()} />}
     {!versions.isPending && !versions.isError && !rows.length && <p role="status">{t('react.catalog.noVersions')}</p>}
@@ -51,23 +95,26 @@ function ProjectVersions({ detail, query }: { detail: CatalogDetail; query: Cata
       {rows.map(row => <li key={row.id} data-version-id={row.id}>
         <strong>{row.name}</strong><span>{row.version}</span><span>{row.minecraft} {row.loaders && `· ${row.loaders}`}</span>
         <span>{t(`react.catalog.${row.release || 'release'}`)} · {Number.isFinite(Date.parse(row.date)) ? d(new Date(row.date), { dateStyle: 'medium' }) : t('react.catalog.unknownDate')}</span>
+        {detail.project.kind === 'modpack' && <button className="button primary" data-testid="catalog-import-version" disabled={busy || versions.isFetching} onClick={() => void download(row.id)}>{t('react.catalog.downloadImport')}</button>}
       </li>)}
     </ul>
     {!!versions.data?.total && <nav className="catalog-pagination" aria-label={t('react.catalog.versionPages')}>
-      <button className="button secondary" disabled={!page || versions.isFetching} onClick={() => setPage(page => page - 1)}><ChevronLeft size={16} />{t('react.catalog.previous')}</button>
+      <button className="button secondary" disabled={busy || !page || versions.isFetching} onClick={() => setPage(page => page - 1)}><ChevronLeft size={16} />{t('react.catalog.previous')}</button>
       <span>{t('react.catalog.page', { page: n(page + 1), total: n(Math.min(200, Math.ceil(versions.data.total / 50))) })}</span>
-      <button className="button secondary" disabled={(page + 1) * 50 >= versions.data.total || page >= 199 || versions.isFetching} onClick={() => setPage(page => page + 1)}>{t('react.catalog.next')}<ChevronRight size={16} /></button>
+      <button className="button secondary" disabled={busy || (page + 1) * 50 >= versions.data.total || page >= 199 || versions.isFetching} onClick={() => setPage(page => page + 1)}>{t('react.catalog.next')}<ChevronRight size={16} /></button>
     </nav>}
   </section>
 }
 
-function ProjectSheet({ provider, id, query, close, returnFocus }: { provider: Provider; id: string; query: CatalogQuery; close: () => void; returnFocus: () => void }) {
+function ProjectSheet({ provider, id, query, close, returnFocus, onImport }: { provider: Provider; id: string; query: CatalogQuery; close: () => void; returnFocus: () => void; onImport: (path: string) => void }) {
   const { t, n } = useI18n(), [tab, setTab] = useState('about')
+  const [busy, setBusy] = useState(false)
+  const [versionsVisited, setVersionsVisited] = useState(false)
   const detail = useQuery({ queryKey: ['catalog-detail', provider, id], queryFn: ({ signal }) => getCatalogDetail(provider, id, signal) })
   const html = useMemo(() => detail.data ? catalogDescription(detail.data.body, detail.data.markdown) : '', [detail.data])
   const body = useRef<HTMLDivElement>(null)
   useEffect(() => { if (body.current) body.current.scrollTop = 0 }, [tab, id])
-  return <Dialog.Root open onOpenChange={open => { if (!open) close() }}><Dialog.Portal>
+  return <Dialog.Root open onOpenChange={open => { if (!open && !busy) close() }}><Dialog.Portal>
     <Dialog.Overlay className="dialog-backdrop" />
     <Dialog.Content className="dialog creation-dialog catalog-sheet" data-testid="catalog-project" onCloseAutoFocus={event => { event.preventDefault(); returnFocus() }} onPointerDownOutside={event => event.preventDefault()}>
       <div className="catalog-project-heading">
@@ -75,9 +122,9 @@ function ProjectSheet({ provider, id, query, close, returnFocus }: { provider: P
         <div><Dialog.Title>{detail.data?.project.name || t('react.catalog.project')}</Dialog.Title>
           <Dialog.Description>{detail.data?.project.description || t('react.catalog.loadingProject')}</Dialog.Description></div>
       </div>
-      <button className="icon-button dialog-close" aria-label={t('react.catalog.close')} onClick={close}><X size={20} /></button>
+      <button className="icon-button dialog-close" aria-label={t('react.catalog.close')} disabled={busy} onClick={close}><X size={20} /></button>
       {detail.data && <nav className="source-tabs catalog-sheet-tabs" aria-label={t('react.catalog.projectSections')}>
-        {['about', 'gallery', 'versions'].map(value => <button key={value} aria-pressed={tab === value} onClick={() => setTab(value)}>{t(`react.catalog.${value}`)}</button>)}
+        {['about', 'gallery', 'versions'].map(value => <button key={value} disabled={busy} aria-pressed={tab === value} onClick={() => { if (value === 'versions') setVersionsVisited(true); setTab(value) }}>{t(`react.catalog.${value}`)}</button>)}
       </nav>}
       <div className="creation-body catalog-sheet-body" ref={body}>
         {detail.isPending && <p role="status">{t(detail.fetchStatus === 'paused' ? 'react.catalog.offline' : 'react.catalog.loadingProject')}</p>}
@@ -94,22 +141,23 @@ function ProjectSheet({ provider, id, query, close, returnFocus }: { provider: P
             }} dangerouslySetInnerHTML={{ __html: html }} />
           </>}
           {tab === 'gallery' && <div className="catalog-gallery">{detail.data.gallery.length ? detail.data.gallery.map((src, index) => <a key={src} href={src} target="_blank" rel="noopener noreferrer"><Image src={src} alt={t('react.catalog.galleryImage', { index: index + 1, name: detail.data.project.name })} /></a>) : <p>{t('react.catalog.noGallery')}</p>}</div>}
-          {tab === 'versions' && <ProjectVersions detail={detail.data} query={query} />}
+          <div hidden={tab !== 'versions'}>{versionsVisited && <ProjectVersions detail={detail.data} query={query} onBusy={setBusy} onImport={onImport} />}</div>
         </>}
       </div>
       <footer className="dialog-actions">
         {detail.data?.website && <a className="button secondary" href={detail.data.website} target="_blank" rel="noopener noreferrer">{t('react.catalog.website')}<ExternalLink size={16} /></a>}
-        <button className="button secondary" onClick={close}>{t('react.catalog.close')}</button>
+        <button className="button secondary" disabled={busy} onClick={close}>{t('react.catalog.close')}</button>
       </footer>
     </Dialog.Content>
   </Dialog.Portal></Dialog.Root>
 }
 
-function CatalogPage() {
+function CatalogPage({ onImport }: { onImport: (path: string, trigger: HTMLElement | null) => void }) {
   const { t, n } = useI18n(), [params, setParams] = useSearchParams(), location = useLocation(), navigate = useNavigate()
   const query = readCatalogQuery(params), [text, setText] = useState(query.text), [filters, setFilters] = useState(false)
   const [minecraft, setMinecraft] = useState(query.minecraft)
   const restore = useRef<HTMLElement | null>(null), scroll = useRef(0), search = useRef<HTMLInputElement>(null)
+  const pendingImport = useRef(''), handoff = useRef(false)
   const result = useQuery({ queryKey: ['catalog-search', query], queryFn: ({ signal }) => searchCatalog(query, signal) })
   const route = /^\/store\/(modrinth|curseforge)\/([^/]+)\/?$/.exec(location.pathname)
   const change = (values: Record<string, string>, replace = false) => {
@@ -129,11 +177,12 @@ function CatalogPage() {
         const area = document.querySelector('.page-scroll')
         if (area) area.scrollTop = scroll.current
         const target = restore.current?.isConnected ? restore.current : search.current
-        target?.focus({ preventScroll: true })
+        if (!handoff.current) target?.focus({ preventScroll: true })
       })
     }
   }, [location.pathname])
   function open(project: CatalogProject, target: HTMLElement) {
+    handoff.current = false
     restore.current = target; scroll.current = document.querySelector('.page-scroll')?.scrollTop || 0
     void navigate(`/store/${project.provider}/${project.id}${location.search}`, { state: { catalogSheet: true }, preventScrollReset: true })
   }
@@ -179,8 +228,12 @@ function CatalogPage() {
       </nav>}
     </>}
     {location.pathname !== '/store' && !route && <div role="alert"><p>{t('react.catalog.missing')}</p><Link className="button secondary" to={`/store${location.search}`}>{t('react.catalog.back')}</Link></div>}
-    {route && <ProjectSheet key={`${route[1]}:${route[2]}`} provider={route[1] as Provider} id={route[2]} query={query} close={close} returnFocus={() => (restore.current?.isConnected ? restore.current : search.current)?.focus({ preventScroll: true })} />}
+    {route && <ProjectSheet key={`${route[1]}:${route[2]}`} provider={route[1] as Provider} id={route[2]} query={query} close={close} onImport={path => { pendingImport.current = path; handoff.current = true; close() }} returnFocus={() => {
+      const trigger = restore.current?.isConnected ? restore.current : search.current
+      if (pendingImport.current) { const path = pendingImport.current; pendingImport.current = ''; onImport(path, trigger) }
+      else trigger?.focus({ preventScroll: true })
+    }} />}
   </section>
 }
 
-export function Catalog() { return <QueryClientProvider client={catalogQueries}><CatalogPage /></QueryClientProvider> }
+export function Catalog({ onImport }: { onImport: (path: string, trigger: HTMLElement | null) => void }) { return <QueryClientProvider client={catalogQueries}><CatalogPage onImport={onImport} /></QueryClientProvider> }

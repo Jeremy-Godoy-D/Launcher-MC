@@ -1,4 +1,6 @@
 import { CurseforgeV1Client } from '@xmcl/curseforge'
+import { onDownloadMultiple, type WithDownload } from '@xmcl/installer'
+import { randomUUID } from 'node:crypto'
 import {
   InstanceLockSchema,
   PartialRuntimeVersions,
@@ -34,6 +36,7 @@ import {
   type ExportModpackOptions,
   type ExportModpackResult,
   type ExportModpackTask,
+  type DownloadModpackTask,
   type ModrinthPackProfile,
   type ModpackService as IModpackService,
   type PublishModrinthOptions,
@@ -49,6 +52,7 @@ import { readEntry } from '@xmcl/unzip'
 import { AnyError } from '@xmcl/utils'
 import filenamify from 'filenamify'
 import { ensureDir, readFile, readJson, stat, unlink } from 'fs-extra'
+import { mkdtemp, rm } from 'node:fs/promises'
 import { basename, dirname, extname, join, relative } from 'path'
 import { Entry, ZipFile as YauzlZipFile } from '@xmcl/yauzl'
 import { ZipFile } from 'yazl'
@@ -59,6 +63,7 @@ import { InstanceInstallService } from '~/instanceIO'
 import { LaunchService, VersionService } from '~/launch'
 import { UserService } from '~/user'
 import { kMarketProvider } from '~/market'
+import { modpackRequest } from '../market/modpackRequest'
 import { kDownloadOptions } from '~/network'
 import { kResourceManager, kResourceWorker, type ResourceWorker } from '~/resource'
 import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/service'
@@ -209,20 +214,29 @@ export class ModpackService extends AbstractService implements IModpackService {
     this.handlers['technic'] = createTechnicHandler()
   }
 
-  async installModapckFromMarket(options: InstallMarketOptions): Promise<string[]> {
-    const provider = await this.app.registry.get(kMarketProvider)
-    const result = await provider.installFile({
-      ...options,
-      directory: this.getPath('modpacks'),
-    })
-    const paths = result.map((r) => r.path)
-    if (paths.length === 0) {
-      throw new ModpackException(
-        { type: 'invalidModpack', path: '' },
-        'The marketplace did not return a modpack file.',
-      )
+  async installModapckFromMarket(options: InstallMarketOptions, operationId = randomUUID()): Promise<string[]> {
+    const request = modpackRequest(options)
+    if (typeof operationId !== 'string' || !/^[A-Za-z0-9._-]{1,128}$/.test(operationId)) throw new Error('Invalid modpack operation')
+    const task = this.tasks.create<DownloadModpackTask>({ type: 'downloadModpack', key: `downloadModpack-${operationId}`, operationId, market: request.market })
+    let directory: string | undefined
+    try {
+      const provider = await this.app.registry.get(kMarketProvider)
+      task.controller.signal.throwIfAborted()
+      const cache = this.getPath('modpacks')
+      await ensureDir(cache)
+      // ZIP profiles are keyed by path; keep each archive stable until import finishes.
+      directory = await mkdtemp(join(cache, 'market-'))
+      const result = await provider.installFile({ ...request, directory, signal: task.controller.signal, tracker: onDownloadMultiple(getTracker<{ download: WithDownload<{}> }>(task), 'download', {}) })
+      task.controller.signal.throwIfAborted()
+      const paths = result.map((r) => r.path)
+      if (paths.length === 0) throw new ModpackException({ type: 'invalidModpack', path: '' }, 'The marketplace did not return a modpack file.')
+      task.complete()
+      return paths
+    } catch (error) {
+      task.fail(error)
+      if (directory) await rm(directory, { recursive: true, force: true })
+      throw error
     }
-    return paths
   }
 
   async importModpack(

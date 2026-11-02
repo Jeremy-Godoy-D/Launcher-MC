@@ -47,3 +47,14 @@ export async function makeReactModpack(path: string, unsafe = false) {
   zip.end()
   await writing
 }
+
+export async function makeReactCurseforgeModpack(path: string) {
+  const require = createRequire(new URL('../../xmcl-runtime/package.json', import.meta.url))
+  const { ZipFile } = require('yazl')
+  const zip = new ZipFile()
+  zip.addBuffer(Buffer.from(JSON.stringify({ minecraft: { version: '1.21.1', modLoaders: [{ id: 'forge-52.0.0', primary: true }] }, manifestType: 'minecraftModpack', manifestVersion: 1, name: 'CF Import QA', version: '1.0', author: 'Synthetic QA', files: [], overrides: 'overrides' })), 'manifest.json')
+  zip.addBuffer(Buffer.from('preserved-cf-import-fixture'), 'overrides/config/qa.txt')
+  const writing = pipeline(zip.outputStream, createWriteStream(path))
+  zip.end()
+  await writing
+}

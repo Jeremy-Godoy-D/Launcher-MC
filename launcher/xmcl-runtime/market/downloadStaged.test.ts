@@ -81,6 +81,25 @@ describe('downloadStaged', () => {
     }
   }, 30_000)
 
+  it.each(['integrity', 'cancel'] as const)('preserves the previous file when %s fails before publication', async reason => {
+    const { server, baseUrl } = await startServer({ '/a': { body: 'NEW', headers: { 'Content-Length': '3' } } })
+    const dir = await tempDir(), destination = join(dir, 'a.bin'), controller = new AbortController()
+    try {
+      await writeFile(destination, 'OLD')
+      await expect(downloadStaged({ url: `${baseUrl}/a`, destination, signal: controller.signal, validate: async pending => {
+        expect(await readFile(pending, 'utf8')).toBe('NEW')
+        expect(await readFile(destination, 'utf8')).toBe('OLD')
+        if (reason === 'integrity') throw new Error('Checksum mismatch')
+        controller.abort()
+      } })).rejects.toThrow()
+      expect(await readFile(destination, 'utf8')).toBe('OLD')
+      expect(await pathExists(destination + '.pending')).toBe(false)
+    } finally {
+      server.close()
+      await rm(dir, { recursive: true, force: true })
+    }
+  })
+
   it('replaces an existing destination on success', async () => {
     const newContent = 'NEW'
     const { server, baseUrl } = await startServer({

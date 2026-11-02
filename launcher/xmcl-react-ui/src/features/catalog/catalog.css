@@ -40,6 +40,10 @@
   .catalog-version-list li > span { color: var(--muted); font-size: 12px; }
   .catalog-versions > label { display: block; margin-bottom: 8px; }
   .catalog-versions > .form-help { margin-top: 8px; color: var(--muted); font-size: 12px; }
+  .catalog-download { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; }
+  .catalog-download p { margin: 0; }
+  .catalog-download progress { width: 100%; accent-color: var(--accent); }
+  .catalog-download .button, .catalog-version-list .button { justify-self: start; }
 }
 @layer responsive {
   @media (max-height: 500px) {

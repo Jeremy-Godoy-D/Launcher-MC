@@ -16,7 +16,7 @@ import {
 } from './services/InstallService'
 import { InstallInstanceTask } from './services/InstanceInstallService'
 import { MigrateMinecraftTask } from './services/VersionService'
-import { ExportModpackTask } from './services/ModpackService'
+import { DownloadModpackTask, ExportModpackTask } from './services/ModpackService'
 import { InstallAuthlibInjectorTask } from './services/AuthlibInjectorService'
 import { DownloadModMetadataDbTask } from './services/ModMetadataService'
 import { DuplicateInstanceTask } from './services/InstanceService'
@@ -114,6 +114,7 @@ export type Tasks =
   | MigrateMinecraftTask
   | InstallInstanceTask
   | ExportModpackTask
+  | DownloadModpackTask
   | InstallAuthlibInjectorTask
   | DownloadModMetadataDbTask
   | DuplicateInstanceTask

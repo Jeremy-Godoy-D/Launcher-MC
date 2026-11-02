@@ -1165,6 +1165,18 @@ react:
     close: "Cerrar consola"
 
   catalog:
+    importHelp: "Se verificará el archivo y después podrás revisar el nombre y el contenido en el importador. Todavía no se crea ninguna instancia."
+    downloadImport: "Descargar e importar"
+    preparingDownload: "Preparando la descarga verificada…"
+    downloading: "Descargando: {progress} de {total} bytes. Se comprueba la integridad antes de importar."
+    downloadProgress: "Progreso de descarga del modpack"
+    cancelDownload: "Cancelar descarga"
+    cancelling: "Cancelando descarga…"
+    downloadCancelled: "Descarga cancelada. No se creó ninguna instancia. Puedes volver a intentarlo."
+    downloadFailed: "No se pudo descargar o verificar el paquete. Reintenta o visita su página e importa un archivo local."
+    archiveUnavailable: "Esta versión no ofrece un archivo de modpack disponible. Consulta las opciones de descarga en la página del proyecto."
+    cancelFailed: "No se pudo cancelar la descarga. Reintenta mientras siga en curso."
+    pendingCreation: "Hay una creación de instancia pendiente. Termínala o revisa sus archivos antes de importar otro modpack."
     title: "Dale otra vida a tu mundo."
     subtitle: "Encuentra mods, modpacks y nuevas formas de explorar."
     banner: "Pequeños cambios. Grandes aventuras."

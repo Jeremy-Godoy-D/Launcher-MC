@@ -267,6 +267,7 @@ export function App() {
   const [dialog, setDialog] = useState<{ title: string; message: string } | null>(null)
   const [showCredits, setShowCredits] = useState(false)
   const [adding, setAdding] = useState<'create' | 'import'>()
+  const [incomingArchive, setIncomingArchive] = useState<string>()
   const [operating, setOperating] = useState<SavedInstance>()
   const [operatingMode, setOperatingMode] = useState<'options' | 'duplicate'>('options')
   const [managingGroups, setManagingGroups] = useState(false)
@@ -786,7 +787,7 @@ export function App() {
               )}
             </section>
           )}
-          {catalog && <Catalog />}
+          {catalog && <Catalog onImport={(path, trigger) => { restoreFocus.current = trigger; setIncomingArchive(path); setAdding('import') }} />}
           {settings && (
             <section className="settings-page">
               <div className="page-heading">
@@ -872,8 +873,9 @@ export function App() {
       {operating && <InstanceOperations key={operating.path} initialMode={operatingMode} instance={operating} onClose={() => setOperating(undefined)} returnFocus={restoreFocus} onCreated={path => {
         savedLibrary?.select(path, () => void navigate('/instance'))
       }} />}
-      {savedLibrary && <AddInstance open={!!adding} initialMode={adding ?? 'create'} onClose={() => setAdding(undefined)} returnFocus={restoreFocus} onCreated={path => {
+      {savedLibrary && <AddInstance open={!!adding} initialMode={adding ?? 'create'} initialArchive={incomingArchive} onClose={() => { setAdding(undefined); setIncomingArchive(undefined) }} returnFocus={restoreFocus} onCreated={path => {
         setAdding(undefined)
+        setIncomingArchive(undefined)
         savedLibrary.select(path, () => void navigate('/instance'))
       }} />}
       <Dialog.Root

@@ -2,6 +2,7 @@ import type { InstanceFile } from '@xmcl/instance'
 import { ResourceDomain, ResourceMetadata } from '@xmcl/resource'
 import { InstallMarketOptions, } from '@xmcl/runtime-api'
 import { InjectionKey } from '~/app'
+import type { ProgressTrackerMultiple } from '@xmcl/file-transfer'
 
 export const kMarketProvider: InjectionKey<MarketProvider> = Symbol('MarketProvider')
 
@@ -10,6 +11,8 @@ export type InstallMarketDirectoryOptions = InstallMarketOptions & {
    * The directory to intall the file
    */
   directory: string
+  signal?: AbortSignal
+  tracker?: ProgressTrackerMultiple
 }
 
 export type InstallMarketInstanceOptions = InstallMarketOptions & {

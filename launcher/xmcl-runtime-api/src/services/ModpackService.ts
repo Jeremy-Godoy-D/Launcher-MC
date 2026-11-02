@@ -6,7 +6,7 @@ import type { SharedState } from '../util/SharedState'
 import type { CreateInstanceOption } from './InstanceService'
 import type { ServiceKey } from './Service'
 import type { Task, SubState } from '../task'
-import type { WithProgress } from '@xmcl/installer'
+import type { WithProgress, WithDownload } from '@xmcl/installer'
 import type { CreateModrinthProjectData, CreateModrinthVersionData, Project, UpdateModrinthProjectData } from '@xmcl/modrinth'
 
 export interface ExportModpackTrackerEvents {
@@ -18,6 +18,13 @@ export interface ExportModpackTask extends Task {
   instancePath: string
   name: string
   substate: SubState<ExportModpackTrackerEvents, 'zip.progress'>
+}
+
+export interface DownloadModpackTask extends Task {
+  type: 'downloadModpack'
+  operationId: string
+  market: InstallMarketOptions['market']
+  substate: SubState<{ download: WithDownload<{}> }, 'download'>
 }
 
 export interface ExportFileDirective {
@@ -254,7 +261,7 @@ export interface ModpackService {
    * Install the modpack from market to local cache.
    * @returns The installed modpack path
    */
-  installModapckFromMarket(options: InstallMarketOptions): Promise<string[]>
+  installModapckFromMarket(options: InstallMarketOptions, operationId?: string): Promise<string[]>
   /**
    * Export the instance as an curseforge/modrinth/mcbbs modpack
    * @param options The curseforge/modrinth/mcbbs modpack export options

@@ -1,5 +1,6 @@
 type ModrinthVersionIdentifier = {
   versionId: string
+  projectId?: string
   filename?: string
   icon?: string
 }
@@ -12,6 +13,7 @@ export type InstallMarketOptionsModrinth = {
 
 type CurseforgeFileIdentifier = {
   fileId: number
+  projectId?: number
   icon?: string
 }
 
