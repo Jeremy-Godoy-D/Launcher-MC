@@ -46,6 +46,8 @@ for (const provider of ['modrinth', 'curseforge'] as const) test(`React reviews 
   await page.emulateMedia({ colorScheme: provider === 'modrinth' ? 'dark' : 'light', reducedMotion: 'reduce' })
   const dialog = await open(launcher, path, provider), confirm = dialog.getByRole('button', { name: 'Aplicar actualización', exact: true })
   await expect(confirm).toBeEnabled()
+  await expect(dialog).toContainText(provider === 'modrinth' ? 'Fabric 0.16.0' : 'Forge 52.0.0')
+  await expect(dialog).toContainText(provider === 'modrinth' ? 'Fabric 0.16.1' : 'Forge 52.0.1')
   expect(await readFile(join(path, 'config/pack.txt'), 'utf8')).toBe('USER EDIT')
   await expect(dialog.getByTestId('modpack-update-files')).toContainText('config/pack.txt')
   await expect(dialog.getByTestId('modpack-update-files')).toContainText('config/old.txt')

@@ -3,7 +3,7 @@ import { InstanceDataSchema } from '../../../../packages/instance/instance'
 import type { SavedInstance } from '../library/model'
 import type { ModpackState } from '@xmcl/runtime-api/src/services/ModpackService'
 import type { StateData } from '@launcher/renderer-client'
-import { assertPackUpdateChanges, isPackTarget, preparePackUpdate } from './modpackUpdate'
+import { assertPackUpdateChanges, isPackTarget, packRuntimeLabel, preparePackUpdate } from './modpackUpdate'
 
 const upstream = { type: 'modrinth-modpack', projectId: 'AAAA0001', versionId: 'VVVV0002' } as const
 const target = { ...InstanceDataSchema.parse({ name: 'My custom name', runtime: { minecraft: '1.21.1' }, upstream: { ...upstream, versionId: 'VVVV0001' }, java: 'C:/Java/java.exe', vmOptions: ['-Dlocal=keep'] }), path: 'C:/owned/instance' } as SavedInstance
@@ -15,6 +15,8 @@ describe('existing modpack update preparation', () => {
     expect(result.edit).toEqual({ instancePath: target.path, runtime: expect.objectContaining({ minecraft: '1.21.1', fabricLoader: '0.16.1' }), version: '', upstream })
     expect(result.edit).not.toHaveProperty('name'); expect(result.edit).not.toHaveProperty('java'); expect(result.edit).not.toHaveProperty('vmOptions'); expect(result.edit).not.toHaveProperty('preExecuteCommand')
     expect(result.options).toMatchObject({ path: target.path, upstream, files: [{ path: 'config/owned.txt' }] })
+    expect(packRuntimeLabel(result.edit.runtime)).toBe('Minecraft 1.21.1 · Fabric 0.16.1')
+    expect(packRuntimeLabel({ minecraft: '1.21.1', forge: '52.0.1' })).toBe('Minecraft 1.21.1 · Forge 52.0.1')
   })
   it('requires a populated ready profile and the same project origin', () => {
     for (const state of [{ ...profile(), ready: false }, { ...profile(), files: [] }, { ...profile(), error: new Error('Failed') }]) expect(() => preparePackUpdate(state, target, upstream)).toThrow()

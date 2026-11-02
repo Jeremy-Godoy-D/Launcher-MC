@@ -8,6 +8,11 @@ import { importedOptions, validateImportFiles } from '../library/creation'
 import type { CatalogProject } from './api'
 
 export type PackUpstream = Extract<InstanceUpstream, { type: 'modrinth-modpack' | 'curseforge-modpack' }>
+export function packRuntimeLabel(runtime: Partial<SavedInstance['runtime']> | undefined) {
+  if (!runtime) return ''
+  const loaders = [['Fabric', runtime.fabricLoader], ['Quilt', runtime.quiltLoader], ['Forge', runtime.forge], ['NeoForge', runtime.neoForged], ['OptiFine', runtime.optifine], ['LabyMod', runtime.labyMod]]
+  return [`Minecraft ${runtime.minecraft}`, ...loaders.flatMap(([name, value]) => value ? [`${name} ${value}`] : [])].join(' · ')
+}
 export function isPackTarget(target: Pick<SavedInstance, 'upstream'>, project: Pick<CatalogProject, 'provider' | 'id'>) {
   return project.provider === 'modrinth' ? target.upstream?.type === 'modrinth-modpack' && target.upstream.projectId === project.id
     : target.upstream?.type === 'curseforge-modpack' && String(target.upstream.modId) === project.id

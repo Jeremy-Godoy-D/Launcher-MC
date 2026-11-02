@@ -8,7 +8,7 @@ react:
     review: "Modpack changes"
     preparing: "Preparing the files and list of changes…"
     installing: "Applying the confirmed update…"
-    runtime: "Minecraft: {before} → {after}. The pack loader will also be reviewed."
+    runtime: "{before} → {after}"
     confirm: "Apply update"
     close: "Close update"
     complete: "Modpack files and configuration updated."

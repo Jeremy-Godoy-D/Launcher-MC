@@ -13,7 +13,7 @@ import { useLibrary } from '../library/context'
 import type { SavedInstance } from '../library/model'
 import { isOperationCancelled } from '../library/operations'
 import { useI18n } from '../../i18n'
-import { assertPackUpdateChanges, preparePackUpdate, type PackUpstream } from './modpackUpdate'
+import { assertPackUpdateChanges, packRuntimeLabel, preparePackUpdate, type PackUpstream } from './modpackUpdate'
 
 export type PackUpdateSelection = { path: string; target: SavedInstance; upstream: PackUpstream }
 type Review = ReturnType<typeof preparePackUpdate> & { changes: InstanceFileUpdate[]; resume: boolean }
@@ -101,10 +101,10 @@ export function ModpackUpdate({ selection, close, returnFocus }: { selection: Pa
     <button type="button" className="icon-button dialog-close" disabled={working.current} aria-label={t('react.packUpdate.close')} onClick={close}><X size={20} aria-hidden="true" /></button>
     <form className="catalog-install operation-form" onSubmit={event => { event.preventDefault(); void install() }}>
       <div className="creation-body" role="region" tabIndex={0} aria-label={t('react.packUpdate.review')}>
-        <p><strong>{target.name}</strong></p><p className="instance-path">{target.path}</p>
+        <p className="instance-path">{target.path}</p>
         {error && <p ref={message} tabIndex={-1} role="alert" className="form-error">{t(`react.packUpdate.${error}`)}</p>}
         {busy && <div role="status"><p>{t(stopping ? 'react.catalog.cancelling' : phase === 'install' ? 'react.packUpdate.installing' : 'react.packUpdate.preparing')}</p><progress aria-label={t('react.catalogInstall.progress')} max={progress && progress.total > 0 ? progress.total : undefined} value={progress && progress.total > 0 ? progress.progress : undefined} /></div>}
-        {runtimeChanged && <p>{t('react.packUpdate.runtime', { before: target.runtime.minecraft, after: review.edit.runtime?.minecraft || target.runtime.minecraft })}</p>}
+        {runtimeChanged && <p>{t('react.packUpdate.runtime', { before: packRuntimeLabel(target.runtime), after: packRuntimeLabel(review.edit.runtime) })}</p>}
         {review && <ul className="catalog-install-files" data-testid="modpack-update-files">{review.changes.map(change => <li key={`${change.file.path}:${change.operation}`}><span>{t(`react.modUpdates.operations.${change.operation}`)}</span><code>{change.file.path}</code></li>)}</ul>}
         {phase === 'done' && <p role="status" data-testid="modpack-update-complete">{t('react.packUpdate.complete')}</p>}
         {phase === 'error' && pendingFiles && <p>{t('react.catalogInstall.retained')}</p>}
