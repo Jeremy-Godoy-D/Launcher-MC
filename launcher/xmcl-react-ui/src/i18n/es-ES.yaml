@@ -809,6 +809,30 @@ react:
     time: "Días del mundo"
     seed: "Semilla"
 
+  worldSharing:
+    title: "Mundos comunes de este equipo"
+    description: "Añade acceso a un mundo existente o mueve uno local aquí para usarlo desde otra instancia."
+    connected: "Esta instancia usa la carpeta común. Los cambios en estos mundos también afectan a las otras instancias conectadas."
+    empty: "Todavía no hay mundos comunes. Mueve uno local aquí para que esté disponible."
+    loadFailed: "No se pudieron leer los mundos comunes. Usa Volver a leer para reintentar."
+    connect: "Usar carpeta común"
+    disconnect: "Usar carpeta independiente"
+    activate: "Añadir acceso"
+    active: "Acceso ya añadido"
+    deactivate: "Retirar acceso"
+    share: "Mover a carpeta común"
+    remove: "Retirar mundo común"
+    connectHelp: "Conecta {instance} a la carpeta común. Los mundos locales se copian con nombres disponibles y sus originales se respaldan. Los cambios futuros serán compartidos. Cierra Minecraft antes de confirmar."
+    disconnectHelp: "Crea una carpeta local vacía de mundos para {instance}. Los mundos comunes se conservan y puedes volver a añadirlos. Cierra Minecraft antes de confirmar."
+    activateHelp: "Añade acceso a {name} en {instance}, con un nombre de carpeta disponible. El original sigue en la carpeta común; los cambios afectan a las otras instancias que lo usan."
+    deactivateHelp: "Retira el acceso de esta instancia a {name}. El mundo original de la carpeta común se conserva."
+    shareHelp: "Mueve {name} a la carpeta común con un nombre disponible. Su original se respalda y deja de aparecer en esta instancia hasta que añadas acceso otra vez."
+    removeHelp: "Retira {name} de la carpeta común y guarda un respaldo. Otras instancias con acceso dejarán de encontrarlo. Cierra todas las partidas antes de confirmar."
+    confirmName: "Escribe el nombre de carpeta {name} para confirmar"
+    running: "Cierra todas las partidas de Minecraft que utilicen estos mundos antes de reintentar."
+    failed: "La acción no terminó. Revisa permisos, espacio disponible y diagnósticos antes de reintentar. Los mundos originales o sus respaldos se conservan."
+    done: "Operación completada."
+
   worldFiles:
     importShared: "El destino es la carpeta común de mundos: el nuevo mundo estará disponible para todas las instancias vinculadas. El origen y los demás mundos se conservan. Cierra las partidas antes de confirmar."
 

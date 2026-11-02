@@ -1,4 +1,5 @@
 @layer components {
+  .common-worlds { margin-block-start: 28px; }
   .instance-settings { display: grid; gap: 16px; padding-block: 16px; min-width: 0; }
   .instance-settings form { display: grid; gap: 24px; min-width: 0; }
   .instance-settings fieldset { min-width: 0; margin: 0; padding: 16px; border: 1px solid var(--line); border-radius: 14px; }

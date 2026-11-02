@@ -809,6 +809,30 @@ react:
     time: "World days"
     seed: "Seed"
 
+  worldSharing:
+    title: "Common worlds on this computer"
+    description: "Add access to an existing world or move a local world here to use it from another instance."
+    connected: "This instance uses the common folder. Changes to these worlds also affect other connected instances."
+    empty: "No common worlds yet. Move a local world here to make it available."
+    loadFailed: "Could not read the common worlds. Use Refresh to try again."
+    connect: "Use common folder"
+    disconnect: "Use a separate folder"
+    activate: "Add access"
+    active: "Access already added"
+    deactivate: "Remove access"
+    share: "Move to common folder"
+    remove: "Remove common world"
+    connectHelp: "Connect {instance} to the common folder. Local worlds are copied using available names and their originals are backed up. Future changes are shared. Close Minecraft before confirming."
+    disconnectHelp: "Give {instance} an empty local worlds folder. Common worlds are preserved and can be added again. Close Minecraft before confirming."
+    activateHelp: "Add access to {name} in {instance}, using an available folder name. The original remains in the common folder; changes affect other instances using it."
+    deactivateHelp: "Remove this instance's access to {name}. The original common world is preserved."
+    shareHelp: "Move {name} to the common folder using an available name. Its original is backed up and it leaves this instance until you add access again."
+    removeHelp: "Remove {name} from the common folder and retain a backup. Other instances with access will no longer find it. Close all Minecraft games before confirming."
+    confirmName: "Type the folder name {name} to confirm"
+    running: "Close all Minecraft games using these worlds before retrying."
+    failed: "The action did not finish. Check permissions, available space and diagnostics before retrying. Original worlds or backups are preserved."
+    done: "Operation completed."
+
   worldFiles:
     importShared: "The destination is the common worlds folder: the new world will be available to all linked instances. The source and other worlds are preserved. Close games before confirming."
 

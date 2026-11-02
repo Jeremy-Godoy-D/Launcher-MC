@@ -9,6 +9,7 @@ import { WorldFilesDialog } from './WorldFilesDialog'
 import { WorldProgress } from './WorldProgress'
 import { WorldMap } from './WorldMap'
 import type { WorldFileOperation } from '@xmcl/runtime-api/src/services/InstanceSavesService'
+import { WorldSharingDialog, type WorldSharingAction } from './WorldSharingDialog'
 
 export function InstanceWorlds({ path, running }: { path: string; running: boolean }) {
   const service = useService(InstanceSavesServiceKey), { t, d, n } = useI18n()
@@ -17,6 +18,8 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
   const [initialTab, setInitialTab] = useState<'info' | 'progress' | 'map'>('info')
   const [migration, setMigration] = useState<LegacyWorldMigrationStatus>(), [recovering, setRecovering] = useState(false), recovery = useRef(false)
   const recoveryFocus = useRef(false), retryButton = useRef<HTMLButtonElement>(null)
+  const [common, setCommon] = useState<InstanceSavePreview[]>([]), [linked, setLinked] = useState<boolean | null>(null), [commonError, setCommonError] = useState(false)
+  const [sharing, setSharing] = useState<WorldSharingAction | null>(null), shareTrigger = useRef<HTMLButtonElement | null>(null)
   const [action, setAction] = useState<{ name: string; type: WorldFileOperation['type']; datapackFileName?: string } | null>(null), actionTrigger = useRef<HTMLButtonElement | null>(null), search = useRef<HTMLInputElement>(null)
   const alive = useRef(true), openingFolder = useRef(false), trigger = useRef<HTMLButtonElement | null>(null)
   useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
@@ -29,10 +32,13 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
       if (pending) { again = true; return }
       pending = true; setReading(true); setError(false)
       try {
-        const [saves, status] = await Promise.allSettled([running ? Promise.resolve(undefined) : service.getInstanceSaves(path), service.getLegacyWorldMigrationStatus()])
+        const [saves, status, shared, connection] = await Promise.allSettled([running ? Promise.resolve(undefined) : service.getInstanceSaves(path), service.getLegacyWorldMigrationStatus(), service.getSharedSaves(), service.isSaveLinked(path)])
         if (active) {
           if (saves.status === 'fulfilled' && saves.value) setWorlds(saves.value)
           if (status.status === 'fulfilled') setMigration(status.value)
+          if (shared.status === 'fulfilled') setCommon(shared.value)
+          if (connection.status === 'fulfilled') setLinked(connection.value)
+          setCommonError(shared.status === 'rejected' || connection.status === 'rejected')
           setError(saves.status === 'rejected' || status.status === 'rejected')
         }
       }
@@ -60,6 +66,7 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
   const selected = worlds.find(world => world.name === details)
   const visible = worlds.filter(world => `${world.levelName || ''} ${world.name} ${world.gameVersion || ''}`.toLocaleLowerCase().includes(query.toLocaleLowerCase()))
   function closeDetails() { setDetails(''); setInitialTab('info'); trigger.current?.focus() }
+  function openSharing(action: WorldSharingAction, button: HTMLButtonElement) { shareTrigger.current = button; setSharing(action) }
   return <section data-testid="instance-worlds" aria-labelledby="worlds-title" aria-busy={reading}>
     <div className="section-heading"><h2 id="worlds-title">{t('react.workspace.worlds')}</h2><div className="content-actions">
       <button className="button primary" disabled={reading || running || !window.windowController?.showOpenDialog} onClick={event => { actionTrigger.current = event.currentTarget; setAction({ type: 'import', name: '' }) }}><Plus size={17} aria-hidden="true" />{t('react.worldFiles.importTitle')}</button>
@@ -113,9 +120,24 @@ export function InstanceWorlds({ path, running }: { path: string; running: boole
             {t('react.worldMap.tab')}
           </button>
           {(['metadata', 'copy', 'export', 'remove'] as const).map(type => <button key={type} className="button secondary" disabled={running || reading || world.error === 'unsafe' || type === 'metadata' && !!world.error} aria-label={t(`react.worldFiles.${type}Name`, { name: world.name })} onClick={event => { actionTrigger.current = event.currentTarget; setAction({ name: world.name, type }) }}>{t(`react.worldFiles.${type}`)}</button>)}
+          {linked === false && <button className="button secondary" disabled={running || reading || !!world.error || commonError} onClick={event => openSharing({ type: world.linkTo ? 'deactivate' : 'share', world }, event.currentTarget)}>{t(world.linkTo ? 'react.worldSharing.deactivate' : 'react.worldSharing.share')}</button>}
         </div>
       </div>
     </li>)}</ul>
+    <section aria-labelledby="common-worlds-title" className="common-worlds" data-testid="worlds-common">
+      <div className="section-heading"><h3 id="common-worlds-title">{t('react.worldSharing.title')}</h3><button className="button secondary" disabled={running || reading || linked === null || commonError} onClick={event => openSharing({ type: linked ? 'disconnect' : 'connect' }, event.currentTarget)}>{t(linked ? 'react.worldSharing.disconnect' : 'react.worldSharing.connect')}</button></div>
+      <p>{t(linked ? 'react.worldSharing.connected' : 'react.worldSharing.description')}</p>
+      {commonError && <p className="form-error" role="alert">{t('react.worldSharing.loadFailed')}</p>}
+      {!linked && !commonError && !reading && !common.length && <p className="empty">{t('react.worldSharing.empty')}</p>}
+      {!linked && <ul className="pack-list world-list">{common.map(world => {
+        const active = worlds.some(local => local.linkTo && local.linkTo.replace(/\\/g, '/').split('/').pop()?.toLowerCase() === world.name.toLowerCase())
+        return <li key={world.name} data-common-world={world.name}><Map size={24} aria-hidden="true" /><div className="content-file"><strong>{world.levelName || world.name}</strong><small>{world.name} · {world.gameVersion || t('react.workspace.unknown')}</small><div className="content-actions">
+          <button className="button secondary" disabled={running || reading || active || commonError} onClick={event => openSharing({ type: 'activate', world }, event.currentTarget)}>{t(active ? 'react.worldSharing.active' : 'react.worldSharing.activate')}</button>
+          <button className="button secondary" disabled={running || reading || commonError} onClick={event => openSharing({ type: 'remove', world }, event.currentTarget)}>{t('react.worldSharing.remove')}</button>
+        </div></div></li>
+      })}</ul>}
+    </section>
+    {sharing && <WorldSharingDialog key={`${sharing.type}:${'world' in sharing ? sharing.world.name : ''}`} path={path} action={sharing} close={() => setSharing(null)} changed={() => setRevision(value => value + 1)} returnFocus={() => { const button = shareTrigger.current; if (button?.isConnected && !button.disabled) button.focus(); else search.current?.focus() }} />}
     {action && <WorldFilesDialog key={`${action.name}:${action.type}:${action.datapackFileName || ''}`} path={path} name={action.name} type={action.type} datapackFileName={action.datapackFileName} world={worlds.find(world => world.name === action.name)} close={() => setAction(null)} changed={() => { setRevision(value => value + 1) }} returnFocus={() => { const target = actionTrigger.current; if (target?.isConnected && !target.disabled) target.focus(); else search.current?.focus() }} />}
   </section>
 }
