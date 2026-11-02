@@ -21,7 +21,7 @@
   .catalog-project-heading h2 { font-size: 22px; overflow-wrap: anywhere; line-height: 1.25; }
   .catalog-project-heading p { color: var(--muted); font-size: 12px; line-height: 1.5; margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .catalog-sheet-tabs { flex-shrink: 0; margin: 16px 0 0; }
-  .catalog-sheet-body { padding-block: 16px; overflow-wrap: anywhere; }
+  .catalog-sheet-body { flex: 1; display: block; padding-block: 16px; overflow-wrap: anywhere; }
   .catalog-project-meta { color: var(--muted); font-size: 12px; margin-bottom: 20px; }
   .catalog-description { line-height: 1.7; max-width: 75ch; font-size: 14px; }
   .catalog-description :is(p, ul, ol, pre, table, blockquote, details) { margin-block: 12px; }
