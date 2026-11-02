@@ -2,17 +2,15 @@
 
 ## Estado vigente
 
-Objetivo completo PLAN/SCOPE; v0.3.0-beta.1 tras gates. Producción beta.2, PR4 borrador. Etapas0–4 completas;5 activa,K12/K21pass,K11pending;6–9 pendientes. Usuario insiste en terminar/publicar toda la migración, sin rehacer ni repetir innecesariamente. Aproximación comunicada63%, no gate.
+Etapas0–5 completas;6 activa, catálogo público K14/K15/K16. Producción beta.2, PR4 borrador, objetivo completo0.3.0-beta.1 después de gates. Usuario prioriza terminar/publicar toda la migración reutilizando lo existente, sin rehacer ni repetir verificaciones válidas. Microsoft pospuesto.
 
-STAGE5-WORLD-RECOVERY.md: appReact42f65e5,Vue/fixtures630add6. Aviso/reintento de mundos heredados bloqueados, DTO sin errores/rutas crudas, coalescencia y guardas existentes. RPC cacheado ahora espera initialize: tres regresiones reprodujeron el fallo anterior. React23 escenarios distintos (22 del lote previo y UI corregida;85/91 finales12/12),Vue22+2skip;1372unitarias/134archivos,32.11s,4workers independiente;12Axe0violaciones/16incomplete;tipos/lint/9harness,E2E56base. Captura clara mínima revisada, scroll real/foco/recarga; no AA global ni Minecraft. HostVue verificado. Build DeskGap emitió archivos pero exit no recuperado tras interrupción; proceso propio ya no existe, no repetir solo por esa observación.
-
-CI41390951440/72bf920 failure:Vue39pass1skip1fallo85watch WorldChangedError,Reactcancelado por matriz;80Java pasó. Fixture85 prepara el mundo antes de publicar la instancia (Vue puede observarla inmediatamente); no se retiró la guarda de integridad. Confirmar nuevo CI, sin atribuir causalidad remota solo por pasar local. Manifest `stage5-world-recovery-manifest.json`, SHA-256 `8b19fb24c362737bab6181c4591180d9cdf8a7af31f65568a10e88ffa765e3e3`. Código nuevo aún no es release.
+K11/K12/K21pass. STAGE5-WORLD-SHARING-UI.md combina evidencia previa de lectura,CRUD,datapacks,mapa/progreso/dimensiones/regiones/chunks/sesiones/legacy con seis acciones comunes React usando servicios existentes. App2f9c9e8,tests bdda898:5Native17.1s,163React+29focales incluyendo guardas no disponibles,4Axe0violaciones/8incomplete;tipos/lint/E2E56base,129IDs,hostVueverificado. Se reutiliza full1372/134 anterior sin repetirlo; no afirmar1374 local. CI84b44b7 confirma1372unitarias y41NativeVue+2skip;React en curso al cierre. Manifest `stage5-world-sharing-ui-manifest.json`, SHA-256 `48cdb78814b68358a444f66202e6d6c208393f513a82d40b727060d04e10dfed`.
 
 ## Siguiente tarea
 
-1. Verificar CI por SHA tras push; no reiniciar jobs vivos por tardar. No rehacer lectores/writers/consola/borrado/recuperación aceptados sin regresión.
-2. K11: conectar compartir/activar mundos locales a React usando getSharedSaves/shareSave/importSave/linkSharedSave/unlinkSharedSave ya asegurados y confirmaciones claras. Conserva todos los mapas/progreso/dimensiones/regiones/chunks. No confundirlo con P2P retirado.
-3. Cerrar integral/noNIO/paridad de K11 con evidencia; K12/K21pass. Luego6catálogos,7globales/actualizador,8Reactdefault/recorte y9QA/instalador/publicación. No ampliar backend por perfeccionismo ni repetir suites completas sin cambios que lo justifiquen.
+1. Catálogo: sustituir el bloque de ejemplos de App.tsx por búsqueda real con ambos clientes, filtros/paginación/historial, fichas seguras y versiones/destinos/instalación/progreso/errores. Reutilizar clientes/servicios del núcleo y patrones de UI existentes; CF siempre por su proxy, sin APIkey en renderer.
+2. Revisar DOMPurify WIP de package.json/lock al incorporarlo a6; hasta entonces preservar/excluir. Mantener medios oficiales de proyectos, Vanilla/fallback con licencia, y rutas antiguas documentadas.
+3. Verificar CI84 y nuevo SHA tras push sin reiniciar trabajos vivos. No repetir Mundos ni backend aceptados sin regresión. Gate6 requiere sus pruebas/errores/recorrido; luego7globales,8defaultReact/recorte,9QA/instalador/publicacióncompleta.
 
 ## Evidencia y decisiones técnicas que se conservan
 
