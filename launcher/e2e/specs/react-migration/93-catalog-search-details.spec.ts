@@ -6,7 +6,7 @@ import { mockReactCatalog } from '../../helpers/react-catalog'
 import { activateLauncherControl } from '../../helpers/focus-launcher'
 
 const test = base.extend<{ catalog: Awaited<ReturnType<typeof mockReactCatalog>> }>({
-  catalog: async ({ launcher }, use) => { const fixture = await mockReactCatalog(launcher); try { await use(fixture) } finally { await fixture.close() } },
+  catalog: async ({ launcher }, use, info) => { const fixture = await mockReactCatalog(launcher); try { await use(fixture) } finally { await writeFile(info.outputPath('fixture-requests.json'), JSON.stringify(fixture.state, null, 2)); await fixture.close() } },
 })
 
 test.use({ launcherOptions: { locale: 'es-ES' } })
