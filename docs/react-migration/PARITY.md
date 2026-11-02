@@ -393,3 +393,9 @@ STAGE6-CATALOG-BROWSING.md acepta K14 y los gates de búsqueda/fallos de red. Ap
 STAGE6-CATALOG-MODPACKS.md: app62094d8/fixtures97c8118. Descargar e importar MR/CF reutiliza AddInstance con confirmación, identidad/upstream y borrador preservados, integridad antes de publicar, cancelación de metadatos/bytes y progreso.1434unitarias/141,17NativeReact distintos/3Vue,20Axe0violaciones/36incomplete,check completo/lint/DeskGap0/E2E56base,hostVue. La carrera real de filtros y el smoke del prototipo se corrigieron/probaron; nuevo CI pendiente.
 
 K14 sigue pass. K15/K16/catalog-install siguen pending por destinos de contenido/dependencias/actualizaciones y packs existentes; no se marca6 completa. No repetir importador nuevo ni áreas0–5. Siguen7–9 y publicación completa0.3.0-beta.1; Microsoft pospuesto, producción/proxy intactos y sin borrar datos.
+
+## Instalación revisada del catálogo — 2026-11-02
+
+STAGE6-CATALOG-CONTENT.md: app e974e30/flujos5a91e41,1460unitarias/143/28,62s,26NativeReact distintos/3Vue,4Axe0violaciones/8incomplete nuevos,tipos/lint/DeskGap0/E2E56base,hostVue. Instalar/actualizar mods,packs,shaders MR/CF con destino capturado, dependencias del mismo tipo/opcionales/conflictos, Iris, inventario esperado, null normalizado, POST/tarea nativa cancelables y recuperación parcial. No se reescribe el instalador y se conservan nombres/backups/autoridad; sin descarga prematura ni lanzamiento.
+
+K15/K16/catalog-install siguen pending por mundos desde ficha, packs existentes/Biblioteca, estados por versión y dependencias de otra clase. Los cruces actuales fallan explícitamente y no se instalan en dominio incorrecto. K14pass;6activa,7–9pendientes. CI0b8f2ce success; nuevo CI pendiente. Microsoft pospuesto,PR4 borrador,producción/proxy intactos; seguir hacia publicación completa, sin repetir0–5.

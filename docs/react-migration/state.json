@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 6,
-  "nextAction": "Etapa6 activa: K14/search/network pass; modpacks nuevos ya descargan/verifican e importan vía AddInstance (STAGE6-CATALOG-MODPACKS). No rehacer este flujo ni etapas0–5. K15/K16 pendientes: instalar/actualizar mods,packs,shaders y mundos con destino capturado, dependencias MR/CF/conflictos/opcionales/compatibilidad, review/progreso/cancelación/recuperación; actualizar modpacks existentes y acción de Biblioteca. Reutilizar resolveFromMarket y previewInstanceFiles/installInstanceFiles; admitir altas seguras en guard de packs sin quitar snapshots/backups/autoridad. Revisar POST de metadatos cancelables al integrar actualizaciones. App62094d8,fixtures97c8118:1434/141unit,17React+3VueNative,20Axe0/36incomplete,tipos/lint/DeskGap0/E2E56base,hostVue. CI7edfda4 terminó React failure por01 desactualizado y carrera real93; ambos corregidos/probados, verificar próximo push sin reiniciar jobs. Luego7globales,8defaultReact/recorte,9QA/ActionsWindows desechable/publicación completa0.3.0-beta.1. Microsoft pospuesto; producción/proxy intactos; sin fetch sustituido/DevTools/limpiezas denegadas; ANALISIS excluido.",
+  "nextAction": "Etapa6 activa. K14/search/network pass; K15/K16/catalog-install pending. STAGE6-CATALOG-CONTENT acepta instalación/actualización revisada de mods/packs/shaders MR/CF, dependencias del mismo tipo/opcionales/conflictos, Iris, cancelación POST y nativa, progreso y recuperación. App e974e30 (flujos5a91e41):1460/143unit,26React distintos/3VueNative,4Axe0/8incomplete nuevos,check/lint/DeskGap0/E2E56base; hostVue verificado. No rehacer estos flujos, el importador de packs nuevos ni0–5. Siguiente: mundos CF desde ficha hacia preview/applyWorldFiles sin instalar al abrir; actualizar packs existentes desde ficha/Biblioteca reutilizando importModpack/previewInstanceFiles/upstream/manifiestos; estados por versión y dependencias de otra clase (no ignorarlas ni instalarlas en el dominio equivocado). CI41431957014/0b8f2ce success; verificar nuevo push sin reiniciar runs terminados. Luego7 globales,8 defaultReact/recorte y9 QA/ActionsWindows desechable/publicación completa0.3.0-beta.1. Microsoft pospuesto; producción/proxy intactos; sin fetch sustituido/DevTools/limpiezas denegadas; ANALISIS excluido.",
   "stages": [
     {
       "id": 0,
@@ -982,9 +982,13 @@
             {
               "path": "docs/react-migration/STAGE6-CATALOG-MODPACKS.md",
               "sha256": "cdae6a97773bb7aa5baa8bbb71f32cb03f6fef453b28fc08be4666b6af11cce1"
+            },
+            {
+              "path": "docs/react-migration/STAGE6-CATALOG-CONTENT.md",
+              "sha256": "c9d763a3159cc1a1387502b60822486fd8ceae1c477c13f4ebffcc36414a25e0"
             }
           ],
-          "note": "STAGE6-CATALOG-MODPACKS: app62094d8/fixtures97c8118; descarga verificada MR/CF a AddInstance con confirmación, upstream/whitelist y borrador retenidos, cancelación de metadatos/bytes y progreso real. 1434unitarias/141,17NativeReact distintos/3Vue,20Axe0violaciones/36incomplete,check completo/lint/DeskGap0/E2E56base,hostVue. K15/K16/catalog-install siguen pending: contenido/dependencias/actualizaciones completas; no publicar todavía."
+          "note": "STAGE6-CATALOG-CONTENT: e974e30/flujos5a91e41,1460unitarias/143,26React distintos/3VueNative,4Axe0/8incomplete nuevos,tipos/lint/DeskGap0/E2E56base y hostVue. Instalar/actualizar mods,packs,shaders y recuperar parcial funciona. K15/K16/catalog-install mantienen mundos, packs existentes/Biblioteca, estados por versión y dependencias de otra clase pendientes. CI0b8f2ce success; nuevo CI pendiente. No publicar ni repetir0–5."
         },
         {
           "id": "catalog-install",
@@ -993,9 +997,13 @@
             {
               "path": "docs/react-migration/STAGE6-CATALOG-MODPACKS.md",
               "sha256": "cdae6a97773bb7aa5baa8bbb71f32cb03f6fef453b28fc08be4666b6af11cce1"
+            },
+            {
+              "path": "docs/react-migration/STAGE6-CATALOG-CONTENT.md",
+              "sha256": "c9d763a3159cc1a1387502b60822486fd8ceae1c477c13f4ebffcc36414a25e0"
             }
           ],
-          "note": "STAGE6-CATALOG-MODPACKS: app62094d8/fixtures97c8118; descarga verificada MR/CF a AddInstance con confirmación, upstream/whitelist y borrador retenidos, cancelación de metadatos/bytes y progreso real. 1434unitarias/141,17NativeReact distintos/3Vue,20Axe0violaciones/36incomplete,check completo/lint/DeskGap0/E2E56base,hostVue. K15/K16/catalog-install siguen pending: contenido/dependencias/actualizaciones completas; no publicar todavía."
+          "note": "STAGE6-CATALOG-CONTENT: e974e30/flujos5a91e41,1460unitarias/143,26React distintos/3VueNative,4Axe0/8incomplete nuevos,tipos/lint/DeskGap0/E2E56base y hostVue. Instalar/actualizar mods,packs,shaders y recuperar parcial funciona. K15/K16/catalog-install mantienen mundos, packs existentes/Biblioteca, estados por versión y dependencias de otra clase pendientes. CI0b8f2ce success; nuevo CI pendiente. No publicar ni repetir0–5."
         },
         {
           "id": "catalog-network-failures",
@@ -1008,9 +1016,13 @@
             {
               "path": "docs/react-migration/STAGE6-CATALOG-MODPACKS.md",
               "sha256": "cdae6a97773bb7aa5baa8bbb71f32cb03f6fef453b28fc08be4666b6af11cce1"
+            },
+            {
+              "path": "docs/react-migration/STAGE6-CATALOG-CONTENT.md",
+              "sha256": "c9d763a3159cc1a1387502b60822486fd8ceae1c477c13f4ebffcc36414a25e0"
             }
           ],
-          "note": "STAGE6-CATALOG-MODPACKS: app62094d8/fixtures97c8118; descarga verificada MR/CF a AddInstance con confirmación, upstream/whitelist y borrador retenidos, cancelación de metadatos/bytes y progreso real. 1434unitarias/141,17NativeReact distintos/3Vue,20Axe0violaciones/36incomplete,check completo/lint/DeskGap0/E2E56base,hostVue. K15/K16/catalog-install siguen pending: contenido/dependencias/actualizaciones completas; no publicar todavía."
+          "note": "STAGE6-CATALOG-CONTENT: e974e30/flujos5a91e41,1460unitarias/143,26React distintos/3VueNative,4Axe0/8incomplete nuevos,tipos/lint/DeskGap0/E2E56base y hostVue. Instalar/actualizar mods,packs,shaders y recuperar parcial funciona. K15/K16/catalog-install mantienen mundos, packs existentes/Biblioteca, estados por versión y dependencias de otra clase pendientes. CI0b8f2ce success; nuevo CI pendiente. No publicar ni repetir0–5."
         }
       ]
     },
@@ -1125,5 +1137,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-02T10:47:19Z"
+  "updatedAt": "2026-11-02T12:15:10Z"
 }
