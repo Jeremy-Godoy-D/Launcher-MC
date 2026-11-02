@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 7,
-  "nextAction": "Etapa6 completa: STAGE6-CLOSURE.md, K08/09/10/14/15/16 pass. App39700ac/candidata78f8bcd:35NativeReact distintos93–98+2 finales de etiqueta,1472/144 unit/28,81s y18afectadas posteriores,check/lint0/E2E56base,24Axe0/52incomplete (incluye4repetidos),152IDs,hostVue restaurado. No rehacer0–6. Etapa7 activa: extraer/reutilizar apariencia de App.tsx y completar ajustes globales mediante BaseService.getSettings/Settings.commit, Java/RAM/argumentos/red/directorios; actualizador/notas/enlaces públicos; tareas/notificaciones/ayuda y migration.html (auxiliary.tsx placeholder). Reusar logger/onboarding aceptados. CI9a64eb6 y66e8877 success ambas matrices; verificar nuevo push97/98 sin reiniciar. Luego8defaultReact/retiradaVue/extras,9juego/Java/loaders físicos K03/K05/K06,seguridad/presupuestos,NSIS/actualización en ActionsWindows desechable,assets y publicación0.3.0-beta.1. Microsoft pospuesto;producción/proxy intactos;ANALISIS protegido;sin fetch sustituido/DevTools/limpiezas denegadas.",
+  "nextAction": "Etapa7 activa, STAGE7-SETTINGS.md: candidata8537d80,1503/148 unit/29.86s/4workers,23afectadas finales,check/lint0/E2E56base,7NativeReact distintos(4nuevos99/19.1s+3reg05/74/10.1s),2Vue03/08/10.4s,8Axe0/8incomplete,DeskGapcheck/buildproduction0,176IDs,hostVue restaurado. CI2bead26 success ambas matrices; verificar push7 sin reiniciar. Siguiente: datos/directorios y caché, proteger migrate.ts(destino vacío/rutas/enlaces/journal parcial antes de exponer), migration.html real600x400/suscripciones off, actualizador servidorHTTP propio main-only sin fetch sustituido(descarga/hash/cancel/error), superficies tareas/notifs/ayuda/cierreborrador/AA/RTL/arrastre y buscador padding. K18/19/20/22/23 y gates7 siguen pending. No rehacer0–6. Después8defaultReact/retiradaextras,9Java/loaders/juego físicos K03/K05/K06,seguridad/perf,NSIS/update WindowsActions desechable,assets/publicación0.3.0-beta.1. Microsoftpospuesto;producción/proxy intactos;ANALISIS protegido;sin DevTools/limpiezas denegadas.",
   "stages": [
     {
       "id": 0,
@@ -1058,7 +1058,12 @@
         {
           "id": "global-settings-updater",
           "status": "pending",
-          "evidence": []
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE7-SETTINGS.md",
+              "sha256": "fa978692a44abf72ba4014d00b3adaf58e5a772441a8a5cd1b8154e249285758"
+            }
+          ]
         },
         {
           "id": "remaining-windows",
@@ -1161,5 +1166,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-02T13:32:23Z"
+  "updatedAt": "2026-11-02T14:48:19.381326+00:00"
 }

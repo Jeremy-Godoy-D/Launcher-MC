@@ -2,20 +2,21 @@
 
 ## Estado vigente
 
-Etapas0–6 completas;7 activa. K08/K09/K10/K14/K15/K16 pass. Producción beta.2 y proxy intactos, PR4 borrador, objetivo0.3.0-beta.1 tras7–9. Microsoft pospuesto. El usuario exige terminar/publicar reutilizando y evitando bucles. No rehacer catálogo ni0–5.
+Etapas 0–6 completas; 7 activa. K08/K09/K10/K14/K15/K16 pass. Producción beta.2 y proxy intactos; PR4 borrador; objetivo 0.3.0-beta.1 tras 7–9. Microsoft pospuesto. El usuario pide terminar y publicar reutilizando lo aceptado, sin bucles.
 
-STAGE6-CLOSURE.md: app39700ac/presentación e7e49c1/candidata78f8bcd.35NativeReact distintos93–98 (9/26,3s+26/1,1min) y2actualizaciones finales/6,8s;1472unitarias/144/28,81s/4workers,18afectadas tras etiqueta sin repetirfull;check/lint0/E2E56base,24Axe0violaciones/52incomplete incluyendo4repetidos,152IDs. HostVue restaurado/verificado por compile; evidencia Vue/DeskGap e974e30 conservada sin fuentes nativas/Vue alteradas.
+Bloque nuevo `STAGE7-SETTINGS.md`: aplicación faa9c94, candidata 8537d80. Ajustes globales y superficie del actualizador conectados; BaseService.editSettings valida y escribe de forma atómica antes de aplicar al estado, con conflictos y reintento. 1.503 unitarias/148 archivos/29,86 s/4 workers, 23 afectadas posteriores, check/lint0/E2E56 base. Native: 4 nuevos99/19,1s + 3 regresiones05/74/10,1s y 2 Vue03/08/10,4s. Ocho Axe:0 violaciones/8 incomplete. DeskGap tipos/build production0;176 anclas. Host restaurado a Vue y hash verificado; EXE React independiente. CI2bead26 terminó success en ambas matrices. Los gates7 y K18/19/20/22/23 siguen pendientes; no confundir este bloque con etapa completa.
 
-Packs existentes actualizan desde Biblioteca/ficha mediante openModpack.ready, importedOptions/validateImportFiles y preview/install/resume existentes. Se preservan identidad,Java,argumentos,comandos,memoria y mundos; cambia runtime/versión/upstream después de completar archivos. Datos personales en delta bloquean y ofrecen nueva instancia. Requisitos cruzados se guían a su carpeta y al volver se comprueban metadata/activación/versión/hash; 98 pruebaMR/CF sin bucle y mismo destino. Estados por versión usan stores compartidos. FocusResults corrige foco fuera de viewport al volver tras redimensionar. No reimplementar estos flujos.
+Último cierre anterior: STAGE6-CLOSURE.md, catálogo completo y probado; no repetirlo. Evidencias detalladas conservadas más abajo.
 
-Manifest stage6-closure-manifest.json SHA256cc8edd5e8e54c6d5a618a4939e37571afe2478c1887414e14a65e69d92802233,21fuentes/115artefactos. CI41443432293/9a64eb6 y41446162692/66e8877 success ambas matrices; comprobar nuevo push97/98, sin reiniciar jobs terminados. K03/K05/K06 físicos siguen9, explícito en STAGE4-CLOSURE.
+## Siguiente tarea — etapa 7
 
-## Siguiente tarea — etapa7
+1. Completar directorios/datos y limpieza de caché PresentationService.clearCache. Antes de exponer migrate.ts, proteger destino vacío/relación de rutas, enlaces y rollback parcial: hoy sobrescribe destinos y solo registra directorios completos. Preservar archivos; pruebas únicamente en perfiles temporales.
+2. Sustituir el placeholder de auxiliary.tsx/migration.html por progreso/error/final nativo. Ventana real600×400; contrato Migration y preload existentes. Añadir retirada de listeners compatible con Electron/DeskGap y conservar logger/onboarding ya aceptados.
+3. Actualizador: servidor HTTP propio y redirección main-only de webRequest, sin sustituir fetch; comprobar consulta, errores, descarga/SHA, cancelación y reintento. La UI/notas/enlaces/confirmación de99 ya pasan. Instalación completa solo en Windows desechable etapa9.
+4. Completar tareas/notificaciones/ayuda, protección de cierre con borrador, arrastre y AA/RTL/teclado. Corregir padding/borde duplicado de la búsqueda al integrar próximos controles; conservar distribución y apariencia.
+5. Luego8 React predeterminado, retirar Vue/extras y mensajes de implementación del producto;9 aceptación física K03/K05/K06, presupuestos/seguridad, NSIS/update en Actions Windows desechable, assets/checksums/publicación. No pedir otra VM al usuario.
 
-1. Ajustes globales: App.tsx791–853 solo contiene apariencia; reutilizar esos controles/PreferencesProvider en la nueva distribución de categorías/búsqueda. BaseService.getSettings devuelve Settings; persistencia por commit de mutaciones nativas. Conservar idioma/directorio/Java/RAM/argumentos/resolución/red/descargas y opciones núcleo. No mostrar campos de IA/P2P/SSH/etc presentes por compatibilidad. InstanceBaseSettings y sus validadores sirven de referencia; no migrar extras.
-2. Actualizador y notas: BaseService.checkUpdate/downloadUpdate/quitAndInstall, Settings.updateInfo/updateStatus. Conservar enlaces públicos y verificación nativa; APIasset solo interno. Errores/offline, operación manual y800×400. No instalar en el perfil habitual.
-3. Tareas/notificaciones/ayuda local y ventanas restantes. Logger está aceptado: reutilizar. auxiliary.tsx/migration.html aún muestran placeholder; conectar el contrato nativo con progreso/error. No afirmar que ya mueve datos.
-4. Accesibilidad/teclado/RTL globales. Después8 defaultReact y recorte del grafo sin borrar datos;9 juego/Java/loaders físicos,seguridad/presupuestos,WindowsActions desechable para NSIS/actualización y publicación. No repetir bloques aceptados para aparentar progreso.
+No hay sesiones ejecutándose al cerrar este bloque. Los cuatro casos99 pasan juntos en stage7-settings-accepted-native.log. Las regresiones05/74 y Vue03/08 están completas. No repetir suites amplias por cambios de documentos. Verificar la CI del nuevo push sin reiniciar runs acabados.
 
 ## Evidencia y decisiones técnicas que se conservan
 
