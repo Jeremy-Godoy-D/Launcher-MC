@@ -18,9 +18,11 @@ import { isOperationCancelled } from '../library/operations'
 import { modpackDownload } from './modpack'
 import { ContentInstall, type ContentSelection } from './ContentInstall'
 import { WorldFilesDialog, type WorldArchiveImport } from '../instance/WorldFilesDialog'
+import { ModpackUpdate, type PackUpdateSelection } from './ModpackUpdateDialog'
+import { isPackTarget } from './modpackUpdate'
 import './catalog.css'
 
-type ArchiveImport = { path: string } & ({ kind: 'modpack' } | { kind: 'world'; target: ContentSelection['target']; import: WorldArchiveImport })
+type ArchiveImport = { path: string } & ({ kind: 'modpack' } | { kind: 'world'; target: ContentSelection['target']; import: WorldArchiveImport } | { kind: 'update'; selection: PackUpdateSelection })
 
 function Image({ src, alt, fallback = vanilla, ...props }: { src: string; alt: string; fallback?: string; className?: string }) {
   return <img {...props} src={src || fallback} alt={alt} loading="lazy" referrerPolicy="no-referrer" onError={event => { if (event.currentTarget.src !== new URL(fallback, location.href).href) event.currentTarget.src = fallback }} />
@@ -38,8 +40,9 @@ function Failure({ error, retry, stale = false }: { error: unknown; retry: () =>
 
 function ProjectVersions({ detail, query, onBusy, onImport, onReview }: { detail: CatalogDetail; query: CatalogQuery; onBusy: (busy: boolean) => void; onImport: (selection: ArchiveImport) => void; onReview: (selection: ContentSelection, trigger: HTMLButtonElement) => void }) {
   const { t, n, d } = useI18n(), library = useLibrary()
+  const [params] = useSearchParams()
   const service = useService(ModpackServiceKey), tasks = useTasks()
-  const [target, setTarget] = useState(detail.project.kind === 'modpack' ? '' : library?.current?.path || '')
+  const [target, setTarget] = useState(params.get('target') || (detail.project.kind === 'modpack' ? '' : library?.current?.path || ''))
   const [page, setPage] = useState(0)
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [cancelling, setCancelling] = useState(false)
   const running = useRef(false), request = useRef(''), alive = useRef(true)
@@ -55,14 +58,18 @@ function ProjectVersions({ detail, query, onBusy, onImport, onReview }: { detail
     let options
     try { options = modpackDownload(detail.project, versions.data, id) } catch { setError('archiveUnavailable'); return }
     const destination = detail.project.kind === 'world' && instance ? structuredClone(instance) : undefined
+    const packTarget = detail.project.kind === 'modpack' && instance ? structuredClone(instance) : undefined
     if (detail.project.kind === 'world' && (!destination || options.market !== 1 || Array.isArray(options.file) || versions.data.provider !== 'curseforge' || !versions.data.versions.find(file => String(file.id) === id)?.gameVersions.includes(destination.runtime.minecraft))) { setError('archiveUnavailable'); return }
     running.current = true; request.current = createOperationId(); setBusy(true); onBusy(true); setError(''); setCancelling(false)
     try {
       const paths = await service.installModapckFromMarket(options, request.current)
       if (paths.length !== 1 || typeof paths[0] !== 'string' || !paths[0]) throw new Error('Invalid archive result')
-      if (alive.current) onImport(destination && options.market === 1 && !Array.isArray(options.file)
-        ? { kind: 'world', path: paths[0], target: destination, import: { sourcePath: paths[0], saveName: detail.project.name.replace(/[<>:"/\\|?*\p{Cc}]/gu, '-').trim().replace(/\.+$/, '').slice(0, 120) || 'World', targetName: `${destination.name} · ${destination.runtime.minecraft}`, curseforge: { projectId: Number(detail.project.id), fileId: options.file.fileId } } }
-        : { kind: 'modpack', path: paths[0] })
+      if (alive.current) {
+        if (packTarget) onImport({ kind: 'update', path: paths[0], selection: { path: paths[0], target: packTarget, upstream: detail.project.provider === 'modrinth' ? { type: 'modrinth-modpack', projectId: detail.project.id, versionId: id } : { type: 'curseforge-modpack', modId: Number(detail.project.id), fileId: Number(id) } } })
+        else onImport(destination && options.market === 1 && !Array.isArray(options.file)
+          ? { kind: 'world', path: paths[0], target: destination, import: { sourcePath: paths[0], saveName: detail.project.name.replace(/[<>:"/\\|?*\p{Cc}]/gu, '-').trim().replace(/\.+$/, '').slice(0, 120) || 'World', targetName: `${destination.name} · ${destination.runtime.minecraft}`, curseforge: { projectId: Number(detail.project.id), fileId: options.file.fileId } } }
+          : { kind: 'modpack', path: paths[0] })
+      }
     } catch (failure) {
       if (alive.current) setError(isOperationCancelled(failure) ? 'downloadCancelled' : 'downloadFailed')
     } finally {
@@ -75,8 +82,9 @@ function ProjectVersions({ detail, query, onBusy, onImport, onReview }: { detail
     setCancelling(true)
     try { await tasks.cancel(active.id) } catch { setError('cancelFailed'); setCancelling(false) }
   }
-  const instance = library?.instances.find(instance => instance.path === target)
-  const minecraft = instance?.runtime.minecraft || query.minecraft
+  const eligible = library?.instances.filter(instance => detail.project.kind !== 'modpack' || isPackTarget(instance, detail.project)) || []
+  const instance = eligible.find(instance => instance.path === target)
+  const minecraft = detail.project.kind === 'modpack' ? query.minecraft : instance?.runtime.minecraft || query.minecraft
   const loader = detail.project.kind === 'mod' ? instance ? instance.runtime.fabricLoader ? 'fabric' : instance.runtime.quiltLoader ? 'quilt' : instance.runtime.neoForged ? 'neoforge' : instance.runtime.forge ? 'forge' : '' : query.loader : ''
   const versions = useQuery({ queryKey: ['catalog-versions', detail.project.provider, detail.project.id, minecraft, loader, page], queryFn: ({ signal }) => getCatalogVersions(detail.project.provider, detail.project.id, minecraft, loader, page, signal) })
   const rows = versions.data?.provider === 'modrinth'
@@ -86,11 +94,11 @@ function ProjectVersions({ detail, query, onBusy, onImport, onReview }: { detail
     <label htmlFor="catalog-target">{t('react.catalog.target')}</label>
     <select id="catalog-target" value={target} disabled={busy} onChange={event => { setTarget(event.target.value); setPage(0) }}>
       <option value="">{t(detail.project.kind === 'modpack' ? 'react.catalog.newInstance' : 'react.catalog.allVersions')}</option>
-      {detail.project.kind !== 'modpack' && library?.instances.map(instance => <option key={instance.path} value={instance.path}>{instance.name} · {instance.runtime.minecraft}</option>)}
+      {eligible.map(instance => <option key={instance.path} value={instance.path}>{instance.name} · {instance.runtime.minecraft}</option>)}
     </select>
     <p className="form-help">{t('react.catalog.compatibility', { minecraft: minecraft || t('react.catalog.anyVersion'), loader: loader || t('react.catalog.anyLoader') })}</p>
     {!instance && ['mod', 'resourcepack', 'shader', 'world'].includes(detail.project.kind) && <p className="form-help">{t('react.catalogInstall.chooseTarget')} <Link to="/me?add=create">{t('react.catalog.newInstance')}</Link></p>}
-    {detail.project.kind === 'modpack' && <p className="form-help">{t('react.catalog.importHelp')}</p>}
+    {detail.project.kind === 'modpack' && <p className="form-help">{t(instance ? 'react.packUpdate.downloadHelp' : 'react.catalog.importHelp')}</p>}
     {detail.project.kind === 'world' && <p className="form-help">{t('react.catalog.worldImportHelp')}</p>}
     {busy && <div className="catalog-download" role="status" data-testid="catalog-download">
       <p>{t(cancelling ? 'react.catalog.cancelling' : progress && progress.total > 0 ? 'react.catalog.downloading' : 'react.catalog.preparingDownload', { progress: n(progress?.progress || 0), total: n(progress?.total || 0) })}</p>
@@ -105,7 +113,7 @@ function ProjectVersions({ detail, query, onBusy, onImport, onReview }: { detail
       {rows.map(row => <li key={row.id} data-version-id={row.id}>
         <strong>{row.name}</strong><span>{row.version}</span><span>{row.minecraft} {row.loaders && `· ${row.loaders}`}</span>
         <span>{t(`react.catalog.${row.release || 'release'}`)} · {Number.isFinite(Date.parse(row.date)) ? d(new Date(row.date), { dateStyle: 'medium' }) : t('react.catalog.unknownDate')}</span>
-        {['modpack', 'world'].includes(detail.project.kind) && <button className="button primary" data-testid="catalog-import-version" disabled={busy || versions.isFetching || detail.project.kind === 'world' && !instance} onClick={() => void download(row.id)}>{t('react.catalog.downloadImport')}</button>}
+        {['modpack', 'world'].includes(detail.project.kind) && <button className="button primary" data-testid="catalog-import-version" disabled={busy || versions.isFetching || detail.project.kind === 'world' && !instance} onClick={() => void download(row.id)}>{t(detail.project.kind === 'modpack' && instance ? 'react.packUpdate.download' : 'react.catalog.downloadImport')}</button>}
         {['mod', 'resourcepack', 'shader'].includes(detail.project.kind) && <button className="button primary" data-testid="catalog-review-version" disabled={busy || versions.isFetching || !instance} onClick={event => {
           if (!instance || !versions.data) return
           const result = versions.data
@@ -183,6 +191,7 @@ function CatalogPage({ onImport }: { onImport: (path: string, trigger: HTMLEleme
   const restore = useRef<HTMLElement | null>(null), scroll = useRef(0), search = useRef<HTMLInputElement>(null)
   const pendingImport = useRef<ArchiveImport | undefined>(undefined), handoff = useRef(false)
   const [worldImport, setWorldImport] = useState<Extract<ArchiveImport, { kind: 'world' }>>()
+  const [packUpdate, setPackUpdate] = useState<PackUpdateSelection>()
   const result = useQuery({ queryKey: ['catalog-search', query], queryFn: ({ signal }) => searchCatalog(query, signal) })
   const route = /^\/store\/(modrinth|curseforge)\/([^/]+)\/?$/.exec(location.pathname)
   const change = (values: Record<string, string>, replace = false) => {
@@ -258,11 +267,13 @@ function CatalogPage({ onImport }: { onImport: (path: string, trigger: HTMLEleme
       if (pendingImport.current) {
         const archive = pendingImport.current; pendingImport.current = undefined
         if (archive.kind === 'world') setWorldImport(archive)
+        else if (archive.kind === 'update') setPackUpdate(archive.selection)
         else onImport(archive.path, trigger)
       }
       else trigger?.focus({ preventScroll: true })
     }} />}
     {worldImport && <WorldFilesDialog type="import" path={worldImport.target.path} name="" initialImport={worldImport.import} changed={() => {}} close={() => setWorldImport(undefined)} returnFocus={() => (restore.current?.isConnected ? restore.current : search.current)?.focus({ preventScroll: true })} />}
+    {packUpdate && <ModpackUpdate selection={packUpdate} close={() => setPackUpdate(undefined)} returnFocus={() => (restore.current?.isConnected ? restore.current : search.current)?.focus({ preventScroll: true })} />}
   </section>
 }
 

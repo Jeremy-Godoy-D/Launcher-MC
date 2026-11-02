@@ -870,7 +870,13 @@ export function App() {
       </main>
       {launch && <LaunchDialog launch={launch} returnFocus={restoreFocus} />}
       {managingGroups && <GroupsDialog returnFocus={restoreFocus} onClose={() => setManagingGroups(false)} onRemoved={id => { if (group === `id:${id}`) setGroup('') }} />}
-      {operating && <InstanceOperations key={operating.path} initialMode={operatingMode} instance={operating} onClose={() => setOperating(undefined)} returnFocus={restoreFocus} onCreated={path => {
+      {operating && <InstanceOperations key={operating.path} initialMode={operatingMode} instance={operating} onClose={() => setOperating(undefined)} returnFocus={restoreFocus} onUpdate={() => {
+        const source = operating.upstream
+        if (source?.type !== 'modrinth-modpack' && source?.type !== 'curseforge-modpack') return
+        const provider = source.type === 'modrinth-modpack' ? 'modrinth' : 'curseforge', id = source.type === 'modrinth-modpack' ? source.projectId : String(source.modId)
+        const params = new URLSearchParams({ source: provider, kind: 'modpack', target: operating.path })
+        setOperating(undefined); void navigate(`/store/${provider}/${encodeURIComponent(id)}?${params}`)
+      }} onCreated={path => {
         savedLibrary?.select(path, () => void navigate('/instance'))
       }} />}
       {savedLibrary && <AddInstance open={!!adding} initialMode={adding ?? 'create'} initialArchive={incomingArchive} onClose={() => { setAdding(undefined); setIncomingArchive(undefined) }} returnFocus={restoreFocus} onCreated={path => {

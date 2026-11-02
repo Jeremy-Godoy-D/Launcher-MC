@@ -130,7 +130,7 @@ export async function loaderVersions(
 }
 
 /** Only game identity crosses from an untrusted archive into a newly created instance. */
-export function importedOptions(config: ModpackState['config'], name: string): CreationOptions {
+export function importedOptions(config: unknown, name: string): CreationOptions {
   const data = InstanceDataSchema.parse(config)
   if (
     data.edition !== 'java' ||

@@ -14,7 +14,7 @@ import { DuplicateInstance } from './DuplicateInstance'
 import './operations.css'
 
 type Mode = 'options' | 'edit' | 'icon' | 'duplicate' | 'remove' | 'group' | 'export'
-export function InstanceOperations({ instance, onClose, onCreated, returnFocus, initialMode = 'options' }: { instance: SavedInstance; onClose: () => void; onCreated: (path: string) => void; returnFocus: RefObject<HTMLElement | null>; initialMode?: 'options' | 'duplicate' }) {
+export function InstanceOperations({ instance, onClose, onCreated, onUpdate, returnFocus, initialMode = 'options' }: { instance: SavedInstance; onClose: () => void; onCreated: (path: string) => void; onUpdate: () => void; returnFocus: RefObject<HTMLElement | null>; initialMode?: 'options' | 'duplicate' }) {
   const library = useLibrary()
   const service = useService(InstanceServiceKey)
   const processes = useService(LaunchServiceKey)
@@ -97,6 +97,7 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus, 
               <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('duplicate')}><Copy size={18} aria-hidden="true" />{t(library?.data?.pendingCopies[instance.path] ? 'react.copy.resume' : 'react.operations.duplicate')}</button>
               <button type="button" className="button secondary" disabled={busy || unavailable} onClick={() => changeMode('group')}><Layers size={18} aria-hidden="true" />{t('react.operations.group')}</button>
               <button type="button" className="button secondary" disabled={busy || unavailable || !!library?.data?.pendingCopies[instance.path]} onClick={() => changeMode('export')}><Download size={18} aria-hidden="true" />{t('react.export.action')}</button>
+              {(instance.upstream?.type === 'modrinth-modpack' || instance.upstream?.type === 'curseforge-modpack') && <button type="button" className="button secondary" disabled={busy || unavailable} onClick={onUpdate}><Download size={18} aria-hidden="true" />{t('react.packUpdate.action')}</button>}
               <div className="operation-order">
                 {([-1, 1] as const).map(direction => <button key={direction} type="button" className="button secondary" disabled={busy || unavailable} onClick={() => void run(async () => {
                   await library?.move(instance.path, direction)
