@@ -21,7 +21,7 @@ const test = base.extend<{ kind: 'mod' | 'resourcepack' | 'shader'; catalog: Awa
 test.use({ launcherOptions: { locale: 'es-ES' } })
 
 async function entries(path: string) { try { return await readdir(path) } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []; throw error } }
-async function review(launcher: LauncherFixture, kind: 'mod' | 'resourcepack' | 'shader', provider: string, target: string, version = 1) {
+async function review(launcher: LauncherFixture, kind: 'mod' | 'resourcepack' | 'shader', provider: string, target: string, version = 1, ready = true) {
   const page = launcher.main
   await page.getByTestId('nav-store').click()
   const filters = page.getByRole('button', { name: 'Filtros', exact: true })
@@ -37,7 +37,7 @@ async function review(launcher: LauncherFixture, kind: 'mod' | 'resourcepack' | 
   await sheet.locator('#catalog-target').selectOption(target)
   const id = provider === 'modrinth' ? `VVVV000${version}` : String(100 + version)
   await sheet.locator(`[data-version-id="${id}"]`).getByTestId('catalog-review-version').click()
-  await expect(page.getByTestId('catalog-install-confirm')).toBeEnabled()
+  if (ready) await expect(page.getByTestId('catalog-install-confirm')).toBeEnabled()
   return page.getByTestId('catalog-install')
 }
 
@@ -67,15 +67,16 @@ for (const provider of ['modrinth', 'curseforge']) test(`React reviews ${provide
 
 test.describe('resource pack catalog review', () => {
   test.use({ kind: 'resourcepack' })
-  test('React installs then upgrades a pack without changing its filename or unrelated options', async ({ launcher, catalog }, info) => {
+  for (const provider of ['modrinth', 'curseforge']) test(`React installs then upgrades a ${provider} pack without changing its filename or unrelated options`, async ({ launcher, catalog }, info) => {
     const page = launcher.main, paths = await seedReactLibrary(page)
+    await page.emulateMedia({ colorScheme: provider === 'modrinth' ? 'dark' : 'light', reducedMotion: 'reduce' })
     await writeFile(join(paths[1], 'options.txt'), 'resourcePacks:["vanilla"]\r\n', 'utf8')
-    await review(launcher, 'resourcepack', 'modrinth', paths[1])
+    await review(launcher, 'resourcepack', provider, paths[1])
     await page.getByTestId('catalog-install-confirm').click()
     await expect(page.getByTestId('catalog-install-complete')).toBeVisible()
     await page.getByTestId('catalog-install').getByRole('button', { name: 'Volver a versiones', exact: true }).click()
     await page.getByTestId('catalog-project').getByRole('button', { name: 'Cerrar ficha', exact: true }).last().click()
-    const form = await review(launcher, 'resourcepack', 'modrinth', paths[1], 2), win = await launcher.app.browserWindow(page)
+    const form = await review(launcher, 'resourcepack', provider, paths[1], 2), win = await launcher.app.browserWindow(page)
     await expect(form.getByTestId('catalog-install-changes')).toContainText('resourcepacks/root1.zip')
     await expect(form.getByTestId('catalog-install-changes')).not.toContainText('resourcepacks/root2.zip')
     for (const width of [1200, 800]) {
@@ -95,6 +96,23 @@ test.describe('resource pack catalog review', () => {
     const backups = await entries(join(paths[1], '.backups')); expect(backups.length).toBeGreaterThan(0)
     expect(await readFile(join(paths[1], '.backups', backups[0], 'resourcepacks', 'root1.zip'))).toEqual(catalog.assets.find(asset => asset.key === 'root1')!.bytes)
   })
+})
+
+for (const provider of ['modrinth', 'curseforge']) test(`React stops ${provider} native metadata resolution without creating files and can retry`, async ({ launcher, catalog }) => {
+  const page = launcher.main, paths = await seedReactLibrary(page)
+  catalog.content.metadataSlow = true
+  const form = await review(launcher, 'mod', provider, paths[1], 1, false)
+  await expect.poll(() => catalog.content.metadataStarted).toBe(true)
+  await form.getByRole('button', { name: 'Detener operación', exact: true }).click()
+  await expect(page.getByTestId('catalog-install-error')).toContainText('detenida')
+  await expect.poll(() => catalog.content.metadataAborted).toBe(true)
+  expect(catalog.content.transfers).toEqual([]); expect(await entries(join(paths[1], 'mods'))).toEqual([])
+  catalog.content.metadataSlow = false
+  await form.getByRole('button', { name: 'Reintentar', exact: true }).click()
+  await expect(page.getByTestId('catalog-install-confirm')).toBeEnabled()
+  expect(catalog.content.transfers).toEqual([])
+  await page.getByTestId('catalog-install-confirm').click()
+  await expect(page.getByTestId('catalog-install-complete')).toBeVisible()
 })
 
 test('React retains a stopped native installation and confirms its recovery before reporting completion', async ({ launcher, catalog }) => {
