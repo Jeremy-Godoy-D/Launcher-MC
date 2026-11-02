@@ -13,10 +13,10 @@ export async function mockCatalogContent(launcher: LauncherFixture, kind: 'mod' 
     { key: 'optional', project: 'OOOO0001', version: 'OPTV0001', modId: 3, fileId: 301, artifact: 'catalog_optional', number: '1.0.0' },
   ]
   const assets = await Promise.all(definitions.map(async definition => {
-    const filename = `${definition.key}.${kind === 'mod' ? 'jar' : 'zip'}`, path = join(launcher.appDataPath, filename)
-    if (kind === 'mod') await makeReactMod(path, definition.artifact, `Catalog ${definition.key}`, { version: definition.number })
-    else if (kind === 'resourcepack') await makeReactResourcePack(path, `${definition.key}-${definition.number}`)
-    else await makeReactShaderPack(path, definition.key, definition.number)
+    const filename = `${definition.key}.${kind === 'mod' ? 'jar' : 'zip'}`, path = join(launcher.appDataPath, kind === 'mod' ? 'mods' : kind === 'resourcepack' ? 'resourcepacks' : 'shaderpacks', filename)
+    if (kind === 'mod') await makeReactMod(launcher.appDataPath, definition.key, `Catalog ${definition.key}`, { id: definition.artifact, version: definition.number })
+    else if (kind === 'resourcepack') await makeReactResourcePack(launcher.appDataPath, definition.key, `${definition.key}-${definition.number}`)
+    else await makeReactShaderPack(launcher.appDataPath, definition.key, definition.number)
     const bytes = await readFile(path)
     return { ...definition, filename, bytes, hash: createHash('sha1').update(bytes).digest('hex') }
   }))
