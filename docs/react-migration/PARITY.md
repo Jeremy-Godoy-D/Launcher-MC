@@ -21,7 +21,7 @@ Referencia: beta.2, commit `7671c6f1bdc471d42816241920a262a18aca5a44`. Alcance c
 | K11 | Mundos `/instance/save`, Save.vue | InstanceSavesService, instanceSave*, savesSearch | Operaciones locales, datapacks, importar/exportar/clonar/borrar y todas las herramientas locales: mapa, progreso, dimensiones, regiones y editar/copiar/pegar/eliminar chunks; revisión y backups de cambios. Confirmado por el usuario 2026-10-31. Compartir P2P se retira. | pass |
 | K12 | Ajustes `/instance/base-setting` | InstanceOptionsService/InstanceService, instanceOptions, instanceEdit | Java/RAM/args/resolución/heredar/restablecer/null, guardar/salir con cambios. Sin SSH ni editor de temas. | pass |
 | K13 | Entrar a servidor normal desde Minecraft | InstanceServerInfoService, BaseSettingServer, Instance.server | Conservar destino de servidor al lanzar Java; no confundir con host/SSH/P2P. | pass |
-| K14 | Catálogo `/store` | Store.vue, curseforgeSearch/modrinthSearch y clientes | Búsqueda/filtros/proveedores públicos, paginación, offline y fallo independiente. | pending |
+| K14 | Catálogo `/store` | Store.vue, curseforgeSearch/modrinthSearch y clientes | Búsqueda/filtros/proveedores públicos, paginación, offline y fallo independiente. | pass |
 | K15 | Fichas `/store/{curseforge,modrinth}/:id` | StoreProject*, clientes existentes, DOMPurify | Información/galería/versiones/destino; conservar scroll/history/foco; ningún HTML ejecutable. | pending |
 | K16 | Instalación/actualización de contenido/modpacks | curseforgeInstaller/modrinthInstaller, ModpackService, InstanceInstallService | Dependencias/progreso/error/cancelar y confirmación del servicio; CF exclusivamente proxy. | pending |
 | K17 | Cuentas locales `/accounts`, SetupAccount | UserService/OfficialUserService, user.ts, LauncherAccounts | Crear/seleccionar/editar/eliminar local, preservar perfiles y selección. | complete |
@@ -383,3 +383,7 @@ CI72bf920:Vue39pass1skip1fallo85watch,Reactcancelado;80Java pasó. Fixture85 pre
 ## K11 aceptado — etapa5 completa (2026-11-02)
 
 STAGE5-WORLD-SHARING-UI.md cierra la paridad local con seis acciones confirmadas de mundos comunes, sin P2P ni reescritura del backend. Cinco Native React,163React/29focales,4Axe0violaciones/8incomplete; evidencia previa de lectura/CRUD/datapacks/mapa/progreso/regiones/chunks/sesiones/legacy/recuperacion conservada. Se reutiliza1372/134 yCI84Vue41+2skip; no se afirma full1374 local. K11/K12/K21pass,etapa5completa;6activaK14/K15/K16. Publicacion/seguridadglobal/distribucion/instalador/rendimiento siguen7-9.
+
+## Catálogo público de lectura y red — 2026-11-02
+
+STAGE6-CATALOG-BROWSING.md acepta K14 y los gates de búsqueda/fallos de red. App1517fad: seis NativeReact14,3s sobre EXE identificado y tres Vue10,7s;183React/19, suite1403/139 previa a dos casos nuevos conservada,4Axe0violaciones/8incomplete,tipos/lint/E2E56base/DeskGap producción/hostVue. Búsqueda real, ambos proveedores/filtros de modpacks/páginas/rutas, contenido remoto sanitizado, offline/cuota y cancelación nativa GET con límites; salto CF al proxy verificado sin secretos. K15 mantiene destino operativo/estados y K16 mantiene instalación/dependencias/actualización/progreso/recuperación pendientes. Etapa6 activa;7-9 pendientes, Microsoft pospuesto y producción/proxy intactos. No se repiten etapas0-5.
