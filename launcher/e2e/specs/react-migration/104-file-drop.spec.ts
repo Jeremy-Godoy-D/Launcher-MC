@@ -13,7 +13,7 @@ test('native file drops review the captured instance, preserve sources and rejec
   const page = launcher.main, [first, second] = await seedReactLibrary(page), source = join(launcher.gameDataPath, 'drop-source')
   await makeReactMod(source, 'alpha', 'Dropped Alpha'); await makeReactMod(source, 'beta', 'Dropped Beta')
   const alpha = join(source, 'mods/alpha.jar'), beta = join(source, 'mods/beta.jar'), bytes = await readFile(alpha)
-  await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click(); await page.getByRole('link', { name: 'Mods', exact: true }).click()
+  await page.getByTestId('nav-library').click(); await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click(); await page.getByLabel('Secciones de la instancia').getByRole('link', { name: 'Mods', exact: true }).click()
   const area = page.getByTestId('instance-mods'), review = page.getByTestId('file-drop-review')
   await expect(area.getByRole('button', { name: 'Añadir archivos', exact: true })).toBeEnabled()
   const search = area.getByLabel('Buscar mods instalados', { exact: true }); await search.focus()

@@ -455,7 +455,6 @@ export function App() {
       <a className="skip-content" href="#launcher-content" onClick={event => { event.preventDefault(); document.getElementById('launcher-content')?.focus() }}>{t('react.files.skip')}</a>
       <header className="titlebar">
         <div className="titlebar-left">
-          <div className="history-controls"><button type="button" className="icon-button" aria-label={t('react.files.back')} title={t('react.files.back')} disabled={!(window.history.state?.idx > 0)} onClick={() => void navigate(-1)}><ChevronLeft size={16} aria-hidden="true" /></button><button type="button" className="icon-button" aria-label={t('react.files.forward')} title={t('react.files.forward')} disabled={!(window.history.state?.idx < window.history.length - 1)} onClick={() => void navigate(1)}><ChevronRight size={16} aria-hidden="true" /></button></div>
           <img className="titlebar-logo" src={brandIcon} alt="" />
           <span>Grimo Launcher</span>
           <span className="preview-label">{accountsPage ? t('react.accounts.saved') : catalog ? t('react.catalog.connected') : t('react.instances.connected')}</span>
@@ -555,9 +554,10 @@ export function App() {
       <main className="main" id="launcher-content" tabIndex={-1}>
         <div className="page-toolbar">
           <div className="history">
-            <button className="icon-button" aria-label="Atrás" onClick={() => navigate(-1)}>
-              <ChevronLeft size={20} />
+            <button type="button" className="icon-button" aria-label={t('react.files.back')} title={t('react.files.back')} disabled={!(window.history.state?.idx > 0)} onClick={() => void navigate(-1)}>
+              <ChevronLeft size={20} aria-hidden="true" />
             </button>
+            <button type="button" className="icon-button" aria-label={t('react.files.forward')} title={t('react.files.forward')} disabled={!(window.history.state?.idx < window.history.length - 1)} onClick={() => void navigate(1)}><ChevronRight size={20} aria-hidden="true" /></button>
             <span>{title}</span>
           </div>
           <div className="toolbar-actions">

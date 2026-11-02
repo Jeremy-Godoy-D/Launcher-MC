@@ -1,6 +1,5 @@
 @layer components {
-  .history-controls { display: flex; gap: 2px; }
-  .history-controls:dir(rtl) svg { transform: scaleX(-1); }
+  .history:dir(rtl) button svg { transform: scaleX(-1); }
   .skip-content { position: fixed; inset-inline-start: 16px; top: 8px; transform: translateY(-200%); z-index: 200; padding: 10px 16px; border-radius: 8px; background: var(--surface); color: var(--ink); }
   .skip-content:focus { transform: none; }
   .file-drop-overlay { position: fixed; inset: 48px 16px 16px; z-index: 100; pointer-events: none; display: grid; place-content: center; justify-items: center; gap: 12px; border: 2px dashed var(--accent); border-radius: 14px; background: var(--glass-elevated); color: var(--ink); font-size: 20px; }
