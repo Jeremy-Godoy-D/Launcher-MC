@@ -15,6 +15,7 @@ import {
   InstallCurseforgeFileTrackerEvents,
   InstallModrinthFileTask,
   InstallModrinthFileTrackerEvents,
+  ResolveMarketFilesTask,
   getCurseforgeFileUri,
   getModrinthPrimaryFile,
   getModrinthVersionFileUri,
@@ -37,6 +38,7 @@ import {
   kMarketProvider,
 } from './marketProvider'
 import { getMarketFilePath } from './marketFilePath'
+import { modpackRequest } from './modpackRequest'
 
 type InstanceFile = _InstanceFile & { downloads: string[]; icon?: string }
 
@@ -341,6 +343,7 @@ export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
     options: InstallMarketDirectoryOptions | InstallMarketInstanceOptions,
     signal?: AbortSignal,
   ): Promise<InstanceFile[]> {
+    signal = signal ? AbortSignal.any([signal, AbortSignal.timeout(30_000)]) : AbortSignal.timeout(30_000)
     const domain = 'domain' in options ? options.domain : ''
     if (options.market === 0) {
       const versions = Array.isArray(options.version) ? options.version : [options.version]
@@ -370,7 +373,17 @@ export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
   }
 
   app.registry.register(kMarketProvider, {
-    resolveInstanceFiles: getFiles,
+    resolveInstanceFiles: async options => {
+      const request = modpackRequest(options)
+      if (options.id !== undefined && (typeof options.id !== 'string' || !/^[A-Za-z0-9._-]{1,128}$/.test(options.id))) throw new Error('Invalid market metadata operation')
+      const task = options.id ? tasks.create<ResolveMarketFilesTask>({ type: 'resolveMarketFiles', key: `resolveMarketFiles-${options.id}`, operationId: options.id, market: request.market }) : undefined
+      try {
+        const files = await getFiles({ ...request, domain: options.domain, instancePath: options.instancePath }, task?.controller.signal)
+        task?.controller.signal.throwIfAborted()
+        task?.complete()
+        return files
+      } catch (error) { task?.fail(error); throw error }
+    },
     installFile: async (options) => {
       const downloadOptions = await app.registry.get(kDownloadOptions)
 

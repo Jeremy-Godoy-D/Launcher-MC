@@ -15,6 +15,7 @@ export type CatalogDetail = { project: CatalogProject; body: string; markdown: b
 const modrinth = new ModrinthV2Client({ fetch: publicMetadataFetch })
 // Electron's existing HTTPS handler routes this client to the configured Worker and strips credentials.
 const curseforge = new CurseforgeV1Client('', { fetch: publicMetadataFetch })
+export const catalogClients = { modrinth, curseforge }
 const classIds: Record<Kind, number> = { mod: 6, modpack: 4471, resourcepack: 12, shader: 6552, world: 17 }
 const loaderIds = { fabric: FileModLoaderType.Fabric, forge: FileModLoaderType.Forge, neoforge: FileModLoaderType.NeoForge, quilt: FileModLoaderType.Quilt }
 const cfSort = { relevance: ModsSearchSortField.Popularity, downloads: ModsSearchSortField.TotalDownloads, updated: ModsSearchSortField.LastUpdated, newest: ModsSearchSortField.ReleasedDate }

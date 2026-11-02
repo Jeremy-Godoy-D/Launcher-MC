@@ -20,7 +20,7 @@ import { DownloadModpackTask, ExportModpackTask } from './services/ModpackServic
 import { InstallAuthlibInjectorTask } from './services/AuthlibInjectorService'
 import { DownloadModMetadataDbTask } from './services/ModMetadataService'
 import { DuplicateInstanceTask } from './services/InstanceService'
-import { InstallModrinthFileTask, InstallCurseforgeFileTask } from './services/MarketService'
+import { InstallModrinthFileTask, InstallCurseforgeFileTask, ResolveMarketFilesTask } from './services/MarketService'
 import { InstallBedrockTask, InstallBedrockVersionTask } from './services/BedrockService'
 import { InstallBlueprintTask } from './services/BlueprintMarketService'
 
@@ -120,6 +120,7 @@ export type Tasks =
   | DuplicateInstanceTask
   | InstallModrinthFileTask
   | InstallCurseforgeFileTask
+  | ResolveMarketFilesTask
   | InstallBedrockTask
   | InstallBedrockVersionTask
   | InstallBlueprintTask

@@ -1325,6 +1325,34 @@ describe('InstanceInstallService progressive installation', () => {
   })
 
   describe.each(['resourcepacks', 'shaderpacks'] as const)('%s reviewed updates', domain => {
+  it('installs a reviewed new archive without replacing existing packs', async () => {
+    const f = await fixture(), added = f.file(`${domain}/added.zip`, 'NEW')
+    await f.write(join(f.instancePath, domain, 'other.zip'), 'KEEP')
+    mockedDownload.mockImplementation(f.downloadAll)
+    await f.service.installInstanceFiles(await f.review([], [added], domain))
+    expect(await readFile(join(f.instancePath, added.path), 'utf8')).toBe('NEW')
+    expect(await readFile(join(f.instancePath, domain, 'other.zip'), 'utf8')).toBe('KEEP')
+  })
+
+  it('updates the selected archive and adds a dependency while preserving its old bytes in backup', async () => {
+    const f = await fixture(), old = f.file(`${domain}/pack.zip`, 'OLD'), next = f.file(old.path, 'NEW'), dependency = f.file(`${domain}/dependency.zip`, 'DEPENDENCY')
+    await f.write(join(f.instancePath, old.path), 'OLD')
+    mockedDownload.mockImplementation(f.downloadAll)
+    await f.service.installInstanceFiles(await f.review([old], [next, dependency], domain))
+    expect(await readFile(join(f.instancePath, old.path), 'utf8')).toBe('NEW')
+    expect(await readFile(join(f.instancePath, dependency.path), 'utf8')).toBe('DEPENDENCY')
+    const [backup] = await readdir(join(f.instancePath, '.backups'))
+    expect(await readFile(join(f.instancePath, '.backups', backup, old.path), 'utf8')).toBe('OLD')
+  })
+
+  it('blocks a new archive whose filename belongs to an unselected existing pack', async () => {
+    const f = await fixture(), added = f.file(`${domain}/pack.zip`, 'NEW')
+    await f.write(join(f.instancePath, added.path), 'KEEP')
+    await expect(f.service.installInstanceFiles(await f.review([], [added], domain))).rejects.toThrow('already occupies')
+    expect(mockedDownload).not.toHaveBeenCalled()
+    expect(await readFile(join(f.instancePath, added.path), 'utf8')).toBe('KEEP')
+  })
+
   it.each([false, true])('updates a pack in place with backup and unchanged options/groups/worlds (shared=%s)', async shared => {
     const f = await fixture(), old = f.file(`${domain}/My Pack.zip`, 'OLD'), next = f.file(old.path, 'NEW')
     const global = join(f.root, domain)

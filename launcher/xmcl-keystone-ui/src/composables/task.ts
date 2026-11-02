@@ -268,7 +268,7 @@ export function useLocalizedTaskFunc() {
       return { title, subtitle: '' }
     }
 
-    if (task.type === 'downloadModpack') {
+    if (task.type === 'downloadModpack' || task.type === 'resolveMarketFiles') {
       return { title: task.market === 0 ? t('installModrinthFile.name') : t('installCurseforgeFile'), subtitle: '' }
     }
 

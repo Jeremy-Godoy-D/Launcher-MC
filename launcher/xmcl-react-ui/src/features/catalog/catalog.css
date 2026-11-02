@@ -44,6 +44,16 @@
   .catalog-download p { margin: 0; }
   .catalog-download progress { width: 100%; accent-color: var(--accent); }
   .catalog-download .button, .catalog-version-list .button { justify-self: start; }
+  .catalog-sheet-body[hidden] { display: none; }
+  .catalog-install { flex: 1; }
+  .catalog-install .creation-body { display: block; overflow-wrap: anywhere; }
+  .catalog-install .creation-body > :is(p, h3, h4, ul, fieldset) { margin-bottom: 16px; }
+  .catalog-install progress { width: 100%; accent-color: var(--accent); }
+  .catalog-install-projects, .catalog-install-files { list-style: none; }
+  .catalog-install-projects li, .catalog-install-files li { padding: 10px 0; display: grid; gap: 4px; border-bottom: 1px solid var(--line); }
+  .catalog-install-projects span { color: var(--muted); font-size: 12px; }
+  .catalog-install fieldset { padding: 12px; border: 1px solid var(--line); border-radius: 10px; }
+  .catalog-install fieldset label { display: flex; gap: 8px; margin: 8px 0; }
 }
 @layer responsive {
   @media (max-height: 500px) {

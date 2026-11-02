@@ -6,25 +6,31 @@ This file is the contract between the launcher UI in `xmcl-react-ui/` and the Pl
 
 Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testids` with the selected LAUNCHER_RENDERER. Computed IDs are not resolved by this static registry.
 
-**Total anchors:** 141 (in 48 Vue/TSX files)
+**Total anchors:** 147 (in 49 Vue/TSX files)
 
 | Test ID | Defined in |
 |---|---|
 | `accounts-page` | [`xmcl-react-ui/src/features/accounts/Accounts.tsx#L86`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L86) |
 | `app-backdrop` | [`xmcl-react-ui/src/App.tsx#L435`](../xmcl-react-ui/src/App.tsx#L435) |
 | `app-sidebar` | [`xmcl-react-ui/src/App.tsx#L470`](../xmcl-react-ui/src/App.tsx#L470) |
-| `catalog` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L193`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L193) |
-| `catalog-description` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L135`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L135) |
-| `catalog-download` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L85`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L85) |
-| `catalog-download-error` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L90`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L90) |
-| `catalog-import-version` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L98`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L98) |
-| `catalog-kind` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L203`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L203) |
-| `catalog-loader` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L205`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L205) |
-| `catalog-minecraft` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L204`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L204) |
-| `catalog-project` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L119`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L119) |
-| `catalog-results` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L214`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L214) |
-| `catalog-sort` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L206`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L206) |
-| `catalog-versions` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L94`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L94) |
+| `catalog` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L209`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L209) |
+| `catalog-description` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L150`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L150) |
+| `catalog-download` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L87`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L87) |
+| `catalog-download-error` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L92`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L92) |
+| `catalog-import-version` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L100`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L100) |
+| `catalog-install` | [`xmcl-react-ui/src/features/catalog/ContentInstall.tsx#L151`](../xmcl-react-ui/src/features/catalog/ContentInstall.tsx#L151) |
+| `catalog-install-changes` | [`xmcl-react-ui/src/features/catalog/ContentInstall.tsx#L164`](../xmcl-react-ui/src/features/catalog/ContentInstall.tsx#L164) |
+| `catalog-install-complete` | [`xmcl-react-ui/src/features/catalog/ContentInstall.tsx#L166`](../xmcl-react-ui/src/features/catalog/ContentInstall.tsx#L166) |
+| `catalog-install-confirm` | [`xmcl-react-ui/src/features/catalog/ContentInstall.tsx#L175`](../xmcl-react-ui/src/features/catalog/ContentInstall.tsx#L175) |
+| `catalog-install-error` | [`xmcl-react-ui/src/features/catalog/ContentInstall.tsx#L157`](../xmcl-react-ui/src/features/catalog/ContentInstall.tsx#L157) |
+| `catalog-kind` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L219`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L219) |
+| `catalog-loader` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L221`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L221) |
+| `catalog-minecraft` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L220`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L220) |
+| `catalog-project` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L134`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L134) |
+| `catalog-results` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L230`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L230) |
+| `catalog-review-version` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L101`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L101) |
+| `catalog-sort` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L222`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L222) |
+| `catalog-versions` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L96`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L96) |
 | `chunk-backups` | [`xmcl-react-ui/src/features/instance/ChunkChangesDialog.tsx#L90`](../xmcl-react-ui/src/features/instance/ChunkChangesDialog.tsx#L90) |
 | `chunk-change-review` | [`xmcl-react-ui/src/features/instance/ChunkChangesDialog.tsx#L58`](../xmcl-react-ui/src/features/instance/ChunkChangesDialog.tsx#L58) |
 | `chunk-change-submit` | [`xmcl-react-ui/src/features/instance/ChunkChangesDialog.tsx#L73`](../xmcl-react-ui/src/features/instance/ChunkChangesDialog.tsx#L73) |
@@ -133,7 +139,7 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `setup-next` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L345`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L345) |
 | `setup-path` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L233`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L233) |
 | `setup-root` | [`xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L153`](../xmcl-react-ui/src/features/onboarding/Onboarding.tsx#L153) |
-| `store-search` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L197`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L197) |
+| `store-search` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L213`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L213) |
 | `world-action-map` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L111`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L111) |
 | `world-action-progress` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L96`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L96) |
 | `world-datapacks` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L270`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L270) |

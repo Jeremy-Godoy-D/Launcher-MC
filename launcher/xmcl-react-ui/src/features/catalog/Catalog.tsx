@@ -16,6 +16,7 @@ import { createOperationId } from '@xmcl/runtime-api/src/util/launch'
 import { useService, useTasks } from '../../runtime'
 import { isOperationCancelled } from '../library/operations'
 import { modpackDownload } from './modpack'
+import { ContentInstall, type ContentSelection } from './ContentInstall'
 import './catalog.css'
 
 function Image({ src, alt, fallback = vanilla, ...props }: { src: string; alt: string; fallback?: string; className?: string }) {
@@ -32,7 +33,7 @@ function Failure({ error, retry, stale = false }: { error: unknown; retry: () =>
   </div>
 }
 
-function ProjectVersions({ detail, query, onBusy, onImport }: { detail: CatalogDetail; query: CatalogQuery; onBusy: (busy: boolean) => void; onImport: (path: string) => void }) {
+function ProjectVersions({ detail, query, onBusy, onImport, onReview }: { detail: CatalogDetail; query: CatalogQuery; onBusy: (busy: boolean) => void; onImport: (path: string) => void; onReview: (selection: ContentSelection, trigger: HTMLButtonElement) => void }) {
   const { t, n, d } = useI18n(), library = useLibrary()
   const service = useService(ModpackServiceKey), tasks = useTasks()
   const [target, setTarget] = useState(detail.project.kind === 'modpack' ? '' : library?.current?.path || '')
@@ -81,6 +82,7 @@ function ProjectVersions({ detail, query, onBusy, onImport }: { detail: CatalogD
       {detail.project.kind !== 'modpack' && library?.instances.map(instance => <option key={instance.path} value={instance.path}>{instance.name} · {instance.runtime.minecraft}</option>)}
     </select>
     <p className="form-help">{t('react.catalog.compatibility', { minecraft: minecraft || t('react.catalog.anyVersion'), loader: loader || t('react.catalog.anyLoader') })}</p>
+    {!instance && ['mod', 'resourcepack', 'shader'].includes(detail.project.kind) && <p className="form-help">{t('react.catalogInstall.chooseTarget')} <Link to="/me?add=create">{t('react.catalog.newInstance')}</Link></p>}
     {detail.project.kind === 'modpack' && <p className="form-help">{t('react.catalog.importHelp')}</p>}
     {busy && <div className="catalog-download" role="status" data-testid="catalog-download">
       <p>{t(cancelling ? 'react.catalog.cancelling' : progress && progress.total > 0 ? 'react.catalog.downloading' : 'react.catalog.preparingDownload', { progress: n(progress?.progress || 0), total: n(progress?.total || 0) })}</p>
@@ -96,6 +98,17 @@ function ProjectVersions({ detail, query, onBusy, onImport }: { detail: CatalogD
         <strong>{row.name}</strong><span>{row.version}</span><span>{row.minecraft} {row.loaders && `· ${row.loaders}`}</span>
         <span>{t(`react.catalog.${row.release || 'release'}`)} · {Number.isFinite(Date.parse(row.date)) ? d(new Date(row.date), { dateStyle: 'medium' }) : t('react.catalog.unknownDate')}</span>
         {detail.project.kind === 'modpack' && <button className="button primary" data-testid="catalog-import-version" disabled={busy || versions.isFetching} onClick={() => void download(row.id)}>{t('react.catalog.downloadImport')}</button>}
+        {['mod', 'resourcepack', 'shader'].includes(detail.project.kind) && <button className="button primary" data-testid="catalog-review-version" disabled={busy || versions.isFetching || !instance} onClick={event => {
+          if (!instance || !versions.data) return
+          const result = versions.data
+          if (result.provider === 'modrinth') {
+            const version = result.versions.find(version => version.id === row.id)
+            if (version) onReview({ project: detail.project, target: structuredClone(instance), candidate: { provider: 'modrinth', version } }, event.currentTarget)
+          } else {
+            const file = result.versions.find(file => String(file.id) === row.id)
+            if (file) onReview({ project: detail.project, target: structuredClone(instance), candidate: { provider: 'curseforge', file } }, event.currentTarget)
+          }
+        }}>{t('react.catalogInstall.review')}</button>}
       </li>)}
     </ul>
     {!!versions.data?.total && <nav className="catalog-pagination" aria-label={t('react.catalog.versionPages')}>
@@ -110,6 +123,8 @@ function ProjectSheet({ provider, id, query, close, returnFocus, onImport }: { p
   const { t, n } = useI18n(), [tab, setTab] = useState('about')
   const [busy, setBusy] = useState(false)
   const [versionsVisited, setVersionsVisited] = useState(false)
+  const [operation, setOperation] = useState<ContentSelection>()
+  const operationTrigger = useRef<HTMLButtonElement | null>(null)
   const detail = useQuery({ queryKey: ['catalog-detail', provider, id], queryFn: ({ signal }) => getCatalogDetail(provider, id, signal) })
   const html = useMemo(() => detail.data ? catalogDescription(detail.data.body, detail.data.markdown) : '', [detail.data])
   const body = useRef<HTMLDivElement>(null)
@@ -123,10 +138,10 @@ function ProjectSheet({ provider, id, query, close, returnFocus, onImport }: { p
           <Dialog.Description>{detail.data?.project.description || t('react.catalog.loadingProject')}</Dialog.Description></div>
       </div>
       <button className="icon-button dialog-close" aria-label={t('react.catalog.close')} disabled={busy} onClick={close}><X size={20} /></button>
-      {detail.data && <nav className="source-tabs catalog-sheet-tabs" aria-label={t('react.catalog.projectSections')}>
+      {detail.data && !operation && <nav className="source-tabs catalog-sheet-tabs" aria-label={t('react.catalog.projectSections')}>
         {['about', 'gallery', 'versions'].map(value => <button key={value} disabled={busy} aria-pressed={tab === value} onClick={() => { if (value === 'versions') setVersionsVisited(true); setTab(value) }}>{t(`react.catalog.${value}`)}</button>)}
       </nav>}
-      <div className="creation-body catalog-sheet-body" ref={body}>
+      <div className="creation-body catalog-sheet-body" ref={body} hidden={!!operation}>
         {detail.isPending && <p role="status">{t(detail.fetchStatus === 'paused' ? 'react.catalog.offline' : 'react.catalog.loadingProject')}</p>}
         {detail.isError && <Failure error={detail.error} retry={() => void detail.refetch()} />}
         {detail.data && <>
@@ -141,13 +156,14 @@ function ProjectSheet({ provider, id, query, close, returnFocus, onImport }: { p
             }} dangerouslySetInnerHTML={{ __html: html }} />
           </>}
           {tab === 'gallery' && <div className="catalog-gallery">{detail.data.gallery.length ? detail.data.gallery.map((src, index) => <a key={src} href={src} target="_blank" rel="noopener noreferrer"><Image src={src} alt={t('react.catalog.galleryImage', { index: index + 1, name: detail.data.project.name })} /></a>) : <p>{t('react.catalog.noGallery')}</p>}</div>}
-          <div hidden={tab !== 'versions'}>{versionsVisited && <ProjectVersions detail={detail.data} query={query} onBusy={setBusy} onImport={onImport} />}</div>
+          <div hidden={tab !== 'versions'}>{versionsVisited && <ProjectVersions detail={detail.data} query={query} onBusy={setBusy} onImport={onImport} onReview={(selection, trigger) => { operationTrigger.current = trigger; setBusy(true); setOperation(selection) }} />}</div>
         </>}
       </div>
-      <footer className="dialog-actions">
+      {operation && <ContentInstall key={`${operation.target.path}:${operation.candidate.provider === 'modrinth' ? operation.candidate.version.id : operation.candidate.file.id}`} selection={operation} onBusy={setBusy} onBack={() => { setOperation(undefined); setBusy(false); requestAnimationFrame(() => operationTrigger.current?.focus()) }} />}
+      {!operation && <footer className="dialog-actions">
         {detail.data?.website && <a className="button secondary" href={detail.data.website} target="_blank" rel="noopener noreferrer">{t('react.catalog.website')}<ExternalLink size={16} /></a>}
         <button className="button secondary" disabled={busy} onClick={close}>{t('react.catalog.close')}</button>
-      </footer>
+      </footer>}
     </Dialog.Content>
   </Dialog.Portal></Dialog.Root>
 }

@@ -7,6 +7,28 @@ const request = () => ({ url: 'https://api.modrinth.com/v2/search', headers: { '
 const cancel = (protocol: LauncherProtocolHandler, token = id) => protocol.handle({ url: `http://launcher/catalog-request/${token}`, method: 'POST' })
 afterEach(() => vi.useRealTimers())
 
+it.each(['https://api.modrinth.com/v2/version_files', 'https://api.modrinth.com/v2/version_files/update', 'https://api.curseforge.com/v1/mods/files'])('cancels the metadata POST %s without changing its body or leaking its capability', async url => {
+  const protocol = new LauncherProtocolHandler(), body = JSON.stringify({ ids: ['synthetic'] })
+  const sink = vi.fn(({ request, response }) => {
+    expect(request.method).toBe('POST'); expect(request.body).toBe(body)
+    expect(request.headers).toEqual({ 'content-type': 'application/json' })
+    response.status = 200; response.body = new Readable({ read() {} })
+  })
+  protocol.registerHandler('https', sink, true)
+  const response = await protocol.handle({ ...request(), url, method: 'POST', body, headers: { ...request().headers, 'content-type': 'application/json' } })
+  const signal = sink.mock.calls[0][0].request.signal as AbortSignal
+  expect(signal.aborted).toBe(false); await cancel(protocol); expect(signal.aborted).toBe(true)
+  ;(response.body as Readable).destroy()
+})
+
+it.each(['https://api.modrinth.com/v2/project/AAAA0001', 'https://api.curseforge.com/v1/mods/1', 'https://api.modrinth.com:8443/v2/version_files'])('does not grant metadata cancellation to POST %s', async url => {
+  const protocol = new LauncherProtocolHandler(), sink = vi.fn(({ response }) => { response.status = 200; response.body = 'unchanged' })
+  protocol.registerHandler('https', sink, true)
+  await protocol.handle({ ...request(), url, method: 'POST' })
+  expect(sink.mock.calls[0][0].request.signal).toBeUndefined()
+  expect(sink.mock.calls[0][0].request.headers).toEqual({})
+})
+
 it('cancels only the identified metadata read and removes its header before any provider or proxy', async () => {
   const protocol = new LauncherProtocolHandler(), sink = vi.fn(({ request, response }) => { expect(request.headers).toEqual({}); response.status = 200; response.body = new Readable({ read() {} }) })
   protocol.registerHandler('https', sink, true)

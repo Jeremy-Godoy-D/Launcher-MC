@@ -1,6 +1,12 @@
 import type { WithDownload } from '@xmcl/installer'
 import type { SubState, Task } from '../task'
 
+export interface ResolveMarketFilesTask extends Task {
+  type: 'resolveMarketFiles'
+  operationId: string
+  market: 0 | 1
+}
+
 export interface InstallModrinthFileTrackerEvents {
   download: WithDownload<{}>
 }

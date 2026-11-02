@@ -65,7 +65,7 @@ export async function prepareModInstallReview(
   if (recoveryReview?.domain !== undefined && recoveryReview.domain !== domain) throw changed()
   if (domain !== 'mods') {
     const before = activeInstallFiles(state, true).map(file => file.path.replace(/\\/g, '/')).sort(), after = activeInstallFiles(state).map(file => file.path.replace(/\\/g, '/')).sort()
-    if (JSON.stringify(before) !== JSON.stringify(after)) throw new Error('Pack updates preserve archive names')
+    if (before.some(name => !after.includes(name))) throw new Error('Pack updates preserve archive names')
   }
   const paths = [...new Set(updates.map(update => modPath(update.file.path, domain)))]
   const wanted = new Map(activeInstallFiles(state).map(file => {
@@ -89,6 +89,11 @@ export async function prepareModInstallReview(
     else {
       if (reviewedInventory!.fingerprint !== review.snapshot) throw changed()
       for (const file of oldFiles) if (await readHash(modPath(file.path, domain)) !== file.hashes.sha1?.toLowerCase()) throw changed()
+      const replacements = new Set(oldFiles.map(file => modPath(file.path, domain)))
+      for (const [name, hash] of wanted) {
+        const actual = await readHash(name)
+        if (!replacements.has(name) && actual !== null && actual !== hash) throw new Error('A different pack already occupies the installation filename')
+      }
     }
     const targets: Record<string, string | null> = {}
     for (const name of paths) targets[name] = await readHash(name)

@@ -1,4 +1,5 @@
 import { Readable } from 'stream'
+import { isCatalogMetadataRead } from '@xmcl/runtime-api/src/util/catalogMetadata'
 
 export interface Context {
   request: Request
@@ -78,7 +79,7 @@ export class LauncherProtocolHandler {
   private beginCatalogRequest(request: Request) {
     const key = Object.keys(request.headers).find(key => key.toLowerCase() === 'x-grimo-catalog-request'), id: unknown = key ? request.headers[key] : undefined
     if (key) delete request.headers[key]
-    if (!this.catalogId(id) || request.method !== 'GET' || request.url.protocol !== 'https:' || !['api.modrinth.com', 'api.curseforge.com'].includes(request.url.host)) return
+    if (!this.catalogId(id) || !isCatalogMetadataRead(request.url, request.method)) return
     if (this.catalogRequests.has(id) || this.catalogRequests.size >= 64) throw new Error('Catalog request capacity reached')
     const controller = new AbortController()
     request.signal = request.signal ? AbortSignal.any([request.signal, controller.signal]) : controller.signal

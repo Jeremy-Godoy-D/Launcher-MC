@@ -27,6 +27,7 @@ export type InstallMarketOptions = InstallMarketOptionsModrinth | InstallMarketO
 
 export type InstallMarketOptionWithInstance = InstallMarketOptions & {
   instancePath: string
+  id?: string
 }
 
 export enum MarketType {

@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import { createServer } from 'node:http'
+import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
 import { createHash } from 'node:crypto'
 import type { LauncherFixture } from '../fixtures/launcher'
 
@@ -12,7 +12,7 @@ export function modrinthHit(index: number, type = 'modpack', query = '') {
 export function curseforgeMod(index = 1) {
   return { id: index, gameId: 432, classId: 6, name: `Proyecto CurseForge ${index}`, summary: 'Descripción proporcionada por su creador.', authors: [{ name: 'Autor CF' }], downloadCount: 150000, logo: { thumbnailUrl: catalogImage, url: catalogImage }, screenshots: [{ modId: index, url: catalogImage }], links: { websiteUrl: `https://www.curseforge.com/minecraft/mc-mods/project-${index}` } }
 }
-export async function mockReactCatalog(launcher: LauncherFixture, archives?: { modrinth: Buffer; curseforge: Buffer }) {
+export async function mockReactCatalog(launcher: LauncherFixture, archives?: { modrinth: Buffer; curseforge: Buffer }, handle?: (url: URL, request: IncomingMessage, response: ServerResponse) => boolean) {
   const image = await readFile(resolve('..', 'branding/copper/app-64.png'))
   const state = { mode: 'normal' as 'normal' | 'races' | 'errors', fileMode: 'normal' as 'normal' | 'badHash' | 'slow' | 'metadataSlow' | 'wrongId' | 'wrongProject' | 'blocked', fileStarted: false, fileAborted: false, metadataStarted: false, metadataAborted: false, phase: 0, slowStarted: false, slowAborted: false, release: () => {}, requests: [] as { url: string; key: boolean; authorization: boolean; cancellationId: boolean }[] }
   let base = ''
@@ -24,6 +24,7 @@ export async function mockReactCatalog(launcher: LauncherFixture, archives?: { m
     if (url.pathname === '/image') { response.writeHead(200, { 'content-type': 'image/png' }); response.end(image); return }
     state.requests.push({ url: url.pathname + url.search, key: !!request.headers['x-api-key'], authorization: !!request.headers.authorization, cancellationId: !!request.headers['x-grimo-catalog-request'] })
     const json = (value: unknown, status = 200, headers: Record<string, string> = {}) => { response.writeHead(status, { 'content-type': 'application/json', ...headers }); response.end(JSON.stringify(value)) }
+    if (handle?.(url, request, response)) return
     if (url.pathname.startsWith('/archive/')) {
       const bytes = archives?.[url.pathname.endsWith('modrinth') ? 'modrinth' : 'curseforge']
       if (!bytes) { json({}, 404); return }
@@ -83,7 +84,7 @@ export async function mockReactCatalog(launcher: LauncherFixture, archives?: { m
   // Same native HTTP redirect used by spec86; clients, protocol/proxy handling and response parsing remain real.
   await launcher.app.evaluate(({ session }, base) => {
     ;(globalThis as any).__catalogNativeHops = []
-    session.defaultSession.webRequest.onBeforeRequest({ urls: ['https://api.modrinth.com/v2/*', 'https://*/v1/mods*', 'https://cdn.modrinth.com/catalog-qa.png'] }, (details: { url: string; webContentsId?: number }, callback: (response: { redirectURL?: string }) => void) => {
+    session.defaultSession.webRequest.onBeforeRequest({ urls: ['https://api.modrinth.com/v2/*', 'https://*/v1/*', 'https://cdn.modrinth.com/catalog-qa.png'] }, (details: { url: string; webContentsId?: number }, callback: (response: { redirectURL?: string }) => void) => {
       // Let the renderer reach its real protocol/proxy handler; redirect only the main-process HTTP hop.
       if (details.webContentsId && details.webContentsId > 0) { callback({}); return }
       const url = new URL(details.url), path = url.pathname === '/catalog-qa.png' ? '/image' : `${url.pathname.startsWith('/v1/') ? '/curseforge' : '/modrinth'}${url.pathname}${url.search}`
@@ -91,7 +92,7 @@ export async function mockReactCatalog(launcher: LauncherFixture, archives?: { m
       callback({ redirectURL: base + path })
     })
   }, base)
-  return { state, hops: () => launcher.app.evaluate(() => (globalThis as any).__catalogNativeHops as { provider: string; usedProxy: boolean }[]), close: async () => {
+  return { state, base, hops: () => launcher.app.evaluate(() => (globalThis as any).__catalogNativeHops as { provider: string; usedProxy: boolean }[]), close: async () => {
     await launcher.app.evaluate(({ session }) => { session.defaultSession.webRequest.onBeforeRequest(null) })
     server.closeAllConnections(); await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve()))
   } }

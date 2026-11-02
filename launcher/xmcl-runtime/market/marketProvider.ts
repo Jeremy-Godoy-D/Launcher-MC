@@ -20,6 +20,7 @@ export type InstallMarketInstanceOptions = InstallMarketOptions & {
    * The instance path to install the file
    */
   instancePath: string
+  id?: string
   /**
    * The domain of the resource
    */
