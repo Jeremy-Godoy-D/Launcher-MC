@@ -13,10 +13,9 @@ const settingsPath = (launcher: LauncherFixture) => join(launcher.appDataPath, '
 async function native(page: Page, mutation?: { method: string; value: unknown }) {
   return page.evaluate(async mutation => {
     const state = await (window as any).serviceChannels.open('BaseService').call('getSettings')
-    try {
-      if (mutation) await state.commit(mutation.method, mutation.value)
-      return Object.fromEntries(['locale', 'globalJava', 'globalAssignMemory', 'globalMinMemory', 'globalMaxMemory', 'globalVmOptions', 'globalMcOptions', 'globalResolution', 'globalPreExecuteCommand', 'globalEnv', 'globalDisableAuthlibInjector', 'httpProxy', 'httpProxyEnabled', 'maxSockets', 'maxAPISockets', 'apiSetsPreference'].map(key => [key, state[key]]))
-    } finally { await state.unref() }
+    // The production locale store owns this window's settings lease; do not release it here.
+    if (mutation) await state.commit(mutation.method, mutation.value)
+    return Object.fromEntries(['locale', 'globalJava', 'globalAssignMemory', 'globalMinMemory', 'globalMaxMemory', 'globalVmOptions', 'globalMcOptions', 'globalResolution', 'globalPreExecuteCommand', 'globalEnv', 'globalDisableAuthlibInjector', 'httpProxy', 'httpProxyEnabled', 'maxSockets', 'maxAPISockets', 'apiSetsPreference'].map(key => [key, state[key]]))
   }, mutation)
 }
 async function category(page: Page, id: string) {

@@ -49,7 +49,7 @@ export class BaseService extends AbstractService implements IBaseService {
     @Inject(kTasks) private tasks: Tasks,
   ) {
     super(app, async () => {
-      this.checkUpdate()
+      if (!process.env.XMCL_E2E) void this.checkUpdate().catch(error => this.warn(error))
     })
   }
 
