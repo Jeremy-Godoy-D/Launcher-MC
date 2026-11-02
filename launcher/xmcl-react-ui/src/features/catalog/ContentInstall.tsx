@@ -17,6 +17,7 @@ import { isOperationCancelled } from '../library/operations'
 import { updateLoaders, updateMods, shaderUpdateLoader } from '../instance/queryModUpdates'
 import { catalogClients, type CatalogProject } from './api'
 import { resolveCatalogDependencies, type CatalogVersion, type DependencyNode } from './dependencies'
+import { waitCatalogInventory } from './inventory'
 
 export type ContentSelection = { project: CatalogProject; candidate: CatalogVersion; target: SavedInstance }
 type Plan = Awaited<ReturnType<typeof resolveCatalogDependencies>>
@@ -68,8 +69,12 @@ export function ContentInstall({ selection, onBack, onBusy }: { selection: Conte
     request.current = createOperationId(); cancelling.current = false; setCancelRequested(false); cancelledTask.current = ''; setError(''); setPhase('prepare'); setReview(undefined)
     try {
       if ((await readPending()).length) throw Object.assign(new Error('Pending reviewed installation'), { code: 'pending' })
+      await store.revalidate()
+      const inventory = await snapshotFiles()
+      if (inventory.configuration && Object.keys({ ...target.runtime, ...inventory.configuration.runtime }).some(key => target.runtime[key as keyof typeof target.runtime] !== inventory.configuration!.runtime[key as keyof typeof target.runtime])) throw Object.assign(new Error('Instance runtime changed'), { code: 'incompatible' })
+      const files = await waitCatalogInventory(store, inventory.entries, domain, AbortSignal.any([abort.signal, AbortSignal.timeout(30000)]))
       const sources = domain === 'mods' ? await mods.getModSources(path) : domain === 'shaderpacks' ? await shaders.getShaderSources(path) : await packs.getPackSources(path)
-      const current = updateMods(resources.data.files, target.runtime, sources)
+      const current = updateMods(files, target.runtime, sources)
       let loader = ''
       try {
         if (domain === 'mods') loader = updateLoaders(target.runtime)[0]
@@ -77,17 +82,17 @@ export function ContentInstall({ selection, onBack, onBusy }: { selection: Conte
       } catch { throw Object.assign(new Error('Missing compatible runtime'), { code: 'incompatible' }) }
       const result = await resolveCatalogDependencies(captured.candidate, project, target.runtime.minecraft, loader, current, selected, catalogClients, abort.signal)
       abort.signal.throwIfAborted()
-      const inventory = await snapshotFiles(), changes = result.selected.filter(needed)
+      const changes = result.selected.filter(needed)
       const options: Extract<InstallInstanceOptions, { oldFiles: InstanceFile[] }> = { path, files: [], oldFiles: [], review: { ...(domain !== 'mods' ? { domain } : {}), snapshot: inventory.fingerprint, changes: [] } }
       if (changes.length) {
         const first = changes[0]
         const selectors = first.provider === 'modrinth'
           ? { market: 0 as const, version: changes.map(node => { if (node.provider !== 'modrinth') throw new Error('Provider changed'); return { versionId: node.version.id, projectId: node.project.id, ...(node.key === `${project.provider}:${project.id}` && project.icon ? { icon: project.icon } : {}) } }) }
           : { market: 1 as const, file: changes.map(node => { if (node.provider !== 'curseforge') throw new Error('Provider changed'); return { fileId: node.file.id, projectId: Number(node.project.id), ...(node.key === `${project.provider}:${project.id}` && project.icon ? { icon: project.icon } : {}) } }) }
-        const files = await service.resolveFromMarket({ ...selectors, instancePath: path, id: request.current })
+        const resolved = await service.resolveFromMarket({ ...selectors, instancePath: path, id: request.current })
         abort.signal.throwIfAborted()
         for (const node of changes) {
-          const found = files.find(file => node.provider === 'modrinth' ? file.modrinth?.projectId === node.project.id && file.modrinth.versionId === node.version.id : file.curseforge?.projectId === Number(node.project.id) && file.curseforge.fileId === node.file.id)
+          const found = resolved.find(file => node.provider === 'modrinth' ? file.modrinth?.projectId === node.project.id && file.modrinth.versionId === node.version.id : file.curseforge?.projectId === Number(node.project.id) && file.curseforge.fileId === node.file.id)
           if (!found || !/^[a-f0-9]{40}$/i.test(found.hashes.sha1 || '')) throw Object.assign(new Error('Missing file integrity'), { code: 'integrity' })
           const file = structuredClone(found)
           if (node.current) {
@@ -95,7 +100,7 @@ export function ContentInstall({ selection, onBack, onBusy }: { selection: Conte
             if (domain !== 'mods') file.path = `${domain}/${node.current.fileName}`
             else if (/\.disabled$/i.test(node.current.fileName) && !node.activate) file.path += '.disabled'
             if (node.activate) file.path = file.path.replace(/\.disabled$/i, '')
-          } else if (inventory.entries.some(entry => entry.fileName.toLowerCase() === file.path.split('/').at(-1)!.toLowerCase()) && !resources.data.files.some(existing => existing.fileName.toLowerCase() === file.path.split('/').at(-1)!.toLowerCase() && existing.hash === file.hashes.sha1)) throw Object.assign(new Error('Occupied filename'), { code: 'filenameConflict' })
+          } else if (inventory.entries.some(entry => entry.fileName.toLowerCase() === file.path.split('/').at(-1)!.toLowerCase()) && !files.some(existing => existing.fileName.toLowerCase() === file.path.split('/').at(-1)!.toLowerCase() && existing.hash === file.hashes.sha1)) throw Object.assign(new Error('Occupied filename'), { code: 'filenameConflict' })
           options.files.push(file)
         }
         if (new Set(options.files.map(file => file.path.toLowerCase())).size !== options.files.length) throw Object.assign(new Error('Conflicting filenames'), { code: 'filenameConflict' })
