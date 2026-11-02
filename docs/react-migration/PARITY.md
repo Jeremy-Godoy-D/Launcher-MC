@@ -15,15 +15,15 @@ Referencia: beta.2, commit `7671c6f1bdc471d42816241920a262a18aca5a44`. Alcance c
 | K05 | Versiones/loaders Java, BaseSettingVersions | version*, instanceVersionInstall*, JavaService | Usar resolución/instalación actual; conservar diagnosticar/reparar. | pending |
 | K06 | Lanzar/estado/salida/error | LaunchService, launchTask, launchException, instanceLaunch | Instancia/usuario capturados, estado proceso, no doble lanzamiento por Strict Mode. | pending |
 | K07 | Resumen `/instance`, Home.vue | InstanceService/VersionService, instanceJavaDiagnose | Runtime/última partida/acciones del núcleo y diagnóstico. | pass |
-| K08 | Mods `/instance/mods`, Mod.vue y acciones | InstanceModsService/InstanceModsGroupService, instanceMods, modUpgrade | Activar/instalar/actualizar/retirar/buscar/agrupar según funciones actuales. | pending |
-| K09 | Packs `/instance/resourcepacks` | InstanceResourcePacksService, instanceResourcePack | Instalar/activar/ordenar/retirar y metadatos públicos. | pending |
-| K10 | Shaders `/instance/shaderpacks` | InstanceShaderPacksService, instanceShaderPack | Compatibilidad, instalar/activar/retirar/actualizar. | pending |
+| K08 | Mods `/instance/mods`, Mod.vue y acciones | InstanceModsService/InstanceModsGroupService, instanceMods, modUpgrade | Activar/instalar/actualizar/retirar/buscar/agrupar según funciones actuales. | pass |
+| K09 | Packs `/instance/resourcepacks` | InstanceResourcePacksService, instanceResourcePack | Instalar/activar/ordenar/retirar y metadatos públicos. | pass |
+| K10 | Shaders `/instance/shaderpacks` | InstanceShaderPacksService, instanceShaderPack | Compatibilidad, instalar/activar/retirar/actualizar. | pass |
 | K11 | Mundos `/instance/save`, Save.vue | InstanceSavesService, instanceSave*, savesSearch | Operaciones locales, datapacks, importar/exportar/clonar/borrar y todas las herramientas locales: mapa, progreso, dimensiones, regiones y editar/copiar/pegar/eliminar chunks; revisión y backups de cambios. Confirmado por el usuario 2026-10-31. Compartir P2P se retira. | pass |
 | K12 | Ajustes `/instance/base-setting` | InstanceOptionsService/InstanceService, instanceOptions, instanceEdit | Java/RAM/args/resolución/heredar/restablecer/null, guardar/salir con cambios. Sin SSH ni editor de temas. | pass |
 | K13 | Entrar a servidor normal desde Minecraft | InstanceServerInfoService, BaseSettingServer, Instance.server | Conservar destino de servidor al lanzar Java; no confundir con host/SSH/P2P. | pass |
 | K14 | Catálogo `/store` | Store.vue, curseforgeSearch/modrinthSearch y clientes | Búsqueda/filtros/proveedores públicos, paginación, offline y fallo independiente. | pass |
-| K15 | Fichas `/store/{curseforge,modrinth}/:id` | StoreProject*, clientes existentes, DOMPurify | Información/galería/versiones/destino; conservar scroll/history/foco; ningún HTML ejecutable. | pending |
-| K16 | Instalación/actualización de contenido/modpacks | curseforgeInstaller/modrinthInstaller, ModpackService, InstanceInstallService | Dependencias/progreso/error/cancelar y confirmación del servicio; CF exclusivamente proxy. | pending |
+| K15 | Fichas `/store/{curseforge,modrinth}/:id` | StoreProject*, clientes existentes, DOMPurify | Información/galería/versiones/destino; conservar scroll/history/foco; ningún HTML ejecutable. | pass |
+| K16 | Instalación/actualización de contenido/modpacks | curseforgeInstaller/modrinthInstaller, ModpackService, InstanceInstallService | Dependencias/progreso/error/cancelar y confirmación del servicio; CF exclusivamente proxy. | pass |
 | K17 | Cuentas locales `/accounts`, SetupAccount | UserService/OfficialUserService, user.ts, LauncherAccounts | Crear/seleccionar/editar/eliminar local, preservar perfiles y selección. | complete |
 | K18 | Ajustes globales `/setting` | BaseService/JavaService, SettingGeneral/Global/Network/Advanced | Persistir idioma/directorios/Java/RAM/red/descargas y opciones núcleo; quitar categorías de extras. | pending |
 | K19 | Actualizaciones y notas | BaseService, SettingUpdate/SettingUpdateInfoDialog, ReleaseFile | url pública, apiUrl solo interno, operación manual, integridad, 800×400 y errores. | pending |
@@ -405,3 +405,9 @@ K15/K16/catalog-install siguen pending por mundos desde ficha, packs existentes/
 STAGE6-CATALOG-WORLDS.md acepta descarga verificadaCF hacia el importador existente, con destino capturado, confirmación preview/apply, colisiones/foco/integridad/cancelación/reintento y origen local sin identidadCF falsa. App969f7b7/fixturese10e1ff:3Native+13regresiones64/94,12focales,suite1460/143 heredada,tipos/lint/E2E56base,4Axe0violaciones/8incomplete y hostVue restaurado sin reconstruir Vue/DeskGap intactos.
 
 K15/K16/catalog-install aún pendientes por packs existentes/Biblioteca, estados por versión y dependencias de otra clase. No reimplementar mundos ni contenido aceptado. openModpack.config incluye xmclCache: whitelist antes de actualizar y ningún importModpack prematuro. CI9a64eb6 Vue success/React en curso;7–9 pendientes,Microsoft pospuesto,producción/proxy intactos.
+
+## Etapa6 completa — 2026-11-02
+
+STAGE6-CLOSURE.md acepta K08/K09/K10/K15/K16 junto a K14. App39700ac/candidata78f8bcd:35NativeReact distintos93–98 más2finales de presentación;1472/144/28,81s y18focales posteriores,tipos/lint/E2E56base,24Axe0violaciones/52incomplete (4repetidos),152IDs y hostVue restaurado. Actualización de packs existentes/Biblioteca con whitelist/runtime/upstream/backups/recuperación y mundos conservados; estados por versión, requisitos cruzados guiados verificados sin bucle y conflictos entre inventarios. Datos y proxy intactos.
+
+7 activa para globales/actualizador/tareas/migration/accesibilidad;8–9 pendientes. K03/K05/K06 mantienen aceptación física final9 según STAGE4-CLOSURE; no se rebajan esos criterios. CI9a64eb6/66e8877 success; nuevo push por comprobar. Microsoft pospuesto y PR4 borrador; avanzar a producción completa sin repetir áreas aceptadas.

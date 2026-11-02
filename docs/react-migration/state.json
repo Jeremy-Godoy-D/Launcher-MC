@@ -19,8 +19,8 @@
     ],
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
-  "currentStage": 6,
-  "nextAction": "Etapa6 activa: K14/search/network pass; K15/K16/catalog-install pending. STAGE6-CATALOG-WORLDS acepta mundoCF hacia WorldFilesDialog/preview/apply confirmados, app969f7b7/fixturese10e1ff:3Native96+13regresiones64/94,12unitfocales,suite1460/143 heredada,check/lint0/E2E56base,4Axe0/8incomplete,hostVue restaurado sin reconstruir consumidores intactos. Contenido mods/packs/shaders e974e30 y packs nuevos ya aceptados: no rehacer. Siguiente: actualizar modpacks existentes desde ficha/Biblioteca (openModpack, esperar ready, previewInstanceFiles/upstream/manifiestos); no copiar config completa con xmclCache/argumentos ni llamar importModpack antes de confirmar. Mantener whitelist, identidad, backups, sesiones y datos/mundos. Completar estados por versión y dependencias de otra clase. CI41443432293/9a64eb6:Vue success,React en curso; verificar sin reiniciar. Luego7globales,8defaultReact/recorte y9QA/ActionsWindows desechable/publicación0.3.0-beta.1. Microsoft pospuesto,producción/proxy intactos;ANALISIS protegido;sin fetch sustituido/DevTools/limpiezas denegadas.",
+  "currentStage": 7,
+  "nextAction": "Etapa6 completa: STAGE6-CLOSURE.md, K08/09/10/14/15/16 pass. App39700ac/candidata78f8bcd:35NativeReact distintos93–98+2 finales de etiqueta,1472/144 unit/28,81s y18afectadas posteriores,check/lint0/E2E56base,24Axe0/52incomplete (incluye4repetidos),152IDs,hostVue restaurado. No rehacer0–6. Etapa7 activa: extraer/reutilizar apariencia de App.tsx y completar ajustes globales mediante BaseService.getSettings/Settings.commit, Java/RAM/argumentos/red/directorios; actualizador/notas/enlaces públicos; tareas/notificaciones/ayuda y migration.html (auxiliary.tsx placeholder). Reusar logger/onboarding aceptados. CI9a64eb6 y66e8877 success ambas matrices; verificar nuevo push97/98 sin reiniciar. Luego8defaultReact/retiradaVue/extras,9juego/Java/loaders físicos K03/K05/K06,seguridad/presupuestos,NSIS/actualización en ActionsWindows desechable,assets y publicación0.3.0-beta.1. Microsoft pospuesto;producción/proxy intactos;ANALISIS protegido;sin fetch sustituido/DevTools/limpiezas denegadas.",
   "stages": [
     {
       "id": 0,
@@ -969,7 +969,7 @@
     {
       "id": 6,
       "title": "Catálogo público",
-      "status": "active",
+      "status": "complete",
       "gates": [
         {
           "id": "catalog-search",
@@ -990,13 +990,17 @@
             {
               "path": "docs/react-migration/STAGE6-CATALOG-WORLDS.md",
               "sha256": "d8c91e49bf17785c88549ad8b9531fdec6fc1fef832e9dab2c988a78c6326a03"
+            },
+            {
+              "path": "docs/react-migration/STAGE6-CLOSURE.md",
+              "sha256": "ec714c33218efaa4cc0f953e31dc9b2757e0f72c6294478df058d8231c960576"
             }
           ],
-          "note": "STAGE6-CATALOG-WORLDS:969f7b7/fixturese10e1ff;descargaCF verificada a importador existente con destino/confirmación/foco,3Native+13regresiones,12focales,1460/143heredada,tipos/lint/E2E56base,4Axe0/8incomplete y hostVue. K15/K16/catalog-install mantienen packs existentes/Biblioteca,estados por versión y dependencias cruzadas pendientes. CI9a64eb6 Vue success/React en curso; no repetir0–5 ni publicar."
+          "note": "STAGE6-CLOSURE acepta catálogo completo:buscar/fichas/destino/estados,instalar/actualizar mods,packs,shaders,mundos y packs existentes/Biblioteca,dependencias/guiado cruzado/conflictos,progreso/cancelación/recuperación.35NativeReact+2etiqueta,1472/144+18focales,tipos/lint/E2E56,24Axe0/52incomplete y hostVue; no certifica publicación ni partida real."
         },
         {
           "id": "catalog-install",
-          "status": "pending",
+          "status": "passed",
           "evidence": [
             {
               "path": "docs/react-migration/STAGE6-CATALOG-MODPACKS.md",
@@ -1009,9 +1013,13 @@
             {
               "path": "docs/react-migration/STAGE6-CATALOG-WORLDS.md",
               "sha256": "d8c91e49bf17785c88549ad8b9531fdec6fc1fef832e9dab2c988a78c6326a03"
+            },
+            {
+              "path": "docs/react-migration/STAGE6-CLOSURE.md",
+              "sha256": "ec714c33218efaa4cc0f953e31dc9b2757e0f72c6294478df058d8231c960576"
             }
           ],
-          "note": "STAGE6-CATALOG-WORLDS:969f7b7/fixturese10e1ff;descargaCF verificada a importador existente con destino/confirmación/foco,3Native+13regresiones,12focales,1460/143heredada,tipos/lint/E2E56base,4Axe0/8incomplete y hostVue. K15/K16/catalog-install mantienen packs existentes/Biblioteca,estados por versión y dependencias cruzadas pendientes. CI9a64eb6 Vue success/React en curso; no repetir0–5 ni publicar."
+          "note": "STAGE6-CLOSURE acepta catálogo completo:buscar/fichas/destino/estados,instalar/actualizar mods,packs,shaders,mundos y packs existentes/Biblioteca,dependencias/guiado cruzado/conflictos,progreso/cancelación/recuperación.35NativeReact+2etiqueta,1472/144+18focales,tipos/lint/E2E56,24Axe0/52incomplete y hostVue; no certifica publicación ni partida real."
         },
         {
           "id": "catalog-network-failures",
@@ -1032,16 +1040,20 @@
             {
               "path": "docs/react-migration/STAGE6-CATALOG-WORLDS.md",
               "sha256": "d8c91e49bf17785c88549ad8b9531fdec6fc1fef832e9dab2c988a78c6326a03"
+            },
+            {
+              "path": "docs/react-migration/STAGE6-CLOSURE.md",
+              "sha256": "ec714c33218efaa4cc0f953e31dc9b2757e0f72c6294478df058d8231c960576"
             }
           ],
-          "note": "STAGE6-CATALOG-WORLDS:969f7b7/fixturese10e1ff;descargaCF verificada a importador existente con destino/confirmación/foco,3Native+13regresiones,12focales,1460/143heredada,tipos/lint/E2E56base,4Axe0/8incomplete y hostVue. K15/K16/catalog-install mantienen packs existentes/Biblioteca,estados por versión y dependencias cruzadas pendientes. CI9a64eb6 Vue success/React en curso; no repetir0–5 ni publicar."
+          "note": "STAGE6-CLOSURE acepta catálogo completo:buscar/fichas/destino/estados,instalar/actualizar mods,packs,shaders,mundos y packs existentes/Biblioteca,dependencias/guiado cruzado/conflictos,progreso/cancelación/recuperación.35NativeReact+2etiqueta,1472/144+18focales,tipos/lint/E2E56,24Axe0/52incomplete y hostVue; no certifica publicación ni partida real."
         }
       ]
     },
     {
       "id": 7,
       "title": "Superficies restantes",
-      "status": "pending",
+      "status": "active",
       "gates": [
         {
           "id": "global-settings-updater",
@@ -1149,5 +1161,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-02T12:34:17Z"
+  "updatedAt": "2026-11-02T13:32:23Z"
 }
