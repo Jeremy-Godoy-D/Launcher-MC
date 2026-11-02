@@ -18,6 +18,7 @@ import { ModChangesDialog } from './ModChangesDialog'
 import { ModUpdates } from './ModUpdates'
 import { modModel } from './modModel'
 import { planModChanges } from '@xmcl/runtime-api/src/util/modChanges'
+import { waitCatalogInventory } from '../catalog/inventory'
 
 type ModChangeReview = { plan: ReturnType<typeof planModChanges>; inventory: ModFilesSnapshot; revision: number; enable: boolean; incomplete: boolean }
 
@@ -43,7 +44,8 @@ export function InstanceMods({ path, runtime, running, configuredJava }: { path:
   const detailsTrigger = useRef<HTMLButtonElement | null>(null)
   const removeButton = useRef<HTMLButtonElement>(null)
   const active = useRef(true), pending = useRef(false)
-  useEffect(() => { active.current = true; return () => { active.current = false } }, [])
+  const lifetime = useRef(new AbortController())
+  useEffect(() => { active.current = true; if (lifetime.current.signal.aborted) lifetime.current = new AbortController(); return () => { active.current = false; lifetime.current.abort() } }, [])
   const files = (snapshot.data?.files || []).map(file => { const identity = modIdentity(file, runtime); return { ...file, name: identity.name, resourceVersion: identity.version } })
   const memberships = useMemo(() => contentGroupMemberships(groups), [grouping.data?.groups])
   const fileGroups = (file: typeof files[number]) => memberships.get(normalizeModFileName(file.fileName)) || []
@@ -94,10 +96,11 @@ export function InstanceMods({ path, runtime, running, configuredJava }: { path:
     if (!active.current) return
     await store.revalidate()
     if (store.getSnapshot().status === 'error') throw new Error('refresh')
-    if (diagnostics) {
-      const inventory = await service.getModFilesSnapshot(path)
-      if (active.current) setDiagnostics(inventory)
-    }
+    const inventory = await service.getModFilesSnapshot(path), current = store.getSnapshot().data
+    // Wait for changed valid files; malformed files remain available to the diagnostics view.
+    const known = inventory.entries.filter(entry => current?.files.some(file => file.path === entry.path) && !current.errors.some(error => error.path === entry.path))
+    await waitCatalogInventory(store, known, 'mods', AbortSignal.any([lifetime.current.signal, AbortSignal.timeout(10000)]))
+    if (diagnostics && active.current) setDiagnostics(inventory)
   }
   function closeRemoval() { setRemoving(null) }
   return <section aria-labelledby="instance-mods-title" data-testid="instance-mods" data-instance-path={path} aria-busy={busy || snapshot.status === 'loading'}>

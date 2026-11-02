@@ -40,6 +40,7 @@ test('information follows current file metadata, closes on removal and stays wit
   await makeReactMod(a, 'alpha', 'Alpha', { description: 'Updated description', version: '2.0.0' })
   await list.getByRole('button', { name: 'Volver a leer', exact: true }).click()
   await expect(info).toContainText('Updated description'); await expect(info).toContainText('2.0.0')
+  await expect(info).toContainText(createHash('sha1').update(await readFile(join(a, 'mods/alpha.jar'))).digest('hex'))
   await list.getByRole('button', { name: 'Desactivar Alpha', exact: true }).click()
   await expect(info).toHaveCount(0)
   await expect(list.getByLabel('Buscar mods instalados')).toBeFocused()
