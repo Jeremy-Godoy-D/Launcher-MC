@@ -48,12 +48,12 @@ export function curseforgeProject(row: Mod, fallback: Kind): CatalogProject {
 export async function searchCatalog(query: CatalogQuery, signal?: AbortSignal): Promise<{ projects: CatalogProject[]; total: number }> {
   if (query.provider === 'modrinth') {
     if (query.kind === 'world') return { projects: [], total: 0 }
-    const facets = [[`project_type:${query.kind}`], ...(query.minecraft ? [[`versions:${query.minecraft}`]] : []), ...(query.loader && query.kind === 'mod' ? [[`categories:${query.loader}`]] : [])]
+    const facets = [[`project_type:${query.kind}`], ...(query.minecraft ? [[`versions:${query.minecraft}`]] : []), ...(query.loader && (query.kind === 'mod' || query.kind === 'modpack') ? [[`categories:${query.loader}`]] : [])]
     const result = await modrinth.searchProjects({ query: query.text, facets: JSON.stringify(facets), index: query.sort, limit: PAGE_SIZE, offset: query.page * PAGE_SIZE }, signal)
     if (!Array.isArray(result.hits) || result.hits.length > PAGE_SIZE || !Number.isSafeInteger(result.total_hits) || result.total_hits < 0) throw new Error('Invalid catalog response')
     return { projects: result.hits.map(modrinthProject), total: result.total_hits }
   }
-  const result = await curseforge.searchMods({ classId: classIds[query.kind], searchFilter: query.text, gameVersion: query.minecraft || undefined, modLoaderType: query.loader && query.kind === 'mod' ? loaderIds[query.loader] : undefined, sortField: cfSort[query.sort], index: query.page * PAGE_SIZE, pageSize: PAGE_SIZE }, signal)
+  const result = await curseforge.searchMods({ classId: classIds[query.kind], searchFilter: query.text, gameVersion: query.minecraft || undefined, modLoaderType: query.loader && (query.kind === 'mod' || query.kind === 'modpack') ? loaderIds[query.loader] : undefined, sortField: cfSort[query.sort], index: query.page * PAGE_SIZE, pageSize: PAGE_SIZE }, signal)
   if (!Array.isArray(result.data) || result.data.length > PAGE_SIZE || !Number.isSafeInteger(result.pagination.totalCount) || result.pagination.totalCount < 0) throw new Error('Invalid catalog response')
   return { projects: result.data.map(row => curseforgeProject(row, query.kind)), total: result.pagination.totalCount }
 }

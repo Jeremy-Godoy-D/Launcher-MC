@@ -23,6 +23,13 @@ it('uses the existing CurseForge client without any renderer API key', async () 
   const [input, init] = fetch.mock.calls[0] as unknown as [URL, RequestInit]
   expect(input.hostname).toBe('api.curseforge.com'); expect(input.searchParams.get('classId')).toBe('6552'); expect(input.searchParams.get('index')).toBe('24'); expect(new Headers(init.headers).has('x-api-key')).toBe(false)
 })
+it.each(['modrinth', 'curseforge'])('applies the selected loader to modpack searches on %s', async provider => {
+  const fetch = vi.fn(async () => Response.json(provider === 'modrinth' ? { hits: [], total_hits: 0 } : { data: [], pagination: { totalCount: 0 } })); vi.stubGlobal('fetch', fetch)
+  await searchCatalog(readCatalogQuery(new URLSearchParams(`source=${provider}&kind=modpack&loader=fabric`)))
+  const [url] = fetch.mock.calls[0] as unknown as [URL]
+  if (provider === 'modrinth') expect(JSON.parse(url.searchParams.get('facets')!)).toContainEqual(['categories:fabric'])
+  else { expect(url.searchParams.get('classId')).toBe('4471'); expect(url.searchParams.get('modLoaderType')).toBe('4') }
+})
 it('rejects malformed provider responses and avoids unsupported world requests', async () => {
   const fetch = vi.fn(async () => Response.json({ hits: {}, total_hits: 0 })); vi.stubGlobal('fetch', fetch)
   await expect(searchCatalog(readCatalogQuery(new URLSearchParams()))).rejects.toThrow('Invalid catalog response')

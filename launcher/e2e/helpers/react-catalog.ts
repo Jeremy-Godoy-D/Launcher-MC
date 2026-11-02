@@ -47,7 +47,7 @@ export async function mockReactCatalog(launcher: LauncherFixture) {
       return
     }
     const id = Number(/^\/curseforge\/v1\/mods\/(\d+)/.exec(url.pathname)?.[1] || 1)
-    if (url.pathname === '/curseforge/v1/mods/search') json({ data: Array.from({ length: 24 }, (_, index) => curseforgeMod(Number(url.searchParams.get('index') || 0) + index + 1)), pagination: { totalCount: 48 } })
+    if (url.pathname === '/curseforge/v1/mods/search') json(url.searchParams.get('searchFilter') === 'fixture-empty' ? { data: [], pagination: { totalCount: 0 } } : { data: Array.from({ length: 24 }, (_, index) => curseforgeMod(Number(url.searchParams.get('index') || 0) + index + 1)), pagination: { totalCount: 48 } })
     else if (url.pathname.endsWith('/description')) json({ data: catalogBody })
     else if (url.pathname.endsWith('/files')) json({ data: [{ id: 101, modId: id, gameId: 432, displayName: 'Versión CF compatible', fileName: 'catalog.jar', fileDate: '2026-10-30T12:00:00Z', gameVersions: ['1.21.1', 'Fabric'], releaseType: 1, dependencies: [] }], pagination: { totalCount: 1 } })
     else json({ data: curseforgeMod(id) })

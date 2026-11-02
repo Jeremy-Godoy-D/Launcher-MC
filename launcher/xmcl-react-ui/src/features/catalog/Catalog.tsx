@@ -153,7 +153,7 @@ function CatalogPage() {
     <div id="catalog-filters" className="catalog-filters" hidden={!filters}>
       <label>{t('react.catalog.kind')}<select data-testid="catalog-kind" value={query.kind} onChange={event => change({ kind: event.target.value })}>{kinds.map(kind => <option key={kind} value={kind}>{t(`react.catalog.kind_${kind}`)}</option>)}</select></label>
       <label>{t('react.catalog.minecraft')}<input data-testid="catalog-minecraft" placeholder="1.21.1" maxLength={40} pattern="[A-Za-z0-9_.-]{1,40}" value={minecraft} onChange={event => setMinecraft(event.target.value)} onBlur={event => { if (event.currentTarget.reportValidity() && minecraft !== query.minecraft) change({ minecraft }, true) }} onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); event.currentTarget.blur() } }} /></label>
-      <label>{t('react.catalog.loader')}<select data-testid="catalog-loader" value={query.loader} onChange={event => change({ loader: event.target.value })}>{loaders.map(loader => <option key={loader} value={loader}>{loader || t('react.catalog.anyLoader')}</option>)}</select></label>
+      <label>{t('react.catalog.loader')}<select data-testid="catalog-loader" value={query.loader} disabled={query.kind !== 'mod' && query.kind !== 'modpack'} onChange={event => change({ loader: event.target.value })}>{loaders.map(loader => <option key={loader} value={loader}>{loader || t('react.catalog.anyLoader')}</option>)}</select></label>
       <label>{t('react.catalog.sort')}<select data-testid="catalog-sort" value={query.sort} onChange={event => change({ sort: event.target.value })}>{sorts.map(sort => <option key={sort} value={sort}>{t(`react.catalog.sort_${sort}`)}</option>)}</select></label>
       <button className="button secondary" onClick={() => { setText(''); setParams({ source: query.provider }, { preventScrollReset: true }) }}>{t('react.catalog.clear')}</button>
     </div>
@@ -171,7 +171,7 @@ function CatalogPage() {
           <button className="button secondary" onClick={event => open(project, event.currentTarget)}>{t('react.catalog.view')}<ArrowRight size={16} aria-hidden="true" /></button>
         </article>)}
       </div>
-      {!result.data.projects.length && query.kind !== 'world' && <div className="empty"><Search size={28} aria-hidden="true" /><h2>{t('react.catalog.empty')}</h2><p>{t('react.catalog.emptyHelp')}</p></div>}
+      {!result.data.projects.length && !(query.kind === 'world' && query.provider === 'modrinth') && <div className="empty"><Search size={28} aria-hidden="true" /><h2>{t('react.catalog.empty')}</h2><p>{t('react.catalog.emptyHelp')}</p></div>}
       {result.data.total > PAGE_SIZE && <nav className="catalog-pagination" aria-label={t('react.catalog.resultPages')}>
         <button className="button secondary" disabled={!query.page || result.isFetching} onClick={() => change({ page: String(query.page - 1) })}><ChevronLeft size={16} />{t('react.catalog.previous')}</button>
         <span>{t('react.catalog.page', { page: n(query.page + 1), total: n(Math.min(417, Math.ceil(result.data.total / PAGE_SIZE))) })}</span>
