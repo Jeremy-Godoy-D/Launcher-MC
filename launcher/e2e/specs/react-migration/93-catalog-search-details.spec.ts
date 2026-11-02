@@ -27,7 +27,7 @@ test('React searches both public sources with shareable filters, paging and no r
   const requests = catalog.state.requests
   const cf = requests.map(request => new URL(request.url, 'http://fixture')).find(url => url.pathname === '/curseforge/v1/mods/search')!
   expect(cf.searchParams.get('gameVersion')).toBe('1.21.1'); expect(cf.searchParams.get('modLoaderType')).toBe('4')
-  expect(requests.every(request => !request.key && !request.authorization)).toBe(true)
+  expect(requests.every(request => !request.key && !request.authorization && !request.cancellationId)).toBe(true)
   await area.getByTestId('catalog-source-modrinth').click(); await area.getByTestId('catalog-kind').selectOption('world')
   await expect(area.getByRole('status').filter({ hasText: 'Los mundos' })).toContainText('Los mundos están disponibles en CurseForge')
   await writeFile(testInfo.outputPath('catalog-requests.json'), JSON.stringify(requests, null, 2))
@@ -103,4 +103,17 @@ test('React reports authorization, malformed data and invalid links without leak
   await expect(page.locator('body')).not.toContainText('REMOTE_PRIVATE_ERROR')
   await page.evaluate(() => { location.hash = '/store/modrinth/invalid-path' }); await expect(page.getByTestId('catalog-project').getByRole('alert')).toContainText('No pudimos cargar')
   await page.keyboard.press('Escape'); await expect(page).toHaveURL(/#\/store$/)
+})
+
+test('React pauses uncached catalog searches offline and resumes once without installing content', async ({ launcher, catalog }) => {
+  const page = launcher.main; await page.getByTestId('nav-store').click(); await expect(page.locator('.project-card')).toHaveCount(24)
+  const before = catalog.state.requests.filter(request => request.url.includes('/v2/search')).length
+  try {
+    await page.context().setOffline(true)
+    await page.getByTestId('store-search').fill('offline'); await page.getByTestId('store-search').press('Enter')
+    await expect(page.getByTestId('catalog').getByRole('status')).toContainText('Sin conexión')
+    expect(catalog.state.requests.filter(request => request.url.includes('/v2/search')).length).toBe(before)
+  } finally { await page.context().setOffline(false) }
+  await expect(page.locator('.project-card').first()).toContainText('offline 1')
+  expect(catalog.state.requests.filter(request => request.url.includes('/v2/search')).length).toBe(before + 1)
 })

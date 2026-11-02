@@ -18,7 +18,7 @@ it('cancels only the identified metadata read and removes its header before any 
 it('handles cancellation arriving before dispatch without starting the network operation', async () => {
   const protocol = new LauncherProtocolHandler(), sink = vi.fn(); protocol.registerHandler('https', sink, true)
   await cancel(protocol)
-  await expect(protocol.handle(request())).rejects.toHaveProperty('name', 'AbortError'); expect(sink).not.toHaveBeenCalled()
+  expect((await protocol.handle(request())).status).toBe(499); expect(sink).not.toHaveBeenCalled()
 })
 it('bounds a stalled public read to 30 seconds and clears the retained capability', async () => {
   vi.useFakeTimers(); const protocol = new LauncherProtocolHandler(); let signal: AbortSignal | undefined

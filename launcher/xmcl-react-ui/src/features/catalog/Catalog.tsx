@@ -44,7 +44,7 @@ function ProjectVersions({ detail, query }: { detail: CatalogDetail; query: Cata
       {library?.instances.map(instance => <option key={instance.path} value={instance.path}>{instance.name} · {instance.runtime.minecraft}</option>)}
     </select>
     <p className="form-help">{t('react.catalog.compatibility', { minecraft: minecraft || t('react.catalog.anyVersion'), loader: loader || t('react.catalog.anyLoader') })}</p>
-    {versions.isPending && <p role="status">{t('react.catalog.loadingVersions')}</p>}
+    {versions.isPending && <p role="status">{t(versions.fetchStatus === 'paused' ? 'react.catalog.offline' : 'react.catalog.loadingVersions')}</p>}
     {versions.isError && <Failure error={versions.error} retry={() => void versions.refetch()} />}
     {!versions.isPending && !versions.isError && !rows.length && <p role="status">{t('react.catalog.noVersions')}</p>}
     <ul className="catalog-version-list" data-testid="catalog-versions">
@@ -80,7 +80,7 @@ function ProjectSheet({ provider, id, query, close, returnFocus }: { provider: P
         {['about', 'gallery', 'versions'].map(value => <button key={value} aria-pressed={tab === value} onClick={() => setTab(value)}>{t(`react.catalog.${value}`)}</button>)}
       </nav>}
       <div className="creation-body catalog-sheet-body" ref={body}>
-        {detail.isPending && <p role="status">{t('react.catalog.loadingProject')}</p>}
+        {detail.isPending && <p role="status">{t(detail.fetchStatus === 'paused' ? 'react.catalog.offline' : 'react.catalog.loadingProject')}</p>}
         {detail.isError && <Failure error={detail.error} retry={() => void detail.refetch()} />}
         {detail.data && <>
           {tab === 'about' && <>
@@ -108,6 +108,7 @@ function ProjectSheet({ provider, id, query, close, returnFocus }: { provider: P
 function CatalogPage() {
   const { t, n } = useI18n(), [params, setParams] = useSearchParams(), location = useLocation(), navigate = useNavigate()
   const query = readCatalogQuery(params), [text, setText] = useState(query.text), [filters, setFilters] = useState(false)
+  const [minecraft, setMinecraft] = useState(query.minecraft)
   const restore = useRef<HTMLElement | null>(null), scroll = useRef(0), search = useRef<HTMLInputElement>(null)
   const result = useQuery({ queryKey: ['catalog-search', query], queryFn: ({ signal }) => searchCatalog(query, signal) })
   const route = /^\/store\/(modrinth|curseforge)\/([^/]+)\/?$/.exec(location.pathname)
@@ -118,6 +119,7 @@ function CatalogPage() {
     setParams(next, { replace, preventScrollReset: true })
   }
   useEffect(() => { setText(query.text) }, [query.text])
+  useEffect(() => { setMinecraft(query.minecraft) }, [query.minecraft])
   const opened = useRef(false)
   useEffect(() => {
     if (route) { opened.current = true; return }
@@ -150,13 +152,13 @@ function CatalogPage() {
     <div className="source-tabs" aria-label={t('react.catalog.source')}>{providers.map(provider => <button data-testid={`catalog-source-${provider}`} key={provider} aria-pressed={query.provider === provider} onClick={() => change({ source: provider })}>{provider === 'modrinth' ? 'Modrinth' : 'CurseForge'}</button>)}</div>
     <div id="catalog-filters" className="catalog-filters" hidden={!filters}>
       <label>{t('react.catalog.kind')}<select data-testid="catalog-kind" value={query.kind} onChange={event => change({ kind: event.target.value })}>{kinds.map(kind => <option key={kind} value={kind}>{t(`react.catalog.kind_${kind}`)}</option>)}</select></label>
-      <label>{t('react.catalog.minecraft')}<input data-testid="catalog-minecraft" placeholder="1.21.1" maxLength={40} value={query.minecraft} onChange={event => change({ minecraft: event.target.value }, true)} /></label>
+      <label>{t('react.catalog.minecraft')}<input data-testid="catalog-minecraft" placeholder="1.21.1" maxLength={40} pattern="[A-Za-z0-9_.-]{1,40}" value={minecraft} onChange={event => setMinecraft(event.target.value)} onBlur={event => { if (event.currentTarget.reportValidity() && minecraft !== query.minecraft) change({ minecraft }, true) }} onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); event.currentTarget.blur() } }} /></label>
       <label>{t('react.catalog.loader')}<select data-testid="catalog-loader" value={query.loader} onChange={event => change({ loader: event.target.value })}>{loaders.map(loader => <option key={loader} value={loader}>{loader || t('react.catalog.anyLoader')}</option>)}</select></label>
       <label>{t('react.catalog.sort')}<select data-testid="catalog-sort" value={query.sort} onChange={event => change({ sort: event.target.value })}>{sorts.map(sort => <option key={sort} value={sort}>{t(`react.catalog.sort_${sort}`)}</option>)}</select></label>
       <button className="button secondary" onClick={() => { setText(''); setParams({ source: query.provider }, { preventScrollReset: true }) }}>{t('react.catalog.clear')}</button>
     </div>
     {query.kind === 'world' && query.provider === 'modrinth' && <p role="status">{t('react.catalog.worldSource')} <button className="button secondary" onClick={() => change({ source: 'curseforge' })}>CurseForge</button></p>}
-    {result.isPending && <p role="status">{t('react.catalog.loading')}</p>}
+    {result.isPending && <p role="status">{t(result.fetchStatus === 'paused' ? 'react.catalog.offline' : 'react.catalog.loading')}</p>}
     {result.isError && <Failure error={result.error} retry={() => void result.refetch()} stale={!!result.data} />}
     {result.data && <>
       <p className="catalog-count" role="status">{t('react.catalog.results', { count: n(result.data.total) })}{result.isFetching && ` · ${t('react.catalog.refreshing')}`}</p>

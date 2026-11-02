@@ -13,11 +13,11 @@ export function curseforgeMod(index = 1) {
 }
 export async function mockReactCatalog(launcher: LauncherFixture) {
   const image = await readFile(resolve('..', 'branding/copper/app-64.png'))
-  const state = { mode: 'normal' as 'normal' | 'races' | 'errors', phase: 0, slowStarted: false, slowAborted: false, release: () => {}, requests: [] as { url: string; key: boolean; authorization: boolean }[] }
+  const state = { mode: 'normal' as 'normal' | 'races' | 'errors', phase: 0, slowStarted: false, slowAborted: false, release: () => {}, requests: [] as { url: string; key: boolean; authorization: boolean; cancellationId: boolean }[] }
   const server = createServer((request, response) => {
     const url = new URL(request.url!, 'http://fixture')
     if (url.pathname === '/image') { response.writeHead(200, { 'content-type': 'image/png' }); response.end(image); return }
-    state.requests.push({ url: url.pathname + url.search, key: !!request.headers['x-api-key'], authorization: !!request.headers.authorization })
+    state.requests.push({ url: url.pathname + url.search, key: !!request.headers['x-api-key'], authorization: !!request.headers.authorization, cancellationId: !!request.headers['x-grimo-catalog-request'] })
     const json = (value: unknown, status = 200, headers: Record<string, string> = {}) => { response.writeHead(status, { 'content-type': 'application/json', ...headers }); response.end(JSON.stringify(value)) }
     const project = /^\/modrinth\/v2\/project\/([^/]+)/.exec(url.pathname)?.[1] || 'AAAA0001'
     if (url.pathname === '/modrinth/v2/search') {

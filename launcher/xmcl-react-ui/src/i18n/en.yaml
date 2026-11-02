@@ -1231,3 +1231,4 @@ react:
     retryAt: "Try again after {time}."
     cached: "Showing previously loaded public metadata."
     back: "Return to catalog"
+    offline: 'Offline. This public query will resume when the connection returns.'

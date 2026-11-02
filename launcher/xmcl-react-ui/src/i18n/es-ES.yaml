@@ -1231,3 +1231,4 @@ react:
     retryAt: "Reintenta después de las {time}."
     cached: "Se muestran los metadatos públicos cargados anteriormente."
     back: "Volver al catálogo"
+    offline: 'Sin conexión. Esta consulta pública continuará cuando vuelva la conexión.'

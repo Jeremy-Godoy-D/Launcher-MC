@@ -12,7 +12,7 @@ Las cifras exactas y hashes se registran en STAGE1.json; esta tabla redondea las
 
 ## Recursos de proyectos
 
-`src/project-fixtures.json` contiene una muestra pública de los endpoints `https://api.modrinth.com/v2/project/{id}`: Fabulously Optimized (1KVo5zza), Sodium (AANobbMI), Iris (YL57xq9U). Los iconos y galerías se consumen desde sus URLs de metadatos en cdn.modrinth.com; no se buscaron sustitutos en bancos de imágenes. El pack utiliza su propia destacada «Sunrise behind a hill». El catálogo de esta etapa no es una búsqueda real ni conecta CurseForge.
+`src/project-fixtures.json` contiene una muestra pública de los endpoints `https://api.modrinth.com/v2/project/{id}`: Fabulously Optimized (1KVo5zza), Sodium (AANobbMI), Iris (YL57xq9U). Los iconos y galerías se consumen desde sus URLs de metadatos en cdn.modrinth.com; no se buscaron sustitutos en bancos de imágenes. El pack utiliza su propia destacada «Sunrise behind a hill». Esta muestra solo documenta el prototipo aprobado de la etapa1. Desde la etapa6, el catálogo de la aplicación consulta los clientes reales de Modrinth/CurseForge y utiliza sus metadatos actuales; este archivo JSON ya no se importa en el renderer.
 
 ## Tres ambientes empaquetados
 

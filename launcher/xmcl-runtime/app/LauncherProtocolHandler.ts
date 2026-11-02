@@ -145,7 +145,11 @@ export class LauncherProtocolHandler {
       await handle(context)
       if (finish && context.response.body instanceof Readable) context.response.body.once('end', finish).once('close', finish).once('error', finish)
       else finish?.()
-    } catch (error) { finish?.(); throw error }
+    } catch (error) {
+      finish?.()
+      if (finish && context.request.signal?.aborted) return { status: 499, headers: { 'cache-control': 'no-store' } }
+      throw error
+    }
     return {
       status: context.response.status ?? 404,
       headers: context.response.headers,
