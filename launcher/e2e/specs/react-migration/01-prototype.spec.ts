@@ -2,8 +2,16 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { writeFile } from 'node:fs/promises'
 import axe from 'axe-core'
-import { test, expect, snap, type LauncherFixture } from '../../helpers/scratch'
+import { test as base, expect, snap, type LauncherFixture } from '../../helpers/scratch'
 import { seedReactLibrary } from '../../helpers/react-library'
+import { mockReactCatalog } from '../../helpers/react-catalog'
+
+const test = base.extend<{ catalog: Awaited<ReturnType<typeof mockReactCatalog>> }>({
+  catalog: [async ({ launcher }, use) => {
+    const catalog = await mockReactCatalog(launcher)
+    try { await use(catalog) } finally { await catalog.close() }
+  }, { auto: true }],
+})
 
 const url = pathToFileURL(resolve(dirname(fileURLToPath(import.meta.url)), '../../../xmcl-react-ui/dist/index.html')).href
 
@@ -60,7 +68,7 @@ test('React prototype: both appearances and supported sizes, navigation and auto
   expect(errors).toEqual([])
 })
 
-test('React prototype: independent selection, filters, dialogue focus and actual video pause', async ({ launcher }) => {
+test('React prototype: independent selection, filters, dialogue focus and actual video pause', async ({ launcher, catalog }) => {
   const { page, window } = await openPrototype(launcher)
   await page.emulateMedia({ reducedMotion: 'no-preference' })
   const background = page.getByTestId('app-backdrop')
@@ -134,11 +142,15 @@ test('React prototype: independent selection, filters, dialogue focus and actual
   await expect(page.getByRole('button', { name: 'Créditos visuales' })).toBeFocused()
   await page.getByTestId('nav-home').click()
   await expect(page.locator('.instance-row')).toHaveCount(0)
+  catalog.state.mode = 'errors'; catalog.state.phase = 2
   await page.getByTestId('nav-store').click()
   await page.getByLabel('Buscar en el catálogo').fill('inexistente')
+  await page.getByLabel('Buscar en el catálogo').press('Enter')
   await expect(page.getByRole('heading', { name: 'No encontramos ese contenido' })).toBeVisible()
-  await page.getByRole('button', { name: 'Limpiar búsqueda' }).click()
-  await expect(page.locator('.project-card')).toHaveCount(3)
+  catalog.state.mode = 'normal'
+  await page.getByRole('button', { name: 'Filtros', exact: true }).click()
+  await page.getByRole('button', { name: 'Limpiar filtros', exact: true }).click()
+  await expect(page.locator('.project-card')).toHaveCount(24)
   await page.getByTestId('nav-settings').click()
   await page.getByRole('checkbox', { name: 'Modo rendimiento' }).check()
   await expect.poll(() => page.locator('.sidebar').evaluate(element => getComputedStyle(element).backdropFilter)).toBe('none')

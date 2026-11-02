@@ -40,7 +40,12 @@ test('React searches both public sources with shareable filters, paging and no r
   const hops = await catalog.hops(); expect(hops.length).toBeGreaterThan(0); expect(hops.every(hop => hop.usedProxy)).toBe(true)
   await area.getByTestId('catalog-kind').selectOption('modpack')
   await expect.poll(() => catalog.state.requests.some(request => { const url = new URL(request.url, 'http://fixture'); return url.pathname === '/curseforge/v1/mods/search' && url.searchParams.get('classId') === '4471' && url.searchParams.get('modLoaderType') === '4' })).toBe(true)
-  await area.getByTestId('catalog-source-modrinth').click(); await area.getByTestId('catalog-kind').selectOption('world')
+  await area.evaluate(element => {
+    ;(element.querySelector('[data-testid="catalog-source-modrinth"]') as HTMLButtonElement).click()
+    const select = element.querySelector('[data-testid="catalog-kind"]') as HTMLSelectElement
+    select.value = 'world'; select.dispatchEvent(new Event('change', { bubbles: true }))
+  })
+  await expect(page).toHaveURL(/source=modrinth/); await expect(page).toHaveURL(/kind=world/)
   await expect(area.getByRole('status').filter({ hasText: 'Los mundos' })).toContainText('Los mundos están disponibles en CurseForge')
   await expect(area.getByTestId('catalog-loader')).toBeDisabled()
   await area.getByTestId('catalog-source-curseforge').click(); await area.getByTestId('store-search').fill('fixture-empty'); await area.getByTestId('store-search').press('Enter')

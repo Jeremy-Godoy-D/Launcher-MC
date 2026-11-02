@@ -164,7 +164,7 @@ function CatalogPage({ onImport }: { onImport: (path: string, trigger: HTMLEleme
     const next = new URLSearchParams(params)
     for (const [key, value] of Object.entries(values)) { if (value) next.set(key, value); else next.delete(key) }
     if (!('page' in values)) next.delete('page')
-    setParams(next, { replace, preventScrollReset: true })
+    setParams(next, { replace, preventScrollReset: true, flushSync: true })
   }
   useEffect(() => { setText(query.text) }, [query.text])
   useEffect(() => { setMinecraft(query.minecraft) }, [query.minecraft])
@@ -204,7 +204,7 @@ function CatalogPage({ onImport }: { onImport: (path: string, trigger: HTMLEleme
       <label>{t('react.catalog.minecraft')}<input data-testid="catalog-minecraft" placeholder="1.21.1" maxLength={40} pattern="[A-Za-z0-9_.-]{1,40}" value={minecraft} onChange={event => setMinecraft(event.target.value)} onBlur={event => { if (event.currentTarget.reportValidity() && minecraft !== query.minecraft) change({ minecraft }, true) }} onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); event.currentTarget.blur() } }} /></label>
       <label>{t('react.catalog.loader')}<select data-testid="catalog-loader" value={query.loader} disabled={query.kind !== 'mod' && query.kind !== 'modpack'} onChange={event => change({ loader: event.target.value })}>{loaders.map(loader => <option key={loader} value={loader}>{loader || t('react.catalog.anyLoader')}</option>)}</select></label>
       <label>{t('react.catalog.sort')}<select data-testid="catalog-sort" value={query.sort} onChange={event => change({ sort: event.target.value })}>{sorts.map(sort => <option key={sort} value={sort}>{t(`react.catalog.sort_${sort}`)}</option>)}</select></label>
-      <button className="button secondary" onClick={() => { setText(''); setParams({ source: query.provider }, { preventScrollReset: true }) }}>{t('react.catalog.clear')}</button>
+      <button className="button secondary" onClick={() => { setText(''); setParams({ source: query.provider }, { preventScrollReset: true, flushSync: true }) }}>{t('react.catalog.clear')}</button>
     </div>
     {query.kind === 'world' && query.provider === 'modrinth' && <p role="status">{t('react.catalog.worldSource')} <button className="button secondary" onClick={() => change({ source: 'curseforge' })}>CurseForge</button></p>}
     {result.isPending && <p role="status">{t(result.fetchStatus === 'paused' ? 'react.catalog.offline' : 'react.catalog.loading')}</p>}

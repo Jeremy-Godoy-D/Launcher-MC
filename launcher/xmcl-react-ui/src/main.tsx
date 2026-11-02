@@ -1,6 +1,7 @@
 import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { createHashRouter, RouterProvider } from 'react-router'
+import { createHashRouter } from 'react-router'
+import { RouterProvider } from 'react-router/dom'
 import { RendererClient } from '@launcher/renderer-client'
 import { ThemeServiceKey } from '@xmcl/runtime-api/src/services/ThemeService'
 import { App } from './App'

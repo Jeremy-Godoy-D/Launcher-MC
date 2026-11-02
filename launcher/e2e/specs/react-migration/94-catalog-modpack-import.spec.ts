@@ -29,6 +29,7 @@ async function openPack(launcher: LauncherFixture, provider = 'modrinth') {
   await page.getByTestId('nav-store').click()
   await page.getByTestId(`catalog-source-${provider}`).click()
   await expect(page.locator('.project-card')).toHaveCount(24)
+  await expect(page.locator('.project-card').first()).toHaveAttribute('data-project-id', provider === 'modrinth' ? 'AAAA0001' : '1')
   const trigger = page.locator('.project-card').first().getByRole('button', { name: 'Ver contenido', exact: true })
   await trigger.scrollIntoViewIfNeeded(); await activateLauncherControl(launcher, trigger)
   const sheet = page.getByTestId('catalog-project')
@@ -83,13 +84,19 @@ for (const [provider, theme] of [['modrinth', 'dark'], ['curseforge', 'light']])
   await expect(page.locator('h1')).toHaveText(`Catalog ${provider} QA`)
 })
 
-for (const mode of ['slow', 'metadataSlow'] as const) test(`React cancels a native ${mode} pack request and retries without creating an instance`, async ({ launcher, catalog }) => {
+for (const mode of ['slow', 'metadataSlow'] as const) test(`React cancels a native ${mode} pack request and retries without creating an instance`, async ({ launcher, catalog }, info) => {
   const page = launcher.main, trigger = await openPack(launcher)
+  if (mode === 'slow') await (await launcher.app.browserWindow(page)).evaluate(win => win.setContentSize(800, 400))
   catalog.state.fileMode = mode
   await page.getByTestId('catalog-import-version').click()
   await expect.poll(() => mode === 'slow' ? catalog.state.fileStarted : catalog.state.metadataStarted).toBe(true)
   const cancel = page.getByRole('button', { name: 'Cancelar descarga', exact: true })
-  await expect(cancel).toBeEnabled(); await cancel.click()
+  await expect(cancel).toBeEnabled(); await expect(cancel).toBeInViewport({ ratio: 1 })
+  if (mode === 'slow') {
+    await expect.poll(() => page.getByTestId('catalog-download').locator('progress').evaluate((element: HTMLProgressElement) => element.hasAttribute('value') && element.value > 0 && element.max > element.value)).toBe(true)
+    await page.screenshot({ path: info.outputPath('download-800.png') })
+  }
+  await cancel.click()
   await expect(page.getByTestId('catalog-download-error')).toContainText('Descarga cancelada')
   await expect.poll(() => mode === 'slow' ? catalog.state.fileAborted : catalog.state.metadataAborted).toBe(true)
   expect(await entries(join(launcher.gameDataPath, 'instances'))).toEqual([])
