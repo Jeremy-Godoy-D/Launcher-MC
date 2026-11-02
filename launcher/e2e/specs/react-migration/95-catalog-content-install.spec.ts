@@ -5,15 +5,27 @@ import { test as base, expect } from '../../helpers/scratch'
 import { seedReactLibrary } from '../../helpers/react-library'
 import { mockCatalogContent } from '../../helpers/react-catalog-content'
 import { activateLauncherControl } from '../../helpers/focus-launcher'
+import { makeReactMod } from '../../helpers/react-content'
 import type { LauncherFixture } from '../../fixtures/launcher'
 
 const test = base.extend<{ kind: 'mod' | 'resourcepack' | 'shader'; catalog: Awaited<ReturnType<typeof mockCatalogContent>> }>({
   kind: ['mod', { option: true }],
   catalog: async ({ launcher, kind }, use, info) => {
     const fixture = await mockCatalogContent(launcher, kind), errors: string[] = []
+    await launcher.app.evaluate(({ ipcMain }) => {
+      const original = (ipcMain as any)._invokeHandlers.get('service-call')
+      ;(globalThis as any).__contentReviewCalls = []
+      ipcMain.removeHandler('service-call')
+      ipcMain.handle('service-call', async (event, service, method, ...args) => {
+        const result = await original(event, service, method, ...args)
+        if (['getPackSources', 'getShaderSources', 'getModSources', 'resolveFromMarket', 'previewInstanceFiles'].includes(method)) (globalThis as any).__contentReviewCalls.push({ service, method, result })
+        return result
+      })
+    })
     launcher.main.on('pageerror', error => errors.push(error.message))
     try { await use(fixture) } finally {
       await writeFile(info.outputPath('content-http.json'), JSON.stringify({ ...fixture.state, ...fixture.content, nativeHops: await fixture.hops(), rendererErrors: errors }, null, 2))
+      await writeFile(info.outputPath('content-rpc.json'), JSON.stringify(await launcher.app.evaluate(() => (globalThis as any).__contentReviewCalls), null, 2))
       await fixture.close(); expect(errors).toEqual([])
     }
   },
@@ -95,6 +107,25 @@ test.describe('resource pack catalog review', () => {
     expect(await readFile(join(paths[1], 'options.txt'), 'utf8')).toBe('resourcePacks:["vanilla"]\r\n')
     const backups = await entries(join(paths[1], '.backups')); expect(backups.length).toBeGreaterThan(0)
     expect(await readFile(join(paths[1], '.backups', backups[0], 'resourcepacks', 'root1.zip'))).toEqual(catalog.assets.find(asset => asset.key === 'root1')!.bytes)
+  })
+})
+
+test.describe('shader catalog review', () => {
+  test.use({ kind: 'shader' })
+  for (const provider of ['modrinth', 'curseforge']) test(`React installs ${provider} shaders only after checking the target's Iris engine`, async ({ launcher, catalog }) => {
+    const page = launcher.main, paths = await seedReactLibrary(page)
+    await review(launcher, 'shader', provider, paths[1], 1, false)
+    await expect(page.getByTestId('catalog-install-error')).toContainText('compatible')
+    expect(catalog.content.transfers).toEqual([])
+    await makeReactMod(paths[1], 'iris', 'Iris')
+    await page.getByTestId('catalog-install').getByRole('button', { name: 'Reintentar', exact: true }).click()
+    await expect(page.getByTestId('catalog-install-confirm')).toBeEnabled()
+    await page.getByTestId('catalog-install-confirm').click()
+    await expect(page.getByTestId('catalog-install-complete')).toBeVisible()
+    expect((await entries(join(paths[1], 'shaderpacks'))).sort()).toEqual(['dependency.zip', 'root1.zip'])
+    expect(await entries(join(paths[0], 'shaderpacks'))).toEqual([])
+    expect(await readFile(join(paths[1], 'shaderpacks', 'root1.zip'))).toEqual(catalog.assets.find(asset => asset.key === 'root1')!.bytes)
+    expect(await entries(join(paths[1], 'mods'))).toEqual(['iris.jar'])
   })
 })
 

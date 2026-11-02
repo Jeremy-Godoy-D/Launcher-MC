@@ -4,6 +4,7 @@ import type { File } from '@xmcl/curseforge'
 import type { ProjectVersion } from '@xmcl/modrinth'
 import type { SavedInstance } from '../library/model'
 import { queryModUpdates, shaderUpdateLoader, updateLoaders, updateMods, type UpdateMod, type UpdateOptions } from './queryModUpdates'
+import { InstanceFile } from '../../../../packages/instance/files'
 
 const caches: QueryClient[] = []
 afterEach(() => { for (const cache of caches.splice(0)) cache.clear() })
@@ -92,6 +93,16 @@ it('uses committed provider IDs even before their batched state event, without m
   const sources = [{ hash, curseforge: { projectId: 11, fileId: 1 } }]
   expect(updateMods([file], runtime, sources)[0].curseforge).toEqual(sources[0].curseforge)
   expect(file.metadata).toEqual({})
+})
+
+it('omits database null provider references when constructing a native file manifest', () => {
+  const file = { hash, path: mod.path, fileName: mod.fileName, size: 100, name: 'A', metadata: {} } as Parameters<typeof updateMods>[0][number]
+  for (const provider of ['modrinth', 'curseforge'] as const) {
+    const source = { hash, modrinth: provider === 'modrinth' ? mod.modrinth : null, curseforge: provider === 'curseforge' ? mod.curseforge : null } as unknown as NonNullable<Parameters<typeof updateMods>[2]>[number]
+    const current = updateMods([file], runtime, [source])[0]
+    expect(current[provider === 'modrinth' ? 'curseforge' : 'modrinth']).toBeUndefined()
+    expect(InstanceFile.safeParse({ path: 'mods/a.jar.disabled', hashes: { sha1: hash }, size: current.size, modrinth: current.modrinth, curseforge: current.curseforge }).success).toBe(true)
+  }
 })
 
 it('queries resource packs for Vanilla using the documented minecraft identity without requiring a mod loader', async () => {

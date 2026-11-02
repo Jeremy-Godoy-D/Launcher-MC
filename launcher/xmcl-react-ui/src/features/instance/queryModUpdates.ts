@@ -22,7 +22,7 @@ type Clients = { modrinth: Pick<ModrinthV2Client, 'getLatestVersionsFromHashes' 
 
 export function updateMods(files: StateData<ResourceState>['files'], runtime: RuntimeVersions, sources: readonly ModSource[] = []): UpdateMod[] {
   const byHash = new Map(sources.map(source => [source.hash, source]))
-  return files.filter(file => /^[a-f0-9]{40}$/i.test(file.hash)).map(file => ({ path: file.path, name: modIdentity(file, runtime).name, fileName: file.fileName, hash: file.hash, size: file.size, curseforge: (byHash.get(file.hash) || file.metadata).curseforge, modrinth: (byHash.get(file.hash) || file.metadata).modrinth }))
+  return files.filter(file => /^[a-f0-9]{40}$/i.test(file.hash)).map(file => ({ path: file.path, name: modIdentity(file, runtime).name, fileName: file.fileName, hash: file.hash, size: file.size, curseforge: (byHash.get(file.hash) || file.metadata).curseforge ?? undefined, modrinth: (byHash.get(file.hash) || file.metadata).modrinth ?? undefined }))
 }
 
 export function updateLoaders(runtime: RuntimeVersions) {

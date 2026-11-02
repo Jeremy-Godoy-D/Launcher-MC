@@ -34,6 +34,7 @@ export function ContentInstall({ selection, onBack, onBusy }: { selection: Conte
   const installs = useService(InstanceInstallServiceKey), tasks = useTasks(), library = useLibrary(), navigate = useNavigate(), { t, n } = useI18n()
   const store = useSharedStateStore({ key: `instance-${domain}://${path}`, Type: ResourceState, load: client => client.service(domain === 'mods' ? InstanceModsServiceKey : domain === 'resourcepacks' ? InstanceResourcePacksServiceKey : InstanceShaderPacksServiceKey).watch(path) })
   const resources = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
+  const engines = useSharedStateStore({ key: `instance-mods://${path}`, Type: ResourceState, load: client => client.service(InstanceModsServiceKey).watch(path) })
   const [phase, setPhase] = useState<'prepare' | 'review' | 'install' | 'done' | 'error'>('prepare')
   const [plan, setPlan] = useState<Plan>(), [review, setReview] = useState<Review>(), [error, setError] = useState(''), [optional, setOptional] = useState(new Set<string>()), [pending, setPending] = useState<ReviewedModInstall[]>([])
   const [cancelRequested, setCancelRequested] = useState(false)
@@ -41,6 +42,7 @@ export function ContentInstall({ selection, onBack, onBusy }: { selection: Conte
   const message = useRef<HTMLParagraphElement>(null), cancelButton = useRef<HTMLButtonElement>(null)
   const engineSnapshot = useRef('')
   const busy = phase === 'prepare' || phase === 'install'
+  useEffect(() => domain === 'shaderpacks' ? engines.subscribe(() => {}) : undefined, [domain, engines])
   const active = tasks.tasks.find(task => task.state === TaskState.Running && (task.type === 'resolveMarketFiles' && task.operationId === request.current || task.type === 'installInstance' && task.instancePath === path && task.taskId === request.current))
   const progress = active?.progress && typeof active.progress === 'object' ? active.progress : undefined
   useEffect(() => { alive.current = true; return () => { alive.current = false; controller.current?.abort() } }, [])
@@ -78,7 +80,14 @@ export function ContentInstall({ selection, onBack, onBusy }: { selection: Conte
       let loader = ''
       try {
         if (domain === 'mods') loader = updateLoaders(target.runtime)[0]
-        if (domain === 'shaderpacks') { const selection = await shaders.getSelection(path); loader = shaderUpdateLoader(selection.engine); engineSnapshot.current = selection.snapshot }
+        if (domain === 'shaderpacks') {
+          await engines.revalidate()
+          const metadata = await mods.getModFilesSnapshot(path)
+          await waitCatalogInventory(engines, metadata.entries, 'mods', AbortSignal.any([abort.signal, AbortSignal.timeout(30000)]))
+          const selection = await shaders.getSelection(path)
+          if (selection.metadataPending) throw new Error('Shader engine metadata pending')
+          loader = shaderUpdateLoader(selection.engine); engineSnapshot.current = selection.snapshot
+        }
       } catch { throw Object.assign(new Error('Missing compatible runtime'), { code: 'incompatible' }) }
       const result = await resolveCatalogDependencies(captured.candidate, project, target.runtime.minecraft, loader, current, selected, catalogClients, abort.signal)
       abort.signal.throwIfAborted()
