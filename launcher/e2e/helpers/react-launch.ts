@@ -4,8 +4,9 @@ import type { LauncherFixture } from '../fixtures/launcher'
 export async function mockLaunchRuntime(
   launcher: LauncherFixture,
   javaMode: 'available' | 'download' | 'fail' = 'available',
+  launchResponseDelay = 0,
 ) {
-  await launcher.app.evaluate(({ ipcMain, BrowserWindow }, javaMode) => {
+  await launcher.app.evaluate(({ ipcMain, BrowserWindow }, { javaMode, launchResponseDelay }) => {
     const original = (ipcMain as any)._invokeHandlers.get('service-call')
     const processes = new Map<number, any>()
     let javaAvailable = javaMode === 'available'
@@ -78,6 +79,8 @@ export async function mockLaunchRuntime(
           await new Promise(resolve => setTimeout(resolve, 25))
         }
         if (!record) throw new Error('No-spawn fixture launch identity missing')
+        // The history lookup may lag behind the start event on a busy runner.
+        if (launchResponseDelay) await new Promise(resolve => setTimeout(resolve, launchResponseDelay))
         processes.set(response.result, {
           pid: response.result,
           launchId: record.launchId,
@@ -88,7 +91,7 @@ export async function mockLaunchRuntime(
       }
       return response
     })
-  }, javaMode)
+  }, { javaMode, launchResponseDelay })
 }
 
 export async function addLaunchProfile(launcher: LauncherFixture) {

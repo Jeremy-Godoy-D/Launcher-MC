@@ -73,7 +73,7 @@ test('launch checks profile and physical directory, confirms once, restores proc
   const page = launcher.main
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
-  await mockLaunchRuntime(launcher)
+  await mockLaunchRuntime(launcher, 'available', 1000)
   await page.getByTestId('featured-play').click()
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByRole('alert')).toContainText('perfil local')
@@ -138,7 +138,9 @@ test('launch checks profile and physical directory, confirms once, restores proc
   await page.getByTestId('launch-confirm').click({ clickCount: 2 })
   await expect(dialog.getByRole('status').filter({ hasText: 'En ejecución' })).toBeVisible()
   expect(await launcher.app.evaluate(() => (globalThis as any).__launchCalls.length)).toBe(1)
+  await expect(dialog.getByRole('button', { name: 'Cerrar', exact: true }).last()).toBeEnabled()
   await page.keyboard.press('Escape')
+  await expect(dialog).toHaveCount(0)
   await expect(page.getByTestId('react-prototype')).toHaveAttribute(
     'data-motion-state',
     /"gameRunning":true/,
