@@ -9,8 +9,14 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 vi.mock('~/app', () => ({ Inject: () => () => {}, LauncherAppKey: Symbol('app'), PathResolver: class {}, kGameDataPath: Symbol('path') }))
 vi.mock('~/infra', () => ({ ImageStorage: class {}, Tasks: class {}, kTasks: Symbol('tasks') }))
 vi.mock('~/install', () => ({ VersionMetadataService: class {} }))
+vi.mock('~/instance', () => ({ InstanceService: class {} }))
+vi.mock('~/launch', () => ({ LaunchService: class {} }))
+vi.mock('~/save', () => ({ kSaveWorker: Symbol('save') }))
+vi.mock('~/resource', () => ({ kResourceManager: Symbol('resources') }))
+vi.mock('~/market', () => ({ kMarketProvider: Symbol('market') }))
 vi.mock('fs-extra', async importOriginal => { const real = await importOriginal<any>(); const values = { ...real.default, ...real }; return { ...values, rename: vi.fn(values.rename) } })
 const { InstanceService } = await import('./InstanceService')
+const { InstanceSavesService } = await import('./InstanceSavesService')
 let root: string, path: string, state: InstanceState, service: InstanceType<typeof InstanceService>
 function instance(at: string, name = 'Original'): Instance { return { ...InstanceSchema.parse({ name, path: at, runtime: { minecraft: '1.21.1' } }), path: at, creationDate: 1, lastAccessDate: 1, lastPlayedDate: 0, playtime: 0 } }
 beforeEach(async () => {
@@ -22,8 +28,10 @@ beforeEach(async () => {
   Object.assign(state, { subscribe: vi.fn() })
   state.instanceAdd(instance(path))
   const locks = new Map<string, Mutex>()
-  const app = { appDataPath: root, getLogger: () => ({ log: vi.fn(), warn: vi.fn(), error: vi.fn() }), controller: { broadcast: vi.fn() }, mutex: { of: (key: string) => { if (!locks.has(key)) locks.set(key, new Mutex()); return locks.get(key)! } } }
+  let worlds: InstanceType<typeof InstanceSavesService>
+  const app = { appDataPath: root, getLogger: () => ({ log: vi.fn(), warn: vi.fn(), error: vi.fn() }), controller: { broadcast: vi.fn() }, mutex: { of: (key: string) => { if (!locks.has(key)) locks.set(key, new Mutex()); return locks.get(key)! } }, registry: { getOrCreate: async () => worlds, get: async () => ({ getGameProcesses: async () => [] }) }, acquireWorldLock: async () => ({ verify: async () => {}, release: () => {} }) }
   service = new InstanceService(app as any, { registerStatic: () => state } as any, { getLatestRelease: () => '1.21.1' } as any, (...parts: string[]) => join(root, ...parts), {} as any, {} as any)
+  worlds = new InstanceSavesService(app as any, service, (...parts) => join(root, ...parts), {} as any)
   vi.spyOn(service, 'initialize').mockResolvedValue(undefined)
   vi.mocked(rename).mockClear()
 })

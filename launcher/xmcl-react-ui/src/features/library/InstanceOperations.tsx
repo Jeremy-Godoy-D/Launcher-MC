@@ -52,8 +52,10 @@ export function InstanceOperations({ instance, onClose, onCreated, returnFocus, 
     } catch (failure) {
       const name = failure && typeof failure === 'object' && 'name' in failure && typeof failure.name === 'string' ? failure.name : ''
       const message = failure && typeof failure === 'object' && 'message' in failure && typeof failure.message === 'string' ? failure.message : ''
-      const reason = ['InstanceMetadataChanged', 'InstanceGroupsChanged'].includes(name) ? 'changed' : name === 'InstanceNameDuplicatedError' ? 'duplicateName' : message
-      setError(['missing', 'changed', 'invalid', 'invalidGroup', 'duplicateName', 'running'].includes(reason) ? reason : mode === 'icon' ? 'iconFailed' : 'failed')
+      const reason = ['InstanceMetadataChanged', 'InstanceGroupsChanged', 'InstanceFilesChangedError'].includes(name) ? 'changed'
+        : ['InstanceRunningError', 'SharedWorldRunningError'].includes(name) ? 'running'
+          : name === 'WorldOperationBusyError' ? 'worldBusy' : name === 'InstanceNameDuplicatedError' ? 'duplicateName' : message
+      setError(['missing', 'changed', 'invalid', 'invalidGroup', 'duplicateName', 'running', 'worldBusy'].includes(reason) ? reason : mode === 'icon' ? 'iconFailed' : 'failed')
     } finally { operation.current = false; setBusy(false) }
   }
   return <Dialog.Root open onOpenChange={open => { if (!open && !operation.current) onClose() }}>

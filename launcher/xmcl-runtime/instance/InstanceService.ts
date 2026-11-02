@@ -25,7 +25,7 @@ import { createHash } from 'node:crypto'
 import { isDeepStrictEqual } from 'node:util'
 import { instanceSettingsSnapshot, instanceSettingsEdit, instanceSettingsKeys, instanceSettingsReviewKeys, parseInstanceSettingsChanges, parseInstanceSettingsSnapshot } from '@xmcl/runtime-api/src/util/instanceSettings'
 import { existsSync } from 'fs'
-import { ensureDir, lstat, mkdir, realpath, readdir, readlink, readJson, rename, rm, writeJson } from 'fs-extra'
+import { ensureDir, lstat, mkdir, realpath, readdir, readJson, rename, rm, writeJson } from 'fs-extra'
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'path'
 import { Inject, LauncherAppKey, kGameDataPath, type PathResolver } from '~/app'
 import { ImageStorage, kTasks, Tasks } from '~/infra'
@@ -43,6 +43,7 @@ import { writeFile as writeAtomically } from 'atomically'
 import { assertInstanceCopyComplete, prepareInstanceCopy, readInstanceCopy, runInstanceCopy } from './instanceCopy'
 import { saveInstanceCopy, type InstanceCopyJob } from './instanceCopy'
 import type { TaskInstance } from '../infra/task'
+import { assertInstallDirectory } from '../util/assertDirectory'
 
 const INSTANCES_FOLDER = 'instances'
 
@@ -568,40 +569,6 @@ export class InstanceService extends StatefulService<InstanceState> implements I
   }
 
   /**
-   * Move all the saves of an instance to the shared saves folder before the
-   * instance is deleted, so the user can re-enable them on another instance
-   * instead of losing them. If the instance `saves` folder is a symlink to the
-   * shared folder, nothing needs to be moved.
-   */
-  private async moveSavesToShared(path: string) {
-    const instanceSaves = join(path, 'saves')
-    if (!existsSync(instanceSaves)) {
-      return
-    }
-    // If linked to shared, saves already live in the shared folder.
-    if (await readlink(instanceSaves).catch(() => '')) {
-      return
-    }
-    const sharedSaves = this.getPath('saves')
-    try {
-      await ensureDir(sharedSaves)
-      const saves = await readdir(instanceSaves)
-      for (const saveName of saves) {
-        const savePath = join(instanceSaves, saveName)
-        // Skip individually linked saves
-        if (await readlink(savePath).catch(() => '')) continue
-        let dest = join(sharedSaves, saveName)
-        if (existsSync(dest)) {
-          dest = join(sharedSaves, `${saveName}-${Date.now()}`)
-        }
-        await rename(savePath, dest)
-      }
-    } catch (e) {
-      throw new Error('Cannot preserve instance worlds before deletion', { cause: e })
-    }
-  }
-
-  /**
    * Delete the managed instance from the disk
    * @param path The instance path
    */
@@ -612,13 +579,22 @@ export class InstanceService extends StatefulService<InstanceState> implements I
 
     const instance = this.state.instances.find(i => i.path === path)
     if (!instance) throw new AnyError('InstanceNotFoundError')
-    const isBedrock = instance?.edition === 'bedrock'
-
-    const isManaged = this.isUnderManaged(path)
+    const isManaged = instance.edition === 'java' && this.isUnderManaged(path)
     const lock = this.mutex.of(LockKey.instanceRemove(path))
     const instanceLock = this.mutex.of(LockKey.instance(path))
     if (isManaged && (await exists(path))) {
-      if ((await lstat(path)).isSymbolicLink() || !this.isUnderManaged(await realpath(path))) throw new Error('Unsafe managed instance directory')
+      await assertInstallDirectory(this.getPath(), path)
+      const original = await lstat(path, { bigint: true }), actual = await realpath(path)
+      const managed = join(await realpath(this.getPath()), INSTANCES_FOLDER), inside = relative(managed, actual)
+      if (!original.isDirectory() || original.isSymbolicLink() || !inside || inside === '..' || inside.startsWith('..' + sep) || isAbsolute(inside)) throw new Error('Unsafe managed instance directory')
+      const unchanged = async () => {
+        await assertInstallDirectory(this.getPath(), path)
+        const current = await lstat(path, { bigint: true })
+        if (current.ino !== original.ino || current.dev !== original.dev || current.isSymbolicLink() || await realpath(path) !== actual || !this.state.instances.some(row => row.path === path && row.edition === 'java')) throw new AnyError('InstanceFilesChangedError')
+      }
+      const worldsModule = await import('./InstanceSavesService')
+      const worlds = await this.app.registry.getOrCreate(worldsModule.InstanceSavesService)
+      await worlds.initialize()
       await lock.runExclusive(async () => {
         // Reject any install requests currently waiting for the instance
         // lock so they don't start work that we are about to wipe out.
@@ -650,42 +626,26 @@ export class InstanceService extends StatefulService<InstanceState> implements I
           await Promise.allSettled(handlerPromises)
           await this.#instanceWrites.get(path)
 
-          if (isBedrock && process.platform === 'win32') {
-            try {
-              const { execFile } = require('child_process')
-              await new Promise<void>((resolve, reject) => {
-                execFile('powershell', ['-Command', 'Get-AppxPackage Microsoft.MinecraftUWP | Remove-AppxPackage'], { windowsHide: true }, (err: any) => {
-                  if (err) reject(err)
-                  else resolve()
-                })
-              })
-              this.log(`Successfully uninstalled Bedrock UWP package for instance ${path}`)
-            } catch (e) {
-              this.warn(`Failed to uninstall Bedrock UWP package: ${e}`)
-            }
-          }
-
-          if (deleteData) {
-            await this.moveSavesToShared(path)
-            try {
-              await rm(path, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 })
-            } catch (e) {
-              if (isSystemError(e) && e.code === ENOENT_ERROR) {
-                this.warn(`Fail to remove instance ${path}: ${e}`)
-              } else {
-                if (e instanceof Error && e.name === 'Error') {
-                  e.name = 'InstanceDeleteError'
+          await unchanged()
+          await worlds[worldsModule.kGuardInstanceRemoval](path, deleteData, async () => {
+            await unchanged()
+            if (deleteData) {
+              try {
+                await rm(path, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 })
+              } catch (e) {
+                if (isSystemError(e) && e.code === ENOENT_ERROR && await lstat(path).then(() => false, error => { if (error.code !== 'ENOENT') throw error; return true })) {
+                  this.warn(`Fail to remove instance ${path}: ${e}`)
+                } else {
+                  if (e instanceof Error && e.name === 'Error') e.name = 'InstanceDeleteError'
+                  throw e
                 }
-                throw e
               }
-            }
-          } else {
-            // Rename to hidden
-            const name = basename(path)
-            const newPath = join(dirname(path), '.' + name)
-              if (await exists(newPath)) throw new Error('Retired instance destination already exists')
+            } else {
+              const newPath = join(dirname(path), '.' + basename(path))
+              if (await lstat(newPath).then(() => true, error => { if (error.code !== 'ENOENT') throw error; return false })) throw new Error('Retired instance destination already exists')
               await rename(path, newPath)
-          }
+            }
+          })
 
           this.#removeHandlers[path] = []
         })

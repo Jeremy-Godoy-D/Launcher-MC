@@ -291,6 +291,7 @@ react:
     changed: These details changed in another window. Close and reopen to review the current version before editing.
     invalid: Check the name, description and author. Use a valid name of up to 100 characters.
     duplicateName: An instance already uses this name. Choose another one.
+    worldBusy: A world operation is in progress. Wait for it to finish, then try again.
     running: Close this instance’s game before performing this action.
     failed: The action did not finish. Check the folder and diagnostics before retrying. A failed duplication may have left an incomplete copy in the library.
     groupTitle: Organize instance

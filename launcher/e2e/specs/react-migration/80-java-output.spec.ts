@@ -10,15 +10,24 @@ import { promisify } from 'node:util'
 import { test, expect } from '../../helpers/scratch'
 import { seedReactLibrary } from '../../helpers/react-library'
 
-test.use({ launcherOptions: { locale: 'es-ES', gameDataParentAlias: true } })
+const run = promisify(execFile)
+async function executable(name: string) {
+  const home = process.env.JAVA_HOME_17_X64 || process.env.JAVA_HOME
+  return home ? join(home, 'bin', `${name}.exe`) : (await run('where.exe', [`${name}.exe`])).stdout.trim().split(/\r?\n/)[0]
+}
+test.use({ launcherOptions: { locale: 'es-ES', gameDataParentAlias: true, prepareGameData: async root => {
+  const classes = join(root, 'fixture-classes'); await mkdir(classes)
+  try {
+    await run(await executable('javac'), ['--release', '17', '-encoding', 'UTF-8', '-d', classes, fileURLToPath(new URL('../../fixtures/GrimoGameOutput.java', import.meta.url))], { windowsHide: true, timeout: 15000 })
+  } catch (failure) {
+    const error = failure as Error & { code?: unknown; signal?: unknown; killed?: boolean; stderr?: string }
+    throw new Error(`Java fixture compilation failed: ${JSON.stringify({ code: error.code, signal: error.signal, killed: error.killed, stderr: error.stderr?.slice(-4096) })}`, { cause: failure })
+  }
+} } })
 
 test('packaged Native delivers and archives real Java pipes with Unicode and launch identity', async ({ launcher }, testInfo) => {
   const page = launcher.main, paths = (await seedReactLibrary(page)).slice(0, 2), root = launcher.gameDataPath
-  const run = promisify(execFile), home = process.env.JAVA_HOME_17_X64 || process.env.JAVA_HOME
-  const executable = async (name: string) => home ? join(home, 'bin', `${name}.exe`) : (await run('where.exe', [`${name}.exe`])).stdout.trim().split(/\r?\n/)[0]
-  const java = await executable('java'), javac = await executable('javac'), classes = join(root, 'fixture-classes'), version = 'grimo-output-fixture'
-  await mkdir(classes)
-  await run(javac, ['--release', '17', '-encoding', 'UTF-8', '-d', classes, fileURLToPath(new URL('../../fixtures/GrimoGameOutput.java', import.meta.url))], { windowsHide: true, timeout: 15000 })
+  const java = await executable('java'), classes = join(root, 'fixture-classes'), version = 'grimo-output-fixture'
   const directory = join(root, 'versions', version)
   await mkdir(directory, { recursive: true }); await mkdir(join(root, 'assets/indexes'), { recursive: true })
   const require = createRequire(new URL('../../../xmcl-runtime/package.json', import.meta.url)), zip = new (require('yazl').ZipFile)()

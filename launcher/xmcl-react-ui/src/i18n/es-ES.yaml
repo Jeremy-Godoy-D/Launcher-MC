@@ -291,6 +291,7 @@ react:
     changed: Los datos cambiaron en otra ventana. Cierra y vuelve a abrir para revisar la versión actual antes de editar.
     invalid: Revisa el nombre, la descripción y el autor. Usa un nombre válido de hasta 100 caracteres.
     duplicateName: Ya existe una instancia con ese nombre. Elige otro.
+    worldBusy: Hay una operación de mundos en curso. Espera a que termine y vuelve a intentarlo.
     running: Cierra la partida de esta instancia antes de realizar esta operación.
     failed: No se completó la operación. Revisa la carpeta y los diagnósticos antes de reintentar. Si estabas copiando, puede haber quedado una copia incompleta en la biblioteca.
     groupTitle: Organizar instancia
