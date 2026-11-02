@@ -75,6 +75,21 @@ for (const provider of ['modrinth', 'curseforge']) test(`React reviews ${provide
   expect(catalog.content.transfers).toHaveLength(provider === 'modrinth' ? 3 : 2)
   expect(catalog.state.requests.every(request => !request.key && !request.authorization && !request.cancellationId)).toBe(true)
   expect(await page.evaluate(async () => (window as any).serviceChannels.open('LaunchService').call('getGameProcesses'))).toEqual([])
+  await form.getByRole('button', { name: 'Volver a versiones', exact: true }).click()
+  await page.getByTestId('catalog-project').getByRole('button', { name: 'Cerrar ficha', exact: true }).last().click()
+  await review(launcher, 'mod', provider, paths[1], 2)
+  await expect(page.getByTestId('catalog-install-changes').locator('li')).toHaveCount(2)
+  await page.getByTestId('catalog-install-confirm').click()
+  await expect(page.getByTestId('catalog-install-complete')).toBeVisible()
+  expect((await entries(join(paths[1], 'mods'))).sort()).toEqual(provider === 'modrinth' ? ['dependency.jar', 'optional.jar', 'root2.jar'] : ['dependency.jar', 'root2.jar'])
+  expect(await readFile(join(paths[1], 'mods', 'root2.jar'))).toEqual(catalog.assets.find(asset => asset.key === 'root2')!.bytes)
+  const transfers = catalog.content.transfers.length
+  await page.getByTestId('catalog-install').getByRole('button', { name: 'Volver a versiones', exact: true }).click()
+  await page.getByTestId('catalog-project').getByRole('button', { name: 'Cerrar ficha', exact: true }).last().click()
+  const installed = await review(launcher, 'mod', provider, paths[1], 2, false)
+  await expect(installed).toContainText('ya está instalado')
+  await expect(page.getByTestId('catalog-install-confirm')).toHaveCount(0)
+  expect(catalog.content.transfers).toHaveLength(transfers)
 })
 
 test.describe('resource pack catalog review', () => {
