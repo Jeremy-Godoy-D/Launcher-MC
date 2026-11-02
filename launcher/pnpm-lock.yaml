@@ -1425,9 +1425,15 @@ importers:
       '@xmcl/runtime-api':
         specifier: workspace:*
         version: link:../xmcl-runtime-api
+      dompurify:
+        specifier: 3.4.17
+        version: 3.4.17
       lucide-react:
         specifier: 1.61.0
         version: 1.61.0(@types/react@19.3.0)(react@19.3.1)
+      markdown-it:
+        specifier: ^14.2.0
+        version: 14.3.1
       react:
         specifier: 19.3.1
         version: 19.3.1
@@ -1444,6 +1450,9 @@ importers:
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
+      '@types/markdown-it':
+        specifier: 12.2.3
+        version: 12.2.3
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0

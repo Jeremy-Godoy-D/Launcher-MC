@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/react-query'
+import { catalogQueries, publicMetadataFetch } from '../catalog/queries'
 import { CurseforgeV1Client, FileModLoaderType, HashAlgo, type File } from '@xmcl/curseforge'
 import { ModrinthV2Client, type ProjectVersion } from '@xmcl/modrinth'
 import type { SavedInstance } from '../library/model'
@@ -16,24 +16,8 @@ export type UpdateMod = { path: string; name: string; fileName: string; hash: st
 export type ModUpdate = { mod: UpdateMod } & ({ version: ProjectVersion } | { file: File })
 export type UpdateIssue = { provider: 'modrinth' | 'curseforge'; kind: 'failed' | 'limited' | 'incomplete'; file?: string }
 
-// Public metadata only. No account tokens, instance configuration or install state enter this cache.
-export const modUpdateQueries = new QueryClient({ defaultOptions: { queries: { staleTime: 120000, gcTime: 300000, retry: (count, error) => count < 2 && (error instanceof TypeError || 'status' in error && Number(error.status) >= 500) } } })
-const cooldowns = new Map<string, number>()
-const metadataFetch: typeof fetch = async (input, init) => {
-  const origin = new URL(input instanceof Request ? input.url : String(input)).origin
-  if ((cooldowns.get(origin) || 0) > Date.now()) throw Object.assign(new Error('Metadata rate limited'), { status: 429 })
-  const response = await fetch(input, init)
-  if (!response.ok) {
-    if (response.status === 429) {
-      const header = response.headers.get('retry-after') || '60'
-      const delay = /^\d+$/.test(header) ? Number(header) * 1000 : Date.parse(header) - Date.now()
-      cooldowns.set(origin, Date.now() + Math.max(1000, Number.isFinite(delay) ? delay : 60000))
-    }
-    throw Object.assign(new Error('Public metadata request failed'), { status: response.status })
-  }
-  return response
-}
-const clients = { modrinth: new ModrinthV2Client({ fetch: metadataFetch }), curseforge: new CurseforgeV1Client('', { fetch: metadataFetch }) }
+export const modUpdateQueries = catalogQueries
+const clients = { modrinth: new ModrinthV2Client({ fetch: publicMetadataFetch }), curseforge: new CurseforgeV1Client('', { fetch: publicMetadataFetch }) }
 type Clients = { modrinth: Pick<ModrinthV2Client, 'getLatestVersionsFromHashes' | 'getProjectVersionsByHash'>; curseforge: Pick<CurseforgeV1Client, 'getModFiles' | 'getFiles'> }
 
 export function updateMods(files: StateData<ResourceState>['files'], runtime: RuntimeVersions, sources: readonly ModSource[] = []): UpdateMod[] {

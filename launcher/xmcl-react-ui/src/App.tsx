@@ -34,7 +34,7 @@ import {
   UserRound,
   X,
 } from 'lucide-react'
-import projects from './project-fixtures.json'
+import { Catalog } from './features/catalog/Catalog'
 import brandIcon from '../../branding/copper/app-64.png'
 import sunset from './assets/ambient/vanilla-shaders.webp'
 import caves from './assets/ambient/vanilla-caves.webp'
@@ -387,9 +387,6 @@ export function App() {
     (!loader || instance.loader === loader) &&
     (!group || (group === 'ungrouped' ? !savedLibrary?.data?.groups.some(entry => typeof entry !== 'string' && entry.instances.includes(instance.id)) : savedLibrary?.data?.groups.some(entry => typeof entry !== 'string' && `id:${entry.id}` === group && entry.instances.includes(instance.id))))
   const matchingInstances = (savedLibrary?.ordered || []).filter(item => matchesInstanceQuery(item, query)).map(present).filter(matchesInstance)
-  const matchingProjects = projects.filter((project) =>
-    `${project.title} ${project.description}`.toLowerCase().includes(query.toLowerCase()),
-  )
   useEffect(() => {
     setQuery('')
     setLoader('')
@@ -443,7 +440,7 @@ export function App() {
         <div className="titlebar-left">
           <img className="titlebar-logo" src={brandIcon} alt="" />
           <span>Grimo Launcher</span>
-          <span className="preview-label">{accountsPage ? t('react.accounts.saved') : catalog ? 'Vista previa · datos de ejemplo' : t('react.instances.connected')}</span>
+          <span className="preview-label">{accountsPage ? t('react.accounts.saved') : catalog ? t('react.catalog.connected') : t('react.instances.connected')}</span>
         </div>
         <div className="window-controls">
           <button
@@ -789,117 +786,7 @@ export function App() {
               )}
             </section>
           )}
-          {catalog && (
-            <section className="catalog-page">
-              <div className="page-heading">
-                <div>
-                  <h1>Dale otra vida a tu mundo.</h1>
-                  <p>Encuentra mods, modpacks y nuevas formas de explorar.</p>
-                </div>
-              </div>
-              <div
-                className="catalog-banner"
-                style={{
-                  backgroundImage: `linear-gradient(90deg, #111923ed, #11192355), url(${ocean})`,
-                }}
-              >
-                <div>
-                  <h2>
-                    Pequeños cambios.
-                    <br />
-                    Grandes aventuras.
-                  </h2>
-                  <p>Elige contenido para hacer Minecraft más tuyo.</p>
-                </div>
-                <Compass size={64} strokeWidth={1} aria-hidden="true" />
-              </div>
-              <div className="filterbar">
-                <label className="search">
-                  <Search size={18} />
-                  <input
-                    placeholder="Buscar contenido…"
-                    aria-label="Buscar en el catálogo"
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    data-testid="store-search"
-                  />
-                </label>
-                <button
-                  className="button secondary"
-                  onClick={() =>
-                    preview(
-                      'Filtrar contenido',
-                      'Versión de Minecraft, loader, tipo de contenido y fuente. En el prototipo se muestran proyectos de ejemplo de Modrinth.',
-                    )
-                  }
-                >
-                  <SlidersHorizontal size={17} />
-                  Filtros
-                </button>
-              </div>
-              <div className="source-tabs">
-                <button aria-pressed="true">Modrinth</button>
-                <button
-                  aria-pressed="false"
-                  onClick={() =>
-                    preview(
-                      'CurseForge',
-                      'La búsqueda real se conectará al proxy actual. No se modifica ni se solicita tu API key.',
-                    )
-                  }
-                >
-                  CurseForge
-                </button>
-              </div>
-              <div className="catalog-grid">
-                {matchingProjects.map((project) => (
-                  <article key={project.id} className="project-card">
-                    <button
-                      className="project-art"
-                      onClick={() => preview(project.title, project.description)}
-                    >
-                      <img
-                        src={
-                          project.gallery.find((image) => image.featured)?.url ??
-                          project.gallery[0]?.url ??
-                          sunset
-                        }
-                        alt={`Ver ${project.title}`}
-                        loading="lazy"
-                      />
-                    </button>
-                    <div className="project-card-copy">
-                      <img src={project.icon} alt="" />
-                      <div>
-                        <span className="project-kind">
-                          {project.projectType === 'modpack' ? 'Modpack' : 'Mod'}
-                        </span>
-                        <h2>{project.title}</h2>
-                      </div>
-                    </div>
-                    <p>{project.description}</p>
-                    <button
-                      className="button secondary full-width"
-                      onClick={() => preview(project.title, project.description)}
-                    >
-                      Ver contenido
-                      <ArrowRight size={16} />
-                    </button>
-                  </article>
-                ))}
-              </div>
-              {matchingProjects.length === 0 && (
-                <div className="empty">
-                  <Search size={28} aria-hidden="true" />
-                  <h2>No encontramos ese contenido</h2>
-                  <p>Prueba otro nombre o vuelve a los proyectos de ejemplo.</p>
-                  <button className="button secondary" onClick={() => setQuery('')}>
-                    Limpiar búsqueda
-                  </button>
-                </div>
-              )}
-            </section>
-          )}
+          {catalog && <Catalog />}
           {settings && (
             <section className="settings-page">
               <div className="page-heading">
