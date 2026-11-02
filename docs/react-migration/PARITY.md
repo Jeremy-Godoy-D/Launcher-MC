@@ -27,7 +27,7 @@ Referencia: beta.2, commit `7671c6f1bdc471d42816241920a262a18aca5a44`. Alcance c
 | K17 | Cuentas locales `/accounts`, SetupAccount | UserService/OfficialUserService, user.ts, LauncherAccounts | Crear/seleccionar/editar/eliminar local, preservar perfiles y selección. | complete |
 | K18 | Ajustes globales `/setting` | BaseService/JavaService, SettingGeneral/Global/Network/Advanced | Persistir idioma/directorios/Java/RAM/red/descargas y opciones núcleo; quitar categorías de extras. | pending |
 | K19 | Actualizaciones y notas | BaseService, SettingUpdate/SettingUpdateInfoDialog, ReleaseFile | url pública, apiUrl solo interno, operación manual, integridad, 800×400 y errores. | pending |
-| K20 | Tareas/notificaciones | taskMonitor, taskManager, dialog/notifier, AppTaskDialog | Un poll activo sin solapamiento, cancelar/limpiar, errores en área afectada. | pending |
+| K20 | Tareas/notificaciones | taskMonitor, taskManager, dialog/notifier, AppTaskDialog | Un poll activo sin solapamiento, cancelar/limpiar, errores en área afectada. | pass |
 | K21 | Consola integrada / logger.html | InstanceLogService, gameMonitor, windows/logger | Logs/filtros/copiar/exportar/scroll/abrir ventana; sin IA diagnóstica remota. | pass |
 | K22 | Onboarding/bootstrap y migration.html | bootstrap/migration preload, Setup, windows/migration | Perfil/ruta seguros, tres etapas, progreso/error, no tocar raíz habitual. | pending |
 | K23 | Barra de ventana/teclado/diálogos/arrastre | windowController, dropHandler, dialog, quick commands | Arrastre de archivos núcleo, minimizar/maximizar/cerrar, navegación/foco/accesibilidad. Sin invocar extras. | pending |
@@ -414,3 +414,5 @@ STAGE6-CLOSURE.md acepta K08/K09/K10/K15/K16 junto a K14. App39700ac/candidata78
 
 
 Bloque etapa7, candidata8537d80: `STAGE7-SETTINGS.md` conecta ajustes globales, guardado atómico validado en main y superficie de actualizaciones. 1.503/148 unitarias seleccionadas;7NativeReact distintos y2Vue;8Axe0violaciones/8incomplete;tipos/lint/builds/E2E56base. K18/K19/K20/K22/K23 permanecen pending por directorios/migración/caché, transferencia real del actualizador y superficies/accesibilidad restantes. No se publica todavía ni se repiten0–6.
+
+Bloque etapa7 a65cab0: STAGE7-ACTIVITY-UPDATER.md acepta K20 (monitor compartido, tareas/notificaciones reales, cancelar/limpiar y errores), caché visual y cierre nativo de borradores. Actualizador: 503/cancelación/SHA incorrecto/reintento verificados con servidor propio y bytes sintéticos; rama pública y aplicación real pendientes9. 1505/149 unitarias,12NativeReact distintos+2Vue,2Axe0/4incomplete; CI35 reparada y9regresiones locales pasan, nuevaCI pendiente. K18/K19/K22/K23 y gates7 siguen pending.

@@ -2,21 +2,18 @@
 
 ## Estado vigente
 
-Etapas 0–6 completas; 7 activa. K08/K09/K10/K14/K15/K16 pass. Producción beta.2 y proxy intactos; PR4 borrador; objetivo 0.3.0-beta.1 tras 7–9. Microsoft pospuesto. El usuario pide terminar y publicar reutilizando lo aceptado, sin bucles.
+Etapas0–6 completas;7 activa. K20 pasa. K18/K19/K22/K23 y los tres gates7 permanecen pending. Producción beta.2 y proxy intactos; PR4 borrador; objetivo0.3.0-beta.1 después de7–9. Microsoft pospuesto. El usuario exige terminar/publicar reutilizando lo aceptado y evitando bucles.
 
-Bloque nuevo `STAGE7-SETTINGS.md`: aplicación faa9c94, candidata 8537d80. Ajustes globales y superficie del actualizador conectados; BaseService.editSettings valida y escribe de forma atómica antes de aplicar al estado, con conflictos y reintento. 1.503 unitarias/148 archivos/29,86 s/4 workers, 23 afectadas posteriores, check/lint0/E2E56 base. Native: 4 nuevos99/19,1s + 3 regresiones05/74/10,1s y 2 Vue03/08/10,4s. Ocho Axe:0 violaciones/8 incomplete. DeskGap tipos/build production0;176 anclas. Host restaurado a Vue y hash verificado; EXE React independiente. CI2bead26 terminó success en ambas matrices. Los gates7 y K18/19/20/22/23 siguen pendientes; no confundir este bloque con etapa completa.
+Último bloque `STAGE7-ACTIVITY-UPDATER.md`, candidata a65cab0: tareas/notificaciones reales, caché visual y guardar/descartar/seguir aquí al cerrar; actualizador100 con servidor propio prueba503, transferencia API con token ficticio, cancelación global, SHA incorrecto y reintento verificado. NO aplica el ASAR. Se reparó la caché inexistente y el snapshot de cancelación. 1505unit/149/33,19s;3Native100/101/7,4s+9reg35/36/37/34,1s+2Vue/10,0s;tipos/lint0/E2E56base;2Axe0/4incomplete;186anclas;DeskGapReactbuildproduction0. HostVue restaurado/verificado. CI5b05060: Vue success,React304pass/2skip/1fallo35; se reforzó refresh para esperar metadatos coherentes, nueve regresiones locales pasan; verificar CI nueva sin reiniciar la anterior. No hay sesiones activas.
 
-Último cierre anterior: STAGE6-CLOSURE.md, catálogo completo y probado; no repetirlo. Evidencias detalladas conservadas más abajo.
+`STAGE7-SETTINGS.md` conserva el bloque anterior de ajustes y guardado atómico nativo. `STAGE6-CLOSURE.md` conserva el catálogo completo. No rehacer0–6 ni repetir100/101 sin un cambio relacionado.
 
 ## Siguiente tarea — etapa 7
 
-1. Completar directorios/datos y limpieza de caché PresentationService.clearCache. Antes de exponer migrate.ts, proteger destino vacío/relación de rutas, enlaces y rollback parcial: hoy sobrescribe destinos y solo registra directorios completos. Preservar archivos; pruebas únicamente en perfiles temporales.
-2. Sustituir el placeholder de auxiliary.tsx/migration.html por progreso/error/final nativo. Ventana real600×400; contrato Migration y preload existentes. Añadir retirada de listeners compatible con Electron/DeskGap y conservar logger/onboarding ya aceptados.
-3. Actualizador: servidor HTTP propio y redirección main-only de webRequest, sin sustituir fetch; comprobar consulta, errores, descarga/SHA, cancelación y reintento. La UI/notas/enlaces/confirmación de99 ya pasan. Instalación completa solo en Windows desechable etapa9.
-4. Completar tareas/notificaciones/ayuda, protección de cierre con borrador, arrastre y AA/RTL/teclado. Corregir padding/borde duplicado de la búsqueda al integrar próximos controles; conservar distribución y apariencia.
-5. Luego8 React predeterminado, retirar Vue/extras y mensajes de implementación del producto;9 aceptación física K03/K05/K06, presupuestos/seguridad, NSIS/update en Actions Windows desechable, assets/checksums/publicación. No pedir otra VM al usuario.
-
-No hay sesiones ejecutándose al cerrar este bloque. Los cuatro casos99 pasan juntos en stage7-settings-accepted-native.log. Las regresiones05/74 y Vue03/08 están completas. No repetir suites amplias por cambios de documentos. Verificar la CI del nuevo push sin reiniciar runs acabados.
+1. Migración de datos: añadir revisión nativa de destino vacío, rutas disjuntas/canónicas y bloqueo por partida/tareas. Proteger enlaces y recuperar movimientos parciales con journal en migrate.ts antes de exponerla. El escritor de root debe ser atómico; fallo de ventana cosmética no debe deshacer datos ya confirmados.
+2. Conectar migration.html/auxiliary.tsx al progreso/error/final nativo real600×400; añadir retirada de listeners Electron/DeskGap. Conservar selección tras mover con contexto nativo, no confiar en queryparams arbitrarios. Reusar logger/onboarding.
+3. Revisar arrastre/AA/RTL y controles globales restantes. K18/19/22/23 y gates7 pending; K20 pass. Caché/tareas/cierre/transferencia autenticada ya aceptados: no repetir100/101 salvo cambio relacionado.
+4. Luego8 React default/extras y mensajes de implementación;9 descarga pública sin token, instalador/update real en Actions Windows desechable, Java/loaders/juego físicos K03/05/06, presupuestos/seguridad, assets/publicación. No pedir otraVM.
 
 ## Evidencia y decisiones técnicas que se conservan
 
