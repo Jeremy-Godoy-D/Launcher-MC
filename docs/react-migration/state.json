@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 6,
-  "nextAction": "Etapa6 activa: K14 y gates catalog-search/catalog-network-failures pass en STAGE6-CATALOG-BROWSING. App1517fad:6Native14.3s,4Axe0violaciones/8incomplete,183React; full1403/139 en4workers previo a dos casos nuevos (no afirmar1405 local). Vue3Native10.7s,DeskGap producción0,tipos/lint/E2E56base,hostVue restaurado. K15/K16/catalog-install pendientes: destinos operativos, dependencias Modrinth/CF, instalar/actualizar contenido y modpacks, revisión/progreso/cancelación/recuperación. Reutilizar servicios e importador existentes, sin rehacer áreas0-5 ni pedir aprobación visual repetida. CF solo proxy, credenciales fuera del renderer; Microsoft pospuesto. Luego7globales,8defaultReact/recorte,9QA/instalador en Actions Windows desechable/publicación completa0.3.0-beta.1. Revisar nuevo CI del push sin reiniciar trabajos vivos. No usar sustitución de fetch en fixtures: rechazada; usar HTTP local nativo. ANALISIS excluido, producción/proxy intactos.",
+  "nextAction": "Etapa6 activa: K14/search/network pass; modpacks nuevos ya descargan/verifican e importan vía AddInstance (STAGE6-CATALOG-MODPACKS). No rehacer este flujo ni etapas0–5. K15/K16 pendientes: instalar/actualizar mods,packs,shaders y mundos con destino capturado, dependencias MR/CF/conflictos/opcionales/compatibilidad, review/progreso/cancelación/recuperación; actualizar modpacks existentes y acción de Biblioteca. Reutilizar resolveFromMarket y previewInstanceFiles/installInstanceFiles; admitir altas seguras en guard de packs sin quitar snapshots/backups/autoridad. Revisar POST de metadatos cancelables al integrar actualizaciones. App62094d8,fixtures97c8118:1434/141unit,17React+3VueNative,20Axe0/36incomplete,tipos/lint/DeskGap0/E2E56base,hostVue. CI7edfda4 terminó React failure por01 desactualizado y carrera real93; ambos corregidos/probados, verificar próximo push sin reiniciar jobs. Luego7globales,8defaultReact/recorte,9QA/ActionsWindows desechable/publicación completa0.3.0-beta.1. Microsoft pospuesto; producción/proxy intactos; sin fetch sustituido/DevTools/limpiezas denegadas; ANALISIS excluido.",
   "stages": [
     {
       "id": 0,
@@ -978,14 +978,24 @@
             {
               "path": "docs/react-migration/STAGE6-CATALOG-BROWSING.md",
               "sha256": "03abd9e75b9530c52f9da9547cdc42586c01c3d50c086c14ab2f9cf82fafd0bc"
+            },
+            {
+              "path": "docs/react-migration/STAGE6-CATALOG-MODPACKS.md",
+              "sha256": "cdae6a97773bb7aa5baa8bbb71f32cb03f6fef453b28fc08be4666b6af11cce1"
             }
           ],
-          "note": "K14: clientes públicos reales, filtros mods/modpacks, paginación/rutas y recuperación;183React,1403base,6NativeReact/3Vue,4Axe0violaciones. Ver STAGE6-CATALOG-BROWSING. K15/K16 operativos aún pendientes;6 sigue activa."
+          "note": "STAGE6-CATALOG-MODPACKS: app62094d8/fixtures97c8118; descarga verificada MR/CF a AddInstance con confirmación, upstream/whitelist y borrador retenidos, cancelación de metadatos/bytes y progreso real. 1434unitarias/141,17NativeReact distintos/3Vue,20Axe0violaciones/36incomplete,check completo/lint/DeskGap0/E2E56base,hostVue. K15/K16/catalog-install siguen pending: contenido/dependencias/actualizaciones completas; no publicar todavía."
         },
         {
           "id": "catalog-install",
           "status": "pending",
-          "evidence": []
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE6-CATALOG-MODPACKS.md",
+              "sha256": "cdae6a97773bb7aa5baa8bbb71f32cb03f6fef453b28fc08be4666b6af11cce1"
+            }
+          ],
+          "note": "STAGE6-CATALOG-MODPACKS: app62094d8/fixtures97c8118; descarga verificada MR/CF a AddInstance con confirmación, upstream/whitelist y borrador retenidos, cancelación de metadatos/bytes y progreso real. 1434unitarias/141,17NativeReact distintos/3Vue,20Axe0violaciones/36incomplete,check completo/lint/DeskGap0/E2E56base,hostVue. K15/K16/catalog-install siguen pending: contenido/dependencias/actualizaciones completas; no publicar todavía."
         },
         {
           "id": "catalog-network-failures",
@@ -994,9 +1004,13 @@
             {
               "path": "docs/react-migration/STAGE6-CATALOG-BROWSING.md",
               "sha256": "03abd9e75b9530c52f9da9547cdc42586c01c3d50c086c14ab2f9cf82fafd0bc"
+            },
+            {
+              "path": "docs/react-migration/STAGE6-CATALOG-MODPACKS.md",
+              "sha256": "cdae6a97773bb7aa5baa8bbb71f32cb03f6fef453b28fc08be4666b6af11cce1"
             }
           ],
-          "note": "K14: clientes públicos reales, filtros mods/modpacks, paginación/rutas y recuperación;183React,1403base,6NativeReact/3Vue,4Axe0violaciones. Ver STAGE6-CATALOG-BROWSING. K15/K16 operativos aún pendientes;6 sigue activa."
+          "note": "STAGE6-CATALOG-MODPACKS: app62094d8/fixtures97c8118; descarga verificada MR/CF a AddInstance con confirmación, upstream/whitelist y borrador retenidos, cancelación de metadatos/bytes y progreso real. 1434unitarias/141,17NativeReact distintos/3Vue,20Axe0violaciones/36incomplete,check completo/lint/DeskGap0/E2E56base,hostVue. K15/K16/catalog-install siguen pending: contenido/dependencias/actualizaciones completas; no publicar todavía."
         }
       ]
     },
@@ -1111,5 +1125,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-02T08:59:36Z"
+  "updatedAt": "2026-11-02T10:47:19Z"
 }

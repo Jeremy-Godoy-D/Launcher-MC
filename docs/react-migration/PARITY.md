@@ -387,3 +387,9 @@ STAGE5-WORLD-SHARING-UI.md cierra la paridad local con seis acciones confirmadas
 ## Catálogo público de lectura y red — 2026-11-02
 
 STAGE6-CATALOG-BROWSING.md acepta K14 y los gates de búsqueda/fallos de red. App1517fad: seis NativeReact14,3s sobre EXE identificado y tres Vue10,7s;183React/19, suite1403/139 previa a dos casos nuevos conservada,4Axe0violaciones/8incomplete,tipos/lint/E2E56base/DeskGap producción/hostVue. Búsqueda real, ambos proveedores/filtros de modpacks/páginas/rutas, contenido remoto sanitizado, offline/cuota y cancelación nativa GET con límites; salto CF al proxy verificado sin secretos. K15 mantiene destino operativo/estados y K16 mantiene instalación/dependencias/actualización/progreso/recuperación pendientes. Etapa6 activa;7-9 pendientes, Microsoft pospuesto y producción/proxy intactos. No se repiten etapas0-5.
+
+## Modpacks del catálogo y navegación consecutiva — 2026-11-02
+
+STAGE6-CATALOG-MODPACKS.md: app62094d8/fixtures97c8118. Descargar e importar MR/CF reutiliza AddInstance con confirmación, identidad/upstream y borrador preservados, integridad antes de publicar, cancelación de metadatos/bytes y progreso.1434unitarias/141,17NativeReact distintos/3Vue,20Axe0violaciones/36incomplete,check completo/lint/DeskGap0/E2E56base,hostVue. La carrera real de filtros y el smoke del prototipo se corrigieron/probaron; nuevo CI pendiente.
+
+K14 sigue pass. K15/K16/catalog-install siguen pending por destinos de contenido/dependencias/actualizaciones y packs existentes; no se marca6 completa. No repetir importador nuevo ni áreas0–5. Siguen7–9 y publicación completa0.3.0-beta.1; Microsoft pospuesto, producción/proxy intactos y sin borrar datos.
