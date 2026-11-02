@@ -231,6 +231,11 @@ function CatalogPage({ onImport }: { onImport: (path: string, trigger: HTMLEleme
     if (location.state?.catalogSheet) void navigate(-1)
     else void navigate(`/store${location.search}`, { replace: true, preventScrollReset: true })
   }
+  function focusResults() {
+    const target = restore.current?.isConnected ? restore.current : search.current
+    target?.focus({ preventScroll: true })
+    target?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }
   return <section className="catalog-page" data-testid="catalog">
     <div className="page-heading"><div><h1>{t('react.catalog.title')}</h1><p>{t('react.catalog.subtitle')}</p></div></div>
     <div className="catalog-banner" style={{ backgroundImage: `linear-gradient(90deg, #111923ed, #11192355), url(${ocean})` }}><div><h2>{t('react.catalog.banner')}</h2><p>{t('react.catalog.bannerHelp')}</p></div><Compass size={64} strokeWidth={1} aria-hidden="true" /></div>
@@ -279,8 +284,8 @@ function CatalogPage({ onImport }: { onImport: (path: string, trigger: HTMLEleme
       }
       else trigger?.focus({ preventScroll: true })
     }} />}
-    {worldImport && <WorldFilesDialog type="import" path={worldImport.target.path} name="" initialImport={worldImport.import} changed={() => {}} close={() => setWorldImport(undefined)} returnFocus={() => (restore.current?.isConnected ? restore.current : search.current)?.focus({ preventScroll: true })} />}
-    {packUpdate && <ModpackUpdate selection={packUpdate} close={() => setPackUpdate(undefined)} returnFocus={() => (restore.current?.isConnected ? restore.current : search.current)?.focus({ preventScroll: true })} />}
+    {worldImport && <WorldFilesDialog type="import" path={worldImport.target.path} name="" initialImport={worldImport.import} changed={() => {}} close={() => setWorldImport(undefined)} returnFocus={focusResults} />}
+    {packUpdate && <ModpackUpdate selection={packUpdate} close={() => setPackUpdate(undefined)} returnFocus={focusResults} />}
   </section>
 }
 

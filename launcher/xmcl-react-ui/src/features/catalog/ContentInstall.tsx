@@ -127,7 +127,8 @@ export function ContentInstall({ selection, onBack, onBusy }: { selection: Conte
             return id
           }
           const id = present[0].curseforge!.fileId, values = await catalogClients.curseforge.getFiles([id], abort.signal), value = values.find(file => file.id === id)
-          if (!value || value.modId !== Number(requirement.id) || value.gameId !== 432 || !value.gameVersions.includes(target.runtime.minecraft) || requirement.kind === 'mod' && !loaders.some(loader => value.gameVersions.some(tag => tag.toLowerCase().replace(/[ _-]/g, '') === loader)) || !value.hashes.some(hash => hash.algo === 1 && hash.value.toLowerCase() === present[0].hash)) return undefined
+          const declared = value?.gameVersions.map(tag => tag.toLowerCase().replace(/[ _-]/g, '')).filter(tag => ['fabric', 'quilt', 'forge', 'neoforge'].includes(tag)) || []
+          if (!value || value.modId !== Number(requirement.id) || value.gameId !== 432 || !value.gameVersions.includes(target.runtime.minecraft) || requirement.kind === 'mod' && declared.length > 0 && !loaders.some(loader => declared.includes(loader)) || !value.hashes.some(hash => hash.algo === 1 && hash.value.toLowerCase() === present[0].hash)) return undefined
           return String(id)
       }
       const installedConflict = async (provider: 'modrinth' | 'curseforge', id: string, version: string | undefined) => {
