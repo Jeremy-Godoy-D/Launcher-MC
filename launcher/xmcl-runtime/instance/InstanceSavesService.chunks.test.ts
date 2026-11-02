@@ -135,6 +135,12 @@ describe('InstanceSavesService chunk operations and safety', () => {
     await expect(service.deleteSaveChunks({ savePath, dimension: 'minecraft:overworld', chunks: [{ chunkX: 0, chunkZ: 0 }] })).rejects.toThrow('Process state unavailable')
     expect(applySaveChunkPlan).not.toHaveBeenCalled()
   })
+  it('does not publish chunks when native session protection is unavailable', async () => {
+    const region = join(savePath, 'region/r.0.0.mca'), before = await readFile(region)
+    acquireWorldLock.mockResolvedValue(undefined)
+    await expect(service.deleteSaveChunks({ savePath, dimension: 'minecraft:overworld', chunks: [{ chunkX: 0, chunkZ: 0 }] })).rejects.toHaveProperty('name', 'WorldLockUnavailableError')
+    expect(await readFile(region)).toEqual(before)
+  })
 
   it('rejects dimensions and chunk coordinates that cannot identify local region files', async () => {
     for (const dimension of ['evil:../../outside', 'constructor', 'minecraft:overworld/../region']) {

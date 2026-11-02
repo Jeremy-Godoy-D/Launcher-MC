@@ -38,6 +38,13 @@ it('requires both source and destination to be registered Java instances before 
   }
   expect(previewWorldFiles).not.toHaveBeenCalled(); expect(applyWorldFiles).not.toHaveBeenCalled()
 })
+it('does not publish world files when native session protection is unavailable', async () => {
+  const published = vi.fn()
+  vi.mocked(applyWorldFiles).mockImplementationOnce(async (value, root, verify) => { await verify!(review); published(); return { path: 'created' } })
+  acquireSession.mockResolvedValue(undefined)
+  await expect(service.applyWorldFiles(review)).rejects.toHaveProperty('name', 'WorldLockUnavailableError')
+  expect(published).not.toHaveBeenCalled()
+})
 it('rechecks registration after waiting on a lock', async () => {
   const release = await lock.acquire(), pending = service.previewWorldFiles(operation), failure = expect(pending).rejects.toHaveProperty('name', 'InstanceNotFoundError')
   await vi.waitFor(() => expect(of).toHaveBeenCalledWith(LockKey.instance('source'))); instances = []; release(); await failure; expect(previewWorldFiles).not.toHaveBeenCalled()
