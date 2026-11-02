@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 5,
-  "nextAction": "Etapa 5 activa: K12/K21 pass, K11 pending. STAGE5-WORLD-METADATA-READERS/765a054 cierra getSharedSaves/watch con parser acotado, autoridad Java/depósito, recuentos/procedencia y observadores canónicos sin seguir enlaces. 1343 unitarias,72 focales,React22/Vue21,4Axe0violaciones/8incomplete,tipos/lint/DeskGap/9harness,E2E56base. CI41355748466/28039b0: Vue30 y1338 unitarias aprobadas; React en curso, comprobar cierre y nuevo SHA tras push. Próximo K11: init InstanceSavesService (snapshots saves por atime, shared-saves), InstanceService.moveSavesToShared/deleteInstance, luego integral/noNIO. No reabrir lectores/datapacks/writers/consola aceptados sin regresión. Todas las herramientas/chunks conservadas;6–9 pendientes,Microsoft pospuesto,PR4 borrador,distVue/paquetes separados,producción/proxy intactos. DOMPurify WIP/ANALISIS excluidos; no reintentar acciones denegadas.",
+  "nextAction": "Etapa 5 activa: K12/K21 pass, K11 pending. STAGE5-WORLD-INITIALIZATION: aplicación 6b50d6b, fixtures 3bd0380. Init sin borrar por atime; raíces validadas antes de mkdir; migración shared-saves con copias verificadas, colisiones y originales respaldados. 1351 unitarias/131 archivos; React26/Vue19 sobre43c0bf8, finales6+6 sobre6b50d6b y lanzamiento4/4; 21Axe sin violaciones/46incomplete, tipos/lint/DeskGap/9harness; E2E56base. CI41355748466 success;41357342729 failure spec12: carrera de fixture reproducida y corregida sin relajar aserciones; verificar nuevo CI. Próximo: InstanceService.moveSavesToShared/deleteInstance, aviso/reintento visible de migración heredada bloqueada, integral/noNIO y paridad local/chunks. No rehacer lectores/writers/consola aceptados salvo regresión. Etapas6–9 pendientes, Microsoft pospuesto, PR4 borrador; distVue/producción/proxy intactos. DOMPurify WIP/ANALISIS excluidos; no reintentar acciones denegadas.",
   "stages": [
     {
       "id": 0,
@@ -893,9 +893,13 @@
             {
               "path": "docs/react-migration/STAGE5-WORLD-METADATA-READERS.md",
               "sha256": "22229d5ae6cba0c34aad4e5b0f1de182fb3314444608704bd9ce50d6d7eb7511"
+            },
+            {
+              "path": "docs/react-migration/STAGE5-WORLD-INITIALIZATION.md",
+              "sha256": "9dc436b21665fda7c55b1e854f94f59fe4549243f6058a99598b25a3497ad846"
             }
           ],
-          "note": "K11 pending. Lectores/observadores de metadatos de Mundos acotados y autorizados, recuentos legacy/procedencia válidos y alias del depósito actualizados sin seguir enlaces ajenos. Código/EXE765a054: 1343 unitarias/130 archivos,72 focales,React22/Vue21 sin reintentos,4Axe0violaciones/8incomplete,tipos/lint/DeskGap/9harness; E2E56base. Faltan init legacy, conservación al borrar instancias e integral/noNIO. K12/K21 pass;5 activa."
+          "note": "K11 pending. Init de Mundos no borra por atime; migración legacy con raíz validada, snapshots/copias exclusivas, colisiones, sesiones y originales respaldados. Aplicación6b50d6b/fixtures3bd0380: 1351 unitarias, regresión43c0bf8 React26/Vue19, finales6+6, lanzamiento4/4;21Axe0violaciones/46incomplete,tipos/lint/DeskGap/9harness,E2E56base. CI78903b4 falló spec12 por fixture de procesos todavía incompleta al recargar; reproducido con1s y corregido esperando confirmación terminada. Pendientes conservación al borrar instancias, aviso/reintento legacy e integral/noNIO. K12/K21 pass,5 activa."
         },
         {
           "id": "console-isolation",
@@ -1083,5 +1087,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-01T22:28:00.378623Z"
+  "updatedAt": "2026-11-02T04:21:40.305236Z"
 }

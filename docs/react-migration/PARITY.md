@@ -361,3 +361,9 @@ STAGE5-DATAPACK-READERS.md asegura watchSaveDatapacks/getInstanceSaveDatapacks s
 STAGE5-WORLD-METADATA-READERS.md cierra getSharedSaves/watch con parser acotado, autoridad Java/depósito, recuentos legacy/procedencia y raíces canónicas sin seguir enlaces ajenos. Pasan 1.343 unitarias/130 archivos, 72 focales, React22/Vue21 sin reintentos, cuatro Axe sin violaciones/ocho incomplete, tipos/lint/builds y nueve harness; E2E conserva56 diagnósticos base.
 
 CI41355748466/28039b0: Vue pasó30 Native y1.338 unitarias; React aún en curso al registrar el bloque. Nuevo SHA pendiente. K11 permanece pending por init legacy, conservación al borrar instancias e integral/noNIO. K12/K21 pass, etapa5 activa,6–9 pendientes. Todas las herramientas/chunks conservadas, Microsoft pospuesto, PR4 borrador y distVue/producción/proxy intactos.
+
+## Inicialización que conserva Mundos (6b50d6b; fixtures 3bd0380)
+
+STAGE5-WORLD-INITIALIZATION.md registra retirada del borrado por atime y migración legacy con raíz validada, copias exclusivas verificadas, colisiones y originales respaldados. Pasan 1.351 unitarias/131 archivos; regresión React26/Vue19 sobre43c0bf8, finales seis+seis sobre6b50d6b y lanzamiento4/4. Se registran 21 Axe sin violaciones/46 incomplete, tipos/lint/DeskGap/nueve harness; E2E conserva56 diagnósticos base.
+
+CI28039b0 success;78903b4 falló spec12 por carrera de la fixture, reproducida y corregida sin relajar aserciones. Nuevo CI pendiente. K11 mantiene conservación al borrar instancias, aviso/reintento legacy e integral/noNIO/paridad pendientes; K12/K21 pass, etapa5 activa y6–9 pendientes. Todas las herramientas/chunks conservados, Microsoft pospuesto, PR4 borrador y producción/proxy intactos.
