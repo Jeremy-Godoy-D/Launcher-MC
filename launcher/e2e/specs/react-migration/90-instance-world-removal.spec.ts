@@ -92,7 +92,7 @@ test('React removal explains world contention, retains confirmation and permits 
   await launcher.app.evaluate(({ ipcMain }) => {
     const original = (ipcMain as any)._invokeHandlers.get('service-call'); (globalThis as any).__removalBusy = true
     ipcMain.removeHandler('service-call'); ipcMain.handle('service-call', async (event: unknown, service: string, method: string, ...args: unknown[]) => {
-      if (service === 'InstanceService' && method === 'deleteInstance' && (globalThis as any).__removalBusy) throw Object.assign(new Error('Fixture world operation is pending'), { name: 'WorldOperationBusyError' })
+      if (service === 'InstanceService' && method === 'deleteInstance' && (globalThis as any).__removalBusy) return { error: { name: 'WorldOperationBusyError', message: 'Fixture world operation is pending' } }
       return original(event, service, method, ...args)
     })
   })
