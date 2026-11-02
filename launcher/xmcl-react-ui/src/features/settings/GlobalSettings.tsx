@@ -10,6 +10,7 @@ import { useI18n } from '../../i18n'
 import { useService, useSharedState, useSharedStateStore } from '../../runtime'
 import { ArgumentEditor } from '../instance/ArgumentEditor'
 import { LauncherUpdates } from './LauncherUpdates'
+import { VisualCache } from './VisualCache'
 import { dirtyGlobalSettings, globalDraft, invalidGlobalSetting, prepareGlobalSettings, reconcileGlobalSettings, type GlobalField, type GlobalSettingsForm } from './settingsDraft'
 import './settings.css'
 
@@ -35,11 +36,13 @@ function SettingsContent({ store, data, appearance }: { store: StateStore<Settin
   const text = (key: string) => t(`react.globalSettings.${key}`), gameText = (key: string) => t(`react.instanceSettings.${key}`)
   const [category, setCategory] = useState<Category>('appearance'), [query, setQuery] = useState('')
   const [draft, setDraft] = useState(() => globalDraft(data)), [saving, setSaving] = useState(false), [browsing, setBrowsing] = useState(false)
+  const [closing, setClosing] = useState(false)
   const [failure, setFailure] = useState<'invalid' | 'conflict' | 'save' | 'java' | 'directory' | ''>(''), [field, setField] = useState<GlobalField>(), [saved, setSaved] = useState(false)
   const [directory, setDirectory] = useState(''), [environment, setEnvironment] = useState<Environment>(), [detailsError, setDetailsError] = useState(false), [detailsAttempt, setDetailsAttempt] = useState(0)
-  const pending = useRef(false), alive = useRef(true), allowExit = useRef(false), stay = useRef<HTMLButtonElement>(null), errorFocus = useRef<HTMLParagraphElement>(null), returnFocus = useRef<HTMLElement | null>(null)
+  const pending = useRef(false), alive = useRef(true), allowExit = useRef(false), stay = useRef<HTMLButtonElement>(null), errorFocus = useRef<HTMLParagraphElement>(null), dialogErrorFocus = useRef<HTMLParagraphElement>(null), returnFocus = useRef<HTMLElement | null>(null)
   const dirty = dirtyGlobalSettings(draft).length > 0, busy = saving || browsing, values = draft.values
   const blocker = useBlocker(({ currentLocation, nextLocation }) => !allowExit.current && (dirty || pending.current) && currentLocation.pathname !== nextLocation.pathname)
+  const dialogOpen = closing || blocker.state === 'blocked'
   const latest = useRef(draft); latest.current = draft
   useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
   useEffect(() => { setDraft(previous => reconcileGlobalSettings(previous, data)) }, [data])
@@ -49,10 +52,10 @@ function SettingsContent({ store, data, appearance }: { store: StateStore<Settin
     return () => { active = false }
   }, [base, detailsAttempt])
   useEffect(() => {
-    const close = (event: BeforeUnloadEvent) => { if (!allowExit.current && (dirty || pending.current)) { event.preventDefault(); event.returnValue = '' } }
+    const close = (event: BeforeUnloadEvent) => { if (!allowExit.current && (dirtyGlobalSettings(latest.current).length || pending.current)) { event.preventDefault(); event.returnValue = 'false'; setClosing(true) } }
     window.addEventListener('beforeunload', close); return () => window.removeEventListener('beforeunload', close)
   }, [dirty])
-  useEffect(() => { if (failure) errorFocus.current?.focus() }, [failure])
+  useEffect(() => { if (failure) (dialogOpen ? dialogErrorFocus.current : errorFocus.current)?.focus() }, [failure])
   function change<K extends GlobalField>(key: K, value: GlobalSettingsForm[K]) {
     allowExit.current = false; setDraft(previous => ({ ...previous, values: { ...previous.values, [key]: value } })); setFailure(''); setField(undefined); setSaved(false)
   }
@@ -79,6 +82,7 @@ function SettingsContent({ store, data, appearance }: { store: StateStore<Settin
         const current = store.getSnapshot().data
         if (current) setDraft(previous => reconcileGlobalSettings(previous, current))
         setField(invalid as GlobalField | undefined)
+        if (invalid) setQuery('')
         setFailure(invalid ? 'invalid' : error && typeof error === 'object' && ('conflict' in error || 'name' in error && error.name === 'LauncherSettingsConflict') ? 'conflict' : 'save')
         if (invalid && ['java', 'assignMemory', 'minMemory', 'maxMemory', 'vmOptions', 'mcOptions', 'width', 'height', 'fullscreen'].includes(invalid)) setCategory('game')
         else if (invalid && ['httpProxy', 'maxSockets', 'maxAPISockets'].includes(invalid)) setCategory('network')
@@ -104,7 +108,8 @@ function SettingsContent({ store, data, appearance }: { store: StateStore<Settin
   const visible = matches.some(([id]) => id === category) ? category : matches[0]?.[0]
   const issue = (key: GlobalField) => ({ 'aria-invalid': field === key || undefined, 'aria-describedby': field === key ? 'global-settings-error' : undefined })
   const javas = javaState.data?.all.filter(java => java.valid) ?? []
-  function leave() { allowExit.current = true; discard(); if (blocker.state === 'blocked') blocker.proceed() }
+  function stayHere() { if (pending.current) return; setClosing(false); if (blocker.state === 'blocked') blocker.reset() }
+  function leave() { allowExit.current = true; discard(); setClosing(false); if (closing) { if (blocker.state === 'blocked') blocker.reset(); window.windowController?.close() } else if (blocker.state === 'blocked') blocker.proceed() }
   return <section className="settings-page global-settings" data-testid="global-settings">
     <div className="page-heading"><div><h1>{text('title')}</h1><p>{text('subtitle')}</p></div></div>
     <div className="global-settings-search"><Search size={18} aria-hidden="true" /><input type="search" data-testid="settings-search" aria-label={text('search')} placeholder={text('search')} value={query} onChange={event => setQuery(event.target.value)} /></div>
@@ -113,7 +118,7 @@ function SettingsContent({ store, data, appearance }: { store: StateStore<Settin
       {!!matches.length && <select className="settings-category-select" aria-label={text('categories')} data-testid="settings-category-select" value={visible} onChange={event => setCategory(event.target.value as Category)}>{matches.map(([id]) => <option key={id} value={id}>{text(id)}</option>)}</select>}
       <div className="settings-category-content">
         {!matches.length && <p role="status">{text('noResults')}</p>}
-        <div className="settings-section" hidden={visible !== 'appearance'}>{appearance}</div>
+        <div className="settings-section settings-appearance" hidden={visible !== 'appearance'}>{appearance}<VisualCache /></div>
         <section className="settings-group settings-section" hidden={visible !== 'general'} aria-labelledby="global-general-title"><h2 id="global-general-title">{text('general')}</h2>
           <div className="setting-row"><div><label htmlFor="global-locale">{text('language')}</label><p>{text('languageHelp')}</p></div><select id="global-locale" data-testid="global-locale" value={values.locale} disabled={busy} onChange={event => change('locale', event.target.value)}>{[...new Map([{ locale: 'es-ES', name: 'Español' }, { locale: 'en', name: 'English' }, ...data.locales, { locale: data.locale, name: data.locales.find(item => item.locale === data.locale)?.name ?? data.locale }].map(item => [item.locale, item])).values()].map(item => <option key={item.locale} value={item.locale}>{item.name}</option>)}</select></div>
           <div className="setting-row"><div><strong>{text('dataDirectory')}</strong><p className="settings-path" data-testid="global-data-directory">{directory || text('loading')}</p></div><button type="button" className="button secondary" disabled={!directory || busy} onClick={() => void base.openDirectory(directory).then(opened => { if (!opened) setFailure('directory') }, () => setFailure('directory'))}><FolderOpen size={16} aria-hidden="true" />{text('openDirectory')}</button></div>
@@ -142,8 +147,8 @@ function SettingsContent({ store, data, appearance }: { store: StateStore<Settin
     </div>
     {failure && <p id="global-settings-error" ref={errorFocus} tabIndex={-1} role="alert" className="form-error" data-testid="global-settings-error">{text(`${failure}Error`)}</p>}
     <div className="global-settings-save"><p role="status" data-testid="global-settings-status">{text(busy ? browsing ? 'checkingJava' : 'saving' : saved ? 'saved' : dirty ? 'unsaved' : 'upToDate')}</p><div><button type="button" className="button secondary" data-testid="global-settings-discard" disabled={!dirty || busy} onClick={discard}><Undo2 size={16} aria-hidden="true" />{text('discard')}</button><button type="button" className="button primary" data-testid="global-settings-save" disabled={!dirty || busy} onClick={() => void save()}><Save size={16} aria-hidden="true" />{text('save')}</button></div></div>
-    <Dialog.Root open={blocker.state === 'blocked'} onOpenChange={open => { if (!open && !pending.current && blocker.state === 'blocked') blocker.reset() }}><Dialog.Portal><Dialog.Overlay className="dialog-backdrop" /><Dialog.Content className="dialog creation-dialog operation-dialog" data-testid="global-settings-leave" onOpenAutoFocus={event => { event.preventDefault(); returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; stay.current?.focus() }} onCloseAutoFocus={event => { event.preventDefault(); if (!allowExit.current) returnFocus.current?.focus() }} onPointerDownOutside={event => event.preventDefault()} onEscapeKeyDown={event => { if (busy) event.preventDefault() }}>
-      <Dialog.Title>{text('leaveTitle')}</Dialog.Title><Dialog.Description>{text('leaveHelp')}</Dialog.Description><div className="creation-body">{failure && <p role="alert">{text(`${failure}Error`)}</p>}</div><div className="dialog-actions"><button ref={stay} type="button" className="button secondary" disabled={busy} onClick={() => { if (blocker.state === 'blocked') blocker.reset() }}>{text('stay')}</button><button type="button" className="button secondary" data-testid="global-settings-leave-discard" disabled={busy} onClick={leave}>{text('discardContinue')}</button><button type="button" className="button primary" data-testid="global-settings-leave-save" disabled={busy} onClick={async () => { if (await save()) leave() }}>{text('saveContinue')}</button></div>
+    <Dialog.Root open={dialogOpen} onOpenChange={open => { if (!open) stayHere() }}><Dialog.Portal><Dialog.Overlay className="dialog-backdrop" /><Dialog.Content className="dialog creation-dialog operation-dialog settings-draft-dialog" data-testid="global-settings-leave" onOpenAutoFocus={event => { event.preventDefault(); returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; stay.current?.focus() }} onCloseAutoFocus={event => { event.preventDefault(); if (!allowExit.current) returnFocus.current?.focus() }} onPointerDownOutside={event => event.preventDefault()} onEscapeKeyDown={event => { if (busy) event.preventDefault() }}>
+      <Dialog.Title>{text('leaveTitle')}</Dialog.Title><Dialog.Description>{text('leaveHelp')}</Dialog.Description><div className="creation-body">{failure && <p ref={dialogErrorFocus} tabIndex={-1} role="alert">{text(`${failure}Error`)}</p>}</div><div className="dialog-actions"><button ref={stay} type="button" className="button secondary" disabled={busy} onClick={stayHere}>{text('stay')}</button><button type="button" className="button secondary" data-testid="global-settings-leave-discard" disabled={busy} onClick={leave}>{text('discardContinue')}</button><button type="button" className="button primary" data-testid="global-settings-leave-save" disabled={busy} onClick={async () => { if (await save()) leave() }}>{text('saveContinue')}</button></div>
     </Dialog.Content></Dialog.Portal></Dialog.Root>
   </section>
 }

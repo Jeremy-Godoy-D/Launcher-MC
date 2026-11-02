@@ -216,19 +216,9 @@ export class ElectronUpdater implements LauncherAppUpdater {
       .fetch(`https://api.github.com/repos/${DEFAULT_GITHUB_REPO}/releases?per_page=10`, {
         headers: buildGitHubHeaders(token),
       })
-      .catch(() => undefined)
+      .catch(() => { throw new AnyError('CheckUpdateError', 'No se pudo conectar con GitHub Releases.') })
 
-    if (!response || !response.ok) {
-      this.logger.warn(`GitHub releases check returned ${response?.status ?? 'network error'} for ${DEFAULT_GITHUB_REPO}`)
-      return {
-        name: app.version,
-        body: 'No hay actualizaciones pendientes en GitHub Releases.',
-        date: '',
-        files: [],
-        newUpdate: false,
-        operation: ElectronUpdateOperation.Manual,
-      }
-    }
+    if (!response.ok) throw new AnyError('CheckUpdateError', `No se pudo consultar GitHub Releases (HTTP ${response.status}).`)
 
     const releases = (await response.json()) as any[]
     const latest = Array.isArray(releases)

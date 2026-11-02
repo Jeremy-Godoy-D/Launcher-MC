@@ -1,0 +1,24 @@
+@layer components {
+  .activity-button { position: relative; }
+  .activity-count { position: absolute; inset-block-start: -3px; inset-inline-end: -3px; min-width: 17px; padding: 1px 4px; border-radius: 8px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); font-size: 10px; }
+  .dialog.activity-panel { inset: 64px 24px auto auto; transform: none; width: min(550px, calc(100vw - 40px)); max-width: none; max-height: calc(100vh - 88px); padding: 0; display: flex; flex-direction: column; }
+  .activity-heading { display: flex; align-items: start; justify-content: space-between; gap: 16px; padding: 22px; border-bottom: 1px solid var(--line); }
+  .activity-heading h2 { font-size: 22px; margin-bottom: 8px; }
+  .activity-heading p { color: var(--muted); line-height: 1.5; }
+  .activity-heading .icon-button { flex-shrink: 0; }
+  .activity-body { min-height: 0; overflow: auto; padding: 20px 22px; }
+  .activity-list { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 18px; }
+  .activity-item { display: grid; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid var(--line); min-width: 0; }
+  .activity-item-heading { display: flex; align-items: start; gap: 12px; overflow-wrap: anywhere; }
+  .activity-item-heading > div { flex: 1; min-width: 0; }
+  .activity-item-heading > svg { flex-shrink: 0; margin-top: 2px; }
+  .activity-item-heading > span, .activity-item p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .activity-item-heading > span { text-align: end; }
+  .activity-item > .button { justify-self: start; }
+  .activity-item progress { width: 100%; accent-color: var(--accent); }
+  .activity-empty { display: grid; justify-items: center; gap: 14px; padding: 24px; color: var(--muted); text-align: center; }
+  .activity-footer { display: flex; justify-content: end; flex-wrap: wrap; gap: 12px; padding: 16px 22px; border-top: 1px solid var(--line); }
+}
+@layer responsive {
+  @media (max-height: 500px) { .activity-panel { top: 46px; right: 12px; max-height: calc(100vh - 58px); } .activity-heading { padding: 14px 18px; } .activity-heading h2 { font-size: 19px; } .activity-heading p { font-size: 12px; } .activity-body { padding: 12px 18px; } .activity-footer { padding: 12px 18px; } }
+}

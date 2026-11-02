@@ -36,6 +36,7 @@ import {
 } from 'lucide-react'
 import { Catalog } from './features/catalog/Catalog'
 import { GlobalSettings } from './features/settings/GlobalSettings'
+import { GlobalActivity } from './features/activity/GlobalActivity'
 import brandIcon from '../../branding/copper/app-64.png'
 import sunset from './assets/ambient/vanilla-shaders.webp'
 import caves from './assets/ambient/vanilla-caves.webp'
@@ -552,6 +553,7 @@ export function App() {
             >
               {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
             </button>
+            {savedLibrary ? <GlobalActivity /> : <>
             <button
               className="icon-button"
               aria-label="Tareas"
@@ -571,6 +573,7 @@ export function App() {
             >
               <Bell size={19} />
             </button>
+            </>}
           </div>
         </div>
         <div className="page-scroll">
