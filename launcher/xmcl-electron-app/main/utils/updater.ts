@@ -29,7 +29,6 @@ import { promisify } from 'util'
 import { createGunzip } from 'zlib'
 import { Logger } from '~/infra'
 import { kSettings } from '~/settings'
-import { checksum } from '~/util/fs'
 import ElectronLauncherApp from '../ElectronLauncherApp'
 import { ensureElevateExe } from './elevate'
 import { getGitHubReleaseFiles, validateUpdateAsset, verifyUpdate } from './verifyUpdate'
@@ -101,8 +100,8 @@ async function downloadAsarUpdate(
   if (!sha256Response.ok) throw new AnyError('UpdateAsarError', 'No se pudo verificar la integridad SHA-256 de la actualización.')
   const sha256 = (await sha256Response.text()).trim().split(/\s+/)[0]
   if (!/^[a-f\d]{64}$/i.test(sha256)) throw new AnyError('UpdateAsarError', 'El archivo SHA-256 de la actualización no es válido.')
-  const actual = await checksum(destination, 'sha256').catch(() => '')
-  if (actual.toLowerCase() === sha256.toLowerCase()) {
+  const cached = await verifyUpdate(destination, sha256).then(() => true, () => false)
+  if (cached) {
     await writeFile(destination + '.sha256', sha256)
     return
   }

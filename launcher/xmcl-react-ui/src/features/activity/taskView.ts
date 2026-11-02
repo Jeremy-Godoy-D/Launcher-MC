@@ -6,7 +6,7 @@ const labels: Record<string, string> = {
   installInstance: 'instance', duplicateInstance: 'copy', exportModpack: 'export', downloadModpack: 'modpack',
   resolveMarketFiles: 'requirements', installModrinthFile: 'content', installCurseforgeFile: 'content',
 }
-export const taskLabel = (task: Pick<Task, 'type'>) => labels[task.type] ?? 'operation'
+export const taskLabel = (task: Pick<Task, 'type'>) => Object.hasOwn(labels, task.type) ? labels[task.type] : 'operation'
 export function taskProgress(task: Pick<Task, 'progress'>) {
   const value = task.progress
   if (!value || !Number.isSafeInteger(value.total) || value.total <= 0 || !Number.isFinite(value.progress) || value.progress < 0) return

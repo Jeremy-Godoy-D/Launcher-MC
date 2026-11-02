@@ -11,4 +11,5 @@ it('uses human labels and names only from known instances, without exposing URLs
   expect(taskInstance(task, [{ path: 'C:/owned', name: 'My world' }])).toBe('My world')
   expect(taskInstance(task, [])).toBeUndefined(); expect(taskLabel(task)).toBe('instance')
   expect(taskLabel({ type: 'unknown-secret-value' })).toBe('operation')
+  expect(taskLabel({ type: 'toString' })).toBe('operation')
 })
