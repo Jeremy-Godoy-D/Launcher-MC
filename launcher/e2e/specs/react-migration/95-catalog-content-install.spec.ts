@@ -16,7 +16,7 @@ const test = base.extend<{ kind: 'mod' | 'resourcepack' | 'shader'; catalog: Awa
       const original = (ipcMain as any)._invokeHandlers.get('service-call')
       ;(globalThis as any).__contentReviewCalls = []
       ipcMain.removeHandler('service-call')
-      ipcMain.handle('service-call', async (event, service, method, ...args) => {
+      ipcMain.handle('service-call', async (event: unknown, service: string, method: string, ...args: unknown[]) => {
         const result = await original(event, service, method, ...args)
         if (['getPackSources', 'getShaderSources', 'getModSources', 'resolveFromMarket', 'previewInstanceFiles'].includes(method)) (globalThis as any).__contentReviewCalls.push({ service, method, result })
         return result
@@ -87,7 +87,7 @@ for (const provider of ['modrinth', 'curseforge']) test(`React reviews ${provide
   await page.getByTestId('catalog-install').getByRole('button', { name: 'Volver a versiones', exact: true }).click()
   await page.getByTestId('catalog-project').getByRole('button', { name: 'Cerrar ficha', exact: true }).last().click()
   const installed = await review(launcher, 'mod', provider, paths[1], 2, false)
-  await expect(installed).toContainText('ya está instalado')
+  await expect(installed).toContainText('Ya está instalado')
   await expect(page.getByTestId('catalog-install-confirm')).toHaveCount(0)
   expect(catalog.content.transfers).toHaveLength(transfers)
 })
@@ -101,6 +101,7 @@ test.describe('resource pack catalog review', () => {
     await review(launcher, 'resourcepack', provider, paths[1])
     await page.getByTestId('catalog-install-confirm').click()
     await expect(page.getByTestId('catalog-install-complete')).toBeVisible()
+    const previousBackups = new Set(await entries(join(paths[1], '.backups')))
     await page.getByTestId('catalog-install').getByRole('button', { name: 'Volver a versiones', exact: true }).click()
     await page.getByTestId('catalog-project').getByRole('button', { name: 'Cerrar ficha', exact: true }).last().click()
     const form = await review(launcher, 'resourcepack', provider, paths[1], 2), win = await launcher.app.browserWindow(page)
@@ -120,7 +121,7 @@ test.describe('resource pack catalog review', () => {
     expect(await readFile(join(paths[1], 'resourcepacks', 'root1.zip'))).toEqual(catalog.assets.find(asset => asset.key === 'root2')!.bytes)
     expect(await entries(join(paths[1], 'resourcepacks'))).not.toContain('root2.zip')
     expect(await readFile(join(paths[1], 'options.txt'), 'utf8')).toBe('resourcePacks:["vanilla"]\r\n')
-    const backups = await entries(join(paths[1], '.backups')); expect(backups.length).toBeGreaterThan(0)
+    const backups = (await entries(join(paths[1], '.backups'))).filter(name => !previousBackups.has(name)); expect(backups).toHaveLength(1)
     expect(await readFile(join(paths[1], '.backups', backups[0], 'resourcepacks', 'root1.zip'))).toEqual(catalog.assets.find(asset => asset.key === 'root1')!.bytes)
   })
 })
@@ -179,4 +180,29 @@ test('React retains a stopped native installation and confirms its recovery befo
   await page.getByTestId('catalog-install-confirm').click()
   await expect(page.getByTestId('catalog-install-complete')).toBeVisible()
   expect((await entries(join(paths[1], 'mods'))).sort()).toEqual(['dependency.jar', 'root1.jar'])
+})
+
+test('React rejects an occupied archive name without replacing an unrelated local mod', async ({ launcher, catalog }) => {
+  const paths = await seedReactLibrary(launcher.main)
+  await makeReactMod(paths[1], 'root1', 'Unrelated local mod')
+  const before = await readFile(join(paths[1], 'mods', 'root1.jar'))
+  await review(launcher, 'mod', 'modrinth', paths[1], 1, false)
+  await expect(launcher.main.getByTestId('catalog-install-error')).toContainText('Un archivo existente ocupa el nombre')
+  await expect(launcher.main.getByTestId('catalog-install-confirm')).toHaveCount(0)
+  expect(catalog.content.transfers).toEqual([])
+  expect(await readFile(join(paths[1], 'mods', 'root1.jar'))).toEqual(before)
+})
+
+test('Native catalog installation blocks changed configuration before publishing a plan or files', async ({ launcher, catalog }) => {
+  const page = launcher.main, paths = await seedReactLibrary(page)
+  const form = await review(launcher, 'mod', 'modrinth', paths[1])
+  await page.evaluate(async path => (window as any).serviceChannels.open('InstanceService').call('editInstance', { instancePath: path, runtime: { minecraft: '1.20.4' } }), paths[1])
+  await page.getByTestId('catalog-install-confirm').click()
+  await expect(page.getByTestId('catalog-install-error')).toContainText('No se completó la instalación')
+  await expect(page.getByTestId('catalog-install-complete')).toHaveCount(0)
+  expect(await entries(join(paths[1], 'mods'))).toEqual([])
+  expect(catalog.content.transfers).toEqual([])
+  expect(await page.evaluate(async path => (window as any).serviceChannels.open('InstanceInstallService').call('getReviewedModInstalls', path, 'mods'), paths[1])).toEqual([])
+  await form.getByRole('button', { name: 'Reintentar', exact: true }).click()
+  await expect(page.getByTestId('catalog-install-error')).toContainText('no son compatibles')
 })

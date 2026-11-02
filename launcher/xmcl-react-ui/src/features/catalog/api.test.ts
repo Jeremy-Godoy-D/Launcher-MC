@@ -1,6 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import { getCatalogDetail, getCatalogVersions, getRequiredModrinthVersions, readCatalogQuery, safeCatalogImage, searchCatalog } from './api'
-import type { ProjectVersion } from '@xmcl/modrinth'
+import { getCatalogDetail, getCatalogVersions, readCatalogQuery, safeCatalogImage, searchCatalog } from './api'
 
 afterEach(() => vi.unstubAllGlobals())
 it('bounds shareable search state and refuses filter injection and invalid pagination', () => {
@@ -49,19 +48,5 @@ it('rejects malformed or cross-project version lists before rendering them', asy
 it('bounds version pagination before sending a request', async () => {
   const fetch = vi.fn(); vi.stubGlobal('fetch', fetch)
   for (const page of [-1, 200, 1.5]) await expect(getCatalogVersions('modrinth', 'AAAAAAAA', '', '', page)).rejects.toThrow('Invalid version page')
-  expect(fetch).not.toHaveBeenCalled()
-})
-const version = (id: string, dependencies: ProjectVersion['dependencies'] = []) => ({ id, project_id: id, game_versions: ['1.21.1'], loaders: ['fabric'], dependencies }) as ProjectVersion
-it('resolves required versions once, tolerates cycles and leaves optional dependencies out', async () => {
-  const a = version('AAAAAAAA', [{ version_id: 'BBBBBBBB', project_id: 'BBBBBBBB', dependency_type: 'required' }, { version_id: 'CCCCCCCC', project_id: 'CCCCCCCC', dependency_type: 'optional' }])
-  const b = version('BBBBBBBB', [{ version_id: 'AAAAAAAA', project_id: 'AAAAAAAA', dependency_type: 'required' }])
-  const fetch = vi.fn(async (input: unknown) => Response.json(String(input).endsWith('BBBBBBBB') ? b : a)); vi.stubGlobal('fetch', fetch)
-  expect((await getRequiredModrinthVersions(a, '1.21.1', 'fabric')).map(file => file.id)).toEqual(['BBBBBBBB', 'AAAAAAAA'])
-  expect(fetch).toHaveBeenCalledTimes(1)
-})
-it('rejects incompatible or unidentifiable required versions before installation', async () => {
-  const fetch = vi.fn(); vi.stubGlobal('fetch', fetch)
-  await expect(getRequiredModrinthVersions(version('AAAAAAAA'), '1.20.1', 'fabric')).rejects.toThrow('incompatible')
-  await expect(getRequiredModrinthVersions(version('AAAAAAAA', [{ version_id: '../x', project_id: 'BBBBBBBB', dependency_type: 'required' }]), '1.21.1', 'fabric')).rejects.toThrow('Invalid project identifier')
   expect(fetch).not.toHaveBeenCalled()
 })

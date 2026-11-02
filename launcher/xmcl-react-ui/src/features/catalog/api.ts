@@ -1,6 +1,6 @@
 import { CurseforgeV1Client, FileModLoaderType, ModsSearchSortField, type Mod } from '@xmcl/curseforge'
 import { publicMetadataFetch } from './queries'
-import { ModrinthV2Client, type SearchResultHit, type ProjectVersion } from '@xmcl/modrinth'
+import { ModrinthV2Client, type SearchResultHit } from '@xmcl/modrinth'
 
 export const providers = ['modrinth', 'curseforge'] as const
 export const kinds = ['modpack', 'mod', 'resourcepack', 'shader', 'world'] as const
@@ -88,27 +88,4 @@ export async function getCatalogVersions(provider: Provider, id: string, minecra
   const result = await curseforge.getModFiles({ modId: Number(id), gameVersion: minecraft || undefined, modLoaderType: loader ? loaderIds[loader] : undefined, index: page * 50, pageSize: 50 }, signal)
   if (!Array.isArray(result.data) || result.data.length > 50 || !Number.isSafeInteger(result.pagination?.totalCount) || result.pagination.totalCount < 0 || result.data.some(file => file.modId !== Number(id) || file.gameId !== 432 || !Number.isSafeInteger(file.id) || file.id <= 0 || typeof file.displayName !== 'string' || typeof file.fileName !== 'string' || typeof file.fileDate !== 'string' || !strings(file.gameVersions))) throw new Error('Invalid catalog response')
   return { provider, versions: result.data, total: result.pagination.totalCount } as const
-}
-
-export async function getRequiredModrinthVersions(version: ProjectVersion, minecraft: string, loader: CatalogQuery['loader'], signal?: AbortSignal) {
-  const seen = new Set<string>(), result: ProjectVersion[] = []
-  async function visit(current: ProjectVersion) {
-    projectId('modrinth', current.id)
-    if (minecraft && !current.game_versions?.includes(minecraft) || loader && !current.loaders?.includes(loader)) throw new Error('Required project dependency is incompatible')
-    if (seen.has(current.id)) return
-    if (seen.size >= 128) throw new Error('Too many project dependencies')
-    seen.add(current.id)
-    for (const dependency of current.dependencies || []) {
-      if (dependency.dependency_type !== 'required') continue
-      let next: ProjectVersion | undefined
-      if (dependency.version_id && seen.has(dependency.version_id)) continue
-      if (dependency.version_id) { projectId('modrinth', dependency.version_id); next = await modrinth.getProjectVersion(dependency.version_id, signal) }
-      else if (dependency.project_id) { projectId('modrinth', dependency.project_id); next = (await modrinth.getProjectVersions(dependency.project_id, { ...(minecraft ? { gameVersions: [minecraft] } : {}), ...(loader ? { loaders: [loader] } : {}) }, signal))[0] }
-      if (!next || dependency.project_id && next.project_id !== dependency.project_id) throw new Error('Required project dependency is unavailable')
-      await visit(next)
-    }
-    result.push(current)
-  }
-  await visit(version)
-  return result
 }

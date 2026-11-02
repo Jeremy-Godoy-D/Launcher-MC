@@ -21,6 +21,19 @@ const installed = (projectId = 'DEPS0001', versionId = 'VERS0001', disabled = fa
 const run = (root: ProjectVersion, api: DependencyClients, present: UpdateMod[] = [], optional = new Set<string>(), loader = 'fabric') => resolveCatalogDependencies({ provider: 'modrinth', version: root }, project, '1.21.1', loader, present, optional, api, new AbortController().signal)
 
 describe('catalog dependency resolution', () => {
+  it('rejects malformed dependency identifiers and incompatible roots before network access', async () => {
+    const root = version('ROOTVER1', project.id, [edge('../unsafe')]), api = clients([root])
+    await expect(run(root, api)).rejects.toMatchObject({ code: 'unavailable' })
+    expect(api.modrinth.getProject).not.toHaveBeenCalled()
+    await expect(run(version('ROOTVER1', project.id, [], ['forge']), api)).rejects.toMatchObject({ code: 'incompatible' })
+    expect(api.modrinth.getProjectVersion).not.toHaveBeenCalled()
+  })
+  it('bounds graph expansion and oversized edge arrays', async () => {
+    const versions = Array.from({ length: 129 }, (_, index) => version(`V${String(index).padStart(7, '0')}`, index ? `P${String(index).padStart(7, '0')}` : project.id, index === 128 ? [] : [edge(`P${String(index + 1).padStart(7, '0')}`)]))
+    await expect(run(versions[0], clients(versions))).rejects.toMatchObject({ code: 'tooMany' })
+    const oversized = version('ROOTVER1', project.id, Array.from({ length: 257 }, () => edge('DEPS0001')))
+    await expect(run(oversized, clients([oversized]))).rejects.toMatchObject({ code: 'unavailable' })
+  })
   it('resolves a cycle without switching the explicitly selected root to a newer version', async () => {
     const root = version('ROOTVER1', project.id, [edge('DEPS0001')]), dependency = version('VERS0001', 'DEPS0001', [edge(project.id)])
     const api = clients([root, dependency, version('ROOTVER2', project.id)])
