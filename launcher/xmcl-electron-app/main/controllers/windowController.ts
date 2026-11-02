@@ -100,6 +100,10 @@ export const windowController: ControllerPlugin = function (this: ElectronContro
     exportOwner(event)
     return this.getLoggerContext(event.sender)
   })
+  ipcMain.handle('get-migration-context', event => {
+    exportOwner(event)
+    return this.getMigrationContext(event.sender)
+  })
   ipcMain.handle('find-in-page', (event, text: string, options: FindInPageOptions) => {
     event.sender.findInPage(text, options)
   })

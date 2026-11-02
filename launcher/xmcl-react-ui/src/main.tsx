@@ -1,4 +1,4 @@
-import { StrictMode, useState } from 'react'
+import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createHashRouter } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
@@ -8,7 +8,8 @@ import { App } from './App'
 import { RuntimeProvider } from './runtime'
 import { PreferencesProvider } from './preferences-context'
 import { PreferencesStore } from './preferences'
-import { I18nProvider } from './i18n'
+import { I18nProvider, useI18n } from './i18n'
+import { migrateSelectedInstance } from './features/settings/migrationSelection'
 import { AccountsProvider } from './features/accounts/context'
 import { Onboarding } from './features/onboarding/Onboarding'
 import { LibraryProvider } from './features/library/context'
@@ -24,7 +25,22 @@ const preferences = new PreferencesStore(() => window.localStorage, window, asyn
 )
 window.addEventListener('pagehide', () => { launches?.dispose(); client?.dispose() }, { once: true })
 function Entry() {
+  const { t } = useI18n()
+  const [ready, setReady] = useState(!client), [migrationError, setMigrationError] = useState(false)
+  useEffect(() => {
+    if (!client) return
+    let active = true
+    void Promise.resolve().then(() => {
+      if (!window.windowController?.getMigrationContext) throw new Error('Native migration context unavailable')
+      return window.windowController.getMigrationContext()
+    }).then(context => {
+      if (active) migrateSelectedInstance(localStorage, context)
+    }).catch(() => { if (active) setMigrationError(true) }).finally(() => { if (active) setReady(true) })
+    return () => { active = false }
+  }, [])
   const [onboarding, setOnboarding] = useState(() => new URLSearchParams(location.search).has('bootstrap'))
+  if (!ready) return <p role="status">{t('react.migration.loading')}</p>
+  if (migrationError) return <main className="auxiliary" role="alert"><p>{t('react.migration.selectionError')}</p><button className="button secondary" onClick={() => setMigrationError(false)}>{t('react.migration.continue')}</button></main>
   if (onboarding && client) return <Onboarding onFinished={choice => {
     const url = new URL(location.href)
     url.searchParams.delete('bootstrap')

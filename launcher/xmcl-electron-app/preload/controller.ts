@@ -66,6 +66,7 @@ function createController(): WindowController {
     exportLogView: (text, name) => ipcRenderer.invoke('export-log-view', text, name),
     openLogger: (instancePath, source) => ipcRenderer.invoke('open-logger', instancePath, source),
     getLoggerContext: () => ipcRenderer.invoke('get-logger-context'),
+    getMigrationContext: () => ipcRenderer.invoke('get-migration-context'),
     getPathForFile,
     queryAudioPermission: () => ipcRenderer.invoke('query-audio-permission'),
     getMonitors: () => ipcRenderer.invoke('get-monitors'),

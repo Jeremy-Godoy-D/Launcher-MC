@@ -11,6 +11,7 @@ import { I18nProvider, useI18n } from './i18n'
 import { LaunchProvider } from './features/launch/context'
 import { LaunchStore } from './features/launch/store'
 import { InstanceConsole } from './features/instance/InstanceConsole'
+import { MigrationWindow } from './windows/MigrationWindow'
 import { loaderName } from './features/library/model'
 import brandIcon from '../../branding/copper/app-64.png'
 import './styles.css'
@@ -83,6 +84,6 @@ function Logger() {
 }
 
 createRoot(document.getElementById('root')!).render(migration
-  ? <main className="auxiliary" data-testid="react-migration-window"><img src={brandIcon} width="48" height="48" alt="" /><h1>Migración de datos</h1><p>Vista previa de Grimo Launcher</p><p>Este entorno de prueba no mueve ni modifica tus datos.</p></main>
+  ? <StrictMode><PreferencesProvider store={preferences}><I18nProvider client={null}><MigrationWindow /></I18nProvider></PreferencesProvider></StrictMode>
   : <StrictMode><RuntimeProvider client={client}><PreferencesProvider store={preferences}><I18nProvider client={client}><Logger /></I18nProvider></PreferencesProvider></RuntimeProvider></StrictMode>,
 )

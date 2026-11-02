@@ -143,6 +143,8 @@ export interface LauncherFixture {
 }
 
 export interface LauncherOptions {
+  /** Move only this disposable fixture's data root through the real startup path. */
+  migrateData?: boolean
   /** Exercise configured paths through a temporary parent junction. */
   gameDataParentAlias?: boolean
   /** Disable the recorder only for calibrated performance measurements. */
@@ -215,7 +217,7 @@ export const test = base.extend<{
 
     const app = await _electron.launch({
       executablePath: ELECTRON_BIN,
-      args: PACKAGED_BINARY ? [] : [ELECTRON_ENTRY],
+      args: [...(PACKAGED_BINARY ? [] : [ELECTRON_ENTRY]), ...(launcherOptions.migrateData ? ['--migrate', join(gameParent, 'migrated-data')] : [])],
       cwd: resolve(REPO_ROOT, 'xmcl-electron-app/dist'),
       env: {
         ...process.env,

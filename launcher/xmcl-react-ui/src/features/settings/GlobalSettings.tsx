@@ -11,6 +11,7 @@ import { useService, useSharedState, useSharedStateStore } from '../../runtime'
 import { ArgumentEditor } from '../instance/ArgumentEditor'
 import { LauncherUpdates } from './LauncherUpdates'
 import { VisualCache } from './VisualCache'
+import { DataDirectory } from './DataDirectory'
 import { dirtyGlobalSettings, globalDraft, invalidGlobalSetting, prepareGlobalSettings, reconcileGlobalSettings, type GlobalField, type GlobalSettingsForm } from './settingsDraft'
 import './settings.css'
 
@@ -124,6 +125,7 @@ function SettingsContent({ store, data, appearance }: { store: StateStore<Settin
           <div className="setting-row"><div><strong>{text('dataDirectory')}</strong><p className="settings-path" data-testid="global-data-directory">{directory || text('loading')}</p></div><button type="button" className="button secondary" disabled={!directory || busy} onClick={() => void base.openDirectory(directory).then(opened => { if (!opened) setFailure('directory') }, () => setFailure('directory'))}><FolderOpen size={16} aria-hidden="true" />{text('openDirectory')}</button></div>
           {detailsError && <p role="alert">{text('detailsError')} <button type="button" className="button secondary" onClick={() => setDetailsAttempt(value => value + 1)}>{text('retry')}</button></p>}
           <div className="setting-row"><div><strong>{text('accounts')}</strong><p>{text('accountsHelp')}</p></div><Link className="button secondary" to="/accounts">{text('manageAccounts')}</Link></div>
+          <DataDirectory disabled={dirty || busy || !directory} />
           <details className="settings-help"><summary>{text('help')}</summary><p>{text('helpJava')}</p><p>{text('helpContent')}</p><p>{text('helpData')}</p></details>
         </section>
         <section className="settings-group settings-section instance-settings" hidden={visible !== 'game'} aria-labelledby="global-game-title"><h2 id="global-game-title">{text('game')}</h2><p>{text('gameHelp')}</p>

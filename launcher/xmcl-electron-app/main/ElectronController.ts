@@ -243,7 +243,7 @@ export class ElectronController implements LauncherAppController {
     await app.whenReady()
     const restoredSession = this.app.session.getSession(defaultApp.url)
     const browser = new BrowserWindow({
-      title: 'XMCL Launcher Migrate',
+      title: 'Grimo Launcher · Migración de datos',
       frame: false,
       resizable: false,
       width: 600,
@@ -260,7 +260,7 @@ export class ElectronController implements LauncherAppController {
 
   async endMigrate(result?: { from: string; to: string }) {
     this.migrated = result
-    if (this.migrationRef) {
+    if (result && this.migrationRef && !this.migrationRef.isDestroyed()) {
       this.migrationRef.close()
     }
   }
@@ -440,6 +440,10 @@ export class ElectronController implements LauncherAppController {
   getLoggerContext(contents: WebContents) {
     const context = [...this.loggerWindows.values()].find(entry => entry.window?.webContents === contents)?.context
     return context ? { ...context } : undefined
+  }
+
+  getMigrationContext(contents: WebContents) {
+    return this.mainWin?.webContents === contents && this.migrated ? { ...this.migrated } : undefined
   }
 
   async openLogger(instancePath: string, source?: string) {

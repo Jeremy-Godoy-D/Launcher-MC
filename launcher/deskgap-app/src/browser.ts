@@ -275,6 +275,7 @@ function installBridge(deskgap: DeskGapBrowserClient) {
     exportLogView: (text, name) => invoke<boolean>('window.export-log-view', text, name),
     openLogger: (instancePath, source) => invoke<void>('window.open-logger', instancePath, source),
     getLoggerContext: () => invoke('window.get-logger-context'),
+    getMigrationContext: () => invoke('window.get-migration-context'),
     writeClipboardImage: (imageUrl: string) => { void invoke('window.write-clipboard-image', imageUrl) },
     getPathForFile(file: File) {
       const index = droppedEntries.findIndex(entry =>

@@ -46,3 +46,6 @@
     .global-settings-save > div { margin-inline-start: auto; }
   }
 }
+.data-migration-review dl { margin: 12px 0; font-size: 13px; }
+.data-migration-review dt { color: var(--muted); }
+.data-migration-review dd { margin: 0 0 8px; overflow-wrap: anywhere; }

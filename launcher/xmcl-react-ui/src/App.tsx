@@ -60,7 +60,10 @@ import { InstanceWorkspace } from './features/instance/InstanceWorkspace'
 
 declare global {
   interface Window {
+    migration?: import('@xmcl/runtime-api/migration').Migration
     windowController?: {
+      hide(): void
+      getMigrationContext(): Promise<{ from: string; to: string } | undefined>
       minimize(): void
       maximize(): void
       close(): void

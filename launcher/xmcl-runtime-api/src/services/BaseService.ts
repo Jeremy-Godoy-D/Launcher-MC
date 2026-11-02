@@ -9,7 +9,9 @@ import type { EditLauncherSettings } from '../util/launcherSettings'
 
 export interface MigrateOptions {
   destination: string
+  expectedSource?: string
 }
+export interface DataMigrationReview { source: string; destination: string; unchanged: boolean }
 
 export class LauncherProfileState implements LauncherProfile {
   profiles = {}
@@ -170,6 +172,8 @@ export interface BaseService extends GenericEventEmitter<BaseServiceEventMap> {
    * @param options The migration options
    */
   migrate(options: MigrateOptions): Promise<void>
+
+  reviewDataMigration(destination: string): Promise<DataMigrationReview>
 
   getMemoryStatus(): Promise<{ total: number; free: number }>
 

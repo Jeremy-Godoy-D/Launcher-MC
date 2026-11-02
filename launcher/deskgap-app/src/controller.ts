@@ -149,6 +149,7 @@ export class DeskGapController implements LauncherAppController {
   private readonly handlerDisposers = new Map<DeskGapClient, Map<string, () => void>>()
   private readonly logger: Logger
   private mainWindow?: BrowserWindow
+  private migrated?: { from: string; to: string }
   private mainClient?: DeskGapClient
   private monitorWindow?: BrowserWindow
   private monitorClient?: DeskGapClient
@@ -437,7 +438,7 @@ export class DeskGapController implements LauncherAppController {
     await app.whenReady()
     if (this.migrationWindow && !this.migrationWindow.isDestroyed()) return
     const window = new BrowserWindow({
-      title: 'XMCL Launcher Migration',
+      title: 'Grimo Launcher · Migración de datos',
       icon: this.launcher.getWindowIcon(this.launcher.builtinAppManifest),
       width: 600,
       height: 400,
@@ -468,11 +469,11 @@ export class DeskGapController implements LauncherAppController {
   }
 
   async endMigrate(result?: { from: string; to: string }) {
+    this.migrated = result
     const window = this.migrationWindow
     const client = this.migrationClient
     if (!window || window.isDestroyed() || !client) return
     if (!result) {
-      this.finishMigrationWindow()
       return
     }
     await new Promise<void>(resolve => {
@@ -577,6 +578,7 @@ export class DeskGapController implements LauncherAppController {
       const context = [...this.loggerWindows.values()].find(entry => entry.window === this.getWindow(sender))?.context
       return context ? { ...context } : undefined
     })
+    this.handle('window.get-migration-context', ({ sender }) => this.getWindow(sender) === this.mainWindow && this.migrated ? { ...this.migrated } : undefined)
     this.handle('window.export-log-view', async ({ sender }, text, name) => {
       const window = this.getWindow(sender)
       if (exporting.has(sender)) throw new Error('Log export is already open')

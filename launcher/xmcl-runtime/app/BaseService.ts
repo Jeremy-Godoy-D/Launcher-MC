@@ -41,6 +41,8 @@ import { ZipFile } from 'yazl'
 import { getTracker } from '~/util/taskHelper'
 import { addSteamShortcutToVdf } from './steamShortcut'
 import { writeFile as writeAtomically } from 'atomically'
+import { reviewMigrationPaths, migrationPathError } from './migrationPaths'
+import { LaunchService } from '~/launch'
 
 @ExposeServiceKey(BaseServiceKey)
 export class BaseService extends AbstractService implements IBaseService {
@@ -408,9 +410,12 @@ export class BaseService extends AbstractService implements IBaseService {
     this.showItemInDirectory(options.destination)
   }
 
-  async migrate(options: MigrateOptions) {
-    const destination = options.destination
-    const code = await validateDirectory(this.app.platform, destination)
+  async reviewDataMigration(destination: string) {
+    const current = await this.getGameDataDirectory()
+    const review = await reviewMigrationPaths(current, destination)
+    if (review.unchanged) return review
+    if (this.tasks.getActiveTask() || (await (await this.app.registry.get(LaunchService)).getGameProcesses()).length) throw migrationPathError('busy')
+    const code = await validateDirectory(this.app.platform, review.destination, true)
     if (code) {
       throw new MigrationException({
         type: 'migrationInvalidDestiantion',
@@ -418,11 +423,16 @@ export class BaseService extends AbstractService implements IBaseService {
         destination,
       })
     }
+    return review
+  }
+
+  async migrate(options: MigrateOptions) {
+    const review = await this.reviewDataMigration(options.destination), destination = review.destination
+    await reviewMigrationPaths(review.source, destination, options.expectedSource)
 
     // Nothing to do if the destination is already the current root. Without
     // this guard the launcher would relaunch and re-migrate into itself.
-    const current = await this.app.registry.get(kGameDataPath).then((f) => f())
-    if (resolve(current) === resolve(destination)) {
+    if (review.unchanged) {
       return
     }
 

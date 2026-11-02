@@ -136,6 +136,7 @@ export interface WindowController extends GenericEventEmitter<WindowControllerEv
 
   openLogger(instancePath: string, source?: string): Promise<void>
   getLoggerContext(): Promise<LoggerContext | undefined>
+  getMigrationContext(): Promise<{ from: string; to: string } | undefined>
 
   writeClipboardImage(imageUrl: string): void
 
