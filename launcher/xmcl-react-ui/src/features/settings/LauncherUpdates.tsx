@@ -19,7 +19,6 @@ export function LauncherUpdates({ settings, getCurrent, dirty }: { settings: Sta
   const info = settings.updateInfo
   const notes = useMemo(() => { try { return info?.body ? catalogDescription(info.body, true) : '' } catch { return '' } }, [info?.body])
   const active = tasks.tasks.find(task => task.type === 'downloaUpdate' && task.state === TaskState.Running)
-  const latestTasks = useRef(tasks.tasks); latestTasks.current = tasks.tasks
   const busy = phase !== 'idle' || !!active, playing = !!launch?.running.length || launch?.phase === 'preparing'
   const latest = useRef({ playing, dirty }); latest.current = { playing, dirty }
   const files = info ? publicUpdateFiles(info) : []
@@ -29,7 +28,7 @@ export function LauncherUpdates({ settings, getCurrent, dirty }: { settings: Sta
     const current = getCurrent()
     if (kind === 'apply' && (latest.current.playing || current?.updateStatus !== 'ready' || !review || current.updateInfo?.name !== review)) { setError(true); return }
     if (kind === 'download' && (!current?.updateInfo?.newUpdate || current.updateInfo.name !== info?.name || !automatic)) return
-    const previousTasks = new Set(latestTasks.current.map(task => task.id))
+    const previousTasks = new Set(tasks.getSnapshot().tasks.map(task => task.id))
     pending.current = true; setPhase(kind); setError(false); setCancelled(false)
     try {
       if (kind === 'check') { await service.checkUpdate(); setChecked(true) }
@@ -37,7 +36,8 @@ export function LauncherUpdates({ settings, getCurrent, dirty }: { settings: Sta
       else { await service.quitAndInstall(); setReview(undefined) }
     } catch (error) {
       const aborted = error && typeof error === 'object' && 'name' in error && error.name === 'AbortError'
-      const task = latestTasks.current.find(task => task.type === 'downloaUpdate' && task.version === info?.name && !previousTasks.has(task.id))
+      if (kind === 'download') await tasks.refresh()
+      const task = tasks.getSnapshot().tasks.find(task => task.type === 'downloaUpdate' && task.version === info?.name && !previousTasks.has(task.id))
       if (kind === 'download' && (aborted || task?.state === TaskState.Cancelled)) setCancelled(true)
       else setError(true)
     }

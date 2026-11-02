@@ -40,7 +40,7 @@ export function useSharedState<T extends object>(descriptor: StateDescriptor<T>)
 export function useTasks() {
   const store = useClient().tasks()
   const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
-  return { ...snapshot, cancel: store.cancel, clear: store.clear, refresh: store.refresh }
+  return { ...snapshot, cancel: store.cancel, clear: store.clear, refresh: store.refresh, getSnapshot: store.getSnapshot }
 }
 
 type Events<T> = T extends GenericEventEmitter<infer E> ? E : never
