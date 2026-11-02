@@ -10,7 +10,7 @@ const test = base.extend<{ catalog: Awaited<ReturnType<typeof mockReactCatalog>>
     const fixture = await mockReactCatalog(launcher), errors: string[] = []
     launcher.main.on('pageerror', error => errors.push(error.message))
     try { await use(fixture) } finally {
-      await writeFile(info.outputPath('fixture-requests.json'), JSON.stringify({ ...fixture.state, rendererErrors: errors }, null, 2))
+      await writeFile(info.outputPath('fixture-requests.json'), JSON.stringify({ ...fixture.state, nativeHops: await fixture.hops(), rendererErrors: errors }, null, 2))
       await fixture.close(); expect(errors).toEqual([])
     }
   },
@@ -35,6 +35,7 @@ test('React searches both public sources with shareable filters, paging and no r
   const cf = requests.map(request => new URL(request.url, 'http://fixture')).find(url => url.pathname === '/curseforge/v1/mods/search')!
   expect(cf.searchParams.get('gameVersion')).toBe('1.21.1'); expect(cf.searchParams.get('modLoaderType')).toBe('4')
   expect(requests.every(request => !request.key && !request.authorization && !request.cancellationId)).toBe(true)
+  const hops = await catalog.hops(); expect(hops.length).toBeGreaterThan(0); expect(hops.every(hop => hop.usedProxy)).toBe(true)
   await area.getByTestId('catalog-source-modrinth').click(); await area.getByTestId('catalog-kind').selectOption('world')
   await expect(area.getByRole('status').filter({ hasText: 'Los mundos' })).toContainText('Los mundos están disponibles en CurseForge')
   await writeFile(testInfo.outputPath('catalog-requests.json'), JSON.stringify(requests, null, 2))

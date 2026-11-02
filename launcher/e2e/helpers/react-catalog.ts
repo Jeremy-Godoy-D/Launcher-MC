@@ -56,14 +56,16 @@ export async function mockReactCatalog(launcher: LauncherFixture) {
   const address = server.address(); if (!address || typeof address === 'string') throw new Error('Missing catalog fixture server')
   // Same native HTTP redirect used by spec86; clients, protocol/proxy handling and response parsing remain real.
   await launcher.app.evaluate(({ session }, base) => {
+    ;(globalThis as any).__catalogNativeHops = []
     session.defaultSession.webRequest.onBeforeRequest({ urls: ['https://api.modrinth.com/v2/*', 'https://*/v1/mods*', 'https://cdn.modrinth.com/catalog-qa.png'] }, (details: { url: string; webContentsId?: number }, callback: (response: { redirectURL?: string }) => void) => {
       // Let the renderer reach its real protocol/proxy handler; redirect only the main-process HTTP hop.
       if (details.webContentsId && details.webContentsId > 0) { callback({}); return }
       const url = new URL(details.url), path = url.pathname === '/catalog-qa.png' ? '/image' : `${url.pathname.startsWith('/v1/') ? '/curseforge' : '/modrinth'}${url.pathname}${url.search}`
+      if (url.pathname.startsWith('/v1/')) (globalThis as any).__catalogNativeHops.push({ provider: 'curseforge', usedProxy: url.hostname !== 'api.curseforge.com' })
       callback({ redirectURL: base + path })
     })
   }, `http://127.0.0.1:${address.port}`)
-  return { state, base: `http://127.0.0.1:${address.port}`, close: async () => {
+  return { state, hops: () => launcher.app.evaluate(() => (globalThis as any).__catalogNativeHops as { provider: string; usedProxy: boolean }[]), close: async () => {
     await launcher.app.evaluate(({ session }) => { session.defaultSession.webRequest.onBeforeRequest(null) })
     server.closeAllConnections(); await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve()))
   } }
