@@ -142,9 +142,8 @@ test('React prototype: independent selection, filters, dialogue focus and actual
   await expect(page.getByRole('button', { name: 'Créditos visuales' })).toBeFocused()
   await page.getByTestId('nav-home').click()
   await expect(page.locator('.instance-row')).toHaveCount(0)
-  catalog.state.mode = 'errors'; catalog.state.phase = 2
   await page.getByTestId('nav-store').click()
-  await page.getByLabel('Buscar en el catálogo').fill('inexistente')
+  await page.getByLabel('Buscar en el catálogo').fill('fixture-empty')
   await page.getByLabel('Buscar en el catálogo').press('Enter')
   await expect(page.getByRole('heading', { name: 'No encontramos ese contenido' })).toBeVisible()
   catalog.state.mode = 'normal'

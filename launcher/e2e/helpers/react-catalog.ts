@@ -62,6 +62,7 @@ export async function mockReactCatalog(launcher: LauncherFixture, archives?: { m
         else json({ hits: [], total_hits: 0 })
         return
       }
+      if (query === 'fixture-empty') { json({ hits: [], total_hits: 0 }); return }
       const start = Number(url.searchParams.get('offset') || 0), type = JSON.parse(url.searchParams.get('facets') || '[]')[0]?.[0]?.split(':')[1] || 'modpack'
       json({ hits: Array.from({ length: 24 }, (_, index) => modrinthHit(start + index + 1, type, query)), total_hits: 48, offset: start, limit: 24 }); return
     }
