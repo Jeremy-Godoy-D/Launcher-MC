@@ -96,6 +96,12 @@ test('React removal explains world contention, retains confirmation and permits 
       return original(event, service, method, ...args)
     })
   })
+  const failure = await page.evaluate(async path => {
+    try { await (window as any).serviceChannels.open('InstanceService').call('deleteInstance', path, false); return { rejected: false } }
+    catch (error: any) { return { rejected: true, type: typeof error, name: error?.name, message: error?.message, keys: Object.keys(error || {}) } }
+  }, path)
+  expect(failure).toMatchObject({ rejected: true, name: 'WorldOperationBusyError' })
+  await writeFile(testInfo.outputPath('busy-error.json'), JSON.stringify(failure, null, 2))
   for (const theme of ['dark', 'light']) {
     await page.getByTestId('nav-settings').click(); await page.getByLabel('Apariencia', { exact: true }).selectOption(theme)
     await page.getByTestId('nav-library').click(); await activateLauncherControl(launcher, page.getByRole('button', { name: 'Opciones de Mi mundo', exact: true }))
