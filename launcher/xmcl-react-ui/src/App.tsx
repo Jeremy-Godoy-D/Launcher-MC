@@ -35,6 +35,7 @@ import {
   X,
 } from 'lucide-react'
 import { Catalog } from './features/catalog/Catalog'
+import { GlobalSettings } from './features/settings/GlobalSettings'
 import brandIcon from '../../branding/copper/app-64.png'
 import sunset from './assets/ambient/vanilla-shaders.webp'
 import caves from './assets/ambient/vanilla-caves.webp'
@@ -788,23 +789,16 @@ export function App() {
             </section>
           )}
           {catalog && <Catalog onImport={(path, trigger) => { restoreFocus.current = trigger; setIncomingArchive(path); setAdding('import') }} />}
-          {settings && (
-            <section className="settings-page">
-              <div className="page-heading">
-                <div>
-                  <h1>A tu manera.</h1>
-                  <p>Un launcher que se adapta a cómo juegas.</p>
-                </div>
-              </div>
+          {settings && <GlobalSettings native={!!savedLibrary} appearance={
               <div className="settings-group">
-                <h2>Apariencia y rendimiento</h2>
+                <h2>{t('react.globalSettings.appearance')}</h2>
                 {preferencesError && <p role="status">{preferencesError === 'newer-version'
-                  ? 'Tus preferencias pertenecen a una versión más reciente. Los cambios se aplicarán solo en esta ventana.'
-                  : 'No se pudieron recuperar o guardar todas tus preferencias. Puedes seguir usando el launcher y cambiar estos ajustes.'}</p>}
+                  ? t('react.globalSettings.newerPreferences')
+                  : t('react.globalSettings.preferencesError')}</p>}
                 <div className="setting-row">
                   <div>
                     <strong>{t('react.appearance')}</strong>
-                    <p>La misma interfaz, con otra luz.</p>
+                    <p>{t('react.globalSettings.appearanceHelp')}</p>
                   </div>
                   <select
                     aria-label={t('react.appearance')}
@@ -817,18 +811,18 @@ export function App() {
                   </select>
                 </div>
                 <div className="setting-row">
-                  <div><strong>{t('react.ambientVideo')}</strong><p>Reproduce los vídeos disponibles cuando la ventana esté activa.</p></div>
+                  <div><strong>{t('react.ambientVideo')}</strong><p>{t('react.globalSettings.videoHelp')}</p></div>
                   <input type="checkbox" aria-label={t('react.ambientVideo')} checked={preferences.backgroundVideoEnabled} onChange={event => setPreferences({ backgroundVideoEnabled: event.target.checked })} />
                 </div>
                 <div className="setting-row">
-                  <div><strong>{t('react.carousel')}</strong><p>Alterna la instancia destacada mientras no estés interactuando.</p></div>
+                  <div><strong>{t('react.carousel')}</strong><p>{t('react.globalSettings.carouselHelp')}</p></div>
                   <input type="checkbox" aria-label={t('react.carousel')} checked={preferences.carouselEnabled} onChange={event => setPreferences({ carouselEnabled: event.target.checked })} />
                 </div>
                 <div className="setting-row">
                   <div>
                     <strong>{t('react.performance')}</strong>
                     <p>
-                      Utiliza imágenes estáticas, detiene la presentación y desactiva el desenfoque.
+                      {t('react.globalSettings.performanceHelp')}
                     </p>
                   </div>
                   <input
@@ -840,16 +834,15 @@ export function App() {
                 </div>
                 <div className="setting-row">
                   <div>
-                    <strong>Recursos visuales</strong>
-                    <p>Autores, fuentes y licencias de las imágenes y vídeos.</p>
+                    <strong>{t('react.globalSettings.visualResources')}</strong>
+                    <p>{t('react.globalSettings.visualResourcesHelp')}</p>
                   </div>
                   <button className="button secondary" onClick={openCredits}>
-                    Ver créditos
+                    {t('react.globalSettings.viewCredits')}
                   </button>
                 </div>
               </div>
-            </section>
-          )}
+          } />}
           {accountsPage && <Accounts />}
           {!home && !library && !catalog && !settings && !accountsPage && !current && <div className="empty" role="status"><h1>{t('react.instances.noneSelected')}</h1><Link className="button secondary" to="/me">{t('react.instances.choose')}</Link></div>}
           {instancePage && current && savedLibrary?.current && <InstanceWorkspace key={current.id}

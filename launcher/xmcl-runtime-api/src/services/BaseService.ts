@@ -5,6 +5,7 @@ import { Platform } from '../entities/platform'
 import { Settings } from '../entities/setting'
 import { SharedState } from '../util/SharedState'
 import { ServiceKey } from './Service'
+import type { EditLauncherSettings } from '../util/launcherSettings'
 
 export interface MigrateOptions {
   destination: string
@@ -106,6 +107,9 @@ export interface BaseService extends GenericEventEmitter<BaseServiceEventMap> {
   getDeviceId(): Promise<string>
 
   getSettings(): Promise<SharedState<Settings>>
+
+  /** Persist reviewed core preferences atomically before acknowledging the change. */
+  editSettings(options: EditLauncherSettings): Promise<void>
 
   makeDesktopShortcut(): Promise<boolean>
 

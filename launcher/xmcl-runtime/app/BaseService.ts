@@ -30,7 +30,8 @@ import {
 } from '~/infra'
 import { kNetworkInterface } from '~/network'
 import { AbstractService, ExposeServiceKey, Singleton } from '~/service'
-import { kSettings } from '~/settings'
+import { kEditSettings, kSettings } from '~/settings'
+import type { EditLauncherSettings } from '@xmcl/runtime-api/src/util/launcherSettings'
 import { type Tasks, kTasks } from '~/infra'
 import { validateDirectory } from '~/util/validate'
 import { writeZipFile } from '../util/zip'
@@ -78,6 +79,10 @@ export class BaseService extends AbstractService implements IBaseService {
 
   async getSettings(): Promise<SharedState<Settings>> {
     return this.app.registry.get(kSettings)
+  }
+
+  async editSettings(options: EditLauncherSettings): Promise<void> {
+    return (await this.app.registry.get(kEditSettings))(options)
   }
 
   async getEnvironment(): Promise<Environment> {

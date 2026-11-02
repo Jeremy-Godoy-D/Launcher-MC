@@ -1,10 +1,12 @@
 import { SettingSchema, Settings } from '@xmcl/runtime-api'
 import { AggregateExecutor } from '@xmcl/utils'
-import { readJson, writeJson } from 'fs-extra'
+import { readJson } from 'fs-extra'
+import { writeFile as writeAtomically } from 'atomically'
+import { type EditLauncherSettings, launcherSettingsConflict, parseLauncherSettingsEdit, validateLauncherSettings } from '@xmcl/runtime-api/src/util/launcherSettings'
 import { join } from 'path'
 import { LauncherAppPlugin } from '~/app'
 import { ServiceStateManager } from '~/service'
-import { kSettings } from './settings'
+import { kEditSettings, kSettings } from './settings'
 
 export const pluginSettings: LauncherAppPlugin = async (app) => {
   const stateManager = await app.registry.get(ServiceStateManager)
@@ -12,10 +14,30 @@ export const pluginSettings: LauncherAppPlugin = async (app) => {
   const logger = app.getLogger('Settings')
   const settingJsonPath = join(app.appDataPath, 'setting.json')
 
+  let tail = Promise.resolve(), applying = false
+  const serialize = () => JSON.stringify(SettingSchema.parse(state), null, 2)
+  const enqueue = (operation: () => Promise<void>) => {
+    const next = tail.catch(() => {}).then(operation)
+    tail = next
+    return next
+  }
+  const edit = async (options: EditLauncherSettings) => {
+    const input = parseLauncherSettingsEdit(options)
+    return enqueue(async () => {
+      for (const key of input.review) if (JSON.stringify(state[key]) !== JSON.stringify(input.expected[key])) throw launcherSettingsConflict()
+      validateLauncherSettings(state, input.changes)
+      const before = serialize(), config = { ...JSON.parse(before), ...input.changes }
+      await writeAtomically(settingJsonPath, JSON.stringify(config, null, 2))
+      // A legacy mutation can arrive during disk I/O; preserve it and require a fresh review.
+      if (serialize() !== before) { await writeAtomically(settingJsonPath, serialize()); throw launcherSettingsConflict() }
+      applying = true
+      try { state.config(config) } finally { applying = false }
+    })
+  }
+
   const saver = new AggregateExecutor<void, void>(() => { }, async () => {
-    const data = SettingSchema.parse(state)
     try {
-      await writeJson(settingJsonPath, data, { spaces: 2 })
+      await enqueue(() => writeAtomically(settingJsonPath, serialize()))
     } catch (e) {
       // Best-effort: do NOT propagate as an unhandled rejection.
       // This saver runs on every state change; if writeJson fails
@@ -30,7 +52,8 @@ export const pluginSettings: LauncherAppPlugin = async (app) => {
   }, 1000)
 
   app.registryDisposer(async () => {
-    return saver.flush()
+    await saver.flush()
+    await tail.catch(() => {})
   })
 
   const normalizeLocale = (locale: string) => {
@@ -54,8 +77,9 @@ export const pluginSettings: LauncherAppPlugin = async (app) => {
     state.config(data)
   }).finally(() => {
     app.registry.register(kSettings, state)
+    app.registry.register(kEditSettings, edit)
     state.subscribeAll(() => {
-      saver.push()
+      if (!applying) saver.push()
     })
   })
 }

@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef } from 'react'
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react'
 import { useI18n } from '../../i18n'
 
-export function ArgumentEditor({ id, title, value, disabled, change }: { id: string; title: string; value: readonly string[] | undefined; disabled: boolean; change: (value: string[] | undefined) => void }) {
+export function ArgumentEditor({ id, title, value, disabled, change, inherit = true }: { id: string; title: string; value: readonly string[] | undefined; disabled: boolean; change: (value: string[] | undefined) => void; inherit?: boolean }) {
   const { t } = useI18n(), fields = useRef(new Map<number, HTMLTextAreaElement>()), add = useRef<HTMLButtonElement>(null), focus = useRef<number | 'add' | null>(null)
   useLayoutEffect(() => {
     if (focus.current !== null) { (focus.current === 'add' ? add.current : fields.current.get(focus.current))?.focus(); focus.current = null }
@@ -11,14 +11,14 @@ export function ArgumentEditor({ id, title, value, disabled, change }: { id: str
     const next = [...value!]; [next[index], next[index + offset]] = [next[index + offset], next[index]]
     focus.current = index + offset; change(next)
   }
-  return <div className="argument-editor">
-    <label htmlFor={`${id}-mode`}>{title}</label>
-    <select id={`${id}-mode`} aria-label={t('react.instanceSettings.argumentMode', { title })} disabled={disabled} value={value === undefined ? 'inherit' : 'custom'} onChange={event => change(event.target.value === 'inherit' ? undefined : [])}>
+  return <div id={id} className="argument-editor">
+    {inherit ? <label htmlFor={`${id}-mode`}>{title}</label> : <strong>{title}</strong>}
+    {inherit && <select id={`${id}-mode`} aria-label={t('react.instanceSettings.argumentMode', { title })} disabled={disabled} value={value === undefined ? 'inherit' : 'custom'} onChange={event => change(event.target.value === 'inherit' ? undefined : [])}>
       <option value="inherit">{t('react.instanceSettings.argumentsInherit')}</option><option value="custom">{t('react.instanceSettings.argumentsCustom')}</option>
-    </select>
+    </select>}
     <p id={`${id}-help`} className="text-muted">{t(value === undefined ? 'react.instanceSettings.argumentsInherited' : 'react.instanceSettings.argumentsHelp')}</p>
     {value !== undefined && <>
-      {!value.length && <p className="text-muted">{t('react.instanceSettings.argumentsEmpty')}</p>}
+      {!value.length && <p className="text-muted">{t(inherit ? 'react.instanceSettings.argumentsEmpty' : 'react.globalSettings.argumentsEmpty')}</p>}
       <ol className="argument-items">{value.map((argument, index) => <li className="argument-row" key={index}>
         <textarea ref={element => { if (element) fields.current.set(index, element); else fields.current.delete(index) }} aria-label={t('react.instanceSettings.argumentValue', { title, index: index + 1 })} aria-describedby={`${id}-help`} placeholder={t('react.instanceSettings.argumentEmptyValue')} rows={argument.includes('\n') ? 2 : 1} spellCheck={false} value={argument} disabled={disabled} onChange={event => change(value.map((old, at) => at === index ? event.target.value : old))} />
         <div className="argument-actions">
