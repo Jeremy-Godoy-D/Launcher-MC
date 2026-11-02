@@ -16,7 +16,7 @@ import type { SavedInstance } from '../library/model'
 import { isOperationCancelled } from '../library/operations'
 import { updateLoaders, updateMods, shaderUpdateLoader } from '../instance/queryModUpdates'
 import { catalogClients, type CatalogProject } from './api'
-import { resolveCatalogDependencies, type CatalogVersion, type DependencyNode } from './dependencies'
+import { CatalogRequirementError, resolveCatalogDependencies, type CatalogVersion, type DependencyNode } from './dependencies'
 import { waitCatalogInventory } from './inventory'
 
 export type ContentSelection = { project: CatalogProject; candidate: CatalogVersion; target: SavedInstance }
@@ -35,9 +35,12 @@ export function ContentInstall({ selection, onBack, onBusy }: { selection: Conte
   const store = useSharedStateStore({ key: `instance-${domain}://${path}`, Type: ResourceState, load: client => client.service(domain === 'mods' ? InstanceModsServiceKey : domain === 'resourcepacks' ? InstanceResourcePacksServiceKey : InstanceShaderPacksServiceKey).watch(path) })
   const resources = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
   const engines = useSharedStateStore({ key: `instance-mods://${path}`, Type: ResourceState, load: client => client.service(InstanceModsServiceKey).watch(path) })
+  const requiredPacks = useSharedStateStore({ key: `instance-resourcepacks://${path}`, Type: ResourceState, load: client => client.service(InstanceResourcePacksServiceKey).watch(path) })
+  const requiredShaders = useSharedStateStore({ key: `instance-shaderpacks://${path}`, Type: ResourceState, load: client => client.service(InstanceShaderPacksServiceKey).watch(path) })
   const [phase, setPhase] = useState<'prepare' | 'review' | 'install' | 'done' | 'error'>('prepare')
   const [plan, setPlan] = useState<Plan>(), [review, setReview] = useState<Review>(), [error, setError] = useState(''), [optional, setOptional] = useState(new Set<string>()), [pending, setPending] = useState<ReviewedModInstall[]>([])
   const [cancelRequested, setCancelRequested] = useState(false)
+  const [requirement, setRequirement] = useState<CatalogRequirementError['requirement']>()
   const alive = useRef(true), started = useRef(false), working = useRef(false), controller = useRef<AbortController | null>(null), request = useRef(''), cancelling = useRef(false), cancelledTask = useRef('')
   const message = useRef<HTMLParagraphElement>(null), cancelButton = useRef<HTMLButtonElement>(null)
   const engineSnapshot = useRef('')
@@ -68,7 +71,7 @@ export function ContentInstall({ selection, onBack, onBusy }: { selection: Conte
   async function prepare(selected: Set<string>) {
     if (working.current || resources.status !== 'ready' || !resources.data) return
     working.current = true; controller.current?.abort(); const abort = new AbortController(); controller.current = abort
-    request.current = createOperationId(); cancelling.current = false; setCancelRequested(false); cancelledTask.current = ''; setError(''); setPhase('prepare'); setReview(undefined)
+    request.current = createOperationId(); cancelling.current = false; setCancelRequested(false); cancelledTask.current = ''; setError(''); setRequirement(undefined); setPhase('prepare'); setReview(undefined)
     try {
       if ((await readPending()).length) throw Object.assign(new Error('Pending reviewed installation'), { code: 'pending' })
       await store.revalidate()
@@ -89,7 +92,49 @@ export function ContentInstall({ selection, onBack, onBusy }: { selection: Conte
           loader = shaderUpdateLoader(selection.engine); engineSnapshot.current = selection.snapshot
         }
       } catch { throw Object.assign(new Error('Missing compatible runtime'), { code: 'incompatible' }) }
-      const result = await resolveCatalogDependencies(captured.candidate, project, target.runtime.minecraft, loader, current, selected, catalogClients, abort.signal)
+      type Kind = CatalogRequirementError['requirement']['kind']
+      const inventories = new Map<Kind, Promise<ReturnType<typeof updateMods>>>()
+      const readRequired = (kind: Kind) => {
+        if (!inventories.has(kind)) inventories.set(kind, (async () => {
+          const requiredDomain = kind === 'mod' ? 'mods' : kind === 'shader' ? 'shaderpacks' : 'resourcepacks'
+          if (requiredDomain === domain) return current.filter(file => !/\.disabled$/i.test(file.fileName))
+          const other = requiredDomain === 'mods' ? engines : requiredDomain === 'shaderpacks' ? requiredShaders : requiredPacks, stop = other.subscribe(() => {})
+          try {
+            await other.revalidate()
+            const snapshot = requiredDomain === 'mods' ? await mods.getModFilesSnapshot(path) : requiredDomain === 'shaderpacks' ? await shaders.getShaderFilesSnapshot(path) : await packs.getPackFilesSnapshot(path)
+            const files = await waitCatalogInventory(other, snapshot.entries, requiredDomain, AbortSignal.any([abort.signal, AbortSignal.timeout(30000)]))
+            const sources = requiredDomain === 'mods' ? await mods.getModSources(path) : requiredDomain === 'shaderpacks' ? await shaders.getShaderSources(path) : await packs.getPackSources(path)
+            return updateMods(files, target.runtime, sources).filter(file => !/\.disabled$/i.test(file.fileName))
+          } finally { stop() }
+        })())
+        return inventories.get(kind)!
+      }
+      const installedRequirement = async (requirement: CatalogRequirementError['requirement'], version: string | undefined) => {
+          const present = (await readRequired(requirement.kind)).filter(file => requirement.provider === 'modrinth' ? file.modrinth?.projectId === requirement.id : String(file.curseforge?.projectId) === requirement.id)
+          if (present.length !== 1) return undefined
+          let loaders: string[] = []
+          if (requirement.kind === 'mod') { const loader = updateLoaders(target.runtime)[0]; loaders = loader === 'quilt' ? ['quilt', 'fabric'] : [loader] }
+          if (requirement.kind === 'shader') {
+            const stop = engines.subscribe(() => {})
+            try { await engines.revalidate(); await readRequired('mod'); const selected = await shaders.getSelection(path); if (!selected.engine || selected.metadataPending) return undefined; loaders = selected.engine === 'iris' ? ['iris', 'optifine'] : ['optifine'] }
+            finally { stop() }
+          }
+          if (requirement.provider === 'modrinth') {
+            const id = present[0].modrinth!.versionId
+            if (version && version !== id) return undefined
+            const value = await catalogClients.modrinth.getProjectVersion(id, abort.signal)
+            if (value.id !== id || value.project_id !== requirement.id || !value.game_versions.includes(target.runtime.minecraft) || loaders.length && !loaders.some(loader => value.loaders.includes(loader)) || !value.files.some(file => file.hashes.sha1 === present[0].hash)) return undefined
+            return id
+          }
+          const id = present[0].curseforge!.fileId, values = await catalogClients.curseforge.getFiles([id], abort.signal), value = values.find(file => file.id === id)
+          if (!value || value.modId !== Number(requirement.id) || value.gameId !== 432 || !value.gameVersions.includes(target.runtime.minecraft) || requirement.kind === 'mod' && !loaders.some(loader => value.gameVersions.some(tag => tag.toLowerCase().replace(/[ _-]/g, '') === loader)) || !value.hashes.some(hash => hash.algo === 1 && hash.value.toLowerCase() === present[0].hash)) return undefined
+          return String(id)
+      }
+      const installedConflict = async (provider: 'modrinth' | 'curseforge', id: string, version: string | undefined) => {
+        for (const kind of ['mod', 'resourcepack', 'shader'] as const) if ((await readRequired(kind)).some(file => provider === 'modrinth' ? file.modrinth?.projectId === id && (!version || file.modrinth.versionId === version) : String(file.curseforge?.projectId) === id && (!version || String(file.curseforge?.fileId) === version))) return true
+        return false
+      }
+      const result = await resolveCatalogDependencies(captured.candidate, project, target.runtime.minecraft, loader, current, selected, { ...catalogClients, installedRequirement, installedConflict }, abort.signal)
       abort.signal.throwIfAborted()
       const changes = result.selected.filter(needed)
       const options: Extract<InstallInstanceOptions, { oldFiles: InstanceFile[] }> = { path, files: [], oldFiles: [], review: { ...(domain !== 'mods' ? { domain } : {}), snapshot: inventory.fingerprint, changes: [] } }
@@ -119,7 +164,11 @@ export function ContentInstall({ selection, onBack, onBusy }: { selection: Conte
       options.review!.changes = updates.map(update => ({ path: update.file.path, operation: update.operation }))
       if (alive.current) { setPlan(result); setOptional(new Set(selected)); setReview({ options, changes: updates }); setPhase('review') }
     } catch (failure) {
-      if (alive.current) { setError(isOperationCancelled(failure) || abort.signal.aborted ? 'cancelled' : failure && typeof failure === 'object' && 'code' in failure && typeof failure.code === 'string' && ['incompatible', 'conflict', 'unavailable', 'tooMany', 'pending', 'integrity', 'filenameConflict'].includes(failure.code) ? failure.code : 'failed'); setPhase('error') }
+      if (alive.current) {
+        if (failure instanceof CatalogRequirementError) { setRequirement(failure.requirement); setError('requirement') }
+        else setError(isOperationCancelled(failure) || abort.signal.aborted ? 'cancelled' : failure && typeof failure === 'object' && 'code' in failure && typeof failure.code === 'string' && ['incompatible', 'conflict', 'unavailable', 'tooMany', 'pending', 'integrity', 'filenameConflict'].includes(failure.code) ? failure.code : 'failed')
+        setPhase('error')
+      }
     } finally { working.current = false }
   }
   async function recover(operationId: string) {
@@ -169,7 +218,10 @@ export function ContentInstall({ selection, onBack, onBusy }: { selection: Conte
       <p className="form-help">{t('react.catalogInstall.help')}</p>
       {busy && <div role="status"><p>{t(cancelRequested ? 'react.catalog.cancelling' : phase === 'prepare' ? 'react.catalogInstall.preparing' : 'react.catalogInstall.installing')}</p><progress aria-label={t('react.catalogInstall.progress')} max={progress && progress.total > 0 ? progress.total : undefined} value={progress && progress.total > 0 ? progress.progress : undefined} /></div>}
       {error && <p ref={message} tabIndex={-1} role="alert" className="form-error" data-testid="catalog-install-error">{t(`react.catalogInstall.${error}`)}</p>}
+      {requirement && <p>{requirement.name} <button type="button" className="button secondary" data-testid="catalog-required-project" onClick={() => { const params = new URLSearchParams({ source: requirement.provider, kind: requirement.kind, target: path }); void navigate(`/store/${requirement.provider}/${requirement.id}?${params}`) }}>{t('react.catalogInstall.reviewRequirement')}</button></p>}
+      {error === 'incompatible' && domain === 'shaderpacks' && <button type="button" className="button secondary" onClick={() => library?.select(path, () => void navigate('/instance/mods'))}>{t('react.shaders.manageMods')}</button>}
       {plan && <ul className="catalog-install-projects">{plan.selected.map(node => <li key={node.key}><strong>{node.project.name}</strong><span>{candidateId(node)} · {t(node.activate ? 'react.catalogInstall.activate' : needed(node) ? node.current ? 'react.catalogInstall.replace' : 'react.catalogInstall.add' : 'react.catalogInstall.installed')}</span></li>)}</ul>}
+      {!!plan?.satisfied.length && <ul className="catalog-install-projects">{plan.satisfied.map(node => <li key={`${node.provider}:${node.id}`}><strong>{node.name}</strong><span>{node.version} · {t('react.catalogInstall.installed')}</span></li>)}</ul>}
       {phase === 'review' && plan && review && !('operationId' in review) && <>
         {!!(plan.optional.length + optional.size) && <fieldset><legend>{t('react.catalogInstall.optional')}</legend>{[...plan.optional, ...plan.selected.filter(node => !node.required)].map(node => <label key={node.key}><input type="checkbox" checked={optional.has(node.key)} onChange={event => { const next = new Set(optional); if (event.target.checked) next.add(node.key); else next.delete(node.key); void prepare(next) }} />{node.project.name}</label>)}</fieldset>}
         {!!optional.size && <button type="button" className="button secondary" onClick={() => void prepare(new Set())}>{t('react.catalogInstall.withoutOptional')}</button>}

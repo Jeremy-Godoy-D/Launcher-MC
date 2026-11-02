@@ -76,6 +76,11 @@ test('CF world archive hands off to one confirmed importer and preserves existin
   expect(catalog.state.requests.every(request => !request.key && !request.authorization && !request.cancellationId)).toBe(true)
   const hops = await catalog.hops(); expect(hops.length).toBeGreaterThan(0); expect(hops.every(hop => hop.usedProxy)).toBe(true)
   await page.keyboard.press('Escape'); await expect(trigger).toBeFocused()
+  await activateLauncherControl(launcher, trigger)
+  const sheet = page.getByTestId('catalog-project')
+  await sheet.getByRole('button', { name: 'Versiones', exact: true }).click()
+  await sheet.locator('#catalog-target').selectOption(paths[1])
+  await expect(sheet.getByTestId('catalog-installed-version')).toHaveText('Este lanzamiento ya fue importado')
 })
 
 test('CF world transfer cancellation can retry and closing the importer leaves saves untouched', async ({ launcher, catalog }) => {

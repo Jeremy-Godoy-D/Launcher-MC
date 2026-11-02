@@ -20,6 +20,7 @@ import { ContentInstall, type ContentSelection } from './ContentInstall'
 import { WorldFilesDialog, type WorldArchiveImport } from '../instance/WorldFilesDialog'
 import { ModpackUpdate, type PackUpdateSelection } from './ModpackUpdateDialog'
 import { isPackTarget } from './modpackUpdate'
+import { InstalledVersion } from './InstalledVersion'
 import './catalog.css'
 
 type ArchiveImport = { path: string } & ({ kind: 'modpack' } | { kind: 'world'; target: ContentSelection['target']; import: WorldArchiveImport } | { kind: 'update'; selection: PackUpdateSelection })
@@ -40,7 +41,7 @@ function Failure({ error, retry, stale = false }: { error: unknown; retry: () =>
 
 function ProjectVersions({ detail, query, onBusy, onImport, onReview }: { detail: CatalogDetail; query: CatalogQuery; onBusy: (busy: boolean) => void; onImport: (selection: ArchiveImport) => void; onReview: (selection: ContentSelection, trigger: HTMLButtonElement) => void }) {
   const { t, n, d } = useI18n(), library = useLibrary()
-  const [params] = useSearchParams()
+  const [params, setVersionParams] = useSearchParams(), location = useLocation()
   const service = useService(ModpackServiceKey), tasks = useTasks()
   const [target, setTarget] = useState(params.get('target') || (detail.project.kind === 'modpack' ? '' : library?.current?.path || ''))
   const [page, setPage] = useState(0)
@@ -92,7 +93,12 @@ function ProjectVersions({ detail, query, onBusy, onImport, onReview }: { detail
     : versions.data?.versions.map(file => ({ id: String(file.id), name: file.displayName, version: file.fileName, minecraft: file.gameVersions.join(', '), loaders: '', date: file.fileDate, release: ({ 1: 'release', 2: 'beta', 3: 'alpha' })[file.releaseType] })) || []
   return <section aria-label={t('react.catalog.versions')} className="catalog-versions">
     <label htmlFor="catalog-target">{t('react.catalog.target')}</label>
-    <select id="catalog-target" value={target} disabled={busy} onChange={event => { setTarget(event.target.value); setPage(0) }}>
+    <select id="catalog-target" value={target} disabled={busy} onChange={event => {
+      setTarget(event.target.value); setPage(0)
+      const next = new URLSearchParams(params)
+      if (event.target.value) next.set('target', event.target.value); else next.delete('target')
+      setVersionParams(next, { replace: true, state: location.state, preventScrollReset: true, flushSync: true })
+    }}>
       <option value="">{t(detail.project.kind === 'modpack' ? 'react.catalog.newInstance' : 'react.catalog.allVersions')}</option>
       {eligible.map(instance => <option key={instance.path} value={instance.path}>{instance.name} · {instance.runtime.minecraft}</option>)}
     </select>
@@ -113,6 +119,7 @@ function ProjectVersions({ detail, query, onBusy, onImport, onReview }: { detail
       {rows.map(row => <li key={row.id} data-version-id={row.id}>
         <strong>{row.name}</strong><span>{row.version}</span><span>{row.minecraft} {row.loaders && `· ${row.loaders}`}</span>
         <span>{t(`react.catalog.${row.release || 'release'}`)} · {Number.isFinite(Date.parse(row.date)) ? d(new Date(row.date), { dateStyle: 'medium' }) : t('react.catalog.unknownDate')}</span>
+        {instance && <InstalledVersion project={detail.project} target={instance} version={row.id} />}
         {['modpack', 'world'].includes(detail.project.kind) && <button className="button primary" data-testid="catalog-import-version" disabled={busy || versions.isFetching || detail.project.kind === 'world' && !instance} onClick={() => void download(row.id)}>{t(detail.project.kind === 'modpack' && instance ? 'react.packUpdate.download' : 'react.catalog.downloadImport')}</button>}
         {['mod', 'resourcepack', 'shader'].includes(detail.project.kind) && <button className="button primary" data-testid="catalog-review-version" disabled={busy || versions.isFetching || !instance} onClick={event => {
           if (!instance || !versions.data) return

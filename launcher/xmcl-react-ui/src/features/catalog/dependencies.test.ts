@@ -3,7 +3,7 @@ import type { ProjectVersion } from '@xmcl/modrinth'
 import type { File } from '@xmcl/curseforge'
 import type { CatalogProject } from './api'
 import type { UpdateMod } from '../instance/queryModUpdates'
-import { resolveCatalogDependencies, type DependencyClients } from './dependencies'
+import { CatalogRequirementError, resolveCatalogDependencies, type DependencyClients } from './dependencies'
 
 const project = { provider: 'modrinth', id: 'ROOT0001', kind: 'mod', name: 'Root' } as CatalogProject
 const version = (id: string, owner: string, dependencies: unknown[] = [], loaders = ['fabric']) => ({ id, project_id: owner, name: id, game_versions: ['1.21.1'], loaders, version_type: 'release', dependencies, files: [] }) as unknown as ProjectVersion
@@ -21,6 +21,31 @@ const installed = (projectId = 'DEPS0001', versionId = 'VERS0001', disabled = fa
 const run = (root: ProjectVersion, api: DependencyClients, present: UpdateMod[] = [], optional = new Set<string>(), loader = 'fabric') => resolveCatalogDependencies({ provider: 'modrinth', version: root }, project, '1.21.1', loader, present, optional, api, new AbortController().signal)
 
 describe('catalog dependency resolution', () => {
+  it('guides another content type and accepts its verified installed version without installing it as a mod', async () => {
+    const root = version('ROOTVER1', project.id, [edge('DEPS0001', 'required', 'VERS0001')]), api = clients([root])
+    vi.mocked(api.modrinth.getProject).mockResolvedValue({ id: 'DEPS0001', title: 'Required pack', project_type: 'resourcepack' } as Awaited<ReturnType<typeof api.modrinth.getProject>>)
+    await expect(run(root, api)).rejects.toBeInstanceOf(CatalogRequirementError)
+    api.installedRequirement = vi.fn(async () => 'VERS0001')
+    const result = await run(root, api)
+    expect(result.selected.map(node => node.project.id)).toEqual([project.id])
+    expect(result.satisfied).toEqual([{ provider: 'modrinth', id: 'DEPS0001', kind: 'resourcepack', name: 'Required pack', version: 'VERS0001' }])
+    expect(api.installedRequirement).toHaveBeenCalledWith(expect.objectContaining({ id: 'DEPS0001' }), 'VERS0001')
+  })
+  it('does not reinterpret a nested missing requirement using an ancestor version constraint', async () => {
+    const root = version('ROOTVER1', project.id, [edge('DEPS0001', 'required', 'VERS0001')]), child = version('VERS0001', 'DEPS0001', [edge('PACK0001', 'required', 'PACKVER1')]), api = clients([root, child])
+    const get = api.modrinth.getProject
+    api.modrinth.getProject = vi.fn(async (id, signal) => id === 'PACK0001' ? { id, title: 'Pack', project_type: 'resourcepack' } as Awaited<ReturnType<typeof get>> : get(id, signal))
+    api.installedRequirement = vi.fn(async () => undefined)
+    await expect(run(root, api)).rejects.toBeInstanceOf(CatalogRequirementError)
+    expect(api.installedRequirement).toHaveBeenCalledTimes(1)
+    expect(api.installedRequirement).toHaveBeenCalledWith(expect.objectContaining({ id: 'PACK0001' }), 'PACKVER1')
+  })
+  it('blocks an incompatible project found in another local content inventory', async () => {
+    const root = version('ROOTVER1', project.id, [edge('PACK0001', 'incompatible')]), api = clients([root])
+    api.installedConflict = vi.fn(async () => true)
+    await expect(run(root, api)).rejects.toMatchObject({ code: 'conflict' })
+    expect(api.installedConflict).toHaveBeenCalledWith('modrinth', 'PACK0001', undefined)
+  })
   it('rejects malformed dependency identifiers and incompatible roots before network access', async () => {
     const root = version('ROOTVER1', project.id, [edge('../unsafe')]), api = clients([root])
     await expect(run(root, api)).rejects.toMatchObject({ code: 'unavailable' })

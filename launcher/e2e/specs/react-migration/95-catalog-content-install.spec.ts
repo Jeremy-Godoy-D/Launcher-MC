@@ -48,6 +48,7 @@ async function review(launcher: LauncherFixture, kind: 'mod' | 'resourcepack' | 
   await sheet.getByRole('button', { name: 'Versiones', exact: true }).click()
   await sheet.locator('#catalog-target').selectOption(target)
   const id = provider === 'modrinth' ? `VVVV000${version}` : String(100 + version)
+  if (version === 2) await expect(sheet.locator(`[data-version-id="${id}"]`).getByTestId('catalog-installed-version')).toBeVisible()
   await sheet.locator(`[data-version-id="${id}"]`).getByTestId('catalog-review-version').click()
   if (ready) await expect(page.getByTestId('catalog-install-confirm')).toBeEnabled()
   return page.getByTestId('catalog-install')

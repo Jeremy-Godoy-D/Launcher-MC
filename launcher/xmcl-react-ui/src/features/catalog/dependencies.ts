@@ -9,6 +9,11 @@ export type DependencyNode = CatalogVersion & { project: Pick<CatalogProject, 'p
 export type DependencyClients = {
   modrinth: Pick<ModrinthV2Client, 'getProjectVersion' | 'getProjectVersions' | 'getProject'>
   curseforge: Pick<CurseforgeV1Client, 'getMod' | 'getFiles' | 'getModFiles'>
+  installedRequirement?: (requirement: CatalogRequirementError['requirement'], version: string | undefined) => Promise<string | undefined>
+  installedConflict?: (provider: 'modrinth' | 'curseforge', id: string, version: string | undefined) => Promise<boolean>
+}
+export class CatalogRequirementError extends Error {
+  constructor(readonly requirement: { provider: 'modrinth' | 'curseforge'; id: string; kind: 'mod' | 'resourcepack' | 'shader'; name: string }) { super('A dependency of another content type needs a separate installation'); this.name = 'CatalogRequirementError' }
 }
 const loaderIds = { fabric: FileModLoaderType.Fabric, quilt: FileModLoaderType.Quilt, forge: FileModLoaderType.Forge, neoforge: FileModLoaderType.NeoForge }
 function failed(code: 'incompatible' | 'conflict' | 'unavailable' | 'tooMany') { return Object.assign(new Error('Catalog dependencies could not be resolved'), { code, name: 'CatalogDependencyError' }) }
@@ -19,6 +24,7 @@ const projectKey = (provider: string, id: string) => `${provider}:${id}`
 export async function resolveCatalogDependencies(root: CatalogVersion, project: DependencyNode['project'], minecraft: string, loader: string, installed: readonly UpdateMod[], optional: ReadonlySet<string>, clients: DependencyClients, signal: AbortSignal) {
   const chosen = new Map<string, DependencyNode>(), offered = new Map<string, DependencyNode>()
   const unavailableOptional = new Map<string, { key: string; id: string }>()
+  const satisfied: Array<CatalogRequirementError['requirement'] & { version: string }> = []
   const incompatible: Array<{ key: string; version?: string }> = [], requests = new Map<string, Promise<unknown>>()
   const allowedLoaders = loader === 'quilt' ? ['quilt', 'fabric'] : [loader]
   const cached = <T,>(key: string, read: () => Promise<T>) => {
@@ -40,11 +46,20 @@ export async function resolveCatalogDependencies(root: CatalogVersion, project: 
     if (provider === project.provider && id === project.id) info = project
     else if (provider === 'modrinth') {
       const data = await cached(`mr-project:${id}`, () => clients.modrinth.getProject(id, signal))
-      if (data.id !== id || data.project_type !== project.kind || typeof data.title !== 'string' || project.kind === 'mod' && data.client_side === 'unsupported') throw failed('incompatible')
+      if (data.id !== id || typeof data.title !== 'string' || data.project_type === 'mod' && data.client_side === 'unsupported') throw failed('incompatible')
+      if (data.project_type !== project.kind) {
+        if (data.project_type === 'mod' || data.project_type === 'resourcepack' || data.project_type === 'shader') throw new CatalogRequirementError({ provider, id, kind: data.project_type, name: data.title.slice(0, 256) })
+        throw failed('incompatible')
+      }
       info = { provider, id, kind: project.kind, name: data.title.slice(0, 256) }
     } else {
       const data = await cached(`cf-project:${id}`, () => clients.curseforge.getMod(Number(id), signal)), classId = { mod: 6, resourcepack: 12, shader: 6552 }[project.kind as 'mod' | 'resourcepack' | 'shader']
-      if (data.id !== Number(id) || data.gameId !== 432 || data.classId !== classId || typeof data.name !== 'string') throw failed('incompatible')
+      if (data.id !== Number(id) || data.gameId !== 432 || typeof data.name !== 'string') throw failed('incompatible')
+      if (data.classId !== classId) {
+        const kind = data.classId === 6 ? 'mod' : data.classId === 12 ? 'resourcepack' : data.classId === 6552 ? 'shader' : undefined
+        if (kind) throw new CatalogRequirementError({ provider, id, kind, name: data.name.slice(0, 256) })
+        throw failed('incompatible')
+      }
       info = { provider, id, kind: project.kind, name: data.name.slice(0, 256) }
     }
     const present = existing(provider, id)
@@ -124,7 +139,17 @@ export async function resolveCatalogDependencies(root: CatalogVersion, project: 
         }
         continue
       }
-      const child = await lookup(candidate.provider, id, exact)
+      let child: Awaited<ReturnType<typeof lookup>>
+      try {
+        child = await lookup(candidate.provider, id, exact)
+      } catch (error) {
+        if (!(error instanceof CatalogRequirementError)) throw error
+        const present = await clients.installedRequirement?.(error.requirement, exact)
+        signal.throwIfAborted()
+        if (!present) throw error
+        if (!satisfied.some(requirement => requirement.provider === error.requirement.provider && requirement.id === error.requirement.id && requirement.version === present)) satisfied.push({ ...error.requirement, version: present })
+        continue
+      }
       await visit(child.candidate, child.info, relation === 'required')
     }
   }
@@ -135,7 +160,8 @@ export async function resolveCatalogDependencies(root: CatalogVersion, project: 
     if (node && (!/\.disabled$/i.test(node.current?.fileName || '') || node.activate) && (!conflict.version || identifier(node) === conflict.version)) throw failed('conflict')
     const [provider, id] = conflict.key.split(':')
     if (existing(provider, id).some(file => !/\.disabled$/i.test(file.fileName) && (!conflict.version || currentId(file, provider) === conflict.version))) throw failed('conflict')
+    if (await clients.installedConflict?.(provider as 'modrinth' | 'curseforge', id, conflict.version)) throw failed('conflict')
   }
   signal.throwIfAborted()
-  return { selected: [...chosen.values()], optional: [...offered.values()].filter(node => !chosen.has(node.key)), unavailableOptional: [...unavailableOptional.values()].filter(node => !chosen.has(node.key)) }
+  return { selected: [...chosen.values()], optional: [...offered.values()].filter(node => !chosen.has(node.key)), unavailableOptional: [...unavailableOptional.values()].filter(node => !chosen.has(node.key)), satisfied }
 }

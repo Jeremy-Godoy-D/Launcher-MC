@@ -20,6 +20,8 @@ react:
     cancelled: "Actualización detenida. Revisa los cambios pendientes antes de reanudar."
     cancelFailed: "No se pudo detener la tarea. Reintenta mientras siga en curso."
   catalogInstall:
+    requirement: "Este proyecto necesita contenido de otro tipo. Revisa e instala ese requisito en la misma instancia y después vuelve a esta versión. No se instalará en una carpeta incorrecta."
+    reviewRequirement: "Revisar requisito"
     review: "Revisar instalación"
     destination: "Destino: {name}"
     help: "Comprueba los proyectos y archivos antes de confirmar. Se conservarán copias al reemplazar contenido."
@@ -1220,6 +1222,8 @@ react:
     close: "Cerrar consola"
 
   catalog:
+    worldImported: "Este lanzamiento ya fue importado"
+    otherInstalled: "Hay otra versión instalada en este destino"
     importHelp: "Se verificará el archivo y después podrás revisar el nombre y el contenido en el importador. Todavía no se crea ninguna instancia."
     downloadImport: "Descargar e importar"
     preparingDownload: "Preparando la descarga verificada…"

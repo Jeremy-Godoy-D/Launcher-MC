@@ -31,6 +31,8 @@ async function open(launcher: LauncherFixture, path: string, provider: 'modrinth
   await sheet.getByRole('button', { name: 'Versiones', exact: true }).click()
   await expect(sheet.locator('#catalog-target')).toHaveValue(path)
   const id = provider === 'modrinth' ? 'VVVV0002' : '102'
+  await expect(sheet.locator(`[data-version-id="${provider === 'modrinth' ? 'VVVV0001' : '101'}"]`).getByTestId('catalog-installed-version')).toHaveText('Ya está instalado')
+  await expect(sheet.locator(`[data-version-id="${id}"]`).getByTestId('catalog-installed-version')).toContainText('otra versión')
   await sheet.locator(`[data-version-id="${id}"]`).getByTestId('catalog-import-version').click()
   const dialog = page.getByTestId('modpack-update')
   await expect(dialog).toBeVisible(); await expect(page.getByRole('dialog')).toHaveCount(1)
@@ -63,7 +65,7 @@ for (const provider of ['modrinth', 'curseforge'] as const) test(`React reviews 
   expect(await entries(join(path, 'config'))).not.toContain('old.txt')
   expect(await readFile(join(world, 'level.dat'))).toEqual(worldBytes)
   const saved = await page.evaluate(async path => {
-    const state = await (window as any).serviceChannels.open('InstanceService').call('getState')
+    const state = await (window as any).serviceChannels.open('InstanceService').call('getSharedInstancesState')
     return state.instances.find((instance: { path: string }) => instance.path === path)
   }, path)
   expect(saved.name).toBe('Owned pack'); expect(saved.java).toBe('C:/owned/java.exe'); expect(saved.vmOptions).toEqual(['-Dlocal=keep']); expect(saved.preExecuteCommand).toBe('USER VALUE')

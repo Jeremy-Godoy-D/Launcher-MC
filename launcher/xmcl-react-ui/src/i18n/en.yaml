@@ -20,6 +20,8 @@ react:
     cancelled: "Update stopped. Review the pending changes before resuming."
     cancelFailed: "Could not stop the task. Try again while it is running."
   catalogInstall:
+    requirement: "This project requires a different content type. Review and install that requirement in the same instance, then return to this version. It will not be installed in the wrong folder."
+    reviewRequirement: "Review requirement"
     review: "Review installation"
     destination: "Destination: {name}"
     help: "Review the projects and files before confirming. Replaced content is backed up."
@@ -1220,6 +1222,8 @@ react:
     close: "Close console"
 
   catalog:
+    worldImported: "This release was already imported"
+    otherInstalled: "Another version is installed in this target"
     importHelp: "The archive will be verified, then you can review the name and contents in the existing importer. No instance is created yet."
     downloadImport: "Download and import"
     preparingDownload: "Preparing verified download…"
