@@ -168,7 +168,10 @@ export function ContentInstall({ selection, onBack, onBusy }: { selection: Conte
       {phase === 'error' && !!pending.length && <ul className="catalog-install-files">{pending.map(item => <li key={item.operationId}><code>{item.files[0]?.path}</code><button type="button" className="button secondary" onClick={() => void recover(item.operationId)}>{t('react.catalogInstall.recover')}</button></li>)}</ul>}
     </div>
     <footer className="dialog-actions">
-      {busy ? <button ref={cancelButton} type="button" className="button secondary" disabled={cancelRequested} onClick={() => void cancel()}>{t('react.catalogInstall.cancel')}</button> : <>
+      {busy ? <>
+        <button ref={cancelButton} type="button" className="button secondary" disabled={cancelRequested} onClick={() => void cancel()}>{t('react.catalogInstall.cancel')}</button>
+        {phase === 'install' && <button type="button" className="button primary" disabled>{t('react.catalogInstall.confirm')}</button>}
+      </> : <>
         <button type="button" className="button secondary" onClick={onBack}>{t('react.catalogInstall.back')}</button>
         {(phase === 'done' || error === 'pending') && <button type="button" className="button primary" onClick={showTarget}>{t('react.catalogInstall.open')}</button>}
         {phase === 'error' && !pending.length && <button type="button" className="button secondary" disabled={resources.status === 'loading'} onClick={retry}>{t('react.instances.retry')}</button>}
