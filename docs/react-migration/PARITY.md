@@ -367,3 +367,9 @@ CI41355748466/28039b0: Vue pasó30 Native y1.338 unitarias; React aún en curso 
 STAGE5-WORLD-INITIALIZATION.md registra retirada del borrado por atime y migración legacy con raíz validada, copias exclusivas verificadas, colisiones y originales respaldados. Pasan 1.351 unitarias/131 archivos; regresión React26/Vue19 sobre43c0bf8, finales seis+seis sobre6b50d6b y lanzamiento4/4. Se registran 21 Axe sin violaciones/46 incomplete, tipos/lint/DeskGap/nueve harness; E2E conserva56 diagnósticos base.
 
 CI28039b0 success;78903b4 falló spec12 por carrera de la fixture, reproducida y corregida sin relajar aserciones. Nuevo CI pendiente. K11 mantiene conservación al borrar instancias, aviso/reintento legacy e integral/noNIO/paridad pendientes; K12/K21 pass, etapa5 activa y6–9 pendientes. Todas las herramientas/chunks conservados, Microsoft pospuesto, PR4 borrador y producción/proxy intactos.
+
+## Conservación al eliminar instancias — 2026-11-01
+
+STAGE5-INSTANCE-REMOVAL.md: guardas de raíz/registro/sesión, copias y backups fuera de la instancia, colisiones y notas/carpetas no jugables conservadas; observadores cerrados o recuperados, y errores de rm sin desregistro indebido. Se retiran el bypass moveSavesToShared y el uninstall Bedrock. Paquetes c97d57f: React16/Vue16+1skip,1365unitarias/133archivos,4Axe0violaciones/8incomplete,tipos/lint/DeskGap/9harness,E2E56base. Primer renderer obsoleto descartado; cierre sobre renderer recompilado y hash del hostVue verificado.
+
+CI0645052 falló compilando javac80; React fue cancelado por la matriz. Preparación previa a Electron y diagnóstico acotado, mismo límite15s; nuevo CI pendiente. K11 mantiene aviso/reintento legacy e integral/noNIO/paridad local pendientes; K12/K21 pass,5 activa y6–9 pendientes. Herramientas locales y chunks conservados, Microsoft pospuesto, PR4 borrador y producción/proxy intactos.
