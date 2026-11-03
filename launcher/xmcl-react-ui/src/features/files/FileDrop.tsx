@@ -6,7 +6,7 @@ import { useLibrary } from '../library/context'
 import { acceptsDrop, droppedFiles, type DroppedFile } from './droppedFiles'
 import './files.css'
 
-interface DropTarget { path: string; type: 'mods' | 'resourcepacks' | 'shaderpacks' | 'worlds'; busy: boolean; onFiles: (paths: string[]) => void | Promise<void> }
+interface DropTarget { path: string; type: 'mods' | 'resourcepacks' | 'shaderpacks' | 'worlds'; busy: boolean; onFiles: (paths: string[], names?: string[]) => void | Promise<void> }
 const Context = createContext<((target: RefObject<DropTarget>) => () => void) | null>(null)
 export function useFileDrop(target: DropTarget) {
   const register = useContext(Context), latest = useRef(target); latest.current = target
@@ -39,7 +39,7 @@ export function FileDrop({ disabled, onArchive, children }: { disabled: boolean;
         if (!acceptsDrop(current?.type ?? 'archive', incoming)) { setIssue('unsupported'); return }
         if (current) {
           if (current.busy) { setIssue('busy'); return }
-          if (current.type === 'worlds') { void Promise.resolve(current.onFiles(incoming.map(file => file.path))).catch(() => setIssue('failed')); return }
+          if (current.type === 'worlds') { void Promise.resolve(current.onFiles(incoming.map(file => file.path), incoming.map(file => file.name))).catch(() => setIssue('failed')); return }
           setReview({ target: current, files: incoming, name: live.current.library?.readInstance(current.path)?.name || current.path }); setIssue('')
         } else live.current.onArchive(incoming[0].path)
       } catch { setIssue('failed') }

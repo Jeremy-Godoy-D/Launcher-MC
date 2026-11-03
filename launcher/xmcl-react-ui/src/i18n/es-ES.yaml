@@ -1441,6 +1441,7 @@ react:
     operation: "Operación del launcher"
   migration:
     title: "Mover datos del launcher"
+    edit: "Cambiar destino"
     move: "Mover datos…"
     help: "Traslada los archivos administrados de Minecraft a una carpeta nueva o vacía. Cierra Minecraft y espera a que terminen las tareas. Conserva una copia de seguridad; Grimo se reiniciará para realizar el traslado."
     source: "Ubicación actual"

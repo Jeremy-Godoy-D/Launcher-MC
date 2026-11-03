@@ -4,7 +4,8 @@ export function droppedFiles(files: readonly File[], getPath: (file: File) => st
   const seen = new Set<string>()
   return files.map(file => {
     const path = getPath(file)
-    if (!path || path.length > 32768 || path.includes('\0') || path.includes('\r') || path.includes('\n') || !/^(?:[a-z]:[\\/]|\\\\|\/)/i.test(path) || seen.has(path)) throw new Error('Invalid native file path')
+    const nativeHandle = path.startsWith('deskgap-file-handle:') && path.length > 'deskgap-file-handle:'.length
+    if (!path || path.length > 32768 || path.includes('\0') || path.includes('\r') || path.includes('\n') || !nativeHandle && !/^(?:[a-z]:[\\/]|\\\\|\/)/i.test(path) || seen.has(path)) throw new Error('Invalid native file path')
     seen.add(path)
     return { path, name: file.name, folder: !file.type && file.size === 0 }
   })

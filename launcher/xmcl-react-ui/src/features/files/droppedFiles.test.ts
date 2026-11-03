@@ -2,8 +2,9 @@ import { expect, it, vi } from 'vitest'
 import { acceptsDrop, droppedFiles } from './droppedFiles'
 
 const file = { name: 'mod.jar', size: 10, type: 'application/java-archive' } as File
-it('uses only native absolute paths and bounds the drop before resolving files', () => {
+it('preserves native paths or owned handles and bounds the drop before resolving files', () => {
   expect(droppedFiles([file], () => 'C:\\owned\\mod.jar')).toEqual([{ path: 'C:\\owned\\mod.jar', name: 'mod.jar', folder: false }])
+  expect(droppedFiles([file], () => 'deskgap-file-handle:owned')).toEqual([{ path: 'deskgap-file-handle:owned', name: 'mod.jar', folder: false }])
   for (const path of ['', 'relative.jar', 'https://example.org/mod.jar', '/bad\npath']) expect(() => droppedFiles([file], () => path)).toThrow()
   expect(() => droppedFiles([file, file], () => '/same.jar')).toThrow()
   const get = vi.fn(); expect(() => droppedFiles(Array(257).fill(file), get)).toThrow(); expect(get).not.toHaveBeenCalled()

@@ -10,10 +10,10 @@ export function DataDirectory({ disabled }: { disabled: boolean }) {
   const text = (key: string) => t(`react.migration.${key}`)
   const [open, setOpen] = useState(false), [path, setPath] = useState(''), [review, setReview] = useState<DataMigrationReview>()
   const [state, setState] = useState<'idle' | 'reviewing' | 'restarting'>('idle'), [issue, setIssue] = useState('')
-  const pending = useRef(false), alive = useRef(true), errorFocus = useRef<HTMLParagraphElement>(null), reviewFocus = useRef<HTMLDivElement>(null)
+  const pending = useRef(false), alive = useRef(true), errorFocus = useRef<HTMLParagraphElement>(null), reviewFocus = useRef<HTMLDivElement>(null), destinationFocus = useRef<HTMLInputElement>(null)
   useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
   useEffect(() => { if (issue) errorFocus.current?.focus() }, [issue])
-  useEffect(() => { if (review) reviewFocus.current?.focus() }, [review])
+  useEffect(() => { if (review) reviewFocus.current?.focus(); else if (open) destinationFocus.current?.focus() }, [review, open])
   function failed(error: unknown) {
     const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : ''
     setIssue(['invalid', 'occupied', 'nested', 'changed', 'busy'].includes(code) ? code : 'reviewError')
@@ -46,9 +46,9 @@ export function DataDirectory({ disabled }: { disabled: boolean }) {
     <Dialog.Portal><Dialog.Overlay className="dialog-backdrop" /><Dialog.Content className="dialog creation-dialog operation-dialog" data-testid="data-migration-dialog" onPointerDownOutside={event => event.preventDefault()} onEscapeKeyDown={event => { if (pending.current) event.preventDefault() }}>
       <Dialog.Title>{text('title')}</Dialog.Title><Dialog.Description>{text('help')}</Dialog.Description>
       <div className="creation-body">
-        <div className="field"><label htmlFor="migration-destination">{text('destination')}</label><input id="migration-destination" data-testid="data-migration-destination" value={path} disabled={state !== 'idle'} aria-invalid={!!issue || undefined} aria-describedby={issue ? 'data-migration-error' : undefined} onChange={event => { setPath(event.target.value); setReview(undefined); setIssue('') }} /></div>
-        <button type="button" className="button secondary" data-testid="data-migration-choose" disabled={state !== 'idle'} onClick={() => void choose()}>{text('choose')}</button>
-        {review && <div ref={reviewFocus} tabIndex={-1} role="group" aria-label={text('review')} className="data-migration-review" data-testid="data-migration-review"><dl><dt>{text('source')}</dt><dd>{review.source}</dd><dt>{text('destination')}</dt><dd>{review.destination}</dd></dl><p role="status">{text(review.unchanged ? 'unchanged' : 'reviewHelp')}</p></div>}
+        {!review && <><div className="field"><label htmlFor="migration-destination">{text('destination')}</label><input ref={destinationFocus} id="migration-destination" data-testid="data-migration-destination" value={path} disabled={state !== 'idle'} aria-invalid={!!issue || undefined} aria-describedby={issue ? 'data-migration-error' : undefined} onChange={event => { setPath(event.target.value); setReview(undefined); setIssue('') }} /></div>
+        <button type="button" className="button secondary" data-testid="data-migration-choose" disabled={state !== 'idle'} onClick={() => void choose()}>{text('choose')}</button></>}
+        {review && <div ref={reviewFocus} tabIndex={-1} role="group" aria-label={text('review')} className="data-migration-review" data-testid="data-migration-review"><dl><dt>{text('source')}</dt><dd>{review.source}</dd><dt>{text('destination')}</dt><dd>{review.destination}</dd></dl><button type="button" className="button secondary" disabled={state !== 'idle'} onClick={() => setReview(undefined)}>{text('edit')}</button><p role="status">{text(review.unchanged ? 'unchanged' : 'reviewHelp')}</p></div>}
         {issue && <p id="data-migration-error" ref={errorFocus} tabIndex={-1} role="alert" data-testid="data-migration-error">{text(issue)}</p>}
         {state !== 'idle' && <p role="status">{text(state)}</p>}
       </div>
