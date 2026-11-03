@@ -2,18 +2,20 @@
 
 ## Estado vigente
 
-Etapas0–6 completas;7 activa. K20 pasa. K18/K19/K22/K23 y los tres gates7 permanecen pending. Producción beta.2 y proxy intactos; PR4 borrador; objetivo0.3.0-beta.1 después de7–9. Microsoft pospuesto. El usuario exige terminar/publicar reutilizando lo aceptado y evitando bucles.
+Etapas 0–7 completas; **8 activa**. K18/K19/K22/K23 pasan según STAGE7-CLOSURE.md/JSON; K20/K21 conservan su aceptación. Producción v0.2.0-beta.2 y proxy intactos; PR4 borrador; destino v0.3.0-beta.1 después de 8–9. Microsoft pospuesto. El usuario pide terminar y publicar reutilizando lo aceptado y evitando bucles.
 
-Último bloque `STAGE7-ACTIVITY-UPDATER.md`, candidata a65cab0: tareas/notificaciones reales, caché visual y guardar/descartar/seguir aquí al cerrar; actualizador100 con servidor propio prueba503, transferencia API con token ficticio, cancelación global, SHA incorrecto y reintento verificado. NO aplica el ASAR. Se reparó la caché inexistente y el snapshot de cancelación. 1505unit/149/33,19s;3Native100/101/7,4s+9reg35/36/37/34,1s+2Vue/10,0s;tipos/lint0/E2E56base;2Axe0/4incomplete;186anclas;DeskGapReactbuildproduction0. HostVue restaurado/verificado. CI5b05060: Vue success,React304pass/2skip/1fallo35; se reforzó refresh para esperar metadatos coherentes, nueve regresiones locales pasan; verificar CI nueva sin reiniciar la anterior. No hay sesiones activas.
+Última candidata: 8d3b919. Suite seleccionada: 1.520 pruebas/154 archivos; ocho Native React distintos de este bloque y dos Vue. Tipos/lint/builds aprobados, 56 diagnósticos E2E de referencia sin cambios y 199 IDs. Nueve Axe sin violaciones, doce incomplete; geometría y teclado revisados. Host Vue restaurado y hash comprobado. No quedan sesiones activas de este bloque.
 
-`STAGE7-SETTINGS.md` conserva el bloque anterior de ajustes y guardado atómico nativo. `STAGE6-CLOSURE.md` conserva el catálogo completo. No rehacer0–6 ni repetir100/101 sin un cambio relacionado.
+STAGE7-CLOSURE.md documenta revisión/traslado de datos, journal parcial/rollback, migration.html real600×400, selección por contexto nativo, arrastre, teclado y límites. STAGE7-SETTINGS.md y STAGE7-ACTIVITY-UPDATER.md conservan ajustes atómicos/caché/cierre/tareas/actualizador. No se aplicó ningún ASAR ni se ejecutó el instalador en el perfil habitual.
 
-## Siguiente tarea — etapa 7
+CI 41474917961 (5561253): Vue success; React307pass/2skip/1fallo100 por selector compacto antes de esperar el formulario. Helper corregido y recorrido800×400 aprobado localmente. La regresión35 pasó. Comprobar la siguiente CI, sin reiniciar la anterior.
 
-1. Migración de datos: añadir revisión nativa de destino vacío, rutas disjuntas/canónicas y bloqueo por partida/tareas. Proteger enlaces y recuperar movimientos parciales con journal en migrate.ts antes de exponerla. El escritor de root debe ser atómico; fallo de ventana cosmética no debe deshacer datos ya confirmados.
-2. Conectar migration.html/auxiliary.tsx al progreso/error/final nativo real600×400; añadir retirada de listeners Electron/DeskGap. Conservar selección tras mover con contexto nativo, no confiar en queryparams arbitrarios. Reusar logger/onboarding.
-3. Revisar arrastre/AA/RTL y controles globales restantes. K18/19/22/23 y gates7 pending; K20 pass. Caché/tareas/cierre/transferencia autenticada ya aceptados: no repetir100/101 salvo cambio relacionado.
-4. Luego8 React default/extras y mensajes de implementación;9 descarga pública sin token, instalador/update real en Actions Windows desechable, Java/loaders/juego físicos K03/05/06, presupuestos/seguridad, assets/publicación. No pedir otraVM.
+## Siguiente tarea — etapa 8
+
+1. Hacer React predeterminado y devolverlo al puerto habitual; actualizar selector/build/CI/consumidores de forma acotada.
+2. Desconectar extras del arranque y del grafo distribuido: definedServices/definedPlugins de ambos hosts y dependencias transitivas; revisar ElectronController, RTC/P2P y plugins. Conservar todas las herramientas locales de Mundos, incluidos chunks y carpetas compartidas locales. Conservar datos de extras inertes.
+3. Retirar browser.html y referencias coherentemente; quitar mensajes de implementación/fixtures del producto. Verificar que Vue/Vuetify/Vue Router y servicios de extras no contribuyan al paquete público.
+4. Validar datos anteriores, rutas, ventanas, builds y pruebas afectadas; documentar evidencia y cerrar solo gates satisfechos. Después9: juego/Java/loaders físicos K03/K05/K06, descarga pública sin token y aplicación real del actualizador, instalador/upgrade Windows desechable en Actions, rendimiento/seguridad/assets y publicación. No pedir otra VM.
 
 ## Evidencia y decisiones técnicas que se conservan
 

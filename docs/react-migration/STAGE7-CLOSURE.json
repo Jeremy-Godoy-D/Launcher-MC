@@ -1,0 +1,34 @@
+{
+  "stage": 7,
+  "sourceCommit": "8d3b91932781ab6b260d04def0adf487cdaa58d2",
+  "unitTests": 1520,
+  "unitFiles": 154,
+  "nativeReactDistinctNew": 8,
+  "nativeVueRegression": 2,
+  "axeReports": 9,
+  "axeViolations": 0,
+  "axeIncomplete": 12,
+  "testIds": 199,
+  "e2eUnchangedBaselineDiagnostics": 56,
+  "manifest": {
+    "path": "launcher/e2e/artifacts/stage7-closure-manifest.json",
+    "sha256": "4628631cfb5285b249fab4a52644f95b668829c60f15c53e47182fce7108667d",
+    "bytes": 18785
+  },
+  "typecheck": "passed",
+  "lint": "passed with preexisting warnings",
+  "builds": [
+    "React renderer + Electron",
+    "Vue Electron",
+    "DeskGap React NODE_ENV=production"
+  ],
+  "limits": [
+    "Microsoft deferred",
+    "Physical public update download/apply and installer/upgrade remain stage 9",
+    "Java/loaders/Minecraft physical acceptance and final performance/security remain stage 9",
+    "Cross-volume branch exercised with actual file operations and injected EXDEV, not a second physical volume",
+    "Rollback journal is in memory; power-loss recovery was not simulated",
+    "RTL geometry forced in an owned window; no new language was added",
+    "Axe incomplete items are not automatic proof of compliance"
+  ]
+}

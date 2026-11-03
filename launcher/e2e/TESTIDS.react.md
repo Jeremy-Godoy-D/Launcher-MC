@@ -65,8 +65,8 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `datapack-remove` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L287`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L287) |
 | `export-confirm` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L88`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L88) |
 | `export-result` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L81`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L81) |
-| `featured-play` | [`xmcl-react-ui/src/App.tsx#L638`](../xmcl-react-ui/src/App.tsx#L638) |
-| `featured-project-cover` | [`xmcl-react-ui/src/App.tsx#L630`](../xmcl-react-ui/src/App.tsx#L630) |
+| `featured-play` | [`xmcl-react-ui/src/App.tsx#L639`](../xmcl-react-ui/src/App.tsx#L639) |
+| `featured-project-cover` | [`xmcl-react-ui/src/App.tsx#L631`](../xmcl-react-ui/src/App.tsx#L631) |
 | `file-drop-confirm` | [`xmcl-react-ui/src/features/files/FileDrop.tsx#L66`](../xmcl-react-ui/src/features/files/FileDrop.tsx#L66) |
 | `file-drop-overlay` | [`xmcl-react-ui/src/features/files/FileDrop.tsx#L62`](../xmcl-react-ui/src/features/files/FileDrop.tsx#L62) |
 | `file-drop-review` | [`xmcl-react-ui/src/features/files/FileDrop.tsx#L63`](../xmcl-react-ui/src/features/files/FileDrop.tsx#L63) |
@@ -113,8 +113,8 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `instance-workspace` | [`xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L34`](../xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L34) |
 | `instance-worlds` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L72`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L72) |
 | `launch-confirm` | [`xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157`](../xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157) |
-| `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L721`](../xmcl-react-ui/src/App.tsx#L721) |
-| `library-groups` | [`xmcl-react-ui/src/App.tsx#L717`](../xmcl-react-ui/src/App.tsx#L717) |
+| `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L722`](../xmcl-react-ui/src/App.tsx#L722) |
+| `library-groups` | [`xmcl-react-ui/src/App.tsx#L718`](../xmcl-react-ui/src/App.tsx#L718) |
 | `library-groups-dialog` | [`xmcl-react-ui/src/features/library/GroupsDialog.tsx#L41`](../xmcl-react-ui/src/features/library/GroupsDialog.tsx#L41) |
 | `library-state` | [`xmcl-react-ui/src/App.tsx#L438`](../xmcl-react-ui/src/App.tsx#L438) |
 | `library-window` | [`xmcl-react-ui/src/features/library/LibraryWindow.tsx#L96`](../xmcl-react-ui/src/features/library/LibraryWindow.tsx#L96) |
