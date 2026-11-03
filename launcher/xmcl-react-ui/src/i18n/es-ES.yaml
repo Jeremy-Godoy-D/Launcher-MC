@@ -73,7 +73,7 @@ react:
     listLabel: Instancias de la biblioteca
     keyboard: En bibliotecas grandes usa las flechas para recorrer instancias, Inicio y Fin para ir a los extremos, y Tab para recorrer sus acciones.
     saved: Guardada en este equipo
-    connected: Biblioteca del equipo · migración en curso
+    connected: Biblioteca del equipo
     subtitle: Tus instancias de Minecraft Java, en un solo lugar.
     description: Continúa tu aventura o administra esta instancia.
     ambient: Paisaje ambiental de Minecraft Vanilla.
@@ -89,7 +89,7 @@ react:
     missingSelection: La instancia seleccionada ya no está disponible. Elige otra para continuar.
     storageError: La selección se aplicará en esta ventana; no se pudo guardar en este equipo.
     launchPending: 'Se ha seleccionado «{name}». El lanzamiento todavía no está conectado en React. No se inicia Minecraft.'
-    featurePending: Esta función sigue pendiente en la migración a React. Tus instancias guardadas se conservan.
+    featurePending: Esta sección no está disponible. Tus instancias guardadas se conservan.
   accounts:
     appearance: Apariencia
     appearanceName: 'Apariencia de {name}'
@@ -1493,3 +1493,10 @@ react:
     working: "Añadiendo archivos…"
     confirm: "Añadir a esta instancia"
     cancel: "Cerrar"
+  shell:
+    startError: "No se pudo conectar con el launcher. Abre Grimo Launcher desde su aplicación instalada o reintenta."
+    creditsTitle: "Créditos visuales"
+    creditsHelp: "Material de Minecraft obtenido de sus fuentes, con atribución a sus autores. Grimo Launcher no está afiliado con Mojang ni Microsoft."
+    source: "Ver fuente"
+    understood: "Entendido"
+    closeDialog: "Cerrar diálogo"

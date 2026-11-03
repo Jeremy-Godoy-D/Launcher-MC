@@ -19,7 +19,6 @@ import {
 import { AnyError } from '@xmcl/utils'
 import debounce from 'lodash.debounce'
 import { Inject, LauncherApp, LauncherAppKey, kGameDataPath } from '~/app'
-import { ExternalCredentialService } from '~/credential/ExternalCredentialService'
 import { kDownloadOptions } from '~/network'
 import { ExposeServiceKey, Lock, ServiceStateManager, Singleton, StatefulService } from '~/service'
 import { writeFile, copyFile } from 'node:fs/promises'
@@ -28,7 +27,6 @@ import { YggdrasilSeriveRegistry, kYggdrasilSeriveRegistry } from './YggdrasilSe
 import type { UserAccountSystem } from './accountSystems/AccountSystem'
 import { YggdrasilAccountSystem, kYggdrasilAccountSystem } from './accountSystems/YggdrasilAccountSystem'
 import { kUserTokenStorage, type UserTokenStorage } from './userTokenStore'
-import { getModrinthAccessToken, loginModrinth } from './utils/loginModrinth'
 import { ensureLauncherProfile, preprocessUserData } from './utils/userData'
 import { UserPersistence, type UserPersistenceIntent } from './UserPersistence'
 import { ImageStorage } from '~/infra'
@@ -121,10 +119,6 @@ export class UserService extends StatefulService<UserState> implements IUserServ
     })
   }
 
-  private getExternalCredentials(): Promise<ExternalCredentialService> {
-    return this.app.registry.getOrCreate(ExternalCredentialService)
-  }
-
   private getTokenStorage(): Promise<UserTokenStorage> {
     return this.app.registry.get(kUserTokenStorage)
   }
@@ -141,16 +135,10 @@ export class UserService extends StatefulService<UserState> implements IUserServ
     return this.accountSystems[authority] || await this.getYggdrasilAccountSystem()
   }
 
-  async hasModrinthToken(): Promise<boolean> {
-    return !!await getModrinthAccessToken(this.app, await this.getExternalCredentials())
-  }
+  async hasModrinthToken(): Promise<boolean> { return false }
 
-  // Dedupe concurrent calls so we never open multiple OAuth browser windows.
-  // The `invalidate` flag is part of the singleton key so a forced re-auth
-  // can still proceed even while a non-invalidating call is in flight.
-  @Singleton((invalidate?: boolean) => `loginModrinth-${invalidate ? '1' : '0'}`)
-  async loginModrinth(invalidate = false): Promise<void> {
-    await loginModrinth(this.app, this, ['USER_READ_EMAIL', 'USER_READ', 'USER_WRITE', 'COLLECTION_CREATE', 'COLLECTION_READ', 'COLLECTION_WRITE', 'COLLECTION_DELETE', 'PROJECT_CREATE', 'PROJECT_READ', 'PROJECT_WRITE', 'VERSION_CREATE', 'VERSION_READ', 'VERSION_WRITE'], invalidate, this.loginController?.signal, await this.getExternalCredentials())
+  async loginModrinth(_invalidate = false): Promise<void> {
+    throw new AnyError('FeatureUnavailableError', 'La publicación y las cuentas de autor no están disponibles en Grimo Launcher.')
   }
 
   async addYggdrasilService(url: string): Promise<void> {

@@ -17,7 +17,6 @@ import { listen } from '../util/server'
 import { createDummyLogger } from './DummyLogger'
 import { Host } from './Host'
 import { LauncherAppController } from './LauncherAppController'
-import { LauncherAppManager } from './LauncherAppManager'
 import { LauncherAppPlugin } from './LauncherAppPlugin'
 import { LauncherAppUpdater } from './LauncherAppUpdater'
 import { LauncherProtocolHandler } from './LauncherProtocolHandler'
@@ -124,7 +123,6 @@ export class LauncherApp extends EventEmitter {
   readonly minecraftDataPath: string
 
   readonly mutex: MutexManager
-  readonly launcherAppManager: LauncherAppManager
   /**
    * The log event emitter. This should only be used for log consumer like telemetry or log file writer.
    */
@@ -244,7 +242,6 @@ export class LauncherApp extends EventEmitter {
     this.updater = getUpdater(this)
 
     this.mutex = new MutexManager(this)
-    this.launcherAppManager = new LauncherAppManager(this)
 
     for (const plugin of plugins) {
       try {
@@ -261,9 +258,6 @@ export class LauncherApp extends EventEmitter {
     })
   }
 
-  getAppInstallerStartUpUrl(): string {
-    return ''
-  }
 
   getLogger(tag: string, destination = 'main'): Logger {
     return createDummyLogger(tag, destination, this.logEmitter)
@@ -411,79 +405,11 @@ export class LauncherApp extends EventEmitter {
     })
   }
 
-  protected async getStartupUrl(): Promise<string | undefined> {
-    if (!IS_DEV && process.platform === 'win32') {
-      this.logger.log(`Try to check the start up url: ${process.argv.join(' ')}`)
-      if (process.argv.length > 1) {
-        const urlOption = process.argv.find(a => a.startsWith('--url='))
-        if (urlOption) {
-          const url = urlOption.substring('--url='.length)
-          if (url) {
-            return url
-          }
-        }
-        this.logger.log('Didn\'t find --url options')
-        const protocolOption = process.argv.find(a => a.startsWith('launchermc://'))
-        if (protocolOption) {
-          const u = new URL(protocolOption)
-          if (u.host === 'launcher' && u.pathname === '/app' && u.searchParams.has('url')) {
-            return u.searchParams.get('url') as string
-          }
-        }
-        this.logger.log('Didn\'t find xmcl:// protocol')
-      }
-    }
-    this.logger.log('Didn\'t find the start up url, try to load from config file.')
-
-    try {
-      const { default: url } = JSON.parse(await readFile(join(this.launcherAppManager.root, 'apps.json'), 'utf-8'))
-
-      return url
-    } catch (e) {
-      if (isSystemError(e) && e.code === 'ENOENT') {
-        return undefined
-      }
-      throw e
-    }
-  }
-
   protected async onEngineReady() {
     this.logger.log(`cwd: ${process.cwd()}. env: ${process.env.NODE_ENV}`)
 
-    // start the app
-    let app: InstalledAppManifest
-    try {
-      const url = await this.getStartupUrl()
-      if (url) {
-        this.logger.log(`Try to use start up url ${url}`)
-        const existedApp = await this.launcherAppManager.tryGetInstalledApp(url)
-        if (existedApp) {
-          app = existedApp
-        } else {
-          app = await this.launcherAppManager.installApp(url)
-        }
-      } else {
-        throw new Error('No start up url')
-      }
-    } catch (e) {
-      if ((e as any).message !== 'No start up url') {
-        this.logger.warn('Fail to use start up url:')
-        this.logger.warn(e)
-      }
-      try {
-        const startUp = this.getAppInstallerStartUpUrl()
-        if (startUp) {
-          this.logger.log(`Try to use appinstaller startup url: "${startUp}"`)
-          app = await this.launcherAppManager.installApp(startUp)
-        } else {
-          app = this.builtinAppManifest
-        }
-      } catch (e) {
-        app = this.builtinAppManifest
-      }
-    }
     const isBootstrap = await this.#isBootstrapSignal.promise
-    await this.controller.activate(app, isBootstrap)
+    await this.controller.activate(this.builtinAppManifest, isBootstrap)
     this.logger.log(`Current launcher core version is ${this.version}.`)
     this.logger.log('App booted')
   }

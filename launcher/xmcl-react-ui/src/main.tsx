@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { createHashRouter } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
 import { RendererClient } from '@launcher/renderer-client'
-import { ThemeServiceKey } from '@xmcl/runtime-api/src/services/ThemeService'
+import { BaseServiceKey } from '@xmcl/runtime-api/src/services/BaseService'
 import { App } from './App'
 import { RuntimeProvider } from './runtime'
 import { PreferencesProvider } from './preferences-context'
@@ -21,7 +21,7 @@ const router = createHashRouter([{ path: '*', element: <App /> }])
 const client = window.serviceChannels ? new RendererClient(window.serviceChannels, window.taskMonitor) : null
 const launches = client ? new LaunchStore(client) : null
 const preferences = new PreferencesStore(() => window.localStorage, window, async () =>
-  (await client?.service(ThemeServiceKey).getCurrentTheme())?.settings?.dark,
+  client?.service(BaseServiceKey).getLegacyAppearance(),
 )
 window.addEventListener('pagehide', () => { launches?.dispose(); client?.dispose() }, { once: true })
 function Entry() {
@@ -39,6 +39,7 @@ function Entry() {
     return () => { active = false }
   }, [])
   const [onboarding, setOnboarding] = useState(() => new URLSearchParams(location.search).has('bootstrap'))
+  if (!client || !launches) return <main className="auxiliary" role="alert"><h1>Grimo Launcher</h1><p>{t('react.shell.startError')}</p><button className="button secondary" onClick={() => location.reload()}>{t('react.globalSettings.retry')}</button></main>
   if (!ready) return <p role="status">{t('react.migration.loading')}</p>
   if (migrationError) return <main className="auxiliary" role="alert"><p>{t('react.migration.selectionError')}</p><button className="button secondary" onClick={() => setMigrationError(false)}>{t('react.migration.continue')}</button></main>
   if (onboarding && client) return <Onboarding onFinished={choice => {
@@ -48,7 +49,7 @@ function Entry() {
     void router.navigate(choice === 'library' ? '/me' : `/me?add=${choice}`)
     setOnboarding(false)
   }} />
-  return client && launches ? <LibraryProvider><LaunchProvider store={launches}><RouterProvider router={router} /></LaunchProvider></LibraryProvider> : <RouterProvider router={router} />
+  return <LibraryProvider><LaunchProvider store={launches}><RouterProvider router={router} /></LaunchProvider></LibraryProvider>
 }
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

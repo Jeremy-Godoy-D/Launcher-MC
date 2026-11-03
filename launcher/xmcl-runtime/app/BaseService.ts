@@ -42,6 +42,7 @@ import { getTracker } from '~/util/taskHelper'
 import { addSteamShortcutToVdf } from './steamShortcut'
 import { writeFile as writeAtomically } from 'atomically'
 import { reviewMigrationPaths, migrationPathError } from './migrationPaths'
+import { readLegacyAppearance } from './legacyAppearance'
 
 @ExposeServiceKey(BaseServiceKey)
 export class BaseService extends AbstractService implements IBaseService {
@@ -426,6 +427,8 @@ export class BaseService extends AbstractService implements IBaseService {
     }
     return review
   }
+
+  getLegacyAppearance() { return readLegacyAppearance(this.app.appDataPath) }
 
   async migrate(options: MigrateOptions) {
     const review = await this.reviewDataMigration(options.destination), destination = review.destination

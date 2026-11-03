@@ -174,6 +174,7 @@ export interface BaseService extends GenericEventEmitter<BaseServiceEventMap> {
   migrate(options: MigrateOptions): Promise<void>
 
   reviewDataMigration(destination: string): Promise<DataMigrationReview>
+  getLegacyAppearance(): Promise<'dark' | 'light' | 'system' | undefined>
 
   getMemoryStatus(): Promise<{ total: number; free: number }>
 

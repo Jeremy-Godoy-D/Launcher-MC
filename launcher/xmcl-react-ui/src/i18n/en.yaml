@@ -73,7 +73,7 @@ react:
     listLabel: Library instances
     keyboard: In large libraries, use arrow keys to move between instances, Home and End to reach either end, and Tab to move through their actions.
     saved: Saved on this device
-    connected: Local library · migration in progress
+    connected: Local library
     subtitle: Your Minecraft Java instances, in one place.
     description: Continue your adventure or manage this instance.
     ambient: Minecraft Vanilla ambient scenery.
@@ -89,7 +89,7 @@ react:
     missingSelection: The selected instance is no longer available. Choose another to continue.
     storageError: The selection applies to this window; it could not be saved on this device.
     launchPending: 'Selected “{name}”. Launching is not connected in React yet. Minecraft will not start.'
-    featurePending: This feature is still pending in the React migration. Your saved instances are preserved.
+    featurePending: This section is unavailable. Your saved instances are preserved.
   accounts:
     appearance: Appearance
     appearanceName: 'Appearance of {name}'
@@ -1493,3 +1493,10 @@ react:
     working: "Adding files…"
     confirm: "Add to this instance"
     cancel: "Close"
+  shell:
+    startError: "Could not connect to the launcher. Open Grimo Launcher from its installed application or retry."
+    creditsTitle: "Visual credits"
+    creditsHelp: "Minecraft media from its original sources, with attribution. Grimo Launcher is not affiliated with Mojang or Microsoft."
+    source: "View source"
+    understood: "Got it"
+    closeDialog: "Close dialog"

@@ -42,13 +42,6 @@ export const trayPlugin: ControllerPlugin = function (this: ElectronController) 
   let checkUpdate: (() => void) | undefined
   const createMenu = () => {
     const app = this.app
-    const onBrowseAppClicked = () => {
-      if (this.browserRef && !this.browserRef.isDestroyed()) {
-        this.browserRef.show()
-      } else {
-        this.createBrowseWindow()
-      }
-    }
     const diagnose = () => {
       this.openDevTools()
     }
@@ -71,11 +64,6 @@ export const trayPlugin: ControllerPlugin = function (this: ElectronController) 
           this.app.registry.get(BaseService).then(service => service.makeDesktopShortcut())
         },
       },
-      // {
-      //   label: t('browseApps'),
-      //   type: 'normal',
-      //   click: onBrowseAppClicked,
-      // },
       { type: 'separator' },
       // {
       //   label: t('showLogsFolder'),

@@ -17,7 +17,7 @@ import { version } from './package.json'
 import { rendererTarget } from '../scripts/renderer'
 
 const renderer = rendererTarget()
-const outputDirectory = renderer.name === 'react' ? 'build/output/react' : 'build/output'
+const outputDirectory = renderer.name === 'vue' ? 'build/output/vue' : 'build/output'
 
 /**
  * @returns Hash string

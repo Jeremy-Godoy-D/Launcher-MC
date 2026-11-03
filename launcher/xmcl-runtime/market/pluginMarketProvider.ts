@@ -29,7 +29,6 @@ import { kDownloadOptions } from '~/network'
 import { kResourceManager, kResourceWorker } from '~/resource'
 import { hardLinkFiles } from '~/util/fs'
 import { getTracker } from '~/util/taskHelper'
-import { createModrinthAuthenticatedFetch } from '~/user/utils/loginModrinth'
 import { downloadStaged } from './downloadStaged'
 import {
   InstallMarketDirectoryOptions,
@@ -43,7 +42,7 @@ import { modpackRequest } from './modpackRequest'
 type InstanceFile = _InstanceFile & { downloads: string[]; icon?: string }
 
 export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
-  const modrinth = new ModrinthV2Client({ fetch: createModrinthAuthenticatedFetch(app) })
+  const modrinth = new ModrinthV2Client({ fetch: (...args) => app.fetch(...args) })
   app.registry.register(ModrinthV2Client, modrinth)
   const curseforge = createCurseforgeProxyClient((...args) => app.fetch(...args))
   app.registry.register(CurseforgeV1Client, curseforge)

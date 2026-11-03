@@ -34,78 +34,15 @@ function createPlugin(resolveAuthorization: () => Promise<unknown>) {
 }
 
 describe('pluginApiFallback', () => {
-  test('strips renderer authorization before lookup and applies generated DPoP headers', async () => {
-    const headers: Record<string, string> = {
-      Authorization: 'renderer-token',
-      DPoP: 'renderer-proof',
+  test('retired XMCL endpoints fail locally without resolving credentials', async () => {
+    for (const host of ['signaling.xmcl.app', 'xmcl.app', 'xmcl-core-api.azurewebsites.net']) {
+      const { handler, app } = createPlugin(async () => { throw new Error('Credentials must stay inert') })
+      const request = { method: 'POST', url: new URL(`https://${host}/v1/rtc/official`), headers: { Authorization: 'renderer-token', DPoP: 'renderer-proof', Cookie: 'private' } }
+      const response: Record<string, any> = {}
+      await handler({ request, response })
+      expect(response).toMatchObject({ status: 410, handled: true })
+      expect(request.headers).toEqual({}); expect(app.registry.get).not.toHaveBeenCalled()
     }
-    const resolveAuthorization = vi.fn(async () => {
-      expect(headers).toEqual({})
-      return {
-        accessToken: 'xmcl-token',
-        accountId: 'account-id',
-        tokenType: 'DPoP',
-        dpopProof: 'main-process-proof',
-      }
-    })
-    const { handler } = createPlugin(resolveAuthorization)
-    const request = {
-      method: 'POST',
-      url: new URL('https://signaling.xmcl.app/v1/rtc/official?room=1'),
-      headers,
-    }
-
-    await handler({ request, response: {} })
-
-    expect(headers).toEqual({
-      Authorization: 'DPoP xmcl-token',
-      DPoP: 'main-process-proof',
-    })
-  })
-
-  test('does not restore renderer credentials when no session is available', async () => {
-    const headers: Record<string, string> = {
-      authorization: 'renderer-token',
-      dpop: 'renderer-proof',
-    }
-    const { handler } = createPlugin(async () => undefined)
-    const request = {
-      method: 'GET',
-      url: new URL('https://signaling.xmcl.app/v1/multiplayer/rooms'),
-      headers,
-    }
-
-    const response: Record<string, any> = { headers: {} }
-    await handler({ request, response })
-
-    expect(headers).toEqual({})
-    expect(response).toMatchObject({
-      status: 401,
-      handled: true,
-      headers: { 'content-type': 'application/json' },
-    })
-    expect(JSON.parse(response.body)).toEqual({
-      error: 'xmcl_account_session_missing',
-      message: 'xmcl_account_session_missing',
-    })
-  })
-
-  test('returns a local service error when authorization cannot be resolved', async () => {
-    const { handler } = createPlugin(async () => {
-      throw new Error('xmcl_account_server_time_unavailable')
-    })
-    const request = {
-      method: 'POST',
-      url: new URL('https://signaling.xmcl.app/v1/rtc/official'),
-      headers: {},
-    }
-    const response: Record<string, any> = { headers: {} }
-
-    await handler({ request, response })
-
-    expect(response.status).toBe(503)
-    expect(response.handled).toBe(true)
-    expect(JSON.parse(response.body).error).toBe('xmcl_account_server_time_unavailable')
   })
 
   test('rejects unconfigured or unsafe proxy URLs locally', async () => {

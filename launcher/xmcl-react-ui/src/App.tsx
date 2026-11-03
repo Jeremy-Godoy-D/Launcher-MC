@@ -3,9 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router'
 import * as Dialog from '@radix-ui/react-dialog'
 import {
-  ArrowDownToLine,
   ArrowRight,
-  Bell,
   Box,
   Check,
   ChevronDown,
@@ -279,7 +277,6 @@ export function App() {
   const [visible, setVisible] = useState(() => !document.hidden)
   const featuredRegion = useRef<HTMLElement>(null)
   const [regionVisible, setRegionVisible] = useState(false)
-  const [dialog, setDialog] = useState<{ title: string; message: string } | null>(null)
   const [showCredits, setShowCredits] = useState(false)
   const [adding, setAdding] = useState<'create' | 'import'>()
   const [incomingArchive, setIncomingArchive] = useState<string>()
@@ -355,7 +352,7 @@ export function App() {
     reducedMotion,
     performanceMode,
     interacting: hovered || focusWithin,
-    dialogOpen: !!dialog || showCredits || !!adding || !!operating || managingGroups || !!launch?.dialog || !!launch?.running.length,
+    dialogOpen: showCredits || !!adding || !!operating || managingGroups || !!launch?.dialog || !!launch?.running.length,
     manuallyPaused: paused,
   })
 
@@ -388,13 +385,6 @@ export function App() {
     )
     return () => clearInterval(interval)
   }, [home, canMove, preferences.carouselEnabled, featured, savedLibrary?.home])
-  const preview = (
-    title: string,
-    message = t('react.instances.featurePending'),
-  ) => {
-    restoreFocus.current = document.activeElement as HTMLElement
-    setDialog({ title, message })
-  }
   const openCredits = () => {
     restoreFocus.current = document.activeElement as HTMLElement
     setShowCredits(true)
@@ -457,7 +447,7 @@ export function App() {
         <div className="titlebar-left">
           <img className="titlebar-logo" src={brandIcon} alt="" />
           <span>Grimo Launcher</span>
-          <span className="preview-label">{accountsPage ? t('react.accounts.saved') : catalog ? t('react.catalog.connected') : t('react.instances.connected')}</span>
+          <span className="preview-label">{title}</span>
         </div>
         <div className="window-controls">
           <button
@@ -568,27 +558,7 @@ export function App() {
             >
               {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
             </button>
-            {savedLibrary ? <GlobalActivity /> : <>
-            <button
-              className="icon-button"
-              aria-label="Tareas"
-              onClick={() =>
-                preview(
-                  'No hay tareas en curso',
-                  'Las instalaciones y descargas aparecerán aquí. Esta vista previa no descarga archivos del juego.',
-                )
-              }
-            >
-              <ArrowDownToLine size={19} />
-            </button>
-            <button
-              className="icon-button"
-              aria-label="Notificaciones"
-              onClick={() => preview('Todo al día', 'No hay notificaciones en esta vista previa.')}
-            >
-              <Bell size={19} />
-            </button>
-            </>}
+            <GlobalActivity />
           </div>
         </div>
         <div className="page-scroll">
@@ -896,10 +866,9 @@ export function App() {
         savedLibrary.select(path, () => void navigate('/instance'))
       }} />}
       <Dialog.Root
-        open={!!dialog || showCredits}
+        open={showCredits}
         onOpenChange={(open) => {
           if (!open) {
-            setDialog(null)
             setShowCredits(false)
           }
         }}
@@ -913,11 +882,9 @@ export function App() {
               restoreFocus.current?.focus()
             }}
           >
-            <Dialog.Title>{showCredits ? 'Créditos visuales' : dialog?.title}</Dialog.Title>
+            <Dialog.Title>{t('react.shell.creditsTitle')}</Dialog.Title>
             <Dialog.Description>
-              {showCredits
-                ? 'Material de Minecraft obtenido de sus fuentes, con atribución a sus autores. Grimo Launcher no está afiliado con Mojang ni Microsoft.'
-                : dialog?.message}
+              {t('react.shell.creditsHelp')}
             </Dialog.Description>
             {showCredits && (
               <ul className="credits-list">
@@ -938,15 +905,15 @@ export function App() {
                     </span>
                     <span>{credit.changes}</span>
                     <a href={credit.source} target="_blank" rel="noreferrer">
-                      Ver fuente
+                      {t('react.shell.source')}
                       <ExternalLink size={13} />
                     </a>
                   </li>
                 ))}
               </ul>
             )}
-            <Dialog.Close className="button primary">Entendido</Dialog.Close>
-            <Dialog.Close className="icon-button dialog-close" aria-label="Cerrar diálogo">
+            <Dialog.Close className="button primary">{t('react.shell.understood')}</Dialog.Close>
+            <Dialog.Close className="icon-button dialog-close" aria-label={t('react.shell.closeDialog')}>
               <X size={19} />
             </Dialog.Close>
           </Dialog.Content>

@@ -11,7 +11,7 @@ test('React development Strict Mode shares native state, applies live mutations 
   const opening = launcher.app.waitForEvent('window')
   await launcher.app.evaluate(async ({ BrowserWindow }, preload) => {
     const win = new BrowserWindow({ width: 1200, height: 720, minWidth: 800, minHeight: 400, webPreferences: { preload, contextIsolation: true, sandbox: true, nodeIntegration: false } })
-    await win.loadURL('http://localhost:3001/client-harness.html')
+    await win.loadURL('http://localhost:3000/client-harness.html')
     win.focus()
   }, preload)
   const page = await opening

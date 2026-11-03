@@ -21,7 +21,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
 const renderer = rendererTarget()
 const SOURCE_ROOT = resolve(REPO_ROOT, renderer.package, 'src')
-const OUTPUT = resolve(REPO_ROOT, renderer.name === 'react' ? 'e2e/TESTIDS.react.md' : 'e2e/TESTIDS.md')
+const OUTPUT = resolve(REPO_ROOT, renderer.name === 'vue' ? 'e2e/TESTIDS.vue.md' : 'e2e/TESTIDS.md')
 
 interface Hit {
   testid: string
@@ -100,6 +100,7 @@ async function main(): Promise<void> {
   lines.push('')
 
   await writeFile(OUTPUT, lines.join('\n'), 'utf8')
+  if (renderer.name === 'react') await writeFile(resolve(REPO_ROOT, 'e2e/TESTIDS.react.md'), lines.join('\n'), 'utf8')
   // eslint-disable-next-line no-console
   console.log(`[gen-testids] wrote ${sortedIds.length} testids to ${relative(REPO_ROOT, OUTPUT)}`)
 }

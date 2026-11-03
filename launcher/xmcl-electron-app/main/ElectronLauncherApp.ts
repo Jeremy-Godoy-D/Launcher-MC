@@ -308,20 +308,6 @@ export default class ElectronLauncherApp extends LauncherApp {
 
   windowsUtils = getWindowsUtils(this, this.logger)
 
-  getAppInstallerStartUpUrl(): string {
-    if (this.windowsUtils) {
-      try {
-        const uri = this.windowsUtils.getAppInstallerUri()
-        const url = new URL(uri)
-        const appUrl = url.searchParams.get('app') || ''
-        return appUrl
-      } catch {
-        return ''
-      }
-    }
-    return ''
-  }
-
   relaunch(args?: string[]) {
     app.relaunch({ args })
     app.exit(0)

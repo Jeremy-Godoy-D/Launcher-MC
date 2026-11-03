@@ -1,10 +1,7 @@
 import { HAS_DEV_SERVER, HOST, IS_DEV, IS_REACT_RENDERER, WindowsBuild } from '@/constant'
-import browsePreload from '@preload/browse'
 import indexPreload from '@preload/index'
-import indexTogetherPreload from '@preload/indexTogether'
 import migrationPreload from '@preload/migration'
 import monitorPreload from '@preload/monitor'
-import browserWinUrl from '@renderer/browser.html'
 import loggerWinUrl from '@renderer/logger.html'
 import migrateWinUrl from '@renderer/migration.html'
 import { parseOAuthRedirect } from '@xmcl/runtime/user/accountSystems/oauthRedirect'
@@ -25,8 +22,6 @@ import { getLoginSuccessHTML } from './utils/login'
 import { createWindowTracker } from './utils/windowSizeTracker'
 import { isBootstrapSender } from './utils/bootstrapSender'
 import { rendererNavigation, externalNavigation } from '@xmcl/runtime/util/rendererNavigation'
-import { MultiplayerNetworkDiagnosticsController } from './MultiplayerNetworkDiagnosticsController'
-import { BrowserRtcController } from './BrowserRtcController'
 
 export class ElectronController implements LauncherAppController {
   protected windowsVersion?: { major: number; minor: number; build: number }
@@ -36,7 +31,6 @@ export class ElectronController implements LauncherAppController {
   protected loggerWin: BrowserWindow | undefined = undefined
   private loggerWindows = new Map<string, { context: LoggerContext; window?: BrowserWindow; opening?: Promise<void> }>()
 
-  protected browserRef: BrowserWindow | undefined = undefined
 
   protected migrationRef: BrowserWindow | undefined = undefined
 
@@ -59,9 +53,6 @@ export class ElectronController implements LauncherAppController {
 
   private migrated: { from: string; to: string } | undefined
 
-  private readonly multiplayerNetworkDiagnostics: MultiplayerNetworkDiagnosticsController
-
-  readonly browserRtc = new BrowserRtcController()
 
   maximized: boolean | undefined
 
@@ -124,7 +115,6 @@ export class ElectronController implements LauncherAppController {
   }
 
   constructor(protected app: ElectronLauncherApp) {
-    this.multiplayerNetworkDiagnostics = new MultiplayerNetworkDiagnosticsController(ipcMain)
     plugins.forEach(p => p.call(this))
 
     if (app.platform.os === 'windows') {
@@ -283,53 +273,16 @@ export class ElectronController implements LauncherAppController {
     }
   }
 
-  async createBrowseWindow() {
-    // Determine if translucency should be enabled
-    const enableTranslucency = this.settings?.windowTranslucent ?? false
-
-    const browser = new BrowserWindow({
-      title: 'XMCL Launcher Browser',
-      frame: false,
-      transparent: true,
-      resizable: false,
-      width: 860,
-      height: 450,
-      useContentSize: true,
-      vibrancy: enableTranslucency && this.app.platform.os === 'osx' ? 'sidebar' : undefined, // macOS vibrancy
-      backgroundMaterial: this.getBackgroundMaterial(enableTranslucency), // Windows mica/acrylic
-      icon: darkIcon,
-      webPreferences: {
-        preload: browsePreload,
-      },
-    })
-
-    browser.loadURL(browserWinUrl)
-
-    this.browserRef = browser
-  }
-
-  openMultiplayer() {
-    const window = this.mainWin
-    if (!window || window.isDestroyed()) return
-    if (window.isMinimized()) window.restore()
-    window.show()
-    window.focus()
-    window.webContents.send('navigate', '/multiplayer')
-  }
-
   setWindowTranslucent(enable: boolean) {
     if (this.mainWin && !this.mainWin.isDestroyed()) {
-      if (this.app.platform.os === 'osx') {
-        this.mainWin.setVibrancy(enable ? 'sidebar' : null)
-      } else if (this.app.platform.os === 'windows') {
-        this.mainWin.setBackgroundMaterial(this.getBackgroundMaterial(enable) ?? 'auto')
-      }
+      if (this.app.platform.os === 'osx') this.mainWin.setVibrancy(enable ? 'sidebar' : null)
+      else if (this.app.platform.os === 'windows') this.mainWin.setBackgroundMaterial(this.getBackgroundMaterial(enable) ?? 'auto')
     }
   }
 
   async createAppWindow(isBootstrap: boolean) {
     const man = this.activatedManifest!
-    const tracker = createWindowTracker(this.app, 'app-manager', man)
+    const tracker = createWindowTracker(this.app, 'app-manager')
     const config = await tracker.getConfig()
 
     const restoredSession = this.app.session.getSession(man.url)
@@ -362,17 +315,15 @@ export class ElectronController implements LauncherAppController {
       titleBarStyle: this.getTitlebarStyle(),
       trafficLightPosition: this.app.platform.os === 'osx' ? { x: 14, y: 10 } : undefined,
       webPreferences: {
-        preload: indexTogetherPreload,
+        preload: indexPreload,
         session: restoredSession,
         contextIsolation: true,
         sandbox: true,
-        webviewTag: !IS_REACT_RENDERER,
+        webviewTag: false,
       },
       show: false,
     })
 
-    this.multiplayerNetworkDiagnostics.attach(browser.webContents)
-    this.browserRtc.attach(browser.webContents)
 
     if (man.ratio) {
       browser.setAspectRatio(minWidth / minHeight)
@@ -393,10 +344,7 @@ export class ElectronController implements LauncherAppController {
     browser.webContents.on('will-navigate', this.onWebContentWillNavigate)
     browser.webContents.on('did-create-window', this.onWebContentCreateWindow)
     browser.webContents.setWindowOpenHandler(this.windowOpenHandler)
-    const webContentsId = browser.webContents.id
     browser.on('closed', () => {
-      this.multiplayerNetworkDiagnostics.detach(webContentsId)
-      this.browserRtc.detach(webContentsId)
       this.mainWin = undefined
     })
 
@@ -467,7 +415,7 @@ export class ElectronController implements LauncherAppController {
   }
 
   async createMonitorWindow(context?: LoggerContext) {
-    const tracker = createWindowTracker(this.app, 'monitor', this.activatedManifest!)
+    const tracker = createWindowTracker(this.app, 'monitor')
     // Determine if translucency should be enabled
     const enableTranslucency = this.settings?.windowTranslucent ?? false
 

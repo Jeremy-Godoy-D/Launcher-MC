@@ -15,8 +15,8 @@ export default function createRendererPlugin(): Plugin {
       build.onResolve({ filter: /@renderer\/.+/ }, async ({ path }) => ({ path: basename(path) + '?renderer', namespace: 'renderer' }))
       build.onLoad({ filter: /^.+\?renderer$/, namespace: 'renderer' }, async ({ path }) => {
         const page = cleanUrl(path)
-        // The removed browser has no React entry; old host references land on the main preview until stage 8 removes them.
-        const clean = renderer.name === 'react' && page === 'browser.html' ? 'index.html' : page
+        if (page === 'browser.html') throw new Error('The launcher browser has been removed')
+        const clean = page
         const outDir = build.initialOptions.outdir
         return {
           contents:

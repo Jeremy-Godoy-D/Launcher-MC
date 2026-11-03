@@ -11,7 +11,7 @@ const locales = (process.env.XMCL_E2E_LOCALES ?? 'en').split(',').map((s) => s.t
 export default defineConfig({
   webServer: process.env.XMCL_REACT_CLIENT_HARNESS === '1' ? {
     command: 'pnpm --dir .. --filter @launcher/react-ui dev',
-    url: 'http://localhost:3001/client-harness.html',
+    url: 'http://localhost:3000/client-harness.html',
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
   } : undefined,

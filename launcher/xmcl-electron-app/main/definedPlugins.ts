@@ -1,4 +1,3 @@
-import { kMultiplayerHostFactory } from '@xmcl/runtime/peer'
 import { pluginIconProtocol } from './pluginIconProtocol'
 import { pluginDiscreteGPULinux } from './pluginDiscreteGPULinux'
 import { pluginLinuxDisplay } from './pluginLinuxDisplay'
@@ -32,7 +31,6 @@ import { pluginSaveWorker } from '@xmcl/runtime/save/pluginSaveWorker'
 import { pluginServicesHandler } from '@xmcl/runtime/service/pluginServicesHandler'
 import { pluginSettings } from '@xmcl/runtime/settings/pluginSettings'
 import { pluginSetup } from '@xmcl/runtime/setup/pluginSetup'
-import { pluginModrinthAccess } from '@xmcl/runtime/user/pluginModrinthAccess'
 import { pluginOfficialUserApi } from '@xmcl/runtime/user/pluginOfficialUserApi'
 import { pluginOffineUser } from '@xmcl/runtime/user/pluginOfflineUser'
 import { pluginUserTokenStorage } from '@xmcl/runtime/user/pluginUserTokenStorage'
@@ -43,26 +41,6 @@ import { LauncherAppPlugin } from '~/app'
 import { definedServices } from './definedServices'
 
 export const definedPlugins: LauncherAppPlugin[] = [
-  (app) => {
-    const rejectP2P = async (): Promise<never> => {
-      throw new Error('P2P no está disponible en Grimo Launcher.')
-    }
-    app.registry.register(kMultiplayerHostFactory, async () => ({
-      closed: new Promise<void>(() => {}),
-      on: () => {},
-      dispose: async () => {},
-      setUserInfo: () => {},
-      refreshIceServers: async () => {},
-      initiate: rejectP2P,
-      setRemoteDescription: rejectP2P,
-      drop: rejectP2P,
-      createGroup: rejectP2P,
-      joinGroup: rejectP2P,
-      transferGroupMaster: rejectP2P,
-      leaveGroup: rejectP2P,
-      shareInstance: rejectP2P,
-    } as any))
-  },
   pluginCli,
   pluginPowerMonitor,
   pluginIconProtocol,
@@ -99,7 +77,6 @@ export const definedPlugins: LauncherAppPlugin[] = [
   pluginOffineUser,
   pluginUndiciLogger,
 
-  pluginModrinthAccess,
 
   pluginCommonProtocol,
 ]
