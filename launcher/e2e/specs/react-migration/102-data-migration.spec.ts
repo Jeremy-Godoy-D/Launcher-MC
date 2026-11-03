@@ -23,6 +23,7 @@ test('data move reviews native paths, preserves occupied folders and cancels wit
     if (width === 800) await page.evaluate(() => { const key = 'launcher.react.preferences'; localStorage.setItem(key, JSON.stringify({ ...JSON.parse(localStorage.getItem(key) ?? '{}'), appearance: 'light' })); dispatchEvent(new StorageEvent('storage', { key, newValue: localStorage.getItem(key) })) })
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
     await expect(page.getByTestId('data-migration-confirm')).toBeInViewport({ ratio: 1 })
+    await expect(page.getByRole('button', { name: 'Cambiar destino', exact: true })).toBeInViewport({ ratio: 1 })
     await expect(page.getByTestId('data-migration-review').locator('dd').first()).toBeInViewport({ ratio: 1 }); await expect(page.getByTestId('data-migration-review').locator('dd').last()).toBeInViewport({ ratio: 1 })
     await page.evaluate(axe.source)
     const report = await page.evaluate(() => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }))
