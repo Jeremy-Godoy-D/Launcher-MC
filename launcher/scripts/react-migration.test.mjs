@@ -25,11 +25,14 @@ test('una etapa activa con criterios pendientes es un estado válido, no una eta
   assert.deepEqual(validateState(state, root), [])
 })
 
-test('selector conserva Vue como default y no admite sustituir su entrada', () => {
+test('el selector exige Vue durante la transición y React en el puerto habitual tras sustituirlo', () => {
   const pkg = { scripts: { 'build:renderer': 'tsx scripts/renderer.ts build' } }
-  const targets = { default: 'vue', vue: { package: 'xmcl-keystone-ui' }, react: { package: 'xmcl-react-ui' } }
+  const targets = { default: 'vue', vue: { package: 'xmcl-keystone-ui' }, react: { package: 'xmcl-react-ui', port: 3000 } }
   assert.deepEqual(validateRendererBuild(pkg, targets), [])
-  assert.equal(validateRendererBuild(pkg, { ...targets, default: 'react' }).length, 1)
+  const production = { ...targets, default: 'react' }
+  assert.equal(validateRendererBuild(pkg, production).length, 1)
+  assert.deepEqual(validateRendererBuild(pkg, production, 'react'), [])
+  assert.equal(validateRendererBuild(pkg, { ...production, react: { ...targets.react, port: 3001 } }, 'react').length, 1)
   assert.equal(validateRendererBuild({ scripts: { 'build:renderer': 'other' } }, targets).length, 1)
 })
 

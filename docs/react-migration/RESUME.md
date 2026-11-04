@@ -2,20 +2,16 @@
 
 ## Estado vigente
 
-Etapas 0–7 completas; **8 activa**. K18/K19/K22/K23 pasan según STAGE7-CLOSURE.md/JSON; K20/K21 conservan su aceptación. Producción v0.2.0-beta.2 y proxy intactos; PR4 borrador; destino v0.3.0-beta.1 después de 8–9. Microsoft pospuesto. El usuario pide terminar y publicar reutilizando lo aceptado y evitando bucles.
+Etapas 0–8 completas. **9 activa** para validar y publicar `v0.3.0-beta.1`. La candidata local de etapa 8 es `36d93e9`, todavía numerada beta.2. Producción `v0.2.0-beta.2`, proxy activo y PR4 en borrador. Microsoft pospuesto. El usuario pidió terminar y publicar reutilizando el trabajo aceptado.
 
-Última candidata: 8d3b919. Suite seleccionada: 1.520 pruebas/154 archivos; ocho Native React distintos de este bloque y dos Vue. Tipos/lint/builds aprobados, 56 diagnósticos E2E de referencia sin cambios y 199 IDs. Nueve Axe sin violaciones, doce incomplete; geometría y teclado revisados. Host Vue restaurado y hash comprobado. No quedan sesiones activas de este bloque.
+[STAGE8-CLOSURE.md](STAGE8-CLOSURE.md) registra el paquete React predeterminado, grafos Electron/DeskGap, R01–R11, rutas y archivos antiguos conservados, 18 pruebas focales, tipos/lint y Native 01/02/100/106. La compatibilidad del ZIP beta.3 se ejecutó con descubrimiento público sin token. El instalador beta.2 y la validación integral siguen pendientes. CI anterior `41571802554` falló por alias de directorios temporales en tres fixtures, corregidas y probadas localmente.
 
-STAGE7-CLOSURE.md documenta revisión/traslado de datos, journal parcial/rollback, migration.html real600×400, selección por contexto nativo, arrastre, teclado y límites. STAGE7-SETTINGS.md y STAGE7-ACTIVITY-UPDATER.md conservan ajustes atómicos/caché/cierre/tareas/actualizador. No se aplicó ningún ASAR ni se ejecutó el instalador en el perfil habitual.
+## Siguiente tarea — etapa 9
 
-CI 41474917961 (5561253): Vue success; React307pass/2skip/1fallo100 por selector compacto antes de esperar el formulario. Helper corregido y recorrido800×400 aprobado localmente. La regresión35 pasó. Comprobar la siguiente CI, sin reiniciar la anterior.
-
-## Siguiente tarea — etapa 8
-
-1. Hacer React predeterminado y devolverlo al puerto habitual; actualizar selector/build/CI/consumidores de forma acotada.
-2. Desconectar extras del arranque y del grafo distribuido: definedServices/definedPlugins de ambos hosts y dependencias transitivas; revisar ElectronController, RTC/P2P y plugins. Conservar todas las herramientas locales de Mundos, incluidos chunks y carpetas compartidas locales. Conservar datos de extras inertes.
-3. Retirar browser.html y referencias coherentemente; quitar mensajes de implementación/fixtures del producto. Verificar que Vue/Vuetify/Vue Router y servicios de extras no contribuyan al paquete público.
-4. Validar datos anteriores, rutas, ventanas, builds y pruebas afectadas; documentar evidencia y cerrar solo gates satisfechos. Después9: juego/Java/loaders físicos K03/K05/K06, descarga pública sin token y aplicación real del actualizador, instalador/upgrade Windows desechable en Actions, rendimiento/seguridad/assets y publicación. No pedir otra VM.
+1. Ejecutar la suite integral en Actions y resolver fallos del nuevo paquete. Preparar candidata con la versión final y comprobar fuentes y hashes.
+2. Cerrar K03/K05/K06 con instalación, Java automático y lanzamiento reales. Mantener perfiles desechables y reutilizar diagnósticos y mediciones existentes.
+3. Validar NSIS limpio y sobre beta.2 en Windows desechable, ZIP y actualización con integridad. Conservar cuenta, selección, ajustes, instancia y hash del mundo. Usar Actions porque el usuario no dispone de VM.
+4. Verificar rendimiento final, seguridad, licencias, proxy público y artefactos de la candidata. Publicar el borrador solo tras pasar todas las gates. Conservar beta.2 recuperable.
 
 ## Evidencia y decisiones técnicas que se conservan
 
@@ -25,7 +21,7 @@ CI 41474917961 (5561253): Vue success; React307pass/2skip/1fallo100 por selector
 - Cliente/stores/Strict Mode y transporte3, onboarding/cuentas/biblioteca/lanzamiento/Java automático4 ya cerrados. Referencias: STAGE3.*, STAGE4-CLOSURE.*, STAGE4-LAUNCH.md y los informes de cada bloque. No rehacerlos sin regresión. UserService guarda diferido; tests deben esperar archivos y conservar assertions de datos. Bootstrap valida documento/marco y no confirma antes del registro. Preferencias son launcher.react.preferences v1, Intlify29YAML y assets empaquetados; no aplicar formatos antiguos.
 - Mundos: identidades BigInt con ino/dev/ns normalizados a strings en JSON, no Number ni BigInt crudo. STAGE5-WORLD-IDENTITIES.md, STAGE5-WORLD-LEGACY.md, STAGE5-WORLD-TRANSFERS.md y STAGE5-WORLD-SHARING.md y STAGE5-DATAPACK-READERS.md contienen contratos y límites. Excepción del depósito es privada. Revisión/aplicación comparte locks sin reentrar wrappers públicos. Originales/copias/sidecars competidores se preservan; las operaciones fallidas pueden dejar archivos completos o backups, no borrarlos para aparentar rollback.
 - El EPERM real al renombrar saves en Windows se resolvió pausando/recreando su FSWatcher propio; nuevos watchers se inicializan bajo mutex y limpian listeners ante fallos. Spec85 activa/verifica watcher antes/después. No retirar esta guarda para acelerar tests.
-- Consola integrada/logger K21 aceptada: STAGE5-LOGGER-WINDOWS.md, STAGE5-LIVE-CONSOLE.md y STAGE5-CONSOLE-ACTIONS.md. Contexto Native fijo por instancia/fuente, historial/colas acotadas, acciones de exportación/copia confirmadas, navegación exacta y preExecuteCommand sin salida/credenciales en logs. No retarget al cambiar selección; conservar capas CSS/scroll-padding. Auditoría global IPC y extras en8 sigue pendiente.
+- Consola integrada/logger K21 aceptada: STAGE5-LOGGER-WINDOWS.md, STAGE5-LIVE-CONSOLE.md y STAGE5-CONSOLE-ACTIONS.md. Contexto Native fijo por instancia/fuente, historial/colas acotadas, acciones de exportación/copia confirmadas, navegación exacta y preExecuteCommand sin salida/credenciales en logs. No retarget al cambiar selección; conservar capas CSS/scroll-padding. Recorte de extras aceptado en 8. La revisión de seguridad final sigue en 9.
 
 ## Ejecución y restricciones
 

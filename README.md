@@ -1,16 +1,16 @@
 <div align="center">
 
-<img src="launcher/xmcl-electron-app/icons/launchermc.png" alt="Launcher MC" width="96" height="96" />
+<img src="launcher/xmcl-electron-app/icons/launchermc.png" alt="Grimo Launcher" width="96" height="96" />
 
-# Launcher MC
+# Grimo Launcher
 
 **Launcher de escritorio para Minecraft: Java Edition en Windows 10/11 (x64)**  
-Sistema de diseño «Aurora Glass» · Instancias aisladas · Perfiles locales y Microsoft · Actualizador delta integrado
+Instancias aisladas · Java automático · Perfiles locales · Actualizaciones desde GitHub
 
 [![Release](https://img.shields.io/badge/version-v0.2.0--beta.2-39d9a1?style=flat-square&logo=github)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11%20x64-0ea5e9?style=flat-square&logo=windows)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases)
 [![Electron](https://img.shields.io/badge/Electron-43-47848F?style=flat-square&logo=electron&logoColor=white)](https://www.electronjs.org/)
-[![Vue](https://img.shields.io/badge/Vue-2.7%20%2B%20Vuetify-3b9b78?style=flat-square&logo=vuedotjs&logoColor=white)](https://vuejs.org/)
+[![React](https://img.shields.io/badge/React-19-149eca?style=flat-square&logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-d4943a?style=flat-square)](LICENSE)
 
@@ -25,8 +25,8 @@ Sistema de diseño «Aurora Glass» · Instancias aisladas · Perfiles locales y
 <table>
   <tr>
     <td width="50%" valign="top">
-      <h3>🫧 Diseño «Aurora Glass»</h3>
-      <p>Cristal esmeralda, centro de lanzamiento, dock inferior y biblioteca de instancias. Fondo de burbujas con movimiento reducido y modo rendimiento; distribución adaptada desde 800×400.</p>
+      <h3>Diseño Grimo en React</h3>
+      <p>Paisajes de Minecraft, cristal, barra lateral y biblioteca de instancias. Incluye temas claro, oscuro y sistema, movimiento reducido y modo rendimiento. La descarga beta.2 corresponde al diseño Aurora anterior.</p>
     </td>
     <td width="50%" valign="top">
       <h3>⚡ Instancias y Modloaders</h3>
@@ -35,8 +35,8 @@ Sistema de diseño «Aurora Glass» · Instancias aisladas · Perfiles locales y
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <h3>🔐 Perfiles Offline y Microsoft</h3>
-      <p>Soporte simultáneo para múltiples perfiles locales/offline (con cambio rápido y borrado individual) y autenticación oficial con cuentas de <b>Microsoft / Xbox Live</b>.</p>
+      <h3>🔐 Perfiles locales</h3>
+      <p>Crea y alterna entre varios perfiles locales. Microsoft queda pospuesto y se conservan los datos de las cuentas existentes.</p>
     </td>
     <td width="50%" valign="top">
       <h3>📦 Modrinth, CurseForge y Archivos Locales</h3>
@@ -49,7 +49,7 @@ Sistema de diseño «Aurora Glass» · Instancias aisladas · Perfiles locales y
       <p>Conectado a <b>GitHub Releases</b>: comprueba nuevas versiones al iniciar o bajo demanda. Esta transición desde beta.3 usa el instalador completo o ZIP; la nueva versión incorpora verificación SHA-256 para futuras actualizaciones delta.</p>
     </td>
     <td width="50%" valign="top">
-      <h3>🛠️ Diagnóstico y Telemetría</h3>
+      <h3>🛠️ Diagnóstico local</h3>
       <p>Consola en tiempo real por instancia con filtrado de advertencias y errores, exportación de informes y control fino de memoria RAM, argumentos JVM y resolución de pantalla.</p>
     </td>
   </tr>
@@ -99,10 +99,9 @@ Launcher MC/
 │   │   │   └── utils/updater.ts     # Cliente de actualizaciones vía GitHub Releases + SHA-256
 │   │   └── build/
 │   │       └── electron-builder.config.ts
-│   ├── xmcl-keystone-ui/            # Frontend Vue + Vuetify con sistema de diseño Liquid Glass
-│   │   └── src/
-│   │       ├── assets/common.css    # Tokens CSS, superficies .lg-surface / .lg-inset y tipografía
-│   │       └── views/               # Biblioteca, Navegación, Cuentas, Cabecera de Instancia, Ajustes
+│   ├── xmcl-react-ui/               # Interfaz React, ventanas principal, consola y migración
+│   ├── packages/renderer-client/    # Cliente de servicios, estados compartidos y tareas
+│   ├── xmcl-keystone-ui/            # Referencia histórica de la interfaz Vue
 │   ├── xmcl-runtime/                # Servicios de instancias, Java, cuentas, Modrinth/CurseForge
 │   └── xmcl-runtime-api/            # Contratos IPC tipados entre Main y Renderer
 ├── LICENSE                          # Licencia MIT (SPDX)
@@ -141,7 +140,7 @@ pnpm build:renderer
 pnpm build:all
 ```
 
-Los artefactos generados se ubican en `launcher/xmcl-electron-app/build/output/`.
+React es el renderer predeterminado de desarrollo en `http://localhost:3000` y de los paquetes en `launcher/xmcl-electron-app/build/output/`. El seguimiento y los criterios de aceptación están en [el plan de migración](docs/react-migration/PLAN.md).
 
 ### Variables de entorno opcionales
 

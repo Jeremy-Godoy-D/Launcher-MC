@@ -39,17 +39,17 @@ Referencia: beta.2, commit `7671c6f1bdc471d42816241920a262a18aca5a44`. Alcance c
 
 | ID | Función | Puntos de entrada / acoplamiento observado | Trabajo de retirada | Estado |
 | --- | --- | --- | --- | --- |
-| R01 | IA/agente/chat | App.vue importa/inicializa useAgent aunque AppOmniDialog recibe agent-enabled=false; composables/agent; AgentService; dependencias pi-ai/pi-agent-core | No portar chat/providers/settings/tools; desconectar arranque/IPC y dependencias exclusivas. Retener utilidades compartidas solo con evidencia. | pending |
-| R02 | Bedrock | edition en Instance, BedrockService, BaseSettingBedrockVersions, ramas en HomeActions/instances | UI Java solamente, excluir startup instaladores/servicios Bedrock; datos antiguos no se borran ni reinterpretan como Java. | pending |
-| R03 | Amigos/P2P/voz/grupos | Context.ts inicia useTogetherMultiplayer, PeerService, peers, AppMinecraftFriends/AppShareInstance | No conectar RTC/diagnósticos sociales/voz, acciones ni red de XMCL. Distinguir de Minecraft online normal. | pending |
-| R04 | Administración SSH/servidor remoto | remoteServer.ts, RemoteServerService, BaseSettingServerManage, exportadores SSH | Quitar credenciales/administración/despliegue/UI/arranque del extra. Conservar formato/exportación local y servidor normal. | pending |
-| R05 | Autor/publicación Modrinth | App.vue lazy dialogs create/bind/publish; BaseSettingModrinthProject; modrinthAuthenticatedAPI/ProjectEditor | No migrar autor/login comunitario/publicación. Separar metadatos y descarga públicos, que permanecen. | pending |
-| R06 | Navegador de launchers/aplicaciones | browser.html, windows/browser, appsHost preload, createBrowseWindow | Retirar entrada/acciones y desconectar consumidor del build/controlador cuando ya no se use. No portar host descargable. | pending |
-| R07 | Mando/Big Picture | AppGamepadPrompt, AppBigPictureView, bigPicture y useGamepad* | No portar navegación/controladores/avisos específicos. Teclado y accesibilidad permanecen. | pending |
-| R08 | Blueprints/colecciones/fuentes extra | /instance/blueprints y /store/ftb ya redirigen en router; Context.ts mantiene proveedor blueprint | No reactivarlos; retirar arranque/imports y diálogos exclusivos. Conservar redirecciones documentadas. | pending |
-| R09 | Temas/CSS/burbujas antiguos | theme.ts, InstanceThemeService, customCss, AppBackground y AppMood* | No aplicar CSS/media previa; datos inertes. Nuevo sistema de fondos no importa este motor. | pending |
-| R10 | Audio de temas | AppAudioPlayer consume currentTheme.backgroundMusic; UI superior | No portar reproductor ni migrar playlist a un extra nuevo; conservar archivos sin autoplay. Vídeos sin audio. | pending |
-| R11 | Telemetría de XMCL | telemetry.ts/rendererAction, preload telemetry, instrumentación runtime | Mapear emisores y transporte; conservar errores locales/trazas necesarias sin exportación a servicios heredados. | pending |
+| R01 | IA/agente/chat | App.vue importa/inicializa useAgent aunque AppOmniDialog recibe agent-enabled=false; composables/agent; AgentService; dependencias pi-ai/pi-agent-core | No portar chat/providers/settings/tools; desconectar arranque/IPC y dependencias exclusivas. Retener utilidades compartidas solo con evidencia. | pass |
+| R02 | Bedrock | edition en Instance, BedrockService, BaseSettingBedrockVersions, ramas en HomeActions/instances | UI Java solamente, excluir startup instaladores/servicios Bedrock; datos antiguos no se borran ni reinterpretan como Java. | pass |
+| R03 | Amigos/P2P/voz/grupos | Context.ts inicia useTogetherMultiplayer, PeerService, peers, AppMinecraftFriends/AppShareInstance | No conectar RTC/diagnósticos sociales/voz, acciones ni red de XMCL. Distinguir de Minecraft online normal. | pass |
+| R04 | Administración SSH/servidor remoto | remoteServer.ts, RemoteServerService, BaseSettingServerManage, exportadores SSH | Quitar credenciales/administración/despliegue/UI/arranque del extra. Conservar formato/exportación local y servidor normal. | pass |
+| R05 | Autor/publicación Modrinth | App.vue lazy dialogs create/bind/publish; BaseSettingModrinthProject; modrinthAuthenticatedAPI/ProjectEditor | No migrar autor/login comunitario/publicación. Separar metadatos y descarga públicos, que permanecen. | pass |
+| R06 | Navegador de launchers/aplicaciones | browser.html, windows/browser, appsHost preload, createBrowseWindow | Retirar entrada/acciones y desconectar consumidor del build/controlador cuando ya no se use. No portar host descargable. | pass |
+| R07 | Mando/Big Picture | AppGamepadPrompt, AppBigPictureView, bigPicture y useGamepad* | No portar navegación/controladores/avisos específicos. Teclado y accesibilidad permanecen. | pass |
+| R08 | Blueprints/colecciones/fuentes extra | /instance/blueprints y /store/ftb ya redirigen en router; Context.ts mantiene proveedor blueprint | No reactivarlos; retirar arranque/imports y diálogos exclusivos. Conservar redirecciones documentadas. | pass |
+| R09 | Temas/CSS/burbujas antiguos | theme.ts, InstanceThemeService, customCss, AppBackground y AppMood* | No aplicar CSS/media previa; datos inertes. Nuevo sistema de fondos no importa este motor. | pass |
+| R10 | Audio de temas | AppAudioPlayer consume currentTheme.backgroundMusic; UI superior | No portar reproductor ni migrar playlist a un extra nuevo; conservar archivos sin autoplay. Vídeos sin audio. | pass |
+| R11 | Telemetría de XMCL | telemetry.ts/rendererAction, preload telemetry, instrumentación runtime | Mapear emisores y transporte; conservar errores locales/trazas necesarias sin exportación a servicios heredados. | pass |
 
 ## Pospuesto
 

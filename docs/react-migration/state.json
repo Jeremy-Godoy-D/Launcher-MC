@@ -19,8 +19,8 @@
     ],
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
-  "currentStage": 8,
-  "nextAction": "Etapa 7 completa según STAGE7-CLOSURE.md/JSON (app 8d3b919): 1520 unitarias/154 archivos, 8 Native React distintos y 2 Vue, 9 Axe sin violaciones/12 incomplete, tipos/lint/builds aprobados, E2E56 sin cambios, 199 IDs. Host Vue restaurado y verificado. Etapa 8 activa: React predeterminado y puerto habitual; quitar extras de definedServices/definedPlugins y dependencias de arranque (incluidos RTC/P2P), browser.html y mensajes de implementación; comprobar grafo distribuido, consumidores y datos antiguos inertes sin borrar. No rehacer 0–7. CI5561253 dejó un fallo de fixture100 compacto, corregido y validado localmente; comprobar nueva CI tras el push. Después etapa9: Java/loaders/juego físicos, actualización pública sin token, ASAR/instalador/upgrade en Windows Actions desechable, presupuestos/seguridad y publicación 0.3.0-beta.1. Microsoft pospuesto; producción/proxy/ANALISIS intactos; restricciones AGENTS vigentes.",
+  "currentStage": 9,
+  "nextAction": "Etapa 8 cerrada con STAGE8-CLOSURE.md. Etapa 9 activa. Lanzar CI integral React y preparar candidata v0.3.0-beta.1. Validar Java/loaders/juego reales K03/K05/K06, rendimiento y seguridad K24/K26, actualización sin token y conservación NSIS beta.2/limpia en Windows desechable K25. Publicar desde borrador solo al pasar todos los gates. Reusar pruebas y perfiles aislados existentes. Producción v0.2.0-beta.2 y proxy sin cambios, Microsoft pospuesto.",
   "stages": [
     {
       "id": 0,
@@ -40,7 +40,7 @@
               "sha256": "3cd5ff51492ab003261495faeede5dcbaea2bac86f74aa89f7ddf2e705b801b3"
             }
           ],
-          "note": "Usuario aprobó React y luego confirmó solo núcleo, sin extras, el 2026-10-23. Aclaración directa del usuario el 2026-10-25: Java automático y alternativa manual, añadida a SCOPE; PLAN aprobado se conserva."
+          "note": "Usuario aprobÃ³ React y luego confirmÃ³ solo nÃºcleo, sin extras, el 2026-10-23. AclaraciÃ³n directa del usuario el 2026-10-25: Java automÃ¡tico y alternativa manual, aÃ±adida a SCOPE; PLAN aprobado se conserva."
         },
         {
           "id": "inventory-parity",
@@ -120,7 +120,7 @@
     },
     {
       "id": 1,
-      "title": "Prototipo y revisión visual",
+      "title": "Prototipo y revisiÃ³n visual",
       "status": "complete",
       "gates": [
         {
@@ -177,7 +177,7 @@
           "approval": {
             "date": "2026-10-24",
             "source": "user",
-            "reference": "Respuesta del usuario en este chat, posterior a la captura y entrega ebf87a1: «si lo apruebo». Acepta prototipo con fondo global y glassmorphism, código 21d9fdda21981e76bb1acd1ae4db41ec1b4112cd."
+            "reference": "Respuesta del usuario en este chat, posterior a la captura y entrega ebf87a1: Â«si lo aprueboÂ». Acepta prototipo con fondo global y glassmorphism, cÃ³digo 21d9fdda21981e76bb1acd1ae4db41ec1b4112cd."
           }
         }
       ]
@@ -344,7 +344,7 @@
               "sha256": "24ce9e09365740dc99e40a9c01e0b71d47901ae91168ccb24e5779b4aa05279d"
             }
           ],
-          "note": "Onboarding por servicios, alta/selección/eliminación y edición de apariencia local verificados, incluidos errores, foco, persistencia y reinicio del EXE. La equivalencia exacta de OFFLINE conserva la selección local; nuevos perfiles posteriores al reinicio conservan los anteriores. Nombre/UUID de juego estables, cuentas externas intactas, Microsoft deferred. El aspecto dentro de Minecraft se valida con el juego en etapa9; aquí se acredita la gestión local y los bytes guardados."
+          "note": "Onboarding por servicios, alta/selecciÃ³n/eliminaciÃ³n y ediciÃ³n de apariencia local verificados, incluidos errores, foco, persistencia y reinicio del EXE. La equivalencia exacta de OFFLINE conserva la selecciÃ³n local; nuevos perfiles posteriores al reinicio conservan los anteriores. Nombre/UUID de juego estables, cuentas externas intactas, Microsoft deferred. El aspecto dentro de Minecraft se valida con el juego en etapa9; aquÃ­ se acredita la gestiÃ³n local y los bytes guardados."
         },
         {
           "id": "home-carousel",
@@ -415,7 +415,7 @@
               "sha256": "411fc2911171c8ebad9c49cd290d8c6d2a83489ccd0df42fb38681e5486b2052"
             }
           ],
-          "note": "Integración de Inicio/carrusel y presupuesto de referencia aceptados:orden/selección independiente,medios/caché/pausas/ticks reales,CPU<8%,24fps,memoria/arranque comparados yGPU física. Recientes limitados3 yBiblioteca1000virtualizada. Fuente6e3b83d/STAGE4-CLOSURE. Tareas7 ycabecera5 no se declaran implementadas."
+          "note": "IntegraciÃ³n de Inicio/carrusel y presupuesto de referencia aceptados:orden/selecciÃ³n independiente,medios/cachÃ©/pausas/ticks reales,CPU<8%,24fps,memoria/arranque comparados yGPU fÃ­sica. Recientes limitados3 yBiblioteca1000virtualizada. Fuente6e3b83d/STAGE4-CLOSURE. Tareas7 ycabecera5 no se declaran implementadas."
         },
         {
           "id": "library-instance-launch",
@@ -582,7 +582,7 @@
               "sha256": "411fc2911171c8ebad9c49cd290d8c6d2a83489ccd0df42fb38681e5486b2052"
             }
           ],
-          "note": "PLAN5.4 exige crear/importar/lanzar vía servicios en4;contratos React/IPC,archivos,diagnósticos/captura/reintento/procesos probados por informes registrados. Se acepta esa integración;Java/loaders/partida reales continúan pendientes enK03/K05/K06 y aceptación9. Las notas previas confundían validación física final con esta gate;PLAN/SCOPE no cambian. Fuente6e3b83d/STAGE4-CLOSURE,no publicación."
+          "note": "PLAN5.4 exige crear/importar/lanzar vÃ­a servicios en4;contratos React/IPC,archivos,diagnÃ³sticos/captura/reintento/procesos probados por informes registrados. Se acepta esa integraciÃ³n;Java/loaders/partida reales continÃºan pendientes enK03/K05/K06 y aceptaciÃ³n9. Las notas previas confundÃ­an validaciÃ³n fÃ­sica final con esta gate;PLAN/SCOPE no cambian. Fuente6e3b83d/STAGE4-CLOSURE,no publicaciÃ³n."
         }
       ]
     },
@@ -962,13 +962,13 @@
               "sha256": "e95ad00b90dc900d6157eafaa43fc88fc36d7440efe73f5cb4e3ab054a2b9d72"
             }
           ],
-          "note": "K21 pass: logger por contexto Native fijo en 4016ae9, capas CSS 3eef3ab, precomandos privados 26c16f0, scroll completo 4504f02. 1264 unitarias/125 archivos, tipos/lint/build DeskGap, 28 escenarios React distintos y ocho Vue; fallos geométricos corregidos sin relajar aserciones. Matriz logger final cuatro Axe: cero violaciones/tres incomplete. CI41332318544/3657285 success confirma bloque anterior; verificar nuevo CI. Ver STAGE5-LOGGER-WINDOWS; auditoría global IPC/extras en etapa8, K11 integral todavía pending."
+          "note": "K21 pass: logger por contexto Native fijo en 4016ae9, capas CSS 3eef3ab, precomandos privados 26c16f0, scroll completo 4504f02. 1264 unitarias/125 archivos, tipos/lint/build DeskGap, 28 escenarios React distintos y ocho Vue; fallos geomÃ©tricos corregidos sin relajar aserciones. Matriz logger final cuatro Axe: cero violaciones/tres incomplete. CI41332318544/3657285 success confirma bloque anterior; verificar nuevo CI. Ver STAGE5-LOGGER-WINDOWS; auditorÃ­a global IPC/extras en etapa8, K11 integral todavÃ­a pending."
         }
       ]
     },
     {
       "id": 6,
-      "title": "Catálogo público",
+      "title": "CatÃ¡logo pÃºblico",
       "status": "complete",
       "gates": [
         {
@@ -996,7 +996,7 @@
               "sha256": "ec714c33218efaa4cc0f953e31dc9b2757e0f72c6294478df058d8231c960576"
             }
           ],
-          "note": "STAGE6-CLOSURE acepta catálogo completo:buscar/fichas/destino/estados,instalar/actualizar mods,packs,shaders,mundos y packs existentes/Biblioteca,dependencias/guiado cruzado/conflictos,progreso/cancelación/recuperación.35NativeReact+2etiqueta,1472/144+18focales,tipos/lint/E2E56,24Axe0/52incomplete y hostVue; no certifica publicación ni partida real."
+          "note": "STAGE6-CLOSURE acepta catÃ¡logo completo:buscar/fichas/destino/estados,instalar/actualizar mods,packs,shaders,mundos y packs existentes/Biblioteca,dependencias/guiado cruzado/conflictos,progreso/cancelaciÃ³n/recuperaciÃ³n.35NativeReact+2etiqueta,1472/144+18focales,tipos/lint/E2E56,24Axe0/52incomplete y hostVue; no certifica publicaciÃ³n ni partida real."
         },
         {
           "id": "catalog-install",
@@ -1019,7 +1019,7 @@
               "sha256": "ec714c33218efaa4cc0f953e31dc9b2757e0f72c6294478df058d8231c960576"
             }
           ],
-          "note": "STAGE6-CLOSURE acepta catálogo completo:buscar/fichas/destino/estados,instalar/actualizar mods,packs,shaders,mundos y packs existentes/Biblioteca,dependencias/guiado cruzado/conflictos,progreso/cancelación/recuperación.35NativeReact+2etiqueta,1472/144+18focales,tipos/lint/E2E56,24Axe0/52incomplete y hostVue; no certifica publicación ni partida real."
+          "note": "STAGE6-CLOSURE acepta catÃ¡logo completo:buscar/fichas/destino/estados,instalar/actualizar mods,packs,shaders,mundos y packs existentes/Biblioteca,dependencias/guiado cruzado/conflictos,progreso/cancelaciÃ³n/recuperaciÃ³n.35NativeReact+2etiqueta,1472/144+18focales,tipos/lint/E2E56,24Axe0/52incomplete y hostVue; no certifica publicaciÃ³n ni partida real."
         },
         {
           "id": "catalog-network-failures",
@@ -1046,7 +1046,7 @@
               "sha256": "ec714c33218efaa4cc0f953e31dc9b2757e0f72c6294478df058d8231c960576"
             }
           ],
-          "note": "STAGE6-CLOSURE acepta catálogo completo:buscar/fichas/destino/estados,instalar/actualizar mods,packs,shaders,mundos y packs existentes/Biblioteca,dependencias/guiado cruzado/conflictos,progreso/cancelación/recuperación.35NativeReact+2etiqueta,1472/144+18focales,tipos/lint/E2E56,24Axe0/52incomplete y hostVue; no certifica publicación ni partida real."
+          "note": "STAGE6-CLOSURE acepta catÃ¡logo completo:buscar/fichas/destino/estados,instalar/actualizar mods,packs,shaders,mundos y packs existentes/Biblioteca,dependencias/guiado cruzado/conflictos,progreso/cancelaciÃ³n/recuperaciÃ³n.35NativeReact+2etiqueta,1472/144+18focales,tipos/lint/E2E56,24Axe0/52incomplete y hostVue; no certifica publicaciÃ³n ni partida real."
         }
       ]
     },
@@ -1109,35 +1109,59 @@
     },
     {
       "id": 8,
-      "title": "Sustitución y retirada de extras",
-      "status": "active",
+      "title": "SustituciÃ³n y retirada de extras",
+      "status": "complete",
       "gates": [
         {
           "id": "react-default",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE8-CLOSURE.md",
+              "sha256": "31324d76917051a8109dcfafd56a27d0955b2d33b42bf11cb879a57c0520589e"
+            }
+          ],
+          "note": "Paquete Electron React sin LAUNCHER_RENDERER, puerto habitual 3000 y salida build/output. Native 01, 02 y 106, selector y harness."
         },
         {
           "id": "removed-features",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE8-CLOSURE.md",
+              "sha256": "31324d76917051a8109dcfafd56a27d0955b2d33b42bf11cb879a57c0520589e"
+            }
+          ],
+          "note": "Grafo de bytes emitidos Electron y DeskGap, inventario ASAR y 13 llamadas rechazadas en Native 106. R01–R11 pasan."
         },
         {
           "id": "consumer-builds",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE8-CLOSURE.md",
+              "sha256": "31324d76917051a8109dcfafd56a27d0955b2d33b42bf11cb879a57c0520589e"
+            }
+          ],
+          "note": "Compilaciones Electron/DeskGap, tipos/lint, registro React de 199 IDs y consumidores CI y release adaptados. El CI integral de la candidata es gate de etapa 9."
         },
         {
           "id": "data-compatibility",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE8-CLOSURE.md",
+              "sha256": "31324d76917051a8109dcfafd56a27d0955b2d33b42bf11cb879a57c0520589e"
+            }
+          ],
+          "note": "Native 106 conserva datos retirados inertes, recupera apariencia y rutas. ZIP público beta.3 a React conserva cuenta, instancia y mundo. Upgrade NSIS beta.2 sigue en 9."
         }
       ]
     },
     {
       "id": 9,
-      "title": "Validación y publicación",
-      "status": "pending",
+      "title": "ValidaciÃ³n y publicaciÃ³n",
+      "status": "active",
       "gates": [
         {
           "id": "full-validation",
@@ -1171,30 +1195,30 @@
     {
       "date": "2026-10-23",
       "source": "user",
-      "change": "Medios reales: Vanilla/fallback se busca en internet; packs usan sus propios recursos vía metadatos. No usar la imagen IA generada ni reemplazar fondos de todos los packs por Vanilla.",
+      "change": "Medios reales: Vanilla/fallback se busca en internet; packs usan sus propios recursos vÃ­a metadatos. No usar la imagen IA generada ni reemplazar fondos de todos los packs por Vanilla.",
       "previousPlanSha256": "8595d10f58038fcc06935c8cf7be6a34f6ac38942c12413b4c0db7a64a60f30a",
       "previousScopeSha256": "16b7e8204a84c923dce1c695e4155da409d1df24c19e240fab54fde9f67063d2"
     },
     {
       "date": "2026-10-23",
       "source": "user",
-      "change": "Priorizar imágenes reales Vanilla con shaders ya renderizados; packs conservan sus propios recursos. No instalar ni ejecutar shaders para el fondo.",
+      "change": "Priorizar imÃ¡genes reales Vanilla con shaders ya renderizados; packs conservan sus propios recursos. No instalar ni ejecutar shaders para el fondo.",
       "previousPlanSha256": "55c35896706c4546f3d95b97d87fee9f2a309636f88c41f53d52e33530abff01",
       "previousScopeSha256": "0f69c85567cbeeed08198949abf02a281d60229822039dea617fe0c64f25bd52"
     },
     {
       "date": "2026-10-24",
       "source": "user",
-      "change": "Revisión visual: extender paisaje a fondo de toda la ventana y añadir glassmorphism. No es aceptación final; conservar contraste/rendimiento y no reintroducir extras.",
+      "change": "RevisiÃ³n visual: extender paisaje a fondo de toda la ventana y aÃ±adir glassmorphism. No es aceptaciÃ³n final; conservar contraste/rendimiento y no reintroducir extras.",
       "previousPlanSha256": "14759855940f8a67672231b46f8c94f374e3828d583006b4c2af001c40a37b95",
       "previousScopeSha256": "8c0b6136b39ab2a8bcfa982780ceb0971a013c68328bfcb5d196990432a71340"
     },
     {
       "date": "2026-10-31",
       "source": "user",
-      "change": "Conservar todas las herramientas locales de Mundos en React, incluidos mapa, progreso, dimensiones, regiones y edición/copia/pegado/eliminación de chunks; mantener garantías de datos. K11 continúa pendiente.",
+      "change": "Conservar todas las herramientas locales de Mundos en React, incluidos mapa, progreso, dimensiones, regiones y ediciÃ³n/copia/pegado/eliminaciÃ³n de chunks; mantener garantÃ­as de datos. K11 continÃºa pendiente.",
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-02T15:45:42.786167+00:00"
+  "updatedAt": "2026-11-04T04:52:27.255685+00:00"
 }

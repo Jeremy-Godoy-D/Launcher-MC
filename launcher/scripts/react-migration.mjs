@@ -21,12 +21,13 @@ export const requirements = [
 
 export const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex')
 
-export function validateRendererBuild(pkg, targets) {
+export function validateRendererBuild(pkg, targets, expected = 'vue') {
   const errors = []
   if (pkg.scripts['build:renderer'] !== 'tsx scripts/renderer.ts build') errors.push('El build debe usar el selector de renderer')
-  if (targets.default !== 'vue' || targets.vue?.package !== 'xmcl-keystone-ui' || targets.react?.package !== 'xmcl-react-ui') {
-    errors.push('Vue debe seguir como default y ambos paquetes deben conservar sus rutas durante la transición')
+  if (targets.default !== expected || targets.vue?.package !== 'xmcl-keystone-ui' || targets.react?.package !== 'xmcl-react-ui') {
+    errors.push(`El renderer predeterminado debe ser ${expected} y los paquetes deben conservar sus rutas`)
   }
+  if (expected === 'react' && targets.react?.port !== 3000) errors.push('React debe usar el puerto habitual 3000')
   return errors
 }
 
@@ -107,14 +108,12 @@ function checkRepository(state) {
     if (!originalCheckout && !existsSync(resolve(root, ref.path))) continue
     try { readReference(root, ref) } catch (error) { errors.push(`Archivo del usuario alterado: ${error.message}`) }
   }
-  if (state.currentStage < 8) {
-    const pkg = JSON.parse(readFileSync(resolve(root, 'launcher/package.json'), 'utf8'))
-    if (state.currentStage >= 2) {
-      const targets = JSON.parse(readFileSync(resolve(root, 'launcher/scripts/renderer-targets.json'), 'utf8'))
-      errors.push(...validateRendererBuild(pkg, targets))
-    } else if (pkg.scripts['build:renderer'] !== 'pnpm --prefix=xmcl-keystone-ui build') {
-      errors.push('El build público de referencia cambió antes de la etapa de sustitución; comprobar selector/default Vue')
-    }
+  const pkg = JSON.parse(readFileSync(resolve(root, 'launcher/package.json'), 'utf8'))
+  if (state.currentStage >= 2) {
+    const targets = JSON.parse(readFileSync(resolve(root, 'launcher/scripts/renderer-targets.json'), 'utf8'))
+    errors.push(...validateRendererBuild(pkg, targets, state.currentStage >= 8 ? 'react' : 'vue'))
+  } else if (pkg.scripts['build:renderer'] !== 'pnpm --prefix=xmcl-keystone-ui build') {
+    errors.push('El build público de referencia cambió antes de la etapa de sustitución; comprobar selector/default Vue')
   }
   return errors
 }

@@ -1,5 +1,3 @@
-import { fileURLToPath, pathToFileURL } from 'node:url'
-import { dirname, resolve } from 'node:path'
 import { writeFile } from 'node:fs/promises'
 import axe from 'axe-core'
 import { test as base, expect, snap, type LauncherFixture } from '../../helpers/scratch'
@@ -13,28 +11,19 @@ const test = base.extend<{ catalog: Awaited<ReturnType<typeof mockReactCatalog>>
   }, { auto: true }],
 })
 
-const url = pathToFileURL(resolve(dirname(fileURLToPath(import.meta.url)), '../../../xmcl-react-ui/dist/index.html')).href
-
-async function openPrototype(launcher: LauncherFixture) {
-  await expect(launcher.main.getByTestId('app-sidebar')).toBeVisible()
-  const opening = launcher.app.waitForEvent('window')
-  await launcher.app.evaluate(({ BrowserWindow, app }, url) => {
-    const preload = `${app.getAppPath()}/index-preload.js`
-    const win = new BrowserWindow({ width: 1200, height: 720, minWidth: 800, minHeight: 400, frame: false, webPreferences: { preload, contextIsolation: true, sandbox: true, nodeIntegration: false } })
-    void win.loadURL(url)
-  }, url)
-  const page = await opening
+async function openReact(launcher: LauncherFixture) {
+  const page = launcher.main
   await expect(page.getByTestId('react-prototype')).toBeVisible()
   await seedReactLibrary(page)
   await expect(page.locator('.featured h2')).toHaveText('Mi mundo')
   expect(await page.evaluate(() => typeof window.windowController?.on)).toBe('function')
   const window = await launcher.app.browserWindow(page)
-  await window.evaluate(win => win.focus())
+  await window.evaluate(win => { win.setContentSize(1200, 720); win.show(); win.focus(); win.webContents.focus() })
   return { page, window }
 }
 
-test('React prototype: both appearances and supported sizes, navigation and automated accessibility', async ({ launcher }, testInfo) => {
-  const { page, window } = await openPrototype(launcher)
+test('React main: both appearances and supported sizes, navigation and automated accessibility', async ({ launcher }, testInfo) => {
+  const { page, window } = await openReact(launcher)
   const errors: string[] = []
   page.on('pageerror', error => errors.push(error.message))
   await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' })
@@ -68,8 +57,8 @@ test('React prototype: both appearances and supported sizes, navigation and auto
   expect(errors).toEqual([])
 })
 
-test('React prototype: independent selection, filters, dialogue focus and actual video pause', async ({ launcher, catalog }) => {
-  const { page, window } = await openPrototype(launcher)
+test('React main: independent selection, filters, dialogue focus and actual video pause', async ({ launcher, catalog }) => {
+  const { page, window } = await openReact(launcher)
   await page.emulateMedia({ reducedMotion: 'no-preference' })
   const background = page.getByTestId('app-backdrop')
   const initialBackground = await background.evaluate(element => getComputedStyle(element).backgroundImage)
