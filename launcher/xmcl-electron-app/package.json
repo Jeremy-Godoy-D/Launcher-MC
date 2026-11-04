@@ -2,7 +2,7 @@
     "name": "launcher-mc",
     "private": true,
     "main": "./index.js",
-    "version": "0.2.0-beta.2",
+    "version": "0.3.0-beta.1",
     "author": "Jeremy Godoy (@Jeremy-Godoy-D)",
     "description": "Grimo Launcher - Minecraft Java para Windows",
     "license": "MIT",

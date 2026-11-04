@@ -135,7 +135,7 @@ pnpm test
 # 4. Iniciar en modo desarrollo (hot-reload)
 pnpm dev
 
-# 5. Compilar aplicación completa (.exe + .zip + .asar.gz)
+# 5. Compilar instalador y paquete portable
 pnpm build:renderer
 pnpm build:all
 ```
@@ -155,9 +155,9 @@ React es el renderer predeterminado de desarrollo en `http://localhost:3000` y d
 ## Flujo de publicación de versiones
 
 1. Actualiza el campo `"version"` en [`launcher/package.json`](launcher/package.json) y [`launcher/xmcl-electron-app/package.json`](launcher/xmcl-electron-app/package.json).
-2. Confirma los cambios y sube un tag semántico (`git tag v0.1.0-beta.2 && git push origin main --tags`).
-3. El workflow [`.github/workflows/release.yml`](.github/workflows/release.yml) compila el instalador `.exe`, el paquete `.zip` y el binario diferencial `.asar.gz` junto con su suma `.sha256`, adjuntándolos automáticamente al Release de GitHub.
-4. Los usuarios con **Launcher MC** reciben la actualización al iniciar la app (modo automático) o desde **Ajustes → Actualizaciones** (modo manual).
+2. Ejecuta el [workflow de borrador](.github/workflows/release.yml) sobre el commit de la candidata. Comprueba el instalador, ZIP, sumas SHA-256 y la migración en un Windows desechable.
+3. Revisa la evidencia del borrador y los criterios de aceptación del plan antes de publicar. Valida los mismos archivos del borrador con `validate_only`.
+4. La primera entrega React usa el instalador completo. Los usuarios pueden descubrirla desde **Ajustes → Actualizaciones** y conservar los datos al instalar sobre el programa anterior.
 
 ---
 

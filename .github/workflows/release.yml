@@ -1,14 +1,6 @@
-name: Build & Publish Grimo Launcher Release
+name: Build & Validate Grimo Launcher Draft
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'launcher/package.json'
-      - 'launcher/xmcl-electron-app/package.json'
-    tags:
-      - 'v*'
   workflow_dispatch:
     inputs:
       validate_only:
@@ -102,7 +94,9 @@ jobs:
           $out = 'launcher/xmcl-electron-app/build/output'
           $version = (Get-Content 'launcher/xmcl-electron-app/package.json' | ConvertFrom-Json).version
           New-Item -ItemType Directory -Force $out | Out-Null
-          gh release download "v$version" --pattern '*.zip*' --dir $out
+          $isDraft = gh release view "v$version" --json isDraft --jq .isDraft
+          if ($LASTEXITCODE -ne 0 -or $isDraft -ne 'true') { throw 'Expected a draft release for validation.' }
+          gh release download "v$version" --pattern '*.zip*' --pattern '*.exe*' --dir $out
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $name = "GrimoLauncher-$version-win-x64.zip"
           if ((Get-FileHash "$out/$name" -Algorithm SHA256).Hash -ne (Get-Content "$out/$name.sha256").Trim()) { throw 'Draft package checksum mismatch' }
@@ -116,6 +110,14 @@ jobs:
           Invoke-WebRequest 'https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/download/v0.1.0-beta.3/LauncherMC-0.1.0-beta.3-win-x64.zip' -OutFile "$baseline/beta3.zip"
           if ((Get-FileHash "$baseline/beta3.zip" -Algorithm SHA256).Hash.ToLowerInvariant() -ne '47590518b18273811bb1118a02562d2d37b62d6a0b28efff903ae8a4fa75d301') { throw 'Published beta.3 checksum mismatch' }
           Expand-Archive -LiteralPath "$baseline/beta3.zip" -DestinationPath "$baseline/app"
+
+      - name: Verify published beta.2 installer baseline
+        shell: pwsh
+        run: |
+          $baseline = 'launcher/e2e/artifacts/beta2'
+          New-Item -ItemType Directory -Force $baseline | Out-Null
+          Invoke-WebRequest 'https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/download/v0.2.0-beta.2/LauncherMC-0.2.0-beta.2-win-x64.exe' -OutFile "$baseline/beta2.exe"
+          if ((Get-FileHash "$baseline/beta2.exe" -Algorithm SHA256).Hash.ToLowerInvariant() -ne '01233e355406b1790d45b091a8dea580841bd8ec9ab258813dce5ee9a28da624') { throw 'Published beta.2 installer checksum mismatch' }
 
       - name: Prepare Electron validation tools
         working-directory: launcher
@@ -131,10 +133,11 @@ jobs:
           XMCL_E2E_LOCALES: 'es-ES'
         run: pnpm --prefix=e2e exec playwright test specs/react-migration/02-packaged.spec.ts specs/react-migration/106-core-scope.spec.ts --retries=0 --output=artifacts/react-production
 
-      - name: Validate packaged boot and beta.3 migration
+      - name: Validate packaged boot, NSIS clean and upgrades
         working-directory: launcher
         env:
           XMCL_BETA3_BINARY: ${{ github.workspace }}\launcher\e2e\artifacts\beta3\app\Launcher MC.exe
+          XMCL_BETA2_INSTALLER: ${{ github.workspace }}\launcher\e2e\artifacts\beta2\beta2.exe
         run: pnpm test:e2e:release --retries=0
 
       - name: Preserve Electron validation evidence
@@ -160,7 +163,7 @@ jobs:
           "tag=v$ver" >> $env:GITHUB_OUTPUT
           "prerelease=$isPrerelease" >> $env:GITHUB_OUTPUT
 
-      - name: Publish or Update GitHub Release
+      - name: Upload validated packages to the release draft
         if: ${{ !inputs.validate_only }}
         shell: pwsh
         env:

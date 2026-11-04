@@ -13,6 +13,8 @@ Etapas 0–8 completas. **9 activa** para validar y publicar `v0.3.0-beta.1`. La
 3. Validar NSIS limpio y sobre beta.2 en Windows desechable, ZIP y actualización con integridad. Conservar cuenta, selección, ajustes, instancia y hash del mundo. Usar Actions porque el usuario no dispone de VM.
 4. Verificar rendimiento final, seguridad, licencias, proxy público y artefactos de la candidata. Publicar el borrador solo tras pasar todas las gates. Conservar beta.2 recuperable.
 
+La candidata `v0.3.0-beta.1` ya compila con el grafo Electron aprobado. El workflow de borrador descarga y verifica el instalador beta.2 y ejecuta la prueba de NSIS en un runner desechable. La prueba de juego Vanilla usa la opción `XMCL_E2E_REAL_GAME=1` y la fixture habitual con un perfil aislado. La preparación de estos recorridos no acredita todavía su aceptación.
+
 ## Evidencia y decisiones técnicas que se conservan
 
 - PLAN/SCOPE son autoridad; aprobación visual ya existe en DESIGN_APPROVAL.json: «si lo apruebo». No volver a pedirla. Gaming obsidiana/cobre, barra lateral, paisaje de toda la ventana y glassmorphism con contraste/fallback/rendimiento. No Aurora/burbujas/editor/CSS personalizado/audio antiguo. Packs usan sus medios oficiales; internet solo Vanilla/fallback real, preferentemente shaders, con licencia. Nunca imágenes IA.

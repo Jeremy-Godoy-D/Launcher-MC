@@ -149,6 +149,8 @@ export interface LauncherOptions {
   gameDataParentAlias?: boolean
   /** Disable the recorder only for calibrated performance measurements. */
   recordVideo?: boolean
+  /** Allow real Java processes only in the opt-in live validation. */
+  launchGame?: boolean
   /**
    * If true, skip writing the `root` file so the launcher shows the bootstrap
    * (first-launch) wizard. Default: false.
@@ -227,7 +229,7 @@ export const test = base.extend<{
         // Isolate the onboarding data-root default so the bootstrap wizard
         // never commits the real ~/.minecraftx (see pluginSetup.ts).
         XMCL_E2E_GAME_DATA: gameDataPath,
-        XMCL_E2E_NO_LAUNCH: '1',
+        XMCL_E2E_NO_LAUNCH: launcherOptions.launchGame ? '' : '1',
         XMCL_E2E_LOCALE: locale,
         // Make the launcher logs deterministic.
         NODE_ENV: 'production',
