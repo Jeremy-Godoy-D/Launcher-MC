@@ -1,182 +1,87 @@
 <div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="launcher/branding/copper/wordmark-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="launcher/branding/copper/wordmark-light.png">
+    <img src="launcher/branding/copper/wordmark-light.png" alt="Grimo Launcher" width="340">
+  </picture>
 
-<img src="launcher/xmcl-electron-app/icons/launchermc.png" alt="Grimo Launcher" width="96" height="96" />
+  <p>Launcher de escritorio para Minecraft: Java Edition en Windows 10 y 11 (x64).</p>
+
+  <p>
+    <a href="https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/download/v0.3.0-beta.1/GrimoLauncher-0.3.0-beta.1-win-x64.exe"><strong>Descargar instalador</strong></a>
+    · <a href="https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/download/v0.3.0-beta.1/GrimoLauncher-0.3.0-beta.1-win-x64.zip">Descargar ZIP portable</a>
+    · <a href="https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/tag/v0.3.0-beta.1">Notas de v0.3.0-beta.1</a>
+  </p>
+</div>
 
 # Grimo Launcher
 
-**Launcher de escritorio para Minecraft: Java Edition en Windows 10/11 (x64)**  
-Instancias aisladas · Java automático · Perfiles locales · Actualizaciones desde GitHub
+Crea y organiza instancias independientes de Minecraft Java. Cada instancia tiene su propia carpeta para mundos, mods y configuración. Grimo detecta el Java que necesita cada instancia o modpack y puede descargarlo e instalarlo en el almacenamiento del launcher.
 
-[![Release](https://img.shields.io/badge/version-v0.3.0--beta.1-39d9a1?style=flat-square&logo=github)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/tag/v0.3.0-beta.1)
-[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11%20x64-0ea5e9?style=flat-square&logo=windows)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases)
-[![Electron](https://img.shields.io/badge/Electron-43-47848F?style=flat-square&logo=electron&logoColor=white)](https://www.electronjs.org/)
-[![React](https://img.shields.io/badge/React-19-149eca?style=flat-square&logo=react&logoColor=white)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-d4943a?style=flat-square)](LICENSE)
+- **Instancias.** Vanilla, Fabric, Forge, NeoForge, Quilt, OptiFine y LabyMod. OptiFine requiere seleccionar BMCLAPI en **Ajustes → Red y descargas**.
+- **Contenido.** Busca e instala modpacks, mods, paquetes de recursos y shaders desde Modrinth y CurseForge. También puedes importar contenido local.
+- **Mundos y diagnóstico.** Administra mundos, datapacks, regiones y chunks. Consulta la consola de cada instancia y configura Java, memoria y argumentos de lanzamiento.
+- **Interfaz.** Biblioteca y catálogo en React, temas claro y oscuro, movimiento reducido y modo rendimiento.
 
-[**Descargar `.exe`**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/download/v0.3.0-beta.1/GrimoLauncher-0.3.0-beta.1-win-x64.exe) · [**Notas de versión**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/tag/v0.3.0-beta.1) · [**Reportar un problema**](https://github.com/Jeremy-Godoy-D/Launcher-MC/issues) · [**Licencia y Avisos**](NOTICE)
+La versión pública está en beta y admite perfiles locales. El inicio de sesión con Microsoft queda pospuesto.
 
-</div>
+## Instalar o actualizar
 
----
+El **instalador `.exe`** configura el programa y sus accesos directos. Para usar el **ZIP portable**, extrae la carpeta completa y abre `Grimo Launcher.exe` desde allí.
 
-## Vista general
+### Actualizar desde Launcher MC v0.2.0-beta.2
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>Diseño Grimo en React</h3>
-      <p>Paisajes de Minecraft, cristal, barra lateral y biblioteca de instancias. Incluye temas claro, oscuro y sistema, movimiento reducido y modo rendimiento.</p>
-    </td>
-    <td width="50%" valign="top">
-      <h3>⚡ Instancias y Modloaders</h3>
-      <p>Creación y aislamiento por carpeta para <b>Vanilla</b>, <b>Fabric</b>, <b>Forge</b> y <b>NeoForge</b>. Detección e instalación automática del runtime de <b>Java (JRE 8/17/21)</b> según la versión de Minecraft.</p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>🔐 Perfiles locales</h3>
-      <p>Crea y alterna entre varios perfiles locales. Microsoft queda pospuesto y se conservan los datos de las cuentas existentes.</p>
-    </td>
-    <td width="50%" valign="top">
-      <h3>📦 Modrinth, CurseForge y Archivos Locales</h3>
-      <p>Explorador integrado para buscar e instalar mods, modpacks, shaders y resource packs desde <b>Modrinth</b> y <b>CurseForge</b>, además de importación directa de archivos <code>.jar</code>, <code>.zip</code> y <code>.mrpack</code>.</p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>🔄 Actualizaciones Automáticas o Manuales</h3>
-      <p>Comprueba versiones nuevas en <b>GitHub Releases</b> al iniciar o bajo demanda. La primera entrega React se instala con el EXE completo o el ZIP. Las descargas incluyen sumas SHA-256.</p>
-    </td>
-    <td width="50%" valign="top">
-      <h3>🛠️ Diagnóstico local</h3>
-      <p>Consola en tiempo real por instancia con filtrado de advertencias y errores, exportación de informes y control fino de memoria RAM, argumentos JVM y resolución de pantalla.</p>
-    </td>
-  </tr>
-</table>
+1. Abre **Ajustes → Acerca de → Ver actualización → Descargar instalador (.exe)**. El navegador debe descargar `GrimoLauncher-0.3.0-beta.1-win-x64.exe`. Si el botón de una versión anterior abre una página de texto, usa el enlace directo de arriba.
+2. Cierra Minecraft. En **Ajustes → General → Ubicación del almacenamiento**, localiza tu carpeta de datos y haz una copia. Esta carpeta contiene tus instancias y los mundos compartidos. Incluye en la copia cualquier instancia guardada en otra ubicación y `%APPDATA%\LauncherMC` para respaldar también tus perfiles y ajustes.
+3. Cierra Minecraft y Launcher MC. Ejecuta el instalador y conserva la misma carpeta del programa. Si usas el ZIP, extrae la nueva versión en una carpeta de programa y conserva tu ubicación de almacenamiento.
+4. Abre Grimo Launcher. Revisa tus instancias en **Biblioteca** y entra en **Mundos** para comprobar las partidas locales y compartidas.
 
----
+Esta transición usa el instalador completo. La prueba en Windows conservó la instancia seleccionada, el mundo, el perfil local, la memoria configurada y la ubicación de datos. [Evidencia de la actualización desde beta.2](docs/react-migration/STAGE9-INSTALLER.md).
 
-## Descarga e instalación
+### Verificar la descarga
 
-<table>
-  <thead>
-    <tr>
-      <th>Formato</th>
-      <th>Archivo</th>
-      <th>Descripción</th>
-      <th>Actualización in-app</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><b>Instalador NSIS (Recomendado)</b></td>
-      <td><code>GrimoLauncher-0.3.0-beta.1-win-x64.exe</code></td>
-      <td>Asistente de instalación con selección de ruta y accesos directos en Escritorio y Menú Inicio.</td>
-      <td>Descarga manual del instalador en esta versión</td>
-    </tr>
-    <tr>
-      <td><b>Archivo Portable</b></td>
-      <td><code>GrimoLauncher-0.3.0-beta.1-win-x64.zip</code></td>
-      <td>Carpeta descomprimible sin instalación en el registro del sistema.</td>
-      <td>Reemplazo completo de la carpeta de programa</td>
-    </tr>
-  </tbody>
-</table>
-
-Para actualizar desde beta.2, cierra el launcher y ejecuta el instalador en la misma ruta. Conserva la carpeta de datos para mantener tus perfiles, instancias y mundos. [Volver a descargar beta.2](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/tag/v0.2.0-beta.2).
-
----
-
-## Arquitectura del proyecto
-
-```
-Launcher MC/
-├── .github/workflows/
-│   └── release.yml                  # CI/CD: empaquetado Windows x64 + publicación en GitHub Releases
-├── launcher/
-│   ├── xmcl-electron-app/           # Proceso principal de Electron, ventana nativa, updater y NSIS
-│   │   ├── main/
-│   │   │   ├── ElectronLauncherApp.ts
-│   │   │   └── utils/updater.ts     # Cliente de actualizaciones vía GitHub Releases + SHA-256
-│   │   └── build/
-│   │       └── electron-builder.config.ts
-│   ├── xmcl-react-ui/               # Interfaz React, ventanas principal, consola y migración
-│   ├── packages/renderer-client/    # Cliente de servicios, estados compartidos y tareas
-│   ├── xmcl-keystone-ui/            # Referencia histórica de la interfaz Vue
-│   ├── xmcl-runtime/                # Servicios de instancias, Java, cuentas, Modrinth/CurseForge
-│   └── xmcl-runtime-api/            # Contratos IPC tipados entre Main y Renderer
-├── LICENSE                          # Licencia MIT (SPDX)
-└── NOTICE                           # Atribuciones upstream (XMCL) y avisos de marcas
-```
-
----
-
-## Desarrollo y compilación local
-
-### Requisitos previos
-- **Sistema operativo:** Windows 10 u 11 (x64)
-- **Node.js:** `>= 22.16.0`
-- **pnpm:** `11.10.0`
-
-### Comandos principales
+Windows puede mostrar un aviso de editor desconocido porque esta beta carece de firma Authenticode. Puedes comparar el SHA-256 del instalador con el valor publicado en GitHub. Desde la carpeta donde guardaste el archivo, ejecuta en PowerShell:
 
 ```powershell
-cd launcher
-
-# 1. Instalar dependencias del monorepo
-pnpm install
-
-# 2. Verificar tipos TypeScript y linter
-pnpm check
-pnpm lint
-
-# 3. Ejecutar pruebas unitarias
-pnpm test
-
-# 4. Iniciar en modo desarrollo (hot-reload)
-pnpm dev
-
-# 5. Compilar instalador y paquete portable
-pnpm build:renderer
-pnpm build:all
+Get-FileHash -Algorithm SHA256 -LiteralPath .\GrimoLauncher-0.3.0-beta.1-win-x64.exe
 ```
 
-React es el renderer predeterminado de desarrollo en `http://localhost:3000` y de los paquetes en `launcher/xmcl-electron-app/build/output/`. El seguimiento y los criterios de aceptación están en [el plan de migración](docs/react-migration/PLAN.md).
+[SHA-256 del instalador](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/download/v0.3.0-beta.1/GrimoLauncher-0.3.0-beta.1-win-x64.exe.sha256) · [SHA-256 del ZIP](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/download/v0.3.0-beta.1/GrimoLauncher-0.3.0-beta.1-win-x64.zip.sha256) · [Versiones anteriores](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases)
 
-### Variables de entorno opcionales
+## Arquitectura
 
-| Variable | Propósito | Comportamiento si se omite |
-| :--- | :--- | :--- |
-| `MICROSOFT_CLIENT_ID` | Client ID de Azure App Registration para login con Microsoft. | El modo local/offline funciona al 100%; el login Microsoft muestra aviso informativo. |
-| `CURSEFORGE_PROXY_URL` | Origen HTTPS público del Worker de CurseForge. La API key vive en Cloudflare. | Modrinth e importación local siguen disponibles; CurseForge muestra un error recuperable. |
-| `LAUNCHER_UPDATE_TOKEN` | Fine-Grained PAT (`Contents: Read-only`) si el repo GitHub es privado. | Consulta la API pública de GitHub Releases (`Jeremy-Godoy-D/Launcher-MC`). |
+| Área | Responsabilidad |
+| --- | --- |
+| [Interfaz React](launcher/xmcl-react-ui) | Vistas del launcher, consola y asistentes. React, TypeScript y Vite. |
+| [Cliente del renderer](launcher/packages/renderer-client) | Consumo de servicios, estados y tareas. |
+| [Proceso principal de Electron](launcher/xmcl-electron-app) | Ventanas, puente IPC, actualizador y empaquetado de Windows. |
+| [Runtime](launcher/xmcl-runtime) y [contratos](launcher/xmcl-runtime-api) | Instancias, Java, cuentas, instalación y lanzamiento de Minecraft. |
+| [Proxy de CurseForge](services/curseforge-proxy/README.md) | Worker de Cloudflare que guarda la clave de CurseForge y restringe las peticiones. |
 
----
+La interfaz Vue anterior sigue en el repositorio como referencia de compatibilidad. [Alcance funcional de Grimo](docs/react-migration/PARITY.md) · [Validación de la versión](docs/react-migration/STAGE9-VALIDATION.md).
 
-## Flujo de publicación de versiones
+## Desarrollo
 
-1. Actualiza el campo `"version"` en [`launcher/package.json`](launcher/package.json) y [`launcher/xmcl-electron-app/package.json`](launcher/xmcl-electron-app/package.json).
-2. Ejecuta el [workflow de borrador](.github/workflows/release.yml) sobre el commit de la candidata. Comprueba el instalador, ZIP, sumas SHA-256 y la migración en un Windows desechable.
-3. Revisa la evidencia del borrador y los criterios de aceptación del plan antes de publicar. Valida los mismos archivos del borrador con `validate_only`.
-4. La primera entrega React usa el instalador completo. Los usuarios pueden descubrirla desde **Ajustes → Actualizaciones** y conservar los datos al instalar sobre el programa anterior.
+Usa Node.js **22.16 o posterior** y **pnpm 11.10.0**. Ejecuta estos comandos desde `launcher/`.
 
----
+```powershell
+pnpm install --frozen-lockfile
+pnpm dev:renderer
+```
+
+En una segunda terminal, también desde `launcher/`, ejecuta `pnpm dev:main`. El servidor de Vite escucha en `http://localhost:3000`.
+
+| Tarea | Comando |
+| --- | --- |
+| Comprobar tipos y lint | `pnpm check` y `pnpm lint` |
+| Ejecutar pruebas unitarias | `pnpm exec vitest run` |
+| Ejecutar pruebas de Electron | `pnpm test:e2e:ci` |
+| Compilar los paquetes de Windows | `pnpm build:renderer` y `pnpm build:all` |
+
+[Guía de contribución](launcher/CONTRIBUTING.md) · [Flujo de publicación](.github/workflows/release.yml) · [Reportar un problema](https://github.com/Jeremy-Godoy-D/Launcher-MC/issues)
 
 ## Licencia y créditos
 
-Distribuido bajo la licencia **MIT**. Consulta [`LICENSE`](LICENSE) y [`NOTICE`](NOTICE) para el texto completo.
+Grimo Launcher se distribuye bajo la licencia MIT. Lo mantiene Jeremy Godoy y parte de [X Minecraft Launcher](https://github.com/Voxelum/x-minecraft-launcher). Consulta la [licencia](LICENSE), los [avisos](NOTICE) y las [licencias de terceros](launcher/THIRD_PARTY_NOTICES.txt).
 
-- **Autoría y mantenimiento:** [Jeremy Godoy (@Jeremy-Godoy-D)](https://github.com/Jeremy-Godoy-D)
-- **Base tecnológica (Upstream):** Derivado de [X Minecraft Launcher (XMCL)](https://github.com/Voxelum/x-minecraft-launcher) (`Copyright (c) 2017-2026 ci010 and X Minecraft Launcher contributors`), cuya licencia original se conserva íntegra en [`launcher/LICENSE-XMCL.txt`](launcher/LICENSE-XMCL.txt) junto con el inventario de dependencias en [`launcher/THIRD_PARTY_NOTICES.txt`](launcher/THIRD_PARTY_NOTICES.txt).
-- **Aviso de marca:** *Minecraft* es una marca registrada de Mojang Synergies AB / Microsoft Corporation. Este proyecto es independiente y no está afiliado ni aprobado por Mojang ni Microsoft.
-
-## Aurora Glass — v0.2.0-beta.2
-
-El rediseño incorpora centro de lanzamiento, dock, navegación de instancia explícita, fichas de catálogo en hojas, filtros bajo demanda, onboarding de tres etapas y preferencias locales de rendimiento.
-
-CurseForge usa el proxy de [services/curseforge-proxy](services/curseforge-proxy/README.md); no incluir una API key en la compilación. El Worker está activo y se comprobó una instalación real de AppleSkin. Consulta [la validación y sus límites](launcher/IMPLEMENTACION_AURORA.md). Microsoft se pospone en esta versión; el modo local está disponible.
-
-Para actualizar desde beta.3, cierra el launcher y ejecuta el instalador completo en la misma ubicación, o reemplaza la carpeta del programa con el ZIP nuevo. Conserva la carpeta de datos y mundos. Esta entrega omite los assets ASAR para evitar que el actualizador antiguo aplique una descarga sin la verificación nueva. Los binarios no tienen firma Authenticode.
-
-La beta.2 corrige la descarga manual con tokens de GitHub: el botón abre el instalador público, y las notas largas mantienen los botones visibles.
+Minecraft es una marca de Mojang. Grimo Launcher es un proyecto independiente, sin afiliación con Mojang ni Microsoft.
