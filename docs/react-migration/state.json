@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 9,
-  "nextAction": "Etapa 9 activa. Candidata v0.3.0-beta.1 compilada localmente con grafo Electron aprobado. CI integral de etapa 8 (41775827529) en curso al preparar el nuevo commit. Workflow manual de borrador conserva EXE/ZIP con SHA-256 y valida NSIS limpio y sobre beta.2 en Windows desechable. La prueba live Vanilla usa instalaciones y procesos reales en perfil aislado. Ejecutar ambos y registrar resultados, extender loaders, verificar rendimiento, seguridad, proxy y actualizador. Producción v0.2.0-beta.2, Microsoft pospuesto.",
+  "nextAction": "Etapa 9 activa. Candidata React v0.3.0-beta.1 con dependencias distribuidas corregidas y firma local sin clave estática, STAGE9-SECURITY.md. Tipos/lint, 135 unitarias más firma, 12 Worker y revisión ASAR local aprobados. CI 41776202750 y workflow de borrador/NSIS 41776208357 prueban b3c270e, anterior a estas correcciones. La primera Vanilla live falló por el selector de opción sin atributo value, se corrigió para usar su etiqueta. Reprobar Vanilla y ampliar loaders, medir, registrar resultados CI/NSIS y validar la candidata definitiva antes de publicar. Producción v0.2.0-beta.2, Microsoft pospuesto.",
   "stages": [
     {
       "id": 0,
@@ -1220,5 +1220,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-04T04:56:25.996288+00:00"
+  "updatedAt": "2026-11-04T05:03:42.701248+00:00"
 }

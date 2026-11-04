@@ -15,6 +15,8 @@ Etapas 0–8 completas. **9 activa** para validar y publicar `v0.3.0-beta.1`. La
 
 La candidata `v0.3.0-beta.1` ya compila con el grafo Electron aprobado. El workflow de borrador descarga y verifica el instalador beta.2 y ejecuta la prueba de NSIS en un runner desechable. La prueba de juego Vanilla usa la opción `XMCL_E2E_REAL_GAME=1` y la fixture habitual con un perfil aislado. La preparación de estos recorridos no acredita todavía su aceptación.
 
+`STAGE9-SECURITY.md` registra la auditoría cruzada con los módulos emitidos, los parches y la sustitución de la clave fija de Yggdrasil. Los recorridos Actions `41776202750` y `41776208357` corresponden a `b3c270e`, anterior al cambio de dependencias. La primera Vanilla se detuvo antes de instalar porque la opción no tenía atributo `value`. La fixture ahora selecciona por etiqueta. Falta evidencia de juego real.
+
 ## Evidencia y decisiones técnicas que se conservan
 
 - PLAN/SCOPE son autoridad; aprobación visual ya existe en DESIGN_APPROVAL.json: «si lo apruebo». No volver a pedirla. Gaming obsidiana/cobre, barra lateral, paisaje de toda la ventana y glassmorphism con contraste/fallback/rendimiento. No Aurora/burbujas/editor/CSS personalizado/audio antiguo. Packs usan sus medios oficiales; internet solo Vanilla/fallback real, preferentemente shaders, con licencia. Nunca imágenes IA.
