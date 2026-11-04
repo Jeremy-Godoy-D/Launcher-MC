@@ -7,7 +7,7 @@
  *   advance towards the totals.
  * - `done`: every candidate has been migrated.
  */
-export type MigrationPhase = 'scanning' | 'migrating' | 'done'
+export type MigrationPhase = 'scanning' | 'migrating' | 'rollingBack' | 'done' | 'failed'
 
 export interface MigrationProgress {
   /**
@@ -43,10 +43,13 @@ export interface MigrationProgress {
    * Current phase of the migration.
    */
   phase: MigrationPhase
+  error?: { file: string; rollback: 'running' | 'complete' | 'incomplete' }
 }
 
 export interface Migration {
   getProgress(): Promise<MigrationProgress>
   on(event: 'progress', func: (payload: MigrationProgress) => void): void
   on(event: 'error', func: (payload: { file: string, error: object }) => void): void
+  off(event: 'progress', func: (payload: MigrationProgress) => void): void
+  off(event: 'error', func: (payload: { file: string, error: object }) => void): void
 }

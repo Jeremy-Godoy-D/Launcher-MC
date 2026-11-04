@@ -471,11 +471,12 @@ const shaderPackCountLabel = (count: number) => `${count} ${t('shaderPack.name',
 
 const isShaderPackProject = (p: ProjectEntry<ProjectFile> | undefined): p is ShaderPackProject => !!p
 
-const { shaderPack } = injection(kInstanceShaderPacks)
+const { shaderPack, refreshSelection } = injection(kInstanceShaderPacks)
 
-const onUninstall = (files: ProjectFile[]) => {
-  shaderPack.value = ''
-  uninstall({ path: path.value, files: files.map(f => f.path) })
+const onUninstall = async (files: ProjectFile[]) => {
+  const instancePath = path.value
+  await uninstall({ path: instancePath, files: files.map(f => f.path) })
+  if (path.value === instancePath) await refreshSelection()
 }
 const onDisable = () => {
   shaderPack.value = ''

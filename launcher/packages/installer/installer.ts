@@ -56,7 +56,7 @@ export async function diagnoseInstallation(
   if (jar) {
     const jarIssue = await diagnoseFile(
       {
-        file: folder.getVersionJar(version.minecraftVersion, 'client'),
+        file: folder.getVersionJar(version.clientJar || version.minecraftVersion, 'client'),
         expectedChecksum: jar.sha1,
         role: 'minecraftClientJar',
         hint: 'Reinstall the client version.',

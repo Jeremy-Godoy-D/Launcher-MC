@@ -2,6 +2,7 @@
 import { download } from '@xmcl/file-transfer'
 import {
   AUTHORITY_MICROSOFT,
+  AUTHORITY_DEV,
   UserException,
   Users,
   UserServiceKey,
@@ -18,7 +19,6 @@ import {
 import { AnyError } from '@xmcl/utils'
 import debounce from 'lodash.debounce'
 import { Inject, LauncherApp, LauncherAppKey, kGameDataPath } from '~/app'
-import { ExternalCredentialService } from '~/credential/ExternalCredentialService'
 import { kDownloadOptions } from '~/network'
 import { ExposeServiceKey, Lock, ServiceStateManager, Singleton, StatefulService } from '~/service'
 import { writeFile, copyFile } from 'node:fs/promises'
@@ -27,9 +27,10 @@ import { YggdrasilSeriveRegistry, kYggdrasilSeriveRegistry } from './YggdrasilSe
 import type { UserAccountSystem } from './accountSystems/AccountSystem'
 import { YggdrasilAccountSystem, kYggdrasilAccountSystem } from './accountSystems/YggdrasilAccountSystem'
 import { kUserTokenStorage, type UserTokenStorage } from './userTokenStore'
-import { getModrinthAccessToken, loginModrinth } from './utils/loginModrinth'
 import { ensureLauncherProfile, preprocessUserData } from './utils/userData'
 import { UserPersistence, type UserPersistenceIntent } from './UserPersistence'
+import { ImageStorage } from '~/infra'
+import { readLocalProfileTexture } from './utils/localProfileTexture'
 
 @ExposeServiceKey(UserServiceKey)
 export class UserService extends StatefulService<UserState> implements IUserService {
@@ -118,10 +119,6 @@ export class UserService extends StatefulService<UserState> implements IUserServ
     })
   }
 
-  private getExternalCredentials(): Promise<ExternalCredentialService> {
-    return this.app.registry.getOrCreate(ExternalCredentialService)
-  }
-
   private getTokenStorage(): Promise<UserTokenStorage> {
     return this.app.registry.get(kUserTokenStorage)
   }
@@ -138,16 +135,10 @@ export class UserService extends StatefulService<UserState> implements IUserServ
     return this.accountSystems[authority] || await this.getYggdrasilAccountSystem()
   }
 
-  async hasModrinthToken(): Promise<boolean> {
-    return !!await getModrinthAccessToken(this.app, await this.getExternalCredentials())
-  }
+  async hasModrinthToken(): Promise<boolean> { return false }
 
-  // Dedupe concurrent calls so we never open multiple OAuth browser windows.
-  // The `invalidate` flag is part of the singleton key so a forced re-auth
-  // can still proceed even while a non-invalidating call is in flight.
-  @Singleton((invalidate?: boolean) => `loginModrinth-${invalidate ? '1' : '0'}`)
-  async loginModrinth(invalidate = false): Promise<void> {
-    await loginModrinth(this.app, this, ['USER_READ_EMAIL', 'USER_READ', 'USER_WRITE', 'COLLECTION_CREATE', 'COLLECTION_READ', 'COLLECTION_WRITE', 'COLLECTION_DELETE', 'PROJECT_CREATE', 'PROJECT_READ', 'PROJECT_WRITE', 'VERSION_CREATE', 'VERSION_READ', 'VERSION_WRITE'], invalidate, this.loginController?.signal, await this.getExternalCredentials())
+  async loginModrinth(_invalidate = false): Promise<void> {
+    throw new AnyError('FeatureUnavailableError', 'La publicación y las cuentas de autor no están disponibles en Grimo Launcher.')
   }
 
   async addYggdrasilService(url: string): Promise<void> {
@@ -165,8 +156,11 @@ export class UserService extends StatefulService<UserState> implements IUserServ
   }
 
   async removeUserGameProfile(userProfile: UserProfile, gameProfileId: string): Promise<void> {
+    requireObject(userProfile)
+    requireString(gameProfileId)
     const current = this.state.users[userProfile.id]
     if (current) {
+      if (current.authority !== AUTHORITY_DEV) throw new TypeError('Only local profiles can be removed')
       delete current.profiles[gameProfileId]
       const remainingIds = Object.keys(current.profiles)
       if (remainingIds.length === 0) {
@@ -202,6 +196,39 @@ export class UserService extends StatefulService<UserState> implements IUserServ
 
   registerAccountSystem(authority: string, system: UserAccountSystem) {
     this.accountSystems[authority] = system
+  }
+
+  @Lock('uploadSkin')
+  async setLocalProfileAppearance(options: UploadSkinOptions): Promise<void> {
+    requireObject(options)
+    requireString(options.userId)
+    requireString(options.gameProfileId)
+    const user = Object.hasOwn(this.state.users, options.userId) ? this.state.users[options.userId] : undefined
+    const profile = user && Object.hasOwn(user.profiles, options.gameProfileId) ? user.profiles[options.gameProfileId] : undefined
+    if (!user || user.authority !== AUTHORITY_DEV || !profile) throw new TypeError('Local profile not found')
+    const original = JSON.stringify(profile.textures)
+    const textures = structuredClone(profile.textures)
+    const store = await this.app.registry.get(ImageStorage)
+    if (options.skin !== undefined) {
+      if (options.skin === null) textures.SKIN = { url: '' }
+      else {
+        requireObject(options.skin)
+        requireString(options.skin.url)
+        if (typeof options.skin.slim !== 'boolean') throw new TypeError('Invalid skin model')
+        const url = options.skin.url === profile.textures.SKIN.url && options.skin.url
+          ? options.skin.url
+          : await store.addImage(await readLocalProfileTexture(options.skin.url, 'skin'))
+        textures.SKIN = { url, metadata: { model: options.skin.slim ? 'slim' : 'steve' } }
+      }
+    }
+    if (options.cape !== undefined) {
+      requireString(options.cape)
+      if (!options.cape) delete textures.CAPE
+      else textures.CAPE = { url: await store.addImage(await readLocalProfileTexture(options.cape, 'cape')) }
+    }
+    // File validation may yield while another window removes or edits this profile.
+    if (this.state.users[user.id] !== user || user.profiles[profile.id] !== profile || JSON.stringify(profile.textures) !== original) throw new Error('Local profile changed; reopen the editor')
+    this.state.gameProfileUpdate({ userId: user.id, profile: { ...profile, textures } })
   }
 
   @Lock('uploadSkin')
@@ -305,8 +332,12 @@ export class UserService extends StatefulService<UserState> implements IUserServ
   }
 
   async selectUserGameProfile(userProfile: UserProfile, gameProfileId: string): Promise<void> {
-    userProfile.selectedProfile = gameProfileId
-    this.state.userProfile(userProfile)
+    requireObject(userProfile)
+    requireString(gameProfileId)
+    const current = Object.hasOwn(this.state.users, userProfile.id) ? this.state.users[userProfile.id] : undefined
+    if (!current || !Object.hasOwn(current.profiles, gameProfileId)) throw new TypeError('Profile not found')
+    // The renderer may hold an older snapshot; only change selection on the current account.
+    this.state.userProfile({ ...current, selectedProfile: gameProfileId })
   }
 
   @Singleton(p => p.id)

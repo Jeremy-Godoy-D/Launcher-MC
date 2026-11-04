@@ -1,4 +1,3 @@
-import { pluginAgentProtocol } from '@xmcl/runtime/agent'
 import type { LauncherAppPlugin } from '@xmcl/runtime/app'
 import { pluginApiFallback } from '@xmcl/runtime/app/pluginApiFallback'
 import { pluginCommonProtocol } from '@xmcl/runtime/app/pluginCommonProtocol'
@@ -15,7 +14,6 @@ import {
   pluginImageStorage,
   pluginLogConsumer,
   pluginTasks,
-  pluginTelemetry,
   pluginUncaughtError,
 } from '@xmcl/runtime/infra/plugins'
 import { pluginLaunchPrecheck } from '@xmcl/runtime/launch/pluginLaunchPrecheck'
@@ -30,7 +28,6 @@ import { pluginServicesHandler } from '@xmcl/runtime/service/pluginServicesHandl
 import { pluginSettings } from '@xmcl/runtime/settings/pluginSettings'
 import { kSettings } from '@xmcl/runtime/settings'
 import { pluginSetup } from '@xmcl/runtime/setup/pluginSetup'
-import { pluginModrinthAccess } from '@xmcl/runtime/user/pluginModrinthAccess'
 import { pluginOfficialUserApi } from '@xmcl/runtime/user/pluginOfficialUserApi'
 import { pluginOffineUser } from '@xmcl/runtime/user/pluginOfflineUser'
 import { pluginUserTokenStorage } from '@xmcl/runtime/user/pluginUserTokenStorage'
@@ -48,7 +45,6 @@ const pluginLocalization: LauncherAppPlugin = async (app) => {
 }
 
 export const plugins: LauncherAppPlugin[] = [
-  pluginAgentProtocol,
   pluginCommandHost({ services: definedServices }),
   pluginCli,
   pluginApiFallback,
@@ -70,7 +66,6 @@ export const plugins: LauncherAppPlugin[] = [
   pluginYggdrasilHandler,
   pluginClientToken,
   pluginServicesHandler(definedServices),
-  pluginTelemetry,
   pluginLogConsumer,
   pluginSettings,
   pluginDeskGapUpdate,
@@ -84,6 +79,5 @@ export const plugins: LauncherAppPlugin[] = [
   pluginOfficialUserApi,
   pluginOffineUser,
   pluginUserTokenStorage,
-  pluginModrinthAccess,
   pluginCommonProtocol,
 ]

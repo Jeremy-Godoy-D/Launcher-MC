@@ -1,0 +1,147 @@
+import { readFile, readdir, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import axe from 'axe-core'
+import { test, expect, snap } from '../../helpers/scratch'
+import { stubOpenDialog } from '../../helpers/tasks/importModpack'
+import { makeReactModpack, mockCreationMetadata } from '../../helpers/react-creation'
+
+test.use({ launcherOptions: { locale: 'es-ES' } })
+
+test('native manual creation validates, retries metadata, persists every Java loader and stays within the minimum window', async ({ launcher }, testInfo) => {
+  const page = launcher.main
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await mockCreationMetadata(launcher, true)
+  await page.getByTestId('nav-library').click()
+  const trigger = page.getByTestId('library-create-instance')
+  await trigger.click()
+  const dialog = page.getByRole('dialog')
+  await expect(page.getByTestId('instance-name')).toBeFocused()
+  await expect(dialog.getByRole('alert')).toContainText('No se pudo consultar las versiones')
+  await dialog.getByRole('button', { name: 'Reintentar', exact: true }).click()
+  await expect(page.getByTestId('instance-minecraft')).toHaveValue('1.21.1')
+  await page.getByTestId('instance-name').fill('../unsafe')
+  await page.getByTestId('instance-create-confirm').click()
+  await expect(page.getByTestId('instance-name')).toHaveAttribute('aria-invalid', 'true')
+  expect(await launcher.app.evaluate(() => (globalThis as any).__creationCalls.length)).toBe(0)
+  await page.getByTestId('instance-name').fill('Aventura con un nombre largo y caracteres españoles')
+  await page.evaluate(axe.source)
+  const main = await launcher.app.browserWindow(page)
+  const reports: unknown[] = []
+  for (const appearance of ['dark', 'light']) {
+    await page.keyboard.press('Escape')
+    await page.getByTestId('nav-settings').click()
+    await page.getByLabel('Apariencia', { exact: true }).selectOption(appearance)
+    await page.getByTestId('nav-library').click()
+    await trigger.click()
+    await expect(page.locator('html')).toHaveAttribute('data-theme', appearance)
+    for (const width of [1200, 800]) {
+      await main.evaluate((win, width) => win.setContentSize(width, width === 800 ? 400 : 720), width)
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+      await expect(page.getByTestId('instance-create-confirm')).toBeInViewport({ ratio: 1 })
+      const result = await page.evaluate(async () => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }))
+      expect(result.violations).toEqual([])
+      reports.push({ appearance, width, ...result })
+      await snap(launcher, `create-${appearance}-${width}`, 'Crear instancia real: formulario desplazable y confirmación fija; metadatos sintéticos, guardado nativo.')
+    }
+  }
+  await writeFile(testInfo.outputPath('creation-accessibility.json'), JSON.stringify(reports, null, 2), 'utf8')
+  await page.keyboard.press('Escape')
+  await expect(trigger).toBeFocused()
+  await trigger.click()
+  await expect(page.getByTestId('instance-name')).toHaveValue('Aventura con un nombre largo y caracteres españoles')
+  const loaders = [['Vanilla', '', ''], ['Fabric', '0.16.0', 'fabricLoader'], ['Forge', '52.0.0', 'forge'], ['NeoForge', '21.1.1', 'neoForged'], ['Quilt', '0.26.0', 'quiltLoader'], ['OptiFine', 'HD_U_J1', 'optifine'], ['LabyMod', '4', 'labyMod']]
+  for (const [loader, version, key] of loaders) {
+    await page.getByTestId('instance-name').fill(`Created ${loader} QA`)
+    await page.getByLabel('Loader', { exact: true }).selectOption(loader)
+    if (version) await page.getByLabel('Versión del loader', { exact: true }).selectOption(version)
+    await page.getByTestId('instance-create-confirm').click({ clickCount: 2 })
+    await expect(dialog.getByRole('status').filter({ hasText: 'Instancia guardada' })).toBeVisible()
+    await dialog.getByRole('button', { name: 'Ver instancia', exact: true }).click()
+    await expect(page.locator('h1')).toHaveText(`Created ${loader} QA`)
+    const path = await page.evaluate(() => localStorage.getItem('selectedInstancePath'))
+    const saved = JSON.parse(await readFile(join(path!, 'instance.json'), 'utf8'))
+    expect(saved.edition).toBe('java')
+    expect(saved.runtime.minecraft).toBe('1.21.1')
+    if (key) expect(saved.runtime[key]).toBe(version)
+    await page.getByTestId('nav-library').click()
+    await trigger.click()
+  }
+  await page.getByTestId('instance-name').fill('Created Vanilla QA')
+  await page.getByTestId('instance-create-confirm').click()
+  await expect(page.getByTestId('instance-name')).toHaveAttribute('aria-invalid', 'true')
+  await page.keyboard.press('Escape')
+  await page.reload()
+  await expect(page.locator('.instance-card')).toHaveCount(7)
+  expect(await launcher.app.evaluate(() => (globalThis as any).__creationCalls.length)).toBe(7)
+  expect(await page.evaluate(async () => (window as any).serviceChannels.open('LaunchService').call('getGameProcesses'))).toEqual([])
+  expect(errors).toEqual([])
+})
+
+test('local modpack import previews safely, retains a failed install and retries into the same native folder', async ({ launcher }) => {
+  const page = launcher.main
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  await mockCreationMetadata(launcher, false, true)
+  const archive = join(launcher.gameDataPath, 'fixture.mrpack')
+  await makeReactModpack(archive)
+  const marker = join(launcher.gameDataPath, 'outside.txt')
+  await writeFile(marker, 'preserve-outside-data', 'utf8')
+  await page.getByTestId('nav-library').click()
+  await page.getByTestId('library-create-instance').click()
+  const dialog = page.getByRole('dialog')
+  await dialog.getByRole('button', { name: 'Importar modpack', exact: true }).click()
+  await stubOpenDialog(launcher, archive)
+  await dialog.getByRole('button', { name: 'Elegir archivo de modpack', exact: true }).click()
+  await expect(dialog.locator('.import-preview')).toContainText('Import QA')
+  await expect(page.getByTestId('instance-create-confirm')).toBeEnabled()
+  await page.getByTestId('instance-name').fill('Import QA')
+  expect(await launcher.app.evaluate(() => (globalThis as any).__creationCalls.length)).toBe(0)
+  await page.getByTestId('instance-create-confirm').click()
+  await expect(dialog.getByRole('alert')).toContainText('No se pudo terminar')
+  const folders = await readdir(join(launcher.gameDataPath, 'instances'))
+  expect(folders).toHaveLength(1)
+  const path = join(launcher.gameDataPath, 'instances', folders[0])
+  expect(JSON.parse(await readFile(join(path, '.install-manifest'), 'utf8')).files.length).toBeGreaterThan(0)
+  await dialog.getByRole('button', { name: 'Conservar y cerrar', exact: true }).click()
+  await page.getByTestId('library-create-instance').click()
+  await expect(page.getByTestId('instance-name')).toHaveValue('Import QA')
+  await expect(page.getByTestId('instance-name')).toBeDisabled()
+  expect(await dialog.evaluate(element => element.contains(document.activeElement))).toBe(true)
+  await page.getByTestId('instance-create-confirm').click()
+  await expect(dialog.getByRole('button', { name: 'Ver instancia', exact: true })).toBeVisible()
+  expect(await readFile(join(path, 'config', 'qa.txt'), 'utf8')).toBe('preserved-import-fixture')
+  const saved = JSON.parse(await readFile(join(path, 'instance.json'), 'utf8'))
+  expect(saved.runtime.fabricLoader).toBe('0.16.0')
+  expect(saved.java).not.toBe('untrusted-qa.exe')
+  expect(saved.preExecuteCommand ?? '').toBe('')
+  expect(saved.vmOptions ?? []).not.toContain('-javaagent:untrusted-qa.jar')
+  expect(await readdir(join(launcher.gameDataPath, 'instances'))).toEqual(folders)
+  expect(await launcher.app.evaluate(() => (globalThis as any).__creationCalls.length)).toBe(1)
+  expect(await readFile(marker, 'utf8')).toBe('preserve-outside-data')
+  await snap(launcher, 'import-native-retained-success', 'Importación de archivo local real, reintento sin duplicados; comandos y argumentos del archivo no aplicados.')
+  await dialog.getByRole('button', { name: 'Ver instancia', exact: true }).click()
+  await expect(page.locator('h1')).toHaveText('Import QA')
+  expect(errors).toEqual([])
+})
+
+test('corrupt archives and unsafe paths remain blocked before creating an instance', async ({ launcher }) => {
+  const page = launcher.main
+  await mockCreationMetadata(launcher)
+  const corrupt = join(launcher.gameDataPath, 'corrupt.zip')
+  const unsafe = join(launcher.gameDataPath, 'unsafe.mrpack')
+  await writeFile(corrupt, 'not-an-archive', 'utf8')
+  await makeReactModpack(unsafe, true)
+  await page.getByTestId('nav-library').click()
+  await page.getByTestId('library-create-instance').click()
+  const dialog = page.getByRole('dialog')
+  await dialog.getByRole('button', { name: 'Importar modpack', exact: true }).click()
+  for (const archive of [corrupt, unsafe]) {
+    await stubOpenDialog(launcher, archive)
+    await dialog.getByRole('button', { name: 'Elegir archivo de modpack', exact: true }).click()
+    await expect(dialog.getByRole('alert')).toContainText('No se pudo leer un modpack Java válido')
+    await expect(page.getByTestId('instance-create-confirm')).toBeDisabled()
+  }
+  expect(await launcher.app.evaluate(() => (globalThis as any).__creationCalls.length)).toBe(0)
+})

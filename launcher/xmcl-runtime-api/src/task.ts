@@ -16,11 +16,11 @@ import {
 } from './services/InstallService'
 import { InstallInstanceTask } from './services/InstanceInstallService'
 import { MigrateMinecraftTask } from './services/VersionService'
-import { ExportModpackTask } from './services/ModpackService'
+import { DownloadModpackTask, ExportModpackTask } from './services/ModpackService'
 import { InstallAuthlibInjectorTask } from './services/AuthlibInjectorService'
 import { DownloadModMetadataDbTask } from './services/ModMetadataService'
 import { DuplicateInstanceTask } from './services/InstanceService'
-import { InstallModrinthFileTask, InstallCurseforgeFileTask } from './services/MarketService'
+import { InstallModrinthFileTask, InstallCurseforgeFileTask, ResolveMarketFilesTask } from './services/MarketService'
 import { InstallBedrockTask, InstallBedrockVersionTask } from './services/BedrockService'
 import { InstallBlueprintTask } from './services/BlueprintMarketService'
 
@@ -114,11 +114,13 @@ export type Tasks =
   | MigrateMinecraftTask
   | InstallInstanceTask
   | ExportModpackTask
+  | DownloadModpackTask
   | InstallAuthlibInjectorTask
   | DownloadModMetadataDbTask
   | DuplicateInstanceTask
   | InstallModrinthFileTask
   | InstallCurseforgeFileTask
+  | ResolveMarketFilesTask
   | InstallBedrockTask
   | InstallBedrockVersionTask
   | InstallBlueprintTask
@@ -149,5 +151,5 @@ export interface TaskMonitor extends GenericEventEmitter<TaskChannelEventMap> {
   /**
    * Remove all finished tasks
    */
-  clear(): void
+  clear(): void | Promise<void>
 }

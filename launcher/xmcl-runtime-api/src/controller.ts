@@ -1,5 +1,7 @@
 import { GenericEventEmitter } from './events'
 
+export type LoggerContext = Readonly<{ instancePath: string; source: string }>
+
 /**
  * Port from electron
  */
@@ -127,7 +129,14 @@ export interface WindowController extends GenericEventEmitter<WindowControllerEv
 
   getMonitors(): Promise<MonitorInfo[]>
 
-  writeClipboard(text: string): void
+  writeClipboard(text: string): Promise<void>
+
+  /** Save a bounded log view through a native picker; false means cancellation. */
+  exportLogView(text: string, name: string): Promise<boolean>
+
+  openLogger(instancePath: string, source?: string): Promise<void>
+  getLoggerContext(): Promise<LoggerContext | undefined>
+  getMigrationContext(): Promise<{ from: string; to: string } | undefined>
 
   writeClipboardImage(imageUrl: string): void
 

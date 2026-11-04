@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "baselineVersion": "0.2.0-beta.2",
+  "sourceCommit": "7671c6f1bdc471d42816241920a262a18aca5a44",
+  "releaseTagCommit": "9314c125056dcb1ca506bc998808649841259f7c",
+  "packages": [
+    {
+      "name": "LauncherMC-0.2.0-beta.2-win-x64.exe",
+      "sha256": "01233e355406b1790d45b091a8dea580841bd8ec9ab258813dce5ee9a28da624"
+    },
+    {
+      "name": "LauncherMC-0.2.0-beta.2-win-x64.zip",
+      "sha256": "929813fac59a809e3012435ec60822e36b3a8f65c27ae40a5875f9add91702da"
+    }
+  ],
+  "platform": {
+    "os": "10.0.26100",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12400F"
+  },
+  "measurement": {
+    "elapsedSeconds": 60.091,
+    "rendererCpuMeanPercent": 0.6842636000896894,
+    "rendererWorkingSetMeanKiB": 283458.6666666667,
+    "rendererWorkingSetSamplesKiB": [
+      429500,
+      267168,
+      272252,
+      259920,
+      236996,
+      234916
+    ],
+    "processTypes": [
+      "Browser",
+      "GPU",
+      "Utility",
+      "Tab"
+    ],
+    "pageErrors": []
+  },
+  "startup": {
+    "samplesSeconds": [
+      3.1482036,
+      3.2153652,
+      3.2186721,
+      3.2562404,
+      3.6709449
+    ],
+    "medianSeconds": 3.2186721,
+    "definition": "Electron process.uptime al terminar shell ready/dismiss tutorial/navegar a Inicio. Proxy reproducible; no latencia desde doble clic ni benchmark cold-start puro."
+  },
+  "captures": {
+    "count": 24,
+    "routes": [
+      "/",
+      "/me",
+      "/store",
+      "/setting",
+      "/accounts",
+      "/instance/mods"
+    ],
+    "sizes": [
+      "1200x720",
+      "800x400"
+    ],
+    "appearances": [
+      "dark",
+      "light"
+    ]
+  },
+  "evidence": [
+    {
+      "path": "launcher/e2e/specs/react-migration/00-baseline.spec.ts",
+      "sha256": "65451e2daa6cbb874e434adba2bfc48db539aceec5a6ed630311f11bed7ee298"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-baseline.log",
+      "sha256": "12a9f0568932b3d754bf0cbbdd06e2a396c55325bcc77bc02e94141c36313e7d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-baseline-visual.log",
+      "sha256": "2ada68a436a5a1d2bcad3d30825ef4a8891e52d55d1f385a7700144279f72f92"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-baseline-visual/react-migration-00-baselin-941d2--and-60-second-idle-metrics-electron-es-ES/baseline.json",
+      "sha256": "64b60a3d733a2a0cf0116f5febc5df4a4c4b06603ca9e34442c964d1d0f0c7ac"
+    }
+  ],
+  "limits": [
+    "No NSIS ejecutado",
+    "No partida real: fixture sustituye Java",
+    "No Microsoft OAuth",
+    "Datos de instancias sintéticos; catálogo usa red y no es un golden de contenido",
+    "Primer recorrido visual falló por intentar clic en selector de tema fuera del scroll; se corrigió el recorrido usando foco y Enter, sin cambiar el producto. Cinco arranques pasaron; recorrido visual y 60s pasaron en segunda ejecución.",
+    "Las capturas y los logs son artefactos locales ignorados, no se incluyen binarios en Git."
+  ],
+  "harness": {
+    "passedTests": 8,
+    "evidence": [
+      {
+        "path": "launcher/scripts/react-migration.mjs",
+        "sha256": "07efcdd3031e09cdf9440128db6ac91b0a4afbe0231d034998a87bf5c57ea9dd"
+      },
+      {
+        "path": "launcher/scripts/react-migration.test.mjs",
+        "sha256": "b09a295ab1544c5c103a5ce3764ec897793a187f474aa823b1f9a9e362bbb122"
+      },
+      {
+        "path": "launcher/e2e/artifacts/react-migration-harness-tests.log",
+        "sha256": "36f80e8eb24f30282669d8032e283db54b6c8e47ab5c07f183ecf03344b08ac0"
+      }
+    ],
+    "typecheck": "passed",
+    "lint": "passed"
+  }
+}

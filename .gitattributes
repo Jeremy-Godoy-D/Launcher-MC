@@ -1,0 +1,3 @@
+# The harness fingerprints these documents; keep their bytes stable across Windows clones.
+/AGENTS.md text eol=lf
+/docs/react-migration/** text eol=lf

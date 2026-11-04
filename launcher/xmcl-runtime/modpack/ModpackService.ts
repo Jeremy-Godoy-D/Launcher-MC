@@ -1,4 +1,6 @@
 import { CurseforgeV1Client } from '@xmcl/curseforge'
+import { onDownloadMultiple, type WithDownload } from '@xmcl/installer'
+import { randomUUID } from 'node:crypto'
 import {
   InstanceLockSchema,
   PartialRuntimeVersions,
@@ -34,6 +36,7 @@ import {
   type ExportModpackOptions,
   type ExportModpackResult,
   type ExportModpackTask,
+  type DownloadModpackTask,
   type ModrinthPackProfile,
   type ModpackService as IModpackService,
   type PublishModrinthOptions,
@@ -42,11 +45,14 @@ import {
   type UpdateBoundModrinthProjectOptions,
   type InstallMarketOptions,
   type SharedState,
+  type ReviewedInstanceExport,
+  type InstanceExportPreview,
 } from '@xmcl/runtime-api'
 import { readEntry } from '@xmcl/unzip'
 import { AnyError } from '@xmcl/utils'
 import filenamify from 'filenamify'
 import { ensureDir, readFile, readJson, stat, unlink } from 'fs-extra'
+import { mkdtemp, rm } from 'node:fs/promises'
 import { basename, dirname, extname, join, relative } from 'path'
 import { Entry, ZipFile as YauzlZipFile } from '@xmcl/yauzl'
 import { ZipFile } from 'yazl'
@@ -54,9 +60,10 @@ import { Inject, LauncherApp, LauncherAppKey, kGameDataPath, type PathResolver }
 import { ZipManager, kTasks, type Tasks } from '~/infra'
 import { InstanceService } from '~/instance'
 import { InstanceInstallService } from '~/instanceIO'
-import { VersionService } from '~/launch'
+import { LaunchService, VersionService } from '~/launch'
 import { UserService } from '~/user'
 import { kMarketProvider } from '~/market'
+import { modpackRequest } from '../market/modpackRequest'
 import { kDownloadOptions } from '~/network'
 import { kResourceManager, kResourceWorker, type ResourceWorker } from '~/resource'
 import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/service'
@@ -72,6 +79,9 @@ import { createModrinthHandler } from './utils/modrinthHandler'
 import { createTechnicHandler } from './utils/technicHandler'
 import { remapModpackZipDownloads } from './utils/remapZipDownloads'
 import { downloadModpackUrl } from './downloadModpackUrl'
+import { previewInstanceExport, exportReviewedInstance, exportIdentity } from './reviewedExport'
+import { assertInstanceCopyComplete } from '../instance/instanceCopy'
+import { importPathParts } from '../util/importFile'
 import { getArchiveFiles } from './utils/archiveFiles'
 import { deduplicateInstanceFiles } from '~/util/deduplicateInstanceFiles'
 import {
@@ -204,20 +214,29 @@ export class ModpackService extends AbstractService implements IModpackService {
     this.handlers['technic'] = createTechnicHandler()
   }
 
-  async installModapckFromMarket(options: InstallMarketOptions): Promise<string[]> {
-    const provider = await this.app.registry.get(kMarketProvider)
-    const result = await provider.installFile({
-      ...options,
-      directory: this.getPath('modpacks'),
-    })
-    const paths = result.map((r) => r.path)
-    if (paths.length === 0) {
-      throw new ModpackException(
-        { type: 'invalidModpack', path: '' },
-        'The marketplace did not return a modpack file.',
-      )
+  async installModapckFromMarket(options: InstallMarketOptions, operationId = randomUUID()): Promise<string[]> {
+    const request = modpackRequest(options)
+    if (typeof operationId !== 'string' || !/^[A-Za-z0-9._-]{1,128}$/.test(operationId)) throw new Error('Invalid modpack operation')
+    const task = this.tasks.create<DownloadModpackTask>({ type: 'downloadModpack', key: `downloadModpack-${operationId}`, operationId, market: request.market })
+    let directory: string | undefined
+    try {
+      const provider = await this.app.registry.get(kMarketProvider)
+      task.controller.signal.throwIfAborted()
+      const cache = this.getPath('modpacks')
+      await ensureDir(cache)
+      // ZIP profiles are keyed by path; keep each archive stable until import finishes.
+      directory = await mkdtemp(join(cache, 'market-'))
+      const result = await provider.installFile({ ...request, directory, signal: task.controller.signal, tracker: onDownloadMultiple(getTracker<{ download: WithDownload<{}> }>(task), 'download', {}) })
+      task.controller.signal.throwIfAborted()
+      const paths = result.map((r) => r.path)
+      if (paths.length === 0) throw new ModpackException({ type: 'invalidModpack', path: '' }, 'The marketplace did not return a modpack file.')
+      task.complete()
+      return paths
+    } catch (error) {
+      task.fail(error)
+      if (directory) await rm(directory, { recursive: true, force: true })
+      throw error
     }
-    return paths
   }
 
   async importModpack(
@@ -421,7 +440,7 @@ export class ModpackService extends AbstractService implements IModpackService {
     strictModeInModrinth?: boolean,
   ) {
     requireObject(files)
-    const instance = this.instanceService.state.all[instancePath]
+    const instance = this.instanceService.state.instances.find(instance => instance.path === instancePath)
     if (!instance) {
       throw new TypeError(`Cannot preview unmanaged instance ${instancePath}`)
     }
@@ -562,6 +581,39 @@ export class ModpackService extends AbstractService implements IModpackService {
    * Export the instance as an modpack
    * @param options The modpack export options
    */
+  async previewInstanceExport(instancePath: string): Promise<InstanceExportPreview> {
+    const instance = this.instanceService.state.instances.find(instance => instance.path === instancePath && instance.edition === 'java')
+    if (!instance) throw Object.assign(new Error('Instance unavailable'), { name: 'ExportInstanceUnavailable' })
+    return previewInstanceExport(instance, this.getPath())
+  }
+
+  async exportReviewedInstance(options: ReviewedInstanceExport): Promise<string> {
+    requireObject(options)
+    const instance = this.instanceService.state.instances.find(instance => instance.path === options.instancePath && instance.edition === 'java')
+    if (!instance) throw Object.assign(new Error('Instance unavailable'), { name: 'ExportInstanceUnavailable' })
+    const identity = JSON.stringify(exportIdentity(instance))
+    const verify = async () => {
+      const current = this.instanceService.state.all[options.instancePath]
+      if (!current || JSON.stringify(exportIdentity(current)) !== identity) throw Object.assign(new Error('Instance changed'), { name: 'ExportSourceChanged' })
+      if ((await (await this.app.registry.get(LaunchService)).getGameProcesses()).some(process => process.options.gameDirectory === instance.path)) throw Object.assign(new Error('Game is running'), { name: 'ExportGameRunning' })
+    }
+    await verify()
+    const task = this.tasks.create<ExportModpackTask>({ type: 'exportModpack', key: `reviewed-export-${instance.path}`, instancePath: instance.path, name: instance.name })
+    try {
+      const versions = await this.app.registry.get(VersionService)
+      const local = await versions.getLocalVersions()
+      const matched = instance.version ? local.local.find(version => version.id === instance.version) : findMatchedVersion(local.local, '', instance.runtime)
+      if (options.format === 'offline' && !matched) throw Object.assign(new Error('Runtime not installed'), { name: 'ExportMissingRuntime' })
+      const resolved = matched ? await versions.resolveLocalVersion(matched.id) : undefined
+      const destination = await exportReviewedInstance(instance, this.getPath(), options, task.controller.signal, getTracker<ZipTrackerEvents>(task), resolved, async () => {
+        await verify()
+        if (resolved && JSON.stringify(await versions.resolveLocalVersion(resolved.id)) !== JSON.stringify(resolved)) throw Object.assign(new Error('Runtime changed'), { name: 'ExportSourceChanged' })
+      })
+      task.complete()
+      return destination
+    } catch (error) { task.fail(error); throw error }
+  }
+
   async exportModpack(options: ExportModpackOptions): Promise<ExportModpackResult> {
     requireObject(options)
 
@@ -578,11 +630,14 @@ export class ModpackService extends AbstractService implements IModpackService {
       emitOffline,
     } = options
 
-    const instance = this.instanceService.state.all[instancePath]
+    const instance = this.instanceService.state.instances.find(instance => instance.path === instancePath && instance.edition === 'java')
     if (!instance) {
       this.warn(`Cannot export unmanaged instance ${instancePath}`)
       return {}
     }
+    await assertInstanceCopyComplete(instancePath)
+    if (!Array.isArray(files) || files.length > 100000) throw new TypeError('Invalid export files')
+    for (const file of files) { importPathParts(file.path); if (file.source !== undefined) importPathParts(file.source) }
 
     if (!emitCurseforge && !emitModrinth && !emitOffline) {
       return {}

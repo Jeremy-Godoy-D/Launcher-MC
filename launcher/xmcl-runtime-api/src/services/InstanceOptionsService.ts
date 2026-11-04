@@ -16,6 +16,13 @@ export interface EditShaderOptions extends ShaderOptions {
   instancePath: string
 }
 
+export interface ResourcePackSelection {
+  /** Minecraft order: the last entry has the highest priority. */
+  packs: string[]
+  snapshot: string
+  shared: boolean
+}
+
 export interface GameOptions {
   resourcePacks: Array<string>
   anaglyph3d: boolean | undefined
@@ -79,6 +86,10 @@ export class GameOptionsState implements GameOptions {
  * The service for game options & shader options
  */
 export interface InstanceOptionsService {
+  /** Read the persisted selection without creating options.txt. */
+  getResourcePackSelection(instancePath: string): Promise<ResourcePackSelection>
+  /** Compare with the reviewed options before changing activation or priority. */
+  editResourcePackSelection(instancePath: string, selection: ResourcePackSelection): Promise<ResourcePackSelection>
   watch(path: string): Promise<SharedState<GameOptionsState>>
   /**
    * Get the shader setting of the specific instance

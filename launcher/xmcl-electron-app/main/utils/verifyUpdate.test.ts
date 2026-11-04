@@ -18,6 +18,7 @@ test('accepts the downloaded bytes only when the expected hash matches', async (
   try {
     const bytes = Buffer.from('trusted candidate')
     const hash = createHash('sha256').update(bytes).digest('hex')
+    await expect(verifyUpdate(path, hash)).rejects.toMatchObject({ code: 'ENOENT' })
     await writeFile(path, bytes)
     await expect(verifyUpdate(path, hash)).resolves.toBeUndefined()
     await writeFile(path, 'corrupted candidate')

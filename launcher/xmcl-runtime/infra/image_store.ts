@@ -1,6 +1,8 @@
 import { createHash } from 'crypto'
 import { existsSync } from 'fs'
-import { ensureDir, writeFile } from 'fs-extra'
+import { ensureDir } from 'fs-extra'
+import { lstat } from 'node:fs/promises'
+import { writeFile as writeAtomically } from 'atomically'
 import { join } from 'path'
 import { checksum, linkOrCopyFile } from '~/util/fs'
 
@@ -21,12 +23,14 @@ export class ImageStorage {
     }
     const sha1 = typeof pathOrData === 'string' ? await checksum(pathOrData, 'sha1') : createHash('sha1').update(pathOrData).digest('hex')
     const imagePath = join(this.root, sha1)
-    if (!existsSync(imagePath)) {
-      if (typeof pathOrData === 'string') {
-        await linkOrCopyFile(pathOrData, imagePath)
-      } else {
-        await writeFile(imagePath, pathOrData)
-      }
+    if (typeof pathOrData === 'string') {
+      if (!existsSync(imagePath)) await linkOrCopyFile(pathOrData, imagePath)
+    } else {
+      const current = await lstat(imagePath).catch((error: NodeJS.ErrnoException) => {
+        if (error.code !== 'ENOENT') throw error
+      })
+      // Replace legacy links atomically so owning bytes never changes their original file.
+      if (!current?.isFile() || current.nlink > 1) await writeAtomically(imagePath, pathOrData)
     }
     return `http://launcher/image/${sha1}`
   }

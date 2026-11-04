@@ -93,6 +93,7 @@ import { injection } from "@/util/inject";
 import { InstanceLogServiceKey } from "@xmcl/runtime-api";
 import { useDialog } from "../composables/dialog";
 import TabItem from "./HomeLogDialogTab.vue";
+import { useNotifier } from "@/composables/notifier";
 
 const {
   listLogs,
@@ -111,6 +112,8 @@ const {
 } = useService(InstanceLogServiceKey);
 const { isShown, hide } = useDialog("log");
 const { t } = useI18n();
+const { notify } = useNotifier();
+const logFailure = () => notify({ level: 'error', title: t('logsCrashes.readError') });
 
 const { path } = injection(kInstance);
 
@@ -139,6 +142,7 @@ function loadLogs() {
     .then((l) => {
       data.logs = l;
     })
+    .catch(logFailure)
     .finally(() => {
       data.loadingList = false;
     });
@@ -149,6 +153,7 @@ function loadCrashes() {
     .then((l) => {
       data.crashes = l;
     })
+    .catch(logFailure)
     .finally(() => {
       data.loadingList = false;
     });
@@ -159,6 +164,7 @@ function loadServerLogs() {
     .then((l) => {
       data.serverLogs = l;
     })
+    .catch(logFailure)
     .finally(() => {
       data.loadingList = false;
     });

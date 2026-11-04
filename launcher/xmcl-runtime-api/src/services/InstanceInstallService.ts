@@ -1,4 +1,4 @@
-import type { InstanceFile, InstanceInstallManifest, InstanceUpstream } from '@xmcl/instance'
+import type { InstanceFile, InstanceInstallManifest, InstanceUpstream, InstanceModInstallReview } from '@xmcl/instance'
 import type { WithDownload, WithProgress } from '@xmcl/installer'
 import type { SharedState } from '../util/SharedState'
 import type { Task, SubState } from '../task'
@@ -34,6 +34,8 @@ export type InstanceFileUpdate = {
   operation: 'backup-add' | 'backup-remove'
 }
 
+export type ModInstallReview = Pick<InstanceModInstallReview, 'domain' | 'snapshot' | 'changes'>
+
 
 export type InstallInstanceOptions = {
   /**
@@ -61,6 +63,8 @@ export type InstallInstanceOptions = {
    * The files to be removed
    */
   oldFiles: InstanceFile[]
+  /** Bind application to the reviewed inventory and exact previewed changes. */
+  review?: ModInstallReview
   /**
    * The files to add
    */
@@ -69,6 +73,19 @@ export type InstallInstanceOptions = {
    * Passed into task to identify the task
    */
   id?: string
+}
+
+export interface ReviewedModRecovery {
+  review: ModInstallReview
+  changes: InstanceFileUpdate[]
+  configurationChanged: boolean
+  shared?: boolean
+}
+
+export interface ReviewedModInstall {
+  operationId: string
+  files: InstanceFile[]
+  oldFiles: InstanceFile[]
 }
 
 export class InstanceInstallStatus {
@@ -110,7 +127,7 @@ export interface InstanceInstallService {
   /** Read the pending instance install manifest. */
   getInstanceInstallManifest(path: string): Promise<InstanceInstallManifest | undefined>
   /** Apply and clear the pending instance install manifest. */
-  applyInstanceInstallManifest(path: string, id?: string): Promise<void>
+  applyInstanceInstallManifest(path: string, id?: string, review?: ModInstallReview): Promise<void>
   /** Discard the pending instance install manifest without applying it. */
   discardInstanceInstallManifest(path: string): Promise<void>
   /**
@@ -143,7 +160,11 @@ export interface InstanceInstallService {
    *
    * This method might return the errors all the errors are checksum not matched.
    */
-  resumeInstanceInstall(path: string, overrides?: InstanceFile[]): Promise<InstallFileError[] | void>
+  resumeInstanceInstall(path: string, overrides?: InstanceFile[], reviewedOperationId?: string, recoveryReview?: ModInstallReview): Promise<InstallFileError[] | void>
+  /** Read only active reviewed mod plans, without exposing private workspace paths. */
+  getReviewedModInstalls(path: string, domain?: 'mods' | 'resourcepacks' | 'shaderpacks'): Promise<ReviewedModInstall[]>
+  /** Preview current recovery operations without renewing the saved confirmation. */
+  previewModInstallRecovery(path: string, operationId: string): Promise<ReviewedModRecovery>
   /**
    * Check if this instance has any pending install
    *

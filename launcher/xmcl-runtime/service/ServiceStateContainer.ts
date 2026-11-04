@@ -1,4 +1,5 @@
 import EventEmitter from 'events'
+import { randomUUID } from 'node:crypto'
 import { AnyError } from '@xmcl/utils'
 import { ServiceStateContext } from './ServiceStateManager'
 import { Client } from '~/app'
@@ -53,6 +54,9 @@ export class ServiceStateContainer<T = any> implements ServiceStateContext {
   #emitter = new EventEmitter()
   #static = false
   #destroyed = false
+  #revision = 0
+  readonly epoch = randomUUID()
+  #mutations = new Set<string>()
 
   constructor(
     readonly id: string,
@@ -66,16 +70,22 @@ export class ServiceStateContainer<T = any> implements ServiceStateContext {
         id,
       })
 
-      for (const [key, prop] of Object.entries(Object.getOwnPropertyDescriptors(Object.getPrototypeOf(state)))) {
-        if (key !== 'constructor' && prop.value instanceof Function) {
-          // decorate original mutation
-          const func = prop.value.bind(state)
-          Reflect.set(state as any, key, function (this: any, value: any) {
-            func(value)
-            emitter.emit(key, value)
-            emitter.emit('*', key, value)
-          })
+      let prototype = Object.getPrototypeOf(state)
+      while (prototype && prototype !== Object.prototype) {
+        for (const [key, prop] of Object.entries(Object.getOwnPropertyDescriptors(prototype))) {
+          if (key !== 'constructor' && prop.value instanceof Function && !this.#mutations.has(key)) {
+            this.#mutations.add(key)
+            // decorate original mutation
+            const func = prop.value.bind(state)
+            Reflect.set(state as any, key, (value: any) => {
+              func(value)
+              const revision = ++this.#revision
+              emitter.emit(key, value)
+              emitter.emit('*', key, value, revision)
+            })
+          }
         }
+        prototype = Object.getPrototypeOf(prototype)
       }
 
       Object.defineProperties(state, {
@@ -83,7 +93,13 @@ export class ServiceStateContainer<T = any> implements ServiceStateContext {
         [kStateContainer]: { value: this, enumerable: false, configurable: true },
       })
       const parent = new MutableStateImpl(emitter, this.revalidate.bind(this))
-      Object.setPrototypeOf(Object.getPrototypeOf(state), parent)
+      for (const method of ['subscribe', 'unsubscribe', 'subscribeAll', 'unsubscribeAll'] as const) {
+        Object.defineProperty(state, method, {
+          configurable: true,
+          value: (...args: any[]) => { (parent[method] as Function).apply(parent, args); return state },
+        })
+      }
+      Object.defineProperty(state, 'revalidate', { configurable: true, value: parent.revalidate })
     }
 
     if ('factory' in factoryOrInstance) {
@@ -108,6 +124,10 @@ export class ServiceStateContainer<T = any> implements ServiceStateContext {
     return this.#state
   }
 
+  snapshot() {
+    return { ...JSON.parse(JSON.stringify(this.#state)), __stateRevision__: this.#revision, __stateEpoch__: this.epoch }
+  }
+
   get promise() {
     return this.#signal.promise
   }
@@ -120,7 +140,7 @@ export class ServiceStateContainer<T = any> implements ServiceStateContext {
           this.untrack(c)
           continue
         }
-        c.send('state-validating', { id: this.id, semaphore: this.semaphore })
+        c.send('state-validating', { id: this.id, semaphore: this.semaphore, epoch: this.epoch })
       }
       return await action
     } finally {
@@ -131,7 +151,7 @@ export class ServiceStateContainer<T = any> implements ServiceStateContext {
             this.untrack(c)
             continue
           }
-          c.send('state-validating', { id: this.id, semaphore: this.semaphore })
+          c.send('state-validating', { id: this.id, semaphore: this.semaphore, epoch: this.epoch })
         }
       }
     }
@@ -157,8 +177,8 @@ export class ServiceStateContainer<T = any> implements ServiceStateContext {
 
   track(client: Client) {
     if (this.#clients.some(([tracked]) => tracked === client)) return
-    const handler = (type: any, payload: any) => {
-      client.send('commit', this.id, type, payload)
+    const handler = (type: any, payload: any, revision: number) => {
+      client.send('commit', this.id, type, payload, revision, this.epoch)
     }
     this.#clients.push([client, handler])
     this.#emitter.on('*', handler)
@@ -179,6 +199,10 @@ export class ServiceStateContainer<T = any> implements ServiceStateContext {
       }
     }
     return false
+  }
+
+  isTracked(client: Client) {
+    return this.#clients.some(([tracked]) => tracked === client)
   }
 
   destroy() {
@@ -203,7 +227,7 @@ export class ServiceStateContainer<T = any> implements ServiceStateContext {
 
   async commit(type: string, payload: any) {
     const state = await this.#signal.promise
-    if (typeof (state as any)[type] !== 'function') {
+    if (!this.#mutations.has(type)) {
       throw new AnyError('StateError', `Cannot find mutation named ${type} in service ${this.id}`)
     } else {
       (state as any)[type](payload)

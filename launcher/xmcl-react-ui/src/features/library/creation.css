@@ -1,0 +1,78 @@
+@layer components {
+  .creation-dialog {
+    width: min(600px, calc(100vw - 40px));
+    padding: 24px;
+    gap: 16px;
+  }
+  .creation-dialog > p {
+    margin: 0;
+  }
+  .creation-body {
+    min-height: 0;
+    overflow: auto;
+    display: grid;
+    gap: 10px;
+    padding: 8px;
+  }
+  .creation-body label {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .creation-body input:not([type='checkbox']),
+  .creation-body select,
+  .creation-body textarea {
+    font: inherit;
+    min-width: 0;
+    width: 100%;
+    background: var(--canvas);
+    color: var(--ink);
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .creation-modes,
+  .creation-file,
+  .creation-check {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .creation-modes { flex-wrap: wrap; }
+  .creation-advanced { border-top: 1px solid var(--line); padding-top: 12px; }
+  .creation-advanced summary { cursor: pointer; padding: 8px 0; font-weight: 600; }
+  .creation-advanced-body, .folder-import { display: grid; gap: 10px; min-width: 0; }
+  .creation-body textarea { min-height: 72px; resize: vertical; }
+  .creation-advanced fieldset { min-width: 0; border: 0; margin: 4px 0; padding: 0; display: grid; gap: 10px; }
+  .creation-advanced legend { font-size: 13px; font-weight: 600; padding: 0 0 8px; }
+  .creation-check input {
+    accent-color: var(--accent);
+  }
+  .creation-file > input {
+    flex: 1;
+  }
+  .import-preview {
+    display: grid;
+    gap: 6px;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+    padding: 12px 0;
+  }
+  .creation-dialog .dialog-actions {
+    margin-top: 0;
+  }
+  .creation-body progress {
+    display: block;
+    width: 100%;
+    accent-color: var(--accent);
+    margin-top: 10px;
+  }
+  .creation-body .form-help {
+    margin: 0 0 6px;
+  }
+  .empty-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+}

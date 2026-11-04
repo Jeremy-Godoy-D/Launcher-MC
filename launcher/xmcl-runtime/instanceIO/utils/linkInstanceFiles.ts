@@ -34,7 +34,8 @@ async function handleLink(
 
   await ensureDir(dirname(dest))
 
-  if (isInSameDisk(src, dest, platform.os)) {
+  // Local imports must not share mutable world/config inodes with their source.
+  if (!job.file.downloads?.some(url => url.startsWith('file:')) && isInSameDisk(src, dest, platform.os)) {
     await linkWithTimeoutOrCopy(src, dest)
   } else {
     await copyFile(src, dest)

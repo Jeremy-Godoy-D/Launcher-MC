@@ -2,11 +2,19 @@ import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { AppManifest, SettingSchema, Settings, SharedState } from '@xmcl/runtime-api'
 import { join } from 'path'
 import * as fsExtra from 'fs-extra'
+import { writeFile as writeAtomically } from 'atomically'
+import { kEditSettings } from './settings'
+import type { EditLauncherSettings } from '@xmcl/runtime-api/src/util/launcherSettings'
 
 vi.mock('fs-extra', () => ({
   readJson: vi.fn(),
   writeJson: vi.fn(),
 }))
+
+vi.mock('atomically', async () => {
+  const fs = await import('fs-extra')
+  return { writeFile: vi.fn((path: string, content: string) => fs.writeJson(path, JSON.parse(content), { spaces: 2 })) }
+})
 
 vi.mock('~/service', () => ({
   ServiceStateManager: class MockServiceStateManager {
@@ -26,6 +34,7 @@ describe('pluginSettings', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(writeAtomically).mockReset().mockImplementation((path, content) => fsExtra.writeJson(String(path), JSON.parse(content as string), { spaces: 2 }))
     subscribeCallback = null
     registeredDisposer = null
 
@@ -71,6 +80,64 @@ describe('pluginSettings', () => {
     vi.useRealTimers()
   })
 
+  async function editor() {
+    vi.mocked(fsExtra.readJson).mockResolvedValue({ locale: 'en' })
+    vi.mocked(fsExtra.writeJson).mockResolvedValue(undefined)
+    const { pluginSettings } = await import('./pluginSettings')
+    await pluginSettings(mockApp, mockManifest)
+    await vi.waitFor(() => expect(mockApp.registry.register).toHaveBeenCalledWith(kEditSettings, expect.any(Function)))
+    return mockApp.registry.register.mock.calls.find(([key]: [symbol]) => key === kEditSettings)[1] as (options: EditLauncherSettings) => Promise<void>
+  }
+
+  test('acknowledges a reviewed edit only after the atomic file write and preserves commands and extras', async () => {
+    const edit = await editor()
+    mockState.globalPreExecuteCommand = 'user command'; mockState.globalEnv = { LOCAL: 'preserve' }; mockState.agentModel = 'legacy-preserved'
+    let finish!: () => void
+    vi.mocked(writeAtomically).mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve }))
+    const pending = edit({ expected: { locale: 'en' }, changes: { locale: 'es-ES' } })
+    await vi.waitFor(() => expect(finish).toBeTypeOf('function'))
+    expect(mockState.locale).toBe('en')
+    const content = JSON.parse(vi.mocked(writeAtomically).mock.calls.at(-1)![1] as string)
+    expect(content).toMatchObject({ locale: 'es-ES', globalPreExecuteCommand: 'user command', globalEnv: { LOCAL: 'preserve' }, agentModel: 'legacy-preserved' })
+    finish(); await pending
+    expect(mockState.locale).toBe('es-ES')
+  })
+
+  test('leaves runtime settings unchanged on a disk error and allows retry', async () => {
+    const edit = await editor(), options = { expected: { locale: 'en' }, changes: { locale: 'es-ES' } }
+    vi.mocked(writeAtomically).mockRejectedValueOnce(Object.assign(new Error('Locked'), { code: 'EPERM' }))
+    await expect(edit(options)).rejects.toThrow('Locked'); expect(mockState.locale).toBe('en')
+    await edit(options); expect(mockState.locale).toBe('es-ES')
+  })
+
+  test('serializes edits and rejects a stale review before a second write', async () => {
+    const edit = await editor()
+    const first = edit({ expected: { locale: 'en' }, changes: { locale: 'es-ES' } })
+    const second = edit({ expected: { locale: 'en' }, changes: { locale: 'en' } })
+    await expect(second).rejects.toMatchObject({ name: 'LauncherSettingsConflict' }); await first
+    expect(mockState.locale).toBe('es-ES'); expect(writeAtomically).toHaveBeenCalledTimes(1)
+  })
+
+  test('rejects a legacy mutation during disk I/O and restores its current persisted values', async () => {
+    const edit = await editor()
+    vi.mocked(writeAtomically).mockImplementationOnce(async () => { mockState.globalJava = 'C:/other/java.exe' })
+    await expect(edit({ expected: { locale: 'en' }, changes: { locale: 'es-ES' } })).rejects.toMatchObject({ name: 'LauncherSettingsConflict' })
+    expect(mockState.locale).toBe('en'); expect(mockState.globalJava).toBe('C:/other/java.exe')
+    expect(JSON.parse(vi.mocked(writeAtomically).mock.calls.at(-1)![1] as string)).toMatchObject({ locale: 'en', globalJava: 'C:/other/java.exe' })
+  })
+
+  test('validates fields, coupled memory/proxy reviews and bounds before any disk write', async () => {
+    const edit = await editor()
+    for (const options of [
+      { expected: {}, changes: { globalPreExecuteCommand: 'remote command' } },
+      { expected: { maxSockets: 64 }, changes: { maxSockets: 257 } },
+      { expected: { globalAssignMemory: false }, changes: { globalAssignMemory: true } },
+      { expected: { globalAssignMemory: false, globalMinMemory: 0, globalMaxMemory: 0 }, changes: { globalAssignMemory: true, globalMinMemory: 8192, globalMaxMemory: 4096 } },
+      { expected: { httpProxy: '', httpProxyEnabled: false }, changes: { httpProxy: 'file:///secret' } },
+    ]) await expect(edit(options as EditLauncherSettings)).rejects.toThrow()
+    expect(writeAtomically).not.toHaveBeenCalled(); expect(mockState.globalPreExecuteCommand).toBe(''); expect(mockState.globalAssignMemory).toBe(false)
+  })
+
   test('should load settings from setting.json', async () => {
     const mockSettings: SettingSchema = SettingSchema.parse({
       locale: 'zh-CN',
@@ -92,7 +159,7 @@ describe('pluginSettings', () => {
     expect(fsExtra.readJson).toHaveBeenCalledWith(join('/mock/app/data', 'setting.json'))
   })
 
-  test('should use host locale when no locale is set', async () => {
+  test('uses the product Spanish default when no locale is set', async () => {
     vi.mocked(fsExtra.readJson).mockResolvedValue({})
 
     const { pluginSettings } = await import('./pluginSettings')
@@ -102,7 +169,7 @@ describe('pluginSettings', () => {
       expect(mockApp.registry.register).toHaveBeenCalled()
     })
 
-    expect(mockApp.host.getLocale).toHaveBeenCalled()
+    expect(mockState.locale).toBe('es-ES')
   })
 
   test('should normalize English locale to "en"', async () => {
@@ -130,14 +197,14 @@ describe('pluginSettings', () => {
     })
     
     // Verify settings are initialized with defaults (locale normalized to 'en' from 'en-US')
-    expect(mockState.locale).toBe('en')
+    expect(mockState.locale).toBe('es-ES')
     expect(mockState.theme).toBe('dark')
     expect(mockState.developerMode).toBe(false)
     expect(mockState.autoDownload).toBe(false)
     expect(mockState.httpProxy).toBe('')
     expect(mockState.httpProxyEnabled).toBe(false)
     expect(mockState.globalHideLauncher).toBe(true)
-    expect(mockState.discordPresence).toBe(true)
+    expect(mockState.discordPresence).toBe(false)
     expect(mockState.enableDedicatedGPUOptimization).toBe(true)
   })
 
@@ -253,13 +320,13 @@ describe('pluginSettings', () => {
     })
 
     // Verify settings are normalized - locale normalized from host locale
-    expect(mockState.locale).toBe('en') // normalized from host locale 'en-US'
+    expect(mockState.locale).toBe('en') // empty locale uses the host locale
     expect(mockState.theme).toBe('dark')
     expect(mockState.autoDownload).toBe(false)
     expect(mockState.maxSockets).toBe(32) // value from file
     expect(mockState.globalVmOptions).toEqual([])
     expect(mockState.developerMode).toBe(false) // default value
-    expect(mockState.discordPresence).toBe(true) // default from Settings class
+    expect(mockState.discordPresence).toBe(false) // product default
   })
 
   test('should salvage valid fields and use defaults for invalid fields', async () => {
@@ -285,7 +352,7 @@ describe('pluginSettings', () => {
     expect(mockState.httpProxy).toBe('http://proxy.example.com') // valid value from file
 
     // Invalid fields should use defaults (locale normalized from host)
-    expect(mockState.locale).toBe('en') // default normalized from host locale
+    expect(mockState.locale).toBe('es-ES') // product default
     expect(mockState.developerMode).toBe(false) // default value
   })
 
@@ -305,7 +372,7 @@ describe('pluginSettings', () => {
 
     // Invalid fields use defaults, but settings are still normalized
     // Settings are initialized with normalized defaults
-    expect(mockState.locale).toBe('en') // normalized from host locale
+    expect(mockState.locale).toBe('es-ES') // product default
     expect(mockState.theme).toBe('dark') // default value (invalid value was rejected)
     expect(mockState.developerMode).toBe(false)
   })
@@ -334,7 +401,7 @@ describe('pluginSettings', () => {
     expect(fsExtra.writeJson).toHaveBeenCalledWith(
       join('/mock/app/data', 'setting.json'),
       {
-        locale: 'en',
+        locale: 'es-ES',
         autoDownload: false,
         autoInstallOnAppQuit: false,
         allowPrerelease: false,
@@ -361,9 +428,9 @@ describe('pluginSettings', () => {
         globalPrependCommand: '',
         globalPreExecuteCommand: '',
         globalEnv: {},
-        discordPresence: true,
+        discordPresence: false,
         developerMode: true,
-        disableTelemetry: false,
+        disableTelemetry: true,
         multiplayerTransport: 'webrtc',
         agentEndpoint: '',
         agentModel: '',
@@ -406,7 +473,7 @@ describe('pluginSettings', () => {
     expect(fsExtra.writeJson).toHaveBeenCalledWith(
       join('/mock/app/data', 'setting.json'),
       {
-        locale: 'en',
+        locale: 'es-ES',
         autoDownload: false,
         autoInstallOnAppQuit: false,
         allowPrerelease: false,
@@ -433,9 +500,9 @@ describe('pluginSettings', () => {
         globalPrependCommand: '',
         globalPreExecuteCommand: '',
         globalEnv: {},
-        discordPresence: true,
+        discordPresence: false,
         developerMode: false,
-        disableTelemetry: false,
+        disableTelemetry: true,
         multiplayerTransport: 'webrtc',
         agentEndpoint: '',
         agentModel: '',

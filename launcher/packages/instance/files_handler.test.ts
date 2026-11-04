@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { createHash } from 'crypto'
-import { copyFile, mkdtemp, readdir, rm, writeFile, ensureDir, pathExists, readFile, unlink } from 'fs-extra'
+import { copyFile, link, mkdtemp, readdir, rm, writeFile, ensureDir, pathExists, readFile, unlink } from 'fs-extra'
 import { tmpdir } from 'os'
 import { join, dirname } from 'path'
 import {
@@ -181,7 +181,7 @@ describe('InstanceFileOperationHandler', () => {
     }
   })
 
-  it.each(['.install/op.json', 'config/../.install-profile', '.INSTALL\\op\\files\\a'])(
+  it.each(['.install/op.json', '.BACKUPS\\op\\a', 'config/../.install-profile', '.INSTALL\\op\\files\\a', 'instance.json', 'config/../INSTANCE.JSON', 'instance.json.tmp-0123456789abcdef', '.install-state-old.tmp'])(
     'rejects files targeting installer state: %s', async (path) => {
       const { root, instance, workspace, backup } = await setupDirs()
       try {
@@ -282,15 +282,14 @@ describe('InstanceFileOperationHandler', () => {
   it('properly performs phase-3 rename of downloaded files into instance', async () => {
     const { instance, workspace, backup } = await setupDirs()
     try {
-      // Place a file in workspace as if it was downloaded
+      // A partial download must be replaced before phase 3.
       const wsFile = join(workspace, 'mods', 'a.jar')
       await ensureDir(join(workspace, 'mods'))
-      await writeFile(wsFile, 'downloaded')
+      await writeFile(wsFile, 'partial')
 
       const ctx = createContext({
-        // simulate the download having already happened (file present in ws)
         downloadFiles: async (payloads, finished) => {
-          for (const p of payloads) finished.add(p.file.path)
+          for (const p of payloads) { await writeFile(p.options.destination, 'downloaded'); finished.add(p.file.path) }
         },
       })
 
@@ -315,6 +314,27 @@ describe('InstanceFileOperationHandler', () => {
     } finally {
       // best-effort cleanup
     }
+  })
+
+  it('detaches a stale hard-linked workspace file before downloading without changing the original resource', async () => {
+    const { root, instance, workspace, backup } = await setupDirs()
+    try {
+      const cached = join(root, 'cached.jar'), staged = join(workspace, 'mods/a.jar')
+      await writeFile(cached, 'STALE'); await ensureDir(dirname(staged)); await link(cached, staged)
+      const target = file('mods/a.jar', createHash('sha1').update('NEW').digest('hex'), ['https://example.invalid/new.jar'])
+      const handler = new InstanceFileOperationHandler(instance, new Set(), workspace, backup, createContext({
+        worker: { checksum: async (path, algorithm) => createHash(algorithm).update(await readFile(path)).digest('hex') },
+        downloadFiles: async (payloads, finished) => {
+          expect(await pathExists(staged)).toBe(false)
+          for (const payload of payloads) { await writeFile(payload.options.destination, 'NEW'); finished.add(payload.file.path) }
+        },
+      }))
+      const updates = [{ file: target, operation: 'add' as const }]
+      await handler.prepareInstallFiles(updates, new AbortController().signal)
+      await handler.commitReadyFiles(updates, true, async current => { expect(current).toBe(target) })
+      expect(await readFile(join(instance, target.path), 'utf8')).toBe('NEW')
+      expect(await readFile(cached, 'utf8')).toBe('STALE')
+    } finally { await rm(root, { recursive: true, force: true }) }
   })
 
   it('materializes keeps so a refreshed delta can commit them later', async () => {

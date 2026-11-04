@@ -26,7 +26,7 @@ function useLocalModsSearch(path: Ref<string>, runtime: Ref<InstanceData['runtim
   modLoader,
 }: SearchModel) {
   const { searchInstalled } = useService(InstanceModsServiceKey)
-  const modFiles = ref([] as ModFile[])
+  const modFiles: Ref<ModFile[]> = ref([])
 
   const result = computed(() => {
     const indices: Record<string, ProjectEntry<ModFile>> = {}

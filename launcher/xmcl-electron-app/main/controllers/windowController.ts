@@ -5,6 +5,11 @@ import { platform } from 'os'
 import { writeFile } from 'fs-extra'
 import { isNiri } from '@/utils/niri'
 import { isMonitorSelectionSupported } from '@/utils/moveWindowToMonitor'
+import { exportLogView } from '@xmcl/runtime/util/exportLogView'
+import loggerUrl from '@renderer/logger.html'
+import defaultApp from '../defaultApp'
+import { isBootstrapSender } from '../utils/bootstrapSender'
+import type { IpcMainInvokeEvent, WebContents } from 'electron'
 
 export enum Operation {
   Minimize = 0,
@@ -16,6 +21,12 @@ export enum Operation {
 
 export const windowController: ControllerPlugin = function (this: ElectronController) {
   const currentPlatform = platform()
+  const exporting = new WeakSet<WebContents>()
+  const exportOwner = (event: IpcMainInvokeEvent) => {
+    const owner = BrowserWindow.fromWebContents(event.sender)
+    if (!owner || owner.isDestroyed() || ![defaultApp.url, loggerUrl, new URL('logger.html', defaultApp.url).href].some(url => isBootstrapSender(event, owner.webContents, url))) throw new Error('Log export requires a launcher frame')
+    return owner
+  }
 
   app.on('browser-window-created', (_, win: BrowserWindow) => {
     // Wrap webContents.send with destroyed-guards. Without these, fullscreen /
@@ -68,6 +79,30 @@ export const windowController: ControllerPlugin = function (this: ElectronContro
   })
   ipcMain.handle('dialog:showSaveDialog', (event, ...args) => {
     return dialog.showSaveDialog(BrowserWindow.fromWebContents(event.sender)!, args[0])
+  })
+  ipcMain.handle('export-log-view', async (event, text, name) => {
+    const owner = exportOwner(event)
+    if (exporting.has(event.sender)) throw new Error('Log export is already open')
+    exporting.add(event.sender)
+    try {
+      return await exportLogView(text, name, async defaultPath => {
+        const choice = await dialog.showSaveDialog(owner, { defaultPath, filters: [{ name: 'Logs', extensions: ['log', 'txt'] }], properties: ['showOverwriteConfirmation', 'dontAddToRecent'] })
+        if (!choice.canceled && exportOwner(event) !== owner) throw new Error('Log export window changed')
+        return choice
+      })
+    } finally { exporting.delete(event.sender) }
+  })
+  ipcMain.handle('open-logger', async (event, instancePath, source) => {
+    exportOwner(event)
+    await this.openLogger(instancePath, source)
+  })
+  ipcMain.handle('get-logger-context', event => {
+    exportOwner(event)
+    return this.getLoggerContext(event.sender)
+  })
+  ipcMain.handle('get-migration-context', event => {
+    exportOwner(event)
+    return this.getMigrationContext(event.sender)
   })
   ipcMain.handle('find-in-page', (event, text: string, options: FindInPageOptions) => {
     event.sender.findInPage(text, options)
@@ -180,7 +215,7 @@ export const windowController: ControllerPlugin = function (this: ElectronContro
           }
           return false
         case Operation.Close:
-          if (this.parking) {
+          if (this.parking && window === this.mainWin) {
             window.hide()
           } else {
             window.close()

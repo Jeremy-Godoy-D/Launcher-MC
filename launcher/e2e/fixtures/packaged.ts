@@ -35,7 +35,7 @@ const OUTPUT_ROOT = resolve(REPO_ROOT, 'xmcl-electron-app/build/output')
  * runner arch and fall back to whatever exists.
  */
 function findPackagedBinary(): string {
-  const productName = 'Launcher MC'
+  const productName = 'Grimo Launcher'
   if (process.platform === 'win32') {
     return join(OUTPUT_ROOT, 'win-unpacked', `${productName}.exe`)
   }

@@ -766,6 +766,7 @@ loginError:
   requireUsername: Username is required
   timeout: Login timeout. Please retry or check your network.
 logsCrashes:
+  readError: Could not access the log. Check file permissions and size and try again.
   crashes: Crash Reports
   failures: Launch Failures
   logs: Logs

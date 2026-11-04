@@ -4,7 +4,10 @@ import { InstanceSave, InstanceSaveHeader, ResourceSaveMetadata, SaveMetadata } 
 import { FileSystem } from '@xmcl/system'
 import { readdir, readFile, readlink, writeFile } from 'fs-extra'
 import { basename, join } from 'path'
-import { exists } from '../util/fs'
+import { readBoundedFile } from '../util/readBoundedFile'
+import { validateNbt } from './nbtValidation'
+import { gunzip, inflate } from 'node:zlib'
+import { promisify } from 'node:util'
 
 /**
  * Find the relative path of the save relative to the file system.
@@ -67,10 +70,11 @@ export async function readResourceSaveMetadata(resourcePath: string | Uint8Array
   }
 }
 
-export async function readLinkedCurseforge(path: string) {
-  const cfMetadata = join(path, '.curseforge')
-  if (!await exists(cfMetadata)) return undefined
-  return JSON.parse(await readFile(cfMetadata, 'utf-8')) as { projectId: number; fileId: number }
+export async function readLinkedCurseforge(path: string): Promise<{ projectId: number; fileId: number } | undefined> {
+  try {
+    const value = JSON.parse((await readBoundedFile(join(path, '.curseforge'), 64 * 1024)).toString('utf8'))
+    if (value && !Array.isArray(value) && Number.isSafeInteger(value.projectId) && value.projectId > 0 && Number.isSafeInteger(value.fileId) && value.fileId > 0) return { projectId: value.projectId, fileId: value.fileId }
+  } catch { /* Missing or malformed optional provenance does not hide the world. */ }
 }
 
 /**
@@ -156,13 +160,10 @@ export async function readWorldGenSettings(path: string): Promise<{
   try {
     const levelDatPath = join(path, 'level.dat')
     
-    if (!await exists(levelDatPath)) {
-      return undefined
-    }
-    
-    // Read existing level.dat
-    const buffer = await readFile(levelDatPath)
-    const levelData: { Data: LevelDataFrame } = await deserialize(buffer, { compressed: 'gzip' })
+    const buffer = await readBoundedFile(levelDatPath, 4 * 1024 * 1024)
+    const raw = buffer[0] === 31 && buffer[1] === 139 ? await promisify(gunzip)(buffer, { maxOutputLength: 16 * 1024 * 1024 }) : buffer[0] === 0x78 ? await promisify(inflate)(buffer, { maxOutputLength: 16 * 1024 * 1024 }) : buffer
+    validateNbt(raw)
+    const levelData: { Data: LevelDataFrame } = await deserialize(raw)
     
     // Extract world generation settings
     const worldGenSettings = levelData.Data.WorldGenSettings
@@ -172,11 +173,11 @@ export async function readWorldGenSettings(path: string): Promise<{
     }
     
     return {
-      seed: worldGenSettings.seed || levelData.Data.RandomSeed || BigInt(0),
+      seed: worldGenSettings.seed ?? levelData.Data.RandomSeed ?? BigInt(0),
       dimensions: worldGenSettings.dimensions as any || {},
     }
   } catch (err) {
-    console.error('Failed to read world gen settings:', err)
-    return undefined
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return undefined
+    throw err
   }
 }

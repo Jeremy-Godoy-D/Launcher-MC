@@ -14,12 +14,16 @@ import type { Task } from '../task'
 import type { SharedState } from '../util/SharedState'
 import type { InvalidDirectoryErrorCode } from './BaseService'
 import type { ServiceKey } from './Service'
+import type { EditInstanceSettingsOptions, InstanceSettingsSnapshot } from '../util/instanceSettings'
 
 export interface DuplicateInstanceTask extends Task {
   type: 'duplicateInstance'
   from: string
   to: string
+  requestId?: string
 }
+
+export interface InstanceCopyState { sourcePath: string; totalFiles: number; invalid?: boolean }
 
 export type CreateInstanceOption = CreateInstanceOptions
 
@@ -36,6 +40,12 @@ export /* @__PURE__ */ class /* @__PURE__ */ InstanceState {
    * Instance groups
    */
   groups: InstanceGroupDataOrString[] = []
+  pendingCopies: Record<string, InstanceCopyState> = {}
+
+  instanceCopyState({ path, copy }: { path: string; copy?: InstanceCopyState }) {
+    if (copy) this.pendingCopies[path] = copy
+    else delete this.pendingCopies[path]
+  }
 
   instanceGroupsSet(groups: InstanceGroupDataOrString[]) {
     this.groups = InstanceGroupDataOrStringArray.parse(groups)
@@ -55,6 +65,7 @@ export /* @__PURE__ */ class /* @__PURE__ */ InstanceState {
 
   instanceRemove(path: string) {
     delete this.all[path]
+    delete this.pendingCopies[path]
     this.instances = this.instances.filter((i) => i.path !== path)
   }
 
@@ -64,6 +75,7 @@ export /* @__PURE__ */ class /* @__PURE__ */ InstanceState {
       inst.path = to
       delete this.all[from]
       this.all[to] = inst
+      if (this.pendingCopies[from]) { this.pendingCopies[to] = this.pendingCopies[from]; delete this.pendingCopies[from] }
     }
   }
 
@@ -102,12 +114,18 @@ export interface InstanceService {
   /**
    * Duplicate the instance.
    */
-  duplicateInstance(path: string): Promise<string>
+  duplicateInstance(path: string, requestId?: string): Promise<string>
+  getInstanceCopyState(path: string): Promise<InstanceCopyState | undefined>
+  resumeInstanceCopy(path: string, requestId?: string): Promise<string>
+  /** Replace group/order data only when it still matches the reviewed snapshot. */
+  updateInstanceGroups(previous: InstanceState['groups'], next: InstanceState['groups']): Promise<void>
   /**
    * Edit the instance. If the `path` is not present, it will edit the current selected instance.
    * Otherwise, it will edit the instance on the provided path.
    */
-  editInstance(options: EditInstanceOptions & { instancePath: string }): Promise<void>
+  editInstance(options: EditInstanceOptions & { instancePath: string; expectedMetadata?: { name: string; description: string; author: string; icon?: string } }): Promise<void>
+  /** Apply only reviewed Java launch settings; reject stale data and invalid overrides. */
+  editInstanceSettings(options: EditInstanceSettingsOptions): Promise<InstanceSettingsSnapshot>
   /**
    * Get or create a MANAGED instance via your unique id
    * @param id The unique id, can be any string, but it will convert to a string can be file name

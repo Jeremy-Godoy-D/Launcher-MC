@@ -11,6 +11,7 @@ export type SharedState<T> = T & {
    * The id of the state
    */
   readonly id: string
+  readonly __stateEpoch__?: string
 
   subscribe<K extends keyof Mutations<T>>(key: K, listener: (payload: Mutations<T>[K]) => void): SharedState<T>
   subscribe(key: 'state-validating', listener: (v: boolean) => void): SharedState<T>
@@ -22,11 +23,11 @@ export type SharedState<T> = T & {
 
   unsubscribeAll<K extends keyof Mutations<T>>(listener: (mutation: K, payload: Mutations<T>[keyof Mutations<T>]) => void): SharedState<T>
 
-  revalidate(): void
+  revalidate(): void | Promise<void>
 
   /**
    * Release this renderer's reference so the main process can dispose a
    * state-backed resource such as a filesystem watcher when no clients remain.
    */
-  unref(): void
+  unref(): void | Promise<void>
 }

@@ -5,6 +5,12 @@ import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 
 describe('parseSnbt', () => {
+  test('bounds nesting, nodes and numeric tokens, rejecting prototype keys', () => {
+    for (const input of ['['.repeat(100) + '0' + ']'.repeat(100), '{"__proto__":{polluted:true}}', '1e999', '9'.repeat(129) + 'L', '[' + '0,'.repeat(100001) + ']']) {
+      expect(() => parseSnbt(input)).toThrow(SyntaxError)
+    }
+    expect(({} as any).polluted).toBeUndefined()
+  })
   test('rejects malformed and truncated input in a bounded child process', async () => {
     const cases = ['{id: [}', '[}', '{]', '{id}', '{id:}', '{id:', '{', '[', '"unfinished', "'escape\\", '/* unfinished', '{id:1} trailing', ':', '/', '{id: [1, 2}', '[I; 1']
     // A test timeout cannot interrupt a synchronous parser loop; the OS child timeout can.

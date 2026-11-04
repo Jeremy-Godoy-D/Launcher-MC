@@ -19,9 +19,10 @@ import { plugins } from './plugins'
 import { toWebResponseBody } from './transport'
 import { DeskGapUpdater } from './updater'
 import { createDeskGapUpdater } from './updaterHost'
+import { isUpstreamService } from '@xmcl/runtime/app/productPolicy'
 
 const manifest = {
-  name: 'X Minecraft Launcher',
+  name: 'Grimo Launcher',
   description: 'The default XMCL interface hosted by DeskGap',
   url: 'xmcl-deskgap://launcher/index.html',
   backgroundColor: '0x424242',
@@ -135,8 +136,10 @@ export class DeskGapLauncherApp extends LauncherApp {
     })
   }
 
-  fetch: typeof fetch = (input: RequestInfo | URL, init?: RequestInit) =>
-    this.networkSession.fetch(typeof input === 'string' || input instanceof URL ? input : input.url, init)
+  fetch: typeof fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+    if (isUpstreamService(input)) return Promise.reject(new Error('This upstream service is unavailable in Grimo Launcher'))
+    return this.networkSession.fetch(typeof input === 'string' || input instanceof URL ? input : input.url, init)
+  }
 
   setProxy(url: string) {
     void this.networkSession.setProxy(url ? { proxyRules: url } : { mode: 'system' })

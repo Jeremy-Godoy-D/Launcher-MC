@@ -5,14 +5,17 @@ import {
   lstat,
   readdir,
   readlink,
-  remove,
   rename,
   rmdir,
   symlink,
+  stat,
   utimes,
-  writeFile,
+  unlink,
 } from 'fs-extra'
-import { join, resolve } from 'path'
+import { dirname, join } from 'path'
+import { constants } from 'node:fs'
+import { writeFile as writeAtomically } from 'atomically'
+import { reviewMigrationPaths } from './migrationPaths'
 import type { Logger } from '~/infra'
 import type { LauncherApp } from './LauncherApp'
 import { isSystemError } from '@xmcl/utils'
@@ -37,12 +40,8 @@ type OnCopied = (bytes: number, file: string) => void
 /**
  * Move `from` to `to`.
  *
- * Unlike a plain `rename`, this merges into an existing destination directory
- * instead of failing with `ENOTEMPTY`. This matters because the destination
- * validation explicitly accepts an existing XMCL data directory as a target,
- * and a plain rename of `oldRoot/versions -> newRoot/versions` throws when
- * `newRoot/versions` already exists, which previously caused the whole
- * migration to roll back silently ("nothing happens").
+ * The destination starts empty. Directory merging is used only for parents
+ * created by this transfer or its rollback; existing files are never replaced.
  *
  * Symlinks are recreated as links and never followed. Instances keep their
  * `versions`/`libraries` folders as symlinks back to the shared root, so
@@ -55,44 +54,42 @@ type OnCopied = (bytes: number, file: string) => void
  * `onCopied` callback receives byte-level progress for that slow cross-volume
  * path so the UI can render a smooth, determinate progress bar.
  */
-async function move(from: string, to: string, onCopied?: OnCopied) {
+async function move(from: string, to: string, onCopied?: OnCopied, onMoved?: (from: string, to: string) => void) {
   // `lstat`, never `stat`: we must see a symlink as a link, not as its target.
-  const fromStat = await lstat(from).catch(() => undefined)
-  if (!fromStat) return
+  const fromStat = await lstat(from)
+  const toStat = await lstat(to).catch(error => { if (error.code !== 'ENOENT') throw error })
+  if (toStat?.isSymbolicLink()) throw Object.assign(new Error('Migration destination is a link'), { code: 'EEXIST' })
 
   if (fromStat.isSymbolicLink()) {
     // Recreate the link itself at the destination rather than its target. The
     // target is an absolute path into the old root; the instance launch
     // precheck relinks any stale target to the new root on next launch.
-    const target = await readlink(from).catch(() => null)
-    if (target) {
-      await remove(to).catch(() => {})
-      await symlink(target, to).catch(() => {})
+    if (toStat) throw Object.assign(new Error('Migration destination exists'), { code: 'EEXIST' })
+    try { await rename(from, to) } catch (error) {
+      if (!isSystemError(error) || error.code !== 'EXDEV') throw error
+      const type = process.platform === 'win32' && (await stat(from).catch(() => undefined))?.isDirectory() ? 'junction' : undefined
+      await symlink(await readlink(from), to, type)
+      await unlink(from)
     }
-    await remove(from).catch(() => {})
+    onMoved?.(from, to)
     return
   }
-
-  const toStat = await lstat(to).catch(() => undefined)
 
   // Both sides are directories: merge child by child instead of failing.
   if (fromStat.isDirectory() && toStat?.isDirectory()) {
     const children = await readdir(from)
     for (const child of children) {
-      await move(join(from, child), join(to, child), onCopied)
+      await move(join(from, child), join(to, child), onCopied, onMoved)
     }
     // Only removes the source directory once it is empty.
-    await rmdir(from).catch(() => {})
+    await rmdir(from)
     return
   }
 
   try {
-    // The source is authoritative during a migration: replace an existing
-    // destination file so the rename below does not fail (e.g. on Windows).
-    if (toStat && !fromStat.isDirectory()) {
-      await remove(to)
-    }
+    if (toStat) throw Object.assign(new Error('Migration destination exists'), { code: 'EEXIST' })
     await rename(from, to)
+    onMoved?.(from, to)
   } catch (e) {
     if (isSystemError(e) && e.code === 'EXDEV') {
       // Different volume: rename is impossible, copy then remove.
@@ -100,9 +97,9 @@ async function move(from: string, to: string, onCopied?: OnCopied) {
         await ensureDir(to)
         const children = await readdir(from)
         for (const child of children) {
-          await move(join(from, child), join(to, child), onCopied)
+          await move(join(from, child), join(to, child), onCopied, onMoved)
         }
-        await rmdir(from).catch(() => {})
+        await rmdir(from)
       } else {
         // A regular file across volumes (symlinks were handled above). Copy
         // with the low-level `copyFile` to avoid fs-extra's per-file `mkdirs`
@@ -111,14 +108,17 @@ async function move(from: string, to: string, onCopied?: OnCopied) {
         // most of their time. The destination directory is guaranteed to
         // exist (the directory branch above ran `ensureDir`, or this is a
         // top-level file landing in the migration root).
-        await copyFile(from, to)
+        await copyFile(from, to, constants.COPYFILE_EXCL)
+        const current = await lstat(from)
+        if (!current.isFile() || current.size !== fromStat.size || current.mtimeMs !== fromStat.mtimeMs) throw new Error('Migration source changed while copying')
         // Preserve mode (the JRE ships executable binaries) and timestamps
         // (resource caches key off mtime); failures here must not abort the
         // migration on filesystems that ignore these attributes (e.g. NTFS
         // mounted via ntfs-3g).
         await chmod(to, fromStat.mode).catch(() => {})
         await utimes(to, fromStat.atime, fromStat.mtime).catch(() => {})
-        await remove(from)
+        await unlink(from)
+        onMoved?.(from, to)
         onCopied?.(fromStat.size, to)
       }
     } else {
@@ -182,16 +182,19 @@ export async function handleMigrateRoot(
   // relaunch (e.g. by the updater reusing the current argv), so the freshest
   // destination wins.
   const migrateIndex = process.argv.lastIndexOf('--migrate')
-  const destination = process.argv[migrateIndex + 1]
-  if (migrateIndex === -1 || !destination) {
+  const requestedDestination = process.argv[migrateIndex + 1]
+  if (migrateIndex === -1 || !requestedDestination) {
     return source
   }
   // Nothing to do if the destination is already the current root. This avoids
   // popping the migration window (and useless work) when a stale `--migrate`
   // flag survives a relaunch.
-  if (resolve(source) === resolve(destination)) {
-    return source
-  }
+  let destination: string
+  try {
+    const review = await reviewMigrationPaths(source, requestedDestination)
+    if (review.unchanged) return source
+    destination = review.destination
+  } catch (error) { logger.warn('Migration destination refused', error); return source }
   const traceparentIndex = process.argv.lastIndexOf('--migration-traceparent')
   const traceparent = traceparentIndex === -1 ? undefined : process.argv[traceparentIndex + 1]
   const startTime = Date.now()
@@ -227,27 +230,24 @@ export async function handleMigrateRoot(
     totalFiles: 0,
     phase: 'scanning',
   }
+  let lastBroadcast = 0
+  const broadcast = (force = false) => {
+    const now = Date.now()
+    if (!force && now - lastBroadcast < 64) return
+    lastBroadcast = now
+    try { app.controller.broadcast('migration-event', { event: 'progress', payload: { ...state } }) }
+    catch (error) { logger.warn('Migration progress window unavailable', error) }
+  }
   try {
     logger.log(`Try to use rename to migrate the files: ${source} -> ${destination}`)
 
     // The progress window is purely cosmetic — never let its failure abort
     // the migration itself.
-    Promise.resolve(app.controller.startMigrate()).catch((e) => {
+    app.controller.handle('migration-get-progress', () => ({ ...state }))
+    await Promise.resolve().then(() => app.controller.startMigrate()).catch((e) => {
       logger.warn('Failed to show the migration window', e)
     })
     await ensureDir(destination)
-
-    app.controller.handle('migration-get-progress', () => ({ ...state }))
-
-    let lastBroadcast = 0
-    const broadcast = (force = false) => {
-      const now = Date.now()
-      // ~15 fps is plenty for a progress bar and keeps the IPC traffic low even
-      // when copying many tiny files.
-      if (!force && now - lastBroadcast < 64) return
-      lastBroadcast = now
-      app.controller.broadcast('migration-event', { event: 'progress', payload: { ...state } })
-    }
 
     const files = await readdir(source).then((files) =>
       files.filter((file) => candidates.includes(file)),
@@ -281,8 +281,7 @@ export async function handleMigrateRoot(
           state.copiedFiles += 1
           state.file = copiedFile
           broadcast()
-        })
-        finished.push({ from, to })
+        }, (from, to) => finished.push({ from, to }))
         // A same-volume rename moves the whole entry atomically without firing
         // the per-file callback, so reconcile the counters against the scan to
         // keep the bar honest (also covers skipped symlinks on the slow path).
@@ -291,19 +290,14 @@ export async function handleMigrateRoot(
         broadcast(true)
       } catch (e) {
         logger.warn(`Fail to move ${from} -> ${to}`, e)
-        app.controller.broadcast('migration-event', {
-          event: 'error',
-          payload: { file: from, error: e },
-        })
         throw e
       }
     }
 
-    state.phase = 'done'
     state.file = ''
+    await writeAtomically(join(app.appDataPath, 'root'), destination)
+    state.phase = 'done'
     broadcast(true)
-
-    await writeFile(join(app.appDataPath, 'root'), destination)
     completedMigrationTelemetry = {
       traceparent,
       startTime,
@@ -312,10 +306,10 @@ export async function handleMigrateRoot(
       copiedBytes: state.copiedBytes,
       copiedFiles: state.copiedFiles,
     }
-    await app.controller.endMigrate({
+    await Promise.resolve().then(() => app.controller.endMigrate({
       from: source,
       to: destination,
-    })
+    })).catch(error => logger.warn('Failed to close migration window', error))
     return destination
   } catch (e) {
     completedMigrationTelemetry = {
@@ -333,15 +327,25 @@ export async function handleMigrateRoot(
     }
     // rollback
     logger.warn(`Fail to migrate, rollback`, e)
-    for (const { from, to } of finished) {
+    state.phase = 'rollingBack'
+    state.error = { file: state.file, rollback: 'running' }
+    broadcast(true)
+    let restored = true
+    for (const { from, to } of finished.reverse()) {
       try {
         logger.log(`Rollback ${to} -> ${from}`)
+        state.file = from; broadcast()
+        await ensureDir(dirname(from))
         await move(to, from)
       } catch (e) {
+        restored = false
         logger.warn(`Fail to rollback ${to} -> ${from}`, e)
       }
     }
-    await app.controller.endMigrate()
+    state.phase = 'failed'; state.error = { ...state.error, rollback: restored ? 'complete' : 'incomplete' }
+    broadcast(true)
+    try { app.controller.broadcast('migration-event', { event: 'error', payload: { file: state.error.file, error: { name: 'DataMigrationFailed' } } }) } catch {}
+    await Promise.resolve().then(() => app.controller.endMigrate()).catch(error => logger.warn('Migration window unavailable', error))
     return source
   }
 }

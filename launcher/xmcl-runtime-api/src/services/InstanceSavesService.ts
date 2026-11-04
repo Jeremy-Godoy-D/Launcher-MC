@@ -1,6 +1,6 @@
 import { Exception, InstanceNotFoundException } from '../entities/exception'
 import { InstallMarketOptions, InstallMarketOptionWithInstance } from '../entities/market'
-import { InstanceDatapack, InstanceSave, InstanceSaveHeader, InstanceSaveProgress, SaveDatapacks, SaveMetadata, Saves } from '../entities/save'
+import { InstanceDatapack, InstanceSave, InstanceSavePreview, InstanceSaveProgress, SaveDatapacks, SaveMetadata, Saves } from '../entities/save'
 import { SharedState } from '../util/SharedState'
 import { ServiceKey } from './Service'
 
@@ -100,6 +100,41 @@ export interface CloneSaveOptions {
    * @default Generated name from the `saveName`
    */
   newSaveName?: string
+}
+
+export interface WorldMetadataInput {
+  levelName: string
+  seed: string
+  difficulty: 0 | 1 | 2 | 3
+  cheat: boolean
+}
+export interface WorldDatapackReview {
+  name: string
+  fileName: string
+  directory: boolean
+  packFormat?: number
+  description: string
+}
+export type WorldDatapackProviders = Pick<InstanceDatapack, 'curseforge' | 'modrinth'>
+export type WorldFileOperation = { instancePath: string; saveName: string } & (
+  { type: 'import'; sourcePath: string; curseforge?: { projectId: number; fileId: number } } |
+  { type: 'copy'; destinationInstancePath: string; destinationName: string } |
+  { type: 'export'; destinationDirectory: string; fileName: string; format?: 'folder' } |
+  { type: 'metadata'; metadata: WorldMetadataInput } |
+  { type: 'import-datapack'; sourcePath: string; fileName?: string; providers?: WorldDatapackProviders } |
+  { type: 'remove-datapack'; fileName: string } |
+  { type: 'remove' }
+)
+export interface WorldFileReview {
+  operation: WorldFileOperation
+  snapshot: string
+  files: number
+  bytes: number
+  shared: boolean
+  linkOnly: boolean
+  destination: string
+  metadata?: { before: WorldMetadataInput; after: WorldMetadataInput }
+  datapack?: WorldDatapackReview
 }
 
 export function getInstanceSaveKey(path: string) {
@@ -250,16 +285,52 @@ export interface PasteSaveChunksOptions {
   offsetZ?: number
 }
 
+export type SaveChunkChange =
+  | ({ type: 'delete' } & DeleteSaveChunksOptions)
+  | ({ type: 'paste' } & PasteSaveChunksOptions)
+  | { type: 'restore'; savePath: string; backupId: string }
+
+export interface SaveChunkReview {
+  snapshot: string
+  type: SaveChunkChange['type']
+  savePath: string
+  dimension: string
+  chunks: number
+  files: number
+  bytes: number
+  shared: boolean
+  backup?: SaveChunkBackup
+}
+
+export interface SaveChunkBackup {
+  id: string
+  createdAt: number
+  type: SaveChunkChange['type']
+  dimension: string
+  files: number
+  state: 'prepared' | 'complete' | 'incomplete'
+}
+
 /**
  * Provide the ability to preview saves data of an instance
  */
+export type LegacyWorldMigrationStatus = { status: 'ready' | 'running' } | { status: 'blocked'; reason: 'running' | 'session' | 'changed' | 'failed' }
+
 export interface InstanceSavesService {
+  getLegacyWorldMigrationStatus(): Promise<LegacyWorldMigrationStatus>
+  retryLegacyWorldMigration(): Promise<LegacyWorldMigrationStatus>
+  previewSaveChunkChanges(change: SaveChunkChange): Promise<SaveChunkReview>
+  applySaveChunkChanges(change: SaveChunkChange, snapshot: string): Promise<{ backupId?: string; backupPath?: string }>
+  getSaveChunkBackups(savePath: string): Promise<{ entries: SaveChunkBackup[]; unreadable: number }>
+  previewWorldFiles(operation: WorldFileOperation): Promise<WorldFileReview>
+  applyWorldFiles(review: WorldFileReview): Promise<{ path: string; backup?: string }>
+  getWorldDatapacks(instancePath: string, saveName: string): Promise<InstanceDatapack[]>
   showDirectory(instancePath: string): Promise<void>
   /**
    * Read all saves under the instance folder
    * @param path The instance folder path
    */
-  getInstanceSaves(path: string): Promise<InstanceSaveHeader[]>
+  getInstanceSaves(path: string): Promise<InstanceSavePreview[]>
   /**
    * Watch instances saves
    * @param path

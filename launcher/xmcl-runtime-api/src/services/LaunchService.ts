@@ -4,6 +4,15 @@ import { GenericEventEmitter } from '../events'
 import { AUTHORITY_DEV } from '../util/authority'
 import { ServiceKey } from './Service'
 
+export interface GameOutputIdentity {
+  pid: number
+  launchId: string
+  gameDirectory: string
+  side: 'client' | 'server'
+  /** Monotonic publication order across both pipes for this launch. */
+  sequence: number
+}
+
 interface LaunchServiceEventMap {
   'minecraft-window-ready': { pid: number; launchId: string }
   'minecraft-start': {
@@ -27,8 +36,8 @@ interface LaunchServiceEventMap {
     elyByAuthlibReplaced?: boolean
     elyByMinecraftVersion?: string
   }
-  'minecraft-stdout': { pid: number; stdout: string }
-  'minecraft-stderr': { pid: number; stderr: string }
+  'minecraft-stdout': GameOutputIdentity & { stdout: string }
+  'minecraft-stderr': GameOutputIdentity & { stderr: string }
   'error': LaunchException | Error
 }
 
@@ -179,8 +188,9 @@ export interface LaunchService extends GenericEventEmitter<LaunchServiceEventMap
    * @param force If true, force-terminate the process tree (SIGKILL on Unix,
    *   `taskkill /F /T` on Windows). Useful when the JVM hangs on exit and the
    *   default graceful shutdown does not work. See gh #1395.
+   * @param launchId If supplied, prevents a stale action from stopping a reused PID.
    */
-  kill(pid: number, force?: boolean): Promise<void>
+  kill(pid: number, force?: boolean, launchId?: string): Promise<void>
   /**
    * Get the game process
    * @param pid The process id

@@ -1,4 +1,5 @@
 export const IS_DEV = process.env.NODE_ENV === 'development'
+export const IS_REACT_RENDERER = process.env.LAUNCHER_RENDERER === 'react'
 export const HAS_DEV_SERVER = !!process.env.HAS_DEV_SERVER
 export const HOST = HAS_DEV_SERVER ? 'localhost' : 'xmcl.runtime'
 

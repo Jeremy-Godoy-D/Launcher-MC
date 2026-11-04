@@ -1,7 +1,12 @@
-import { ensureDir, pathExists, pathExistsSync, readdir, readFile, stat, unlink, writeFile } from 'fs-extra'
+import { assertInstallDirectory } from '../util/assertDirectory'
+import { lstat, opendir } from 'node:fs/promises'
+import { ensureDir, pathExistsSync, unlink } from 'fs-extra'
 import { join } from 'path'
 import { deflateSync, gunzipSync, gzipSync, inflateSync } from 'zlib'
 import { getBlockColor, TRANSPARENT_BLOCKS } from './blockColors'
+import { validateNbt } from './nbtValidation'
+import { readBoundedFile } from '../util/readBoundedFile'
+import { writeFile as writeAtomically } from 'atomically'
 
 export interface SaveRegionInfo {
   regionX: number
@@ -22,6 +27,13 @@ export interface RenderedRegion {
 }
 
 const REGION_FILE = /^r\.(-?\d+)\.(-?\d+)\.mca$/
+export const MAX_REGION_BYTES = 256 * 1024 * 1024
+
+async function readRegionFile(path: string) {
+  const bytes = await readBoundedFile(path, MAX_REGION_BYTES).catch(error => { if (error.code !== 'ENOENT') throw error; return undefined })
+  if (bytes) validateRegionFile(bytes)
+  return bytes
+}
 
 const DIMENSION_DIRS: Record<string, string> = {
   'minecraft:overworld': '.',
@@ -30,7 +42,9 @@ const DIMENSION_DIRS: Record<string, string> = {
 }
 
 function getDimensionDir(savePath: string, dimension: string): string {
+  if (typeof dimension !== 'string' || dimension.trim() !== dimension || dimension.length > 1024 || !/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(dimension)) throw new Error('Invalid dimension id')
   const [namespace, path] = dimension.split(':')
+  if ([namespace, ...path.split('/')].some(part => !part || part === '.' || part === '..')) throw new Error('Invalid dimension id')
   const dimensionPath = namespace && path
     ? join(savePath, 'dimensions', namespace, ...path.split('/'))
     : undefined
@@ -46,7 +60,7 @@ function getDimensionDir(savePath: string, dimension: string): string {
   return dimensionPath ?? savePath
 }
 
-function getRegionDir(savePath: string, dimension: string): string {
+export function getRegionDir(savePath: string, dimension: string): string {
   return join(getDimensionDir(savePath, dimension), 'region')
 }
 
@@ -55,41 +69,42 @@ function getRegionDir(savePath: string, dimension: string): string {
  */
 export async function listSaveDimensions(savePath: string): Promise<string[]> {
   const result = new Set<string>()
-  for (const [dimension] of Object.entries(DIMENSION_DIRS)) {
-    if (await pathExists(getRegionDir(savePath, dimension))) {
-      result.add(dimension)
+  for (const dimension of Object.keys(DIMENSION_DIRS)) {
+    const directory = getRegionDir(savePath, dimension)
+    await assertInstallDirectory(savePath, directory)
+    if (await lstat(directory).catch(error => { if (error.code !== 'ENOENT') throw error })) result.add(dimension)
+  }
+  const root = join(savePath, 'dimensions'); await assertInstallDirectory(savePath, root)
+  let count = 0
+  const walk = async (directory: string, parts: string[]) => {
+    if (parts.length > 16) throw new Error('Dimension path is too deep')
+    await assertInstallDirectory(savePath, directory)
+    const folder = await opendir(directory).catch(error => { if (error.code !== 'ENOENT') throw error; return undefined })
+    if (!folder) return
+    for await (const entry of folder) {
+      if (++count > 100000) throw new Error('Too many dimension entries')
+      if (entry.isSymbolicLink()) throw new Error('Unsafe dimension link')
+      if (!entry.isDirectory() || !/^[a-z0-9_.-]+$/.test(entry.name) || entry.name === '.' || entry.name === '..') continue
+      if (entry.name === 'region' && parts.length >= 2) result.add(`${parts[0]}:${parts.slice(1).join('/')}`)
+      await walk(join(directory, entry.name), [...parts, entry.name])
     }
   }
-  // Custom datapack dimensions under `dimensions/<namespace>/<path>`
-  const dimensionsRoot = join(savePath, 'dimensions')
-  if (await pathExists(dimensionsRoot)) {
-    const namespaces = await readdir(dimensionsRoot).catch(() => [])
-    for (const namespace of namespaces) {
-      const namespaceDir = join(dimensionsRoot, namespace)
-      if (!(await stat(namespaceDir).then(s => s.isDirectory()).catch(() => false))) continue
-      const paths = await readdir(namespaceDir).catch(() => [])
-      for (const path of paths) {
-        if (await pathExists(join(namespaceDir, path, 'region'))) {
-          result.add(`${namespace}:${path}`)
-        }
-      }
-    }
-  }
+  await walk(root, [])
   return [...result]
 }
 
-/**
- * List the available region files (each covers 32x32 chunks) of a dimension.
- */
+/** List canonical region filenames without following any directory or file links. */
 export async function getSaveRegions(savePath: string, dimension: string): Promise<SaveRegionInfo[]> {
-  const dir = getRegionDir(savePath, dimension)
-  const files = await readdir(dir).catch(() => [] as string[])
-  const result: SaveRegionInfo[] = []
-  for (const file of files) {
-    const match = REGION_FILE.exec(file)
-    if (match) {
-      result.push({ regionX: Number(match[1]), regionZ: Number(match[2]) })
-    }
+  const directory = getRegionDir(savePath, dimension); await assertInstallDirectory(savePath, directory)
+  const folder = await opendir(directory).catch(error => { if (error.code !== 'ENOENT') throw error; return undefined })
+  const result: SaveRegionInfo[] = []; let count = 0
+  if (folder) for await (const entry of folder) {
+    if (++count > 10000) throw new Error('Too many region entries')
+    const match = REGION_FILE.exec(entry.name)
+    if (!match) continue
+    if (entry.isSymbolicLink() || !entry.isFile()) throw new Error('Unsafe region entry')
+    if (![match[1], match[2]].every(value => String(Number(value)) === value && Number.isInteger(Number(value)) && Number(value) >= -67108864 && Number(value) <= 67108863)) continue
+    result.push({ regionX: Number(match[1]), regionZ: Number(match[2]) })
   }
   return result
 }
@@ -447,16 +462,18 @@ export async function renderSaveRegion(
   regionZ: number,
   maxHeight = Number.POSITIVE_INFINITY,
 ): Promise<RenderedRegion> {
+  if (![regionX, regionZ].every(value => Number.isInteger(value) && value >= -2147483648 && value <= 2147483647) || maxHeight !== Infinity && !Number.isFinite(maxHeight)) throw new Error('Invalid region coordinates or height')
   const file = join(getRegionDir(savePath, dimension), `r.${regionX}.${regionZ}.mca`)
   const data = new Uint8Array(512 * 512 * 4)
   const chunks: boolean[] = new Array(1024).fill(false)
   const heights = new Int32Array(512 * 512).fill(-2147483648)
 
-  const buffer = await readFile(file).catch(() => undefined)
+  const buffer = await readRegionFile(file)
   if (!buffer || buffer.length < 8192) {
     return { regionX, regionZ, data, chunks }
   }
 
+  let expanded = 0
   for (let localZ = 0; localZ < 32; localZ++) {
     for (let localX = 0; localX < 32; localX++) {
       const headerOffset = 4 * (localX + localZ * 32)
@@ -471,12 +488,16 @@ export async function renderSaveRegion(
 
       const payload = buffer.subarray(start + 5, start + 4 + length)
       let decoded: DecodedChunk | undefined
+      let raw: Buffer | undefined
       try {
-        const raw = compression === 1 ? gunzipSync(payload) : inflateSync(payload)
-        decoded = decodeChunk(raw)
+        raw = compression === 1 ? gunzipSync(payload, { maxOutputLength: 16 * 1024 * 1024 }) : compression === 2 ? inflateSync(payload, { maxOutputLength: 16 * 1024 * 1024 }) : compression === 3 ? Buffer.from(payload) : undefined
       } catch {
+        if ((expanded += 16 * 1024 * 1024) > MAX_REGION_BYTES) throw new Error('Region has too many invalid compressed chunks')
         continue
       }
+      if (!raw) continue
+      if ((expanded += raw.length) > MAX_REGION_BYTES) throw new Error('Expanded region too large to render')
+      try { validateNbt(raw); decoded = decodeChunk(raw) } catch { continue }
 
       chunks[localX + localZ * 32] = true
       if (!decoded) continue
@@ -529,6 +550,7 @@ export async function deleteSaveChunks(
   dimension: string,
   chunks: Array<{ chunkX: number; chunkZ: number }>,
 ): Promise<void> {
+  validateSaveChunkCoordinates(chunks)
   const dir = getRegionDir(savePath, dimension)
 
   // Group chunks by their region file.
@@ -544,30 +566,23 @@ export async function deleteSaveChunks(
 
   for (const [key, list] of byRegion) {
     const file = join(dir, `r.${key}.mca`)
-    const buffer = await readFile(file).catch(() => undefined)
-    if (!buffer || buffer.length < 8192) continue
-
-    for (const { chunkX, chunkZ } of list) {
-      const index = (chunkX & 31) + (chunkZ & 31) * 32
-      const locOffset = index * 4
-      const timeOffset = 4096 + index * 4
-      buffer.writeUInt32BE(0, locOffset)
-      buffer.writeUInt32BE(0, timeOffset)
-    }
+    const buffer = await readRegionFile(file)
+    if (!buffer) continue
+    const output = prepareRegionChunks(buffer, list, [])
 
     // If no chunk remains in the region, delete the file.
     let hasChunk = false
     for (let i = 0; i < 1024; i++) {
-      if (buffer.readUInt32BE(i * 4) !== 0) {
+      if (output.readUInt32BE(i * 4) !== 0) {
         hasChunk = true
         break
       }
     }
 
     if (hasChunk) {
-      await writeFile(file, buffer)
+      await writeAtomically(file, output, { fsync: true })
     } else {
-      await unlink(file).catch(() => undefined)
+      await unlink(file).catch(error => { if (error.code !== 'ENOENT') throw error })
     }
   }
 }
@@ -589,63 +604,59 @@ export interface SaveChunkData {
   data: Uint8Array
 }
 
-interface StoredChunk {
-  compression: number
-  data: Uint8Array
-  timestamp: number
+export function validateSaveChunkCoordinates(chunks: Array<{ chunkX: number; chunkZ: number }>, offsetX = 0, offsetZ = 0) {
+  const integer = (value: number) => Number.isInteger(value) && value >= -2147483648 && value <= 2147483647
+  if (!Array.isArray(chunks) || chunks.length > 4096 || !integer(offsetX) || !integer(offsetZ)) throw new Error('Invalid chunk coordinates')
+  const seen = new Set<string>()
+  for (const chunk of chunks) {
+    if (!chunk || !integer(chunk.chunkX) || !integer(chunk.chunkZ) || !integer(chunk.chunkX + offsetX) || !integer(chunk.chunkZ + offsetZ)) throw new Error('Invalid chunk coordinates')
+    const key = `${chunk.chunkX},${chunk.chunkZ}`
+    if (seen.has(key)) throw new Error('Duplicate chunk coordinates')
+    seen.add(key)
+  }
 }
 
-/**
- * Parse every chunk stored in a region-file buffer into a map keyed by the
- * local chunk index `(x & 31) + (z & 31) * 32`.
- */
-function parseRegionChunks(buffer: Buffer): Map<number, StoredChunk> {
-  const map = new Map<number, StoredChunk>()
-  if (buffer.length < 8192) return map
+export function validateRegionFile(original: Buffer) {
+  if (original.length < 8192 || original.length > MAX_REGION_BYTES) throw new Error('Invalid region file size')
+  const occupied = new Uint8Array(Math.ceil(original.length / 4096))
+  occupied[0] = 1; occupied[1] = 1
   for (let index = 0; index < 1024; index++) {
-    const headerOffset = index * 4
-    const sectorOffset = (buffer[headerOffset] << 16) | (buffer[headerOffset + 1] << 8) | buffer[headerOffset + 2]
-    if (sectorOffset === 0) continue
-    const start = sectorOffset * 4096
-    if (start + 5 > buffer.length) continue
-    const length = buffer.readUInt32BE(start)
-    if (length <= 0 || start + 4 + length > buffer.length) continue
-    const compression = buffer[start + 4]
-    const data = Uint8Array.from(buffer.subarray(start + 5, start + 4 + length))
-    const timestamp = buffer.readUInt32BE(4096 + headerOffset)
-    map.set(index, { compression, data, timestamp })
+    const location = original.readUInt32BE(index * 4), start = location >>> 8, count = location & 255
+    if (!location) continue
+    if (start < 2 || !count || start + count > occupied.length) throw new Error('Invalid region sector location')
+    for (let sector = start; sector < start + count; sector++) {
+      if (occupied[sector]) throw new Error('Overlapping region sectors')
+      occupied[sector] = 1
+    }
+    if (start * 4096 + 5 > original.length) throw new Error('Invalid region chunk record')
+    const size = original.readUInt32BE(start * 4096)
+    if (!size || size > count * 4096 - 4 || start * 4096 + size + 4 > original.length || !original[start * 4096 + 4]) throw new Error('Invalid region chunk record')
   }
-  return map
 }
 
-/**
- * Serialize a set of chunks back into a region-file buffer, laying out the
- * location/timestamp headers and packing each chunk into 4096-byte sectors.
- */
-function serializeRegionChunks(entries: Map<number, StoredChunk>): Buffer {
-  const locations = Buffer.alloc(4096)
-  const timestamps = Buffer.alloc(4096)
-  const sectors: Buffer[] = []
-  let sectorPointer = 2 // sectors 0 and 1 are the two header tables
-  for (const [index, { compression, data, timestamp }] of entries) {
-    const recordLength = 5 + data.length
-    const sectorCount = Math.ceil(recordLength / 4096)
-    // A region-file location entry stores the sector count in a single byte.
-    if (sectorCount > 255) continue
-    const padded = Buffer.alloc(sectorCount * 4096)
-    padded.writeUInt32BE(1 + data.length, 0) // length covers the compression byte + data
-    padded.writeUInt8(compression, 4)
-    Buffer.from(data.buffer, data.byteOffset, data.byteLength).copy(padded, 5)
-    sectors.push(padded)
-    const headerOffset = index * 4
-    locations.writeUInt8((sectorPointer >> 16) & 0xff, headerOffset)
-    locations.writeUInt8((sectorPointer >> 8) & 0xff, headerOffset + 1)
-    locations.writeUInt8(sectorPointer & 0xff, headerOffset + 2)
-    locations.writeUInt8(sectorCount & 0xff, headerOffset + 3)
-    timestamps.writeUInt32BE(timestamp >>> 0, headerOffset)
-    sectorPointer += sectorCount
+/** Preserve every unselected sector, including chunk formats this editor does not decode. */
+export function prepareRegionChunks(buffer: Buffer | undefined, remove: Array<{ chunkX: number; chunkZ: number }>, paste: SaveChunkData[]) {
+  validateSaveChunkCoordinates(remove); validateSaveChunkCoordinates(paste)
+  const original = buffer || Buffer.alloc(8192)
+  validateRegionFile(original)
+  const header = Buffer.from(original.subarray(0, 8192)), added: Buffer[] = [], now = Math.floor(Date.now() / 1000)
+  for (const chunk of remove) {
+    const index = (chunk.chunkX & 31) + (chunk.chunkZ & 31) * 32
+    header.writeUInt32BE(0, index * 4); header.writeUInt32BE(0, 4096 + index * 4)
   }
-  return Buffer.concat([locations, timestamps, ...sectors])
+  let sector = Math.ceil(original.length / 4096)
+  const padding = Buffer.alloc(sector * 4096 - original.length)
+  for (const chunk of paste) {
+    if (![1, 2, 3].includes(chunk.compression) || !(chunk.data instanceof Uint8Array) || !chunk.data.byteLength) throw new Error('Invalid inline chunk payload')
+    const count = Math.ceil((chunk.data.byteLength + 5) / 4096)
+    if (!count || count > 255 || (sector + count) * 4096 > MAX_REGION_BYTES) throw new Error('Region edit exceeds the inline format or size limit')
+    const record = Buffer.alloc(count * 4096), index = (chunk.chunkX & 31) + (chunk.chunkZ & 31) * 32
+    record.writeUInt32BE(chunk.data.byteLength + 1, 0); record[4] = chunk.compression
+    Buffer.from(chunk.data.buffer, chunk.data.byteOffset, chunk.data.byteLength).copy(record, 5)
+    header.writeUInt32BE((sector << 8) | count, index * 4); header.writeUInt32BE(now >>> 0, 4096 + index * 4)
+    added.push(record); sector += count
+  }
+  return Buffer.concat([header, original.subarray(8192), padding, ...added])
 }
 
 function groupChunksByRegion<T extends { chunkX: number; chunkZ: number }>(chunks: T[]): Map<string, T[]> {
@@ -668,12 +679,17 @@ export async function readSaveChunks(
   dimension: string,
   chunks: Array<{ chunkX: number; chunkZ: number }>,
 ): Promise<SaveChunkData[]> {
+  validateSaveChunkCoordinates(chunks)
   const dir = getRegionDir(savePath, dimension)
   const result: SaveChunkData[] = []
-  for (const [key, list] of groupChunksByRegion(chunks)) {
+  const groups = groupChunksByRegion(chunks)
+  if (groups.size > 64) throw new Error('Too many regions in one chunk operation')
+  let readBytes = 0, copiedBytes = 0
+  for (const [key, list] of groups) {
     const file = join(dir, `r.${key}.mca`)
-    const buffer = await readFile(file).catch(() => undefined)
+    const buffer = await readRegionFile(file)
     if (!buffer || buffer.length < 8192) continue
+    if ((readBytes += buffer.length) > MAX_REGION_BYTES) throw new Error('Chunk operation regions exceed the size limit')
     for (const { chunkX, chunkZ } of list) {
       const index = (chunkX & 31) + (chunkZ & 31) * 32
       const headerOffset = index * 4
@@ -684,11 +700,12 @@ export async function readSaveChunks(
       const length = buffer.readUInt32BE(start)
       if (length <= 0 || start + 4 + length > buffer.length) continue
       const compression = buffer[start + 4]
+      if ((copiedBytes += length - 1) > 64 * 1024 * 1024) throw new Error('Copied chunk batch too large')
       const data = Uint8Array.from(buffer.subarray(start + 5, start + 4 + length))
       result.push({ chunkX, chunkZ, compression, data })
     }
   }
-  return result
+  return relocateSaveChunks(result, 0, 0)
 }
 
 /**
@@ -701,18 +718,13 @@ export async function writeSaveChunks(
   chunks: SaveChunkData[],
 ): Promise<void> {
   if (chunks.length === 0) return
+  relocateSaveChunks(chunks, 0, 0)
   const dir = getRegionDir(savePath, dimension)
   await ensureDir(dir)
-  const now = Math.floor(Date.now() / 1000)
   for (const [key, list] of groupChunksByRegion(chunks)) {
     const file = join(dir, `r.${key}.mca`)
-    const buffer = await readFile(file).catch(() => undefined)
-    const entries = buffer ? parseRegionChunks(buffer) : new Map<number, StoredChunk>()
-    for (const { chunkX, chunkZ, compression, data } of list) {
-      const index = (chunkX & 31) + (chunkZ & 31) * 32
-      entries.set(index, { compression, data, timestamp: now })
-    }
-    await writeFile(file, serializeRegionChunks(entries))
+    const buffer = await readRegionFile(file)
+    await writeAtomically(file, prepareRegionChunks(buffer, [], list), { fsync: true })
   }
 }
 
@@ -722,7 +734,18 @@ export async function writeSaveChunks(
  * coordinates of its new home. Without this Minecraft detects a mismatch
  * between the region-file slot and the stored position and regenerates it.
  */
-function patchChunkPositionInCompound(r: ChunkNbtReader, chunkX: number, chunkZ: number): void {
+function patchBlockPositions(r: ChunkNbtReader, offsetX: number, offsetZ: number) {
+  for (let type = r.u8(); type !== TAG_END; type = r.u8()) {
+    const key = r.str()
+    if (type === TAG_INT && (key === 'x' || key === 'z')) {
+      const value = r.buf.readInt32BE(r.pos) + (key === 'x' ? offsetX : offsetZ) * 16
+      if (!Number.isInteger(value) || value < -2147483648 || value > 2147483647) throw new Error('Relocated block position is outside NBT integer range')
+      r.buf.writeInt32BE(value, r.pos); r.pos += 4
+    } else r.skip(type)
+  }
+}
+
+function patchChunkPositionInCompound(r: ChunkNbtReader, chunkX: number, chunkZ: number, offsetX: number, offsetZ: number): void {
   for (;;) {
     const t = r.u8()
     if (t === TAG_END) break
@@ -735,18 +758,22 @@ function patchChunkPositionInCompound(r: ChunkNbtReader, chunkX: number, chunkZ:
       r.pos += 4
     } else if (t === TAG_COMPOUND && key === 'Level') {
       // Pre-1.18 worlds nest xPos/zPos inside a `Level` compound.
-      patchChunkPositionInCompound(r, chunkX, chunkZ)
+      patchChunkPositionInCompound(r, chunkX, chunkZ, offsetX, offsetZ)
+    } else if (t === TAG_LIST && ['block_entities', 'TileEntities', 'block_ticks', 'fluid_ticks', 'TileTicks', 'LiquidTicks'].includes(key)) {
+      const item = r.u8(), count = r.i32()
+      if (item !== TAG_COMPOUND && count) throw new Error('Invalid block entity or tick list')
+      for (let index = 0; index < count; index++) patchBlockPositions(r, offsetX, offsetZ)
     } else {
       r.skip(t)
     }
   }
 }
 
-function patchChunkPosition(raw: Buffer, chunkX: number, chunkZ: number): void {
+function patchChunkPosition(raw: Buffer, chunkX: number, chunkZ: number, offsetX: number, offsetZ: number): void {
   const r = new ChunkNbtReader(raw)
   if (r.u8() !== TAG_COMPOUND) return
   r.skipStr() // root compound name
-  patchChunkPositionInCompound(r, chunkX, chunkZ)
+  patchChunkPositionInCompound(r, chunkX, chunkZ, offsetX, offsetZ)
 }
 
 /**
@@ -754,29 +781,29 @@ function patchChunkPosition(raw: Buffer, chunkX: number, chunkZ: number): void {
  * NBT position is rewritten to match its new coordinates so the game loads it
  * at the chosen location.
  *
- * Block entities keep their original absolute coordinates, so tile entities
- * (chests, signs, etc.) in relocated chunks may be dropped by the game — the
- * terrain itself relocates correctly.
+ * Block entities and scheduled ticks move with the terrain. Separate entity/POI
+ * region files and custom mod references are outside this terrain payload.
  */
 export function relocateSaveChunks(chunks: SaveChunkData[], offsetX: number, offsetZ: number): SaveChunkData[] {
-  if (offsetX === 0 && offsetZ === 0) return chunks
-  return chunks.map((c) => {
+  validateSaveChunkCoordinates(chunks, offsetX, offsetZ)
+  let compressed = 0, expanded = 0
+  const relocated = chunks.map((c) => {
     const chunkX = c.chunkX + offsetX
     const chunkZ = c.chunkZ + offsetZ
-    let raw: Buffer
-    try {
-      if (c.compression === 1) raw = gunzipSync(c.data)
-      else if (c.compression === 2) raw = inflateSync(c.data)
-      else raw = Buffer.from(c.data)
-    } catch {
-      // Undecodable payload: relocate the region slot without touching the NBT.
-      return { chunkX, chunkZ, compression: c.compression, data: c.data }
-    }
-    patchChunkPosition(raw, chunkX, chunkZ)
+    if (![1, 2, 3].includes(c.compression) || !(c.data instanceof Uint8Array) || !c.data.byteLength || c.data.byteLength > 255 * 4096 - 5 || (compressed += c.data.byteLength) > 64 * 1024 * 1024) throw new Error('Invalid chunk payload')
+    const raw = c.compression === 1 ? gunzipSync(c.data, { maxOutputLength: 16 * 1024 * 1024 }) : c.compression === 2 ? inflateSync(c.data, { maxOutputLength: 16 * 1024 * 1024 }) : Buffer.from(c.data)
+    if ((expanded += raw.length) > 64 * 1024 * 1024) throw new Error('Expanded chunk batch too large')
+    const tags = validateNbt(raw), level = tags.find(tag => tag.type === TAG_COMPOUND && tag.key === 'Level')?.children || tags
+    const x = level.find(tag => tag.key === 'xPos'), z = level.find(tag => tag.key === 'zPos')
+    if (x?.type !== TAG_INT || z?.type !== TAG_INT || raw.readInt32BE(x.valueStart) !== c.chunkX || raw.readInt32BE(z.valueStart) !== c.chunkZ) throw new Error('Chunk NBT position does not match its source')
+    if (offsetX === 0 && offsetZ === 0) return c
+    patchChunkPosition(raw, chunkX, chunkZ, offsetX, offsetZ)
     let data: Uint8Array
     if (c.compression === 1) data = gzipSync(raw)
     else if (c.compression === 2) data = deflateSync(raw)
     else data = raw
+    if (data.byteLength > 255 * 4096 - 5) throw new Error('Relocated chunk exceeds inline region format')
     return { chunkX, chunkZ, compression: c.compression, data }
   })
+  return offsetX === 0 && offsetZ === 0 ? chunks : relocated
 }

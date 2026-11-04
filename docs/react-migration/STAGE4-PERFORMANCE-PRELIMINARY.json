@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "codeCommit": "6f319606ae7a31bdc29029e51dd40f35a027f122",
+  "productImplementationCommit": "505ea2dc8a372c547aeb62c71a367e5a6458263e",
+  "status": "partial-stage-4-performance",
+  "sourceFiles": [
+    {
+      "path": "launcher/e2e/fixtures/launcher.ts",
+      "sha256": "03c669375546e2fbe276650395f39acf291d73940b830bac5442dff7391809be"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/30-ambient-media.spec.ts",
+      "sha256": "da35de8e3c7a048989b1ee0da06d2c6b6ccb18fa69207644f7511beddd8f1606"
+    },
+    {
+      "path": "launcher/e2e/specs/react-performance/01-home.spec.ts",
+      "sha256": "bb4c441add09ebce3affef6e38db9db6a4d353109c355de036c057a5f85bfac9"
+    }
+  ],
+  "environment": {
+    "platform": "win32",
+    "os": "10.0.26100",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+    "logicalCpus": 12,
+    "totalMemoryBytes": 17010274304,
+    "recorder": false,
+    "runtime": {
+      "version": "0.2.0-beta.2",
+      "electron": "43.5.0",
+      "chrome": "150.0.7871.250",
+      "gpu": {
+        "2d_canvas": "enabled",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "enabled",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "enabled_on",
+        "rasterization": "enabled",
+        "raw_draw": "disabled_off_ok",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "enabled",
+        "video_encode": "enabled",
+        "webgl": "enabled",
+        "webgpu": "enabled",
+        "webnn": "disabled_off"
+      }
+    }
+  },
+  "units": {
+    "CPU": "100*cumulative CPU seconds delta / wall seconds; one core=100%; not divided by12 logical CPUs",
+    "memory": "app.getAppMetrics workingSetSize in KiB, divided1024 for MiB; not JS heap or dedicated VRAM",
+    "sampling": "approximately2s,31samples/workload,actual60s intervals; renderer PID+creationTime stable",
+    "GPU": "GPU process CPU/memory plus capability status. Physical GPU engine utilisation/VRAM NOT measured."
+  },
+  "results": [
+    {
+      "workload": "poster",
+      "seconds": 60.0152782,
+      "rendererCPUPercentOfOneCore": 0.13135321932074293,
+      "GPUProcessCPUPercentOfOneCore": 0.038776792673436214,
+      "totalAppCPUPercentOfOneCore": 0.4301987889477119,
+      "rendererMeanWorkingSetMiB": 130.49042338709677,
+      "rendererPeakWorkingSetMiB": 138.87890625,
+      "mediaFPS": null,
+      "initialMediaTime": null,
+      "finalMediaTime": null,
+      "observedScenes": [],
+      "finalDroppedVideoFrames": null
+    },
+    {
+      "workload": "video",
+      "seconds": 60.0036952,
+      "rendererCPUPercentOfOneCore": 1.7669628453149,
+      "GPUProcessCPUPercentOfOneCore": 4.775869203468655,
+      "totalAppCPUPercentOfOneCore": 6.6739289749608615,
+      "rendererMeanWorkingSetMiB": 124.56829637096774,
+      "rendererPeakWorkingSetMiB": 128.0703125,
+      "mediaFPS": 23.98185637073898,
+      "initialMediaTime": 2.048363,
+      "finalMediaTime": 2.008849,
+      "observedScenes": [
+        "nether"
+      ],
+      "finalDroppedVideoFrames": 0
+    },
+    {
+      "workload": "rotation",
+      "seconds": 60.012784100000005,
+      "rendererCPUPercentOfOneCore": 1.9079468102863768,
+      "GPUProcessCPUPercentOfOneCore": 5.210353172066882,
+      "totalAppCPUPercentOfOneCore": 7.285507689019212,
+      "rendererMeanWorkingSetMiB": 130.78616431451613,
+      "rendererPeakWorkingSetMiB": 134.16796875,
+      "mediaFPS": null,
+      "initialMediaTime": 2.018636,
+      "finalMediaTime": 1.972017,
+      "observedScenes": [
+        "end",
+        "nether"
+      ],
+      "finalDroppedVideoFrames": 0
+    },
+    {
+      "workload": "minimized",
+      "seconds": 60.009643699999984,
+      "rendererCPUPercentOfOneCore": 0.02494765687135728,
+      "GPUProcessCPUPercentOfOneCore": 0.07053033044420486,
+      "totalAppCPUPercentOfOneCore": 0.20027614328261725,
+      "rendererMeanWorkingSetMiB": 132.65713205645162,
+      "rendererPeakWorkingSetMiB": 136.1796875,
+      "mediaFPS": null,
+      "initialMediaTime": 0.035426,
+      "finalMediaTime": 0.035426,
+      "observedScenes": [
+        "nether"
+      ],
+      "finalDroppedVideoFrames": 0
+    },
+    {
+      "workload": "performance",
+      "seconds": 60.0164749,
+      "rendererCPUPercentOfOneCore": 0.027050905650574955,
+      "GPUProcessCPUPercentOfOneCore": 0.041077054327295554,
+      "totalAppCPUPercentOfOneCore": 0.16226877730201503,
+      "rendererMeanWorkingSetMiB": 135.41355846774192,
+      "rendererPeakWorkingSetMiB": 135.609375,
+      "mediaFPS": null,
+      "initialMediaTime": 0,
+      "finalMediaTime": 0,
+      "observedScenes": [
+        "nether"
+      ],
+      "finalDroppedVideoFrames": 0
+    }
+  ],
+  "validation": {
+    "performanceCase": {
+      "passed": 1,
+      "duration": "5.2m",
+      "workloads": 5,
+      "recorder": false,
+      "recordingFiles": 0
+    },
+    "defaultRecorderCompatibility": {
+      "passed": 1,
+      "seconds": 3.6,
+      "recordingFiles": 3,
+      "overlapsPreviousPackageCase": true
+    },
+    "harness": {
+      "passed": 9
+    },
+    "lint": "0warnings/errors across3 changed E2E files",
+    "types": "Global E2E tsc exits2 with56 diagnostics in unchanged E2E files;0 diagnostics in fixture,30ambient and new performance spec after annotation fixes. Root production check passed in preceding product block; not rerun for test-only changes. No global config changes.",
+    "priorProductRegression": "STAGE4-AMBIENT-MEDIA:591unit/66React+1Strict+2Vue,not repeated for test-only instrumentation.",
+    "sourceCorrection": "Type-only HTMLVideoElement/ProcessSample annotations and naming a pre-IPC timestamp; same measurement ordering/values. No5minute rerun for erased types.",
+    "dist": "Vue retained; test-only changes required no rebuild"
+  },
+  "commands": {
+    "performance": "LAUNCHER_RENDERER=react XMCL_E2E_EXECUTABLE=<packaged React EXE> XMCL_E2E_LOCALES=es-ES pnpm --dir e2e exec playwright test specs/react-performance/01-home.spec.ts --reporter=line --output=artifacts/home-performance",
+    "default": "Same packaged EXE; playwright test specs/react-migration/02-packaged.spec.ts --reporter=line --output=artifacts/home-performance-recorder-default",
+    "types": "pnpm --dir e2e exec tsc --noEmit (global fail56 unchanged-file diagnostics; changed files0)",
+    "lint": "pnpm exec oxlint -c .oxlintrc.json e2e/fixtures/launcher.ts e2e/specs/react-performance/01-home.spec.ts e2e/specs/react-migration/30-ambient-media.spec.ts",
+    "harness": [
+      "node --test launcher/scripts/react-migration.test.mjs",
+      "node launcher/scripts/react-migration.mjs check"
+    ]
+  },
+  "accepted": [
+    "Reference renderer CPU with video1.76696% of one core<8%; observed23.98186frames/s.",
+    "Minimized/performance video clock stable over60s,all samples paused.",
+    "No recorder in benchmark; existing default recording retained and packaged boot/auxiliary entries/decode passed."
+  ],
+  "remaining": [
+    "Physical GPU engine utilisation/dedicated-shared VRAM; add UTC sample timestamps for counter correlation. app metrics only covers GPU process CPU/memory.",
+    "Poster memory versus exact published beta.2 with equivalent profile and5 equivalent startup medians. Current poster renderer mean130.49MiB is not comparison evidence.",
+    "60s large-library/mod/console/game cases and navigation/subscription stability where those flows are available; all stage5–9 gates pending.",
+    "Global E2E56 unchanged-file type errors remain; do not alter protected ci/showcase tests. Microsoft deferred; no production release."
+  ],
+  "packages": [
+    {
+      "renderer": "react",
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/Grimo Launcher.exe",
+      "bytes": 238238720,
+      "sha256": "9476739eca3bb2e5da4435a51d29053c3f7d24a7456d6a1336677b58b05a7925"
+    },
+    {
+      "renderer": "react",
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/resources/app.asar",
+      "bytes": 26335117,
+      "sha256": "0714474733fe2012ea98d71b401f7932a46a1b24a6ca54c1dbabf65bb399b9f5"
+    },
+    {
+      "renderer": "vue",
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/Grimo Launcher.exe",
+      "bytes": 238238720,
+      "sha256": "13b8b46859deac9edec754c764ac8dfe3c68e41126a301481cae94b353c8ed0c"
+    },
+    {
+      "renderer": "vue",
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/resources/app.asar",
+      "bytes": 23864810,
+      "sha256": "16601ce9d4c0103a0827cadde5c4d8591fc199c24823f0dd18af633d369458fd"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/home-performance/react-performance-01-home--f4940-g-GPU-and-all-app-processes-electron-es-ES/home-performance.json",
+      "bytes": 414504,
+      "sha256": "3517d5303406a30350262cc2ba8cca02679c16cd9f45c0f3bbe982a25191f923"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-performance-harness-tests.log",
+      "bytes": 826,
+      "sha256": "a91aa6492fb6ac75d2611ae0f77cdfbae388302c5338eb2adfe179a2b465923b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-performance-lint-final.log",
+      "bytes": 93,
+      "sha256": "830b42835cc80a323d5c663c483918c739f1f89bbfc833a2351bc26fbed270aa"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-performance-lint.log",
+      "bytes": 93,
+      "sha256": "b8db7203f714801b30052fdd1d25966bdf1444731de8758418d394aa0b8fc855"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-performance-recorder-default/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-performance-recorder-default/react-migration-02-package-ecf1f-d-decodes-its-shipped-video-electron-es-ES/package-smoke.json",
+      "bytes": 277,
+      "sha256": "7f9f489555761c6192eaf2f00dec5d7fbf09c708319f0328e316c672a0cf93d6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-performance-recorder-default.log",
+      "bytes": 884,
+      "sha256": "1521491556c18e8fd201396f6010995aadaf0231b0a2c9f8e1d6c458434da375"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-performance-types-final.log",
+      "bytes": 7794,
+      "sha256": "b031bee6bc0a43bad8812f9ab1aa062a0ce53f3b3bf4c6a0f56e6620263bb7de"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-performance-types.log",
+      "bytes": 11838,
+      "sha256": "7df4ed47cd8fbde44795175d686e4ec050140817d454a508d45f200dbf65ee85"
+    },
+    {
+      "path": "launcher/e2e/artifacts/home-performance-harness-final.log",
+      "sha256": "161849bca366cb0707d554a0b4360a755da3e871240ed2ad7718a07af5165a8b",
+      "bytes": 142
+    }
+  ],
+  "previousRemoteCI": {
+    "run": "https://github.com/Jeremy-Godoy-D/Launcher-MC/actions/runs/40398501994",
+    "head": "2498ac5e5bd6853d71db42c37a46acf685597a86",
+    "conclusion": "success React and Vue"
+  },
+  "currentRemoteCI": "pending after push"
+}

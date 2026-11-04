@@ -35,6 +35,7 @@ autoUpdater.setFeedURL({
 autoUpdater.logger = null
 
 app.whenReady().then(async () => {
+  if (process.env.LAUNCHER_RENDERER === 'react') return
   // Reimplement `electron-devtools-installer`'s install using the non-deprecated
   // `session.extensions` API. The published package still calls the deprecated
   // `session.getAllExtensions`/`session.loadExtension`, which prints trace warnings.

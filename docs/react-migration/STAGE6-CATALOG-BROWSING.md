@@ -1,0 +1,43 @@
+# Catálogo público: búsqueda, fichas y recuperación
+
+Bloque del 2026-11-02. K14 aceptado; criterios `catalog-search` y `catalog-network-failures` aceptados. Etapa6 activa: **K15/K16 y `catalog-install` siguen pendientes** de integrar destinos de instalación, dependencias, actualizaciones y progreso. No se ha publicado React en producción.
+
+## Implementación y límites de aceptación
+
+- `Catalog.tsx` sustituye los ejemplos de App por Modrinth/CurseForge reales: fuente, búsqueda explícita, tipo, Minecraft, loader, orden y páginas de24 resultados. El campo Minecraft confirma al salir o pulsar Enter para no consultar por cada carácter. Validación de parámetros compartibles, IDs, imágenes HTTPS sin credenciales y respuestas del proveedor. Mundos dirige a CurseForge; no simula soporte de Modrinth.
+- TanStack Query conserva cachés independientes de metadatos públicos. Se cancela la consulta obsoleta, se conservan fuente/filtros/scroll/historial y se devuelve foco al cerrar la ficha. Autorización, datos inválidos y cuota no se reintentan automáticamente; dos reintentos transitorios como máximo. El loader se aplica a mods y modpacks; se desactiva para los demás tipos. Se respeta Retry-After sin un temporizador de consultas. Offline pausa una consulta nueva y la conexión la reanuda una vez.
+- La ficha ofrece información, galería y versiones paginadas/filtradas con la compatibilidad de una instancia elegida. MarkdownIt y DOMPurify eliminan scripts, manejadores, iframes, estilos y enlaces/medios inseguros; los enlaces externos pasan por la política existente de main. **El selector todavía comprueba compatibilidad: no representa una instalación terminada.** Destino operativo, instalado/actualización, revisión e instalación se cierran con K15/K16.
+- Se reutilizan los clientes instalados. CurseForge entra en el interceptor existente y se reescribe al proxy antes de la petición nativa; una aserción Native verifica ese salto. No se usa ninguna API key en el renderer. El Worker y sus secretos no cambian.
+- Se reutiliza el control de red de las actualizaciones en `queries.ts`. DOMPurify/MarkdownIt/tipos Markdown ya existían en el lock; se añadieron tres referencias de importer, sin cambiar versiones/integridades globales ni normalizar peers ajenos. Se retiró el stub redundante de tipos DOMPurify. Instalación frozen/offline validada; nueve líneas nuevas en el lock.
+
+## Cancelación y seguridad
+
+La prueba de una búsqueda detenida antes de recibir cabeceras encontró que el Request del protocolo de Electron43 no transmite la cancelación del renderer. El [código oficial de la versión usada](https://raw.githubusercontent.com/electron/electron/v43.5.0/lib/browser/api/protocol.ts) construye ese Request sin asociar una señal. El problema se corrigió en el protocolo compartido, sin sustituir fetch en producción.
+
+Cada lectura GET pública del catálogo usa un identificador aleatorio de122 bits y una operación local POST para cancelarla. El identificador se retira antes de los interceptores/proveedores, no da acceso a archivos/cuentas y no llega al Worker. Registro acotado a64 lecturas y256 cancelaciones tempranas, plazo máximo30s, limpieza al terminar/cerrar el cuerpo y respuesta499 silenciosa para una cancelación esperada. Las peticiones ordinarias conservan método/señal/caché; las consultas POST de actualización se revisarán con K16. Seis unitarias cubren aislamiento, cancelación anticipada, plazo, limpieza, validación y límites. Native confirma que la conexión de la búsqueda anterior se cierra y su resultado no sustituye al nuevo.
+
+Los datos HTML/Markdown remotos no se consideran código confiable. La prueba incluye payloads ejecutables, esquemas javascript/file/data y errores con texto privado, que no se ejecutan ni se muestran. Esto no sustituye la auditoría global de seguridad/distribución de las etapas8–9.
+
+## Evidencia reproducible
+
+| Comprobación | Resultado y alcance |
+| --- | --- |
+| Selección completa de unitarias de migración/CI | **1403/139 archivos**,30,57s, independiente, `--maxWorkers=4`. 192/22 focales antes del cierre. Tras corregir el filtro de modpacks,183/19 React pasan; se conserva la suite1403 previa y se deja el nuevo total1405 al CI, sin repetirla ni declararlo aprobado localmente. |
+| React Native, spec93 | **Seis escenarios distintos**: ambos clientes/filtros/páginas, cancelación/cuota/fuente sana, HTML/Markdown/history/scroll/foco/reload, matriz visual, autorización/datos inválidos y offline. |
+| Paquetes y fixtures | Aplicación y fixtures finales `1517fad`, seis recorridos14,3s sobre el mismo EXE identificado, sin reintentos. Incluye filtros de loader para modpacks de ambas fuentes, vacío de mundos CF y salto al proxy. Se conservan las ejecuciones intermedias como diagnóstico, sin contarlas como casos adicionales. |
+| Matriz visual final | Claro/oscuro y1200×720/800×400;4/2 columnas, cabecera completa y acciones fijas fuera del scroll. Cuatro Axe sin violaciones, ocho incomplete. Capturas revisadas de resultados oscuros estándar y ficha clara mínima. No se afirma revisión AA manual global. |
+| Vue Native | **Tres** pruebas,10,7s, aplicación `bbd8073`: compatibilidad de puente y descargas reales de datapacks Modrinth/CurseForge con sesiones y bytes conservados. Se conserva también CI8a27d20 completo, ambos renderers en success. |
+| Tipos/lint/build | React/runtime/DeskGap pasan tipos; lint sin errores y avisos previos. E2E conserva56 diagnósticos base, sin nuevos. Renderer y paquete Electron recompilados antes de Native; DeskGap con `NODE_ENV=production` sale0. Host Vue restaurado, con identidad registrada. |
+| Harness y dependencias | Nueve pruebas del harness; frozen/offline válido.138 IDs React registrados. No se tocan ANALISIS_ARQUITECTURA, datos habituales ni releases. |
+
+Comandos desde launcher: `pnpm --prefix xmcl-react-ui check`, check runtime/DeskGap, `pnpm lint`, `pnpm --dir e2e exec tsc --noEmit` con comparación de los56 diagnósticos; la selección Vitest del workflow con `--maxWorkers=4 --reporter=dot`; build:renderer y build Electron con `LAUNCHER_RENDERER=react`, Playwright spec93 con EXE propio/es-ES/worker1/retries0/max-failures1. Compatibilidad: paquete Vue y specs03/86. DeskGap: `NODE_ENV=production LAUNCHER_RENDERER=vue pnpm --prefix deskgap-app build`. Las variables se declaran en PowerShell, no con sintaxis Unix. No builds ni suites completas simultáneos con Native.
+
+Los hashes EXE/ASAR/HTML están en las identidades ignoradas `stage6-catalog-verified-react-identity.json`, `stage6-catalog-vue-functional-identity.json` y `stage6-catalog-host-vue-identity.json`. Manifest `stage6-catalog-manifest.json`, SHA-256 **3b38e55309f8a6ed65724d748d82857d8ae3b9ae9058ffc8ac160ea114f579b1**,20 fuentes/96 artefactos, código `1517fad`. Post-check y descripción de PR quedan fuera del manifest.
+
+## Ejecuciones descartadas y pendientes
+
+La interceptación Playwright de página no alcanza el protocolo HTTPS propio; se reemplazó la fixture por el servidor HTTP local y el salto nativo usado por spec86. La revisión automática rechazó la propuesta de sustituir fetch en la fixture; **no repetirla**. La redirección local se limita al salto de main para conservar el estado HTTP del renderer. La cancelación falló antes de la corrección de producto y pasa después; no se relajó esa aserción. El foco tras desplazar la cuadrícula requiere scroll real del botón, incluso si ya estaba enfocado.
+
+Una ejecución amplia sin el límite de procesos falló la prueba antigua de progreso con ENOENT; se descartó como cierre, se fijó el comando de CI a cuatro y pasó1403/1403, sin tocar test ni tiempos del instalador. Una selección vacía arrancó por error el grupo Aurora; se excluye de esta evidencia y se validó el selector del comando antes de ejecutarlo de nuevo. Una invocación DeskGap sin NODE_ENV correcto falló el guard ASCII por un comentario de dependencia; el build de producción indicado en RESUME pasó. No se ocultaron esas ejecuciones ni se borraron artefactos para aparentar éxito.
+
+Falta K16 completo y terminar K15 con su destino operativo: dependencias/compatibilidad, instalar contenido, importar modpacks mediante el flujo existente, actualizar y revisar cambios, progreso/cancelación/recuperación. Después siguen7 globales,8 cambio del renderer por defecto/recorte y9 validación final/instalador/actualización/publicación0.3.0-beta.1. No se ha instalado contenido desde esta ficha ni ejecutado una partida/instalador en este bloque. Las respuestas remotas de la validación son fixtures HTTP; no equivalen a una prueba de cuota/key del Worker real. Microsoft continúa pospuesto.

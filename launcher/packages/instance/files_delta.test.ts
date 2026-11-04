@@ -337,4 +337,10 @@ describe('computeFileUpdates', () => {
     )
     expect(updates[0].operation).toBe('add')
   })
+  it('backs up edited bytes when the target differs only by filename case', async () => {
+    const current = { size: 100, mtime: 1000, sha1: 'USER' }, fs = createFs({ 'mods/Old.jar': current, 'mods/old.jar': current }, INSTANCE)
+    const updates = await computeFileUpdates(INSTANCE, [file('mods/Old.jar', 'ORIGINAL')], [file('mods/old.jar', 'NEW')], undefined, fs, true)
+    expect(updates).toContainEqual({ file: file('mods/old.jar', 'NEW'), operation: 'backup-add' })
+  })
+
 })

@@ -1,0 +1,11 @@
+{
+  "default": "react",
+  "vue": {
+    "package": "xmcl-keystone-ui",
+    "port": 3000
+  },
+  "react": {
+    "package": "xmcl-react-ui",
+    "port": 3000
+  }
+}

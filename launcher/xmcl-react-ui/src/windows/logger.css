@@ -1,0 +1,9 @@
+@layer components {
+  .logger-window { height: 100vh; display: grid; grid-template-rows: 48px minmax(0, 1fr); background: var(--canvas); }
+  .logger-content { min-width: 0; overflow: auto; padding: 20px; scroll-padding-block: 12px; scrollbar-gutter: stable; }
+  .logger-identity { display: grid; gap: 6px; }
+  .logger-identity h1 { margin: 0; font-size: 24px; overflow-wrap: anywhere; }
+  .logger-identity p { color: var(--muted); margin: 0; max-width: 72ch; }
+  .logger-content .console-header h2 { font-size: 18px; }
+  .logger-window[data-performance='true'] .titlebar { backdrop-filter: none; background: var(--canvas); }
+}

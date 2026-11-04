@@ -1,0 +1,127 @@
+import { test, expect, type Page } from '../../helpers/scratch'
+import { seedReactLibrary } from '../../helpers/react-library'
+import { link, mkdir, readFile, readdir, rename, symlink, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { createHash } from 'node:crypto'
+import { pathToFileURL } from 'node:url'
+
+test.use({ launcherOptions: { locale: 'es-ES' } })
+
+async function call(page: Page, method: string, ...args: unknown[]) {
+  return page.evaluate(async ({ method, args }) => {
+    try { return { value: await (window as any).serviceChannels.open('InstanceInstallService').call(method, ...args) } }
+    catch (error: any) { return { error: { name: error.name, message: error.message } } }
+  }, { method, args })
+}
+
+test('native installer refuses unmanaged directories and hides its internal file readers', async ({ launcher }) => {
+  const page = launcher.main, outside = join(launcher.gameDataPath, 'unregistered')
+  await mkdir(outside); await writeFile(join(outside, 'keep'), 'KEEP')
+  const options = { path: outside, oldFiles: [], files: [] }
+  for (const method of ['installInstanceFiles', 'previewInstanceFiles', 'stageInstanceFiles', 'setInstanceInstallManifest']) {
+    expect((await call(page, method, options)).error?.name).toBe('InstanceNotFoundError')
+  }
+  for (const method of ['getInstanceInstallManifest', 'applyInstanceInstallManifest', 'discardInstanceInstallManifest', 'resumeInstanceInstall', 'dismissUnresolvedFiles', 'watchInstanceInstall', 'getLegacyLock']) {
+    expect((await call(page, method, outside)).error?.name).toBe('InstanceNotFoundError')
+  }
+  for (const method of ['getInstallFile', 'getSha1', 'getCrc32', 'getChecksum', 'resumeInstallProfile']) {
+    expect((await call(page, method, outside)).error).toBeTruthy()
+  }
+  expect(await readdir(outside)).toEqual(['keep'])
+  expect(await readFile(join(outside, 'keep'), 'utf8')).toBe('KEEP')
+})
+
+test('native installer rejects a registered root replaced with a junction', async ({ launcher }) => {
+  const page = launcher.main, [path] = await seedReactLibrary(page), outside = join(launcher.gameDataPath, 'outside')
+  await mkdir(outside); await writeFile(join(outside, 'keep'), 'KEEP')
+  await rename(path, `${path}-saved`); await symlink(outside, path, 'junction')
+  for (const method of ['installInstanceFiles', 'stageInstanceFiles']) {
+    expect((await call(page, method, { path, oldFiles: [], files: [] })).error?.name).toBe('UnsafeInstanceDirectory')
+  }
+  expect(await readdir(outside)).toEqual(['keep'])
+  expect(await readFile(join(outside, 'keep'), 'utf8')).toBe('KEEP')
+})
+
+test('native metadata writes preserve linked originals and cannot replace launcher configuration', async ({ launcher }) => {
+  const page = launcher.main, [path] = await seedReactLibrary(page), original = await readFile(join(path, 'instance.json'))
+  for (const target of ['../outside', 'instance.json', 'config/../INSTANCE.JSON', '.install-state-old.tmp', '']) {
+    const options = { path, oldFiles: [], files: [{ path: target, hashes: {} }] }
+    for (const method of ['previewInstanceFiles', 'stageInstanceFiles', 'installInstanceFiles']) {
+      expect((await call(page, method, options)).error?.message).toContain('Invalid instance install path')
+    }
+  }
+  expect(await readFile(join(path, 'instance.json'))).toEqual(original)
+  const outside = join(launcher.gameDataPath, 'manifest-original.json'), manifest = join(path, '.install-manifest')
+  const data = JSON.stringify({ version: 1, createdAt: 1, updatedAt: 1, oldFiles: [], files: [] })
+  await writeFile(outside, data); await link(outside, manifest)
+  expect((await call(page, 'stageInstanceFiles', { path, oldFiles: [], files: [{ path: 'mods/next.jar', hashes: {} }] })).error).toBeUndefined()
+  expect(JSON.parse(await readFile(manifest, 'utf8')).files[0].path).toBe('mods/next.jar')
+  expect(await readFile(outside, 'utf8')).toBe(data)
+  expect((await call(page, 'discardInstanceInstallManifest', path)).error).toBeUndefined()
+  await expect(readFile(manifest)).rejects.toMatchObject({ code: 'ENOENT' })
+  expect(await readFile(outside, 'utf8')).toBe(data)
+  expect(await readFile(join(path, 'instance.json'))).toEqual(original)
+})
+
+for (const name of ['.install', '.backups']) test(`native installer refuses a linked ${name} before staging`, async ({ launcher }) => {
+  const page = launcher.main, [path] = await seedReactLibrary(page), outside = join(launcher.gameDataPath, 'outside')
+  await mkdir(outside); await writeFile(join(outside, 'keep'), 'KEEP')
+  await symlink(outside, join(path, name), 'junction')
+  const result = await call(page, 'installInstanceFiles', { path, oldFiles: [], files: [{ path: 'mods/next.jar', hashes: {} }] })
+  expect(result.error?.message).toContain('Unsafe install directory')
+  expect(await readdir(outside)).toEqual(['keep'])
+  expect(await readFile(join(outside, 'keep'), 'utf8')).toBe('KEEP')
+})
+
+test('native resume rejects external state paths and recovers legacy metadata without moving its external workspace', async ({ launcher }) => {
+  const page = launcher.main, [path] = await seedReactLibrary(page), outside = join(launcher.gameDataPath, 'outside'), profile = join(path, '.install-profile')
+  await mkdir(outside); await writeFile(join(outside, 'keep'), 'KEEP')
+  const state = { version: 1, mtime: 1, upstream: { type: 'peer', id: '' }, oldFiles: [], files: [], finishedPath: [], workspace: join(path, '.install/op/files'), backup: join(path, '.backups/op') }
+  for (const field of ['workspace', 'backup']) {
+    const data = JSON.stringify({ ...state, [field]: outside })
+    await writeFile(profile, data)
+    expect((await call(page, 'resumeInstanceInstall', path)).error?.message).toContain('Unsafe install state paths')
+    expect(await readFile(profile, 'utf8')).toBe(data)
+    expect(await readdir(outside)).toEqual(['keep'])
+  }
+  const { basename, dirname } = await import('node:path'), legacy = join(dirname(path), `.${basename(path)}-install-legacy`)
+  // All resources belong to this isolated launcher fixture.
+  expect(legacy.startsWith(launcher.gameDataPath)).toBe(true)
+  await mkdir(legacy); await writeFile(join(legacy, 'keep'), 'LEGACY')
+  await writeFile(profile, JSON.stringify({ ...state, workspace: legacy }))
+  expect((await call(page, 'resumeInstanceInstall', path)).error).toBeUndefined()
+  await expect(readFile(profile)).rejects.toMatchObject({ code: 'ENOENT' })
+  expect(await readdir(legacy)).toEqual(['keep'])
+  expect(await readFile(join(legacy, 'keep'), 'utf8')).toBe('LEGACY')
+  expect(await readFile(join(outside, 'keep'), 'utf8')).toBe('KEEP')
+})
+
+test('native preview and install reject redirected destination ancestors without changing outside files', async ({ launcher }) => {
+  const page = launcher.main, paths = await seedReactLibrary(page), outside = join(launcher.gameDataPath, 'outside')
+  await mkdir(outside); await writeFile(join(outside, 'next.jar'), 'KEEP')
+  for (const [index, relative, parent] of [[0, 'mods/next.jar', 'mods'], [1, 'config/deep/next.jar', 'config/deep']] as const) {
+    const path = paths[index], linked = join(path, parent), { dirname } = await import('node:path')
+    await mkdir(dirname(linked), { recursive: true }); await symlink(outside, linked, 'junction')
+    for (const method of ['previewInstanceFiles', 'installInstanceFiles']) {
+      expect((await call(page, method, { path, oldFiles: [], files: [{ path: relative, hashes: {} }] })).error?.message).toMatch(/link|Unsafe/)
+    }
+    expect(await readFile(join(outside, 'next.jar'), 'utf8')).toBe('KEEP')
+    expect(await readdir(outside)).toEqual(['next.jar'])
+  }
+})
+
+test('native file installation preserves its own shared roots but refuses nested links and directory replacement', async ({ launcher }) => {
+  const page = launcher.main, [path] = await seedReactLibrary(page), source = join(launcher.gameDataPath, 'source.txt'), outside = join(launcher.gameDataPath, 'outside')
+  await writeFile(source, 'LOCAL FILE'); await mkdir(outside); await writeFile(join(outside, 'keep'), 'KEEP')
+  const hashes = { sha1: createHash('sha1').update('LOCAL FILE').digest('hex') }, downloads = [pathToFileURL(source).href]
+  for (const [name, service, method] of [['resourcepacks', 'InstanceResourcePacksService', 'linkShared'], ['shaderpacks', 'InstanceShaderPacksService', 'linkShared'], ['saves', 'InstanceSavesService', 'linkSharedSave']]) {
+    await page.evaluate(async ({ service, method, path }) => { await (window as any).serviceChannels.open(service).call(method, path) }, { service, method, path })
+    expect((await call(page, 'installInstanceFiles', { path, oldFiles: [], files: [{ path: `${name}/next.txt`, hashes, downloads }] })).error).toBeUndefined()
+    expect(await readFile(join(launcher.gameDataPath, name, 'next.txt'), 'utf8')).toBe('LOCAL FILE')
+    expect(await readFile(source, 'utf8')).toBe('LOCAL FILE')
+    expect((await call(page, 'previewInstanceFiles', { path, oldFiles: [], files: [{ path: name, hashes }] })).error?.message).toContain('Unsafe instance file')
+    await symlink(outside, join(launcher.gameDataPath, name, 'nested'), 'junction')
+    expect((await call(page, 'previewInstanceFiles', { path, oldFiles: [], files: [{ path: `${name}/nested/keep`, hashes }] })).error?.message).toContain('Unsafe instance file')
+  }
+  expect(await readFile(join(outside, 'keep'), 'utf8')).toBe('KEEP')
+})

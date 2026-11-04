@@ -20,6 +20,32 @@ function createClient() {
 }
 
 describe(ServiceStateContainer, () => {
+  test('inherited mutations work across containers without changing class prototypes; prototype methods are not RPC mutations', async () => {
+    class Derived extends TestState { extra = 1 }
+    const original = Object.getPrototypeOf(Derived.prototype)
+    const first = new ServiceStateContainer('a', vi.fn(), { instance: new Derived() })
+    const second = new ServiceStateContainer('b', vi.fn(), { instance: new Derived() })
+    await Promise.all([first.promise, second.promise])
+    await first.commit('valueSet', 2)
+    await second.commit('valueSet', 3)
+    expect(first.snapshot().value).toBe(2)
+    expect(second.snapshot().value).toBe(3)
+    expect(Object.getPrototypeOf(Derived.prototype)).toBe(original)
+    await expect(first.commit('toString', undefined)).rejects.toThrow('Cannot find mutation')
+    await expect(first.commit('constructor', undefined)).rejects.toThrow('Cannot find mutation')
+    first.destroy(); second.destroy()
+  })
+  test('snapshots and commit events carry the same monotonically increasing state revision', async () => {
+    const client = createClient()
+    const container = new ServiceStateContainer('revision', vi.fn(), { instance: new TestState() })
+    await container.promise
+    container.track(client)
+    expect(container.snapshot()).toMatchObject({ value: 0, __stateRevision__: 0 })
+    await container.commit('valueSet', 5)
+    expect(client.send).toHaveBeenLastCalledWith('commit', 'revision', 'valueSet', 5, 1, container.epoch)
+    expect(container.snapshot()).toMatchObject({ value: 5, __stateRevision__: 1 })
+    container.destroy()
+  })
   test('removes the client destroyed listener when the state is untracked', async () => {
     const client = createClient()
     const disposer = vi.fn()

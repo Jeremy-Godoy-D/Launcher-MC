@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-24",
+  "codeCommit": "cd6b9aeb006761115c031a9b9247e7fb694c8112",
+  "stage": 4,
+  "status": "partial",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/react-migration.yml",
+      "sha256": "27f174f2564deab3fdd04492f641c0b6ec720a9c90397210b3fcaf872a709d26"
+    },
+    {
+      "path": "launcher/e2e/TESTIDS.react.md",
+      "sha256": "3efa10b61510405a5be8cf9cefba741b86322a2b8d0e49086cce2918a41bee0c"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/03-vue-compatibility.spec.ts",
+      "sha256": "653736681956b5684165a387ab8d81fb51eb47e27fa3b7d978976bffe450070f"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/06-accounts.spec.ts",
+      "sha256": "eea631ffa021e87ab513b931a4405c9c148db4bbb768a81a2ecc516129e991c5"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/App.tsx",
+      "sha256": "fe3fc9496f8648191a32cf3c3dd59dc9a8a173161699ce108378fd4f846b0e3d"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/accounts/Accounts.tsx",
+      "sha256": "781cf81b039c28d9681fa491e1a5e76f64386d7178c583e368223528abf495d5"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/accounts/accounts.css",
+      "sha256": "76c5bc06d12f48d31bc26998564ebaa7078310bca7185f3162cdbe9e858fa9e1"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/accounts/context.tsx",
+      "sha256": "47a789b397c050599efd7cf26545558b69980d651281aca691b8eadafcfcd5e5"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/accounts/model.test.ts",
+      "sha256": "efa5a2a758d36ed3bcb859fc3a02838f6e88ee576b4c757a8f66d45b7d1e5d97"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/accounts/model.ts",
+      "sha256": "ae4065d5967f9945e715fa2d3864a1861c016fb2fa1be138cc55cbeccd1740c5"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/accounts/selection.ts",
+      "sha256": "75488477cc123590d4af613b2930654624c6d026a30b3328977e63814d71f98d"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/en.yaml",
+      "sha256": "eb10209a4fc9ecc5d4eb30b1347d741e58bfdb279c589e2b01fa476b9e655a56"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/es-ES.yaml",
+      "sha256": "da2b0508d5cf2d4aba7fbf14638c28afe6190922cfaaf48c716443aaa5cf7c29"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/main.tsx",
+      "sha256": "487606ce7603d1eb2a05dd7c1e4252cb74f0d4827c6bc8470ffbab4fccef204f"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/util/offlineUser.ts",
+      "sha256": "03e8ed9453c793bc613518b3dde314ecda1d5c8623e8e9bd913e0c996052d2ea"
+    },
+    {
+      "path": "launcher/xmcl-runtime/user/UserService.persistence.test.ts",
+      "sha256": "971d68e3846f8f1f94bcfe0b1a63a5ea11909cb0a301b9fa39504e6736cc5d17"
+    },
+    {
+      "path": "launcher/xmcl-runtime/user/UserService.ts",
+      "sha256": "0a4f74ee4173762849c0b8cf656e88804fc4a4baddc00dcf1029c8abfef0bd3f"
+    },
+    {
+      "path": "launcher/xmcl-runtime/user/pluginOfflineUser.ts",
+      "sha256": "2f68ef4b668dfbcd64eec4bdc5fb8f7b70bfc448a78ac171bed62691a9144b41"
+    }
+  ],
+  "validation": {
+    "unit": {
+      "passed": 63,
+      "files": 12,
+      "seconds": 2.94
+    },
+    "types": true,
+    "lint": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "harnessTests": 9,
+    "reactRegression": {
+      "passed": 6,
+      "seconds": 28.5,
+      "specs": [
+        "01-prototype",
+        "02-packaged",
+        "05-preferences-i18n",
+        "06-accounts"
+      ]
+    },
+    "accountsVisual": {
+      "passed": 2,
+      "seconds": 10.8,
+      "viewports": [
+        [
+          1200,
+          720
+        ],
+        [
+          800,
+          400
+        ]
+      ],
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "axeReports": 4,
+      "axeViolations": 0,
+      "axeIncompleteTotal": 4
+    },
+    "vue": {
+      "passed": 1,
+      "seconds": 6.2,
+      "staleAccountSnapshotSelection": true
+    },
+    "mechanicalDesignDetector": [],
+    "githubWorkflowExecuted": false
+  },
+  "localIgnoredEvidence": [
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage4-unit.log",
+      "bytes": 253,
+      "sha256": "662868222995d5168f8b6df62f10e8143fae6e1897359d469d06775c104a478d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage4-types.log",
+      "bytes": 562,
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage4-lint.log",
+      "bytes": 1145,
+      "sha256": "7f7f0ec7a88d3de246d6af78cc222be4556eba0202cb0e954034ad933ebe210e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage4-accounts-renderer.log",
+      "bytes": 3181,
+      "sha256": "0126d0055d67c050d0a2239ea487c3f45273d891cb6263b6d6466bac1602f029"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage4-accounts-build.log",
+      "bytes": 2575,
+      "sha256": "7e563d9bfaa98b4c858d88dc1821d5fa29b74b7137e8745354fa06f12e428971"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage4-accounts-regression.log",
+      "bytes": 3624,
+      "sha256": "6cb9e35002217df91023733a09d5dda710b5698eb97dc2c2488e9b5bf92bde14"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage4-accounts-visual.log",
+      "bytes": 1576,
+      "sha256": "902d775fdbcb82f4b036361e6400cf05aeb917b6dbe3406c581c5ed636cf1ad0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage4-vue-build.log",
+      "bytes": 1462,
+      "sha256": "0d2061c9a5dcd644a4f43182eba31be19105aa299873c9a95886d6348e387d22"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage4-vue.log",
+      "bytes": 8762,
+      "sha256": "c3a7a5eab0b6299e0dafdac097b1a624bb65ed84c4d940bad6109e3b1d89877d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage4-design-detector.json",
+      "bytes": 4,
+      "sha256": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage4-accounts-visual/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-es-ES/accounts-accessibility.json",
+      "bytes": 809594,
+      "sha256": "69f2aa6e2cb92998204c5885e448b776e5a7f9ed8fd1d2a9a6374af1b374f2de"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage4-accounts-visual/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-es-ES/accounts.json",
+      "bytes": 214,
+      "sha256": "52734c150ac2fc6295bb147075c7cbd36571bbbcf77233aea80a515c200de297"
+    }
+  ],
+  "packageArtifacts": [
+    {
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/Launcher MC.exe",
+      "bytes": 238133760,
+      "sha256": "278ef356adbab9720d5f283677a38084f84f5366b11e793cec49d9fbe3d9a764"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/resources/app.asar",
+      "bytes": 21396973,
+      "sha256": "4f6d1b3eb16d7f7c54d4616d73d966c4d8dd259c7b65acfd42295b67eed4ee48"
+    }
+  ],
+  "pending": [
+    "Onboarding with validated native root and retry/confirmation",
+    "Local profile appearance/editing",
+    "Real instances/home/carousel/library/create/import/launch",
+    "Manual full accessibility/security/performance/isolated installer release gates"
+  ],
+  "limits": [
+    "Accounts route is connected; the other main feature pages still use clearly identified fixtures. No stage4 gate is complete.",
+    "Only disposable fixture profiles and synthetic world marker were changed. No real game/OAuth/installer executed.",
+    "No deployment/push/PR/publication; public beta.2, proxy, updater and ANALISIS_ARQUITECTURA.md unchanged."
+  ]
+}

@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "timeZone": "America/Bogota",
+  "codeCommit": "d161d3672d6b60b82cd9f096c385fe67d4c56e14",
+  "status": "partial-stage-4",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/react-migration.yml",
+      "sha256": "f043f54807a24816b1a541e81b514ca1497a85d8eebd59501dc8d1a4fb311775"
+    },
+    {
+      "path": "launcher/packages/instance/duplicate.test.ts",
+      "sha256": "067380ef4fece5ee4e132c134fa8f216e57e0b89cda578a7f3eb55feef42ba46"
+    },
+    {
+      "path": "launcher/packages/instance/duplicate.ts",
+      "sha256": "9872c51656b69a3ded3ad39b14c7e64c511ee56bf6e7f8fb3df5249541b9d728"
+    }
+  ],
+  "validation": {
+    "unit": {
+      "passed": 471,
+      "files": 51,
+      "seconds": 13.35
+    },
+    "focusedUnit": {
+      "passed": 7,
+      "files": 1,
+      "seconds": 0.409
+    },
+    "electronAffected": {
+      "passed": 3,
+      "reportedDuration": "9.3s"
+    },
+    "electronVue": {
+      "passed": 2,
+      "reportedDuration": "10.0s"
+    },
+    "harness": {
+      "passed": 9
+    },
+    "types": "pnpm check passed",
+    "lint": "0 warnings/errors",
+    "builds": [
+      "React renderer/host Windows",
+      "Vue renderer/host Windows; dist ends Vue"
+    ],
+    "previousFullRegression": {
+      "report": "docs/react-migration/STAGE4-GROUPS.json",
+      "distinctScenarios": 45,
+      "repeatedInFullForThisNativeFix": false
+    },
+    "negativeReproduction": "Three new scenarios failed against prior code: drain after abort/directory error and cancellation during last file; controlled independent cleanup awaits the real test copy",
+    "remoteCI": {
+      "run": "https://github.com/Jeremy-Godoy-D/Launcher-MC/actions/runs/40276484666",
+      "head": "6ec5c52",
+      "unitPassed": 466,
+      "harnessTestsPassed": 9,
+      "result": "Repository check lacked baseline commit in shallow checkout; Vue failed and React cancelled",
+      "fix": "Workflow checkout fetch-depth0; next remote run pending"
+    }
+  },
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-before-controlled.log",
+      "sha256": "918644170759ff437463aecbff461fba5de15f732fc163de58b9036af615d3a0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-before.log",
+      "sha256": "32d24f8f8325d009249cc65d3d20857f15bd81755901a87cdffd0b14ae1e9c84"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-ci-failure.log",
+      "sha256": "d930920086028fe05c0ed66fb598c0ff7d17509de81e255b2640a6327a700d88"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-electron.log",
+      "sha256": "251e282370dc30f7fbea8d596302bc36546e71fa1198f782ef8c9c111abd13bc"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-electron/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-electron/react-migration-19-library-98b63-folder-after-a-full-restart-electron-en/operations-accessibility.json",
+      "sha256": "87cc5827ecb2b1d63c642418f047dce13dbbcfea3bb23557d62dfad8e9d5b4c0"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-fixed-units.log",
+      "sha256": "00311ac8763179db1ffb2c77b9b230b9678bb46818ecab4e44b42b86a4f2228a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-harness-tests.log",
+      "sha256": "b12c91d3af588782f21c1b1a6d4fe57b6b9a61421ef6a84bbe610e513c7f95b4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-lint.log",
+      "sha256": "9092b2b8a73ab8488cb012fa9d382a72c77c175521e4c998363119f4f6ad66fa"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-react-package.log",
+      "sha256": "18467bbcfb372b70923be2c19bd6c3f4b3e7bf3acf6cb09854d87a16b62d1cb7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-react-renderer.log",
+      "sha256": "c266b2fe0d4f7536749541571cff2ecbea7f19f79de3737918534dd6d3a5220b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-types.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-units.log",
+      "sha256": "11b84f0da5fa447296d43ddf3bdb15906d2d92fb3683cd60150b59958c2b4a16"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-vue-package.log",
+      "sha256": "1de23f04f6589e346c31b03b4149c8a34b842313936ba42eaa101e3f1c58dcf9"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-vue-renderer.log",
+      "sha256": "7cdec2dd03ee59490d3cc3986d30f119bb3aa8995b45fecf22c46d5762ff70e6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-vue.log",
+      "sha256": "b5ca3e0b7c84bbc2ec911622b62199306eeb75e8e4ec97fd5df3c9c698f74f3c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/copy-cancel-vue/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    }
+  ],
+  "limits": [
+    "Native cancellation prerequisite only; React progress/cancellation UI and partial-copy recovery still pending",
+    "OS copies already started are allowed to finish before the call rejects; no rollback or mid-file interruption",
+    "Initial source scan remains non-interruptible; arbitrary links and process shutdown during cancellation are not certified",
+    "Legacy registered partial destination behavior remains; do not create new copies automatically on retry",
+    "Shared consumers retain their API, missing-file tolerance, typed partial errors and content hard links; worlds are independent",
+    "Current Electron exercise is the affected spec19 plus Vue03/08, not a repeat of the entire prior45-scenario suite",
+    "No UI changes; previous visual/accessibility evidence applies, without claiming a new exhaustive audit",
+    "Workflow fetches history to preserve baseline/protected-file checks, not to disable them; remote result after fix must be checked",
+    "Stage4/K02/K03/K04 remain pending; Microsoft deferred, Vue default, data/proxy/Grimo preserved; no real game/Java, NSIS/isolated upgrade,60s performance or production release"
+  ]
+}

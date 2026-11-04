@@ -697,6 +697,7 @@ loginError:
   requireUsername: Se requiere nombre de usuario
   timeout: Tiempo de espera de inicio de sesión. Vuelve a intentarlo o revisa tu red.
 logsCrashes:
+  readError: No se pudo acceder al registro. Comprueba permisos y tamaño del archivo e inténtalo de nuevo.
   crashes: Informes de Errores
   failures: Fallos de inicio
   logs: Registros

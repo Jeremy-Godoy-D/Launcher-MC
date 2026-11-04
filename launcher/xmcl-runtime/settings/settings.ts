@@ -1,7 +1,9 @@
 import { SharedState, Settings } from '@xmcl/runtime-api'
 import { InjectionKey } from '~/app'
+import type { EditLauncherSettings } from '@xmcl/runtime-api/src/util/launcherSettings'
 
 export const kSettings: InjectionKey<SharedState<Settings>> = Symbol('settings')
+export const kEditSettings: InjectionKey<(options: EditLauncherSettings) => Promise<void>> = Symbol('edit-settings')
 
 export function shouldOverrideApiSet(s: Settings, gfw: boolean) {
   if (s.apiSetsPreference === 'mojang') {

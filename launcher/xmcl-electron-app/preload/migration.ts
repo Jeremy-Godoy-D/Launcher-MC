@@ -13,6 +13,9 @@ const migration: Migration = {
   on(event, func) {
     emitter.on(event, func)
   },
+  off(event, func) {
+    emitter.off(event, func)
+  },
   getProgress: function (): Promise<MigrationProgress> {
     return ipcRenderer.invoke('migration-get-progress')
   }

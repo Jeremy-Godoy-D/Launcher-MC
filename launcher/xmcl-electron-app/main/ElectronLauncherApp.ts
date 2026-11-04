@@ -145,6 +145,11 @@ function getErrorCode(e: Error) {
 }
 
 export default class ElectronLauncherApp extends LauncherApp {
+  override async acquireWorldLock(world: string, create: boolean) {
+    if (process.platform !== 'win32') return super.acquireWorldLock(world, create)
+    return (await import('./utils/worldLock')).acquireWindowsWorldLock(world, create)
+  }
+
   readonly session: ElectronSession
 
   /**
@@ -169,7 +174,7 @@ export default class ElectronLauncherApp extends LauncherApp {
     const userData = join(app.getPath('appData'), LAUNCHER_NAME)
     mkdirSync(userData, { recursive: true })
     app.setPath('userData', userData)
-    app.setName('Launcher MC')
+    app.setName('Grimo Launcher')
     if (process.platform === 'win32') app.setAppUserModelId('local.launchermc.desktop')
     super(app as any,
       new ElectronShell(),
@@ -211,7 +216,7 @@ export default class ElectronLauncherApp extends LauncherApp {
 
   fetch: typeof fetch = async (...args: any[]) => {
     if (isUpstreamService(args[0])) {
-      return new Response('Servicio de upstream deshabilitado en Launcher MC.', { status: 503 })
+      return new Response('Servicio de upstream deshabilitado en Grimo Launcher.', { status: 503 })
     }
     const bodies = splitFetchBody(
       await adaptFormDataForElectron(args[1]?.body),
@@ -302,20 +307,6 @@ export default class ElectronLauncherApp extends LauncherApp {
   }
 
   windowsUtils = getWindowsUtils(this, this.logger)
-
-  getAppInstallerStartUpUrl(): string {
-    if (this.windowsUtils) {
-      try {
-        const uri = this.windowsUtils.getAppInstallerUri()
-        const url = new URL(uri)
-        const appUrl = url.searchParams.get('app') || ''
-        return appUrl
-      } catch {
-        return ''
-      }
-    }
-    return ''
-  }
 
   relaunch(args?: string[]) {
     app.relaunch({ args })

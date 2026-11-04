@@ -79,6 +79,7 @@ import { useDialog } from '@/composables/dialog'
 import { getCrashPrompt, getCrashAgentPrompt, toVirtualInstancePath } from '@/util/crashPrompt'
 import { injection } from '@/util/inject'
 import { vSharedTooltip } from '@/directives/sharedTooltip'
+import { useNotifier } from '@/composables/notifier'
 
 const props = defineProps<{
   files: string[]
@@ -86,12 +87,16 @@ const props = defineProps<{
   getFileContent(file: string): Promise<string>
   getLaunchId?(file: string): Promise<string | undefined>
   removeFile(file: string): Promise<void>
-  showFile(file: string): void
+  showFile(file: string): Promise<void>
   visible: boolean
   refreshing: boolean
 }>()
 
 const { t } = useI18n()
+const { notify } = useNotifier()
+const logFailure = () => notify({ level: 'error', title: t('logsCrashes.readError') })
+const showFile = (name: string) => props.showFile(name).catch(logFailure)
+const removeFile = (name: string) => props.removeFile(name).catch(logFailure)
 const { hide: hideDialog } = useDialog('log')
 const { path } = injection(kInstance)
 const content = ref('')
@@ -106,12 +111,14 @@ const goBack = () => {
 const openFile = async (name: string) => {
   loading.value = true
   showedFile.value = name
-  const [nextContent, nextLaunchId] = await Promise.all([
+  const result = await Promise.all([
     props.getFileContent(name),
     props.getLaunchId?.(name).catch(() => undefined) ?? Promise.resolve(undefined),
-  ]).finally(() => {
+  ]).catch(() => { logFailure(); return undefined }).finally(() => {
     loading.value = false
   })
+  if (!result) return
+  const [nextContent, nextLaunchId] = result
   content.value = nextContent
   launchId.value = nextLaunchId ?? ''
 }

@@ -116,6 +116,12 @@ export interface InstanceIOService {
    * @param type Determine if this is a vanilla, mmc or modrinth folder
    */
   parseInstanceFiles(path: string, type?: InstanceType): Promise<InstanceFile[]>
+  /** Preview a local import with pinned hashes, rejecting links and launcher metadata. */
+  previewFolderFiles(path: string, type?: InstanceType): Promise<InstanceFile[]>
+  previewPrismVersion(path: string): Promise<{ fingerprint: string; runtime: CreateInstanceOptions['runtime'] } | undefined>
+  preparePrismVersion(path: string, name: string, fingerprint: string): Promise<{ version: string | undefined } | { error: 'sourceChanged' | 'conflict' }>
+  previewVanillaVersion(root: string, version: string): Promise<{ fingerprint: string; runtime: CreateInstanceOptions['runtime'] } | undefined>
+  prepareVanillaVersion(root: string, version: string, fingerprint: string): Promise<{ version: string } | { error: 'sourceChanged' | 'conflict' }>
   /**
    * Export instance as server
    */

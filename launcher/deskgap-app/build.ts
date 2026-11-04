@@ -5,10 +5,12 @@ import { dirname, extname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import electronConfig from '../xmcl-electron-app/esbuild.config'
 import { unicodeRegexPlugin } from './unicodeRegex'
+import * as rendererModule from '../scripts/renderer'
 
 const root = dirname(fileURLToPath(import.meta.url))
 const dist = join(root, 'dist')
-const rendererSource = resolve(root, '../xmcl-keystone-ui/dist')
+const renderer = (rendererModule as typeof rendererModule & { default?: typeof rendererModule }).default ?? rendererModule
+const rendererSource = resolve(root, '..', renderer.rendererTarget().package, 'dist')
 const rendererDestination = join(dist, 'renderer')
 const sharedConfig = (electronConfig as typeof electronConfig & { default?: typeof electronConfig }).default ?? electronConfig
 
@@ -46,10 +48,10 @@ async function assertAsciiBundle(path: string) {
 
 async function main() {
   if (!await pathExists(join(rendererSource, 'index.html'))) {
-    throw new Error('The Keystone renderer is not built. Run pnpm build:renderer first.')
+    throw new Error('The selected renderer is not built. Run pnpm build:renderer first.')
   }
   await emptyDir(dist)
-  await build({
+  const mainBuild = await build({
     ...sharedConfig,
     entryPoints: [join(root, 'src/main.ts')],
     external: ['deskgap'],
@@ -65,19 +67,16 @@ async function main() {
       },
       ...(sharedConfig.plugins ?? []).filter(plugin => process.env.NODE_ENV !== 'production' || plugin.name !== 'sourcemap'),
     ],
-    define: {
-      ...sharedConfig.define,
-      'process.env.CURSEFORGE_API_KEY': JSON.stringify(process.env.CURSEFORGE_API_KEY ?? ''),
-    },
     minifyIdentifiers: process.env.NODE_ENV === 'production',
     charset: 'ascii',
     legalComments: 'external',
     outdir: dist,
     outExtension: { '.js': '.cjs' },
-    metafile: false,
+    metafile: true,
     sourcemap: process.env.NODE_ENV !== 'production',
     target: 'node20',
   })
+  await writeFile(join(root, 'meta.json'), JSON.stringify(mainBuild.metafile, null, 2))
   await assertAsciiBundle(join(dist, 'main.cjs'))
   await copy(rendererSource, rendererDestination)
   await rewriteRendererResources(rendererDestination)

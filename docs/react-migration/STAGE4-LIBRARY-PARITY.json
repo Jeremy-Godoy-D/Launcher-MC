@@ -1,0 +1,519 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "codeCommit": "89bd5d809b26954fc40f378b4df714332ea669f4",
+  "status": "partial-stage-4",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/react-migration.yml",
+      "sha256": "329e4c54784d5a5ce4a3456ed7757fa22edf96d4471b9952ae650d704fe9149e"
+    },
+    {
+      "path": "launcher/e2e/TESTIDS.react.md",
+      "sha256": "7a379fa5225c69f3f7275ba538af529873fb1ced058fce40539d08eb2b647d0d"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/28-library-parity.spec.ts",
+      "sha256": "e441456798e48b20f8f3145b48523e6415ac0daa37a704ccfd5d053bf884eb75"
+    },
+    {
+      "path": "launcher/packages/core/clientJar.test.ts",
+      "sha256": "53f4d45a563a98a7d834d62c9c5103b90080d354167885e5d7328ea735705370"
+    },
+    {
+      "path": "launcher/packages/installer/clientJar.test.ts",
+      "sha256": "adaed0e97b2927604f2898645b011882be5f7024d430452c4ff30fc4825f7d84"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/App.tsx",
+      "sha256": "f09e74d7d5c30f703d40f9b412f3ba4c779f653feb6e10088b8dc018a0c232fc"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/library/DuplicateInstance.tsx",
+      "sha256": "ee5c47b1e76584f48c2c66af8ff690360514fd3804c16ec11fae97215d289f06"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/library/model.test.ts",
+      "sha256": "a247ef0e8907721c07c34bf566a5afc9d9b8c9fd43bea5a515df167129abe0a8"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/library/model.ts",
+      "sha256": "80ab680a039de919ba20dc3f59680deb9cffe0024b265828d0076f2bf20e166f"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/library/operations.test.ts",
+      "sha256": "f83ab87b9ecf91f219105799d722c1bf223cf8f8457a76753a646b4cedf57b79"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/library/operations.ts",
+      "sha256": "fd00cc2f8f30ae741fa47724f461291032cf6471732e367d7eaa3405971e1ca9"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/en.yaml",
+      "sha256": "099c4546893ac3a89f28a1a155c005d25f861490af2b51dd5f7a23e708676064"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/es-ES.yaml",
+      "sha256": "fd898cd6d5ca8ac70d300daa6ca293be50fe5c5725bc721ce3aa7f6393f53d61"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/styles.css",
+      "sha256": "1334e9f9695113c004698f2f5f9cbed3a5e5f1980b10e855c7e00ff6d79233b2"
+    }
+  ],
+  "validation": {
+    "unit": {
+      "passed": 579,
+      "files": 60,
+      "seconds": 12.5,
+      "newTestsIncluded": 10
+    },
+    "reactFull": {
+      "passed": 61,
+      "duration": "3.5m"
+    },
+    "strict": {
+      "passed": 1,
+      "seconds": 4.1
+    },
+    "vue": {
+      "passed": 2,
+      "seconds": 10.6
+    },
+    "distinctScenarios": 64,
+    "harness": {
+      "passed": 9
+    },
+    "axe": {
+      "reports": 91,
+      "violations": 0,
+      "incomplete": 162
+    },
+    "types": "Root pnpm check plus final React check passed",
+    "lint": "Root pnpm lint passed:0 errors/warnings; final UI detector[]; broader existing stylesheet scan has0 primary and40 advisory findings",
+    "visualReview": "Four final completed-copy/preference-failure captures manually reviewed, dark/light1200x720/800x400. Alert and retry control fully in viewport; internal region keyboard-scrollable.",
+    "builds": "React renderer and packaged host; Vue host rebuilt against existing unchanged Vue renderer; final shared dist Vue.",
+    "priorLiveProviders": "Not repeated:unchanged native media backend has3 real-provider cases in STAGE4-PROVIDER-MEDIA."
+  },
+  "behavior": [
+    "Search trims whitespace and matches instance name,Minecraft/custom version,all6 supported loader labels and their versions; empty query preserves all records without allocation.",
+    "Cards and no-results state use the same derived matching list; clear search restores filters without changing persisted selection.",
+    "Successful duplicate/resume copies only the exact source legacy modsGrouping entry. Native mod-groups.json and world bytes remain independent and unchanged at source.",
+    "Unknown sibling data and an existing destination entry are preserved; malformed source data/access/quota failures never remove or rewrite the old value.",
+    "Copy source is captured before pending state disappears. A preference-write error leaves the completed native instance intact,shows a specific warning and retries only preferences in the same dialog; no second native copy.",
+    "Completed copies no longer show the pending-copy launch/export restriction. Existing native data/metadata/selection safeguards remain.",
+    "Theme foreground/background token pairs switch atomically; removed the shared clickable color interpolation that briefly produced4.38:1 contrast. No forced motion reduction or weakened Axe assertion.",
+    "Core/installer client-JAR tests now each own a unique temporary directory and cleanup. Their prior context.temp resolved to the same launcher/temp and both wrote client-private and1.21.1 JARs. No runtime logic,global test policy or assertions removed."
+  ],
+  "initialFailures": [
+    "Two before-fix packaged cases reproduced missing version/loader search and missing legacy group entry.",
+    "A theme fixture initially omitted StorageEvent.newValue; fixed fixture event and retained both real theme assertions.",
+    "Axe detected4.38:1 on an interpolating primary button during theme change; shared foreground/background transitions removed.",
+    "First broad React run found two no-results regressions introduced while splitting query/filter logic; fixed the remaining caller to use matchingInstances and added explicit empty/clear coverage. Final61 passed.",
+    "A broad unit run had a client-JAR failure; narrow12 passed. Inspection found two parallel tests sharing launcher/temp/client-private and vanilla files; both switched to mkdtemp/onTestFinished. Final579 passed,including original integrity assertions."
+  ],
+  "commands": {
+    "unit": "Exact workflow Vitest command plus --reporter=default --reporter=json --outputFile=e2e/artifacts/library-parity-units-isolated.json",
+    "react": "Exact workflow React smoke command plus --output=artifacts/library-parity-react-final",
+    "strict": "XMCL_REACT_CLIENT_HARNESS=1; pnpm --dir e2e exec playwright test specs/react-migration/04-client-contracts.spec.ts --reporter=line",
+    "vue": "pnpm --dir e2e exec playwright test specs/react-migration/03-vue-compatibility.spec.ts specs/react-migration/08-vue-onboarding.spec.ts --reporter=line",
+    "checks": [
+      "pnpm check",
+      "pnpm lint",
+      "pnpm --dir xmcl-react-ui check",
+      "LAUNCHER_RENDERER=react; pnpm gen:testids",
+      "node --test launcher/scripts/react-migration.test.mjs",
+      "node launcher/scripts/react-migration.mjs check"
+    ],
+    "environment": "Packaged Grimo Launcher.exe,Windows x64,isolated fixture app/game profiles; no habitual installation touched"
+  },
+  "acceptedParityRows": [
+    "K04:basic metadata/icon editing,duplicate/resume/group-data preservation,local export,confirmed remove/delete; see previous operation/export/icon/shared-content reports plus this regression."
+  ],
+  "remaining": [
+    "K02 recent ordering and Home ordering need an explicit selected-first/last-played check; current fallback/recent sort uses lastAccessDate. Do not repeat the fixed search/legacy copy block.",
+    "Home still needs3 licensed clips,next-poster preload,generic Vanilla video+own cover with honest label and60s performance budgets.",
+    "Legacy group consumption/migration into content UI belongs to stage5; existing native group files must take precedence and raw legacy data must not be deleted before acknowledgement. Preference retry across closing the dialog is not claimed.",
+    "K03 real provider installation/Java/game,remaining stage5–9 functions,disposable NSIS/delta,AA/RTL manual certification and production release remain unverified. Microsoft deferred;Vue default."
+  ],
+  "previousRemoteCI": {
+    "run": "https://github.com/Jeremy-Godoy-D/Launcher-MC/actions/runs/40386061680",
+    "head": "7e844918c44a620b8dd4e99b5b075b7f748eb5f7",
+    "conclusion": "success React and Vue; prior media source"
+  },
+  "currentRemoteCI": "pending after push",
+  "packages": [
+    {
+      "renderer": "react",
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/Grimo Launcher.exe",
+      "sha256": "2f17ead7f7b07f914d009b76b53b1b884c6158c7a2d22d3fd7715b1320457655",
+      "bytes": 238238720
+    },
+    {
+      "renderer": "react",
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/resources/app.asar",
+      "sha256": "4eb6fe9fb82004da38726f60fef7ba86fe9a19add410cab50fe9c30aaaad66fb",
+      "bytes": 23786638
+    },
+    {
+      "renderer": "vue",
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/Grimo Launcher.exe",
+      "sha256": "13b8b46859deac9edec754c764ac8dfe3c68e41126a301481cae94b353c8ed0c",
+      "bytes": 238238720
+    },
+    {
+      "renderer": "vue",
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/resources/app.asar",
+      "sha256": "16601ce9d4c0103a0827cadde5c4d8591fc199c24823f0dd18af633d369458fd",
+      "bytes": 23864810
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/library-parity-before.log",
+      "sha256": "c323811966f259ced1d65d314fdafe88d645a2d6208e91299455d0087114855f",
+      "bytes": 7116
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-check.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a",
+      "bytes": 562
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-client-diagnostic.json",
+      "sha256": "6bc954b1de976b8fb4095efe4872df01827e4555e0589f6817562917d423a72a",
+      "bytes": 4218
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-client-diagnostic.log",
+      "sha256": "cfd5a1ff5db0885d4849cf81b2eb28dc0229ff37babf79b7c5c7c157a95dae71",
+      "bytes": 1865
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-contrast.log",
+      "sha256": "d69ce51a254f5dcdefe03ea9e26434a6ee060a7d025ea5388f4b8049e9d45932",
+      "bytes": 2603
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-design.json",
+      "sha256": "053248c1b5e3620e65e5a56d8757e264b467289646aa8352c20e1a0d9ef1c44c",
+      "bytes": 23129
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-final.log",
+      "sha256": "c8e7fc60b8bc6e952190fd4c482e7a2bfbf54e193532f7a3abf423ac840cb890",
+      "bytes": 8537
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-fixed.log",
+      "sha256": "2a281435d24772ea1e1a82ead8745cf0dfc5f5f007e66f7f931ea07a92bdf610",
+      "bytes": 5682
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-harness-before-docs.log",
+      "sha256": "161849bca366cb0707d554a0b4360a755da3e871240ed2ad7718a07af5165a8b",
+      "bytes": 142
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-harness-tests.log",
+      "sha256": "ed0413926c08992a819330af0cedc988dc455f89a00e985e7a71635ce2e09454",
+      "bytes": 828
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-lint-final.log",
+      "sha256": "0dec3fdd4b6cbf7b4c09681ec4adee782caaa89d5f243413324d5c13cd9dc24f",
+      "bytes": 1145
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-lint.log",
+      "sha256": "421acdb65f8118beae024eeea53d4fe1cf52fb3d52dda06a76e5cfc013bc3a98",
+      "bytes": 1145
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-check-final.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172",
+      "bytes": 40
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-check.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172",
+      "bytes": 40
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+      "bytes": 45
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/accessibility.json",
+      "sha256": "109c3dd725cfbafdad7c153443c2268dd08d9c83f76d2906f873b69b2197d99e",
+      "bytes": 277004
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-02-package-ecf1f-d-decodes-its-shipped-video-electron-es-ES/package-smoke.json",
+      "sha256": "7f9f489555761c6192eaf2f00dec5d7fbf09c708319f0328e316c672a0cf93d6",
+      "bytes": 277
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-05-prefere-fb385-windows-and-runtime-locales-electron-es-ES/preferences-i18n.json",
+      "sha256": "b47fb38f873fc32fb1e15510fa777b4a484ff521335547ba87b8a32318f373a3",
+      "bytes": 320
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-es-ES/accounts-accessibility.json",
+      "sha256": "17de7a0a11c29865f23766fb390d698773e27379a707c6d1c6fee99b8121aec5",
+      "bytes": 879176
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-es-ES/accounts.json",
+      "sha256": "52734c150ac2fc6295bb147075c7cbd36571bbbcf77233aea80a515c200de297",
+      "bytes": 214
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-es-ES/onboarding-accessibility.json",
+      "sha256": "a57daf5b30c492d2f370c8a67159459eb8f62834daeeab069ced2b1a29018f40",
+      "bytes": 492318
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-es-ES/onboarding.json",
+      "sha256": "9dfafd8d6db47338f002649ba668d7f5c6758aceb74862282633b25087ef5d3b",
+      "bytes": 226
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-09-library-187cb-ever-launches-from-browsing-electron-es-ES/library-accessibility.json",
+      "sha256": "42c270f48d538e05ea07f1e903444567845137e92acc3d7903edb46420a5ed95",
+      "bytes": 1349556
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-10-creatio-3c436-s-within-the-minimum-window-electron-es-ES/creation-accessibility.json",
+      "sha256": "3e18e406505b04f6ddfd57b1b122c6d05c0125b22e208f53ecf172cb0210b05e",
+      "bytes": 737404
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-12-launch--7dc1c--launch-before-confirmation-electron-es-ES/java-fallback-accessibility.json",
+      "sha256": "135fafb33ed80a1c8dc910efbad5db914610f9b074cd298fcc9823376dbb6a73",
+      "bytes": 108034
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES/launch-accessibility.json",
+      "sha256": "818754e8aa0e6e773bebbd32fa864b97d022f163bc42411141d39a231a4990fb",
+      "bytes": 455446
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES/launch-focus-before-interaction.json",
+      "sha256": "0f4a606700229749245ba9881cf1e379eb3d666ee749631595f314f3641d2d3a",
+      "bytes": 164
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-13-brandin-3fe98-eeps-existing-launcher-data-electron-es-ES/branding.json",
+      "sha256": "a04f0a52911d71b6c26b2e469928a666d84b1768f0365767bb006073a4ce4564",
+      "bytes": 316
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-14-imports-949dd-e-links-without-duplicating-electron-es-ES/imports-accessibility.json",
+      "sha256": "f070b43a1c094726e7c23c6792ac06719cd2638eb03592430ad96927bd12b90d",
+      "bytes": 966968
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-15-prism-v-6545e-ve-version-libraries-safely-electron-es-ES/prism-accessibility.json",
+      "sha256": "e17558527c3025a8823c2bd69321e2541633fbc00fcef795b1830910b000e53a",
+      "bytes": 854660
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-16-vanilla-986e7--personal-launcher-settings-electron-es-ES/vanilla-accessibility.json",
+      "sha256": "217446c0e1f20f3f96aa39a4610c839b1547414ecd3e9fd9200f8a9cded2650a",
+      "bytes": 856295
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-19-library-98b63-folder-after-a-full-restart-electron-es-ES/operations-accessibility.json",
+      "sha256": "ba65f43561a262b738ab84abb0f72d1c7f1dc7442bc4a630492994d8bbb8ce5d",
+      "bytes": 597902
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-20-local-e-45c0f-le-at-both-sizes-and-themes-electron-es-ES/export-accessibility.json",
+      "sha256": "29a6b80cca91ea22d88708f2a350dcb53815bbf52a5dac6d5e8461dfa3bab67f",
+      "bytes": 706593
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-21-group-m-b0126--or-unknown-edition-members-electron-es-ES/groups-accessibility.json",
+      "sha256": "1c08592f292133b9c65d6da3d6877c07a5be7030a4f4bad9f6daa8f08fe222e9",
+      "bytes": 604142
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-22-copy-re-68334-rting-the-packaged-launcher-electron-es-ES/copy-accessibility.json",
+      "sha256": "c87f2c75622960bd33dd92867ff3ac2dffe8fb43c2339ad712d11be77e63cc6c",
+      "bytes": 615232
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-es-ES/large-library-accessibility.json",
+      "sha256": "833b54b40c2570761e3e62c6c57b13a568c2d8200a9e780833743067cd0e5c7d",
+      "bytes": 4347520
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-24-shared--263ba-ublishing-a-partial-archive-electron-es-ES/cancel-export-accessibility.json",
+      "sha256": "0925553b08b5c8bdf63fce4bf87e31478ff673c7e2170b79f19c39e114689b70",
+      "bytes": 151202
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-24-shared--c1d8a--export-only-reviewed-bytes-electron-es-ES/shared-accessibility.json",
+      "sha256": "43df24a235e80ce13e0023f34198405490bd6611651f52fcbe854693bbdf002f",
+      "bytes": 789581
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-24-shared--cf04b-fore-any-destination-exists-electron-es-ES/cancel-copy-accessibility.json",
+      "sha256": "c0ce4ad92bce96f480e45eb77f770f40fa7f28bdbb99f5414696bbdcde601ff7",
+      "bytes": 126036
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-25-profile-b4fcc--including-packaged-restart-electron-es-ES/profile-appearance-accessibility.json",
+      "sha256": "1154b7e97455b7d5b42ed1e39a35ddf2eb4e9e97c0a591e85bc4a4640b401530",
+      "bytes": 593030
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-26-instanc-ea455-iginals-identity-and-worlds-electron-es-ES/instance-icon-accessibility.json",
+      "sha256": "4850ac85ebd439117605879b83cb99ca7c83d2b8acce5dba05050c86d52f1af2",
+      "bytes": 617414
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-27-provide-2a1a8-le-at-both-sizes-and-themes-electron-es-ES/provider-cover-accessibility.json",
+      "sha256": "dc6b427eaf26ddfbbec21cc8720f3a6e01d4fd1e09c2c4cd5087432ae99161c4",
+      "bytes": 650999
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final/react-migration-28-library-0aea5-replacing-destination-edits-electron-es-ES/legacy-groups-accessibility.json",
+      "sha256": "18f1d3fbffa1027488c60b4e530bd7c618d568b2287c9a56e8314c4fc3999402",
+      "bytes": 372487
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-final.log",
+      "sha256": "b2324cb84d23ce63fcc93b8a4a3c4a9ddf5357b759d2d50a65114532b8f5594a",
+      "bytes": 14633
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-full.log",
+      "sha256": "441a2434417e69f61da029f6d2e723e40dcdfc5e838747520013421f7a32cb28",
+      "bytes": 19825
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-lint.log",
+      "sha256": "a9b799277556671cf827ab191447c4d9417e91445d4b9c95677348ad79dfdcb4",
+      "bytes": 162
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-package-final.log",
+      "sha256": "f2e04574874dcd75f16cd8ca2a446dfe951e85a23bc835e548b02a40e7436b8e",
+      "bytes": 2580
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-package.log",
+      "sha256": "c61128f014487e4f2ad0120bdd689254316b456450249dd4235949764b28ac7d",
+      "bytes": 2581
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-renderer-final.log",
+      "sha256": "ff12c70205cbf10d2dbe4f6d25c73566b089cda00afa10344731eaa36933073e",
+      "bytes": 3770
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-react-renderer.log",
+      "sha256": "df790cd4d7dc2a5d537061c651ad8302e91b2edafbc8b376119769197aae417d",
+      "bytes": 3770
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-strict/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+      "bytes": 45
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-strict/react-migration-04-client--bbc79--and-releases-all-consumers-electron-es-ES/client-contracts.json",
+      "sha256": "95f93e0be1f7594c7e08435db0cb6ee691c5709e6b7fdc9939918582981294d5",
+      "bytes": 282
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-strict.log",
+      "sha256": "ca595530fb67a0ea9235f7220c80d1aeebcdc53f23f97f8fb52c6f290d266a32",
+      "bytes": 1441
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-testids.log",
+      "sha256": "d23f41161ee4ccaff13510f2225d448c541678b68f28c48c1ed2e8e747eb730f",
+      "bytes": 86
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-ui-design-final.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "bytes": 3
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-units-final.json",
+      "sha256": "79bd101ca8913a5fb300efa631527dd2d732fbaacf4bb5ad779996fceb842f96",
+      "bytes": 200983
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-units-final.log",
+      "sha256": "f91bf26ff2e0608bccc718c85322f6bca244076b1a74ef061f61543f392cff4b",
+      "bytes": 5291
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-units-full.log",
+      "sha256": "6fd42be731fb8e6ae7a15b989dfff52fbd0ad00c095f7cf61a111bb11d17d97f",
+      "bytes": 449
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-units-isolated.json",
+      "sha256": "c4ac2777578663fcbbf1f141a988401248bf38da2b43b3624721a966b6eec6b0",
+      "bytes": 200958
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-units-isolated.log",
+      "sha256": "7586fb442c65098046dd149fd88e686370d75ed4a662c1329d22552fe437e099",
+      "bytes": 5298
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-units.log",
+      "sha256": "2c75601d9615a9968136da0d1c58f1f642a46cc4343c5ad51164d5ba28c208d7",
+      "bytes": 249
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-vue/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+      "bytes": 45
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-vue-package.log",
+      "sha256": "f0e18dc624ee8504f924b49559bb8f1eda39fb69518cba66cb03116b60a2e41a",
+      "bytes": 2545
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-vue.log",
+      "sha256": "3b0f47994b10b0eb007aa468ff31b52c75163bfccf2c19bd2a1a298fdb9257ec",
+      "bytes": 1451
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-28-library-parity-spec-ts-a-preference-write-failure-retains-the/legacy-groups-retry-dark-1200.png",
+      "sha256": "38220264427a88bebe85d84340efffbf8201c41d2b835a372d28e806a859da3a",
+      "bytes": 192795
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-28-library-parity-spec-ts-a-preference-write-failure-retains-the/legacy-groups-retry-dark-800.png",
+      "sha256": "a1b1bc6ed4005ca80dd13aff84d2e1193eacbc777e373d36608bd70e8044be6d",
+      "bytes": 70347
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-28-library-parity-spec-ts-a-preference-write-failure-retains-the/legacy-groups-retry-light-1200.png",
+      "sha256": "7dd4aa0010ebede579a0ae7720730c9a027e41d8fcdaea6be70f9e565d7ead77",
+      "bytes": 175082
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-28-library-parity-spec-ts-a-preference-write-failure-retains-the/legacy-groups-retry-light-800.png",
+      "sha256": "7343d5922e61064224d883350b6c13aa901da7d01b4a4b412395f72f75b90dc4",
+      "bytes": 63613
+    },
+    {
+      "path": "launcher/e2e/artifacts/library-parity-harness-final.log",
+      "sha256": "161849bca366cb0707d554a0b4360a755da3e871240ed2ad7718a07af5165a8b",
+      "bytes": 142
+    }
+  ]
+}

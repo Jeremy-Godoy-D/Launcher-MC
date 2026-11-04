@@ -46,6 +46,7 @@ export const pluginServicesHandler =
 
         return service as T
       }
+      await instances[skey as string].initialize()
       return instances[skey as string] as T
     }
 

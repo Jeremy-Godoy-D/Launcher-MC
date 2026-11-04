@@ -3,7 +3,7 @@
     <div class="pa-5 flex flex-col gap-4">
       <div class="flex items-start justify-between gap-4 flex-wrap mc-hairline-b pb-4">
         <div>
-          <h2 class="text-xl font-bold tracking-tight text-[var(--mc-ink)]">Launcher MC</h2>
+          <h2 class="text-xl font-bold tracking-tight text-[var(--mc-ink)]">Grimo Launcher</h2>
           <p class="text-sm text-[var(--mc-ink-secondary)] mt-1 mc-tabular">
             Versión <strong>{{ env?.version }}</strong> · Minecraft Java para Windows x64 · Mantenido por <strong>Jeremy Godoy (@Jeremy-Godoy-D)</strong>.
           </p>

@@ -117,13 +117,17 @@ describe('deleteInstance / #install lock handshake', () => {
     const lock = new Mutex()
     const events: string[] = []
 
-    // First install grabs the lock and holds it briefly.
+    let releaseA!: () => void, markStarted!: () => void
+    const holdingA = new Promise<void>(resolve => { releaseA = resolve })
+    const started = new Promise<void>(resolve => { markStarted = resolve })
+    // Keep A locked until cancellation; wall-clock delays can expire under CI load.
     const installA = lock.runExclusive(async () => {
       events.push('A:locked')
-      await new Promise((r) => setTimeout(r, 20))
+      markStarted()
+      await holdingA
     })
 
-    await new Promise((r) => setTimeout(r, 5))
+    await started
 
     // Second install QUEUES on the same lock — pending.
     const installB = lock.runExclusive(async () => {
@@ -133,8 +137,6 @@ describe('deleteInstance / #install lock handshake', () => {
       events.push(`B:cancelled:${e.message}`)
     })
 
-    await new Promise((r) => setTimeout(r, 5))
-
     // deleteInstance: cancel rejects pending B; then synchronously
     // queue our own acquire (which is allowed because cancel() only
     // affects acquires that were pending AT THE TIME of cancel).
@@ -143,6 +145,7 @@ describe('deleteInstance / #install lock handshake', () => {
       events.push('delete:rm')
     })
 
+    releaseA()
     await Promise.all([installA, installB, deleteDone])
 
     expect(events).toContain('A:locked')

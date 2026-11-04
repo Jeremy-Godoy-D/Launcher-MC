@@ -1,0 +1,134 @@
+{
+  "name": "Grimo Launcher",
+  "source": "Built-in image editing of user supplied app icon and horizontal wordmark, 2026-10-25",
+  "modified": true,
+  "palette": [
+    "#10151d",
+    "#171c25",
+    "#ba773e",
+    "#f4bd73",
+    "#f4e4c7"
+  ],
+  "conversion": "System.Drawing resizes the edited icon; the ICO container embeds the resized PNG frames. No original was overwritten.",
+  "files": [
+    {
+      "file": "app-1024.png",
+      "sha256": "62d76a6b165d8b7a0c0020f23e665d607fd7a4dbd3f0db0540ffcee22b820246",
+      "bytes": 1441963,
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "app-128.png",
+      "sha256": "af34c5cefa191cf935d38b76798ac5c10272e06f5917b0c51be76511c4db6dae",
+      "bytes": 27927,
+      "width": 128,
+      "height": 128
+    },
+    {
+      "file": "app-16.png",
+      "sha256": "5b56a8d7c32147b370fd1b6b4d62100e9a8c20a8c907ecfa58adc4115b89cbb5",
+      "bytes": 993,
+      "width": 16,
+      "height": 16
+    },
+    {
+      "file": "app-24.png",
+      "sha256": "06ed5c44e6557762756382e5ffaff6596f1923f922965edc706a2e885d8dbb39",
+      "bytes": 1759,
+      "width": 24,
+      "height": 24
+    },
+    {
+      "file": "app-256.png",
+      "sha256": "2dcf9f5a698a313d103fdaa4b4d51f8ee834e85608d7dc7ed66400ffb715f7a4",
+      "bytes": 94346,
+      "width": 256,
+      "height": 256
+    },
+    {
+      "file": "app-32.png",
+      "sha256": "00741df1c1b3bc8571f99d1471715844abe2cb2a262d8189359eb722e0a1bae2",
+      "bytes": 2744,
+      "width": 32,
+      "height": 32
+    },
+    {
+      "file": "app-48.png",
+      "sha256": "bb8f52ceb0a7341317ab27664f5f13877150920f174e4b477446bf26f0df4c61",
+      "bytes": 5333,
+      "width": 48,
+      "height": 48
+    },
+    {
+      "file": "app-512.png",
+      "sha256": "fe7384d1b45c25a426001d402c03e0d0fb09e9bd51d01e5f91c18b4cca6fb419",
+      "bytes": 364462,
+      "width": 512,
+      "height": 512
+    },
+    {
+      "file": "app-64.png",
+      "sha256": "49ab2ad33cff0ce36818b18cad5a36cc745c99587abc33030c0de60dd7431d08",
+      "bytes": 8525,
+      "width": 64,
+      "height": 64
+    },
+    {
+      "file": "grimo.ico",
+      "sha256": "e71def31723a286560c5abd800822969895ffea50434a4152bb676702e29af56",
+      "bytes": 141745,
+      "sizes": [
+        {
+          "width": 16,
+          "height": 16
+        },
+        {
+          "width": 24,
+          "height": 24
+        },
+        {
+          "width": 32,
+          "height": 32
+        },
+        {
+          "width": 48,
+          "height": 48
+        },
+        {
+          "width": 64,
+          "height": 64
+        },
+        {
+          "width": 128,
+          "height": 128
+        },
+        {
+          "width": 256,
+          "height": 256
+        }
+      ]
+    },
+    {
+      "file": "source-app.png",
+      "sha256": "18bbe47ff3fb95c40a6194ac08f617d805a4a94115de791898b9df0fe90ff4ed",
+      "bytes": 1867080,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "file": "wordmark-dark.png",
+      "sha256": "3121b8dd1291e44b40a6822f867025ea6e5e733b0fb8154227c7bc8ddbc8254d",
+      "bytes": 928330,
+      "width": 2111,
+      "height": 745
+    },
+    {
+      "file": "wordmark-light.png",
+      "sha256": "8c375b6acc47720fa36b0349ebbc53f9c99c61ffa62dfa8ba82c5a1a38c05303",
+      "bytes": 860197,
+      "width": 2110,
+      "height": 745
+    }
+  ]
+}

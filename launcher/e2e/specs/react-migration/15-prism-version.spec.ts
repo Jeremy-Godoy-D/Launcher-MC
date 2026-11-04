@@ -1,0 +1,101 @@
+import { access, mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import axe from 'axe-core'
+import { test, expect, snap } from '../../helpers/scratch'
+import { mockCreationMetadata } from '../../helpers/react-creation'
+import { stubOpenDialog } from '../../helpers/tasks/importModpack'
+
+test.use({ launcherOptions: { locale: 'es-ES' } })
+
+test('Prism standalone review pins source bytes, requires a fresh confirmation and preserves native version libraries safely', async ({ launcher }, testInfo) => {
+  const page = launcher.main
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  await mockCreationMetadata(launcher)
+  const source = join(launcher.gameDataPath, 'prism-custom-source')
+  await mkdir(join(source, '.minecraft', 'saves', 'Sentinel'), { recursive: true })
+  await mkdir(join(source, 'patches'))
+  await mkdir(join(source, 'libraries'))
+  await writeFile(join(source, '.minecraft', 'saves', 'Sentinel', 'level.dat'), 'source-world')
+  await writeFile(join(source, 'instance.cfg'), 'name=Prism custom QA\nJavaPath=untrusted.exe\nJvmArgs=-javaagent:personal.jar\nOverrideCommands=true\nPreLaunchCommand=never-run')
+  await writeFile(join(source, 'mmc-pack.json'), JSON.stringify({ formatVersion: 1, components: [{ uid: 'net.minecraft', version: '1.7.10' }] }))
+  await writeFile(join(source, 'patches', 'net.minecraft.json'), JSON.stringify({ uid: 'net.minecraft', mainClass: 'custom.Main', minecraftArguments: '--username ${auth_player_name}', '+jvmArgs': ['--add-opens=java.base/java.lang=ALL-UNNAMED'], '+tweakers': ['custom.Tweaker'], compatibleJavaMajors: [17, 21], mainJar: { downloads: { artifact: { url: 'https://example.com/client.jar', sha1: 'a'.repeat(40), size: 10 } } }, libraries: [{ name: 'qa.prism:local:1', 'MMC-hint': 'local' }] }))
+  const sourceJar = join(source, 'libraries', 'local-1.jar')
+  await writeFile(sourceJar, 'source-library-v1')
+  const open = async () => {
+    await page.getByTestId('library-create-instance').click()
+    const dialog = page.getByRole('dialog')
+    await dialog.getByRole('button', { name: 'Importar modpack', exact: true }).click()
+    await dialog.getByRole('button', { name: 'Carpeta existente', exact: true }).click()
+    await page.getByLabel('Formato de la carpeta', { exact: true }).selectOption('prism')
+    await stubOpenDialog(launcher, source)
+    await dialog.getByRole('button', { name: 'Elegir carpeta de origen', exact: true }).click()
+    await expect(dialog).toContainText('Versión personalizada revisada')
+    return dialog
+  }
+  await page.getByTestId('nav-library').click()
+  const dialog = await open()
+  expect(await launcher.app.evaluate(() => (globalThis as any).__creationCalls)).toEqual([])
+  const installedBefore = await readdir(join(launcher.gameDataPath, 'versions')).catch(() => [])
+  expect(installedBefore.some(name => name.startsWith('mmc-Prism custom QA-'))).toBe(false)
+  await writeFile(sourceJar, 'source-library-v2')
+  await page.getByTestId('instance-create-confirm').click()
+  await expect(dialog.getByRole('alert')).toContainText('El origen cambió')
+  expect(await launcher.app.evaluate(() => (globalThis as any).__creationCalls)).toEqual([])
+  await dialog.getByRole('button', { name: 'Elegir carpeta de origen', exact: true }).click()
+  await expect(dialog).toContainText('Versión personalizada revisada')
+  const win = await launcher.app.browserWindow(page)
+  await page.evaluate(axe.source)
+  const reports: unknown[] = []
+  for (const appearance of ['dark', 'light']) {
+    await page.keyboard.press('Escape')
+    await page.getByTestId('nav-settings').click()
+    await page.getByLabel('Apariencia', { exact: true }).selectOption(appearance)
+    await page.getByTestId('nav-library').click()
+    await open()
+    for (const width of [1200, 800]) {
+    await win.evaluate((win, width) => win.setContentSize(width, width === 800 ? 400 : 720), width)
+    await page.getByTestId('instance-create-confirm').focus()
+    await dialog.getByRole('button', { name: 'Elegir carpeta de origen', exact: true }).focus()
+    await expect(dialog.getByRole('button', { name: 'Elegir carpeta de origen', exact: true })).toBeInViewport({ ratio: 1 })
+    await dialog.getByText('Versión personalizada revisada.', { exact: false }).scrollIntoViewIfNeeded()
+    await expect(dialog.getByText('Versión personalizada revisada.', { exact: false })).toBeInViewport({ ratio: 1 })
+    await expect(page.getByTestId('instance-create-confirm')).toBeInViewport({ ratio: 1 })
+    const report = await page.evaluate(async () => (window as any).axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }))
+    expect(report.violations).toEqual([])
+    reports.push({ appearance, width, ...report })
+    await snap(launcher, `prism-reviewed-${appearance}-${width}`, 'Origen Prism revisado sin crear instancia; los parches y bibliotecas locales se guardan solo al confirmar.')
+    }
+  }
+  await writeFile(testInfo.outputPath('prism-accessibility.json'), JSON.stringify(reports, null, 2))
+  await page.getByTestId('instance-create-confirm').click()
+  await expect(dialog.getByRole('button', { name: 'Ver instancia', exact: true })).toBeVisible()
+  await dialog.getByRole('button', { name: 'Ver instancia', exact: true }).click()
+  const destination = await page.evaluate(() => localStorage.getItem('selectedInstancePath'))
+  const instance = JSON.parse(await readFile(join(destination!, 'instance.json'), 'utf8'))
+  expect(instance.version).toMatch(/^mmc-Prism custom QA-[a-f0-9]{16}$/)
+  for (const value of ['untrusted.exe', 'personal.jar', 'never-run']) expect(JSON.stringify(instance)).not.toContain(value)
+  const version = JSON.parse(await readFile(join(launcher.gameDataPath, 'versions', instance.version, `${instance.version}.json`), 'utf8'))
+  expect(version.mainClass).toBe('custom.Main')
+  expect(version.arguments.jvm).toContain('--add-opens=java.base/java.lang=ALL-UNNAMED')
+  expect(version.arguments.game).toContain('custom.Tweaker')
+  const localJar = join(launcher.gameDataPath, 'libraries', 'qa', 'prism', 'local', '1', 'local-1.jar')
+  expect(await readFile(localJar, 'utf8')).toBe('source-library-v2')
+  const resolved = await page.evaluate(async id => (window as any).serviceChannels.open('VersionService').call('resolveLocalVersion', id), instance.version)
+  expect(resolved.mainClass).toBe('custom.Main')
+  expect(resolved.javaVersion.majorVersion).toBe(17)
+  expect(await readFile(join(destination!, 'saves', 'Sentinel', 'level.dat'), 'utf8')).toBe('source-world')
+  await page.reload()
+  expect(JSON.parse(await readFile(join(destination!, 'instance.json'), 'utf8')).version).toBe(instance.version)
+  await writeFile(sourceJar, 'source-library-v3')
+  await page.getByTestId('nav-library').click()
+  await open()
+  await page.getByTestId('instance-name').fill('Conflict QA')
+  await page.getByTestId('instance-create-confirm').click()
+  await expect(dialog.getByRole('alert')).toContainText('contenido distinto')
+  expect(await readFile(localJar, 'utf8')).toBe('source-library-v2')
+  expect(await launcher.app.evaluate(() => (globalThis as any).__creationCalls.length)).toBe(1)
+  await expect(page.getByTestId('instance-name')).toBeEnabled()
+  await access(join(source, 'instance.cfg'))
+  expect(errors).toEqual([])
+})

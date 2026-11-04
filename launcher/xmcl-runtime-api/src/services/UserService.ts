@@ -171,6 +171,8 @@ export interface UserService extends GenericEventEmitter<UserServiceEventMap> {
    * If that happened, please let user refresh it credential or re-login.
    */
   uploadSkin(options: UploadSkinOptions): Promise<void>
+  /** Edit a local profile using local PNGs; no network upload or identity change. */
+  setLocalProfileAppearance(options: UploadSkinOptions): Promise<void>
   /**
    * Save the skin to the disk.
    */

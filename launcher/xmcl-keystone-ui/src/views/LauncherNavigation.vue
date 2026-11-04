@@ -3,10 +3,10 @@
     <div class="brand-header px-3.5 py-3 flex items-center justify-between mc-hairline-b">
       <div class="flex items-center gap-2.5 min-w-0">
         <div class="brand-mark flex items-center justify-center rounded-lg">
-          <v-icon size="17" color="#e06d53">view_in_ar</v-icon>
+          <img src="http://launcher/icons/logoDark" width="28" height="28" alt="">
         </div>
         <div class="flex flex-col min-w-0">
-          <strong class="text-sm font-semibold tracking-tight text-[var(--mc-ink)] leading-tight truncate">Launcher MC</strong>
+          <strong class="text-sm font-semibold tracking-tight text-[var(--mc-ink)] leading-tight truncate">Grimo Launcher</strong>
           <span class="text-[11px] text-[var(--mc-ink-muted)] leading-tight truncate mc-tabular">Java Edition · v0.1.0-b3</span>
         </div>
       </div>

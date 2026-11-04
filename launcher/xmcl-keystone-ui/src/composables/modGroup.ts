@@ -1,3 +1,4 @@
+import { migrateLegacyModGroups } from '@xmcl/runtime-api/src/util/migrateLegacyModGroups';
 import { sort as sortFunc } from "@/composables/sortBy";
 import { ModFile } from "@/util/mod";
 import { ProjectEntry, ProjectFile } from "@/util/search";
@@ -11,7 +12,7 @@ import {
 import { ContextMenuItem } from "./contextMenu";
 import { useService } from "./service";
 import { useState } from "./syncableState";
-import { Ref, computed, ref, shallowRef, watch, onMounted, onBeforeUnmount, markRaw } from "vue";
+import { Ref, computed, ref, shallowRef, watch, onBeforeUnmount, markRaw } from "vue";
 
 export type ProjectGroup<T extends ProjectFile = ProjectFile> = {
   name: string;
@@ -33,38 +34,27 @@ export function useModGroups<T extends GroupableProjectFile = ModFile>(
     updateModsGroups,
     getSharedGroupRules,
     updateSharedGroupRules,
+    migrateLegacyModsGroups,
   } = useService(InstanceModsGroupServiceKey);
   const { state } = useState(
     () => path.value ? getGroupState(path.value, contentType) : undefined,
     InstanceModsGroupState
   );
 
-  onMounted(() => {
-    if (contentType !== "mods") return;
-    const cache = localStorage.getItem("modsGrouping");
-    if (cache) {
-      const parsed = JSON.parse(cache) as Record<
-        string,
-        Record<string, string>
-      >;
-      for (const [path, fileToGroup] of Object.entries(parsed)) {
-        const result = {} as Record<string, ModGroupData>;
-        for (const [file, group] of Object.entries(fileToGroup)) {
-          if (!result[group]) {
-            result[group] = { color: "", files: [] };
-          }
-          result[group].files.push(file);
-        }
-        updateModsGroups(path, result, contentType);
-      }
-      localStorage.removeItem("modsGrouping");
-    }
-  });
+  watch(path, (target) => {
+    if (contentType !== "mods" || !target) return;
+    void migrateLegacyModGroups(localStorage, target, migrateLegacyModsGroups).catch((error) => {
+      console.error("Legacy mod groups were preserved because migration failed", error);
+    });
+  }, { immediate: true });
 
   const instanceModGroupping = computed({
     get: () => state.value?.groups ?? {},
     set: (v) => {
-      updateModsGroups(path.value, v, contentType);
+      const previous = JSON.parse(JSON.stringify(state.value?.groups ?? {}));
+      void updateModsGroups(path.value, v, contentType, previous).catch((error) => {
+        console.error("Mod groups were not saved", error);
+      });
     },
   });
 

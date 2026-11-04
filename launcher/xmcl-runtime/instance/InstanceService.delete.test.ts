@@ -18,12 +18,17 @@ vi.mock('~/infra', () => ({
   Tasks: class {},
   kTasks: Symbol('kTasks'),
 }))
+vi.mock('./InstanceSavesService', () => {
+  const key = Symbol('guardInstanceRemoval')
+  return { kGuardInstanceRemoval: key, InstanceSavesService: class { async initialize() {} async [key](_path: string, _deleteData: boolean, remove: () => Promise<void>) { await remove() } } }
+})
 vi.mock('fs-extra', async (importOriginal) => {
   const { default: actual } = await importOriginal<{ default: typeof import('fs-extra') }>()
   return { ...actual, default: actual, rm: vi.fn(actual.rm) }
 })
 
 const { InstanceService } = await import('./InstanceService')
+const { InstanceSavesService } = await import('./InstanceSavesService')
 
 describe('InstanceService deletion', () => {
   const roots: string[] = []
@@ -46,6 +51,7 @@ describe('InstanceService deletion', () => {
       minecraftDataPath: root,
       getLogger: () => logger,
       controller: { broadcast: vi.fn() },
+      registry: { getOrCreate: async () => new (InstanceSavesService as any)() },
     } as any
     app.mutex = new MutexManager(app)
     const service = new InstanceService(
@@ -56,7 +62,7 @@ describe('InstanceService deletion', () => {
     return { path, state, service, logger }
   }
 
-  it.each(['EBUSY', 'EACCES', 'EIO'])('propagates %s and preserves the instance for retry', async (code) => {
+  it.each(['EBUSY', 'EPERM', 'EACCES', 'EIO', 'ENOENT'])('propagates %s when the directory remains and preserves the instance for retry', async (code) => {
     const f = await fixture()
     const error = Object.assign(new Error('cannot remove files'), { code, errno: -1 })
     vi.mocked(rm).mockRejectedValueOnce(error)
@@ -70,9 +76,9 @@ describe('InstanceService deletion', () => {
     expect(await pathExists(f.path)).toBe(false)
   })
 
-  it.each(['ENOENT', 'EPERM'])('preserves the existing tolerated %s behavior with a warning', async (code) => {
+  it('tolerates ENOENT only after confirming the directory has disappeared', async () => {
     const f = await fixture()
-    vi.mocked(rm).mockRejectedValueOnce(Object.assign(new Error('remove failed'), { code, errno: -1 }))
+    vi.mocked(rm).mockImplementationOnce(async path => { await cleanup(path as string, { recursive: true }); throw Object.assign(new Error('already removed'), { code: 'ENOENT', errno: -1 }) })
     await f.service.deleteInstance(f.path)
     expect(f.state.all[f.path]).toBeUndefined()
     expect(f.logger.warn).toHaveBeenCalledWith(expect.stringContaining('Fail to remove instance'))

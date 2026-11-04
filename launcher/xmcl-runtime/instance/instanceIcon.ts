@@ -35,7 +35,7 @@ export function getMediaIconPath(icon: string): string | undefined {
  * located at `iconPath`.
  */
 export function toMediaIconUrl(iconPath: string): string {
-  return MEDIA_URL_PREFIX + iconPath
+  return MEDIA_URL_PREFIX + encodeURIComponent(iconPath)
 }
 
 /**

@@ -1,0 +1,11 @@
+.migration-window { height: 100dvh; display: flex; flex-direction: column; background: var(--surface); }
+.migration-window .titlebar { flex: 0 0 40px; }
+.migration-content { flex: 1; overflow: auto; padding: 16px 24px; }
+.migration-content h1 { font-size: 22px; margin: 0 0 8px; }
+.migration-content p { margin: 8px 0; }
+.migration-paths { margin: 12px 0; font-size: 13px; }
+.migration-paths dt { color: var(--muted); }
+.migration-paths dd { margin: 0 0 8px; overflow-wrap: anywhere; }
+.migration-content progress { width: 100%; height: 8px; accent-color: var(--accent); }
+.migration-current { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.migration-window > .dialog-actions { flex-shrink: 0; padding: 8px 24px 16px; }

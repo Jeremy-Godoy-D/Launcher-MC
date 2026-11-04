@@ -1,7 +1,7 @@
 import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest'
 import { mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs'
 import { tmpdir } from 'os'
-import { join } from 'path'
+import { basename, dirname, join } from 'path'
 
 // fs-extra uses getters, so the spread operator drops most of its
 // exports. Hand back a Proxy that forwards every property except the
@@ -20,7 +20,7 @@ vi.mock('fs-extra', async (importOriginal) => {
   })
 })
 
-import { copyPassively, linkPassively } from './fs'
+import { copyPassively, linkPassively, linkOrCopyFile } from './fs'
 
 const mkSysErr = (code: string, msg: string) => {
   const e: any = new Error(`${code}: ${msg}`)
@@ -38,7 +38,27 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  expect(dirname(root)).toBe(tmpdir()); expect(basename(root)).toMatch(/^xmcl-fs-pass-/)
   rmSync(root, { recursive: true, force: true })
+})
+
+describe('exclusive link-or-copy publication', () => {
+  test('copies without overwriting when hard links are unavailable', async () => {
+    const source = join(root, 'source'), target = join(root, 'target'); writeFileSync(source, 'SOURCE')
+    overrides.link = () => Promise.reject(mkSysErr('ENOTSUP', 'hard links unavailable'))
+    await expect(linkOrCopyFile(source, target, true)).resolves.toBe(target); expect(readFileSync(target, 'utf8')).toBe('SOURCE')
+    await expect(linkOrCopyFile(source, target, true)).rejects.toHaveProperty('code', 'EEXIST'); expect(readFileSync(target, 'utf8')).toBe('SOURCE')
+  })
+  test('preserves a different file created before the fallback copy', async () => {
+    const source = join(root, 'source'), target = join(root, 'target'); writeFileSync(source, 'SOURCE')
+    overrides.link = async () => { writeFileSync(target, 'OTHER'); throw mkSysErr('ENOTSUP', 'hard links unavailable') }
+    await expect(linkOrCopyFile(source, target, true)).rejects.toHaveProperty('code', 'EEXIST'); expect(readFileSync(target, 'utf8')).toBe('OTHER')
+  })
+  test('retains default hard-link idempotence while exclusive publication rejects an existing target', async () => {
+    const source = join(root, 'source'), target = join(root, 'target'); writeFileSync(source, 'SOURCE')
+    await linkOrCopyFile(source, target); await expect(linkOrCopyFile(source, target)).resolves.toBe(target)
+    await expect(linkOrCopyFile(source, target, true)).rejects.toHaveProperty('code', 'EEXIST')
+  })
 })
 
 describe('copyPassively', () => {

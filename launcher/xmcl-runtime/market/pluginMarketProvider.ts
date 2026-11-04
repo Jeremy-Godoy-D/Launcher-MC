@@ -15,6 +15,7 @@ import {
   InstallCurseforgeFileTrackerEvents,
   InstallModrinthFileTask,
   InstallModrinthFileTrackerEvents,
+  ResolveMarketFilesTask,
   getCurseforgeFileUri,
   getModrinthPrimaryFile,
   getModrinthVersionFileUri,
@@ -28,7 +29,6 @@ import { kDownloadOptions } from '~/network'
 import { kResourceManager, kResourceWorker } from '~/resource'
 import { hardLinkFiles } from '~/util/fs'
 import { getTracker } from '~/util/taskHelper'
-import { createModrinthAuthenticatedFetch } from '~/user/utils/loginModrinth'
 import { downloadStaged } from './downloadStaged'
 import {
   InstallMarketDirectoryOptions,
@@ -37,16 +37,15 @@ import {
   kMarketProvider,
 } from './marketProvider'
 import { getMarketFilePath } from './marketFilePath'
+import { modpackRequest } from './modpackRequest'
 
 type InstanceFile = _InstanceFile & { downloads: string[]; icon?: string }
 
 export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
-  const modrinth = new ModrinthV2Client({ fetch: createModrinthAuthenticatedFetch(app) })
+  const modrinth = new ModrinthV2Client({ fetch: (...args) => app.fetch(...args) })
   app.registry.register(ModrinthV2Client, modrinth)
   const curseforge = createCurseforgeProxyClient((...args) => app.fetch(...args))
   app.registry.register(CurseforgeV1Client, curseforge)
-
-  const installService = await app.registry.get(InstanceInstallService)
 
   const resourceManager = await app.registry.get(kResourceManager)
   const tasks = await app.registry.get(kTasks)
@@ -114,7 +113,12 @@ export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
     instFile: InstanceFile,
     domainDir: string,
     downloadOptions: DownloadBaseOptions,
+    control: Pick<InstallMarketDirectoryOptions, 'signal' | 'tracker'>,
   ) {
+    const expectedHash = instFile.hashes.sha1 || instFile.hashes.md5
+    const algorithm = instFile.hashes.sha1 ? 'sha1' : instFile.hashes.md5 ? 'md5' : undefined
+    if (!algorithm || typeof expectedHash !== 'string' || !(algorithm === 'sha1' ? /^[a-f0-9]{40}$/i : /^[a-f0-9]{32}$/i).test(expectedHash)) throw new Error('Market file has no valid checksum')
+    if (!Number.isSafeInteger(instFile.size) || instFile.size! <= 0) throw new Error('Market file has no valid size')
     // Defend against corrupted refs (paths leaked into versionId etc.).
     if (instFile.modrinth && !isValidModrinthRef(instFile.modrinth)) {
       instFile.modrinth = undefined
@@ -126,7 +130,7 @@ export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
     const filePath = join(domainDir, instFile.path)
     const uris = instFile.downloads
 
-    if (snapshoted) {
+    if (snapshoted && (algorithm === 'sha1' || (await hashWorker.checksum(snapshoted[0].path, algorithm)).toLowerCase() === expectedHash.toLowerCase())) {
       const [file, snapshot, metadata] = snapshoted
       await ensureTheFile(filePath, file)
 
@@ -142,9 +146,6 @@ export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
         },
       }
     }
-
-    const expectedHash = instFile.hashes.sha1 || instFile.hashes.md5
-    const algorithm = instFile.hashes.sha1 ? 'sha1' : instFile.hashes.md5 ? 'md5' : undefined
 
     // Check if file already exists and is valid
     if (expectedHash && algorithm) {
@@ -182,16 +183,24 @@ export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
       })
 
       const tracker = getTracker<InstallModrinthFileTrackerEvents>(task)
+      const progress = onDownloadSingle(tracker, 'download', {})
+      control.tracker?.trackers.push(progress)
+      const signal = control.signal ? AbortSignal.any([control.signal, task.controller.signal]) : task.controller.signal
 
       try {
         await downloadStaged({
+          ...downloadOptions,
           url: instFile.downloads,
           destination: filePath,
-          tracker: onDownloadSingle(tracker, 'download', {}),
-          ...downloadOptions,
+          tracker: progress,
+          signal,
+          expectedTotal: instFile.size,
+          validate: async path => { if ((await hashWorker.checksum(path, algorithm)).toLowerCase() !== expectedHash.toLowerCase()) throw Object.assign(new Error('Market file checksum mismatch'), { name: 'ChecksumNotMatchError' }) },
         })
+        signal.throwIfAborted()
         task.complete()
       } catch (error) {
+        if (control.signal?.aborted) task.controller.abort(control.signal.reason)
         task.fail(error)
         throw error
       }
@@ -206,16 +215,24 @@ export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
       })
 
       const tracker: Tracker<InstallCurseforgeFileTrackerEvents> = getTracker(task)
+      const progress = onDownloadSingle(tracker, 'download', {})
+      control.tracker?.trackers.push(progress)
+      const signal = control.signal ? AbortSignal.any([control.signal, task.controller.signal]) : task.controller.signal
 
       try {
         await downloadStaged({
+          ...downloadOptions,
           url: instFile.downloads,
           destination: filePath,
-          tracker: onDownloadSingle(tracker, 'download', {}),
-          ...downloadOptions,
+          tracker: progress,
+          signal,
+          expectedTotal: instFile.size,
+          validate: async path => { if ((await hashWorker.checksum(path, algorithm)).toLowerCase() !== expectedHash.toLowerCase()) throw Object.assign(new Error('Market file checksum mismatch'), { name: 'ChecksumNotMatchError' }) },
         })
+        signal.throwIfAborted()
         task.complete()
       } catch (error) {
+        if (control.signal?.aborted) task.controller.abort(control.signal.reason)
         task.fail(error)
         throw error
       }
@@ -262,6 +279,7 @@ export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
     icon?: string,
   ): InstanceFile {
     const file = version.files.find((f) => f.filename === filename)
+    if (filename && !file) throw new Error('Requested Modrinth file is unavailable')
     const modrinthFile = file || getModrinthPrimaryFile(version)
     const filePath = getMarketFilePath(domain, modrinthFile.filename)
 
@@ -285,6 +303,7 @@ export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
     curseforgeFile: CurseforgeFile,
     icon?: string,
   ): InstanceFile {
+    if (curseforgeFile.isAvailable === false || !curseforgeFile.downloadUrl) throw new Error('CurseForge file download is unavailable')
     const filePath = getMarketFilePath(domain, curseforgeFile.fileName)
 
     const uris = [] as string[]
@@ -321,14 +340,18 @@ export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
 
   async function getFiles(
     options: InstallMarketDirectoryOptions | InstallMarketInstanceOptions,
+    signal?: AbortSignal,
   ): Promise<InstanceFile[]> {
+    signal = signal ? AbortSignal.any([signal, AbortSignal.timeout(30_000)]) : AbortSignal.timeout(30_000)
     const domain = 'domain' in options ? options.domain : ''
     if (options.market === 0) {
       const versions = Array.isArray(options.version) ? options.version : [options.version]
       const versionsDict = Object.fromEntries(versions.map((v) => [v.versionId, v]))
       const modrinthVersions = await modrinth.getProjectVersionsById(
         versions.map((v) => v.versionId),
+        signal,
       )
+      if (!Array.isArray(modrinthVersions) || modrinthVersions.length !== new Set(versions.map(v => v.versionId)).size || new Set(modrinthVersions.map(v => v.id)).size !== modrinthVersions.length || modrinthVersions.some(version => typeof version.id !== 'string' || !Object.hasOwn(versionsDict, version.id) || versionsDict[version.id].projectId !== undefined && versionsDict[version.id].projectId !== version.project_id || typeof version.project_id !== 'string' || !/^[A-Za-z0-9]{8}$/.test(version.project_id))) throw new Error('Invalid Modrinth file selection')
       const result = modrinthVersions.map((version) =>
         getModrinthFile(
           domain,
@@ -340,30 +363,43 @@ export const pluginMarketProvider: LauncherAppPlugin = async (app) => {
       return result
     } else {
       const curseforgeFiles = Array.isArray(options.file) ? options.file : [options.file]
-      const files = await curseforge.getFiles(curseforgeFiles.map((f) => f.fileId))
+      const files = await curseforge.getFiles(curseforgeFiles.map((f) => f.fileId), signal)
       const fileDict = Object.fromEntries(curseforgeFiles.map((f) => [f.fileId, f]))
+      if (!Array.isArray(files) || files.length !== new Set(curseforgeFiles.map(f => f.fileId)).size || new Set(files.map(f => f.id)).size !== files.length || files.some(file => !Number.isSafeInteger(file.id) || !Object.hasOwn(fileDict, file.id) || fileDict[file.id].projectId !== undefined && fileDict[file.id].projectId !== file.modId || file.gameId !== 432 || !Number.isSafeInteger(file.modId) || file.modId <= 0)) throw new Error('Invalid CurseForge file selection')
       const result = files.map((file) => getCurseforgeFile(domain, file, fileDict[file.id].icon))
       return result
     }
   }
 
   app.registry.register(kMarketProvider, {
-    resolveInstanceFiles: getFiles,
+    resolveInstanceFiles: async options => {
+      const request = modpackRequest(options)
+      if (options.id !== undefined && (typeof options.id !== 'string' || !/^[A-Za-z0-9._-]{1,128}$/.test(options.id))) throw new Error('Invalid market metadata operation')
+      const task = options.id ? tasks.create<ResolveMarketFilesTask>({ type: 'resolveMarketFiles', key: `resolveMarketFiles-${options.id}`, operationId: options.id, market: request.market }) : undefined
+      try {
+        const files = await getFiles({ ...request, domain: options.domain, instancePath: options.instancePath }, task?.controller.signal)
+        task?.controller.signal.throwIfAborted()
+        task?.complete()
+        return files
+      } catch (error) { task?.fail(error); throw error }
+    },
     installFile: async (options) => {
       const downloadOptions = await app.registry.get(kDownloadOptions)
 
-      const files = await getFiles(options)
+      const files = await getFiles(options, options.signal)
+      options.signal?.throwIfAborted()
+      if (files.some(file => !file.path || basename(file.path) !== file.path) || new Set(files.map(file => file.path.toLowerCase())).size !== files.length || files.some(file => files.some(other => other.path.toLowerCase() === (file.path + '.pending').toLowerCase()))) throw new Error('Invalid or conflicting market filenames')
 
-      const result = await Promise.all(
-        files.map(async (file) => {
-          const result = await downloadFile(file, options.directory, downloadOptions)
-          await postprocess(result, options.directory, file.icon)
-          return result
-        }),
-      )
-      return result
+      const downloads = files.map(async (file) => {
+        const result = await downloadFile(file, options.directory, downloadOptions, options)
+        await postprocess(result, options.directory, file.icon)
+        return result
+      })
+      try { return await Promise.all(downloads) }
+      catch (error) { await Promise.allSettled(downloads); throw error }
     },
     installInstanceFile: async (options: InstallMarketInstanceOptions) => {
+      const installService = await app.registry.getOrCreate(InstanceInstallService)
       const files = await getFiles(options)
 
       await installService.installInstanceFiles({

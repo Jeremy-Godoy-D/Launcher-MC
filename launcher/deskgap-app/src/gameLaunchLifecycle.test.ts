@@ -42,9 +42,18 @@ describe('bindGameLaunchLifecycle', () => {
   it('parks the launcher and opens the monitor when logging is requested', () => {
     const { service, controller } = setup()
     service.processes = [{}]
-    service.emit('minecraft-start', { showLog: true })
+    service.emit('minecraft-start', { showLog: true, gameDirectory: '/owned/one' })
     expect(controller.setGameRunning).toHaveBeenCalledWith(true)
-    expect(controller.createMonitorWindow).toHaveBeenCalledOnce()
+    expect(controller.createMonitorWindow).toHaveBeenCalledWith('/owned/one')
+  })
+
+  it('reports logger failure without interrupting game lifecycle', async () => {
+    const { service, controller, host } = setup()
+    const failure = new Error('Window unavailable')
+    controller.createMonitorWindow.mockRejectedValueOnce(failure)
+    service.emit('minecraft-start', { showLog: true, gameDirectory: '/owned/one' })
+    await Promise.resolve()
+    expect(host.warn).toHaveBeenCalledWith(failure)
   })
 
   it('restores the launcher and closes the monitor after the last clean exit', () => {

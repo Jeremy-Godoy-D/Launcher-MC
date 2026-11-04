@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-27",
+  "applicationCommit": "33ef2a3023560fc94f162933fb5d522f4918bb4a",
+  "status": "stage-5-partial-instance-installer-authority",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/react-migration.yml",
+      "sha256": "21a11fe7f3aefc7ea93514fd0234f7d3f29c4037cedfcc32f16bf7995cfb8ba8"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/38-installer-authority.spec.ts",
+      "sha256": "c5c8a5f43a6dc9c6272a2c237e144507c3d1bb2dd2991a431ad19812825271ee"
+    },
+    {
+      "path": "launcher/packages/instance/files.ts",
+      "sha256": "da7e103d98d6953bd6278864fc71b7f89023d089f743c7f43ae5016d2ba79f3e"
+    },
+    {
+      "path": "launcher/packages/instance/files_handler.test.ts",
+      "sha256": "61bf2a89b3b8fb049ca25b75ba88c6ab5348d8c575d5f0b92f3f970d348fed51"
+    },
+    {
+      "path": "launcher/packages/instance/files_handler.ts",
+      "sha256": "8cf8a803f3dbc8fbddab9060af2945fd0636737c80f039a484d57659783c8b2e"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instanceIO/InstanceInstallService.concurrent.test.ts",
+      "sha256": "f6510b5555fba122bd381347879bde96f570ece0ca1f48b7c1995e42e93a937d"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instanceIO/InstanceInstallService.progressive.test.ts",
+      "sha256": "083e2498b34faffd6c69edc96cba031c91e157d5c7de22e662fb326f6d3717f1"
+    },
+    {
+      "path": "launcher/xmcl-runtime/instanceIO/InstanceInstallService.ts",
+      "sha256": "2fa0911324ca4f8ac74505993546469d2b38cb477fd421de5fc8c0e2525093ec"
+    }
+  ],
+  "validation": {
+    "unit": {
+      "cases": 694,
+      "files": 77,
+      "newCases": 11,
+      "seconds": 16.09
+    },
+    "focusedUnit": {
+      "cases": 58,
+      "files": 3,
+      "seconds": 11.08
+    },
+    "rootTypes": "passed",
+    "rootLint": "passed",
+    "e2eTypes": {
+      "existingErrors": 56,
+      "newSpecErrors": 0,
+      "result": "existing global baseline remains failing"
+    },
+    "nativeReact": {
+      "cases": 11,
+      "seconds": 24.5,
+      "specs": [
+        14,
+        24,
+        38
+      ]
+    },
+    "nativeVue": {
+      "cases": 3,
+      "seconds": 18.8,
+      "specs": [
+        3,
+        8,
+        33
+      ]
+    },
+    "harnessTests": 9,
+    "axe": {
+      "audits": 10,
+      "violations": 0,
+      "incomplete": 24
+    },
+    "retainedPngs": 19,
+    "previousCI": {
+      "run": 40615348161,
+      "head": "fdce3bc9ece3ee7c6ce5108de1877877ccddf3a5",
+      "applicationSource": "cf2b77d91edccbd9019636ec07fdd3f1d94096b0",
+      "conclusion": "success",
+      "renderers": [
+        "react",
+        "vue"
+      ]
+    },
+    "currentCI": "required after push"
+  },
+  "commands": [
+    "pnpm check",
+    "pnpm lint",
+    "pnpm exec vitest run [explicit workflow list at 33ef2a3023560fc94f162933fb5d522f4918bb4a]",
+    "LAUNCHER_RENDERER=react pnpm build:renderer && pnpm --prefix=xmcl-electron-app build",
+    "XMCL_E2E_EXECUTABLE=<React package> pnpm --dir e2e exec playwright test specs/react-migration/{14-imports-advanced,24-shared-content,38-installer-authority}.spec.ts --reporter=line --output=artifacts/stage5-install-authority-react",
+    "LAUNCHER_RENDERER=vue pnpm build:renderer && pnpm --prefix=xmcl-electron-app build",
+    "XMCL_E2E_EXECUTABLE=<Vue package> pnpm --dir e2e exec playwright test specs/react-migration/{03-vue-compatibility,08-vue-onboarding,33-vue-content-groups}.spec.ts --reporter=line --output=artifacts/stage5-install-authority-vue",
+    "pnpm --dir e2e exec tsc --noEmit",
+    "node --test launcher/scripts/react-migration.test.mjs",
+    "node launcher/scripts/react-migration.mjs check"
+  ],
+  "artifactManifest": {
+    "path": "launcher/e2e/artifacts/stage5-install-authority-artifact-manifest.json",
+    "sha256": "867235230aff29b6c5e0ee75e1c351c283e5f0e3251e901cf79de125b91ad524"
+  },
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-authority-e2e-types.log",
+      "sha256": "47efe23f541affc4c8e52d6c3b30ba91a6f17655bbad76807f5212cf42f8e19f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-authority-full-units-final.log",
+      "sha256": "524a28b6ecf68ba2b56e6205e943dbf5afe7dcf0b89e7d600885f1ebb6259866"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-authority-full-units.log",
+      "sha256": "9ce6e04f83d749f60507bd345ba0b57b0bc00c2b4670b804ac3ba441f5f019dd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-authority-harness.log",
+      "sha256": "92e01ef96cc951d4cb3721604fb18ed72d2206742d361be8b8c7df6ed6d2c18f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-authority-lint.log",
+      "sha256": "e0c4d2d59d725416aaf5a976bc701d6f53977c0eb43ad6c0cbd730356b160511"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-authority-react-host-final.log",
+      "sha256": "7f225d6a59b58c59a70d096e3cce5affc3c9457168228734c237259d884d955e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-authority-react-host.log",
+      "sha256": "a0a1ddeb2462a9d83e06e11a933afba465be5bf4483d430f2209a1464191fa38"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-authority-react-renderer-final.log",
+      "sha256": "b0165e28cf04638f4d5eaa08b13da56f2da02f930e550bba8a4838b40b86776d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-authority-react-renderer.log",
+      "sha256": "3414301f60c3997295f77cfca40c7b80b81df6c06dcbd5c1fccb63b4b46bb06c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-authority-react.log",
+      "sha256": "c248b406b5b7fea04a1cfb0f597fcc049bb0d4c0f73f9b38f86aa2ce1a16d53c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-authority-types-all.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-authority-vue-host.log",
+      "sha256": "4b748839443ecc7b69403202d6413c753ae61264ce9893a7b2e78e031e485837"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-authority-vue-renderer.log",
+      "sha256": "30f8986e4288e991f8afb402001ed1d9d5da482374f4530afd213c309a72eebe"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-install-authority-vue.log",
+      "sha256": "868c705c2a1577afa200d24ff6e6b305b53252a58255ba0f11e7fad016c7364d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-installer-authority-base-units.log",
+      "sha256": "e78927ac3760a29160c52f255f071dae74a212df1d33b44a568ba81bcc76faed"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-installer-authority-new-units.log",
+      "sha256": "9d47dc6ce6a91bf3865f567118c713d9b21e53a0fa9d199131a47d7273a57f40"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-installer-authority-path-units.log",
+      "sha256": "9e73edafa09ca4d056d39caece1e8b2c30c1ea76684de8e367d1aab84b45e01f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/stage5-installer-authority-types.log",
+      "sha256": "014a891360e8bf3c856c604e13ba0dee2eeaf7aa4121c9cb1a2ef4796a223b4c"
+    }
+  ],
+  "packagesAtCapture": [
+    {
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/Grimo Launcher.exe",
+      "sha256": "8f6b8c3f8f08aafab2c742ea46e34c3c958b0bd75fe8ba411ffce5ced2628d4a"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/react/win-unpacked/resources/app.asar",
+      "sha256": "5c4640195d7eca2d216bb5107f6bc6da3725a6fee0c3ea1dbb4cb7e6880b3a3c"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/Grimo Launcher.exe",
+      "sha256": "ebce0ad767675292b2090eb466145a4a59ea8f13dc1254830662ac9c569bc609"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/build/output/win-unpacked/resources/app.asar",
+      "sha256": "75d9621c4acec3f0d6f867908d53ca36c1c0efc8964baefa20ed0fe1f0db65d7"
+    }
+  ],
+  "packageAvailability": "Mutable paths; hashes identify capture. Both renderers and hosts rebuilt; main dist and default restored to Vue.",
+  "limits": [
+    "Registration, direct root, tracked process and lexical file paths are guarded. Persisted workspace/backup/profile paths and linked ancestors remain a mandatory separate block before React upgrades. This is not a final IPC/filesystem security certification.",
+    "Tracked-game races are service tests with controlled processes; packaged cases exercise real IPC/filesystem and existing import flows. No actual Minecraft/Java installation or NSIS/delta proof.",
+    "No whole-batch rollback or power-loss guarantee. Existing service locks serialize metadata mutations. Metadata-only stage/discard remains available while a tracked game runs; apply/resume/install reject.",
+    "The first full unit run caught an overly broad temporary-name exclusion; narrowed to the actual16-hex suffix, preserving similarly named user files, then all694 passed. Original failure retained.",
+    "Chromium emitted GPU command-buffer warnings and Vue emitted an existing Buffer deprecation; tests passed. Builds retain existing chunk/externalization warnings. No new UI or performance calibration claimed.",
+    "Stage5/K08 remain pending; Microsoft deferred, PR4 draft, production v0.2.0-beta.2 and proxy unchanged; user ANALISIS untouched."
+  ]
+}

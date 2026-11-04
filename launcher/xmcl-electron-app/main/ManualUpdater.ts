@@ -7,7 +7,7 @@ export class ManualUpdater implements LauncherAppUpdater {
   async checkUpdateTask(): Promise<ReleaseInfo> {
     return {
       name: this.version(),
-      body: 'Launcher MC se actualiza manualmente. Esta versión no consulta feeds externos.',
+      body: 'Grimo Launcher se actualiza manualmente. Esta versión no consulta feeds externos.',
       date: '',
       files: [],
       newUpdate: false,
@@ -16,10 +16,10 @@ export class ManualUpdater implements LauncherAppUpdater {
   }
 
   async downloadUpdate(): Promise<void> {
-    throw new Error('Las actualizaciones automáticas están desactivadas en Launcher MC.')
+    throw new Error('Las actualizaciones automáticas están desactivadas en Grimo Launcher.')
   }
 
   async installUpdateAndQuit(): Promise<void> {
-    throw new Error('Las actualizaciones automáticas están desactivadas en Launcher MC.')
+    throw new Error('Las actualizaciones automáticas están desactivadas en Grimo Launcher.')
   }
 }

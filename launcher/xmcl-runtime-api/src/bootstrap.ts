@@ -16,6 +16,10 @@ export interface Bootstrap {
     locale: string
     drives: Drive[]
   }>
+  /**
+   * Confirm an absolute data directory. Resolves after native registration is ready.
+   * Validation/preparation failures can be retried; a committed root cannot be replaced in this session.
+   */
   bootstrap(
     path: string
   ): Promise<void>

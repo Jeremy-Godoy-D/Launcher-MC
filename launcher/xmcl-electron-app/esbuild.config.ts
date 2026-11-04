@@ -12,6 +12,7 @@ import pluginStatic from './plugins/esbuild.static.plugin'
 import pluginWorker from './plugins/esbuild.worker.plugin'
 import pluginElevate from './plugins/esbuild.elevate.plugin'
 import pluginTreeshake from 'plugins/esbuild.treeshake.plugin'
+import { rendererTarget } from '../scripts/renderer'
 
 const config = {
   bundle: true,
@@ -26,6 +27,7 @@ const config = {
   keepNames: true,
   define: {
     'process.env.BUILD_NUMBER': JSON.stringify(process.env.BUILD_NUMBER) ?? '0',
+    'process.env.LAUNCHER_RENDERER': JSON.stringify(rendererTarget().name),
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV) ?? '"development"',
     'process.env.CURSEFORGE_PROXY_URL': JSON.stringify(process.env.CURSEFORGE_PROXY_URL || ''),
     'process.env.MICROSOFT_CLIENT_ID': JSON.stringify(process.env.MICROSOFT_CLIENT_ID || ''),

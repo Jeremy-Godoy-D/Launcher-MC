@@ -607,7 +607,8 @@ export class ModrinthV2Client {
       algorithm,
       loaders = [],
       gameVersions = [],
-    }: { algorithm?: string; loaders?: string[]; gameVersions?: string[] } = {},
+      versionTypes,
+    }: { algorithm?: string; loaders?: string[]; gameVersions?: string[]; versionTypes?: Array<'release' | 'alpha' | 'beta'> } = {},
     signal?: AbortSignal,
   ) {
     const url = new URL(this.baseUrl + '/v2/version_files/update')
@@ -618,6 +619,7 @@ export class ModrinthV2Client {
         algorithm,
         loaders,
         game_versions: gameVersions,
+        version_types: versionTypes,
       }),
       headers: { ...this.headers, 'content-type': 'application/json' },
       signal,

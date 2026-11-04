@@ -6,6 +6,8 @@ import { Inject, LauncherAppKey } from '~/app'
 import { AbstractService, ExposeServiceKey, ServiceStateManager } from '~/service'
 import { AnyError } from '@xmcl/utils'
 import { LauncherApp } from '../app/LauncherApp'
+import { InstanceService } from './InstanceService'
+import { legacyContentGroups, readContentGroups, writeContentGroups } from './utils/contentGroupsFile'
 
 /**
  * Provide services to manage mod groups and shared group rules
@@ -20,72 +22,70 @@ export class InstanceModsGroupService extends AbstractService implements IInstan
    * Get the shared state object for mod groups in an instance
    * @param instancePath The instance path
    */
+  async #assertJavaInstance(path: string) {
+    const instances = await this.app.registry.get(InstanceService)
+    await instances.initialize()
+    if (typeof path !== 'string' || !instances.state.instances.some(instance => instance.path === path && instance.edition === 'java')) throw new AnyError('InstanceNotFoundError')
+  }
+
   async getGroupState(instancePath: string, type: InstanceContentGroupType = 'mods'): Promise<SharedState<InstanceModsGroupState>> {
-    if (!instancePath) throw new AnyError('GetGroupStateError', 'Cannot get group state on empty path')
-    if (type !== 'mods' && type !== 'resourcepacks' && type !== 'shaderpacks') {
-      throw new AnyError('GetGroupStateError', `Unsupported content group type: ${type}`)
-    }
-
-    const stateManager = await this.app.registry.get(ServiceStateManager)
-
-    return stateManager.registerOrGet(InstanceGroupStateKey(instancePath, type), async () => {
+    await this.#assertJavaInstance(instancePath)
+    if (!['mods', 'resourcepacks', 'shaderpacks'].includes(type)) throw new AnyError('GetGroupStateError', 'Unsupported content group type')
+    const key = InstanceGroupStateKey(instancePath, type), stateManager = await this.app.registry.get(ServiceStateManager)
+    return stateManager.registerOrGet(key, async () => {
       const state = new InstanceModsGroupState()
-
-      const groupsPath = join(instancePath, getInstanceGroupFileName(type))
-
+      let disposed = false
       const loadGroups = async () => {
-        const data = await readFile(groupsPath, 'utf-8').catch(() => undefined)
-        if (!data) return false
         try {
-          const groups = JSON.parse(data)
-          if (typeof groups !== 'object') return false
-          state.groupsSet(groups)
-          return true
-        } catch (error) {
-          this.warn(`Failed to read mod groups from ${groupsPath}`, error)
-          return false
+          const groups = await readContentGroups(instancePath, type)
+          if (!disposed) { state.groupsSet(groups || {}); state.groupsErrorSet('') }
+        } catch {
+          if (!disposed) state.groupsErrorSet('read')
         }
       }
-
-      await loadGroups()
-
+      const revalidate = () => this.mutex.of(key).runExclusive(loadGroups)
       const watcher = new FSWatcher()
-      watcher.add(groupsPath)
-      watcher.on('all', async (e) => {
-        if (e === 'add' || e === 'change') {
-          await loadGroups()
-        } else {
-          state.groupsSet({})
-        }
-      })
-
-      const dispose = () => {
-        watcher.close()
-      }
-
-      return [state, dispose]
+      watcher.on('all', () => { void revalidate().catch(() => { if (!disposed) state.groupsErrorSet('read') }) })
+      const ready = new Promise<void>(resolve => { watcher.once('ready', resolve); watcher.once('error', () => resolve()) })
+      watcher.on('error', () => { if (!disposed) state.groupsErrorSet('read') })
+      watcher.add(join(instancePath, getInstanceGroupFileName(type)))
+      await ready
+      await revalidate()
+      return [state, () => { disposed = true; void watcher.close() }, revalidate]
     })
   }
 
-  /**
-   * Update all mod group assignments for an instance
-   * @param instancePath The instance path
-   * @param groups Object mapping group names to arrays of mod hashes
-   */
-  async updateModsGroups(instancePath: string, groups: Record<string, ModGroupData>, type: InstanceContentGroupType = 'mods'): Promise<void> {
-    const groupState = await this.getGroupState(instancePath, type)
-    const groupsPath = join(instancePath, getInstanceGroupFileName(type))
+  async updateModsGroups(instancePath: string, groups: Record<string, ModGroupData>, type: InstanceContentGroupType = 'mods', previous?: Record<string, ModGroupData>): Promise<void> {
+    await this.#assertJavaInstance(instancePath)
+    const key = InstanceGroupStateKey(instancePath, type), manager = await this.app.registry.get(ServiceStateManager)
+    await this.mutex.of(key).runExclusive(async () => {
+      await this.#assertJavaInstance(instancePath)
+      try {
+        await writeContentGroups(instancePath, type, groups, previous)
+        const state = manager.get<SharedState<InstanceModsGroupState>>(key)
+        state?.groupsSet(groups)
+        state?.groupsErrorSet('')
+      } catch (error) {
+        manager.get<SharedState<InstanceModsGroupState>>(key)?.groupsErrorSet(error instanceof Error && error.message === 'ContentGroupsChanged' ? 'changed' : 'write')
+        throw error
+      }
+    })
+  }
 
-    // Update all groups at once
-    groupState.groupsSet(groups)
-    try {
-      await ensureFile(groupsPath)
-      await writeFile(groupsPath, JSON.stringify(groups, null, 2), 'utf-8')
-    } catch (e) {
-      this.warn(`Failed to save mod groups to ${groupsPath}`, e)
-    }
-
-    this.log(`Updated ${type} groups for instance ${instancePath} with ${Object.keys(groups).length} groups`)
+  async migrateLegacyModsGroups(instancePath: string, mapping: Record<string, string>): Promise<'existing' | 'imported'> {
+    await this.#assertJavaInstance(instancePath)
+    const key = InstanceGroupStateKey(instancePath), manager = await this.app.registry.get(ServiceStateManager)
+    return this.mutex.of(key).runExclusive(async () => {
+      await this.#assertJavaInstance(instancePath)
+      if (await readContentGroups(instancePath, 'mods') !== undefined) return 'existing'
+      const groups = legacyContentGroups(mapping)
+      const result = await writeContentGroups(instancePath, 'mods', groups, undefined, true)
+      if (result === 'existing') return 'existing'
+      const state = manager.get<SharedState<InstanceModsGroupState>>(key)
+      state?.groupsSet(groups)
+      state?.groupsErrorSet('')
+      return 'imported'
+    })
   }
 
   /**

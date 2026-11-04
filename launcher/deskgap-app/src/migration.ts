@@ -27,6 +27,10 @@ class Emitter {
   emit(event: string, payload: any) {
     for (const listener of this.listeners.get(event) ?? []) listener(payload)
   }
+
+  off(event: string, listener: (payload: any) => void) {
+    this.listeners.get(event)?.delete(listener)
+  }
 }
 
 function installBridge(deskgap: MigrationBrowserClient) {
@@ -37,6 +41,9 @@ function installBridge(deskgap: MigrationBrowserClient) {
   const migration: Migration = {
     on(event, listener) {
       emitter.on(event, listener)
+    },
+    off(event, listener) {
+      emitter.off(event, listener)
     },
     getProgress() {
       return invoke<MigrationProgress>('migration-get-progress')

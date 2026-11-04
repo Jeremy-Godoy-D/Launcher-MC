@@ -1,13 +1,18 @@
 import { Resource, ResourceDomain, ResourceManager } from '@xmcl/resource'
-import { InstanceModsService as IInstanceModsService, InstanceModsServiceKey, UpdateInstanceResourcesOptions } from '@xmcl/runtime-api'
-import { emptyDir, ensureDir, rename, stat } from 'fs-extra'
-import { dirname, join } from 'path'
+import { InstanceModsService as IInstanceModsService, InstanceModsServiceKey, LockKey, ModReviewConfiguration, ReviewedModChanges, UpdateInstanceResourcesOptions } from '@xmcl/runtime-api'
+import { emptyDir, ensureDir, stat } from 'fs-extra'
+import { join } from 'path'
 import { Inject, LauncherAppKey } from '~/app'
 import { kResourceManager } from '~/resource'
 import { ExposeServiceKey } from '~/service'
 import { LauncherApp } from '../app/LauncherApp'
 import { readdirIfPresent } from '../util/fs'
 import { AbstractInstanceDomainService } from './AbstractInstanceDomainService'
+import { setModsEnabled } from './utils/setModsEnabled'
+import { InstanceService } from './InstanceService'
+import { AnyError } from '@xmcl/utils'
+import { installLocalMods, readModFilesSnapshot, uninstallLocalMods, validateModFileChanges } from './utils/localMods'
+import { LaunchService } from '../launch/LaunchService'
 
 /**
  * Provide the abilities to import mods and resource packs files to instance
@@ -20,39 +25,58 @@ export class InstanceModsService extends AbstractInstanceDomainService implement
     super(app, ResourceDomain.Mods)
   }
 
-  async enable({ files: mods, path }: UpdateInstanceResourcesOptions): Promise<void> {
-    this.log(`Enable ${mods.length} mods from ${path}`)
-    const promises: Promise<void>[] = []
-    const instanceModsDir = join(path, ResourceDomain.Mods)
-    for (const resource of mods) {
-      if (dirname(resource) !== instanceModsDir) {
-        this.warn(`Skip to enable unmanaged mod file on ${resource}!`)
-      } else if (!resource.endsWith('.disabled')) {
-        this.warn(`Skip to enable enabled mod file on ${resource}!`)
-      } else {
-        promises.push(rename(resource, resource.substring(0, resource.length - '.disabled'.length)).catch(e => {
-        }))
-      }
-    }
-    await Promise.all(promises)
+  async enable({ files, path, expectedHashes, expectedSnapshot }: ReviewedModChanges): Promise<void> {
+    await this.#changeMods(path, async configuration => { await validateModFileChanges(path, files, expectedHashes, expectedSnapshot, configuration); await setModsEnabled(path, files, true) })
   }
 
-  async disable({ files: mods, path }: UpdateInstanceResourcesOptions) {
-    this.log(`Disable ${mods.length} mods from ${path}`)
-    const promises: Promise<void>[] = []
-    const instanceModsDir = join(path, ResourceDomain.Mods)
-    for (const resource of mods) {
-      if (dirname(resource) !== instanceModsDir) {
-        this.warn(`Skip to disable unmanaged mod file on ${resource}!`)
-      } else if (resource.endsWith('.disabled')) {
-        this.warn(`Skip to disable disabled mod file on ${resource}!`)
-      } else {
-        promises.push(rename(resource, resource + '.disabled').catch(e => {
-          this.warn(e)
-        }))
-      }
-    }
-    await Promise.all(promises)
+  async disable({ files, path, expectedHashes, expectedSnapshot }: ReviewedModChanges): Promise<void> {
+    await this.#changeMods(path, async configuration => { await validateModFileChanges(path, files, expectedHashes, expectedSnapshot, configuration); await setModsEnabled(path, files, false) })
+  }
+
+  async getModFilesSnapshot(path: string) {
+    await this.#assertJavaInstance(path)
+    return this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      const instance = await this.#assertJavaInstance(path)
+      return readModFilesSnapshot(path, { runtime: { ...instance.runtime }, java: instance.java, version: instance.version })
+    })
+  }
+
+  async getModSources(path: string) {
+    await this.#assertJavaInstance(path)
+    const state = this.resourceManager.getWatched(join(path, 'mods'))?.state
+    if (!state) throw new Error('Mods are not watched')
+    const hashes = state.files.map(file => file.hash)
+    if (hashes.length > 10000) throw new Error('Too many mod sources')
+    const selected = new Set(hashes), metadata = await this.resourceManager.getMetadataByHashes(hashes)
+    return metadata.flatMap(value => value && selected.has(value.sha1) ? [{ hash: value.sha1, modrinth: value.modrinth, curseforge: value.curseforge }] : [])
+  }
+
+  async #changeMods<T>(path: string, operation: (configuration: ModReviewConfiguration) => Promise<T>): Promise<T> {
+    await this.#assertJavaInstance(path)
+    return this.mutex.of(LockKey.instance(path)).runExclusive(async () => {
+      const instance = await this.#assertJavaInstance(path)
+      const launch = await this.app.registry.get(LaunchService)
+      if ((await launch.getGameProcesses()).some(process => process.options.gameDirectory === path)) throw new AnyError('InstanceRunningError')
+      return operation({ runtime: { ...instance.runtime }, java: instance.java, version: instance.version })
+    })
+  }
+
+  async install({ files, path }: UpdateInstanceResourcesOptions): Promise<string[]> {
+    const destinations = await this.#changeMods(path, () => installLocalMods(path, files))
+    if (!this.resourceManager.getWatched(join(path, 'mods'))) this.resolveMarketMetadata(destinations).catch(error => this.warn(error))
+    return destinations
+  }
+
+  async uninstall({ files, path, expectedHashes, expectedSnapshot }: ReviewedModChanges): Promise<void> {
+    await this.#changeMods(path, configuration => uninstallLocalMods(path, files, expectedHashes, expectedSnapshot, configuration))
+  }
+
+  async #assertJavaInstance(path: string) {
+    const instances = await this.app.registry.get(InstanceService)
+    await instances.initialize()
+    const instance = typeof path === 'string' ? instances.state.instances.find(instance => instance.path === path && instance.edition === 'java') : undefined
+    if (!instance) throw new AnyError('InstanceNotFoundError')
+    return instance
   }
 
   async installToServerInstance(options: UpdateInstanceResourcesOptions): Promise<void> {
@@ -60,7 +84,7 @@ export class InstanceModsService extends AbstractInstanceDomainService implement
     const modsDir = join(options.path, 'server', 'mods')
     await ensureDir(modsDir)
     await emptyDir(modsDir)
-    await this.install({ ...options, path: join(options.path, 'server') })
+    await super.install({ ...options, path: join(options.path, 'server') })
   }
 
   async getServerInstanceMods(path: string): Promise<Array<{ fileName: string; ino: number }>> {

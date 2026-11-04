@@ -6,7 +6,7 @@ import type { SharedState } from '../util/SharedState'
 import type { CreateInstanceOption } from './InstanceService'
 import type { ServiceKey } from './Service'
 import type { Task, SubState } from '../task'
-import type { WithProgress } from '@xmcl/installer'
+import type { WithProgress, WithDownload } from '@xmcl/installer'
 import type { CreateModrinthProjectData, CreateModrinthVersionData, Project, UpdateModrinthProjectData } from '@xmcl/modrinth'
 
 export interface ExportModpackTrackerEvents {
@@ -18,6 +18,13 @@ export interface ExportModpackTask extends Task {
   instancePath: string
   name: string
   substate: SubState<ExportModpackTrackerEvents, 'zip.progress'>
+}
+
+export interface DownloadModpackTask extends Task {
+  type: 'downloadModpack'
+  operationId: string
+  market: InstallMarketOptions['market']
+  substate: SubState<{ download: WithDownload<{}> }, 'download'>
 }
 
 export interface ExportFileDirective {
@@ -102,6 +109,21 @@ export interface ExportModpackResult {
   curseforgeServer?: string
   modrinth?: string
   offline?: string
+}
+
+export type LocalExportFormat = 'modrinth' | 'curseforge' | 'offline'
+export interface InstanceExportPreview {
+  fingerprint: string
+  files: { path: string; size: number; sha256: string; selected: boolean }[]
+  portable: boolean
+}
+export interface ReviewedInstanceExport {
+  instancePath: string
+  fingerprint: string
+  files: string[]
+  format: LocalExportFormat
+  version: string
+  destinationDirectory: string
 }
 
 export interface ModrinthLinkagePreviewEntry {
@@ -233,11 +255,13 @@ export class ModpackState {
  * For json format modpack like FTB, you can use the `InstanceIOService` to do the actual install operation.
  */
 export interface ModpackService {
+  previewInstanceExport(instancePath: string): Promise<InstanceExportPreview>
+  exportReviewedInstance(options: ReviewedInstanceExport): Promise<string>
   /**
    * Install the modpack from market to local cache.
    * @returns The installed modpack path
    */
-  installModapckFromMarket(options: InstallMarketOptions): Promise<string[]>
+  installModapckFromMarket(options: InstallMarketOptions, operationId?: string): Promise<string[]>
   /**
    * Export the instance as an curseforge/modrinth/mcbbs modpack
    * @param options The curseforge/modrinth/mcbbs modpack export options

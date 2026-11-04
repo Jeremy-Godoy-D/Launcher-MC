@@ -23,90 +23,13 @@ import { useNotifier } from './notifier'
 import { CreateInstanceOptions, Instance, InstanceData, InstanceFile } from '@xmcl/instance'
 import { withRendererAction } from '@/rendererAction'
 import { getErrorMessage } from '@/util/error'
+import { DEFAULT_LINK_PREFERENCES, applyInstanceLinkPreferences, type InstanceCreationLinkPreferences } from '@xmcl/runtime-api/src/util/instanceCreation'
+
+export { applyInstanceLinkPreferences, type InstanceCreationLinkPreferences, type InstanceLinkOperations } from '@xmcl/runtime-api/src/util/instanceCreation'
 
 export type InstanceCreation = ReturnType<typeof useInstanceCreation>
 
 export const kInstanceCreation: InjectionKey<InstanceCreation> = Symbol('CreateOption')
-
-/**
- * Launcher-wide preferences that decide whether a manually created instance
- * should link its `saves` / `resourcepacks` / `shaderpacks` folder to the
- * global shared folder instead of using an ordinary instance-owned directory.
- *
- * These are creation-time defaults for the manual Add Instance form only. They
- * are NOT part of the runtime instance schema and are never applied to imported
- * modpacks/templates.
- */
-export interface InstanceCreationLinkPreferences {
-  version: number
-  saves: boolean
-  resourcepacks: boolean
-  shaderpacks: boolean
-  options: boolean
-  servers: boolean
-}
-
-const DEFAULT_LINK_PREFERENCES: InstanceCreationLinkPreferences = {
-  version: 1,
-  saves: false,
-  resourcepacks: false,
-  shaderpacks: false,
-  options: false,
-  servers: false,
-}
-
-/**
- * The runtime link operations, one per supported shared folder/file. Each
- * mirrors the corresponding local-view link switch (`linkSharedSave` /
- * `linkShared` / `linkGameOptions` / servers `link`), so creation-time links
- * share the exact merge/backup semantics.
- */
-export interface InstanceLinkOperations {
-  linkSaves: (instancePath: string) => Promise<void>
-  linkResourcePacks: (instancePath: string) => Promise<void>
-  linkShaderPacks: (instancePath: string) => Promise<void>
-  linkOptions: (instancePath: string) => Promise<void>
-  linkServers: (instancePath: string) => Promise<void>
-}
-
-/**
- * Apply the checked shared-folder links for a freshly created instance.
- *
- * Each link is applied independently and failure-tolerantly: one failing
- * operation neither aborts the others nor claims success. The returned array
- * lists the folders that failed so the caller can report them per folder while
- * leaving the instance usable with an ordinary directory for the failures.
- */
-export async function applyInstanceLinkPreferences(
-  instancePath: string,
-  preferences: Pick<
-    InstanceCreationLinkPreferences,
-    'saves' | 'resourcepacks' | 'shaderpacks' | 'options' | 'servers'
-  >,
-  operations: InstanceLinkOperations,
-): Promise<string[]> {
-  const tasks: Array<{ folder: string; run: () => Promise<void> }> = []
-  if (preferences.saves)
-    tasks.push({ folder: 'saves', run: () => operations.linkSaves(instancePath) })
-  if (preferences.resourcepacks)
-    tasks.push({ folder: 'resourcepacks', run: () => operations.linkResourcePacks(instancePath) })
-  if (preferences.shaderpacks)
-    tasks.push({ folder: 'shaderpacks', run: () => operations.linkShaderPacks(instancePath) })
-  if (preferences.options)
-    tasks.push({ folder: 'options', run: () => operations.linkOptions(instancePath) })
-  if (preferences.servers)
-    tasks.push({ folder: 'servers', run: () => operations.linkServers(instancePath) })
-  const failed: string[] = []
-  for (const task of tasks) {
-    try {
-      await task.run()
-    } catch (e) {
-      console.error(e)
-      failed.push(task.folder)
-    }
-  }
-  return failed
-}
 
 /**
  * Hook to create a general instance

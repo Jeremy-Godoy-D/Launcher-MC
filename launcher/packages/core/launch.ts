@@ -7,6 +7,7 @@ import { link, mkdir, readFile, writeFile } from 'fs/promises'
 import { EOL } from 'os'
 import { basename, delimiter, dirname, isAbsolute, join, resolve, sep } from 'path'
 import { pipeline } from 'stream'
+import { StringDecoder } from 'node:string_decoder'
 import { promisify } from 'util'
 import { MinecraftFolder } from './folder'
 import { Platform, getPlatform } from './platform'
@@ -295,7 +296,7 @@ export namespace LaunchPrecheck {
     version: ResolvedVersion,
     option: LaunchOption,
   ) {
-    const jarPath = resource.getVersionJar(version.minecraftVersion)
+    const jarPath = resource.getVersionJar(version.clientJar || version.minecraftVersion)
     if (version.downloads.client?.sha1) {
       if (!(await validateSha1(jarPath, version.downloads.client.sha1))) {
         throw Object.assign(
@@ -568,11 +569,11 @@ export interface MinecraftProcessWatcher extends EventEmitter {
       /**
        * The code of the process exit. This is the nodejs child process "exit" event arg.
        */
-      code: number
+      code: number | null
       /**
        * The signal of the process exit. This is the nodejs child process "exit" event arg.
        */
-      signal: string
+      signal: string | null
       /**
        * The crash report content
        */
@@ -601,52 +602,63 @@ export interface MinecraftProcessWatcher extends EventEmitter {
 export function createMinecraftProcessWatcher(
   process: ChildProcess,
   emitter: EventEmitter = new EventEmitter(),
+  stdout: Pick<EventEmitter, 'on'> | null = process.stdout,
 ): MinecraftProcessWatcher {
-  let crashReport = ''
-  let crashReportLocation = ''
-  let waitForReady = true
-  process.on('error', (e) => {
-    emitter.emit('error', e)
-  })
-  process.on('exit', (code, signal) => {
-    emitter.emit('minecraft-exit', {
-      code,
-      signal,
-      crashReport,
-      crashReportLocation,
-    })
-  })
-  process.stdout?.on('data', (s) => {
-    const string = s.toString()
-    if (string.indexOf('---- Minecraft Crash Report ----') !== -1) {
-      crashReport = string
-    } else if (string.indexOf('Crash report saved to:') !== -1) {
-      crashReportLocation = string.substring(
-        string.indexOf('Crash report saved to:') + 'Crash report saved to: #@!@# '.length,
-      )
-      crashReportLocation = crashReportLocation.replace(EOL, '').trim()
-    } else if (string.indexOf('Crash report saved to ') !== -1) {
-      crashReportLocation = string.substring(
-        string.indexOf('Crash report saved to ') + 'Crash report saved to '.length,
-      )
-      crashReportLocation = crashReportLocation.replace(EOL, '').trim()
-    } else if (
-      waitForReady &&
-      (string.indexOf('Missing metadata in pack') !== -1 ||
-        string.indexOf('Registering resource reload listener') !== -1 ||
-        string.indexOf('Reloading ResourceManager') !== -1 ||
-        string.indexOf('LWJGL Version: ') !== -1 ||
-        string.indexOf('OpenAL initialized.') !== -1)
-    ) {
+  const limit = 64 * 1024
+  const decoder = new StringDecoder('utf8')
+  let crashReport = '', crashReportLocation = '', pending = ''
+  let waitForReady = true, capturingCrash = false, crashTruncated = false, outputEnded = !stdout, failed = false, emitted = false
+  let exit: { code: number | null; signal: string | null } | undefined
+  const finish = () => {
+    if (!exit || !outputEnded || failed || emitted) return
+    emitted = true
+    emitter.emit('minecraft-exit', { ...exit, crashReport, crashReportLocation })
+  }
+  const tail = (value: string) => {
+    let start = Math.max(0, value.length - limit)
+    if (start && value.charCodeAt(start) >= 0xdc00 && value.charCodeAt(start) <= 0xdfff) start++
+    return value.slice(start)
+  }
+  const readyMarkers = ['Missing metadata in pack', 'Registering resource reload listener', 'Reloading ResourceManager', 'LWJGL Version: ', 'OpenAL initialized.', ' Preparing level ']
+  const ready = (line: string) => {
+    if (!exit && waitForReady && readyMarkers.some(value => line.includes(value))) {
       waitForReady = false
       emitter.emit('minecraft-window-ready')
-    } else if (waitForReady && string.indexOf(' Preparing level ') !== -1) {
-      waitForReady = false
-      emitter.emit('minecraft-window-ready')
-    } else if (string.indexOf('Failed to start the minecraft server') !== -1) {
-      crashReport = string
     }
-  })
+  }
+  const acceptLine = (line: string) => {
+    if (line.includes('---- Minecraft Crash Report ----') || line.includes('Failed to start the minecraft server')) capturingCrash = true
+    if (capturingCrash && !crashTruncated) {
+      const text = crashReport + line + '\n'
+      const marker = '\n[crash output truncated]'
+      crashTruncated = text.length > limit
+      let end = limit - marker.length
+      if (text.charCodeAt(end) >= 0xdc00 && text.charCodeAt(end) <= 0xdfff) end--
+      crashReport = crashTruncated ? text.slice(0, end) + marker : text
+    }
+    const location = /(?:Crash report saved to: (?:#@!@# )?|Crash report saved to )(.+)$/.exec(line)
+    if (location) crashReportLocation = location[1].trim()
+    ready(line)
+  }
+  const acceptText = (text: string) => {
+    const lines = (pending + text).split(/\r?\n/)
+    pending = tail(lines.pop()!)
+    for (const line of lines) acceptLine(tail(line))
+    ready(pending)
+  }
+  const endOutput = () => {
+    if (outputEnded) return
+    acceptText(decoder.end())
+    if (pending) acceptLine(pending)
+    pending = ''; outputEnded = true; finish()
+  }
+  process.on('error', error => { failed = !process.pid; emitter.emit('error', error) })
+  process.on('exit', (code, signal) => { exit = { code, signal }; finish() })
+  // Native may supply its already decoded stdout to keep a single decoder per pipe.
+  stdout?.on('data', (data: Buffer | string) => {
+    if (outputEnded) return
+    acceptText(typeof data === 'string' ? data : decoder.write(data))
+  }).on('end', endOutput).on('close', endOutput)
   return emitter
 }
 
@@ -856,7 +868,7 @@ export async function generateArguments(options: LaunchOption) {
       ...version.libraries
         .filter((lib) => !lib.isNative)
         .map((lib) => mc.getLibraryByPath(lib.download.path)),
-      mc.getVersionJar(version.minecraftVersion),
+      mc.getVersionJar(version.clientJar || version.minecraftVersion),
       ...(options.extraClassPaths || []),
     ]
       .map((c) => c.replaceAll('\\', '/'))

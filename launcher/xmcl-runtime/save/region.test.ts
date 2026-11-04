@@ -2,7 +2,9 @@ import { describe, expect, test } from 'vitest'
 import { join } from 'path'
 import { tmpdir } from 'os'
 import { copyFile, ensureDir, mkdtemp, rm } from 'fs-extra'
-import { getSaveRegions, listSaveDimensions, readSaveChunks, relocateSaveChunks, renderSaveRegion, writeSaveChunks } from './region'
+import { getSaveRegions, listSaveDimensions, prepareRegionChunks, readSaveChunks, relocateSaveChunks, renderSaveRegion, validateRegionFile, writeSaveChunks } from './region'
+import { deserialize, serialize, TagType } from '@xmcl/nbt'
+import { gzipSync } from 'node:zlib'
 
 const mockRoot = join(__dirname, '..', '..', 'mock', 'saves')
 
@@ -120,4 +122,47 @@ describe('region', () => {
       await rm(dest, { recursive: true, force: true })
     }
   }, 30000)
+
+  test('relocation retains chest data and moves block entities and scheduled ticks with the terrain', async () => {
+    class BlockEntity {
+      @TagType(TagType.Int) x = 33
+      @TagType(TagType.Int) y = 64
+      @TagType(TagType.Int) z = -47
+      @TagType(TagType.String) id = 'minecraft:chest'
+      @TagType(TagType.String) CustomName = 'Keep this chest'
+    }
+    class Chunk {
+      @TagType(TagType.Int) xPos = 2
+      @TagType(TagType.Int) zPos = -3
+      @TagType([BlockEntity]) block_entities = [new BlockEntity()]
+      @TagType([BlockEntity]) block_ticks = [new BlockEntity()]
+      @TagType([BlockEntity]) fluid_ticks = [new BlockEntity()]
+      @TagType(TagType.String) unknown_mod_data = 'Preserve byte content'
+    }
+    const bytes = await serialize(new Chunk(), { compressed: 'gzip' }), original = Buffer.from(bytes)
+    const [moved] = relocateSaveChunks([{ chunkX: 2, chunkZ: -3, compression: 1, data: bytes }], 1, -2)
+    const parsed = await deserialize<any>(moved.data, { compressed: 'gzip' })
+    expect(parsed).toMatchObject({ xPos: 3, zPos: -5, unknown_mod_data: 'Preserve byte content' })
+    for (const key of ['block_entities', 'block_ticks', 'fluid_ticks']) expect(parsed[key]).toEqual([{ x: 49, y: 64, z: -79, id: 'minecraft:chest', CustomName: 'Keep this chest' }])
+    expect(Buffer.from(bytes)).toEqual(original)
+  })
+
+  test('chunk relocation rejects invalid NBT, unsupported compression and excessive decompression before writing', () => {
+    const cases = [
+      { compression: 1, data: gzipSync(Buffer.alloc(17 * 1024 * 1024)) },
+      { compression: 3, data: Buffer.from('not NBT') },
+      { compression: 128, data: Buffer.from([10, 0, 0, 0]) },
+    ]
+    for (const input of cases) for (const offset of [0, 1]) expect(() => relocateSaveChunks([{ chunkX: 0, chunkZ: 0, ...input }], offset, 0)).toThrow()
+  })
+
+  test('region edits retain unselected external records and tolerate a short final sector without accepting truncated payloads', () => {
+    const bytes = Buffer.alloc(8192 + 5)
+    bytes.writeUInt32BE((2 << 8) | 1, 0); bytes.writeUInt32BE(1, 8192); bytes[8196] = 130
+    expect(() => validateRegionFile(bytes)).not.toThrow()
+    const edited = prepareRegionChunks(bytes, [{ chunkX: 1, chunkZ: 0 }], [])
+    expect(edited.subarray(0, bytes.length)).toEqual(bytes); expect(edited.length % 4096).toBe(0)
+    const truncated = Buffer.from(bytes); truncated.writeUInt32BE(2, 8192)
+    expect(() => validateRegionFile(truncated)).toThrow('Invalid region chunk record')
+  })
 })

@@ -20,17 +20,19 @@ import { rename, unlink } from 'fs/promises'
  *   having that code path in the shared download primitive.
  *
  * On success: the destination contains the full payload.
- * On failure: both the staging file and the destination are removed,
- * so a future retry sees a clean slate.
+ * On download/validation failure: staging is removed; an existing destination stays intact.
  */
 export async function downloadStaged(options: Omit<DownloadOptions, 'destination'> & {
   destination: string
+  validate?: (path: string) => Promise<void>
 }): Promise<void> {
   const { destination } = options
   const pending = destination + '.pending'
 
   try {
     await download({ ...options, destination: pending })
+    await options.validate?.(pending)
+    options.signal?.throwIfAborted()
   } catch (e) {
     await unlink(pending).catch(() => undefined)
     throw e

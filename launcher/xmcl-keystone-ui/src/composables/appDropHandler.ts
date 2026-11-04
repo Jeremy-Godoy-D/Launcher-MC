@@ -1,6 +1,7 @@
 import { injection } from '@/util/inject'
 import { getExpectedSize } from '@/util/size'
 import { Resource } from '@xmcl/resource'
+import type { Ref } from 'vue'
 import { useDialog } from './dialog'
 import { kDropHandler } from './dropHandler'
 import { kInstance } from './instance'
@@ -29,7 +30,7 @@ export interface DropItem {
 export function useAppDropHandler() {
   const loading = ref(false)
   const active = ref(false)
-  const items = ref([] as DropItem[])
+  const items: Ref<DropItem[]> = ref([])
   const { t } = useI18n()
 
   const { registerHandler, dragover } = injection(kDropHandler)

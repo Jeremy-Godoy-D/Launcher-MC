@@ -5,10 +5,13 @@ import { Platform } from '../entities/platform'
 import { Settings } from '../entities/setting'
 import { SharedState } from '../util/SharedState'
 import { ServiceKey } from './Service'
+import type { EditLauncherSettings } from '../util/launcherSettings'
 
 export interface MigrateOptions {
   destination: string
+  expectedSource?: string
 }
+export interface DataMigrationReview { source: string; destination: string; unchanged: boolean }
 
 export class LauncherProfileState implements LauncherProfile {
   profiles = {}
@@ -107,6 +110,9 @@ export interface BaseService extends GenericEventEmitter<BaseServiceEventMap> {
 
   getSettings(): Promise<SharedState<Settings>>
 
+  /** Persist reviewed core preferences atomically before acknowledging the change. */
+  editSettings(options: EditLauncherSettings): Promise<void>
+
   makeDesktopShortcut(): Promise<boolean>
 
   addSteamShortcut(): Promise<boolean>
@@ -166,6 +172,9 @@ export interface BaseService extends GenericEventEmitter<BaseServiceEventMap> {
    * @param options The migration options
    */
   migrate(options: MigrateOptions): Promise<void>
+
+  reviewDataMigration(destination: string): Promise<DataMigrationReview>
+  getLegacyAppearance(): Promise<'dark' | 'light' | 'system' | undefined>
 
   getMemoryStatus(): Promise<{ total: number; free: number }>
 

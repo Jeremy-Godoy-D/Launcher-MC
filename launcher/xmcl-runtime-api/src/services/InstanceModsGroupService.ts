@@ -56,6 +56,10 @@ export function migrateModGroupFilenames(groups: Record<string, ModGroupData>, m
 }
 
 export class InstanceModsGroupState {
+  error = ''
+
+  groupsErrorSet(error: string) { this.error = error }
+
   groups: Record<string, ModGroupData> = {}
 
   groupsSet(groups: Record<string, ModGroupData>) {
@@ -100,12 +104,12 @@ export interface InstanceModsGroupService {
    * @param instancePath The instance path
    * @param groups Object mapping group names to grouped file names
    */
-  updateModsGroups(instancePath: string, groups: Record<string, ModGroupData>, type?: InstanceContentGroupType): Promise<void>
+  updateModsGroups(instancePath: string, groups: Record<string, ModGroupData>, type?: InstanceContentGroupType, previous?: Record<string, ModGroupData>): Promise<void>
   
-  /**
-   * Get the shared group rules that map mod IDs to group names
-   * These rules can be applied across all instances
-   */
+  /** Import only when no native file exists; acknowledge after persistence. */
+  migrateLegacyModsGroups(instancePath: string, mapping: Record<string, string>): Promise<'existing' | 'imported'>
+
+  /** Get local shared rules that map mod IDs to group names. */
   getSharedGroupRules(): Promise<ModGroupRules>
   
   /**

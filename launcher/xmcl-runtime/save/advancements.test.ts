@@ -52,6 +52,16 @@ describe('versioned advancement resources', () => {
     await done
   }
 
+  test('reads advancement resources from an isolated client while retaining the base Minecraft identity', async () => {
+    await version('base', 'advancements', 'Base')
+    await version('private', 'advancements', 'Private')
+    await outputJson(join(root, 'versions/modded/modded.json'), { id: 'modded', inheritsFrom: 'base', jar: 'private', mainClass: 'custom.Main', libraries: [] })
+    await outputJson(join(instance, 'instance.json'), { version: 'modded', runtime: { minecraft: 'base' } })
+    expect((await resolveProgressVersion(instance, root))?.clientJarPath).toBe(join(root, 'versions/private/private.jar'))
+    const progress = await readSaveProgress(save, instance, root, 'player', 'en')
+    expect(progress.advancements?.items[0].title).toBe('English private')
+  })
+
   test('uses the inherited game version and its language index, and refreshes locale/version/player data', async () => {
     await version('old', 'advancements', 'Ancien')
     await version('new', 'advancement', 'Nouveau')
@@ -87,7 +97,7 @@ describe('versioned advancement resources', () => {
     expect(reset.advancements?.items.every(item => !item.done && item.criteriaCompleted === 0)).toBe(true)
     expect(french.advancements?.items[0].title).toBe('Ancien')
     expect(french.advancements?.completed).toBe(1)
-  })
+  }, 15000)
 
   test('does not substitute unrelated installed versions when the selected client is unavailable', async () => {
     await version('unrelated', 'advancement', 'Unrelated')

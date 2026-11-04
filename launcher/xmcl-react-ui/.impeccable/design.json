@@ -1,0 +1,462 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-24T05:05:20.244Z",
+  "title": "Design System: Launcher MC — Obsidiana y cobre",
+  "extensions": {
+    "colorMeta": {
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Obsidiana de fondo",
+        "tonalRamp": [
+          "oklch(15% 0.0133 264.15)",
+          "oklch(26% 0.0133 264.15)",
+          "oklch(38% 0.0133 264.15)",
+          "oklch(49% 0.0133 264.15)",
+          "oklch(61% 0.0133 264.15)",
+          "oklch(72% 0.0133 264.15)",
+          "oklch(84% 0.0133 264.15)",
+          "oklch(95% 0.0133 264.15)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Obsidiana de superficie",
+        "tonalRamp": [
+          "oklch(15% 0.0237 259.31)",
+          "oklch(26% 0.0237 259.31)",
+          "oklch(38% 0.0237 259.31)",
+          "oklch(49% 0.0237 259.31)",
+          "oklch(61% 0.0237 259.31)",
+          "oklch(72% 0.0237 259.31)",
+          "oklch(84% 0.0237 259.31)",
+          "oklch(95% 0.0237 259.31)"
+        ]
+      },
+      "elevated": {
+        "role": "neutral",
+        "displayName": "Obsidiana elevada",
+        "tonalRamp": [
+          "oklch(15% 0.0295 256.85)",
+          "oklch(26% 0.0295 256.85)",
+          "oklch(38% 0.0295 256.85)",
+          "oklch(49% 0.0295 256.85)",
+          "oklch(61% 0.0295 256.85)",
+          "oklch(72% 0.0295 256.85)",
+          "oklch(84% 0.0295 256.85)",
+          "oklch(95% 0.0295 256.85)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta principal",
+        "tonalRamp": [
+          "oklch(15% 0.0086 264.52)",
+          "oklch(26% 0.0086 264.52)",
+          "oklch(38% 0.0086 264.52)",
+          "oklch(49% 0.0086 264.52)",
+          "oklch(61% 0.0086 264.52)",
+          "oklch(72% 0.0086 264.52)",
+          "oklch(84% 0.0086 264.52)",
+          "oklch(95% 0.0086 264.52)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Tinta secundaria",
+        "tonalRamp": [
+          "oklch(15% 0.0257 257.65)",
+          "oklch(26% 0.0257 257.65)",
+          "oklch(38% 0.0257 257.65)",
+          "oklch(49% 0.0257 257.65)",
+          "oklch(61% 0.0257 257.65)",
+          "oklch(72% 0.0257 257.65)",
+          "oklch(84% 0.0257 257.65)",
+          "oklch(95% 0.0257 257.65)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Separador discreto",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88 / 0.0706)",
+          "oklch(26% 0.0000 89.88 / 0.0706)",
+          "oklch(38% 0.0000 89.88 / 0.0706)",
+          "oklch(49% 0.0000 89.88 / 0.0706)",
+          "oklch(61% 0.0000 89.88 / 0.0706)",
+          "oklch(72% 0.0000 89.88 / 0.0706)",
+          "oklch(84% 0.0000 89.88 / 0.0706)",
+          "oklch(95% 0.0000 89.88 / 0.0706)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Cobre cálido",
+        "tonalRamp": [
+          "oklch(15% 0.1174 72.63)",
+          "oklch(26% 0.1174 72.63)",
+          "oklch(38% 0.1174 72.63)",
+          "oklch(49% 0.1174 72.63)",
+          "oklch(61% 0.1174 72.63)",
+          "oklch(72% 0.1174 72.63)",
+          "oklch(84% 0.1174 72.63)",
+          "oklch(95% 0.1174 72.63)"
+        ]
+      },
+      "accent-text": {
+        "role": "primary",
+        "displayName": "Tinta de cobre",
+        "tonalRamp": [
+          "oklch(15% 0.0307 69.65)",
+          "oklch(26% 0.0307 69.65)",
+          "oklch(38% 0.0307 69.65)",
+          "oklch(49% 0.0307 69.65)",
+          "oklch(61% 0.0307 69.65)",
+          "oklch(72% 0.0307 69.65)",
+          "oklch(84% 0.0307 69.65)",
+          "oklch(95% 0.0307 69.65)"
+        ]
+      },
+      "hover": {
+        "role": "neutral",
+        "displayName": "Velo de interacción",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88 / 0.0353)",
+          "oklch(26% 0.0000 89.88 / 0.0353)",
+          "oklch(38% 0.0000 89.88 / 0.0353)",
+          "oklch(49% 0.0000 89.88 / 0.0353)",
+          "oklch(61% 0.0000 89.88 / 0.0353)",
+          "oklch(72% 0.0000 89.88 / 0.0353)",
+          "oklch(84% 0.0000 89.88 / 0.0353)",
+          "oklch(95% 0.0000 89.88 / 0.0353)"
+        ]
+      },
+      "light-canvas": {
+        "role": "neutral",
+        "displayName": "Obsidiana de fondo · clara",
+        "tonalRamp": [
+          "oklch(15% 0.0045 258.32)",
+          "oklch(26% 0.0045 258.32)",
+          "oklch(38% 0.0045 258.32)",
+          "oklch(49% 0.0045 258.32)",
+          "oklch(61% 0.0045 258.32)",
+          "oklch(72% 0.0045 258.32)",
+          "oklch(84% 0.0045 258.32)",
+          "oklch(95% 0.0045 258.32)"
+        ]
+      },
+      "light-surface": {
+        "role": "neutral",
+        "displayName": "Obsidiana de superficie · clara",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26% 0.0000 89.88)",
+          "oklch(38% 0.0000 89.88)",
+          "oklch(49% 0.0000 89.88)",
+          "oklch(61% 0.0000 89.88)",
+          "oklch(72% 0.0000 89.88)",
+          "oklch(84% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "light-elevated": {
+        "role": "neutral",
+        "displayName": "Obsidiana elevada · clara",
+        "tonalRamp": [
+          "oklch(15% 0.0097 252.81)",
+          "oklch(26% 0.0097 252.81)",
+          "oklch(38% 0.0097 252.81)",
+          "oklch(49% 0.0097 252.81)",
+          "oklch(61% 0.0097 252.81)",
+          "oklch(72% 0.0097 252.81)",
+          "oklch(84% 0.0097 252.81)",
+          "oklch(95% 0.0097 252.81)"
+        ]
+      },
+      "light-ink": {
+        "role": "neutral",
+        "displayName": "Tinta principal · clara",
+        "tonalRamp": [
+          "oklch(15% 0.0249 253.77)",
+          "oklch(26% 0.0249 253.77)",
+          "oklch(38% 0.0249 253.77)",
+          "oklch(49% 0.0249 253.77)",
+          "oklch(61% 0.0249 253.77)",
+          "oklch(72% 0.0249 253.77)",
+          "oklch(84% 0.0249 253.77)",
+          "oklch(95% 0.0249 253.77)"
+        ]
+      },
+      "light-muted": {
+        "role": "neutral",
+        "displayName": "Tinta secundaria · clara",
+        "tonalRamp": [
+          "oklch(15% 0.0380 255.72)",
+          "oklch(26% 0.0380 255.72)",
+          "oklch(38% 0.0380 255.72)",
+          "oklch(49% 0.0380 255.72)",
+          "oklch(61% 0.0380 255.72)",
+          "oklch(72% 0.0380 255.72)",
+          "oklch(84% 0.0380 255.72)",
+          "oklch(95% 0.0380 255.72)"
+        ]
+      },
+      "light-line": {
+        "role": "neutral",
+        "displayName": "Separador discreto · clara",
+        "tonalRamp": [
+          "oklch(15% 0.0249 253.77 / 0.0863)",
+          "oklch(26% 0.0249 253.77 / 0.0863)",
+          "oklch(38% 0.0249 253.77 / 0.0863)",
+          "oklch(49% 0.0249 253.77 / 0.0863)",
+          "oklch(61% 0.0249 253.77 / 0.0863)",
+          "oklch(72% 0.0249 253.77 / 0.0863)",
+          "oklch(84% 0.0249 253.77 / 0.0863)",
+          "oklch(95% 0.0249 253.77 / 0.0863)"
+        ]
+      },
+      "light-accent": {
+        "role": "primary",
+        "displayName": "Cobre cálido · clara",
+        "tonalRamp": [
+          "oklch(15% 0.1169 57.45)",
+          "oklch(26% 0.1169 57.45)",
+          "oklch(38% 0.1169 57.45)",
+          "oklch(49% 0.1169 57.45)",
+          "oklch(61% 0.1169 57.45)",
+          "oklch(72% 0.1169 57.45)",
+          "oklch(84% 0.1169 57.45)",
+          "oklch(95% 0.1169 57.45)"
+        ]
+      },
+      "light-accent-ink": {
+        "role": "primary",
+        "displayName": "Cobre de lectura · clara",
+        "tonalRamp": [
+          "oklch(15% 0.1132 54.47)",
+          "oklch(26% 0.1132 54.47)",
+          "oklch(38% 0.1132 54.47)",
+          "oklch(49% 0.1132 54.47)",
+          "oklch(61% 0.1132 54.47)",
+          "oklch(72% 0.1132 54.47)",
+          "oklch(84% 0.1132 54.47)",
+          "oklch(95% 0.1132 54.47)"
+        ]
+      },
+      "light-accent-text": {
+        "role": "primary",
+        "displayName": "Tinta de cobre · clara",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26% 0.0000 89.88)",
+          "oklch(38% 0.0000 89.88)",
+          "oklch(49% 0.0000 89.88)",
+          "oklch(61% 0.0000 89.88)",
+          "oklch(72% 0.0000 89.88)",
+          "oklch(84% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "light-hover": {
+        "role": "neutral",
+        "displayName": "Velo de interacción · clara",
+        "tonalRamp": [
+          "oklch(15% 0.0249 253.77 / 0.0275)",
+          "oklch(26% 0.0249 253.77 / 0.0275)",
+          "oklch(38% 0.0249 253.77 / 0.0275)",
+          "oklch(49% 0.0249 253.77 / 0.0275)",
+          "oklch(61% 0.0249 253.77 / 0.0275)",
+          "oklch(72% 0.0249 253.77 / 0.0275)",
+          "oklch(84% 0.0249 253.77 / 0.0275)",
+          "oklch(95% 0.0249 253.77 / 0.0275)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Destacada",
+        "purpose": "Identidad de la instancia sobre paisaje; variante compacta en CSS."
+      },
+      "headline": {
+        "displayName": "Pantalla",
+        "purpose": "Título de la ruta."
+      },
+      "title": {
+        "displayName": "Sección",
+        "purpose": "Agrupar contenido dentro de una ruta."
+      },
+      "body": {
+        "displayName": "Texto base",
+        "purpose": "Fuente y tamaño globales."
+      },
+      "label": {
+        "displayName": "Acciones",
+        "purpose": "Etiquetas de botones."
+      }
+    },
+    "shadows": [
+      {
+        "name": "dialog-dark",
+        "value": "0 18px 56px #0006",
+        "purpose": "Sombra ambiental de diálogo en oscuro; --shadow."
+      },
+      {
+        "name": "dialog-light",
+        "value": "0 18px 56px #17202b20",
+        "purpose": "Sombra ambiental de diálogo en claro; --shadow."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control-state",
+        "value": "background 160ms ease-out, color 160ms ease-out",
+        "purpose": "Respuesta de controles sin desplazar objetivos."
+      },
+      {
+        "name": "video-opacity",
+        "value": "opacity 250ms ease-out",
+        "purpose": "Mostrar vídeo solo cuando está listo y permitido."
+      },
+      {
+        "name": "rotation",
+        "value": "30000ms",
+        "purpose": "Intervalo de presentación de la fixture, condicionado por presentación activa."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "none",
+        "purpose": "Sin transición ni animación al reducir movimiento; el estado de presentación también lo respeta."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide",
+        "value": "(min-width: 1500px)"
+      },
+      {
+        "name": "compact-sidebar",
+        "value": "(max-width: 1023px)"
+      },
+      {
+        "name": "compact-content",
+        "value": "(max-width: 850px)"
+      },
+      {
+        "name": "short-window",
+        "value": "(max-height: 500px)"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botón primario",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción principal en una superficie sólida; hereda la variante activa.",
+      "html": "<button class=\"ds-primary\">Añadir instancia</button>",
+      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:40px;padding:0 17px;border:0;border-radius:10px;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;font-family:'Segoe UI Variable','Segoe UI',sans-serif;transition:background 160ms ease-out,color 160ms ease-out;background:var(--accent);color:var(--accent-text);}.ds-primary:hover{background:color-mix(in srgb,var(--accent) 85%,var(--ink));}.ds-primary:disabled{opacity:.4;cursor:default;}.ds-primary:focus-visible{outline:2px solid var(--accent-ink);outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none;animation:none;}}"
+    },
+    {
+      "name": "Botón secundario",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Acción de apoyo sin competir con el primario.",
+      "html": "<button class=\"ds-secondary\">Abrir carpeta</button>",
+      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:40px;padding:0 17px;border:0;border-radius:10px;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;font-family:'Segoe UI Variable','Segoe UI',sans-serif;transition:background 160ms ease-out,color 160ms ease-out;background:var(--elevated);color:var(--ink);}.ds-secondary:hover{background:color-mix(in srgb,var(--elevated) 88%,var(--muted));}.ds-secondary:disabled{opacity:.4;cursor:default;}.ds-secondary:focus-visible{outline:2px solid var(--accent-ink);outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none;animation:none;}}"
+    },
+    {
+      "name": "Jugar destacado",
+      "kind": "button",
+      "refersTo": "button-play-featured",
+      "description": "Acción sobre medios: cobre cálido fijo en ambas variantes.",
+      "html": "<button class=\"ds-play\"><svg viewBox=\"0 0 24 24\" width=\"19\" height=\"19\" aria-hidden=\"true\" fill=\"currentColor\"><path d=\"M8 5v14l11-7z\"/></svg>Jugar</button>",
+      "css": ".ds-play{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:40px;padding:0 17px;border:0;border-radius:10px;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;font-family:'Segoe UI Variable','Segoe UI',sans-serif;transition:background 160ms ease-out,color 160ms ease-out;height:44px;min-width:125px;background:#f3b86a;color:#271b0d;}.ds-play:hover{background:color-mix(in srgb,var(--accent) 85%,var(--ink));}.ds-play:disabled{opacity:.4;cursor:default;}.ds-play:focus-visible{outline:2px solid var(--accent-ink);outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-play{transition:none;animation:none;}}"
+    },
+    {
+      "name": "Acción sobre imagen",
+      "kind": "button",
+      "description": "Administrar utiliza una base oscura translúcida para proteger la lectura.",
+      "html": "<button class=\"ds-on-art\">Administrar</button>",
+      "css": ".ds-on-art{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:40px;padding:0 17px;border:0;border-radius:10px;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;font-family:'Segoe UI Variable','Segoe UI',sans-serif;transition:background 160ms ease-out,color 160ms ease-out;background:#101720a6;color:#fff;}.ds-on-art:hover{background:#101720d9;}.ds-on-art:disabled{opacity:.4;cursor:default;}.ds-on-art:focus-visible{outline:2px solid var(--accent-ink);outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-on-art{transition:none;animation:none;}}"
+    },
+    {
+      "name": "Botón de icono",
+      "kind": "button",
+      "refersTo": "icon-button",
+      "description": "Objetivo compacto con nombre accesible; ejemplo de opciones.",
+      "html": "<button class=\"ds-icon\" aria-label=\"Opciones\"><svg viewBox=\"0 0 24 24\" width=\"19\" height=\"19\" fill=\"currentColor\" aria-hidden=\"true\"><circle cx=\"5\" cy=\"12\" r=\"1.5\"/><circle cx=\"12\" cy=\"12\" r=\"1.5\"/><circle cx=\"19\" cy=\"12\" r=\"1.5\"/></svg></button>",
+      "css": ".ds-icon{display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;transition:background 160ms ease-out,color 160ms ease-out;}.ds-icon:hover{background:var(--hover);color:var(--ink);}.ds-icon:focus-visible{outline:2px solid var(--accent-ink);outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-icon{transition:none;animation:none;}}"
+    },
+    {
+      "name": "Navegación lateral",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Estado activo mediante cobre y tinte de fondo; ejemplo sin navegación real.",
+      "html": "<nav aria-label=\"Ejemplo de navegación\"><a class=\"ds-nav\" href=\"#\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" width=\"21\" height=\"21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m3 10 9-7 9 7v10H3zM9 20v-7h6v7\"/></svg><span>Inicio</span></a></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;gap:14px;min-height:44px;padding:0 15px;border-radius:10px;color:var(--muted);font-size:14px;font-weight:500;text-decoration:none;font-family:'Segoe UI Variable','Segoe UI',sans-serif;transition:background 160ms ease-out,color 160ms ease-out;}.ds-nav:hover{background:var(--hover);color:var(--ink);}.ds-nav[aria-current=page]{background:color-mix(in srgb,var(--accent) 12%,var(--canvas));color:var(--accent-ink);}.ds-nav:focus-visible{outline:2px solid var(--accent-ink);outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-nav{transition:none;animation:none;}}"
+    },
+    {
+      "name": "Campo de búsqueda",
+      "kind": "input",
+      "refersTo": "search",
+      "description": "Contorno de foco en el contenedor, sin doble borde del input.",
+      "html": "<label class=\"ds-search\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m16 16 5 5\"/></svg><input aria-label=\"Buscar instancias\" placeholder=\"Buscar una instancia…\"/></label>",
+      "css": ".ds-search{display:flex;align-items:center;gap:10px;background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:0 12px;min-height:42px;font-family:'Segoe UI Variable','Segoe UI',sans-serif;}.ds-search:focus-within{outline:2px solid var(--accent-ink);outline-offset:2px;}.ds-search input{background:transparent;border:0;color:var(--ink);min-width:0;width:100%;outline:0;font:inherit;font-size:13px;caret-color:var(--accent-ink);}.ds-search input::placeholder{color:var(--muted);}"
+    },
+    {
+      "name": "Etiqueta de loader",
+      "kind": "chip",
+      "description": "Etiqueta informativa de portada; muestra el tratamiento actual, no una escala nueva.",
+      "html": "<span class=\"ds-tag\">Vanilla</span>",
+      "css": ".ds-tag{display:inline-block;padding:3px 6px;border-radius:5px;background:#101720c7;color:#f3f6fc;font-size:10px;font-family:'Segoe UI Variable','Segoe UI',sans-serif;}"
+    },
+    {
+      "name": "Identidad de instancia",
+      "kind": "card",
+      "refersTo": "instance-card",
+      "description": "Recorte del cuerpo de tarjeta; omite deliberadamente el medio para no inventar arte.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-identity\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m12 3 9 5v8l-9 5-9-5V8zM3 8l9 5 9-5M12 13v8\"/></svg><div><h3>Instancia de ejemplo</h3><p>Minecraft Java · datos de ejemplo</p></div></div></article>",
+      "css": ".ds-card{background:var(--surface);color:var(--ink);border-radius:14px;overflow:hidden;min-width:0;padding:14px 13px 10px;font-family:'Segoe UI Variable','Segoe UI',sans-serif;}.ds-identity{display:flex;align-items:center;gap:9px;min-width:0;}.ds-identity>svg{color:var(--muted);flex-shrink:0;}.ds-identity h3{margin:0;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.ds-identity p{margin:4px 0 0;font-size:11px;color:var(--muted);}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Obsidiana y cobre",
+    "overview": "Superficies oscuras, cobre cálido y paisajes reales de Minecraft forman una identidad propia dentro de la organización familiar de Xbox y Epic. La variante clara conserva la misma jerarquía y geometría. Los controles se leen sobre superficies estables; el paisaje aporta inmersión sin competir con la acción.\n\nLa profundidad se construye con capas tonales y una imagen amplia, con bordes suaves y tipografía Segoe cercana a Windows. El movimiento acompaña la presentación y se detiene durante la interacción. Los packs conservan sus propios recursos mediante metadatos; Vanilla y los fallbacks usan material real de internet con procedencia documentada, preferentemente con shaders ya renderizados.",
+    "keyCharacteristics": [
+      "Navegación lateral persistente y jerarquía visual sobria.",
+      "Cobre para acciones principales, selección y foco.",
+      "Paisajes reales con lectura protegida por degradados.",
+      "Formas consistentes y profundidad tonal, sin neón ni cristal anidado.",
+      "Movimiento ambiental que respeta la interacción y las preferencias del sistema."
+    ],
+    "rules": [
+      {
+        "name": "The Stable Contrast Rule",
+        "body": "El texto y las acciones sobre medios necesitan un degradado o superficie estable; una imagen nueva exige revisar sus combinaciones reales.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Type Voice Rule",
+        "body": "Mantener Segoe y su jerarquía entre pantallas; usar cifras tabulares cuando se comparen posición, versión o progreso.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tonal Depth Rule",
+        "body": "Reservar la sombra estructural para superposiciones; las tarjetas y los controles se distinguen mediante tono, forma y estado.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** mantener superficies estables detrás de texto y acciones sobre medios.",
+      "**Do** usar recursos propios de cada pack mediante sus metadatos y conservar su identidad.",
+      "**Do** usar medios reales Vanilla/fallback con fuente, autor y licencia; priorizar shaders ya renderizados.",
+      "**Do** conservar foco visible, nombres accesibles y pausa contextual sin desplazar controles.",
+      "**Do** comprobar ambas variantes y el tamaño mínimo antes de extender un patrón."
+    ],
+    "donts": [
+      "**Don't** usar arte IA ni sustituir indiscriminadamente el arte de packs por paisajes Vanilla.",
+      "**Don't** reintroducir burbujas, editor de temas, CSS personalizado o neón genérico.",
+      "**Don't** convertir datos, textos de disponibilidad o acciones de fixture en capacidades de producción.",
+      "**Don't** afirmar aprobación humana, contraste completo o rendimiento medido a partir de este documento."
+    ]
+  }
+}

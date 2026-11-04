@@ -1,14 +1,12 @@
-import { InstalledAppManifest } from '@xmcl/runtime-api'
 import { BrowserWindow, screen } from 'electron'
 import { readFile, writeFile } from 'fs-extra'
 import debounce from 'lodash.debounce'
 import { join } from 'path'
 import { LauncherApp } from '~/app'
 
-export function createWindowTracker(app: LauncherApp, role: string, man: InstalledAppManifest) {
-  const appDir = app.launcherAppManager.getAppRoot(man.url)
+export function createWindowTracker(app: LauncherApp, role: string) {
   const basename = `${role}-window-config.json`
-  const configPath = man === app.builtinAppManifest ? join(app.appDataPath, basename) : join(appDir, basename)
+  const configPath = join(app.appDataPath, basename)
 
   const config = {
     width: undefined as undefined | number,

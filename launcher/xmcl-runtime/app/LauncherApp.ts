@@ -2,7 +2,8 @@ import { getPlatform } from '@xmcl/core'
 import type { InstallEvent } from '@xmcl/installer'
 import { AgentRunTrace, InstalledAppManifest, Platform, createPromiseSignal } from '@xmcl/runtime-api'
 import { EventEmitter } from 'events'
-import { ensureDir, readFile, writeFile } from 'fs-extra'
+import { ensureDir, readFile } from 'fs-extra'
+import { writeFile } from 'atomically'
 import { Server, createServer } from 'http'
 import { join } from 'path'
 import { Readable } from 'stream'
@@ -16,7 +17,6 @@ import { listen } from '../util/server'
 import { createDummyLogger } from './DummyLogger'
 import { Host } from './Host'
 import { LauncherAppController } from './LauncherAppController'
-import { LauncherAppManager } from './LauncherAppManager'
 import { LauncherAppPlugin } from './LauncherAppPlugin'
 import { LauncherAppUpdater } from './LauncherAppUpdater'
 import { LauncherProtocolHandler } from './LauncherProtocolHandler'
@@ -27,8 +27,14 @@ import { kGameDataPath, kTempDataPath } from './gameDataPath'
 import { InjectionKey, ObjectFactory } from './objectRegistry'
 import { validateDirectory } from '~/util/validate'
 import { kSettings } from '~/settings'
+import { createBootstrapSession } from '../setup/bootstrapSession'
 
 export const LauncherAppKey: InjectionKey<LauncherApp> = Symbol('LauncherAppKey')
+
+export interface WorldLock {
+  verify(): Promise<void>
+  release(): void
+}
 
 export interface MicrosoftAuthTelemetryEvent {
   name: 'microsoft-auth-start' | 'microsoft-auth-broker-result' | 'microsoft-auth-webview-result' | 'microsoft-auth-complete'
@@ -102,6 +108,10 @@ export interface LogEmitter extends EventEmitter {
 }
 
 export class LauncherApp extends EventEmitter {
+  async acquireWorldLock(_world: string, _create: boolean): Promise<WorldLock | undefined> {
+    throw Object.assign(new Error('World session locking is unavailable on this host'), { name: 'WorldLockUnavailableError' })
+  }
+
   /**
    * Launcher %APPDATA%/xmcl path
    */
@@ -113,7 +123,6 @@ export class LauncherApp extends EventEmitter {
   readonly minecraftDataPath: string
 
   readonly mutex: MutexManager
-  readonly launcherAppManager: LauncherAppManager
   /**
    * The log event emitter. This should only be used for log consumer like telemetry or log file writer.
    */
@@ -233,7 +242,6 @@ export class LauncherApp extends EventEmitter {
     this.updater = getUpdater(this)
 
     this.mutex = new MutexManager(this)
-    this.launcherAppManager = new LauncherAppManager(this)
 
     for (const plugin of plugins) {
       try {
@@ -250,9 +258,6 @@ export class LauncherApp extends EventEmitter {
     })
   }
 
-  getAppInstallerStartUpUrl(): string {
-    return ''
-  }
 
   getLogger(tag: string, destination = 'main'): Logger {
     return createDummyLogger(tag, destination, this.logEmitter)
@@ -344,6 +349,7 @@ export class LauncherApp extends EventEmitter {
     await ensureDir(this.appDataPath)
 
     let gameDataPath: string
+    let bootstrapReady: ReturnType<typeof createPromiseSignal<void>> | undefined
     try {
       gameDataPath = await readFile(join(this.appDataPath, 'root')).then((b) => b.toString().trim())
       gameDataPath = await handleMigrateRoot(gameDataPath, this.logger, this)
@@ -352,13 +358,16 @@ export class LauncherApp extends EventEmitter {
       if (isSystemError(e) && e.code === 'ENOENT') {
         // first launch
         this.#isBootstrapSignal.resolve(true)
-        const path = await new Promise<string>((resolve) => {
-          this.controller.handle('bootstrap', (_, path) => {
-            resolve(path)
-          }, true)
-        })
-        gameDataPath = (path)
-        await writeFile(join(this.appDataPath, 'root'), path)
+        const chosen = createPromiseSignal<string>()
+        bootstrapReady = createPromiseSignal<void>()
+        const ready = bootstrapReady.promise
+        const accept = createBootstrapSession(
+          path => validateDirectory(this.platform, path),
+          async path => { await ensureDir(path); await writeFile(join(this.appDataPath, 'root'), path) },
+          async path => { chosen.resolve(path); await ready },
+        )
+        this.controller.handle('bootstrap', (_, path) => accept(path))
+        gameDataPath = await chosen.promise
       } else {
         this.#isBootstrapSignal.resolve(false)
         gameDataPath = (this.appDataPath)
@@ -368,7 +377,9 @@ export class LauncherApp extends EventEmitter {
     try {
       await ensureDir(gameDataPath)
       await this.#registerGamePath(gameDataPath)
-    } catch {
+      bootstrapReady?.resolve()
+    } catch (error) {
+      if (bootstrapReady) { bootstrapReady.reject(error); throw error }
       gameDataPath = this.appDataPath
       await ensureDir(gameDataPath)
       await this.#registerGamePath(gameDataPath)
@@ -394,79 +405,11 @@ export class LauncherApp extends EventEmitter {
     })
   }
 
-  protected async getStartupUrl(): Promise<string | undefined> {
-    if (!IS_DEV && process.platform === 'win32') {
-      this.logger.log(`Try to check the start up url: ${process.argv.join(' ')}`)
-      if (process.argv.length > 1) {
-        const urlOption = process.argv.find(a => a.startsWith('--url='))
-        if (urlOption) {
-          const url = urlOption.substring('--url='.length)
-          if (url) {
-            return url
-          }
-        }
-        this.logger.log('Didn\'t find --url options')
-        const protocolOption = process.argv.find(a => a.startsWith('launchermc://'))
-        if (protocolOption) {
-          const u = new URL(protocolOption)
-          if (u.host === 'launcher' && u.pathname === '/app' && u.searchParams.has('url')) {
-            return u.searchParams.get('url') as string
-          }
-        }
-        this.logger.log('Didn\'t find xmcl:// protocol')
-      }
-    }
-    this.logger.log('Didn\'t find the start up url, try to load from config file.')
-
-    try {
-      const { default: url } = JSON.parse(await readFile(join(this.launcherAppManager.root, 'apps.json'), 'utf-8'))
-
-      return url
-    } catch (e) {
-      if (isSystemError(e) && e.code === 'ENOENT') {
-        return undefined
-      }
-      throw e
-    }
-  }
-
   protected async onEngineReady() {
     this.logger.log(`cwd: ${process.cwd()}. env: ${process.env.NODE_ENV}`)
 
-    // start the app
-    let app: InstalledAppManifest
-    try {
-      const url = await this.getStartupUrl()
-      if (url) {
-        this.logger.log(`Try to use start up url ${url}`)
-        const existedApp = await this.launcherAppManager.tryGetInstalledApp(url)
-        if (existedApp) {
-          app = existedApp
-        } else {
-          app = await this.launcherAppManager.installApp(url)
-        }
-      } else {
-        throw new Error('No start up url')
-      }
-    } catch (e) {
-      if ((e as any).message !== 'No start up url') {
-        this.logger.warn('Fail to use start up url:')
-        this.logger.warn(e)
-      }
-      try {
-        const startUp = this.getAppInstallerStartUpUrl()
-        if (startUp) {
-          this.logger.log(`Try to use appinstaller startup url: "${startUp}"`)
-          app = await this.launcherAppManager.installApp(startUp)
-        } else {
-          app = this.builtinAppManifest
-        }
-      } catch (e) {
-        app = this.builtinAppManifest
-      }
-    }
     const isBootstrap = await this.#isBootstrapSignal.promise
-    await this.controller.activate(app, isBootstrap)
+    await this.controller.activate(this.builtinAppManifest, isBootstrap)
     this.logger.log(`Current launcher core version is ${this.version}.`)
     this.logger.log('App booted')
   }

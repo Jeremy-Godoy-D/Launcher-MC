@@ -1,0 +1,509 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "codeCommit": "fa9fff56cb208bea7ef3ad6618b0569b37172e2c",
+  "status": "partial-stage-4",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/react-migration.yml",
+      "sha256": "72bbcb990cceebc92081eee08ed091a4d86601ea655da33d35567d2bcd0d4344"
+    },
+    {
+      "path": "launcher/e2e/TESTIDS.react.md",
+      "sha256": "abaac52a81d250694ad7051b9316ca0678230cd131fa0259263c4816f731be52"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/06-accounts.spec.ts",
+      "sha256": "1061aaa127e3fbb825cfa5bd7ada34f83f5b482e253463b281a8c4e6fe85e1e5"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/25-profile-appearance.spec.ts",
+      "sha256": "37f29dc8b597ee73ca862118daad7f6cf8e1ce252f06cba99a6953f2ba40bd75"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/accounts/Accounts.tsx",
+      "sha256": "afad13f7069d64712517c3019623cc2cf47dfa267041ef44fef92d12295a8114"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx",
+      "sha256": "c2b49567fbf7dc19fa9af14413e4b2e436d706760502e0da5b5fab0dbe1dd2b7"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/accounts/accounts.css",
+      "sha256": "10abb3e53a82648f625b291bc7e11106e44a65202c358d1cf2900136cbc1e433"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/accounts/context.tsx",
+      "sha256": "fb9857ffdf161eb52dc77e639f51dc671b81c2a7d2d318976783a26af158909a"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/accounts/model.test.ts",
+      "sha256": "4fd9a9af0c5546e5ed05d0568704ce02d6e4da9fb529981b86e540281837ff80"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/features/accounts/model.ts",
+      "sha256": "cadbb15f2af72e5f333f30cd23accdd50f0a805c34b7b35b6faca2a7022f6e25"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/en.yaml",
+      "sha256": "4a4ad6eea1d39584714511a4bcc46ddf763e09da5aa0ae8764853e27db21fa39"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/es-ES.yaml",
+      "sha256": "42090d68e175393e1f3b0279bbeba3648d341a6380affa5358b83bf26d660e62"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/services/UserService.ts",
+      "sha256": "cc8c17984ba6931957e57cf105543a8653e101f57648223fc5a4e25a2d4871b8"
+    },
+    {
+      "path": "launcher/xmcl-runtime/infra/image_store.test.ts",
+      "sha256": "5c162d5e07e2b468d277b3b628d34de15affbcf8d1515e5a1f124e04dc953e2e"
+    },
+    {
+      "path": "launcher/xmcl-runtime/infra/image_store.ts",
+      "sha256": "949b45719f0f87e6167d296d76eb5e68bc31fdb1848e2b8be10b07c7ed46a2b0"
+    },
+    {
+      "path": "launcher/xmcl-runtime/user/UserService.appearance.test.ts",
+      "sha256": "98fd69ab29b83efcaf1f85561f3c5f9205ae75cd9840698f360ce152a2ffc16c"
+    },
+    {
+      "path": "launcher/xmcl-runtime/user/UserService.ts",
+      "sha256": "837f74170264cab0611bb0dc9a93b2f00a713864784375e742aa06a62d66148b"
+    },
+    {
+      "path": "launcher/xmcl-runtime/user/pluginOfflineUser.test.ts",
+      "sha256": "9c934e81c6912cb5f8bfcdb899a2d955c89476b2e1fa60ec12c190e3f8aecfbe"
+    },
+    {
+      "path": "launcher/xmcl-runtime/user/pluginOfflineUser.ts",
+      "sha256": "ce5227f9a60b8194ebeccec98842eea87e0a1e08ee75d4492dd550767e2116d9"
+    },
+    {
+      "path": "launcher/xmcl-runtime/user/utils/localProfileTexture.ts",
+      "sha256": "d2440f677fceed96c64c2588951ce0a7a39e93bb809f94909a5724560ca52518"
+    }
+  ],
+  "validation": {
+    "unit": {
+      "passed": 523,
+      "files": 56,
+      "seconds": 13.96
+    },
+    "reactFull": {
+      "passed": 52,
+      "duration": "3.2m",
+      "note": "Before final ImageStorage legacy-hard-link guard; final affected4 follow"
+    },
+    "affectedFinal": {
+      "passed": 4,
+      "duration": "25.2s",
+      "overlapReactFull": true,
+      "specs": [
+        6,
+        25
+      ]
+    },
+    "strict": {
+      "passed": 1,
+      "duration": "4.2s"
+    },
+    "vue": {
+      "passed": 2,
+      "duration": "9.9s"
+    },
+    "distinctScenarios": 55,
+    "harness": {
+      "passed": 9
+    },
+    "types": "pnpm check:0 errors after final native guard",
+    "lint": "pnpm lint:0 warnings/errors; source UI detector:0 findings",
+    "axeFull": {
+      "reports": 79,
+      "violations": 0,
+      "incomplete": 142
+    },
+    "axeFinalAffected": {
+      "reports": 8,
+      "violations": 0,
+      "incomplete": 12
+    },
+    "visualReview": "Six captures:dark/light1200x720/800x400 plus invalid PNG and missing file800; exact UI unchanged by final native link guard",
+    "builds": "Windows React renderer/host and Vue renderer/host; final native host rebuilds for both, shared dist Vue",
+    "nativeEvidence": [
+      "Persisted local account ID matches login; legacy OFFLINE selection maps only to its canonical local account, preserving selected game UUID",
+      "Packaged restart retains skin/cape/model/UUID and selected profile; adding another local profile retains both prior profiles",
+      "PNG signature/header/dimensions and1MiB limit checked in main; new remote/UNC/relative inputs rejected; local file and file URL accepted",
+      "Validated byte imports atomically detach prior hard links; changed/deleted source files do not affect owned textures",
+      "Failed validation does not change profile; concurrent removal/texture mutation fails without resurrection/overwrite",
+      "Editor retains failed draft, missing profile disables save, Escape/close restore focus; labelled scroll region and fixed actions at800x400"
+    ],
+    "initialFailures": [
+      "Native restart normalizes OFFLINE to x://OFFLINE@dev while prior login/selection used OFFLINE",
+      "Chromium on Windows parses x://dev as file:///X://dev, unlike Node; renderer uses an exact literal local alias",
+      "An intermediate diagnostic borrowed and unrefed React-owned shared state; removed that diagnostic without weakening restart/new-profile assertions",
+      "Legacy image hard-link regression reproduced nlink2 before atomic detachment fix",
+      "One TypeScript test fixture omitted plugin manifest argument; corrected before final checks"
+    ],
+    "previousRemoteCI": {
+      "run": "https://github.com/Jeremy-Godoy-D/Launcher-MC/actions/runs/40327122067",
+      "head": "58c78ab94e282ba2346a8ae935211de139f0b0fc",
+      "conclusion": "success React/Vue, preceding shared-content block"
+    },
+    "currentRemoteCI": "pending after push"
+  },
+  "commands": {
+    "units": "Exact pnpm exec vitest run selection in .github/workflows/react-migration.yml, includes profile/plugin/ImageStorage regressions",
+    "checks": [
+      "pnpm check",
+      "pnpm lint",
+      "node --test launcher/scripts/react-migration.test.mjs",
+      "node launcher/scripts/react-migration.mjs check"
+    ],
+    "reactFull": "Exact React package smoke command from workflow plus --output=artifacts/profile-appearance-react-full",
+    "affected": "pnpm --dir e2e exec playwright test specs/react-migration/25-profile-appearance.spec.ts specs/react-migration/06-accounts.spec.ts --reporter=line --output=artifacts/profile-appearance-owned-area",
+    "strict": "XMCL_REACT_CLIENT_HARNESS=1; pnpm --dir e2e exec playwright test specs/react-migration/04-client-contracts.spec.ts --reporter=line",
+    "vue": "pnpm --dir e2e exec playwright test specs/react-migration/03-vue-compatibility.spec.ts specs/react-migration/08-vue-onboarding.spec.ts --reporter=line",
+    "builds": [
+      "LAUNCHER_RENDERER=react; pnpm build:renderer; pnpm --prefix xmcl-electron-app build",
+      "LAUNCHER_RENDERER=vue; pnpm build:renderer; pnpm --prefix xmcl-electron-app build"
+    ],
+    "environment": "Windows x64, packaged Grimo Launcher.exe with isolated E2E profiles; no habitual profile touched"
+  },
+  "limits": [
+    "In-game visibility of local skin/cape and playable Minecraft/real Java not certified",
+    "PNG check validates signature/header/dimensions/byte limit, not a complete image decoder",
+    "No remote skin URL import added to React; existing external account data remain intact, Microsoft deferred",
+    "No NSIS/isolated update,60s performance or exhaustive manual AA/RTL certification",
+    "Stage4 remains active:home media/cache/performance and library/import parity audit pending; stages5–9 pending",
+    "Production/main unchanged; Vue remains default; no denied CLI/CDP or cleanup retried"
+  ],
+  "artifacts": [
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-check-final.log",
+      "sha256": "d372118456568f5277f2b94d1f869d20a1ce65260d3ade6c1744d6d05af3de87"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-check-fixed.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-check-owned.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-check.log",
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-electron-final.log",
+      "sha256": "04b9bff5c705b7db995c6462d646d1cce54e2f96865cc77fecfc942168b56dae"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-electron.log",
+      "sha256": "2871d2db493cb12ebd58174e2743203fe9a6252f7df395ff4d23dffbb39c0a66"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-fixed-area.log",
+      "sha256": "d523fea72c8fc3bb9663dac276a4cdaba3140d51677e5b818fabee11f33a6cca"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-focused-final.log",
+      "sha256": "085f3708c46b6cad4adb18c48b4c6202dc8e2894e1a319f4dca4d4f1852d5cee"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-harness-check-final.log",
+      "sha256": "161849bca366cb0707d554a0b4360a755da3e871240ed2ad7718a07af5165a8b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-harness-check.log",
+      "sha256": "161849bca366cb0707d554a0b4360a755da3e871240ed2ad7718a07af5165a8b"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-harness-final.log",
+      "sha256": "4d2b984c7e62ed81ea778313383dd6ef8195e35730032aab1b10b6a7707d509f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-harness-tests.log",
+      "sha256": "aff864eb1105d928b5a3e7010b741f9b7f6b418213696d6d027a50c185a7ce6c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-legacy-link-before.log",
+      "sha256": "7fc321988548ac9ba55589ad5e9d0b9195c11b18ca65c63d6fbcca1d2589a968"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-legacy-link-fixed.log",
+      "sha256": "b1ea020e42512eb913ea48eeb3c63d6cb55745991c6661bd7624fb50513f1fdc"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-lint-final.log",
+      "sha256": "a66fe619d8d5dcacd4daff327e0017b36931fbd016fa5844f7818382ab4d9680"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-lint-owned.log",
+      "sha256": "82e31c35565ee484f595e620cd5aaa7065f8a175f255b6f0de96bc182a653672"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-lint.log",
+      "sha256": "01792aadbf075bdb2c1d684654e31cdfc80941a280c0992de6ee08a136a1ff4e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-login-diagnostic.log",
+      "sha256": "b04e5710766c82ee52c16325e4c2d6b6452e99af58a2ed61c218062dcee382a3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-native-unit.log",
+      "sha256": "8c4825b5f5ed6b82d3f0b2a1897496402ce4ee3cc54db08829d3cbfc96f1bc75"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-owned-area.log",
+      "sha256": "d4f80ec7c0fda8d9eec3f89dd16c19d2973eea2baa779c8916644f9d6860f242"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-check.log",
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full.log",
+      "sha256": "c14920b5e42bae8c648800332d36b94559f595959e7c07e35652f80f8c519a9c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-package-final.log",
+      "sha256": "b9a0a4b645eb8eee66390cbcf712c0fee5a85812ca59899574205f733ef6779c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-package-fixed.log",
+      "sha256": "74aa2dbf889d448f67bd548d71a26a7322341aa499e683b5da138502448722e5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-package-owned.log",
+      "sha256": "7f330b6d202b4a47e1019d368c16cf4b26f4c16582f34e983793faf6ae9cebef"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-package.log",
+      "sha256": "a95db940857282889e9504ac2e52173bb971588ecbb598719b8571d37626d4c2"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-renderer-final.log",
+      "sha256": "1da6576e51ee3632e81690ec1bc82a517f9818f5d8b766cb5720016c9c5d2318"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-renderer-fixed.log",
+      "sha256": "f05da5d7c099f5d99e101860124b951394f52071b800da25816b2c579dc88f7e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-renderer.log",
+      "sha256": "6c5d896a425da7d2febd0b23dc28b85f4ef960e58c98032cc7a966babebd6be7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-restart-diagnostic.log",
+      "sha256": "875a8dba8ec334aa32802bf6b05b55a2d0f015b7c116475399385ca6283c4da4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-reviewed-area.log",
+      "sha256": "78e2538b9f1eef4393b8ca61022e68aced79bedf6063f34228bbb64274ef8c7f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-runtime-check-final.log",
+      "sha256": "014a891360e8bf3c856c604e13ba0dee2eeaf7aa4121c9cb1a2ef4796a223b4c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-runtime-check.log",
+      "sha256": "014a891360e8bf3c856c604e13ba0dee2eeaf7aa4121c9cb1a2ef4796a223b4c"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-strict.log",
+      "sha256": "baf288d9b3fc3a40fd3e43c2b17b55c2fc9d21548c69eb1c53fac6408646179e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-testids.log",
+      "sha256": "e6231f20f17a3bc5e3875cb7f576fd4f6f844cec3eb3d2fff3a4d9ab70873e82"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-units-final.log",
+      "sha256": "57095107d86908d115e852cb082c939e8928880c92d479f33ef3883d5ae1c506"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-units-fixed.log",
+      "sha256": "926c0b8fdec0838f8e53995712948f9ad31db781ca07210e74f33bd4b1f07b05"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-units-owned.log",
+      "sha256": "6bb3477c52bf261a74b1c8e895f94327dca299f2898ec80f7929b7224d6a50b4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-units.log",
+      "sha256": "2467c386cfbb9fb17e818565553d4c6a8626b2229bdbd39728a1525e5a0e11b5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-url-diagnostic.log",
+      "sha256": "2f2a8780bfb0e1e2cfedef900bf4c28e8dd4132d68b22c444c6db9e9f84d0030"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-vue-package-owned.log",
+      "sha256": "1e81a9652e37d9979203a849b13c6f532ed2d3cf59e28f83e9c1731e9c4c8953"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-vue-package.log",
+      "sha256": "5d38fd49c71a9e5c2769a0c270ba90ab9a78316a7185e801b152797321c7bec7"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-vue-renderer.log",
+      "sha256": "9668f35ed7c224c9e8991ffdd9ba9ed6221e646546828f512b05814988aa7d86"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-vue.log",
+      "sha256": "ccbedad06189b138cc816dee76021c629d4aea21920e8e880805e3ce419a0699"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-design-final.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-design-owned.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-design.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-previous-ci.json",
+      "sha256": "02847175a731490f5e911c9d50ac3deddfff2045e37b6a15e568e85e3df6b27f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/accessibility.json",
+      "sha256": "6aae5e80fb93f9a6c6e9a856d4ea01b20f0d8795e44c66824a6a39d92a1d1bc4"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-es-ES/accounts-accessibility.json",
+      "sha256": "dc97f7e721272105cc2413785bcc99ff1483b0de6a387f8a375de00c51186ae3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-07-onboard-8b7cd-ever-launches-at-completion-electron-es-ES/onboarding-accessibility.json",
+      "sha256": "dd7f70e92ce78216d5c2a91ab691049f90c98d33472f99c0d8a62aa2e78f1f24"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-09-library-187cb-ever-launches-from-browsing-electron-es-ES/library-accessibility.json",
+      "sha256": "b7112b0100a508f1f22f7486a31c93b3ec0ca4cf98d445fe222444836ef46d2e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-10-creatio-3c436-s-within-the-minimum-window-electron-es-ES/creation-accessibility.json",
+      "sha256": "a6bcbf0e6ec163ef37435f0c01d86a84dc86939aa1eeb7a7561a54e285c4ce3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-12-launch--7dc1c--launch-before-confirmation-electron-es-ES/java-fallback-accessibility.json",
+      "sha256": "638b67ff726ec54341cea4d1728086320d24dcb996faee75eec401399ab999cd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-12-launch--eab98-stops-without-spawning-Java-electron-es-ES/launch-accessibility.json",
+      "sha256": "09147b92450933a50ee8b31c2930ba67c44e90669591aa413ce40e611ac70bb3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-14-imports-949dd-e-links-without-duplicating-electron-es-ES/imports-accessibility.json",
+      "sha256": "74ca81dd74293e485c145c39c71ea2a8dc3874c5b7e5e05a546693091cd8e404"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-15-prism-v-6545e-ve-version-libraries-safely-electron-es-ES/prism-accessibility.json",
+      "sha256": "7d25ed958daca4a1e6a2b334edce99704ec7818886cb28db15066136c9a42082"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-16-vanilla-986e7--personal-launcher-settings-electron-es-ES/vanilla-accessibility.json",
+      "sha256": "da8ff182339e0d5fc9584edbc73cdf075ddd886bbf8a5efca867cab480e0df68"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-19-library-98b63-folder-after-a-full-restart-electron-es-ES/operations-accessibility.json",
+      "sha256": "7d200ff73f728a6cb288f5519388dcdc3763e4f2a2bbefeffcf0dfd5286094d6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-20-local-e-45c0f-le-at-both-sizes-and-themes-electron-es-ES/export-accessibility.json",
+      "sha256": "519801916a864e4a966c8c8cab41df10ca4ed0d7922255d21ebcff8423c7a7d5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-21-group-m-b0126--or-unknown-edition-members-electron-es-ES/groups-accessibility.json",
+      "sha256": "773344ec98bfae789399816d6a262bd47ef38efd93af3920e58548d77829cf82"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-22-copy-re-68334-rting-the-packaged-launcher-electron-es-ES/copy-accessibility.json",
+      "sha256": "942f05862ca05727cca381515b03c2d7358deb267aa8cd2f0409af72bbd88aea"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-23-large-l-895cd-th-layouts-and-window-sizes-electron-es-ES/large-library-accessibility.json",
+      "sha256": "6cdf82ef6fabc4f537e180b1924defb0d88d2bbeeef98fc98f37e18acabcd9ba"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-24-shared--263ba-ublishing-a-partial-archive-electron-es-ES/cancel-export-accessibility.json",
+      "sha256": "ad69426658ad6bedae912d7d43bc3d567099ff3dc4cadf394fbff6b79d0a5bdc"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-24-shared--c1d8a--export-only-reviewed-bytes-electron-es-ES/shared-accessibility.json",
+      "sha256": "34ac8124851b5adfdd3709efadef1523ea8964ca6aeeb33c5af2b54bbbab131f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-24-shared--cf04b-fore-any-destination-exists-electron-es-ES/cancel-copy-accessibility.json",
+      "sha256": "cfad8c2034f0fb92c609b3ff74024d833328a2f3d4f0fe8043a1186cfe1beeeb"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/react-migration-25-profile-b4fcc--including-packaged-restart-electron-es-ES/profile-appearance-accessibility.json",
+      "sha256": "38586f2ef1051c2484dfe0e3653e4a38a39893701154d17a4dd6180f7e2fcf5f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-react-full/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-owned-area/react-migration-06-account-c4d54-ion-without-touching-worlds-electron-es-ES/accounts-accessibility.json",
+      "sha256": "b517025e100bb65d2f7aa1634d38bc4f27235c74db57551dd0989abce8a9c510"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-owned-area/react-migration-25-profile-b4fcc--including-packaged-restart-electron-es-ES/profile-appearance-accessibility.json",
+      "sha256": "26cb5a01553de73fdb2577edf2b7f250bec5fba7b879f93711e09f14ff813444"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-owned-area/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-strict/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/profile-appearance-vue/.last-run.json",
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-25-profile-appearance-spec-ts-local-appearance-saves-owned-textu/profile-appearance-dark-1200.png",
+      "sha256": "bbf014374c0ba1a8ef98a38a8ca79963ca76f6ac059a30a5690eab1beac6a191"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-25-profile-appearance-spec-ts-local-appearance-saves-owned-textu/profile-appearance-dark-800.png",
+      "sha256": "7a343ab68956b1d1d54b9542e957e5d7a49c9a2f5a268468b61042159469e7cf"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-25-profile-appearance-spec-ts-local-appearance-saves-owned-textu/profile-appearance-light-1200.png",
+      "sha256": "5612444ccecf7d90299f2e477b1d5fc76941a2ad52c90f58dd819e323ab8ac2e"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-25-profile-appearance-spec-ts-local-appearance-saves-owned-textu/profile-appearance-light-800.png",
+      "sha256": "c7214f9dd20a1d599f3162c539cf4d7a731034499e0dbad47f357ce0163a6578"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-25-profile-appearance-spec-ts-local-appearance-saves-owned-textu/profile-invalid-png.png",
+      "sha256": "4dd587c74f60d2c263980f9c6fa216d749e9d382eb3a226d349598f9b29dbb48"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-25-profile-appearance-spec-ts-missing-files-keep-the-editor-draf/profile-missing-file-800.png",
+      "sha256": "7d9e6d977a4299186f1f9c0dcf77871444b032cba45baac01dd7f5a9de4a1e4f"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-25-profile-appearance-spec-ts-local-appearance-saves-owned-textu/manifest.json",
+      "sha256": "6ab364dc4ce76add006d2dcc71f4f22ba5169b3ef44fbdfe1cd32cddf72edcfd"
+    },
+    {
+      "path": "launcher/e2e/artifacts/screenshots/es-ES/react-migration-25-profile-appearance-spec-ts-missing-files-keep-the-editor-draf/manifest.json",
+      "sha256": "ddfa8047f5cba8997b4625b17065ef3a61e03a5ed5210c338961b7a7794fa983"
+    }
+  ]
+}

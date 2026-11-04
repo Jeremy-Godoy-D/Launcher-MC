@@ -30,7 +30,8 @@ import {
 } from '~/infra'
 import { kNetworkInterface } from '~/network'
 import { AbstractService, ExposeServiceKey, Singleton } from '~/service'
-import { kSettings } from '~/settings'
+import { kEditSettings, kSettings } from '~/settings'
+import type { EditLauncherSettings } from '@xmcl/runtime-api/src/util/launcherSettings'
 import { type Tasks, kTasks } from '~/infra'
 import { validateDirectory } from '~/util/validate'
 import { writeZipFile } from '../util/zip'
@@ -40,6 +41,8 @@ import { ZipFile } from 'yazl'
 import { getTracker } from '~/util/taskHelper'
 import { addSteamShortcutToVdf } from './steamShortcut'
 import { writeFile as writeAtomically } from 'atomically'
+import { reviewMigrationPaths, migrationPathError } from './migrationPaths'
+import { readLegacyAppearance } from './legacyAppearance'
 
 @ExposeServiceKey(BaseServiceKey)
 export class BaseService extends AbstractService implements IBaseService {
@@ -48,7 +51,7 @@ export class BaseService extends AbstractService implements IBaseService {
     @Inject(kTasks) private tasks: Tasks,
   ) {
     super(app, async () => {
-      this.checkUpdate()
+      if (!process.env.XMCL_E2E) void this.checkUpdate().catch(error => this.warn(error))
     })
   }
 
@@ -78,6 +81,10 @@ export class BaseService extends AbstractService implements IBaseService {
 
   async getSettings(): Promise<SharedState<Settings>> {
     return this.app.registry.get(kSettings)
+  }
+
+  async editSettings(options: EditLauncherSettings): Promise<void> {
+    return (await this.app.registry.get(kEditSettings))(options)
   }
 
   async getEnvironment(): Promise<Environment> {
@@ -403,9 +410,14 @@ export class BaseService extends AbstractService implements IBaseService {
     this.showItemInDirectory(options.destination)
   }
 
-  async migrate(options: MigrateOptions) {
-    const destination = options.destination
-    const code = await validateDirectory(this.app.platform, destination)
+  async reviewDataMigration(destination: string) {
+    const current = await this.getGameDataDirectory()
+    const review = await reviewMigrationPaths(current, destination)
+    if (review.unchanged) return review
+    if (this.tasks.getActiveTask()) throw migrationPathError('busy')
+    const { LaunchService } = await import('~/launch')
+    if ((await (await this.app.registry.get(LaunchService)).getGameProcesses()).length) throw migrationPathError('busy')
+    const code = await validateDirectory(this.app.platform, review.destination, true)
     if (code) {
       throw new MigrationException({
         type: 'migrationInvalidDestiantion',
@@ -413,11 +425,18 @@ export class BaseService extends AbstractService implements IBaseService {
         destination,
       })
     }
+    return review
+  }
+
+  getLegacyAppearance() { return readLegacyAppearance(this.app.appDataPath) }
+
+  async migrate(options: MigrateOptions) {
+    const review = await this.reviewDataMigration(options.destination), destination = review.destination
+    await reviewMigrationPaths(review.source, destination, options.expectedSource)
 
     // Nothing to do if the destination is already the current root. Without
     // this guard the launcher would relaunch and re-migrate into itself.
-    const current = await this.app.registry.get(kGameDataPath).then((f) => f())
-    if (resolve(current) === resolve(destination)) {
+    if (review.unchanged) {
       return
     }
 

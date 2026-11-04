@@ -6,6 +6,7 @@ export interface QuiltModMetadata {
    */
   schema_version: number
   quilt_loader: QuiltLoaderData
+  minecraft?: { environment?: '*' | 'client' | 'dedicated_server' }
   /**
    * e.g. "example_mod.mixins.json"
    */
@@ -17,7 +18,10 @@ export interface QuiltModMetadata {
  * It can be represented as either an object containing at least the id field, a string mod identifier in the form of either mavenGroup:modId or modId, or an array of dependency objects.
  * If an array of dependency objects is provided, the dependency matches if it matches ANY of the dependency objects for the "depends" and "unless" fields, and ALL for the "breaks" field.
  */
-export interface DependencyObject {
+export type QuiltVersionSpecifier = string | QuiltVersionSpecifier[] | { any: QuiltVersionSpecifier[] } | { all: QuiltVersionSpecifier[] }
+export type DependencyObject = string | QuiltDependencyObject | DependencyObject[]
+
+export interface QuiltDependencyObject {
   /**
    * A mod identifier in the form of either mavenGroup:modId or modId.
    */
@@ -28,7 +32,7 @@ export interface DependencyObject {
    *
    * @default "*"
    */
-  versions?: string | string[]
+  versions?: QuiltVersionSpecifier
   /**
    * A short, human-readable reason for the dependency object to exist.
    */
@@ -57,6 +61,7 @@ export interface DependencyObject {
    * ```
    */
   unless?: DependencyObject
+  environment?: string
 }
 
 export interface QuiltLoaderData {
@@ -71,7 +76,7 @@ export interface QuiltLoaderData {
   /**
    * An array of ProvidesObjects describing other mods/APIs that this package provides.
    */
-  provides?: Array<string>
+  provides?: Array<string | { id: string; version?: string }>
   /**
    * Must conform to the Semantic Versioning 2.0.0 specification. In a development environment, the value ${version} can be used as a placeholder by quilt-gradle to be replaced on building the resulting JAR.
    */
@@ -93,7 +98,7 @@ export interface QuiltLoaderData {
      *
      * A role can be any valid string. The "Owner" role is defined as being the person(s) or organization in charge of the project.
      */
-    contributors?: Record<string, string>
+    contributors?: Record<string, string | string[]>
     /**
      * A collection of key: value pairs denoting various contact information for the people behind this mod, with all values being strings. The following keys are officially defined, though mods can provide as many additional values as they wish:
      */

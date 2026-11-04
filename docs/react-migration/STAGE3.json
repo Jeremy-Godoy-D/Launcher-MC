@@ -1,0 +1,421 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-24",
+  "codeCommit": "086a281e9d90970e241e835d30a23bf8c8298002",
+  "sourceFilesHashEncoding": "SHA-256 committed Git blobs",
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/react-migration.yml",
+      "sha256": "0e4c4b11a8695984ff31259fffd06ec656cb97417a7a184ae8c61a76291f1600"
+    },
+    {
+      "path": "launcher/deskgap-app/src/browser.ts",
+      "sha256": "7002d492dbce2475ea60bdf93d060799875f8e108fbf4567f9db39b49dd3fd6b"
+    },
+    {
+      "path": "launcher/e2e/TESTIDS.react.md",
+      "sha256": "8b8bde8508be719540635587f4ea57e2ee4455849a9e5c3c3f130aa960b9c54e"
+    },
+    {
+      "path": "launcher/e2e/playwright.config.ts",
+      "sha256": "93ef4afb3c00ded6c7cec990b45d6627036e406aa2cb1ae2199384ced308aab2"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/01-prototype.spec.ts",
+      "sha256": "9628c8b889de526c609588d73b48b4a3cf15080a7433b93b3b32be3e895e9c8d"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/03-vue-compatibility.spec.ts",
+      "sha256": "c0d35df87c09b51dc94bf73377e495a6beb5d382bbfd0d06b9d1534e44c20dc3"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/04-client-contracts.spec.ts",
+      "sha256": "c905c7296b535e420c32c530e910f49988b5f5d0f7e584150637e2a837148bf7"
+    },
+    {
+      "path": "launcher/e2e/specs/react-migration/05-preferences-i18n.spec.ts",
+      "sha256": "f5f4398b0cd1ce6748f0e68bd2a3001b964bb7113c2007e0cecd2c0aa63cb66a"
+    },
+    {
+      "path": "launcher/package.json",
+      "sha256": "a938fd23d29894a29a43f9205c48aba7ab12a5f7e6dc9d6e44c9111b58dd0fcf"
+    },
+    {
+      "path": "launcher/packages/renderer-client/README.md",
+      "sha256": "ad79e70337378812d997afcdca65076e56eabdb29a07d12ebf34dd0cb2f73a5c"
+    },
+    {
+      "path": "launcher/packages/renderer-client/client.test.ts",
+      "sha256": "b45b42f3e92afa7ee472794bec208daf73ff2a4df5f0feb30fbfd89371964b6e"
+    },
+    {
+      "path": "launcher/packages/renderer-client/index.ts",
+      "sha256": "2a37636b27220b307c5a1eef961213b76603f69fff11cb8fd83b667c10d65529"
+    },
+    {
+      "path": "launcher/packages/renderer-client/package.json",
+      "sha256": "e2548e5222edafb646a5d28e15f11bbc293558b331a2002af81be90d25fd6836"
+    },
+    {
+      "path": "launcher/packages/renderer-client/state.test.ts",
+      "sha256": "6f65a7b349b76d51101dd05600f6130a61a6b91adea096a18382ef7f4ad82fcf"
+    },
+    {
+      "path": "launcher/packages/renderer-client/state.ts",
+      "sha256": "ec2e0afb4e60afc25ba8cedd737d4b0d5a243e8db2f37a9c3a70d2b18d01e6a4"
+    },
+    {
+      "path": "launcher/packages/renderer-client/tasks.test.ts",
+      "sha256": "e04dc627d39c3e0dfa0c3cdf184bf2f32ff65a4ff15bfe61340adf5412a82bd7"
+    },
+    {
+      "path": "launcher/packages/renderer-client/tasks.ts",
+      "sha256": "abedae94d2b89e8cb4f89a93140d3e65306285ac710ff81eaca54abd8005ed7c"
+    },
+    {
+      "path": "launcher/packages/renderer-client/transport.test.ts",
+      "sha256": "8ee02d1a456e522ced139c0046c2978ceff1138410ac56acdf9d283af0e82564"
+    },
+    {
+      "path": "launcher/packages/renderer-client/transport.ts",
+      "sha256": "34f2457fc75ee36885b581eef10dfaff830e0681921aa4559798cac67f40ea4e"
+    },
+    {
+      "path": "launcher/packages/renderer-client/tsconfig.json",
+      "sha256": "ba946a4e4da7c5d3609a1755cbebe949e547d8ad3ce92f344844c5bdbc223c6b"
+    },
+    {
+      "path": "launcher/pnpm-lock.yaml",
+      "sha256": "330514f15e10cd56b1a1dd895fbea6ac11240c811d55ec2e59842badf5ced327"
+    },
+    {
+      "path": "launcher/xmcl-electron-app/preload/service.ts",
+      "sha256": "afeea7d182ad649a378f1e224d54e5073d86a286e82fc79617892284f7e0b639"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/i18n-compiler.ts",
+      "sha256": "1752d047e29052df8dd21e39b94ba6d942a05ca875dce8ee011a47d3e78554d2"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/package.json",
+      "sha256": "074fb26f74d1f1ca700c284a1408a790fad7e7ee97e7d56faf6bba5053392c23"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/App.tsx",
+      "sha256": "de4b6fc522eadafb0ee7284951d1ee70bd2fb14547c49d9fabd3c1177f1b1037"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/client-harness.html",
+      "sha256": "04c45825d2c5dd66f4fa4b42813681cfe13b4a385e9a265fc9c26e5a6bb4ebcb"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/client-harness.tsx",
+      "sha256": "0be1574564c9442461b803e590fccab1f8d8a503a4551a96c68595bc694343ff"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/en.yaml",
+      "sha256": "a79a9708bf4b4e046543c6445f471f9926cc0cf13b8dc1d5f7f00c3ea31ef910"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/es-ES.yaml",
+      "sha256": "a99eb8b61815274d020e48ea9a807d4700a0f1d69d30472e508d67bc3fc541ce"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/index.tsx",
+      "sha256": "32f7b7b53ac5e57fc42c1f37c2bb86a6122814f9ee6d00069f635e3699fff9a3"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/store.test.ts",
+      "sha256": "ad67a80899c2a92e84d53e5b713edc2c25e09dd48ac8b02cd30baeb77eae7867"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/store.ts",
+      "sha256": "50afa4a51dfb3ef937736cf755d9e5b630a59b948d8139a5a8fbc03d173fec17"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/i18n/yaml.d.ts",
+      "sha256": "60c66cc0d35b7f930a471e5a9e85fe0dff13f544235e12b576d77bcfd3fe2e0f"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/main.tsx",
+      "sha256": "1559a17a21d5a9a8d5bba65e018f86f7f78aa8a85fa41d311688638c10f44c25"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/preferences-context.tsx",
+      "sha256": "f0996b6c901c9bc0e23f68b1ced3a97d8e59a2cb8073772903856136c6bff667"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/preferences.test.ts",
+      "sha256": "72daf85f267edd2ff68adbc78e57f73b55fc7bab0f5bcd03b9bd69c21df40b5c"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/preferences.ts",
+      "sha256": "1f79cf1c68fb7081d871df477e632e0c145d1a1c83abaf3d92b64847148c136a"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/src/runtime.tsx",
+      "sha256": "a961db2913b25a33a62d5972115e2a49e0c0e50c09c9494e36fc1dc16c3c71c9"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/tsconfig.json",
+      "sha256": "f7bd1876c030e38281485aa1dd58ad71c5ec9fcc5eb47cee3d45461b4e3a8878"
+    },
+    {
+      "path": "launcher/xmcl-react-ui/vite.config.ts",
+      "sha256": "c204e4b483d07202993ec4a331640245c01de025492cf2b7c83e206b39e48561"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/task.ts",
+      "sha256": "b42f89e8f80c02208d0f4b500f2649f9a43de09af4ed76489b1f299be656c543"
+    },
+    {
+      "path": "launcher/xmcl-runtime-api/src/util/SharedState.ts",
+      "sha256": "3822abf200c988dcc33cedc0a519b1a926804f2ae6d5c219a95e48c94252bf53"
+    },
+    {
+      "path": "launcher/xmcl-runtime/service/ServiceStateContainer.test.ts",
+      "sha256": "0e50f89418a384bccd6217fa79b2574f72a9459d352b1e97387b586a1ff91857"
+    },
+    {
+      "path": "launcher/xmcl-runtime/service/ServiceStateContainer.ts",
+      "sha256": "9fc832087c855816918b3a76c6faf9a1d1c422cd9f60a590997438a582e46fd1"
+    },
+    {
+      "path": "launcher/xmcl-runtime/service/ServiceStateManager.test.ts",
+      "sha256": "6bcd37331ca2f6d7ea7e70d45c9641d7c8f14fadddf510480d425e7ba291a904"
+    },
+    {
+      "path": "launcher/xmcl-runtime/service/ServiceStateManager.ts",
+      "sha256": "7557f7191ff0c6a324deb31207040cbf14cdbbadf9fb5f93f0be57d10ca722b1"
+    }
+  ],
+  "validation": {
+    "unit": {
+      "passed": 54,
+      "files": 10,
+      "seconds": 2.17,
+      "command": "pnpm exec vitest run scripts/renderer.test.ts xmcl-react-ui/src packages/renderer-client xmcl-runtime/service/ServiceStateContainer.test.ts xmcl-runtime/service/ServiceStateManager.test.ts"
+    },
+    "types": {
+      "passed": true,
+      "command": "pnpm check"
+    },
+    "lint": {
+      "passed": true,
+      "warnings": 0,
+      "command": "pnpm lint"
+    },
+    "harnessTests": {
+      "passed": 9,
+      "command": "node --test launcher/scripts/react-migration.test.mjs"
+    },
+    "react": {
+      "executable": "launcher/xmcl-electron-app/build/output/react/win-unpacked/Launcher MC.exe",
+      "passed": 4,
+      "seconds": 22.3,
+      "specs": [
+        "01-prototype",
+        "02-packaged",
+        "05-preferences-i18n"
+      ],
+      "viewports": [
+        [
+          1200,
+          720
+        ],
+        [
+          800,
+          400
+        ]
+      ],
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "axeReports": 12,
+      "axeViolations": 0,
+      "axeIncompleteTotal": 12
+    },
+    "strictMode": {
+      "passed": 1,
+      "seconds": 6.4,
+      "spec": "04-client-contracts",
+      "metrics": {
+        "reads": 4,
+        "subscriptions": 0,
+        "unrefs": 2,
+        "effects": 12,
+        "cleanups": 12,
+        "taskPolls": 2,
+        "taskListeners": 0,
+        "taskActivePolls": 0,
+        "maxTaskPolls": 1,
+        "sameSnapshot": true,
+        "initialCount": 1,
+        "initialName": "Renderer Client baseline QA",
+        "errors": []
+      }
+    },
+    "vue": {
+      "passed": 1,
+      "seconds": 7.9,
+      "spec": "03-vue-compatibility",
+      "liveMutation": "Instance created through real service appears in Vue library",
+      "verifyBundleOrphans": 0
+    },
+    "translations": {
+      "inheritedYaml": 29,
+      "precompiledAST": true,
+      "vueRepresentativeParity": true,
+      "dynamicFunctionForbiddenUnit": true,
+      "nativeLocaleSync": [
+        "en",
+        "ar",
+        "es-ES"
+      ]
+    },
+    "preferences": {
+      "version": 1,
+      "legacyDataPreserved": true,
+      "reload": true,
+      "crossWindowSameOrigin": true,
+      "followsWindows": true,
+      "deniedStorageUnit": true,
+      "laterVersionPreservedUnit": true
+    },
+    "deskgap": {
+      "types": true,
+      "productionBuildRenderer": "react",
+      "nativeExecuted": false
+    },
+    "workflow": {
+      "yamlValid": true,
+      "matrix": [
+        "vue",
+        "react"
+      ],
+      "permissions": "contents:read",
+      "executedOnGitHub": false
+    }
+  },
+  "package": {
+    "entries": [
+      "index",
+      "logger",
+      "migration"
+    ],
+    "devHarnessExcluded": true,
+    "video": true,
+    "artifacts": [
+      {
+        "path": "xmcl-electron-app/build/output/react/win-unpacked/resources/app.asar",
+        "bytes": 21381191,
+        "sha256": "f4a8e5985622da6f738007be36917b3784b43664a3fda0dfc92b4182caaef6f7"
+      },
+      {
+        "path": "xmcl-electron-app/build/output/react/win-unpacked/Launcher MC.exe",
+        "bytes": 238133760,
+        "sha256": "0a936dabab244bee9e576843d62ad08214fb388dd461295363e82fab6f18e615"
+      }
+    ]
+  },
+  "localIgnoredEvidence": [
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-unit.log",
+      "bytes": 619,
+      "sha256": "639eaee9a29c1c6a0e8382f47063ccccbfba1ec6781cda828c89c776b01a1098"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-types.log",
+      "bytes": 562,
+      "sha256": "b6769c27fb851761f5904723498e6e2976303db1ad2eea2fa97b187e23cc3c3a"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-lint.log",
+      "bytes": 1146,
+      "sha256": "e4572fbe603dfa08dbd422a6579bec86f4fb6397ebe363275105e9447fa07d24"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-vue-build.log",
+      "bytes": 18427,
+      "sha256": "e55e8629735f9843da8048c6e4b8eca707d474a561cbf9653e46dc4338640a57"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-host.log",
+      "bytes": 1462,
+      "sha256": "0ff3c6b2d0e1c79ecf95ca35b444dece49502b9cedc7d8f35a8ceca8c43498e8"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-react-build.log",
+      "bytes": 3105,
+      "sha256": "cb2e800a72b6306521a48c7ca5ea5518c5305f9a51dcdebf2abba42c50a8baae"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-react-package.log",
+      "bytes": 2575,
+      "sha256": "88659b40652dadebf1f8369cbae293138d88acb34fc323bd35ea12e6edc7f180"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-react-final.log",
+      "bytes": 2466,
+      "sha256": "e2d5f33baa1c41add13886913b008fcd9d1d2dca9b609c3b3a3a3794dcb170ff"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-state-tasks-final.log",
+      "bytes": 1439,
+      "sha256": "54dd485430ab6dd133c3b8526779b84c14a727618faf661bed49903dd38a644d"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-vue-final.log",
+      "bytes": 7744,
+      "sha256": "1831dcf1c3f39131e1203922d53175fc1de62a8d6d2c9c0074f48394f81e0484"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-deskgap-types.log",
+      "bytes": 40,
+      "sha256": "15bffbf43568e2d6b8cfadb557eefa9ace53f3d7541cbaae210b39fe3a3be172"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-deskgap-build.log",
+      "bytes": 101,
+      "sha256": "8f85bca756ee09206ee57230f569fd709e72d453fcbe26bd3f43f12d242e0cbc"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-package.json",
+      "bytes": 546,
+      "sha256": "3e97d04b458c69110be29a8143f7947de1c6be8e391fbc145eafde3d2ce364e5"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-react-final/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-react-final/react-migration-01-prototy-38754-and-automated-accessibility-electron-es-ES/accessibility.json",
+      "bytes": 265304,
+      "sha256": "42fcb7e7a08515d6c2a10e1d90e2b86e5f31a5308b73479dce1804dfedb77ed6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-react-final/react-migration-02-package-ecf1f-d-decodes-its-shipped-video-electron-es-ES/package-smoke.json",
+      "bytes": 277,
+      "sha256": "7f9f489555761c6192eaf2f00dec5d7fbf09c708319f0328e316c672a0cf93d6"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-react-final/react-migration-05-prefere-fb385-windows-and-runtime-locales-electron-es-ES/preferences-i18n.json",
+      "bytes": 320,
+      "sha256": "b47fb38f873fc32fb1e15510fa777b4a484ff521335547ba87b8a32318f373a3"
+    },
+    {
+      "path": "launcher/e2e/artifacts/react-migration-stage3-state-tasks-final/react-migration-04-client--bbc79--and-releases-all-consumers-electron-es-ES/client-contracts.json",
+      "bytes": 282,
+      "sha256": "95f93e0be1f7594c7e08435db0cb6ee691c5709e6b7fdc9939918582981294d5"
+    }
+  ],
+  "limits": [
+    "Main UI still uses sample instances/projects. Logger/migration remain infrastructure placeholders. Feature parity is stages 4-8.",
+    "Only initial React copy is connected to translations; full feature text and manual RTL/accessibility audits remain.",
+    "No Minecraft launch, Microsoft authentication, native DeskGap, isolated installer/delta update, final security/CSP audit or 60-second performance measurement.",
+    "JavaScript cannot freeze typed view contents; current state records/arrays are cloned/frozen. Stale native reads release on resolution/window destruction, without aborting native operations.",
+    "Runtime extras have not yet been disconnected; that is stage 8. No push/PR/publication."
+  ]
+}

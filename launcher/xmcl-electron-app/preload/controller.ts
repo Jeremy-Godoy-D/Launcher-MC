@@ -1,5 +1,5 @@
 import type { WindowController } from '@xmcl/runtime-api'
-import { contextBridge, ipcRenderer, clipboard, webUtils } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import EventEmitter from 'events'
 
 export enum Operation {
@@ -46,10 +46,7 @@ function createController(): WindowController {
   })
   const emitter = new EventEmitter()
 
-  const writeClipboard =
-    clipboard && clipboard.writeText && typeof clipboard.writeText === 'function'
-      ? (text: string) => clipboard.writeText(text)
-      : (text: string) => ipcRenderer.invoke('write-clipboard', text)
+  const writeClipboard = (text: string): Promise<void> => ipcRenderer.invoke('write-clipboard', text)
 
   const writeClipboardImage = (imageUrl: string) => {
     ipcRenderer.invoke('write-clipboard-image', imageUrl)
@@ -66,6 +63,10 @@ function createController(): WindowController {
     },
     writeClipboardImage,
     writeClipboard,
+    exportLogView: (text, name) => ipcRenderer.invoke('export-log-view', text, name),
+    openLogger: (instancePath, source) => ipcRenderer.invoke('open-logger', instancePath, source),
+    getLoggerContext: () => ipcRenderer.invoke('get-logger-context'),
+    getMigrationContext: () => ipcRenderer.invoke('get-migration-context'),
     getPathForFile,
     queryAudioPermission: () => ipcRenderer.invoke('query-audio-permission'),
     getMonitors: () => ipcRenderer.invoke('get-monitors'),
