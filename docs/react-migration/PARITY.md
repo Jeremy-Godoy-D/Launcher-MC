@@ -10,10 +10,10 @@ Referencia: beta.2, commit `7671c6f1bdc471d42816241920a262a18aca5a44`. Alcance c
 | --- | --- | --- | --- | --- |
 | K01 | Inicio `/`, LaunchCenter.vue | instances.ts, instanceLaunchCoordinator.ts, LaunchService | Última válida, Jugar explícito, no lanzar al montar; nueva destacada no guarda selección por tick. | complete |
 | K02 | Biblioteca `/me`, LauncherLibrary.vue | InstanceService, instances.ts, instanceGroup.ts | Buscar/filtrar/ordenar/agrupar, selección persistida, cuadrícula/lista. | complete |
-| K03 | Crear/importar, AppAddInstanceDialog/AppImportUrlDialog | instanceCreation.ts, InstanceService, InstanceIOService, ModpackService | Vanilla/loaders/ZIP o formatos admitidos; errores conservan campos. No importar temas/launchers/blueprints como funciones nuevas. | pending |
+| K03 | Crear/importar, AppAddInstanceDialog/AppImportUrlDialog | instanceCreation.ts, InstanceService, InstanceIOService, ModpackService | Vanilla/loaders/ZIP o formatos admitidos; errores conservan campos. No importar temas/launchers/blueprints como funciones nuevas. | pass |
 | K04 | Editar/duplicar/exportar/eliminar, instanceContextMenu.ts | InstanceService, InstanceIOService, ModpackService | Exportación local sí; borrado confirmado y diferenciado de retirar registro. | complete |
-| K05 | Versiones/loaders Java, BaseSettingVersions | version*, instanceVersionInstall*, JavaService | Usar resolución/instalación actual; conservar diagnosticar/reparar. | pending |
-| K06 | Lanzar/estado/salida/error | LaunchService, launchTask, launchException, instanceLaunch | Instancia/usuario capturados, estado proceso, no doble lanzamiento por Strict Mode. | pending |
+| K05 | Versiones/loaders Java, BaseSettingVersions | version*, instanceVersionInstall*, JavaService | Usar resolución/instalación actual; conservar diagnosticar/reparar. | pass |
+| K06 | Lanzar/estado/salida/error | LaunchService, launchTask, launchException, instanceLaunch | Instancia/usuario capturados, estado proceso, no doble lanzamiento por Strict Mode. | pass |
 | K07 | Resumen `/instance`, Home.vue | InstanceService/VersionService, instanceJavaDiagnose | Runtime/última partida/acciones del núcleo y diagnóstico. | pass |
 | K08 | Mods `/instance/mods`, Mod.vue y acciones | InstanceModsService/InstanceModsGroupService, instanceMods, modUpgrade | Activar/instalar/actualizar/retirar/buscar/agrupar según funciones actuales. | pass |
 | K09 | Packs `/instance/resourcepacks` | InstanceResourcePacksService, instanceResourcePack | Instalar/activar/ordenar/retirar y metadatos públicos. | pass |
@@ -31,9 +31,9 @@ Referencia: beta.2, commit `7671c6f1bdc471d42816241920a262a18aca5a44`. Alcance c
 | K21 | Consola integrada / logger.html | InstanceLogService, gameMonitor, windows/logger | Logs/filtros/copiar/exportar/scroll/abrir ventana; sin IA diagnóstica remota. | pass |
 | K22 | Onboarding/bootstrap y migration.html | bootstrap/migration preload, Setup, windows/migration | Perfil/ruta seguros, tres etapas, progreso/error, no tocar raíz habitual. | pass |
 | K23 | Barra de ventana/teclado/diálogos/arrastre | windowController, dropHandler, dialog, quick commands | Arrastre de archivos núcleo, minimizar/maximizar/cerrar, navegación/foco/accesibilidad. Sin invocar extras. | pass |
-| K24 | Apariencia nueva y medios | Nuevo resolvedor; identidad/upstream y galerías públicas existentes | Claro/oscuro/sistema, vídeo/poster/rotación/pausa/rendimiento y fallbacks del plan. | pending |
-| K25 | Preferencias y datos anteriores | selectedInstancePath, claves literales en inventory.json, servicios persistentes | Idempotencia, no vaciar storage, soportar datos de extras inertes. | pending |
-| K26 | Ayuda/diagnóstico local/licencias | Errores/runtime logs, LICENSE, NOTICE | Mensajes útiles/logs sin secretos; conservar atribución MIT. Sin telemetría a XMCL. | pending |
+| K24 | Apariencia nueva y medios | Nuevo resolvedor; identidad/upstream y galerías públicas existentes | Claro/oscuro/sistema, vídeo/poster/rotación/pausa/rendimiento y fallbacks del plan. | pass |
+| K25 | Preferencias y datos anteriores | selectedInstancePath, claves literales en inventory.json, servicios persistentes | Idempotencia, no vaciar storage, soportar datos de extras inertes. | pass |
+| K26 | Ayuda/diagnóstico local/licencias | Errores/runtime logs, LICENSE, NOTICE | Mensajes útiles/logs sin secretos; conservar atribución MIT. Sin telemetría a XMCL. | pass |
 
 ## Retiradas autorizadas
 
@@ -420,3 +420,7 @@ Bloque etapa7 a65cab0: STAGE7-ACTIVITY-UPDATER.md acepta K20 (monitor compartido
 ## Etapa 7 completa — 2026-11-02
 
 STAGE7-CLOSURE.md/JSON acepta K18/K19/K22/K23 y los tres gates 7. App8d3b919: 1520 unitarias/154 archivos, 8 Native React distintos y 2 Vue, 9 Axe0violaciones/12incomplete; tipos/lint/React+Vue+DeskGap producción aprobados, E2E56base y199IDs. Migración de datos segura con recuperación parcial y ventana600×400; arrastre reutiliza instaladores/revisores, conserva originales y rechaza destinos cambiados; teclado/controles/RTL. CI5561253:Vue success,React307pass/2skip/1fallo100 compacto; corregido el helper y Native800 pasa. La aplicación real del actualizador, rama pública sin token, juego/Java/loaders físicos K03/K05/K06 y validación global siguen en9. Etapa8 activa para React predeterminado, desconexión real de extras/grafo, consumidores y datos inertes; no rehacer0–7. Microsoft pospuesto; producción/proxy intactos.
+
+## Cierre de la migración
+
+Las funciones conservadas K01–K26 y las retiradas R01–R11 están verificadas. Microsoft sigue pospuesto. [STAGE9-VALIDATION.md](STAGE9-VALIDATION.md) y [STAGE9-PUBLICATION.md](STAGE9-PUBLICATION.md) enlazan la validación final y la publicación de `v0.3.0-beta.1`.

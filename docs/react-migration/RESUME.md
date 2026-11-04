@@ -2,24 +2,11 @@
 
 ## Estado vigente
 
-Etapas 0–8 completas. **9 activa** para validar y publicar `v0.3.0-beta.1`. La candidata local de etapa 8 es `36d93e9`, todavía numerada beta.2. Producción `v0.2.0-beta.2`, proxy activo y PR4 en borrador. Microsoft pospuesto. El usuario pidió terminar y publicar reutilizando el trabajo aceptado.
+**Etapas 0–9 completas.** Grimo Launcher React [v0.3.0-beta.1](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/tag/v0.3.0-beta.1) publicado. PR4 integrado en `main`. Las descargas públicas EXE y ZIP son binarios y coinciden con las sumas de la candidata. [STAGE9-PUBLICATION.md](STAGE9-PUBLICATION.md) registra la publicación, tag y verificación.
 
-[STAGE8-CLOSURE.md](STAGE8-CLOSURE.md) registra el paquete React predeterminado, grafos Electron/DeskGap, R01–R11, rutas y archivos antiguos conservados, 18 pruebas focales, tipos/lint y Native 01/02/100/106. La compatibilidad del ZIP beta.3 se ejecutó con descubrimiento público sin token. El instalador beta.2 y la validación integral siguen pendientes. CI anterior `41571802554` falló por alias de directorios temporales en tres fixtures, corregidas y probadas localmente.
+[STAGE9-VALIDATION.md](STAGE9-VALIDATION.md) enlaza las comprobaciones de la candidata. CI aprobó 1.526 pruebas unitarias, 316 recorridos Electron y un caso Strict Mode. Minecraft abrió con Vanilla y los seis loaders. Pasaron Java 21 automático, catálogos reales, actualización de prueba con SHA, NSIS limpio/sobre beta.2 y ZIP. CPU del renderer de 2,419 % a 23,994 fps, arranque mediano −23,3 % y memoria −22,4 % frente a beta.2. El vídeo permaneció pausado 60 segundos con un juego abierto.
 
-## Siguiente tarea — etapa 9
-
-1. Ejecutar la suite integral en Actions y resolver fallos del nuevo paquete. Preparar candidata con la versión final y comprobar fuentes y hashes.
-2. Cerrar K03/K05/K06 con instalación, Java automático y lanzamiento reales. Mantener perfiles desechables y reutilizar diagnósticos y mediciones existentes.
-3. Validar NSIS limpio y sobre beta.2 en Windows desechable, ZIP y actualización con integridad. Conservar cuenta, selección, ajustes, instancia y hash del mundo. Usar Actions porque el usuario no dispone de VM.
-4. Verificar rendimiento final, seguridad, licencias, proxy público y artefactos de la candidata. Publicar el borrador solo tras pasar todas las gates. Conservar beta.2 recuperable.
-
-La candidata `v0.3.0-beta.1` ya compila con el grafo Electron aprobado. El workflow de borrador descarga y verifica el instalador beta.2 y ejecuta la prueba de NSIS en un runner desechable. La prueba de juego Vanilla usa la opción `XMCL_E2E_REAL_GAME=1` y la fixture habitual con un perfil aislado. La preparación de estos recorridos no acredita todavía su aceptación.
-
-`STAGE9-SECURITY.md` registra la auditoría cruzada con los módulos emitidos, los parches y la sustitución de la clave fija de Yggdrasil. Los recorridos Actions `41776202750` y `41776208357` corresponden a `b3c270e`, anterior al cambio de dependencias. La primera Vanilla se detuvo antes de instalar porque la opción no tenía atributo `value`. La fixture ahora selecciona por etiqueta. Falta evidencia de juego real.
-
-`STAGE9-LIVE.md` registra Vanilla real con Java 21 gestionado, ambas búsquedas reales y AppleSkin verificado. NSIS limpio/sobre beta.2 y ZIP beta.3 pasaron para `b3c270e` en `41776208357`; el borrador inicial ya existe. La candidata con parches `4affc8d` se comprueba en CI `41776968652` y release `41777200478`. Quedan loaders reales, rendimiento y auditoría/artefactos definitivos. Mantener los gates abiertos hasta la evidencia del paquete final.
-
-Pasaron Fabric, Forge, NeoForge, Quilt y OptiFine reales, además de Vanilla. `41777200478` aprobó NSIS con ASAR idéntico al local. Las licencias adicionales se empaquetan en el siguiente borrador. La sesión local `50444` ejecuta los cinco casos de `specs/react-performance` sobre la candidata segura. Consultar su estado y `stage9-final-performance.log`; evitar Native concurrente. Luego ejecutar LabyMod con `XMCL_E2E_REAL_GAME=LabyMod` y su medición de `currentTime` durante juego abierto. Mantener el ejecutable `4affc8d` mientras cambian solo avisos/fixtures.
+El release usa el instalador completo, conserva los datos y mantiene beta.2 recuperable. Microsoft sigue pospuesto. No sobrescribir los assets publicados. Las evidencias de cada área se conservan en los informes y artefactos del harness.
 
 ## Evidencia y decisiones técnicas que se conservan
 

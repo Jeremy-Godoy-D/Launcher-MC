@@ -7,14 +7,14 @@
 **Launcher de escritorio para Minecraft: Java Edition en Windows 10/11 (x64)**  
 Instancias aisladas · Java automático · Perfiles locales · Actualizaciones desde GitHub
 
-[![Release](https://img.shields.io/badge/version-v0.2.0--beta.2-39d9a1?style=flat-square&logo=github)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases)
+[![Release](https://img.shields.io/badge/version-v0.3.0--beta.1-39d9a1?style=flat-square&logo=github)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/tag/v0.3.0-beta.1)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11%20x64-0ea5e9?style=flat-square&logo=windows)](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases)
 [![Electron](https://img.shields.io/badge/Electron-43-47848F?style=flat-square&logo=electron&logoColor=white)](https://www.electronjs.org/)
 [![React](https://img.shields.io/badge/React-19-149eca?style=flat-square&logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-d4943a?style=flat-square)](LICENSE)
 
-[**Descargar `.exe`**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/tag/v0.2.0-beta.2) · [**Notas de versión**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases) · [**Reportar un problema**](https://github.com/Jeremy-Godoy-D/Launcher-MC/issues) · [**Licencia y Avisos**](NOTICE)
+[**Descargar `.exe`**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/download/v0.3.0-beta.1/GrimoLauncher-0.3.0-beta.1-win-x64.exe) · [**Notas de versión**](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/tag/v0.3.0-beta.1) · [**Reportar un problema**](https://github.com/Jeremy-Godoy-D/Launcher-MC/issues) · [**Licencia y Avisos**](NOTICE)
 
 </div>
 
@@ -26,7 +26,7 @@ Instancias aisladas · Java automático · Perfiles locales · Actualizaciones d
   <tr>
     <td width="50%" valign="top">
       <h3>Diseño Grimo en React</h3>
-      <p>Paisajes de Minecraft, cristal, barra lateral y biblioteca de instancias. Incluye temas claro, oscuro y sistema, movimiento reducido y modo rendimiento. La descarga beta.2 corresponde al diseño Aurora anterior.</p>
+      <p>Paisajes de Minecraft, cristal, barra lateral y biblioteca de instancias. Incluye temas claro, oscuro y sistema, movimiento reducido y modo rendimiento.</p>
     </td>
     <td width="50%" valign="top">
       <h3>⚡ Instancias y Modloaders</h3>
@@ -46,7 +46,7 @@ Instancias aisladas · Java automático · Perfiles locales · Actualizaciones d
   <tr>
     <td width="50%" valign="top">
       <h3>🔄 Actualizaciones Automáticas o Manuales</h3>
-      <p>Conectado a <b>GitHub Releases</b>: comprueba nuevas versiones al iniciar o bajo demanda. Esta transición desde beta.3 usa el instalador completo o ZIP; la nueva versión incorpora verificación SHA-256 para futuras actualizaciones delta.</p>
+      <p>Comprueba versiones nuevas en <b>GitHub Releases</b> al iniciar o bajo demanda. La primera entrega React se instala con el EXE completo o el ZIP. Las descargas incluyen sumas SHA-256.</p>
     </td>
     <td width="50%" valign="top">
       <h3>🛠️ Diagnóstico local</h3>
@@ -71,18 +71,20 @@ Instancias aisladas · Java automático · Perfiles locales · Actualizaciones d
   <tbody>
     <tr>
       <td><b>Instalador NSIS (Recomendado)</b></td>
-      <td><code>LauncherMC-0.2.0-beta.2-win-x64.exe</code></td>
+      <td><code>GrimoLauncher-0.3.0-beta.1-win-x64.exe</code></td>
       <td>Asistente de instalación con selección de ruta y accesos directos en Escritorio y Menú Inicio.</td>
       <td>Descarga manual del instalador en esta versión</td>
     </tr>
     <tr>
       <td><b>Archivo Portable</b></td>
-      <td><code>LauncherMC-0.2.0-beta.2-win-x64.zip</code></td>
+      <td><code>GrimoLauncher-0.3.0-beta.1-win-x64.zip</code></td>
       <td>Carpeta descomprimible sin instalación en el registro del sistema.</td>
       <td>Reemplazo completo de la carpeta de programa</td>
     </tr>
   </tbody>
 </table>
+
+Para actualizar desde beta.2, cierra el launcher y ejecuta el instalador en la misma ruta. Conserva la carpeta de datos para mantener tus perfiles, instancias y mundos. [Volver a descargar beta.2](https://github.com/Jeremy-Godoy-D/Launcher-MC/releases/tag/v0.2.0-beta.2).
 
 ---
 

@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 9,
-  "nextAction": "Etapa 9 activa. Producto seguro 4affc8d; borrador con licencias 5bfffc8 en release 41778557338. Vanilla y cinco loaders físicos, catálogo real y NSIS seguro aprobados. Sesión local 50444 mide rendimiento; no duplicar Native. CI b3c270e 41776202750 obtuvo 315 pass, 2 skip y solo falló 100 porque la versión ficticia era menor que 0.3. Fixture ahora deriva una versión superior. Verificar CI de la corrección. Después de rendimiento, ejecutar Native 100 y LabyMod con medición de pausa por currentTime. Pendientes validación de artefactos, cierre de gates y publicación.",
+  "nextAction": "Migración completa. Grimo Launcher v0.3.0-beta.1 está publicado en GitHub Releases con EXE, ZIP, SHA-256 y manifiesto verificados. PR4 integrado. STAGE9-PUBLICATION.md conserva la evidencia; cualquier corrección posterior requiere una versión superior.",
   "stages": [
     {
       "id": 0,
@@ -1161,32 +1161,70 @@
     {
       "id": 9,
       "title": "ValidaciÃ³n y publicaciÃ³n",
-      "status": "active",
+      "status": "complete",
       "gates": [
         {
           "id": "full-validation",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE9-VALIDATION.md",
+              "sha256": "c0b799a18d586e82cac99671776566dc7e7025395e7065ab6dcb800fdd4cdb96"
+            }
+          ],
+          "note": "CI 41778674557 en 08b074d aprobado: 1526/157 unitarias, 316 Native + 2 optativas, 1 Strict Mode, tipos/lint/builds. Siete variantes reales, catálogos reales, ZIP y actualizador comprobados."
         },
         {
           "id": "isolated-installer",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE9-INSTALLER.md",
+              "sha256": "bc69def94d57d6544e2b16a2510a5bca8fd065bcbbe91bdf711909f9a983d831"
+            }
+          ],
+          "note": "Actions 41778557338 pasó NSIS limpio y sobre beta.2, compatibilidad ZIP beta.3, hashes, perfil, selección, RAM, mundo y accesos. Perfil habitual fuera del recorrido."
         },
         {
           "id": "performance-security",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE9-PERFORMANCE.md",
+              "sha256": "07b5b2ee7216c80d0260ded42180d00c886b64b0b7dcc3710c7124d9e90cb0b5"
+            },
+            {
+              "path": "docs/react-migration/STAGE9-SECURITY.md",
+              "sha256": "46eb6e8dcff1dad79f77ffaf03dcf404381dde8a328ad8055f555569cb9ef0ad"
+            },
+            {
+              "path": "docs/react-migration/STAGE9-INSTALLER.md",
+              "sha256": "bc69def94d57d6544e2b16a2510a5bca8fd065bcbbe91bdf711909f9a983d831"
+            }
+          ],
+          "note": "Cinco casos Windows aprobados, presupuestos de CPU, vídeo, memoria y arranque satisfechos, 60 s con juego real sin avance. ASAR idéntico al auditado, licencias instaladas y cero coincidencias de material secreto en los archivos de texto escaneados."
         },
         {
           "id": "release-assets",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE9-INSTALLER.md",
+              "sha256": "bc69def94d57d6544e2b16a2510a5bca8fd065bcbbe91bdf711909f9a983d831"
+            }
+          ],
+          "note": "Borrador 5bfffc8 con EXE probado, ZIP extraído y verificado, archivos SHA-256 y manifest React. ASAR y licencia idénticos a instalación verificada. Enlaces públicos por comprobar al publicar."
         },
         {
           "id": "publication",
-          "status": "pending",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            {
+              "path": "docs/react-migration/STAGE9-PUBLICATION.md",
+              "sha256": "1eed34ddf762007788d2ab33b3f9427fafe79c05f86ab736fe1e9c7f7db3de45"
+            }
+          ],
+          "note": "PR4 integrado y v0.3.0-beta.1 publicado. Tag 5bfffc8, feed público, digests y firmas MZ/PK verificados sin autenticación. Beta.2 recuperable."
         }
       ]
     }
@@ -1220,5 +1258,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-04T05:20:33.405543+00:00"
+  "updatedAt": "2026-11-04T05:53:29.835985+00:00"
 }
