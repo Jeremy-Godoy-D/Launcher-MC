@@ -1,13 +1,17 @@
 import { readFile, writeFile } from 'node:fs/promises'
-import { isAbsolute, join, relative } from 'node:path'
+import { dirname, isAbsolute, join, relative } from 'node:path'
+import { setTimeout as delay } from 'node:timers/promises'
 import { test, expect } from '../../helpers/scratch'
 import { addLaunchProfile } from '../../helpers/react-launch'
+import { focusLauncher } from '../../helpers/focus-launcher'
 
 const supported = ['Vanilla', 'Fabric', 'Forge', 'NeoForge', 'Quilt', 'OptiFine', 'LabyMod']
 const requested = process.env.XMCL_E2E_REAL_GAME
 const loaders = requested === 'all' ? supported : supported.filter(loader => (requested === '1' ? ['Vanilla'] : requested?.split(','))?.includes(loader))
 test.skip(!loaders.length, 'Opt-in test downloads and launches Minecraft in an isolated profile')
-test.use({ launcherOptions: { locale: 'es-ES', launchGame: true, recordVideo: false } })
+test.use({ launcherOptions: { locale: 'es-ES', launchGame: true, recordVideo: false, prepareGameData: async root => {
+  if (loaders.includes('OptiFine')) await writeFile(join(dirname(root), 'appData', 'LauncherMC', 'setting.json'), JSON.stringify({ apiSetsPreference: 'bmcl' }))
+} } })
 
 test('real Minecraft installations launch with compatible Java', async ({ launcher }, info) => {
   test.setTimeout((20 + 6 * (loaders.length - 1)) * 60_000)
@@ -59,6 +63,29 @@ test('real Minecraft installations launch with compatible Java', async ({ launch
       expect(log).toMatch(/1\.21\.1|LWJGL/)
       const managed = relative(join(launcher.gameDataPath, 'jre'), game.java)
       await writeFile(info.outputPath(`real-${loader.toLowerCase()}.json`), JSON.stringify({ loader, minecraftVersion, versionId: game.version, pid: game.pid, ready: game.ready, javaMajor: java.majorVersion, managedJava: !!managed && !isAbsolute(managed) && !managed.startsWith('..'), gameLogBytes: Buffer.byteLength(log) }, null, 2))
+      if (loader === loaders[0]) {
+        await focusLauncher(launcher)
+        await page.keyboard.press('Escape')
+        await page.getByTestId('nav-home').click()
+        await expect(page.locator('[data-motion-state]')).toHaveAttribute('data-motion-state', /"gameRunning":true/)
+        const samples: { media: { paused: boolean; seconds: number; frames: number }; metrics: unknown }[] = []
+        const start = performance.now()
+        for (;;) {
+          const media = await page.evaluate(() => {
+            const video = document.querySelector('video')
+            return { paused: !video || video.paused, seconds: video?.currentTime ?? 0, frames: video?.getVideoPlaybackQuality().totalVideoFrames ?? 0 }
+          })
+          samples.push({ media, metrics: await launcher.app.evaluate(({ app }) => app.getAppMetrics()) })
+          if (performance.now() - start >= 60_000) break
+          await delay(2000)
+        }
+        await writeFile(info.outputPath('game-open-performance.json'), JSON.stringify({ loader, elapsedSeconds: (performance.now() - start) / 1000, samples }, null, 2))
+        expect((await processes()).some(running => running.pid === game.pid && running.ready)).toBe(true)
+        expect(samples.every(sample => sample.media.paused)).toBe(true)
+        // The decoder can buffer frames while paused. Playback time must remain fixed.
+        const times = samples.map(sample => sample.media.seconds)
+        expect(Math.max(...times) - Math.min(...times)).toBeLessThan(0.05)
+      }
     } finally {
       for (const game of await processes().catch(() => [])) if (game.path === path) {
         await page.evaluate(({ pid, launchId }) => (window as any).serviceChannels.open('LaunchService').call('kill', pid, true, launchId), game)

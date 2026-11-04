@@ -19,6 +19,8 @@ La candidata `v0.3.0-beta.1` ya compila con el grafo Electron aprobado. El workf
 
 `STAGE9-LIVE.md` registra Vanilla real con Java 21 gestionado, ambas búsquedas reales y AppleSkin verificado. NSIS limpio/sobre beta.2 y ZIP beta.3 pasaron para `b3c270e` en `41776208357`; el borrador inicial ya existe. La candidata con parches `4affc8d` se comprueba en CI `41776968652` y release `41777200478`. Quedan loaders reales, rendimiento y auditoría/artefactos definitivos. Mantener los gates abiertos hasta la evidencia del paquete final.
 
+Pasaron Fabric, Forge, NeoForge, Quilt y OptiFine reales, además de Vanilla. `41777200478` aprobó NSIS con ASAR idéntico al local. Las licencias adicionales se empaquetan en el siguiente borrador. La sesión local `50444` ejecuta los cinco casos de `specs/react-performance` sobre la candidata segura. Consultar su estado y `stage9-final-performance.log`; evitar Native concurrente. Luego ejecutar LabyMod con `XMCL_E2E_REAL_GAME=LabyMod` y su medición de `currentTime` durante juego abierto. Mantener el ejecutable `4affc8d` mientras cambian solo avisos/fixtures.
+
 ## Evidencia y decisiones técnicas que se conservan
 
 - PLAN/SCOPE son autoridad; aprobación visual ya existe en DESIGN_APPROVAL.json: «si lo apruebo». No volver a pedirla. Gaming obsidiana/cobre, barra lateral, paisaje de toda la ventana y glassmorphism con contraste/fallback/rendimiento. No Aurora/burbujas/editor/CSS personalizado/audio antiguo. Packs usan sus medios oficiales; internet solo Vanilla/fallback real, preferentemente shaders, con licencia. Nunca imágenes IA.

@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 9,
-  "nextAction": "Etapa 9 activa. Producto 4affc8d v0.3.0-beta.1. Vanilla 1.21.1 real pasó con Java 21 gestionado y PID listo; Modrinth y CurseForge públicos y JAR AppleSkin verificado pasaron. STAGE9-LIVE.md documenta evidencias. NSIS limpio/sobre beta.2 y ZIP beta.3 pasaron en 41776208357 para b3c270e, que creó borrador. Candidata con parches en CI 41776968652 y NSIS 41777200478. Terminar loaders reales, rendimiento, auditoría/artefactos definitivos y publicar solo al pasar todos los gates.",
+  "nextAction": "Etapa 9 activa. Producto 4affc8d: Vanilla/Fabric/Forge/NeoForge/Quilt/OptiFine físicos con Java21, catálogo real aprobado. NSIS seguro 41777200478 aprobado con ASAR exacto. Se añadieron licencias y comprobación del recurso para empaquetar la candidata final. La medición de rendimiento está ejecutándose en sesión 50444; verificar su salida antes de otras pruebas Native. Falta LabyMod real con medición de pausa por currentTime, cierre de CI integral 41776968652 y verificar el borrador final antes de publicar. STAGE9-LIVE.md y STAGE9-SECURITY.md conservan evidencia.",
   "stages": [
     {
       "id": 0,
@@ -1220,5 +1220,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-04T05:09:24.641240+00:00"
+  "updatedAt": "2026-11-04T05:19:28.292204+00:00"
 }

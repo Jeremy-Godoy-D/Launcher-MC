@@ -27,6 +27,7 @@ test('NSIS upgrades beta.2 in place and also supports a clean installation', asy
   expect(candidateHash).toBe((await readFile(`${candidate}.sha256`, 'utf8')).trim().toLowerCase())
   expect(await hash(baseline!)).toBe('01233e355406b1790d45b091a8dea580841bd8ec9ab258813dce5ee9a28da624')
   const candidateAsar = await hash(join(candidateOutput, 'win-unpacked', 'resources', 'app.asar'))
+  const noticeHash = await hash(resolve('../THIRD_PARTY_NOTICES.txt'))
   const installed = join(program, 'Grimo Launcher.exe')
   const install = (file: string) => run(file, ['/S', `/D=${program}`], { windowsVerbatimArguments: true, windowsHide: true, timeout: 90_000 })
   let app: ElectronApplication | undefined
@@ -62,6 +63,7 @@ test('NSIS upgrades beta.2 in place and also supports a clean installation', asy
 
     await install(candidate)
     expect(await hash(join(program, 'resources', 'app.asar'))).toBe(candidateAsar)
+    expect(await hash(join(program, 'resources', 'THIRD_PARTY_NOTICES.txt'))).toBe(noticeHash)
     expect(candidateAsar).not.toBe(previousAsar)
     const upgraded = await launch(installed)
     expect(await app!.evaluate(({ app }) => app.getVersion())).toBe(version)
@@ -88,7 +90,7 @@ test('NSIS upgrades beta.2 in place and also supports a clean installation', asy
     await expect(clean.getByTestId('setup-root')).toBeVisible()
     expect(await hash(join(program, 'resources', 'app.asar'))).toBe(candidateAsar)
     expect(await hash(world)).toBe(worldHash)
-    await writeFile(info.outputPath('nsis-validation.json'), JSON.stringify({ version, candidateHash, candidateAsar, previousAsar, worldHash, clean: true, inPlaceUpgrade: true, shortcutsVerified: true }, null, 2))
+    await writeFile(info.outputPath('nsis-validation.json'), JSON.stringify({ version, candidateHash, candidateAsar, noticeHash, previousAsar, worldHash, clean: true, inPlaceUpgrade: true, shortcutsVerified: true }, null, 2))
   } finally {
     await app?.close()
   }
