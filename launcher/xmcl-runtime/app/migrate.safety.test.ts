@@ -1,4 +1,4 @@
-import { lstat, mkdir, mkdtemp, readFile, rm, symlink as createLink, writeFile } from 'node:fs/promises'
+import { lstat, mkdir, mkdtemp, readFile, realpath, rm, symlink as createLink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, sep } from 'node:path'
 import { copyFile, rename, symlink } from 'fs-extra'
@@ -29,7 +29,7 @@ afterEach(async () => {
   await Promise.all(roots.splice(0).map(root => rm(root, { recursive: true, force: true })))
 })
 async function setup() {
-  const root = await mkdtemp(join(tmpdir(), 'grimo-migrate-safe-')); roots.push(root)
+  const root = await mkdtemp(join(await realpath(tmpdir()), 'grimo-migrate-safe-')); roots.push(root)
   const source = join(root, 'source'), destination = join(root, 'destination'), appDataPath = join(root, 'profile')
   await mkdir(join(source, 'instances', 'owned'), { recursive: true }); await mkdir(appDataPath)
   await writeFile(join(source, 'instances', 'owned', 'a.txt'), 'first world')

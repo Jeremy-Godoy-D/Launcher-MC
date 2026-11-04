@@ -11,8 +11,8 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | Test ID | Defined in |
 |---|---|
 | `accounts-page` | [`xmcl-react-ui/src/features/accounts/Accounts.tsx#L86`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L86) |
-| `app-backdrop` | [`xmcl-react-ui/src/App.tsx#L450`](../xmcl-react-ui/src/App.tsx#L450) |
-| `app-sidebar` | [`xmcl-react-ui/src/App.tsx#L486`](../xmcl-react-ui/src/App.tsx#L486) |
+| `app-backdrop` | [`xmcl-react-ui/src/App.tsx#L440`](../xmcl-react-ui/src/App.tsx#L440) |
+| `app-sidebar` | [`xmcl-react-ui/src/App.tsx#L476`](../xmcl-react-ui/src/App.tsx#L476) |
 | `catalog` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L239`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L239) |
 | `catalog-description` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L173`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L173) |
 | `catalog-download` | [`xmcl-react-ui/src/features/catalog/Catalog.tsx#L109`](../xmcl-react-ui/src/features/catalog/Catalog.tsx#L109) |
@@ -65,8 +65,8 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `datapack-remove` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L287`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L287) |
 | `export-confirm` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L88`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L88) |
 | `export-result` | [`xmcl-react-ui/src/features/library/ExportInstance.tsx#L81`](../xmcl-react-ui/src/features/library/ExportInstance.tsx#L81) |
-| `featured-play` | [`xmcl-react-ui/src/App.tsx#L639`](../xmcl-react-ui/src/App.tsx#L639) |
-| `featured-project-cover` | [`xmcl-react-ui/src/App.tsx#L631`](../xmcl-react-ui/src/App.tsx#L631) |
+| `featured-play` | [`xmcl-react-ui/src/App.tsx#L609`](../xmcl-react-ui/src/App.tsx#L609) |
+| `featured-project-cover` | [`xmcl-react-ui/src/App.tsx#L601`](../xmcl-react-ui/src/App.tsx#L601) |
 | `file-drop-confirm` | [`xmcl-react-ui/src/features/files/FileDrop.tsx#L66`](../xmcl-react-ui/src/features/files/FileDrop.tsx#L66) |
 | `file-drop-overlay` | [`xmcl-react-ui/src/features/files/FileDrop.tsx#L62`](../xmcl-react-ui/src/features/files/FileDrop.tsx#L62) |
 | `file-drop-review` | [`xmcl-react-ui/src/features/files/FileDrop.tsx#L63`](../xmcl-react-ui/src/features/files/FileDrop.tsx#L63) |
@@ -113,10 +113,10 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `instance-workspace` | [`xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L34`](../xmcl-react-ui/src/features/instance/InstanceWorkspace.tsx#L34) |
 | `instance-worlds` | [`xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L72`](../xmcl-react-ui/src/features/instance/InstanceWorlds.tsx#L72) |
 | `launch-confirm` | [`xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157`](../xmcl-react-ui/src/features/launch/LaunchDialog.tsx#L157) |
-| `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L722`](../xmcl-react-ui/src/App.tsx#L722) |
-| `library-groups` | [`xmcl-react-ui/src/App.tsx#L718`](../xmcl-react-ui/src/App.tsx#L718) |
+| `library-create-instance` | [`xmcl-react-ui/src/App.tsx#L692`](../xmcl-react-ui/src/App.tsx#L692) |
+| `library-groups` | [`xmcl-react-ui/src/App.tsx#L688`](../xmcl-react-ui/src/App.tsx#L688) |
 | `library-groups-dialog` | [`xmcl-react-ui/src/features/library/GroupsDialog.tsx#L41`](../xmcl-react-ui/src/features/library/GroupsDialog.tsx#L41) |
-| `library-state` | [`xmcl-react-ui/src/App.tsx#L438`](../xmcl-react-ui/src/App.tsx#L438) |
+| `library-state` | [`xmcl-react-ui/src/App.tsx#L428`](../xmcl-react-ui/src/App.tsx#L428) |
 | `library-window` | [`xmcl-react-ui/src/features/library/LibraryWindow.tsx#L96`](../xmcl-react-ui/src/features/library/LibraryWindow.tsx#L96) |
 | `local-profile-name` | [`xmcl-react-ui/src/features/accounts/Accounts.tsx#L50`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L50)<br>[`xmcl-react-ui/src/features/accounts/Accounts.tsx#L179`](../xmcl-react-ui/src/features/accounts/Accounts.tsx#L179)<br>[`xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35`](../xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35) |
 | `logger-instance-name` | [`xmcl-react-ui/src/auxiliary.tsx#L39`](../xmcl-react-ui/src/auxiliary.tsx#L39) |
@@ -127,11 +127,11 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `modpack-update` | [`xmcl-react-ui/src/features/catalog/ModpackUpdateDialog.tsx#L99`](../xmcl-react-ui/src/features/catalog/ModpackUpdateDialog.tsx#L99) |
 | `modpack-update-complete` | [`xmcl-react-ui/src/features/catalog/ModpackUpdateDialog.tsx#L109`](../xmcl-react-ui/src/features/catalog/ModpackUpdateDialog.tsx#L109) |
 | `modpack-update-files` | [`xmcl-react-ui/src/features/catalog/ModpackUpdateDialog.tsx#L108`](../xmcl-react-ui/src/features/catalog/ModpackUpdateDialog.tsx#L108) |
-| `nav-accounts` | [`xmcl-react-ui/src/App.tsx#L540`](../xmcl-react-ui/src/App.tsx#L540) |
-| `nav-home` | [`xmcl-react-ui/src/App.tsx#L497`](../xmcl-react-ui/src/App.tsx#L497) |
-| `nav-library` | [`xmcl-react-ui/src/App.tsx#L498`](../xmcl-react-ui/src/App.tsx#L498) |
-| `nav-settings` | [`xmcl-react-ui/src/App.tsx#L532`](../xmcl-react-ui/src/App.tsx#L532) |
-| `nav-store` | [`xmcl-react-ui/src/App.tsx#L499`](../xmcl-react-ui/src/App.tsx#L499) |
+| `nav-accounts` | [`xmcl-react-ui/src/App.tsx#L530`](../xmcl-react-ui/src/App.tsx#L530) |
+| `nav-home` | [`xmcl-react-ui/src/App.tsx#L487`](../xmcl-react-ui/src/App.tsx#L487) |
+| `nav-library` | [`xmcl-react-ui/src/App.tsx#L488`](../xmcl-react-ui/src/App.tsx#L488) |
+| `nav-settings` | [`xmcl-react-ui/src/App.tsx#L522`](../xmcl-react-ui/src/App.tsx#L522) |
+| `nav-store` | [`xmcl-react-ui/src/App.tsx#L489`](../xmcl-react-ui/src/App.tsx#L489) |
 | `profile-appearance` | [`xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35`](../xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L35) |
 | `profile-appearance-save` | [`xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L75`](../xmcl-react-ui/src/features/accounts/ProfileAppearance.tsx#L75) |
 | `progress-advancements` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L112`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L112) |
@@ -147,7 +147,7 @@ Add a literal `data-testid="…"` or `testId: "…"` and re-run `pnpm gen:testid
 | `progress-view-mode` | [`xmcl-react-ui/src/features/instance/WorldProgress.tsx#L194`](../xmcl-react-ui/src/features/instance/WorldProgress.tsx#L194) |
 | `react-logger-window` | [`xmcl-react-ui/src/auxiliary.tsx#L68`](../xmcl-react-ui/src/auxiliary.tsx#L68) |
 | `react-migration-window` | [`xmcl-react-ui/src/windows/MigrationWindow.tsx#L31`](../xmcl-react-ui/src/windows/MigrationWindow.tsx#L31) |
-| `react-prototype` | [`xmcl-react-ui/src/App.tsx#L447`](../xmcl-react-ui/src/App.tsx#L447) |
+| `react-prototype` | [`xmcl-react-ui/src/App.tsx#L437`](../xmcl-react-ui/src/App.tsx#L437) |
 | `save-world-map-canvas` | [`xmcl-react-ui/src/features/instance/WorldMap.tsx#L569`](../xmcl-react-ui/src/features/instance/WorldMap.tsx#L569) |
 | `save-world-map-clear-selection` | [`xmcl-react-ui/src/features/instance/WorldMap.tsx#L453`](../xmcl-react-ui/src/features/instance/WorldMap.tsx#L453) |
 | `save-world-map-copy` | [`xmcl-react-ui/src/features/instance/WorldMap.tsx#L462`](../xmcl-react-ui/src/features/instance/WorldMap.tsx#L462) |

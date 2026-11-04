@@ -22,7 +22,7 @@ export async function stageApplication(dist: string, destination: string, versio
     recursive: true,
     filter(source) {
       if (/\.asar(?:\.|$)/i.test(basename(source))) throw new Error('Electron ASAR assets cannot be packaged for DeskGap')
-      return !source.endsWith('.map')
+      return !source.endsWith('.map') && !source.endsWith('-meta.json') && basename(source) !== 'distribution-graph.json'
     },
   })
   await writeFile(join(destination, 'package.json'), JSON.stringify({

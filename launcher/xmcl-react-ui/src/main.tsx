@@ -1,6 +1,6 @@
 import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { createHashRouter } from 'react-router'
+import { createHashRouter, Navigate, useLocation } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
 import { RendererClient } from '@launcher/renderer-client'
 import { BaseServiceKey } from '@xmcl/runtime-api/src/services/BaseService'
@@ -17,7 +17,19 @@ import { LaunchStore } from './features/launch/store'
 import { LaunchProvider } from './features/launch/context'
 import './styles.css'
 
-const router = createHashRouter([{ path: '*', element: <App /> }])
+function MainRoute() {
+  const { pathname, search, hash } = useLocation()
+  const path = pathname.replace(/\/+$/, '') || '/'
+  if (/^\/(?:multiplayer|(?:instance\/)?blueprints|store\/ftb|base-setting\/modrinth-project)(?:\/|$)/.test(path)) {
+    return <Navigate to="/me" replace />
+  }
+  if (['/mods', '/resourcepacks', '/shaderpacks', '/save', '/base-setting'].includes(path)) {
+    return <Navigate to={{ pathname: `/instance${path}`, search, hash }} replace />
+  }
+  return <App />
+}
+
+const router = createHashRouter([{ path: '*', element: <MainRoute /> }])
 const client = window.serviceChannels ? new RendererClient(window.serviceChannels, window.taskMonitor) : null
 const launches = client ? new LaunchStore(client) : null
 const preferences = new PreferencesStore(() => window.localStorage, window, async () =>

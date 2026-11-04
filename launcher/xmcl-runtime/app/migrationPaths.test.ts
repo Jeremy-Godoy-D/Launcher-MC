@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, expect, it } from 'vitest'
@@ -7,7 +7,7 @@ import { reviewMigrationPaths } from './migrationPaths'
 const roots: string[] = []
 afterEach(async () => { await Promise.all(roots.splice(0).map(path => rm(path, { recursive: true, force: true }))) })
 async function setup() {
-  const root = await mkdtemp(join(tmpdir(), 'grimo-migration-path-')); roots.push(root)
+  const root = await mkdtemp(join(await realpath(tmpdir()), 'grimo-migration-path-')); roots.push(root)
   const source = join(root, 'source'); await mkdir(source); await writeFile(join(source, 'keep.txt'), 'original')
   return { root, source, destination: join(root, 'destination') }
 }

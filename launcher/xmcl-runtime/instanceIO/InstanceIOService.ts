@@ -1,6 +1,5 @@
 import {
   ServerFSExporter,
-  ServerSSHExporter,
   parseInstanceFiles,
   parseLauncherData,
   getInstanceConfigFromMmcModpack,
@@ -16,14 +15,12 @@ import {
 import { AnyError, isSystemError } from '@xmcl/utils'
 import { join } from 'path'
 import { Inject, LauncherAppKey, kGameDataPath, type PathResolver } from '~/app'
-import { SSHManager } from '~/infra'
 import { InstanceService } from '~/instance'
 import { LaunchService } from '~/launch'
 import { AbstractService, ExposeServiceKey } from '~/service'
 import { VersionService } from '~/launch'
 import { LauncherApp } from '../app/LauncherApp'
 import { copyPassively, isPathDiskRootPath } from '../util/fs'
-import { uploadSSH } from './utils/uploadSSH'
 import { importLauncherInstance } from './utils/importLauncherInstance'
 import { previewFolderFiles } from './utils/previewFolderFiles'
 import { inspectPrismFolderVersion, preparePrismFolderVersion } from './utils/prismFolderVersion'
@@ -44,6 +41,7 @@ export class InstanceIOService extends AbstractService implements IInstanceIOSer
   }
 
   async exportInstanceAsServer(options: ExportInstanceAsServerOptions): Promise<void> {
+    if (options.output.type !== 'folder') throw new AnyError('FeatureUnavailableError', 'SSH deployment is unavailable in Grimo Launcher')
     const launchService = await this.app.registry.get(LaunchService)
     const versionService = await this.app.registry.get(VersionService)
     const serverVersion = await versionService.resolveServerVersion(options.options.version)
@@ -54,29 +52,6 @@ export class InstanceIOService extends AbstractService implements IInstanceIOSer
         ops,
         options.files.map((f) => f.path),
       )
-    } else if (options.output.type === 'ssh') {
-      const manager = await this.app.registry.getOrCreate(SSHManager)
-      const ssh = await manager.open({
-        host: options.output.host,
-        port: options.output.port,
-        username: options.output.username,
-        credentials: options.output.credentials,
-      })
-      const sftp = await manager.openSFTP(ssh)
-      if (!sftp) {
-        throw new Error('Failed to open sftp')
-      }
-      const exporter = new ServerSSHExporter(this.getPath(), options.output.path, ssh, sftp)
-
-      await uploadSSH(
-        exporter,
-        options.options.gameDirectory,
-        ops,
-        options.files.map((f) => f.path),
-      )
-
-      sftp.end()
-      ssh.end()
     }
   }
 

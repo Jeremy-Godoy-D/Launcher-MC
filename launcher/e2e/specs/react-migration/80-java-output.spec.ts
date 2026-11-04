@@ -78,7 +78,7 @@ test('packaged Native delivers and archives real Java pipes with Unicode and lau
       summary.push({ launchId: start.launchId, pid: pids[index], events: output.length, stdoutUnits: stdout.length, state: archive.record.state })
     }
     await writeFile(testInfo.outputPath('java-output-summary.json'), JSON.stringify(summary, null, 2), 'utf8')
-    if (process.env.LAUNCHER_RENDERER === 'react') {
+    if (process.env.LAUNCHER_RENDERER !== 'vue') {
       await page.getByTestId('nav-library').click()
       await page.getByRole('button', { name: 'Administrar Mi mundo', exact: true }).click()
       await page.getByTestId('instance-workspace').getByLabel('Secciones de la instancia').getByRole('link', { name: 'Consola', exact: true }).click()

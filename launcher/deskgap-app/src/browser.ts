@@ -10,7 +10,7 @@ import { LaunchServiceKey } from '@xmcl/runtime-api'
 import type { Monitor } from '@xmcl/runtime-api/monitor'
 import { SharedStateRegistry } from '../../packages/renderer-client/transport'
 import { TransportFrameDecoder } from './framing'
-import { createRendererTelemetry, createServiceCalls } from './serviceBridge'
+import { createServiceCalls } from './serviceBridge'
 
 const nativeFileHandlePrefix = 'deskgap-file-handle:'
 const pendingMigrationKey = 'xmcl-deskgap-pending-migration'
@@ -340,8 +340,7 @@ function installBridge(deskgap: DeskGapBrowserClient) {
     }, 10_000)
   })
 
-  const rendererTelemetry = createRendererTelemetry(invoke)
-  Object.assign(globalThis, { bootstrap, gameMonitor, serviceChannels, taskMonitor, windowController, rendererTelemetry })
+  Object.assign(globalThis, { bootstrap, gameMonitor, serviceChannels, taskMonitor, windowController })
 }
 
 async function writeTransportFrame(channel: TransportChannel, message: unknown) {

@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, realpath, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { remove } from 'fs-extra'
@@ -16,7 +16,7 @@ describe('data-root migration telemetry', () => {
   })
 
   it('records completed migration work with its incoming trace context', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'xmcl-migrate-test-'))
+    const root = await mkdtemp(join(await realpath(tmpdir()), 'xmcl-migrate-test-'))
     roots.push(root)
     const source = join(root, 'source')
     const destination = join(root, 'destination')

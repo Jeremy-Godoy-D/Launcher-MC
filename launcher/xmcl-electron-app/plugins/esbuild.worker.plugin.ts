@@ -1,6 +1,7 @@
 import { build as esbuild, Plugin } from 'esbuild'
 import { basename, join, resolve } from 'path'
 import { cleanUrl } from './util'
+import { writeFile } from 'node:fs/promises'
 
 /**
  * Resolve ?worker import to the function creating the worker object
@@ -44,6 +45,7 @@ export default function createWorkerPlugin(): Plugin {
         const entryOutput = Object.entries(result.metafile?.outputs ?? {}).find(([, output]) => output.entryPoint)
         if (!entryOutput) throw new Error(`Worker build produced no entry output for ${absoltePath}`)
         const fileName = basename(entryOutput[0])
+        await writeFile(join(outDir, `${fileName}-meta.json`), JSON.stringify(result.metafile, null, 2))
         const functionName = basename(absoltePath).replace(/\W+/g, '_').replace(/^(\d)/, '_$1')
         console.log(functionName)
         return {
