@@ -4,7 +4,10 @@ import type { LauncherFixture } from '../fixtures/launcher'
 
 /** Owned bytes test transfer/hash handling; no installer or ASAR application is invoked. */
 export async function mockReactUpdater(launcher: LauncherFixture) {
-  const version = '0.2.0-beta.99', name = `app-${version}-win.asar`
+  const current = await launcher.app.evaluate(({ app }) => app.getVersion())
+  const major = Number(current.split('.')[0])
+  if (!Number.isSafeInteger(major) || major < 0) throw new Error('Unexpected packaged launcher version')
+  const version = `${major + 1}.0.0-beta.1`, name = `app-${version}-win.asar`
   const bytes = Buffer.from('OWNED INTEGRITY FIXTURE\n'.repeat(65536)), hash = createHash('sha256').update(bytes).digest('hex')
   const state = { feedStatus: 200, slow: false, corrupt: false, started: false, aborted: false, release: () => {} }
   const requests: { method: string; path: string }[] = []

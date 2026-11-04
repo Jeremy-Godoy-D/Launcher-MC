@@ -20,7 +20,7 @@
     "localCheckoutId": "ab0efcaa844f818a4abb4389e340c92e1338de2965ac070160d352c224c3654b"
   },
   "currentStage": 9,
-  "nextAction": "Etapa 9 activa. Producto 4affc8d: Vanilla/Fabric/Forge/NeoForge/Quilt/OptiFine físicos con Java21, catálogo real aprobado. NSIS seguro 41777200478 aprobado con ASAR exacto. Se añadieron licencias y comprobación del recurso para empaquetar la candidata final. La medición de rendimiento está ejecutándose en sesión 50444; verificar su salida antes de otras pruebas Native. Falta LabyMod real con medición de pausa por currentTime, cierre de CI integral 41776968652 y verificar el borrador final antes de publicar. STAGE9-LIVE.md y STAGE9-SECURITY.md conservan evidencia.",
+  "nextAction": "Etapa 9 activa. Producto seguro 4affc8d; borrador con licencias 5bfffc8 en release 41778557338. Vanilla y cinco loaders físicos, catálogo real y NSIS seguro aprobados. Sesión local 50444 mide rendimiento; no duplicar Native. CI b3c270e 41776202750 obtuvo 315 pass, 2 skip y solo falló 100 porque la versión ficticia era menor que 0.3. Fixture ahora deriva una versión superior. Verificar CI de la corrección. Después de rendimiento, ejecutar Native 100 y LabyMod con medición de pausa por currentTime. Pendientes validación de artefactos, cierre de gates y publicación.",
   "stages": [
     {
       "id": 0,
@@ -1220,5 +1220,5 @@
       "previousScopeSha256": "05de28c44af5db33a004a5d8649fc92fb4e9adc8c2bc7f34c02d2d4a4d74f140"
     }
   ],
-  "updatedAt": "2026-11-04T05:19:28.292204+00:00"
+  "updatedAt": "2026-11-04T05:20:33.405543+00:00"
 }
